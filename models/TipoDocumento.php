@@ -48,12 +48,12 @@ class TipoDocumento extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_tipo_documento' => 'Id Tipo Documento',
-            'tipo_documento' => 'Tipo Documento',
+            'id_tipo_documento' => 'Id',
+            'tipo_documento' => 'Tipo documento',
             'documento' => 'Documento',
-            'proceso_nomina' => 'Proceso Nomina',
-            'proceso_cliente' => 'Proceso Cliente',
-            'proceso_proveedor' => 'Proceso Proveedor',
+            'proceso_nomina' => 'Proceso nomina',
+            'proceso_cliente' => 'Proceso cliente',
+            'proceso_proveedor' => 'Proceso proveedor',
             'codigo_interfaz' => 'Codigo Interfaz',
             'fecha_registro' => 'Fecha Registro',
         ];
@@ -65,5 +65,30 @@ class TipoDocumento extends \yii\db\ActiveRecord
     public function getProveedors()
     {
         return $this->hasMany(Proveedor::className(), ['id_tipo_documento' => 'id_tipo_documento']);
+    }
+    
+    public function getProcesoNomina() {
+        if($this->proceso_nomina == 0){
+             $procesonomina = 'NO';           
+        }else{
+            $procesonomina = 'SI';
+        }
+        return $procesonomina;
+    }
+    public function getProcesoCliente() {
+        if($this->proceso_cliente == 0){
+             $procesocliente = 'NO';           
+        }else{
+            $procesocliente = 'SI';
+        }
+        return $procesocliente;
+    }
+    public function getProcesoProveedor() {
+        if($this->proceso_proveedor == 0){
+             $procesoproveedor = 'NO';           
+        }else{
+            $procesoproveedor = 'SI';
+        }
+        return $procesoproveedor;
     }
 }
