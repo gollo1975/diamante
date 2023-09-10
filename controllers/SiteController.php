@@ -119,7 +119,6 @@ class SiteController extends Controller {
                         $eliminar->delete();
                         $this->redirect(["view", 'id' => $id]);
                     }
-                    //$this->redirect(["producto/view", 'id' => $id]);
                 }
             } 
             return $this->render('user', [
@@ -134,7 +133,8 @@ class SiteController extends Controller {
     }
     
     public function actionNewpermiso($id) {
-        $permisos = Permisos::find()->orderBy('modulo,menu_operacion,permiso asc')->all();
+        $permisos_admon = Permisos::find()->where(['=','tipo_modulo', 0])->orderBy('modulo,menu_operacion,permiso asc')->all();
+        $permisos_search = Permisos::find()->where(['=','tipo_modulo', 1])->orderBy('modulo,menu_operacion,permiso asc')->all();
         $mensaje = "";
         if(Yii::$app->request->post()) {
             if (isset($_POST["idpermiso"])) {
@@ -162,9 +162,10 @@ class SiteController extends Controller {
         }
 
         return $this->render('newpermiso', [
-            'permisos' => $permisos,            
+            'permisos_admon' => $permisos_admon,            
             'mensaje' => $mensaje,
             'id' => $id,
+            'permisos_search' => $permisos_search,
 
         ]);
     }

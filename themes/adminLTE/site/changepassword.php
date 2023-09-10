@@ -27,7 +27,7 @@ $form = ActiveForm::begin([
 
 <div class="panel panel-success">
     <div class="panel-heading">
-        Información Usuario
+        USUARIO DE ACCESO
     </div>
     <div class="panel-body">        														   		        
         <div class="row">

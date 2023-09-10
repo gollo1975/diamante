@@ -33,7 +33,7 @@ $form = ActiveForm::begin([
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
-            Usuario
+           USUARIO DE ACCESO
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
@@ -68,7 +68,7 @@ $form = ActiveForm::begin([
 <div class="table table-responsive">
     <div class="panel panel-success ">
         <div class="panel-heading">
-            Permisos
+            LISTADO DE PERMISOS
         </div>
         <div class="panel-body">
             <table class="table table-condensed">
@@ -95,9 +95,9 @@ $form = ActiveForm::begin([
                 <?php endforeach; ?>
             </table>
         </div>
-        <div class="panel-footer text-right">                        
-            <?= Html::a('Nuevo', ['site/newpermiso','id' => $model->codusuario], ['class' => 'btn btn-primary btn-sm']) ?>
-            <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar", ["class" => "btn btn-danger btn-xs", 'name' => 'eliminar']) ?>
+        <div class="panel-footer text-right">     
+            <?= Html::a("<span class='glyphicon glyphicon-plus'></span> Nuevo", ['site/newpermiso','id' => $model->codusuario], ['class' => 'btn btn-primary btn-sm']) ?>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar']) ?>
         </div>
     </div>
 </div>

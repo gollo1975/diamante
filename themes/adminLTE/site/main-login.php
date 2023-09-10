@@ -1,7 +1,7 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use app\models\Matriculaempresa;
+use app\models\MatriculaEmpresa;
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
@@ -20,50 +20,50 @@ $fieldOptions2 = [
 ];
 ?>
 
+
 <div class="login-box">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+    </div>
     <div class="login-logo">
         <?php $empresa = Matriculaempresa::findOne(1) ;?>
-        
+        <a href="#"><b><?= $empresa->nombre_sistema ?></a>
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">
-         <div class="panel panel-success">
-            <div class="panel-heading">
-                <td colspan="2"></td><span class="badge"><h4>Iniciar sesión</h4></span>
+        <p class="login-box-msg">Iniciar Sesión</p>
+        <?php $form = ActiveForm::begin(['id' => 'login-form', 'enableClientValidation' => false]); ?>
+
+        <?= $form
+            ->field($model, 'username', $fieldOptions1)
+            ->label(false)
+            ->textInput(['placeholder' => $model->getAttributeLabel('username')]) ?>
+
+        <?= $form
+            ->field($model, 'password', $fieldOptions2)
+            ->label(false)
+            ->passwordInput(['placeholder' => $model->getAttributeLabel('password')]) ?>
+
+        <div class="row">
+            <div class="col-xs-8">
+                <?= $form->field($model, 'rememberMe')->checkbox() ?>
             </div>
-             <br>
-             <br>
-
-            <?php $form = ActiveForm::begin(['id' => 'login-form', 'enableClientValidation' => false]); ?>
-
-            <?= $form
-                ->field($model, 'username', $fieldOptions1)
-                ->label(false)
-                ->textInput(['placeholder' => $model->getAttributeLabel('username')]) ?>
-
-            <?= $form
-                ->field($model, 'password', $fieldOptions2)
-                ->label(false)
-                ->passwordInput(['placeholder' => $model->getAttributeLabel('password')]) ?>
-
-            <div class="row">
-                <div class="col-xs-8">
-                    <?= $form->field($model, 'rememberMe')->checkbox() ?>
-                </div>
-                <!-- /.col -->
-                <div class="col-xs-4">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-share'></span> Conectar", ['name' => 'login-button','class' => 'btn btn-success btn-sm']); ?>                
-                </div>
-                <!-- /.col -->
+            <!-- /.col -->
+            <div class="col-xs-4">
+                <?= Html::submitButton("<span class='glyphicon glyphicon-user'></span> Iniciar", ['name' => 'login-button', 'class' => 'btn btn-primary btn-lm']); ?>
+                
             </div>
-            <br>
-            <br>        
-            <div class="row" align="center">
-                <img src="dist/images/logos/logolayers.png" align="center" width="40%" height="50%">
-            </div>
-            <?php ActiveForm::end(); ?>
-       </div>
+            <!-- /.col -->
+        </div>
+        <div class="row" align="center">
+            <img src="dist/images/logos/logoempresa.png" align="center" width="50%" height="50%">
+        </div>
+        <?php ActiveForm::end(); ?>
+
+
     </div>
+    <!-- /.login-box-body -->
     
 </div><!-- /.login-box -->
+</div>
 

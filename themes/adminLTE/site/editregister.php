@@ -8,7 +8,7 @@ use yii\helpers\Url;
 /* @var $model app\models\Users */
 /* @var $form yii\widgets\ActiveForm */
 
-$this->title = 'Editar Usuario';
+$this->title = 'Actualizar';
 $this->params['breadcrumbs'][] = ['label' => 'Usuarios', 'url' => ['users']];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -27,14 +27,14 @@ $form = ActiveForm::begin([
 
 <div class="panel panel-success">
     <div class="panel-heading">
-        Información Usuario
+        USUARIO DE ACCESO
     </div>
     <div class="panel-body">        														   		
         <div class="row">
             <?= $form->field($model, "username")->input("text") ?>                
         </div>        
         <div class="row">            
-            <?= $form->field($model, 'role')->dropdownList(['1' => 'USUARIO', '2' => 'ADMINISTRADOR'], ['prompt' => 'Seleccione el tipo de usuario para el sistema']) ?>
+            <?= $form->field($model, 'role')->dropdownList(['1' => 'USUARIO', '2' => 'ADMINISTRADOR','3' => 'VENDEDOR'], ['prompt' => 'Seleccione el tipo de usuario para el sistema']) ?>
         </div>
         <div class="row">
             <?= $form->field($model, "emailusuario")->input("email") ?>           

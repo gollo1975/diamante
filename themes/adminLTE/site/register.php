@@ -8,7 +8,7 @@ use yii\helpers\Url;
 /* @var $model app\models\Users */
 /* @var $form yii\widgets\ActiveForm */
 
-$this->title = 'Nuevo Usuario';
+$this->title = 'Nuevo';
 $this->params['breadcrumbs'][] = ['label' => 'Usuarios', 'url' => ['users']];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -27,7 +27,7 @@ $form = ActiveForm::begin([
 
 <div class="panel panel-success">
     <div class="panel-heading">
-        Información Usuario
+        USUARIO DE ACCESO
     </div>
     <div class="panel-body">        														   		
         <div class="row">
@@ -40,7 +40,7 @@ $form = ActiveForm::begin([
             <?= $form->field($model, "password_repeat")->input("password") ?>                
         </div>
         <div class="row">            
-            <?= $form->field($model, 'role')->dropdownList(['1' => 'USUARIO', '2' => 'ADMINISTRADOR'], ['prompt' => 'Seleccione el tipo de usuario para el sistema']) ?>
+            <?= $form->field($model, 'role')->dropdownList(['1' => 'USUARIO', '2' => 'ADMINISTRADOR','3' => 'VENDEDOR'], ['prompt' => 'Seleccione el tipo de usuario']) ?>
         </div>
         <div class="row">
             <?= $form->field($model, "emailusuario")->input("email") ?>           
