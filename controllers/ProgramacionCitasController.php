@@ -86,7 +86,6 @@ class ProgramacionCitasController extends Controller {
                                     ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])
                                     ->andFilterWhere(['=', 'proceso_cerrado', $proceso])
                                     ->andFilterWhere(['=', 'id_agente', $valor]);
-                            ;
                         }
                         $table = $table->orderBy('id_programacion DESC');
                         $tableexcel = $table->all();

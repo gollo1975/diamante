@@ -49,10 +49,11 @@ $this->params['breadcrumbs'][] = $model->id_presupuesto;
                     <td><?= Html::encode($model->user_name) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_registro') ?>:</th>
                     <td><?= Html::encode($model->fecha_registro) ?></td>
-                     <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
                     <th style='background-color:#F0F3EF;'></th>
-                    <td></td>                    
+                    <td></td>  
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_gastado') ?>:</th>
+                   <td style="text-align: right"><?= Html::encode(''.number_format($model->valor_gastado, 0)) ?></td>  
+                                      
                 </tr>    
             </table>
         </div>

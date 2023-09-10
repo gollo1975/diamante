@@ -46,7 +46,7 @@ class PresupuestoEmpresarial extends \yii\db\ActiveRecord
     {
         return [
             [['descripcion', 'valor_presupuesto', 'id_area', 'año', 'fecha_inicio', 'fecha_corte'], 'required'],
-            [['valor_presupuesto', 'id_area', 'año', 'estado'], 'integer'],
+            [['valor_presupuesto', 'id_area', 'año', 'estado','valor_gastado'], 'integer'],
             [['fecha_inicio', 'fecha_corte', 'fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 20],
             [['user_name'], 'string', 'max' => 15],
@@ -62,7 +62,7 @@ class PresupuestoEmpresarial extends \yii\db\ActiveRecord
         return [
             'id_presupuesto' => 'Id',
             'descripcion' => 'Descripcion',
-            'valor_presupuesto' => 'Valor',
+            'valor_presupuesto' => 'Presupuesto',
             'id_area' => 'Area',
             'año' => 'Año',
             'fecha_inicio' => 'Fecha inicio',
@@ -70,6 +70,7 @@ class PresupuestoEmpresarial extends \yii\db\ActiveRecord
             'user_name' => 'User name',
             'estado' => 'Activo',
             'fecha_registro' => 'Fecha Registro',
+            'valor_gastado' => 'Presupuesto gastado'
         ];
     }
 

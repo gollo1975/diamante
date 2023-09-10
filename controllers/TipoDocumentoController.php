@@ -8,6 +8,7 @@ use app\models\TipoDocumentoSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\models\UsuarioDetalle;
 
 /**
  * TipoDocumentoController implements the CRUD actions for TipoDocumento model.
@@ -33,15 +34,23 @@ class TipoDocumentoController extends Controller
      * Lists all TipoDocumento models.
      * @return mixed
      */
-    public function actionIndex()
+     public function actionIndex()
     {
-        $searchModel = new TipoDocumentoSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',45])->all()){
+                $searchModel = new TipoDocumentoSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            } 
+        }else{
+            return $this->redirect(['site/login']);
+        }
     }
 
     /**
@@ -67,7 +76,7 @@ class TipoDocumentoController extends Controller
         $model = new TipoDocumento();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_tipo_documento]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +96,7 @@ class TipoDocumentoController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_tipo_documento]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
@@ -102,11 +111,19 @@ class TipoDocumentoController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+  public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["tipo-documento/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["tipo-documento/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro. Este documento esta asociados a otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro. Este documento esta asociados a otros procesos');
+            $this->redirect(["tipo-documento/index"]);
+        }
     }
 
     /**

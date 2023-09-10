@@ -27,6 +27,18 @@ class TipoDocumento extends \yii\db\ActiveRecord
     {
         return 'tipo_documento';
     }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->tipo_documento = strtoupper($this->tipo_documento); 
+         $this->documento = strtoupper($this->documento); 
+        $this->codigo_interfaz = strtoupper($this->codigo_interfaz); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}

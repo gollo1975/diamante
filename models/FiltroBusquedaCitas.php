@@ -18,13 +18,14 @@ class FiltroBusquedaCitas extends Model
     public $anocierre;
     public $documento;
     public $agente;
+    public $presupuesto;
 
 
     public function rules()
     {
         return [  
           
-            [['vendedor','proceso','anocierre'], 'integer'],
+            [['vendedor','proceso','anocierre','presupuesto'], 'integer'],
             [['desde','hasta'], 'safe'],
         [['agente','documento'], 'string'],
         ];
@@ -40,6 +41,7 @@ class FiltroBusquedaCitas extends Model
             'anocierre' => 'Año:',
             'agente' => 'Vendedor',
             'documento' => 'Nit/Cedula:',
+            'presupuesto' => 'Tipo Presupuesto:',
           
 
         ];

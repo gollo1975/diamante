@@ -90,6 +90,7 @@
                                             'url' => '#',
                                             'items' => [
                                             ['label' => 'Presupuesto de areas', 'icon' => 'plus-square-o', 'url' => ['/presupuesto-empresarial/index']],                                      
+                                            ['label' => 'Gastos presupuesto', 'icon' => 'plus-square-o', 'url' => ['/presupuesto-empresarial/presupuesto_mensual']],                                          
                                             ],
                                         ],
                                     ],
