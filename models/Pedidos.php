@@ -1,0 +1,126 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "pedidos".
+ *
+ * @property int $id_pedido
+ * @property int $numero_pedido
+ * @property int $id_cliente
+ * @property string $documento
+ * @property int $dv
+ * @property string $cliente
+ * @property int $cantidad
+ * @property int $subtotal
+ * @property int $impuesto
+ * @property int $gran_total
+ * @property int $autorizado
+ * @property int $cerrar_pedido
+ * @property string $usuario
+ * @property string $fecha_proceso
+ * @property int $facturado
+ *
+ * @property Clientes $cliente0
+ */
+class Pedidos extends \yii\db\ActiveRecord
+{
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'pedidos';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['numero_pedido', 'id_cliente','id_agente', 'dv', 'cantidad', 'subtotal', 'impuesto', 'gran_total', 'autorizado', 'cerrar_pedido', 'facturado',
+                'valor_presupuesto','presupuesto'], 'integer'],
+            [['fecha_proceso'], 'required'],
+            [['fecha_proceso'], 'safe'],
+            [['documento', 'usuario'], 'string', 'max' => 15],
+            [['cliente'], 'string', 'max' => 50],
+            [['observacion'], 'string', 'max' => 100], 
+            [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
+            [['id_agente'], 'exist', 'skipOnError' => true, 'targetClass' => AgentesComerciales::className(), 'targetAttribute' => ['id_agente' => 'id_agente']],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id_pedido' => 'Id:',
+            'numero_pedido' => 'Numero pedido:',
+            'documento' => 'Documento:',
+            'dv' => 'Dv',
+            'cliente' => 'Nombre del cliente:',
+            'cantidad' => 'Cantidad:',
+            'subtotal' => 'Subtotal:',
+            'impuesto' => 'Impuesto:',
+            'gran_total' => 'Gran total:',
+            'autorizado' => 'Autorizado:',
+            'cerrar_pedido' => 'Pedido cerrado:',
+            'usuario' => 'Usuario',
+            'fecha_proceso' => 'Fecha pedido',
+            'facturado' => 'Facturado',
+            'id_agente'=> 'Agente comercial:',
+            'observacion' => 'Observacion:',
+            'presupuesto' => 'Presupuesto:',
+            'valor_presupuesto' => 'Valor presupuesto:',
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClientePedido()
+    {
+        return $this->hasOne(Clientes::className(), ['id_cliente' => 'id_cliente']);
+    }
+    public function getAgentePedido()
+    {
+        return $this->hasOne(AgentesComerciales::className(), ['id_agente' => 'id_agente']);
+    }
+    public function getPedidoAbierto() {
+        if($this->cerrar_pedido == 0 ){
+            $pedidoabierto = 'NO';
+        }else{
+            $pedidoabierto = 'SI';
+        }
+        return $pedidoabierto;
+    }
+    public function getPedidoFacturado() {
+        if($this->facturado == 0 ){
+            $pedidofacturado = 'NO';
+        }else{
+            $pedidofacturado = 'SI';
+        }
+        return $pedidofacturado;
+    }
+    public function getAutorizadoPedido() {
+        if($this->autorizado == 0 ){
+            $autorizadopedido = 'NO';
+        }else{
+            $autorizadopedido = 'SI';
+        }
+        return $autorizadopedido;
+    }
+     public function getPresupuestoPedido() {
+        if($this->presupuesto == 0 ){
+            $presupuestopedido = 'NO';
+        }else{
+            $presupuestopedido = 'SI';
+        }
+        return $presupuestopedido;
+    }
+}

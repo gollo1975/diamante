@@ -1,0 +1,54 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "tipo_orden_compra".
+ *
+ * @property int $id_tipo_orden
+ * @property string $descripcion_orden
+ */
+class TipoOrdenCompra extends \yii\db\ActiveRecord
+{
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'tipo_orden_compra';
+    }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->descripcion_orden = strtoupper($this->descripcion_orden); 
+ 
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['descripcion_orden'], 'required'],
+            [['descripcion_orden'], 'string', 'max' => 30],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id_tipo_orden' => 'Código',
+            'descripcion_orden' => 'Descripción',
+        ];
+    }
+}
