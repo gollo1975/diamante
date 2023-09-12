@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $model->id_mensual;
                 if ($model->autorizado == 1 && $model->cerrado == 0){
                     echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_mensual,'desde'=> $model->fecha_inicio,'hasta' => $model->fecha_corte,'cerrado'=>$model->cerrado, 'id_presupuesto' =>$model->presupuesto->id_presupuesto], ['class' => 'btn btn-default btn-sm']);
                       echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar mes', ['cerrar_mes', 'id' => $model->id_mensual],['class' => 'btn btn-warning btn-sm',
-                               'data' => ['confirm' => 'Esta seguro de cerrar la orden de compra.', 'method' => 'post']]);
+                               'data' => ['confirm' => 'Esta seguro de cerrar el presupuesto del '. $model->fecha_inicio.'  al '. $model->fecha_corte.'.', 'method' => 'post']]);
                 }else{
                     echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_cierre_mensual', 'id' => $model->id_mensual], ['class' => 'btn btn-default btn-sm']);            
                 }
@@ -105,6 +105,7 @@ $this->params['breadcrumbs'][] = $model->id_mensual;
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#listo_clientes" aria-controls="listo_clientes" role="tab" data-toggle="tab">Clientes <span class="badge"><?= count($detalle) ?></span></a></li>
+            <li role="presentation"><a href="#graficaMes" aria-controls="graficaMes" role="tab" data-toggle="tab">Grafica <span class="badge"></span></a></li>
         </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="listo_clientes">
@@ -146,6 +147,26 @@ $this->params['breadcrumbs'][] = $model->id_mensual;
                     </div>
                 </div>    
                 <!-- TERMINA TABS -->
+                  <div role="tabpanel" class="tab-pane" id="graficaMes">
+                    <div class="table-responsive">
+                        <div class="panel panel-success">
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <?php 
+                                        $ano = $model->presupuesto->año;
+                                        $gasto = $model->valor_gastado;
+                                        $presupuesto = $model->presupuesto_mensual;
+                                        $porcentaje = $model->porcentaje;
+                                        include('graficapresupuesto.php'); 
+                                        ?>
+                                    </thead>   
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+                <!--termina tabs-->
             </div>  
     </div>
   <?php ActiveForm::end(); ?>  

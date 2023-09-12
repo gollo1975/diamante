@@ -103,7 +103,7 @@ class PresupuestoEmpresarialController extends Controller
                                 ->limit($pages->limit)
                                 ->all();
                         if (isset($_POST['excel'])) {
-                            $this->actionExcelconsultaPresupuesto($tableexcel);
+                            $this->actionExcelPresupuestoMensual($tableexcel);
                         }
                     } else {
                         $form->getErrors();
@@ -121,7 +121,7 @@ class PresupuestoEmpresarialController extends Controller
                             ->limit($pages->limit)
                             ->all();
                     if (isset($_POST['excel'])) {
-                        $this->actionExcelconsultaPresupuesto($tableexcel);
+                        $this->actionExcelPresupuestoMensual($tableexcel);
                     }
                 }
                 $to = $count->count();
@@ -172,6 +172,7 @@ class PresupuestoEmpresarialController extends Controller
             $cliente = Clientes::find()->where(['=','estado_cliente', 0])->andWhere(['>','cupo_asignado', 0])
                                        ->andWhere(['>','presupuesto_comercial', 0])->orderBy('nombre_completo DESC')->all();
             if(count($cliente) > 0){
+                $totalPresupuesto = 0;
                 foreach ($cliente as $clientes):
                     $pedido = Pedidos::find()->where(['between','fecha_proceso', $desde, $hasta])->andWhere(['=','id_cliente', $clientes->id_cliente])
                                             ->andWhere(['=','presupuesto', 1])->all();
@@ -190,6 +191,7 @@ class PresupuestoEmpresarialController extends Controller
                             $table->save();
                         }     
                     }
+                    $totalPresupuesto += $clientes->presupuesto_comercial;
                 endforeach;
                 $detalle = PresupuestoMensualDetalle::find()->where(['=','id_mensual', $id])->all();
                 $con = 0; $total = 0;
@@ -199,6 +201,8 @@ class PresupuestoEmpresarialController extends Controller
                 endforeach;
                 $mensual->total_registro = $con;
                 $mensual->valor_gastado = $total;
+                $mensual->presupuesto_mensual = round($totalPresupuesto /12);
+               $mensual->porcentaje = round((($total / $mensual->presupuesto_mensual)*100),2);
                 $mensual->save();
             }else{
                 Yii::$app->getSession()->setFlash('warning', 'No existen clientes que se les halla asignado presupuesto comercial o estan inactivos. Validar con el administrador.');
@@ -301,6 +305,25 @@ class PresupuestoEmpresarialController extends Controller
         }
          $this->redirect(["presupuesto-empresarial/view_cliente",'desde'=>$desde, 'hasta' => $hasta, 'id' =>$id, 'cerrado'=>$cerrado, 'id_presupuesto' => $id_presupuesto]);
     }
+    //CERRAR EL MES
+    public function actionCerrar_mes($id) {
+        $mensual = PresupuestoMensual::findOne($id);
+        if($mensual->cerrado == 0){
+            $mensual->cerrado = 1;
+            $mensual->save();
+            $this->redirect(['presupuesto_mensual']);    
+        }
+        
+    }
+    public function actionImprimir_cierre_mensual($id) {
+       $model = PresupuestoMensual::findOne($id);
+        return $this->render('../formatos/reporte_presupuesto_mensual', [
+            'model' => $model,
+        ]);
+       /* Yii::$app->getSession()->setFlash('info', 'Este proceso esta en la etapa de desarrollo .');
+        $this->redirect(["view_cliente",'desde'=>$desde, 'hasta' => $hasta, 'id' =>$id, 'cerrado'=>$cerrado, 'id_presupuesto' => $id_presupuesto]);
+        */
+    }
     /**
      * Finds the PresupuestoEmpresarial model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -315,5 +338,81 @@ class PresupuestoEmpresarialController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    //PROCESOS DE EXCEL
+    // CONSULTA DE PRESUPUESTO MENSUAL
+    public function actionExcelPresupuestoMensual($tableexcel) {                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'TIPO PRESUPUESTO')
+                    ->setCellValue('C1', 'DESDE')
+                    ->setCellValue('D1', 'HASTA')
+                    ->setCellValue('E1', 'FECHA CREACION')
+                    ->setCellValue('F1', 'TOTAL REGISTRO')
+                    ->setCellValue('G1', 'VR. GASTADO')
+                    ->setCellValue('H1', 'AUTORIZADO')
+                    ->setCellValue('I1', 'CERRADO')
+                    ->setCellValue('J1', 'USER NAME')    
+                    ->setCellValue('K1', 'OBSERVACION');
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_presupuesto)
+                    ->setCellValue('B' . $i, $val->presupuesto->descripcion)
+                    ->setCellValue('C' . $i, $val->fecha_inicio)
+                    ->setCellValue('D' . $i, $val->fecha_corte)
+                    ->setCellValue('E' . $i, $val->fecha_creacion)
+                    ->setCellValue('F' . $i, $val->total_registro)
+                    ->setCellValue('G' . $i, $val->valor_gastado)
+                    ->setCellValue('H' . $i, $val->autorizadoMes)
+                    ->setCellValue('I' . $i, $val->cerradoMes)
+                    ->setCellValue('J' . $i, $val->user_name)
+                    ->setCellValue('K' . $i, $val->observacion);
+                    
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Detalle');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Presupuesto_mensual.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }

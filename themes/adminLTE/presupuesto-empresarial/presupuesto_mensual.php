@@ -101,6 +101,8 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Desde</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Hasta</th>
                     <th scope="col" style='background-color:#B9D5CE;'>V. gastado</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Presupuesto</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>% Gasto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Registros</th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerr.</span></th>
@@ -118,6 +120,8 @@ $form = ActiveForm::begin([
                         <td><?= $val->fecha_inicio ?></td>
                         <td><?= $val->fecha_corte ?></td>
                         <td style="text-align:right"><?= ''.number_format($val->valor_gastado, 0) ?></td>
+                        <td style="text-align:right"><?= ''.number_format($val->presupuesto_mensual, 0) ?></td>
+                        <td style="text-align:right"><?= $val->porcentaje?> %</td>
                         <td style="text-align:right"><?= ''.number_format($val->total_registro,0) ?></td>
                         <td><?= $val->autorizadoMes ?></td>
                         <td><?= $val->cerradoMes ?></td>
@@ -136,6 +140,7 @@ $form = ActiveForm::begin([
             </tbody>
         </table>   
       <div class="panel-footer text-right">
+        <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                  
         <a align="right" href="<?= Url::toRoute("presupuesto-empresarial/crear_fechas") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
       </div>  
     </div>

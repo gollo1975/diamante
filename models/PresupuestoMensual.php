@@ -36,9 +36,10 @@ class PresupuestoMensual extends \yii\db\ActiveRecord
     {
         return [
             [['id_presupuesto', 'fecha_inicio', 'fecha_corte'], 'required'],
-            [['id_presupuesto', 'valor_gastado', 'total_registro','autorizado','cerrado'], 'integer'],
+            [['id_presupuesto', 'valor_gastado', 'total_registro','autorizado','cerrado','presupuesto_mensual'], 'integer'],
             [['fecha_inicio', 'fecha_corte', 'fecha_creacion'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
+            [['porcentaje'],'number'],
             [['observacion'], 'string', 'max' => 100],
             [['id_presupuesto'], 'exist', 'skipOnError' => true, 'targetClass' => PresupuestoEmpresarial::className(), 'targetAttribute' => ['id_presupuesto' => 'id_presupuesto']],
         ];
@@ -61,6 +62,8 @@ class PresupuestoMensual extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'autorizado' => 'Autorizado:',
             'cerrado' => 'Cerrado:',
+            'presupuesto_mensual' => 'presupuesto_mensual',
+            'porcentaje' => 'porcentaje',
         ];
     }
 
