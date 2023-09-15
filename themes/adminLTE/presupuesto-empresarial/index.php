@@ -43,6 +43,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'año',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
+                        [                
+                'attribute' => 'valor_gastado',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
             [            
                           'attribute' => 'fecha_inicio',
                 'contentOptions' => ['class' => 'col-lg-1'],

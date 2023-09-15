@@ -265,10 +265,15 @@ class PresupuestoEmpresarialController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index']);
         }
-        return $this->render('update', [
-            'model' => $model,
-            'sw' =>$sw,
-        ]);
+        if($model->anio_cerrado == 0){
+            return $this->render('update', [
+                'model' => $model,
+                'sw' =>$sw,
+            ]);
+        }else{
+           Yii::$app->getSession()->setFlash('warning', 'Este proceso ya esta cerrado por presupuesto. Consulte el administrador.'); 
+           $this->redirect(["presupuesto-empresarial/index"]);
+        }    
     }
 
     /**
@@ -320,9 +325,23 @@ class PresupuestoEmpresarialController extends Controller
         return $this->render('../formatos/reporte_presupuesto_mensual', [
             'model' => $model,
         ]);
-       /* Yii::$app->getSession()->setFlash('info', 'Este proceso esta en la etapa de desarrollo .');
-        $this->redirect(["view_cliente",'desde'=>$desde, 'hasta' => $hasta, 'id' =>$id, 'cerrado'=>$cerrado, 'id_presupuesto' => $id_presupuesto]);
-        */
+       
+    }
+    
+    //CERRAR PRESUPUESTO ANUAL
+    
+    public function actionCerrar_anio($id, $desde, $hasta) {
+        $presupuesto = PresupuestoEmpresarial::findOne($id);
+        $mensual = PresupuestoMensual::find()->where(['=','id_presupuesto', $id])->andWhere(['between','fecha_inicio', $desde, $hasta])->all();
+        $total =0;
+        foreach ($mensual as $meses):
+            $total += $meses->valor_gastado;
+        endforeach;
+        $presupuesto->valor_gastado = $total;
+        $presupuesto->estado = 1;
+        $presupuesto->anio_cerrado = 1;
+        $presupuesto->save();
+        $this->redirect(["presupuesto-empresarial/view",'id' =>$id]);
     }
     /**
      * Finds the PresupuestoEmpresarial model based on its primary key value.

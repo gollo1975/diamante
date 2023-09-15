@@ -46,7 +46,7 @@ class PresupuestoEmpresarial extends \yii\db\ActiveRecord
     {
         return [
             [['descripcion', 'valor_presupuesto', 'id_area', 'año', 'fecha_inicio', 'fecha_corte'], 'required'],
-            [['valor_presupuesto', 'id_area', 'año', 'estado','valor_gastado'], 'integer'],
+            [['valor_presupuesto', 'id_area', 'año', 'estado','valor_gastado','anio_cerrado'], 'integer'],
             [['fecha_inicio', 'fecha_corte', 'fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 20],
             [['user_name'], 'string', 'max' => 15],
@@ -70,7 +70,8 @@ class PresupuestoEmpresarial extends \yii\db\ActiveRecord
             'user_name' => 'User name',
             'estado' => 'Activo',
             'fecha_registro' => 'Fecha Registro',
-            'valor_gastado' => 'Presupuesto gastado'
+            'valor_gastado' => 'Vr. gastado',
+            'anio_cerrado' => 'Año cerrado:',
         ];
     }
 
@@ -83,9 +84,9 @@ class PresupuestoEmpresarial extends \yii\db\ActiveRecord
     }
     public function getEstadoRegistro() {
         if($this->estado == 0){
-            $estadoregistro = 'NO';
-        }else{
             $estadoregistro = 'SI';
+        }else{
+            $estadoregistro = 'NO';
         }
         return $estadoregistro;
     }

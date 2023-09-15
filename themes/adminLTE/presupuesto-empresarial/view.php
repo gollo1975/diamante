@@ -16,7 +16,11 @@ $this->params['breadcrumbs'][] = $model->id_presupuesto;
 
     <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index', 'id' => $model->id_presupuesto], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar', ['update', 'id' => $model->id_presupuesto], ['class' => 'btn btn-success btn-sm']) ?>
+         <?php if($model->anio_cerrado == 0){  
+           echo Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar', ['update', 'id' => $model->id_presupuesto], ['class' => 'btn btn-success btn-sm']); 
+           echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar año', ['cerrar_anio', 'id' => $model->id_presupuesto, 'desde' =>$model->fecha_inicio, 'hasta' => $model->fecha_corte],['class' => 'btn btn-warning btn-sm',
+                               'data' => ['confirm' => 'Esta seguro de cerrar el presupuesto del año '. $model->año.'.', 'method' => 'post']]);
+         }?>
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">

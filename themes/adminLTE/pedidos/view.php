@@ -98,7 +98,7 @@ $view = 'pedidos';
                     <th style='background-color:#F0F3EF;'></th>
                     <td></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_presupuesto') ?></th>
-                    <td style="text-align: right"><?= Html::encode(''.number_format($model->valor_presupuesto,0)) ?></td>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->clientePedido->presupuesto_comercial,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>

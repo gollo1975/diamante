@@ -95,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 <?php if($valor){
                                                   $variable = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
                                                   if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                                                      <td style="width: 100px;"> <?= yii\bootstrap\Html::img($variable, ['width' => '70px;', 'height' => '75px;'])?></td>
+                                                <td style="width: 100px; background-color: white" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($variable, ['width' => '70px;', 'height' => '75px;'])?></td>
                                                   <?php }else {?>
                                                       <td><?= 'NOT FOUND'?></td>
                                                   <?php } 

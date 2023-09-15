@@ -153,14 +153,19 @@ $this->params['breadcrumbs'][] = $model->id_mensual;
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <?php 
-                                        $ano = $model->presupuesto->año;
-                                        $gasto = $model->valor_gastado;
-                                        $presupuesto = $model->presupuesto_mensual;
-                                        $porcentaje = $model->porcentaje;
-                                        include('graficapresupuesto.php'); 
+                                         <?php
+                                         $ano = $model->presupuesto->año;
+                                         $meses = $model->fecha_inicio .' - ' .$model->fecha_corte ;
+                                         $clientes = ''; $gasto = 0; $presupueso = 0;
+                                         foreach ($detalle as $val):
+                                          $clientes = $val->cliente->nombre_completo;
+                                          $gasto = $val->gasto_mensual;
+                                          $presupuesto = $val->presupuesto_asignado;
+                                          include('graficapresupuesto.php');
+                                         endforeach;
                                         ?>
                                     </thead>   
+                                                                          
                                 </table>
                             </div>
                         </div>

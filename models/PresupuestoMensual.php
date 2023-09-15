@@ -52,7 +52,7 @@ class PresupuestoMensual extends \yii\db\ActiveRecord
     {
         return [
             'id_mensual' => 'Id',
-            'id_presupuesto' => 'Presupuesto:',
+            'id_presupuesto' => 'Departamento:',
             'fecha_inicio' => 'Fecha Inicio:',
             'fecha_corte' => 'Fecha Corte:',
             'valor_gastado' => 'Valor gastado:',

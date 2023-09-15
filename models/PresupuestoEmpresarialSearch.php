@@ -17,7 +17,7 @@ class PresupuestoEmpresarialSearch extends PresupuestoEmpresarial
     public function rules()
     {
         return [
-            [['id_presupuesto', 'valor_presupuesto', 'id_area', 'año', 'estado'], 'integer'],
+            [['id_presupuesto', 'valor_presupuesto', 'id_area', 'año', 'estado','valor_gastado'], 'integer'],
             [['descripcion', 'fecha_inicio', 'fecha_corte', 'user_name', 'fecha_registro'], 'safe'],
         ];
     }
@@ -46,6 +46,7 @@ class PresupuestoEmpresarialSearch extends PresupuestoEmpresarial
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['año' => SORT_DESC]] // Agregar esta linea para agregar el orden por defecto
         ]);
 
         $this->load($params);

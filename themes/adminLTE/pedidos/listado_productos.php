@@ -18,7 +18,7 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\filters\AccessControl;
 
-$this->title = 'Inventario de productos  ('. $model->cliente. ')';
+$this->title = 'Nuevo pedido';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
@@ -127,14 +127,14 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <?php if($valor){
                                                   $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
                                                   if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                                                      <td style="width: 100px;"> <?= yii\bootstrap\Html::img($cadena, ['width' => '65px;', 'height' => '70px;'])?></td>
+                                            <td style="width: 100px; border: 0px solid grey;" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '65px;', 'height' => '70px;'])?></td>
                                                   <?php }else {?>
                                                       <td><?= 'NOT FOUND'?></td>
                                                   <?php } 
                                                 }else{?>
                                                       <td></td>
                                                 <?php }?>     
-                                            <td style="background-color:#CBAAE3; color: black"><?= $val->stock_unidades ?></td>
+                                            <td style="background-color:#EDF5F3; color: black"><?= $val->stock_unidades ?></td>
                                             <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_productos[]"  style="text-align: right" size="7" maxlength="true"> </td> 
                                             <input type="hidden" name="nuevo_producto[]" value="<?= $val->id_inventario?>"> 
                                         </tr>

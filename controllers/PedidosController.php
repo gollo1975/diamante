@@ -674,6 +674,7 @@ class PedidosController extends Controller
         $this->DevolucionProductosInventario($id, $detalle);
         $this->ActualizarTotalesProducto($detalle);
         $detalle->delete();
+        $this->ActualizarTotalesPedido($id);
         $this->redirect(["adicionar_productos",'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token]);        
     }
     
