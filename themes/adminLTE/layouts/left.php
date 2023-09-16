@@ -174,7 +174,7 @@
                                                 'url' => '#',
                                                 'items' => [
                                                     ['label' => 'Precios de venta', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/crear_precio_venta']],
-                                                    ['label' => 'Presupuesto comercial', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
+                                                    ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
                                                     ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/validador_imagen']],
                                                 ]],
                                             ],

@@ -82,11 +82,25 @@ $this->params['breadcrumbs'][] = $this->title;
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($model as $val): ?>
+                                        <?php
+                                        $variable = '';
+                                        $item = \app\models\Documentodir::findOne(8);
+                                        foreach ($model as $val): 
+                                             $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                                            ?>
                                             <tr style ='font-size: 90%;'>                
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
-                                                <td><?= 1?></td>
+                                                <?php if($valor){
+                                                    $variable = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
+                                                    if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
+                                                        <td style="width: 100px; background-color: white" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($variable, ['width' => '70px;', 'height' => '75px;'])?></td>
+                                                    <?php }else {?>
+                                                      <td><?= 'NOT FOUND'?></td>
+                                                    <?php } 
+                                                }else{?>
+                                                      <td></td>
+                                                <?php }?>      
                                                 <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_producto_presupuesto[]" value="<?= $val->id_inventario ?>"></td> 
                                             </tr>            
                                         <?php endforeach; ?>
@@ -118,11 +132,24 @@ $this->params['breadcrumbs'][] = $this->title;
                                    <tbody>
                                         <?php
                                         $subtotal = 0; $impuesto = 0; $total = 0;
-                                        foreach ($parametros as $val):?>
+                                        $variable = '';
+                                        $item = \app\models\Documentodir::findOne(8);
+                                        foreach ($parametros as $val):
+                                            $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                                            ?>
                                              <tr style ='font-size: 90%;'>                
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
-                                                <td><?= 1?></td>
+                                                <?php if($valor){
+                                                    $variable = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
+                                                    if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
+                                                        <td style="width: 100px; background-color: white" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($variable, ['width' => '70px;', 'height' => '75px;'])?></td>
+                                                    <?php }else {?>
+                                                      <td><?= 'NOT FOUND'?></td>
+                                                    <?php } 
+                                                }else{?>
+                                                      <td></td>
+                                                <?php }?>   
                                                 <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="quitar_producto[]" value="<?= $val->id_inventario ?>"></td> 
                                             </tr>     
                                         <?php endforeach; ?>

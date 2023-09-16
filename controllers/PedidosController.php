@@ -600,8 +600,6 @@ class PedidosController extends Controller
                 $detalle_pedido->impuesto = 0;                
                 $detalle_pedido->total_linea = $subtotal;
             }  
-            $cliente->gasto_presupuesto_comercial = $cliente->gasto_presupuesto_comercial +  $detalle_pedido->total_linea;
-            $cliente->save();
 
         }else{
             Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.'); 
@@ -683,19 +681,19 @@ class PedidosController extends Controller
     {                                
         $detalle = PedidoPresupuestoComercial::findOne($detalle);
         $this->DevolucionProductosPresupuesto($id, $detalle);
-        $this->SumarPresupuesto($detalle, $id);
         $detalle->delete();
-        $this->TotalPresupuestoPedido($id, $sw);
+        $this->SumarPresupuesto($detalle, $id);
         $this->redirect(["view",'id' => $id, 'token' => $token]);        
     }
     protected function SumarPresupuesto($detalle, $id) {
         $suma = 0;
         $pedido = Pedidos::findOne($id);
-        $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
-        $detalle = PedidoPresupuestoComercial::findOne($detalle);
-        $suma = $detalle->total_linea;
-        $cliente->gasto_presupuesto_comercial = $cliente->gasto_presupuesto_comercial - $suma;
-        $cliente->save(false);
+        $detalle = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        foreach ($detalle as $detalles):
+            $suma += $detalles->total_linea;
+        endforeach;
+        $pedido->valor_presupuesto = $suma;
+        $pedido->save(false);
     }
     //PROCESO QUE REINTEGRA LAS UNIDADES AL INVENTARIO CUANDO SE ELIMINA
     protected function DevolucionProductosInventario($id, $detalle) {
@@ -735,8 +733,12 @@ class PedidosController extends Controller
     
     //PROCESO QUE CIERRA EL PEDIDO
     public function actionCerrar_pedido($id, $token) {
-        var_dump($id);
+        $suma = 0;
         $pedido = Pedidos::findOne($id);
+        $cliente = Clientes::findOne($pedido->id_cliente);
+        $suma = $cliente->gasto_presupuesto_comercial;
+        $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+        $cliente->save();
         $pedido->cerrar_pedido = 1;
         $pedido->save(false);
         $this->redirect(["view",'id' => $id, 'token' => $token]);    

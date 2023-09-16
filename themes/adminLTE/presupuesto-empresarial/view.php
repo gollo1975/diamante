@@ -48,13 +48,16 @@ $this->params['breadcrumbs'][] = $model->id_presupuesto;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'estado') ?>:</th>
                     <td><?= Html::encode($model->estadoRegistro) ?></td>                    
                 </tr>   
+                <?php $suma = 0;
+                        $suma = round(($model->valor_gastado/$model->valor_presupuesto)*100,2);
+                        ?>
                 <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?>:</th>
                     <td><?= Html::encode($model->user_name) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_registro') ?>:</th>
                     <td><?= Html::encode($model->fecha_registro) ?></td>
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td></td>  
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Porcentaje') ?>:</th>
+                    <td><?= Html::encode($suma) ?> %</td>  
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_gastado') ?>:</th>
                    <td style="text-align: right"><?= Html::encode(''.number_format($model->valor_gastado, 0)) ?></td>  
                                       

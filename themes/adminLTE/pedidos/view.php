@@ -60,6 +60,16 @@ $view = 'pedidos';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
+                <tr>
+                    <button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                        Ver nota..
+                      </button>
+                      <div class="collapse" id="collapseExample">
+                          <div class="well" style="font-size: 100%;">
+                              <?php echo 'El cliente se ha consumido ('?><?= ''.number_format($model->clientePedido->gasto_presupuesto_comercial,0) ?> <?php echo ') del presupuesto comercial.'?> 
+                        </div>
+                     </div>
+                </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_pedido") ?></th>
                     <td><?= Html::encode($model->id_pedido) ?></td>
@@ -95,9 +105,9 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->usuario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_agente') ?></th>
                     <td><?= Html::encode($model->agentePedido->nombre_completo) ?></td>
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_presupuesto') ?></th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presupuesto_gastado') ?>:</th>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->clientePedido->gasto_presupuesto_comercial,0)) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presupuesto_asignado') ?>:</th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->clientePedido->presupuesto_comercial,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
@@ -183,16 +193,17 @@ $view = 'pedidos';
                             <?php
                             if($cliente->presupuesto_comercial == 0 ){
                                 Yii::$app->getSession()->setFlash('info', 'No se le asignado presupuesto a este cliente. Contactar al representante de ventas');     
-                            }   
-                            if($cliente->presupuesto_comercial >= $cliente->gasto_presupuesto_comercial){
-                                if($model->cerrar_pedido == 0){?>
-                                    <div class="panel-footer text-right">
-                                       <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Adicionar', ['pedidos/adicionar_presupuesto', 'id' => $model->id_pedido, 'token' => $token, 'sw' => 0],[ 'class' => 'btn btn-info btn-sm']) ?>                                            
-                                    </div>     
-                                <?php }
-                            }else{
-                                Yii::$app->getSession()->setFlash('info', 'Ha superado el presupuesto comercial. Favor eliminar productos o solicitar autorizacion de presupuesto.');     
-                            }
+                            }else{   
+                                if($cliente->presupuesto_comercial >= $cliente->gasto_presupuesto_comercial){
+                                    if($model->cerrar_pedido == 0){?>
+                                        <div class="panel-footer text-right">
+                                           <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Adicionar', ['pedidos/adicionar_presupuesto', 'id' => $model->id_pedido, 'token' => $token, 'sw' => 0],[ 'class' => 'btn btn-info btn-sm']) ?>                                            
+                                        </div>     
+                                    <?php }
+                                }else{
+                                    Yii::$app->getSession()->setFlash('info', 'Ha superado el presupuesto comercial. Favor eliminar productos o solicitar autorizacion de presupuesto.');     
+                                }
+                            }    
                             if($model->cerrar_pedido == 1){?>    
                                     <div class="panel-footer text-right">
                                         <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido_presupuesto', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);?>
