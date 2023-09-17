@@ -58,23 +58,22 @@
        
     </p>
 </figure>
-
+<?php
+$detalle = \app\models\PresupuestoMensualDetalle::find()->where(['=','id_mensual', $id])->all();
+?>
 <script type="text/javascript">
-    
-var meses =' <?php echo $meses;?>';
-var cliente =' <?php echo $clientes;?>';
-var gasto = <?php echo $gasto;?>;    
-var presupuesto = <?php echo $presupueso;?>;    
+    var meses = <?php echo $meses;?>;
+    var clientes = <?php echo $clientes;?>;
+
   Highcharts.chart('container', {
     chart: {
-        type: 'column',
-        borderWidth: 0
+        type: 'column'
     },
     title: {
         text: 'PRESUPUESTO MENSUAL POR DEPTO'
     },
     subtitle: {
-        text: 'Fecha: '+ meses
+        text: 'Fecha: '+meses
     },
     
     xAxis: {
@@ -105,12 +104,15 @@ var presupuesto = <?php echo $presupueso;?>;
         }
     },
     series: [{
-        name: 'Gasto',
-        data: [gasto, presupuesto]
-    },{          
-        name: 'Presupuesto',
-        data: [presupuesto]
-        
+        name: 'Cliente',
+        data: [
+            <?php
+            $con = 0;
+            foreach ($detalle as $detalles){
+                
+                echo "['".$detalles->cliente->nombre_completo."',".$detalles->gasto_mensual."],";   
+            }?>
+        ]
     }]
 });
 		</script>

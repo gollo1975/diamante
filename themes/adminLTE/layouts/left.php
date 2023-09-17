@@ -69,7 +69,7 @@
                                                 'icon' => 'cube',
                                                 'url' => '#',
                                                 'items' => [
-                                                    ['label' => 'Juez', 'icon' => 'plus-square-o', 'url' => ['juez/index']],
+                                                  //  ['label' => 'Juez', 'icon' => 'plus-square-o', 'url' => ['juez/index']],
                                                   
                                             ]],
                                             
@@ -82,6 +82,7 @@
                                             'items' => [
                                               ['label' => 'Departamentos', 'icon' => 'plus-square-o', 'url' => ['/departamentos/indexdepartamento']],
                                               ['label' => 'Municipios', 'icon' => 'plus-square-o', 'url' => ['/municipios/indexmunicipio']],
+                                              ['label' => 'Presupuesto x Area', 'icon' => 'plus-square-o', 'url' => ['/presupuesto-empresarial/search_presupuesto_area']],  
                                             ],
                                         ],
                                         [

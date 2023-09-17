@@ -39,8 +39,11 @@ $this->params['breadcrumbs'][] = $model->id_mensual;
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['presupuesto_mensual', 'id' => $model->id_mensual], ['class' => 'btn btn-primary btn-sm']) ?>
-
+        <?php if($token == 0){?> 
+           <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['presupuesto_mensual', 'id' => $model->id_mensual], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?php }else{?>
+           <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_presupuesto_area', 'id' => $model->id_mensual], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?php }?>
             <?php if ($model->autorizado == 0 && $model->cerrado == 0) { ?>
                 <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_mensual,'desde'=> $model->fecha_inicio,'hasta' => $model->fecha_corte,'cerrado'=>$model->cerrado, 'id_presupuesto' =>$model->presupuesto->id_presupuesto], ['class' => 'btn btn-default btn-sm']);
             } else {

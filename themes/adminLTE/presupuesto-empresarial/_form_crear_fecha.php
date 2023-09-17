@@ -11,9 +11,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //model
 use app\models\PresupuestoEmpresarial;
-$this->title = 'Nuevo';
-$this->params['breadcrumbs'][] = ['label' => 'Presupuesto mensual', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <?php
 $form = ActiveForm::begin([

@@ -75,7 +75,7 @@ class PresupuestoEmpresarialController extends Controller
         }
     }
 //PRESUPUESTO MENSUAL
-    public function actionPresupuesto_mensual() {
+    public function actionPresupuesto_mensual($token = 0) {
         if (Yii::$app->user->identity) {
             if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 38])->all()) {
                 $form = new \app\models\FiltroBusquedaCitas();
@@ -129,6 +129,73 @@ class PresupuestoEmpresarialController extends Controller
                             'model' => $model,
                             'form' => $form,
                             'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            } else {
+                return $this->redirect(['site/sinpermiso']);
+            }
+        } else {
+            return $this->redirect(['site/login']);
+        }
+    }
+    
+    //CONSULTA DE PRESUPUESTO POR AREA
+     public function actionSearch_presupuesto_area($token = 1) {
+        if (Yii::$app->user->identity) {
+            if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 46])->all()) {
+                $form = new \app\models\FiltroBusquedaCitas();
+                $desde = null;
+                $hasta = null;
+                $presupuesto = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        $presupuesto = Html::encode($form->presupuesto);
+                        $table = PresupuestoMensual::find()
+                                    ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])
+                                    ->andFilterWhere(['=', 'id_presupuesto', $presupuesto])
+                                    ->andWhere(['=','cerrado', 1]);
+                        $table = $table->orderBy('fecha_inicio DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $this->actionExcelPresupuestoMensual($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                     $table = PresupuestoMensual::find()->Where(['=','cerrado', 1])->orderBy('fecha_inicio DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelPresupuestoMensual($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_presupuesto_area', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
                 ]);
             } else {
                 return $this->redirect(['site/sinpermiso']);
@@ -150,10 +217,12 @@ class PresupuestoEmpresarialController extends Controller
         ]);
     }
     
-    public function actionView_cliente($desde, $hasta, $id_presupuesto,$id, $cerrado) {
+    public function actionView_cliente($desde, $hasta, $id_presupuesto,$id, $cerrado, $token) {
         $model = PresupuestoMensual::findOne($id);
-        if($cerrado == 0){
-            $this->BuscarClientePedido($desde, $hasta, $id_presupuesto, $id);
+        if($token == 0){
+            if($cerrado == 0){
+                $this->BuscarClientePedido($desde, $hasta, $id_presupuesto, $id);
+            }    
         }    
         $detalle = PresupuestoMensualDetalle::find()->where(['=','id_mensual', $id])->all();
         return $this->render('view_cliente', [
@@ -163,6 +232,7 @@ class PresupuestoEmpresarialController extends Controller
             'desde' => $desde,
             'hasta' => $hasta,
             'id' => $id,
+            'token' => $token,
         ]);
     }
     protected function BuscarClientePedido($desde, $hasta,$id_presupuesto, $id) {
@@ -250,7 +320,20 @@ class PresupuestoEmpresarialController extends Controller
             'model' => $model,
         ]);
     }
+   
+    //acutalizar regisgtro mensuales
+     public function actionUpdate_mensual($id_mensual)
+    {
+        $model = PresupuestoMensual::findOne($id_mensual);
 
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['presupuesto_mensual']);
+        }
+       
+            return $this->render('_form_crear_fecha', [
+                'model' => $model,
+            ]);
+        }
     /**
      * Updates an existing PresupuestoEmpresarial model.
      * If update is successful, the browser will be redirected to the 'view' page.

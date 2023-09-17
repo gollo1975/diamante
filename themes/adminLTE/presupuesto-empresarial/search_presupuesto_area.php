@@ -17,7 +17,7 @@ use kartik\depdrop\DepDrop;
 use app\models\Clientes;
 use app\models\User;
 
-$this->title = 'PRESUPUESTO MENSUAL';
+$this->title = 'CONSULTA (PRESUPUESTO X AREA)';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <script language="JavaScript">
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista proveedor</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("presupuesto-empresarial/presupuesto_mensual"),
+    "action" => Url::toRoute("presupuesto-empresarial/search_presupuesto_area"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -77,7 +77,7 @@ $presupueso = ArrayHelper::map(app\models\PresupuestoEmpresarial::find()->orderB
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("presupuesto-empresarial/presupuesto_mensual") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("presupuesto-empresarial/search_presupuesto_area") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -107,7 +107,6 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerr.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
-                    <th scope="col" style='background-color:#B9D5CE;'></th>  
                      </tr>
             </thead>    
             <tbody>
@@ -126,22 +125,14 @@ $form = ActiveForm::begin([
                         <td><?= $val->autorizadoMes ?></td>
                         <td><?= $val->cerradoMes ?></td>
                         <td style= 'width: 25px; height: 25px;'>
-                            <a href="<?= Url::toRoute(["presupuesto-empresarial/view_cliente", "id" => $val->id_mensual, 'id_presupuesto' => $val->presupuesto->id_presupuesto, 'desde' => $val->fecha_inicio, 'hasta' => $val->fecha_corte,'cerrado' => $val->cerrado,'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="<?= Url::toRoute(["presupuesto-empresarial/view_cliente", "id" => $val->id_mensual, 'id_presupuesto' => $val->presupuesto->id_presupuesto, 'desde' => $val->fecha_inicio, 'hasta' => $val->fecha_corte,'cerrado' => $val->cerrado, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
-                        <?php if(count($detalle) > 0){?>
-                            <td style= 'width: 25px; height: 25px;'></td>
-                        <?php }else{?>
-                            <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["presupuesto-empresarial/update_mensual", "id_mensual" => $val->id_mensual]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
-                            </td>
-                        <?php }?>    
                     </tr>    
                 <?php endforeach;?>
             </tbody>
         </table>   
       <div class="panel-footer text-right">
         <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                  
-        <a align="right" href="<?= Url::toRoute("presupuesto-empresarial/crear_fechas") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
       </div>  
     </div>
     <?php $form->end() ?>
