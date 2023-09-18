@@ -74,6 +74,7 @@ $cargo = ArrayHelper::map(Cargos::find()->orderBy('nombre_cargo DESC')->all(), '
                        'allowClear' => true
                    ],
                ]); ?> 
+            <?= $form->field($model, 'gestion_diaria')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
         </div>
     </div>    
     <div class="panel-footer text-right">

@@ -13,13 +13,15 @@ class ModeloGestionComercial extends Model
 {
     public $cumplida;
     public $observacion;
-    
+    public $tipo_visita;
+
+
     public function rules()
     {
         return [
 
            [['observacion'], 'required', 'message' => 'Campo requerido'], 
-           [['cumplida'], 'integer'],
+           [['cumplida','tipo_visita'], 'integer'],
             [['observacion'], 'string'],
         ];
     }
@@ -30,6 +32,7 @@ class ModeloGestionComercial extends Model
 
             'cumplida' => 'Cumplida:',
             'observacion' => 'Nota',
+            'tipo_visita' => 'Tipo visita:',
             
 
         ];

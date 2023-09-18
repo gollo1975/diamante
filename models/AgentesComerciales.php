@@ -59,7 +59,7 @@ class AgentesComerciales extends \yii\db\ActiveRecord
     {
         return [
             [['id_tipo_documento', 'dv','nit_cedula', 'primer_nombre', 'primer_apellido', 'codigo_departamento', 'codigo_municipio', 'id_cargo'], 'required'],
-            [['id_tipo_documento', 'id_cargo','estado','dv'], 'integer'],
+            [['id_tipo_documento', 'id_cargo','estado','dv','gestion_diaria'], 'integer'],
             [['fecha_registro'], 'safe'],
             ['email_agente', 'email'],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'user_name'], 'string', 'max' => 15],
@@ -98,6 +98,7 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             'id_cargo' => 'Cargo:',
             'estado' => 'Activo:',
             'nombre_completo' => 'Agente comercial:',
+            'gestion_diaria' => 'Gestion comercial diaria:',
         ];
     }
 
@@ -140,5 +141,14 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             $estadoregistro = 'NO';
         }
         return $estadoregistro;
+    }
+    
+     public function getGestionDiaria() {
+        if($this->gestion_diaria == 0){
+            $gestiondiaria = 'SI';
+        }else{
+            $gestiondiaria = 'NO';
+        }
+        return $gestiondiaria;
     }
 }

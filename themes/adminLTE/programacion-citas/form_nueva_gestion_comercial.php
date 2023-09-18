@@ -36,6 +36,9 @@ $form = ActiveForm::begin([
                     <div class="row">
                         <?= $form->field($model, 'cumplida')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
                     </div>    
+                     <div class="row">
+                        <?= $form->field($model, 'tipo_visita')->dropdownList(['1' => 'TELEFONICA', '2' => 'VIRTUAL', '3' => 'PRESENCIAL'], ['prompt' => 'Seleccione...']) ?>
+                    </div>
                     <div class="row">
                         <?= $form->field($model, 'observacion')->textArea(['maxlength' => true, 'required' => true]) ?>
                     </div

@@ -76,8 +76,8 @@ $view = 'agentes-comerciales';
                     <td><?= $model->cargo->nombre_cargo ?></td>
                     <th style='background-color:#F0F3EF;'>Fecha registro:</th>
                     <td><?= $model->fecha_registro ?></td>
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
+                    <th style='background-color:#F0F3EF;'>Gestion diaria:</th>
+                    <td><?= $model->gestionDiaria ?></td>
                    
                 </tr>
                  

@@ -35,7 +35,7 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_programacion', 'id_cliente', 'id_tipo_visita','cumplida'], 'integer'],
+            [['id_programacion', 'id_cliente', 'id_tipo_visita','cumplida','tipo_visita'], 'integer'],
             [['id_cliente', 'id_tipo_visita', 'hora_visita'], 'required'],
             [['hora_visita'], 'string'],
             [['fecha_registro','fecha_informe'], 'safe'],
@@ -66,6 +66,7 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
             'cumplida' => 'Cumplida:',
             'fecha_informe' => 'Fecha informe:',
             'descripcion_gestion' => 'Gestion visita:',
+            'tipo_visita' => 'Tipo visita:',
         ];
     }
 
@@ -99,5 +100,18 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
             $citacumplida = 'SI';
         }
         return $citacumplida;
+    }
+    
+    public function getVisitaCliente() {
+        if($this->tipo_visita == 1){
+            $visitacliente = 'TELEFONICA';
+        }else{
+            if($this->tipo_visita == 2){
+               $visitacliente = 'VIRTUAL';
+            }else{
+                $visitacliente = 'PRESENCIAL';
+            }
+        }
+        return $tipovisita;
     }
 }

@@ -72,6 +72,9 @@ $cargo = ArrayHelper::map(Cargos::find()->orderBy('nombre_cargo DESC')->all(), '
                 $( "#' . Html::getInputId($model, 'codigo_municipio', ['required', 'class' => 'select-2']) . '" ).html( data ); });']); ?>
             <?= $form->field($model, 'codigo_municipio')->dropDownList(['prompt' => 'Seleccione...']) ?>
         </div>
+        <div class="row">
+            <?= $form->field($model, 'gestion_diaria')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
+        </div>
     </div>    
     <div class="panel-footer text-right">
         <a href="<?= Url::toRoute("agentes-comerciales/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>

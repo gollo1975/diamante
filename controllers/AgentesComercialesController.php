@@ -254,6 +254,7 @@ class AgentesComercialesController extends Controller
             $table->codigo_municipio = $model->codigo_municipio;
             $table->id_cargo = $model->id_cargo;
             $table->user_name = Yii::$app->user->identity->username;
+            $table->gestion_diaria = $model->gestion_diaria;
             $table->save();
             return $this->redirect(['index']);
         }

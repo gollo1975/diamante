@@ -335,6 +335,7 @@ class ProgramacionCitasController extends Controller {
                     $table->cumplida = $model->cumplida;
                     $table->fecha_informe = date('Y-m-d h:i:s');
                     $table->descripcion_gestion = $model->observacion;
+                    $table->tipo_visita = $model->tipo_visita;
                     $table->save(false);
                     $this->redirect(["programacion-citas/listados_citas", 'id' => $id]);
                 }
@@ -342,8 +343,9 @@ class ProgramacionCitasController extends Controller {
                 $model->getErrors();
             }
         }
-        if (Yii::$app->request->get()) {
+        if (Yii::$app->request->get($id)) {
             $model->cumplida = $table->cumplida;
+            $model->tipo_visita = $table->tipo_visita;
             $model->observacion = $table->descripcion_gestion;
         }
         return $this->renderAjax('form_nueva_gestion_comercial', [
@@ -438,9 +440,11 @@ class ProgramacionCitasController extends Controller {
         $model = new \app\models\FormModeloCrearCita();
         $cita = ProgramacionCitas::find()->where(['=', 'id_agente', $agente])->orderBy('id_programacion DESC')->all();
         if (count($cita) > 0) {
+            $vendedor = AgentesComerciales::findOne($agente);
             $cita = ProgramacionCitas::find()->where(['=', 'id_agente', $agente])->orderBy('id_programacion DESC')->one();
             $valor = $cita->proceso_cerrado;
-            if ($valor == 0) {
+            $diaria = $vendedor->gestion_diaria;
+            if ($valor == 0 && $diaria == 0) {
                 $valor = 1;
             } else {
                 $valor = 0;
@@ -449,7 +453,6 @@ class ProgramacionCitasController extends Controller {
             $valor = 0;
         }
         if ($valor == 0) {
-;
             if ($model->load(Yii::$app->request->post())) {
                 if (isset($_POST["crear_cita_cliente"])) {
                     if ($model->desde <> (NULL) && $model->hasta <> (NULL)) {
