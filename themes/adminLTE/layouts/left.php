@@ -227,6 +227,7 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/index']],
+                                                  ['label' => 'Anular pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/anular_pedidos']],
                                                 ['label' => 'Indicador comercial', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/index']],
                                             ],
                                         ],
@@ -246,7 +247,7 @@
                                                     ['label' => 'Graficas', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_vendedor']],
                                                     
                                                 ]],
-                                                 
+                                                ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedidos']], 
                                             ],
                                         ],
                                         [

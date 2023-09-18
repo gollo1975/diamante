@@ -238,7 +238,118 @@ class PedidosController extends Controller
             return $this->redirect(['site/login']);
         }
     }
+    //CONSULA DE PEDIDOS
+    public function actionSearch_pedidos($token = 2) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',47])->all()){
+                $form = new FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $facturado = null; $pedido_cerrado = null;
+                $vendedores = null; $numero_pedido = null;
+                $tokenAcceso = Yii::$app->user->identity->role;
+                $tokenAgente = Yii::$app->user->identity->username; 
+                $presupuesto = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $facturado = Html::encode($form->facturado);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $pedido_cerrado = Html::encode($form->pedido_cerrado);
+                        $numero_pedido = Html::encode($form->numero_pedido);
+                        $presupuesto = Html::encode($form->presupuesto);
+                        $table = Pedidos::find()
+                            ->andFilterWhere(['=', 'documento', $documento])
+                            ->andFilterWhere(['=', 'id_cliente', $cliente])
+                            ->andFilterWhere(['=', 'facturado', $facturado])
+                            ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                            ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
+                            ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                             ->andFilterWhere(['=','presupuesto', $presupuesto])
+                            ->andWhere(['=','autorizado', 1])
+                            ->andFilterWhere(['=','id_agente', $vendedores]);
+                        $table = $table->orderBy('id_pedido DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = Pedidos::find()->Where(['=','autorizado', 1])->andWhere(['=','cerrar_pedido', 1])->orderBy('id_pedido DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_pedidos', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
     
+    //ANULAR PEDIDO
+    public function actionAnular_pedidos() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',48])->all()){
+                $table = Pedidos::find()->Where(['=','autorizado', 1])->andWhere(['=','cerrar_pedido', 1])
+                                       ->andWhere(['=','pedido_anulado', 0])
+                                       ->andWhere(['=','facturado', 0])->orderBy('id_pedido DESC');
+                $count = clone $table;
+                $pages = new Pagination([
+                    'pageSize' => 15,
+                    'totalCount' => $count->count(),
+                ]);
+                $tableexcel = $table->all();
+                $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                if(isset($_POST['excel'])){                    
+                        $this->actionExcelconsultaPedidos($tableexcel);
+                }
+            }
+            $to = $count->count();
+            return $this->render('anular_pedidos', [
+                        'model' => $model,
+                        'pagination' => $pages,
+            ]);
+        }else{
+            return $this->redirect(['site/login']);
+        }
+      }
     //PROCESO QUE CREA NUEVO PEDIDO
     public function actionCrear_nuevo_pedido($id) {
        //valide cupo
@@ -269,18 +380,69 @@ class PedidosController extends Controller
     {
         $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
         $model = Pedidos::findOne($id);
-        $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
         return $this->render('view', [
             'model' => $this->findModel($id),
-            'detalle_pedido' => $detalle_pedido,
             'token' => $token,
             'pedido_presupuesto' => $pedido_presupuesto,
             'detalle_pedido' => $detalle_pedido,
             'cliente' => $cliente,
         ]);   
     }
+    
+    //VISTA DE ANULAR PEDIDO Y DETALLES DEL PRESUPUESTO
+    public function actionView_anular($id) {
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        $model = Pedidos::findOne($id);
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->all(); 
+        //PROCESO QUE ELIMINAR EL PRESUPUESTO
+        if (isset($_POST["eliminar_presupuesto"])) {
+            if (isset($_POST["detalle_presupuesto"])) {
+                $intIndice = 0;
+                $detalle = 0;
+                foreach ($_POST["detalle_presupuesto"] as $intCodigo) {
+                    $detalle = $intCodigo;
+                    $presupuesto = PedidoPresupuestoComercial::findOne($intCodigo);
+                    $this->DevolucionProductosPresupuesto($id, $detalle);
+                    $presupuesto->registro_eliminado = 1;
+                    $presupuesto->save();
+                    $this->redirect(["view_anular",'id' => $id]); 
+                }       
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar los registros a eliminar.'); 
+                return $this->redirect(['view_anular','id' => $id]);
+            } 
+        }    
+        //PROCESO QUE ELIMINAR DETALLES DE PEDIDO
+        if (isset($_POST["eliminar_pedido"])) {
+            if (isset($_POST["detalle_pedido"])) {
+                $intIndice = 0;
+                $detalle = 0;
+                foreach ($_POST["detalle_pedido"] as $intCodigo) {
+                    $eliminar = PedidoDetalles::findOne($intCodigo);
+                    $detalle = $intCodigo;
+                    $this->DevolucionProductosInventario($id, $detalle);
+                    $detalle = $eliminar->id_inventario;
+                    $this->ActualizarTotalesProducto($detalle);
+                    $eliminar->registro_eliminado = 1;
+                    $eliminar->save(false);
+                    $this->redirect(["view_anular",'id' => $id]); 
+                }       
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar los registros a eliminar.'); 
+                return $this->redirect(['view_anular','id' => $id]);
+            } 
+        }    
+        
+        return $this->render('view_anulado', [
+            'model' => $this->findModel($id),
+            'detalle_pedido' => $detalle_pedido,
+            'pedido_presupuesto' => $pedido_presupuesto,
+         
+        ]);   
+    }
+    
    //PROCESO QUE EDITA EL CLIENTE
      public function actionEditarcliente($id, $tokenAcceso) {
         $model = new \app\models\FormModeloCambiarCantidad();
@@ -395,11 +557,11 @@ class PedidosController extends Controller
                                     $this->ActualizarTotalesPedido($id);
                                 }else{
                                     Yii::$app->getSession()->setFlash('error', 'Las unidades vendidas es mayor que el STOCK de inventarios. Favor validar las cantidades.');
-                                    return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso]);
+                                    return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token]);
                                 }    
                             }else{
                                 Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.');
-                                return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso]);
+                                return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token]);
                             }
                         }    
                     }    
@@ -748,14 +910,12 @@ class PedidosController extends Controller
          $model = new FormModeloBuscar();
          $pedido = Pedidos::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
-          //  if ($model->validate()){
                 if (isset($_POST["crear_observaciones"])) {
                     $table = Pedidos::findOne($id);
                     $table->observacion = $model->observacion;
                     $table->save(false);
                     return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
                 }
-          //  }
         }
         if (Yii::$app->request->get()) {
             $model->observacion= $pedido->observacion;
@@ -768,6 +928,98 @@ class PedidosController extends Controller
            'tokenAcceso' => $tokenAcceso,
             
         ]);      
+    }
+    
+    //ANULAR EL PEDIDO EN SU TOTALIDAD
+    public function actionAnular_pedido_total($id) {
+        $pedido = Pedidos::findOne($id);
+        $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->andWhere(['=','registro_eliminado', 1])->all();
+        $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','registro_eliminado', 1])->all();
+        $sumar_presupuesto = 0;
+        $sumar_detalle = 0;
+        foreach ($pedido_detalle as $detalle):
+            $sumar_detalle += $detalle->total_linea;
+        endforeach;
+        foreach ($pedido_presupuesto as $presupueso):
+            $sumar_presupuesto += $presupueso->total_linea;
+        endforeach;
+        $cliente->gasto_presupuesto_comercial = $cliente->gasto_presupuesto_comercial - $sumar_presupuesto;
+        $cliente->save();
+        $pedido->valor_eliminado_pedido = $sumar_detalle;
+        $pedido->valor_eliminado_presupuesto = $sumar_presupuesto;
+        $pedido->pedido_anulado = 1;
+        $pedido->save();
+        return $this->redirect(['view_anular','id' => $id]);
+        
+    }
+    //ACTUALZAR SALDOS
+     public function actionActualizar_saldos($id) {
+        $pedido = Pedidos::findOne($id);
+        $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->andWhere(['=','registro_eliminado', 0])->all();
+        $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','registro_eliminado', 0])->all();
+        $this->ActualizarSaldoEliminado($pedido, $cliente, $pedido_presupuesto, $pedido_detalle, $id);
+        $this->ActualizarSaldoPresupuestoEiminado($pedido, $cliente, $pedido_presupuesto, $pedido_detalle, $id);
+        return $this->redirect(['view_anular','id' => $id]);
+    }
+    //SUBPROCESO DE PEDIDO DETALLE
+    protected function ActualizarSaldoEliminado($pedido, $cliente, $pedido_presupuesto, $pedido_detalle, $id) {
+        $pedido_pre = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','registro_eliminado', 1])->all();
+        //proceso de pedido detalle
+        if(count($pedido_detalle) > 0){
+            $subtotal = 0; $iva = 0; $total = 0; 
+            foreach ($pedido_detalle as $detalle):
+                $subtotal += $detalle->subtotal;
+                $iva += $detalle->impuesto;
+                $total += $detalle->total_linea;
+            endforeach;
+            $pedido->subtotal = $subtotal;
+            $pedido->impuesto = $iva;
+            $pedido->gran_total = $total;
+            $pedido->save();
+        }    
+        if(count($pedido_pre) > 0){
+            $suma = 0;
+            foreach ($pedido_pre as $eliminado):
+                $suma += $eliminado->total_linea;
+            endforeach;
+            $pedido->valor_eliminado_pedido = $suma;
+            $pedido->save();
+        }else{
+           $pedido->valor_eliminado_pedido = 0;
+           $pedido->save(); 
+        }
+       
+    }
+    
+    //ACTUALIZA EL PRSUPUESTO
+    
+     protected function ActualizarSaldoPresupuestoEiminado($pedido, $cliente, $pedido_presupuesto, $pedido_detalle, $id) {
+        $pedido_pre = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->andWhere(['=','registro_eliminado', 1])->all();
+        //proceso de pedido detalle
+        if(count($pedido_pre) > 0){
+            $suma = 0;
+            foreach ($pedido_pre as $eliminado):
+                $suma += $eliminado->total_linea;
+            endforeach;
+            $pedido->valor_eliminado_presupuesto = $suma;
+            $pedido->save();
+        }else{
+           $pedido->valor_eliminado_presupuesto = 0;
+           $pedido->save(); 
+        }
+        if(count($pedido_presupuesto) > 0){
+             $total = 0; 
+            foreach ($pedido_presupuesto as $detalle):
+                $total += $detalle->total_linea;
+            endforeach;
+            $pedido->valor_presupuesto = $total;
+            $pedido->save();
+        }    
+        $cliente->gasto_presupuesto_comercial = $cliente->gasto_presupuesto_comercial - $total;
+        $cliente->save();
+       
     }
     //REPORTES
     public function actionImprimir_pedido($id) {

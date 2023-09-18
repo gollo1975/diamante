@@ -36,7 +36,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal'], 'integer'],
+            [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
@@ -60,6 +60,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',
             'subtotal' => 'subtotal',
+            'registro_eliminado' => 'Registro eliminado:',
         ];
     }
 
@@ -78,4 +79,12 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     {
         return $this->hasOne(InventarioProductos::className(), ['id_inventario' => 'id_inventario']);
     }
+    public function getRegistroEliminado() {
+      if($this->registro_eliminado ==0){
+          $registroeliminado = 'NO';
+      }else{
+          $registroeliminado = 'SI';
+      }
+      return $registroeliminado;
+   }
 }

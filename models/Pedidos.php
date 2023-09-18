@@ -42,7 +42,7 @@ class Pedidos extends \yii\db\ActiveRecord
     {
         return [
             [['numero_pedido', 'id_cliente','id_agente', 'dv', 'cantidad', 'subtotal', 'impuesto', 'gran_total', 'autorizado', 'cerrar_pedido', 'facturado',
-                'valor_presupuesto','presupuesto'], 'integer'],
+                'valor_presupuesto','presupuesto','pedido_anulado','valor_eliminado_presupuesto','valor_eliminado_pedido'], 'integer'],
             [['fecha_proceso'], 'required'],
             [['fecha_proceso'], 'safe'],
             [['documento', 'usuario'], 'string', 'max' => 15],
@@ -77,6 +77,9 @@ class Pedidos extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'presupuesto' => 'Presupuesto:',
             'valor_presupuesto' => 'Valor presupuesto:',
+            'pedido_anulado' => 'Pedido anulado:',
+            'valor_eliminado_pedido' => 'valor_eliminado_pedido',
+            'valor_eliminado_presupuesto' => 'valor_eliminado_presupuesto',
         ];
     }
 
@@ -122,5 +125,13 @@ class Pedidos extends \yii\db\ActiveRecord
             $presupuestopedido = 'SI';
         }
         return $presupuestopedido;
+    }
+     public function getPedidoAnulado() {
+        if($this->pedido_anulado == 0 ){
+            $pedidoanulado = 'NO';
+        }else{
+            $pedidoanulado = 'SI';
+        }
+        return $pedidoanulado;
     }
 }

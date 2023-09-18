@@ -39,7 +39,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea'], 'integer'],
+            [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -65,6 +65,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
             'total_linea' => 'Total Linea',
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',
+            'registro_eliminado' => 'Registro eliminado:',
         ];
     }
 
@@ -90,5 +91,14 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     public function getPresupuesto()
     {
         return $this->hasOne(PresupuestoEmpresarial::className(), ['id_presupuesto' => 'id_presupuesto']);
-    }
+   }
+   
+   public function getRegistroEliminado() {
+      if($this->registro_eliminado ==0){
+          $registroeliminado = 'NO';
+      }else{
+          $registroeliminado = 'SI';
+      }
+      return $registroeliminado;
+   }
 }

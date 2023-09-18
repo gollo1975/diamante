@@ -32,9 +32,13 @@ $view = 'pedidos';
        <div class="btn-group btn-sm" role="group">    
             <?php if($token == 0){?>
                 <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
-            <?php }else{?>
-                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_orden_compra', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
-            <?php }
+            <?php }else{
+                if($token == 1){?>
+                    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_orden_compra', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
+                <?php }else{?>
+                    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_pedidos', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
+                <?php }           
+            }
             if ($model->autorizado == 1 && $model->cerrar_pedido == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
@@ -50,8 +54,7 @@ $view = 'pedidos';
                             <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Presupuesto pedido', ['imprimir_presupuesto', 'id' => $model->id_pedido]) ?></li>
                         <?php }?>    
                 </ul>
-                <?php   
-               echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 11, 'codigo' => $model->id_pedido,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
+               <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 11, 'codigo' => $model->id_pedido,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
             } ?>        
         </div>    
     <div class="panel panel-success">

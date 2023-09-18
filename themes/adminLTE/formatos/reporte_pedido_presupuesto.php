@@ -228,6 +228,9 @@ $id_pedido = $model->id_pedido;
 $pdf = new PDF();
 $pdf->AliasNbPages();
 $pdf->AddPage();
+if($model->pedido_anulado == 1){
+    $pdf->Image('dist/images/logos/documentoanulado.png' , 20 ,198.5, 130 , 28,'PNG');
+} 
 $pdf->Body($pdf,$model);
 $pdf->AliasNbPages();
 $pdf->SetFont('Times', '', 10);
