@@ -95,7 +95,7 @@ class DirectorioArchivosController extends \yii\web\Controller
             if ($model->file && $model->validate()) {
                 $carpeta = 'Documentos/'.$model->numero.'/'.$model->codigo.'/';
                 if (!file_exists($carpeta)) {
-                    mkdir($carpeta, 0777, true);
+                    mkdir($carpeta, 777, true);
                 }
                 foreach ($model->file as $file):
                     if(!file_exists($carpeta . $file->baseName . '.' . $file->extension)){
@@ -143,7 +143,7 @@ class DirectorioArchivosController extends \yii\web\Controller
             if ($model->file && $model->validate()) {
                 $carpeta = 'Documentos/'.$model->numero.'/'.$model->codigo.'/';
                 if (!file_exists($carpeta)) {
-                    mkdir($carpeta, 0777, true);
+                    mkdir($carpeta, 777, true);
                 }
                 foreach ($model->file as $file):
                     if(!file_exists($carpeta . $file->baseName . '.' . $file->extension)){
