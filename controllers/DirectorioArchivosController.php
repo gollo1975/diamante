@@ -124,7 +124,7 @@ class DirectorioArchivosController extends \yii\web\Controller
             $model->view = $view;
         }
 
-        return $this->render("Subir", ["model" => $model, "msg" => $msg,'view' => $view, 'token' => $token]);
+        return $this->render("subir", ["model" => $model, "msg" => $msg,'view' => $view, 'token' => $token]);
     }
     //permite subir imagen
      public function actionSubir_archivo($token)

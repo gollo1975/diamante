@@ -276,7 +276,7 @@ class PedidosController extends Controller
                         $count = clone $table;
                         $to = $count->count();
                         $pages = new Pagination([
-                            'pageSize' => 15,
+                            'pageSize' => 20,
                             'totalCount' => $count->count()
                         ]);
                         $model = $table
@@ -293,7 +293,7 @@ class PedidosController extends Controller
                     $table = Pedidos::find()->Where(['=','autorizado', 1])->andWhere(['=','cerrar_pedido', 1])->orderBy('id_pedido DESC');
                     $count = clone $table;
                     $pages = new Pagination([
-                        'pageSize' => 15,
+                        'pageSize' => 20,
                         'totalCount' => $count->count(),
                     ]);
                     $tableexcel = $table->all();
