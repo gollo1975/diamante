@@ -69,6 +69,11 @@ class ResolucionDian extends \yii\db\ActiveRecord
         ];
     }
     
+     public function getMatriculaEmpresas()
+    {
+        return $this->hasMany(MatriculaEmpresa::className(), ['id_resolucion' => 'id_resolucion']);
+    }
+    
     public function getActivo() {
         if ($this->estado_resolucion == 0){
             $estado = 'SI';
