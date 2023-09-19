@@ -275,6 +275,7 @@
                                             'icon' => 'database',
                                             'url' => '#',
                                             'items' => [
+                                               ['label' => 'Resolucion fiscal', 'icon' => 'plus-square-o', 'url' => ['/resolucion-dian/index']],  
                                                ['label' => 'Tipo de factura', 'icon' => 'plus-square-o', 'url' => ['/tipo-factura-venta/index']], 
                                                ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
                                               

@@ -1,0 +1,80 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "resolucion_dian".
+ *
+ * @property int $id_resolucion
+ * @property string $numero_resolucion
+ * @property string $desde
+ * @property string $hasta
+ * @property string $fecha_vence
+ * @property string $consecutivo
+ * @property string $fecha_registro
+ * @property string $user_name
+ * @property int $estado_resolucion
+ */
+class ResolucionDian extends \yii\db\ActiveRecord
+{
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'resolucion_dian';
+    }
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->consecutivo = strtoupper($this->consecutivo); 
+ 
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['numero_resolucion', 'desde', 'hasta', 'fecha_vence'], 'required'],
+            [['desde', 'hasta', 'fecha_vence', 'fecha_registro'], 'safe'],
+            [['estado_resolucion'], 'integer'],
+            [['numero_resolucion'], 'string', 'max' => 30],
+            [['consecutivo'], 'string', 'max' => 3],
+            [['user_name'], 'string', 'max' => 15],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id_resolucion' => 'Id',
+            'numero_resolucion' => 'Numero resolucion',
+            'desde' => 'Desde',
+            'hasta' => 'Hasta',
+            'fecha_vence' => 'Fecha vencimiento',
+            'consecutivo' => 'Consecutivo',
+            'fecha_registro' => 'Fecha Registro',
+            'user_name' => 'User Name',
+            'estado_resolucion' => 'Activo',
+        ];
+    }
+    
+    public function getActivo() {
+        if ($this->estado_resolucion == 0){
+            $estado = 'SI';
+        }else{
+            $estado = 'NO';
+        }
+        return $estado;
+    }
+}
