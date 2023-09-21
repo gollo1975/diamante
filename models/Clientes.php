@@ -70,9 +70,9 @@ class Clientes extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_tipo_documento', 'nit_cedula', 'celular', 'email_cliente', 'codigo_departamento', 'codigo_municipio', 'id_naturaleza', 'id_posicion','id_agente'], 'required'],
+            [['id_tipo_documento', 'nit_cedula', 'celular', 'email_cliente', 'codigo_departamento', 'codigo_municipio', 'id_naturaleza', 'id_posicion','id_agente','id_tipo_cliente'], 'required'],
             [['id_tipo_documento', 'dv', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'id_posicion',
-                'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial'], 'integer'],
+                'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente'], 'integer'],
             [['fecha_creacion', 'fecha_editado'], 'safe'],
             [['observacion'], 'string'],
        
@@ -87,6 +87,7 @@ class Clientes extends \yii\db\ActiveRecord
             [['id_naturaleza'], 'exist', 'skipOnError' => true, 'targetClass' => NaturalezaSociedad::className(), 'targetAttribute' => ['id_naturaleza' => 'id_naturaleza']],
             [['id_posicion'], 'exist', 'skipOnError' => true, 'targetClass' => PosicionPrecio::className(), 'targetAttribute' => ['id_posicion' => 'id_posicion']],
             [['id_agente'], 'exist', 'skipOnError' => true, 'targetClass' => AgentesComerciales::className(), 'targetAttribute' => ['id_agente' => 'id_agente']],
+            [['id_tipo_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => TipoCliente::className(), 'targetAttribute' => ['id_tipo_cliente' => 'id_tipo_cliente']],
         ];
     }
 
@@ -130,6 +131,7 @@ class Clientes extends \yii\db\ActiveRecord
             'aplicar_venta_mora' => 'Venta en mora:',
             'presupuesto_comercial' => 'Presupuesto:',
             'gasto_presupuesto_comercial' => 'Gasto presupuesto:',
+            'id_tipo_cliente' => 'Tipo cliente:',
         ];
     }
 
@@ -177,6 +179,11 @@ class Clientes extends \yii\db\ActiveRecord
         return $this->hasOne(PosicionPrecio::className(), ['id_posicion' => 'id_posicion']);
     }
     
+     public function getTipoCliente()
+    {
+        return $this->hasOne(TipoCliente::className(), ['id_tipo_cliente' => 'id_tipo_cliente']);
+    }
+    
     public function getFormaPago() {
         if($this->forma_pago == 1){
             $formapago = 'CONTADO';
@@ -219,5 +226,13 @@ class Clientes extends \yii\db\ActiveRecord
             $estadocliente = 'NO';
         }
         return $estadocliente;
+    }
+    public function getVentaMora() {
+        if($this->aplicar_venta_mora == 0){
+            $ventamora = 'NO';
+        }else{
+            $ventamora = 'SI';
+        }
+        return $ventamora;
     }
 }

@@ -11,6 +11,7 @@ use app\models\Municipios;
 use app\models\Departamentos;
 use app\models\TipoDocumento;
 use app\models\Cargos;
+use app\models\Coordinadores;
 ?>
 
 <!--<h1>Nuevo proveedor</h1>-->
@@ -34,6 +35,7 @@ $departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DE
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
 $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_proveedor', 1])->all(), 'id_tipo_documento', 'documento');
 $cargo = ArrayHelper::map(Cargos::find()->orderBy('nombre_cargo DESC')->all(), 'id_cargo', 'nombre_cargo');
+$coordinador = ArrayHelper::map(Coordinadores::find()->orderBy('nombre_completo DESC')->all(), 'id_coordinador', 'nombre_completo');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -73,6 +75,13 @@ $cargo = ArrayHelper::map(Cargos::find()->orderBy('nombre_cargo DESC')->all(), '
             <?= $form->field($model, 'codigo_municipio')->dropDownList(['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">
+             <?= $form->field($model, 'id_coordinador')->widget(Select2::classname(), [
+                   'data' => $coordinador,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+               ]); ?> 
             <?= $form->field($model, 'gestion_diaria')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
         </div>
     </div>    

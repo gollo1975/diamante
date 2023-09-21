@@ -230,6 +230,7 @@ class PedidosController extends Controller
                             'model' => $model,
                             'form' => $form,
                             'pagination' => $pages,
+                            'vendedor' => $vendedor,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);

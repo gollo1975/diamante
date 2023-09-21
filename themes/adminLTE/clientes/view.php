@@ -55,16 +55,16 @@ $view = 'clientes';
                     <td><?= $model->nombre_completo ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'>Direccion:</th>
-                    <td><?= $model->direccion ?></td>
-                    <th style='background-color:#F0F3EF;'>Email:</th>
-                    <td><?= $model->email_cliente ?></td>
+                    <th style='background-color:#F0F3EF;'>Forma pago:</th>
+                    <td><?= $model->formaPago ?></td>
                     <th style='background-color:#F0F3EF;'>Telefono:</th>
                     <td><?= $model->telefono ?></td>
                     <th style='background-color:#F0F3EF;'>Celular:</th>
                     <td><?= $model->celular ?></td>
-                     <th style='background-color:#F0F3EF;'>Forma pago:</th>
-                    <td><?= $model->formaPago ?></td>
+                        <th style='background-color:#F0F3EF;'>Email:</th>
+                    <td><?= $model->email_cliente ?></td>
+                       <th style='background-color:#F0F3EF;'>Direccion:</th>
+                    <td><?= $model->direccion ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'>Departamento:</th>
@@ -106,8 +106,19 @@ $view = 'clientes';
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'>G. presupuesto:</th>
                     <td style="text-align: right"><?= ''.number_format($model->gasto_presupuesto_comercial,0) ?></td>
+                    <th style='background-color:#F0F3EF;'>Tipo cliente:</th>
+                    <td ><?= $model->tipoCliente->concepto ?></td>
+                    <th style='background-color:#F0F3EF;'>Vender en mora:</th>
+                    <td ><?= $model->ventaMora ?></td>
+                    <th style='background-color:#F0F3EF;'></th>
+                    <td></td>
+                     <th style='background-color:#F0F3EF;'>Cupo asignado:</th>
+                    <td style="text-align: right"><?= ''.number_format($model->cupo_asignado,0) ?></td>
+                    
+                </tr>
+                <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'>Observación:</th>
-                    <td colspan="8"><?= $model->observacion ?></td>
+                    <td colspan="9"><?= $model->observacion ?></td>
                 </tr>
             </table>
         </div>

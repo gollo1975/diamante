@@ -49,36 +49,42 @@ $view = 'agentes-comerciales';
                     <td><?= $model->tipoDocumento->tipo_documento ?></td>
                     <th style='background-color:#F0F3EF;'>Documento:</th>
                     <td><?= $model->nit_cedula ?></td>
-                    <th style='background-color:#F0F3EF;' >Dv:</th>
-                    <td><?= $model->dv ?></td>
-                      <th style='background-color:#F0F3EF;' >Agente comercial:</th>
+                    <th style='background-color:#F0F3EF;' >Agente comercial:</th>
                     <td><?= $model->nombre_completo ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'>Direccion:</th>
-                    <td><?= $model->direccion ?></td>
                     <th style='background-color:#F0F3EF;'>Email:</th>
                     <td><?= $model->email_agente ?></td>
                     <th style='background-color:#F0F3EF;'>Celular:</th>
                     <td><?= $model->celular_agente ?></td>
                     <th style='background-color:#F0F3EF;'>Activo:</th>
                     <td><?= $model->estadoRegistro ?></td>
-                    <th style='background-color:#F0F3EF;'>User name:</th>
-                    <td><?= $model->user_name ?></td>
+                     <th style='background-color:#F0F3EF;'>Direccion:</th>
+                    <td><?= $model->direccion ?></td>
+                 
 
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'>User name:</th>
+                    <td><?= $model->user_name ?></td>
                     <th style='background-color:#F0F3EF;'>Departamento:</th>
                     <td><?= $model->codigoDepartamento->departamento ?></td>
                     <th style='background-color:#F0F3EF;'>Municipio:</th>
                     <td><?= $model->codigoMunicipio->municipio ?></td>
                     <th style='background-color:#F0F3EF;'>Cargo:</th>
                     <td><?= $model->cargo->nombre_cargo ?></td>
+                </tr>
+                <tr style="font-size: 90%">
                     <th style='background-color:#F0F3EF;'>Fecha registro:</th>
                     <td><?= $model->fecha_registro ?></td>
                     <th style='background-color:#F0F3EF;'>Gestion diaria:</th>
                     <td><?= $model->gestionDiaria ?></td>
-                   
+                     <th style='background-color:#F0F3EF;'>Getiona pedido:</th>
+                     <td><?= $model->gestionPedido?></td> 
+                     <th style='background-color:#F0F3EF;'>Coordinador:</th>
+                     <td><?= $model->coordinador->nombre_completo ?></td>
+                    
+                    
                 </tr>
                  
                  

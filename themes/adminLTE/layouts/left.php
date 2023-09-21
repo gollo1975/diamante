@@ -218,6 +218,7 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Cargos', 'icon' => 'plus-square-o', 'url' => ['/cargos/index']],
+                                                ['label' => 'Coordinadores', 'icon' => 'plus-square-o', 'url' => ['/coordinadores/index']],
                                                 ['label' => 'Agentes comerciales', 'icon' => 'plus-square-o', 'url' => ['/agentes-comerciales/index']],
                                             ],
                                         ],

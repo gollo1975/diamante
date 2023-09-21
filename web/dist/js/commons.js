@@ -123,7 +123,7 @@ var esFechaMenor = function(fechaA, fechaB, primerDia){
                 z;
 
         // Se limpia el Nit
-        myNit = document.getElementById('cedulanit').value;
+        myNit = document.getElementById('nit_cedula').value;
         myNit = myNit.replace(/\s/g, ""); // Espacios
         myNit = myNit.replace(/,/g, ""); // Comas
         myNit = myNit.replace(/\./g, ""); // Puntos
@@ -213,15 +213,19 @@ function porcentajeExportacion() {
 };
 
 function mostrar2() {
-    idtipo = document.getElementById('id_tipo_documento').value;
-    if (idtipo == '1') {
-        razonsocial.style.display = "none";
-        nombreproveedor.style.display = "block";
-        apellidoproveedor.style.display = "block";
-    } else if (idtipo == '5') {
-        razonsocial.style.display = "block";
-        nombreproveedor.style.display = "none";
-        apellidoproveedor.style.display = "none";
+    var tipo = document.getElementById('id_tipo_documento').value;
+    if (tipo == '1' || tipo == '2') {
+        razon_social.style.display = "none";
+        primer_nombre.style.display = "block";
+        segundo_nombre.style.display = "block";
+        primer_apellido.style.display = "block";
+        segundo_apellido.style.display = "block";
+    } else if (tipo == '3') {
+        razon_social.style.display = "block";
+        primer_nombre.style.display = "none";
+        segundo_nombre.style.display = "none";
+        primer_apellido.style.display = "none";
+        segundo_apellido.style.display = "none";
     }
 };
 

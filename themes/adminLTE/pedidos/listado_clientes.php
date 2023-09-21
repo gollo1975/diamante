@@ -76,22 +76,27 @@ $this->params['breadcrumbs'][] = $this->title;
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
-            <tr style="font-size: 90%;">                   
-                <td><?= $val->nit_cedula ?></td>
-                <td><?= $val->nombre_completo ?></td>
-                <td style= 'width: 25px; height: 25px;'>
-                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_nuevo_pedido', 'id' => $val->id_cliente], [
-                                  'class' => '',
-                                  'data' => [
-                                      'confirm' => 'Esta seguro de crear un nuevo pedido a este cliente?',
-                                      'method' => 'post',
-                                  ],
-                              ])?>
-                </td>     
-            </tr>
-            </tbody>
-            <?php endforeach; ?>
+                <?php 
+                if($vendedor->hacer_pedido == 0){
+                    foreach ($model as $val): ?>
+                        <tr style="font-size: 90%;">                   
+                            <td><?= $val->nit_cedula ?></td>
+                            <td><?= $val->nombre_completo ?></td>
+                            <td style= 'width: 25px; height: 25px;'>
+                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_nuevo_pedido', 'id' => $val->id_cliente], [
+                                              'class' => '',
+                                              'data' => [
+                                                  'confirm' => 'Esta seguro de crear un nuevo pedido a este cliente?',
+                                                  'method' => 'post',
+                                              ],
+                                          ])?>
+                            </td>     
+                        </tr>
+                   <?php endforeach;
+                 }else{  
+                      Yii::$app->getSession()->setFlash('warning', 'No esta autorizado para crear pedidos. Comunicate con el administrador.'); 
+                 }?>
+            </tbody>        
         </table>
     </div>
 </div>

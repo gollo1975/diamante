@@ -13,6 +13,7 @@ use app\models\TipoDocumento;
 use app\models\NaturalezaSociedad;
 use app\models\PosicionPrecio;
 use app\models\AgentesComerciales;
+use app\models\TipoCliente;
 
 
 $departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
@@ -21,6 +22,7 @@ $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_cli
 $posicion = ArrayHelper::map(PosicionPrecio::find()->all(), 'id_posicion', 'posicion');
 $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza', 'naturaleza');
 $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$tipoCliente = ArrayHelper::map(TipoCliente::find()->all(), 'id_tipo_cliente', 'concepto');
 ?>
 
 <!--<h1>Nuevo proveedor</h1>-->
@@ -75,12 +77,9 @@ $form = ActiveForm::begin([
         <div class="row">
             <?= $form->field($model, 'forma_pago')->dropdownList(['1' => 'CONTADO', '2' => 'CRÉDITO'], ['prompt' => 'Seleccione...', 'onchange' => 'fpago()', 'id' => 'forma_pago']) ?>
             <?= $form->field($model, 'plazo')->input("text",['id' => 'plazo']) ?>
-        </div>    
+        </div>  
         <div class="row">
             <?= $form->field($model, 'tipo_regimen')->dropdownList(['0' => 'SIMPLIFICADO', '1' => 'COMUN'], ['prompt' => 'Seleccione...']) ?>
-            <?= $form->field($model, 'autoretenedor')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>			
-        </div>
-        <div class="row">   
             <?= $form->field($model, 'id_naturaleza')->widget(Select2::classname(), [
                    'data' => $naturaleza,
                    'options' => ['prompt' => 'Seleccione...'],
@@ -88,10 +87,9 @@ $form = ActiveForm::begin([
                        'allowClear' => true
                    ],
                ]); ?> 
-            <?= $form->field($model, 'tipo_sociedad')->dropdownList(['0' => 'NATURAL', '1' => 'JURIDICA'], ['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">
-            
+                <?= $form->field($model, 'tipo_sociedad')->dropdownList(['0' => 'NATURAL', '1' => 'JURIDICA'], ['prompt' => 'Seleccione...']) ?>
                  <?= $form->field($model, 'id_posicion')->widget(Select2::classname(), [
                    'data' => $posicion,
                    'options' => ['prompt' => 'Seleccione...'],
@@ -99,20 +97,42 @@ $form = ActiveForm::begin([
                        'allowClear' => true
                    ],
                ]); ?> 
-              <?= $form->field($model, 'id_agente')->widget(Select2::classname(), [
+        </div> 
+        <div class="row">
+               <?= $form->field($model, 'id_agente')->widget(Select2::classname(), [
                    'data' => $vendedor,
                    'options' => ['prompt' => 'Seleccione...'],
                    'pluginOptions' => [
                        'allowClear' => true
                    ],
                ]); ?>
-        </div> 
-            <div class="row">
+                 <?= $form->field($model, 'id_tipo_cliente')->widget(Select2::classname(), [
+                   'data' => $tipoCliente,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+               ]); ?> 
+        </div>
+        <div class="row">
             <div class="field-tblproveedor-observaciones_proveedor has-success">
                 <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
             </div>    
-            </div>
-        </div> 	
+        </div>
+        <div class="panel panel-success">
+                    <div class="panel-heading">
+                        Parametros
+                    </div>
+                    <div class="panel-body">
+                        <div class="checkbox checkbox-success" align ="left">
+                                <?= $form->field($model, 'autoretenedor')->checkBox(['label' => 'Autorretenedor','1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'autoretenedor']) ?>
+                                <?= $form->field($model, 'estado_cliente')->checkBox(['label' => 'Inactivo',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'estado_cliente']) ?>
+                                <?= $form->field($model, 'aplicar_venta_mora')->checkBox(['label' => 'Vender en mora',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'aplicar_venta_mora']) ?>
+                        </div>
+                        
+                        </div>
+                     </div>
+        </div>  
     </div>    
     <div class="panel-footer text-right">
         <a href="<?= Url::toRoute("clientes/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>

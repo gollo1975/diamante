@@ -58,8 +58,8 @@ class AgentesComerciales extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_tipo_documento', 'dv','nit_cedula', 'primer_nombre', 'primer_apellido', 'codigo_departamento', 'codigo_municipio', 'id_cargo'], 'required'],
-            [['id_tipo_documento', 'id_cargo','estado','dv','gestion_diaria'], 'integer'],
+            [['id_tipo_documento', 'dv','nit_cedula', 'primer_nombre', 'primer_apellido', 'codigo_departamento', 'codigo_municipio', 'id_cargo','id_coordinador'], 'required'],
+            [['id_tipo_documento', 'id_cargo','estado','dv','gestion_diaria','id_coordinador','hacer_pedido'], 'integer'],
             [['fecha_registro'], 'safe'],
             ['email_agente', 'email'],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'user_name'], 'string', 'max' => 15],
@@ -71,6 +71,7 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
             [['codigo_municipio'], 'exist', 'skipOnError' => true, 'targetClass' => Municipios::className(), 'targetAttribute' => ['codigo_municipio' => 'codigo_municipio']],
             [['id_cargo'], 'exist', 'skipOnError' => true, 'targetClass' => Cargos::className(), 'targetAttribute' => ['id_cargo' => 'id_cargo']],
+            [['id_coordinador'], 'exist', 'skipOnError' => true, 'targetClass' => Coordinadores::className(), 'targetAttribute' => ['id_coordinador' => 'id_coordinador']],
         ];
     }
 
@@ -99,6 +100,8 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             'estado' => 'Activo:',
             'nombre_completo' => 'Agente comercial:',
             'gestion_diaria' => 'Gestion comercial diaria:',
+            'id_coordinador' => 'Coordinador:',
+            'hacer_pedido' => 'Gestiona pedidos:'
         ];
     }
 
@@ -116,6 +119,10 @@ class AgentesComerciales extends \yii\db\ActiveRecord
     public function getCodigoDepartamento()
     {
         return $this->hasOne(Departamentos::className(), ['codigo_departamento' => 'codigo_departamento']);
+    }
+    public function getCoordinador()
+    {
+        return $this->hasOne(Coordinadores::className(), ['id_coordinador' => 'id_coordinador']);
     }
 
     /**
@@ -150,5 +157,13 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             $gestiondiaria = 'NO';
         }
         return $gestiondiaria;
+    }
+     public function getGestionPedido() {
+        if($this->hacer_pedido== 0){
+            $gestionapedido = 'SI';
+        }else{
+            $gestionapedido = 'NO';
+        }
+        return $gestionapedido;
     }
 }
