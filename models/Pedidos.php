@@ -42,7 +42,7 @@ class Pedidos extends \yii\db\ActiveRecord
     {
         return [
             [['numero_pedido', 'id_cliente','id_agente', 'dv', 'cantidad', 'subtotal', 'impuesto', 'gran_total', 'autorizado', 'cerrar_pedido', 'facturado',
-                'valor_presupuesto','presupuesto','pedido_anulado','valor_eliminado_presupuesto','valor_eliminado_pedido'], 'integer'],
+                'valor_presupuesto','presupuesto','pedido_anulado','valor_eliminado_presupuesto','valor_eliminado_pedido','pedido_validado'], 'integer'],
             [['fecha_proceso'], 'required'],
             [['fecha_proceso'], 'safe'],
             [['documento', 'usuario'], 'string', 'max' => 15],
@@ -80,6 +80,7 @@ class Pedidos extends \yii\db\ActiveRecord
             'pedido_anulado' => 'Pedido anulado:',
             'valor_eliminado_pedido' => 'valor_eliminado_pedido',
             'valor_eliminado_presupuesto' => 'valor_eliminado_presupuesto',
+            'pedido_validado' => 'Pedido validado:',
         ];
     }
 

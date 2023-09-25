@@ -303,7 +303,7 @@
                                             'icon' => 'book',
                                             'url' => '#',
                                             'items' => [
-                                                //['label' => 'Items', 'icon' => 'plus-square-o', 'url' => ['/items/index']],
+                                                ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
                                                 
                                             ],
                                         ]
