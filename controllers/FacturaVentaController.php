@@ -246,6 +246,22 @@ class FacturaVentaController extends Controller
         $table->save();
     }
 
+    protected function CrearDetalleFactura($id_pedido, $model) {
+        $detalle_pedido = \app\models\PedidoDetalles::find(['=','id_pedido', $id_pedido])->all();
+        foreach ($detalle_pedido as $detalle):
+            $base = new FacturaVentaDetalle();
+            $base->id_factura = $model->id_factura;
+            $base->id_inventario = $detalle->id_inventario;
+            $base->codigo_producto = $detalle->inventario->codigo_producto;
+            $base->producto = $detalle->inventario->nombre_producto;
+            $base->cantidad = $detalle->cantidad;
+            $base->valor_unitario = $detalle->valor_unitario;
+            $base->subtotal = $detalle->subtotal;
+            $base->impuesto = $detalle->impuesto;
+            $base->total_linea = $detalle->total_linea;
+            $detalle->save();
+        endforeach;
+    }
     /**
      * Finds the FacturaVenta model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
