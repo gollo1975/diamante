@@ -17,7 +17,8 @@ class TipoFacturaVentaSearch extends TipoFacturaVenta
     public function rules()
     {
         return [
-            [['id_tipo_factura'], 'integer'],
+            [['id_tipo_factura','base_retencion'], 'integer'],
+            [['porcentaje_retencion'], 'number'],
             [['descripcion', 'user_name', 'fecha_registro'], 'safe'],
         ];
     }
@@ -60,6 +61,8 @@ class TipoFacturaVentaSearch extends TipoFacturaVenta
         $query->andFilterWhere([
             'id_tipo_factura' => $this->id_tipo_factura,
             'fecha_registro' => $this->fecha_registro,
+            'porcentaje_retencion' => $this->porcentaje_retencion,
+            'base_retencion' => $this->base_retencion,
         ]);
 
         $query->andFilterWhere(['like', 'descripcion', $this->descripcion])

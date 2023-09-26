@@ -27,7 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [                
                 'attribute' => 'descripcion',
-                'contentOptions' => ['class' => 'col-lg-4'],
+                'contentOptions' => ['class' => 'col-lg-2'],
+            ],
+            [                
+                'attribute' => 'base_retencion',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+             [                
+                'attribute' => 'porcentaje_retencion',
+                'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [                
                 'attribute' => 'fecha_registro',

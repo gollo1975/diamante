@@ -44,15 +44,16 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
     {
         return [
             [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion', 'codigo_departamento', 'codigo_municipio'], 'required'],
-            [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal'], 'integer'],
+            [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion'], 'integer'],
             [['razon_social', 'razon_social_completa', 'direccion','email','representante_legal'], 'string', 'max' => 50],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'codigo_departamento', 'codigo_municipio'], 'string', 'max' => 10],
             [['telefono', 'celular'], 'string', 'max' => 15],
             [['nombre_sistema', 'pagina_web'], 'string', 'max' => 30],
             [['id_empresa'], 'unique'],
+            ['porcentaje_reteiva', 'number'],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
             [['codigo_municipio'], 'exist', 'skipOnError' => true, 'targetClass' => Municipios::className(), 'targetAttribute' => ['codigo_municipio' => 'codigo_municipio']],
-            [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => Resoluciones::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
+            [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => ResolucionDian::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
         ];
     }
 
@@ -82,6 +83,8 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'documento_representante_legal' => 'Documento',
             'email' => 'Email',
             'pagina_web' => 'Pagina web',
+            'porcentaje_reteiva' => 'Porcentaje reteiva',
+            'sugiere_retencion' => 'Sugiere retencion',
             
             
         ];

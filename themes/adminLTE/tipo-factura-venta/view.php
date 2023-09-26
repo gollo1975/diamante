@@ -29,12 +29,16 @@ $this->params['breadcrumbs'][] = $model->id_tipo_factura;
                     <td><?= Html::encode($model->id_tipo_factura) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion') ?>:</th>
                     <td><?= Html::encode($model->descripcion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'base_retencion') ?>:</th>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->base_retencion,0)) ?></td>
               </tr>
               <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_registro') ?>:</th>
                     <td><?= Html::encode($model->fecha_registro) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?>:</th>
                     <td><?= Html::encode($model->user_name) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_retencion') ?>:</th>
+                    <td style="text-align: right"><?= Html::encode($model->porcentaje_retencion) ?></td>
               </tr>
             </table>
         </div>

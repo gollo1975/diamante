@@ -6,7 +6,7 @@ use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
 use app\models\Departamentos;
 use app\models\Municipios;
-use app\models\Resoluciones;
+use app\models\ResolucionDian;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Parametros */
@@ -28,7 +28,7 @@ $form = ActiveForm::begin([
         ]);
 ?>
 <?php
-$resoluciones = ArrayHelper::map(Resoluciones::find()->all(), 'id_resolucion', 'resolucion');
+$resoluciones = ArrayHelper::map(ResolucionDian::find()->where(['=','estado_resolucion', 0])->all(), 'id_resolucion', 'numero_resolucion');
 $departamento = ArrayHelper::map(Departamentos::find()->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->all(), 'codigo_municipio', 'municipio');
 ?>
@@ -75,7 +75,11 @@ $municipio = ArrayHelper::map(Municipios::find()->all(), 'codigo_municipio', 'mu
         </div>    
         <div class="row">                        
             <?= $form->field($model, 'id_resolucion')->dropDownList($resoluciones, ['prompt' => 'Seleccione una resolucion...']) ?>
+            <?= $form->field($model, 'sugiere_retencion')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
         </div>  
+        <div class="row">                        
+            <?= $form->field($model, 'porcentaje_reteiva')->textInput(['maxlength' => true]) ?>
+        </div> 
         <div class="panel-footer text-right">			                        
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success",]) ?>
        

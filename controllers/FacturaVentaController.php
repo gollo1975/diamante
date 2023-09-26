@@ -205,10 +205,13 @@ class FacturaVentaController extends Controller
         $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
         $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
         $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->one();
+        $iva = \app\models\ConfiguracionIva::findOne(1);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         $fecha_actual = date('Y-m-d');
         $table = new FacturaVenta();
         $table->id_pedido = $id_pedido;
         $table->id_cliente = $pedido->id_cliente;
+        $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
         $table->nit_cedula = $pedido->documento;
         $table->dv = $pedido->dv;
         $table->cliente = $pedido->cliente;
@@ -222,7 +225,25 @@ class FacturaVentaController extends Controller
         $dias = $pedido->clientePedido->plazo;
         $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
         $table->fecha_generada = $fecha_actual;
-        
+        $table->porcentaje_iva = $iva->valor_iva;
+        if($pedido->clientePedido->autoretenedor == 1){
+            $table->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
+        }else{
+            $table->porcentaje_rete_iva = 0;
+        }
+        if($empresa->sugiere_retencion == 0){
+            if($pedido->clientePedido->tipo_regimen == 1){
+                $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+            }else{
+                $table->porcentaje_rete_fuente = 0; 
+            }
+        }else{
+            $table->porcentaje_rete_fuente = 0; 
+        }
+        $table->forma_pago = $pedido->clientePedido->forma_pago;        
+        $table->plazo_pago = $pedido->clientePedido->plazo;
+        $table->user_name = Yii::$app->user->identity->username;
+        $table->save();
     }
 
     /**

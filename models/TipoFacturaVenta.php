@@ -40,6 +40,9 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             [['fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 30],
             [['user_name'], 'string', 'max' => 15],
+            [['porcentaje_retencion'], 'number'],
+            [['base_retencion'], 'integer'],
+            
         ];
     }
 
@@ -53,6 +56,8 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             'descripcion' => 'Tipo factura',
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha registro',
+            'porcentaje_retencion' => '% Retencion',
+            'base_retencion' => 'Base retencion',
         ];
     }
 }
