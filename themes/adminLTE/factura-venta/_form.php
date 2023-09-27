@@ -1,81 +1,63 @@
 <?php
-
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\helpers\ArrayHelper;
+use kartik\date\DatePicker;
+use kartik\time\TimePicker;
+use kartik\select2\Select2;
+use yii\bootstrap\Modal;
+use yii\data\Pagination;
+use kartik\depdrop\DepDrop;
 
-/* @var $this yii\web\View */
-/* @var $model app\models\FacturaVenta */
-/* @var $form yii\widgets\ActiveForm */
+//model
+
+
 ?>
 
-<div class="factura-venta-form">
+<?php
+$form = ActiveForm::begin([
+            "method" => "post",
+            'id' => 'formulario',
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+            'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
+            'labelOptions' => ['class' => 'col-sm-2 control-label'],
+            'options' => []
+        ],
+        ]);
+?>
 
-    <?php $form = ActiveForm::begin(); ?>
-
-    <?= $form->field($model, 'id_pedido')->textInput() ?>
-
-    <?= $form->field($model, 'id_cliente')->textInput() ?>
-
-    <?= $form->field($model, 'id_tipo_factura')->textInput() ?>
-
-    <?= $form->field($model, 'numero_factura')->textInput() ?>
-
-    <?= $form->field($model, 'nit_cedula')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'dv')->textInput() ?>
-
-    <?= $form->field($model, 'cliente')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'numero_resolucion')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'desde')->textInput() ?>
-
-    <?= $form->field($model, 'hasta')->textInput() ?>
-
-    <?= $form->field($model, 'consecutivo')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'fecha_inicio')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_vencimiento')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_generada')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_enviada')->textInput() ?>
-
-    <?= $form->field($model, 'subtotal_factura')->textInput() ?>
-
-    <?= $form->field($model, 'descuento')->textInput() ?>
-
-    <?= $form->field($model, 'impuesto')->textInput() ?>
-
-    <?= $form->field($model, 'total_factura')->textInput() ?>
-
-    <?= $form->field($model, 'porcentaje_iva')->textInput() ?>
-
-    <?= $form->field($model, 'porcentaje_rete_iva')->textInput() ?>
-
-    <?= $form->field($model, 'porcentaje_rete_fuente')->textInput() ?>
-
-    <?= $form->field($model, 'valor_retencion')->textInput() ?>
-
-    <?= $form->field($model, 'valor_reteiva')->textInput() ?>
-
-    <?= $form->field($model, 'porcentaje_descuento')->textInput() ?>
-
-    <?= $form->field($model, 'saldo_factura')->textInput() ?>
-
-    <?= $form->field($model, 'forma_pago')->textInput() ?>
-
-    <?= $form->field($model, 'plazo_pago')->textInput() ?>
-
-    <?= $form->field($model, 'autorizado')->textInput() ?>
-
-    <?= $form->field($model, 'user_name')->textInput(['maxlength' => true]) ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        <h4>FACTURA DE VENTA</h4>
+        
     </div>
-
-    <?php ActiveForm::end(); ?>
-
+    
+    <div class="panel-body">
+        <div class="row">
+             
+        <div class="row">
+            <?= $form->field($model, 'porcentaje_descuento')->textInput(['maxlength' => true, 'size' => '15']) ?>
+            <?=  $form->field($model, 'fecha_vencimiento')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                           'value' => date('Y-m-d', strtotime('+2 days')),
+                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                           'pluginOptions' => [
+                               'format' => 'yyyy-m-d',
+                               'todayHighlight' => true]])
+            ?>
+            
+        </div>
+        <div class="row">
+            
+            <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+        </div>    
+        <div class="panel-footer text-right">			
+            <a href="<?= Url::toRoute(["factura-venta/view", 'id' => $model->id_factura, 'token' => $token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>
+        </div>
+    </div>
 </div>
+<?php $form->end() ?>    

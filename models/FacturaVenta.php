@@ -60,13 +60,15 @@ class FacturaVenta extends \yii\db\ActiveRecord
     {
         return [
             [['id_pedido', 'user_name'], 'required'],
-            [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado'], 'integer'],
-            [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada'], 'safe'],
+            [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
+                'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto'], 'integer'],
+            [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada','fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento'], 'number'],
-            [['nit_cedula', 'user_name','telefono_cliente'], 'string', 'max' => 15],
+            [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
             [['cliente','direccion'], 'string', 'max' => 50],
             [['numero_resolucion'], 'string', 'max' => 30],
             [['consecutivo'], 'string', 'max' => 3],
+            [['observacion'], 'string', 'max' => 200],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
             [['id_tipo_factura'], 'exist', 'skipOnError' => true, 'targetClass' => TipoFacturaVenta::className(), 'targetAttribute' => ['id_tipo_factura' => 'id_tipo_factura']],
@@ -79,39 +81,43 @@ class FacturaVenta extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_factura' => 'Id Factura',
-            'id_pedido' => 'Id Pedido',
-            'id_cliente' => 'Id Cliente',
-            'id_tipo_factura' => 'Id Tipo Factura',
-            'numero_factura' => 'Numero Factura',
-            'nit_cedula' => 'Nit Cedula',
+            'id_factura' => 'Id:',
+            'id_pedido' => 'No pedido:',
+            'id_cliente' => 'Cliente:',
+            'id_tipo_factura' => 'Tipo factura:',
+            'numero_factura' => 'Numero factura:',
+            'nit_cedula' => 'Nit/cedula:',
             'dv' => 'Dv',
-            'cliente' => 'Cliente',
-            'numero_resolucion' => 'Numero Resolucion',
-            'desde' => 'Desde',
-            'hasta' => 'Hasta',
+            'cliente' => 'Cliente:',
+            'numero_resolucion' => 'Numero resolucion:',
+            'desde' => 'Inicio:',
+            'hasta' => 'Final:',
             'consecutivo' => 'Consecutivo',
-            'fecha_inicio' => 'Fecha Inicio',
-            'fecha_vencimiento' => 'Fecha Vencimiento',
-            'fecha_generada' => 'Fecha Generada',
+            'fecha_inicio' => 'Fecha inicio:',
+            'fecha_vencimiento' => 'Fecha vencimiento:',
+            'fecha_generada' => 'Fecha generada:',
             'fecha_enviada' => 'Fecha Enviada',
-            'subtotal_factura' => 'Subtotal Factura',
-            'descuento' => 'Descuento',
-            'impuesto' => 'Impuesto',
-            'total_factura' => 'Total Factura',
-            'porcentaje_iva' => 'Porcentaje Iva',
-            'porcentaje_rete_iva' => 'Porcentaje Rete Iva',
-            'porcentaje_rete_fuente' => 'Porcentaje Rete Fuente',
-            'valor_retencion' => 'Valor Retencion',
-            'valor_reteiva' => 'Valor Reteiva',
-            'porcentaje_descuento' => 'Porcentaje Descuento',
-            'saldo_factura' => 'Saldo Factura',
-            'forma_pago' => 'Forma Pago',
-            'plazo_pago' => 'Plazo Pago',
-            'autorizado' => 'Autorizado',
-            'user_name' => 'User Name',
-            'direccion' => 'direccion',
-            'telefono_cliente' => 'telefono_cliente',
+            'subtotal_factura' => 'Subtotal:',
+            'descuento' => 'Descuento:',
+            'impuesto' => 'Impuesto:',
+            'total_factura' => 'Total pagar:',
+            'porcentaje_iva' => '% Iva:',
+            'porcentaje_rete_iva' => '% Rete iva.',
+            'porcentaje_rete_fuente' => '% Rete fuente',
+            'valor_retencion' => 'Retencion:',
+            'valor_reteiva' => 'Reteiva:',
+            'porcentaje_descuento' => '% Descto:',
+            'saldo_factura' => 'Saldo factura',
+            'forma_pago' => 'Forma pago:',
+            'plazo_pago' => 'Plazo:',
+            'autorizado' => 'Autorizado:',
+            'user_name' => 'User Name:',
+            'direccion' => 'Direccion:',
+            'telefono_cliente' => 'Telefono:',
+            'valor_bruto' => 'Valor bruto:',
+            'observacion' => 'Observacion:',
+            'fecha_editada' => 'fecha_editada',
+            'user_name_editado' => 'user_name_editado',
         ];
     }
 
@@ -126,7 +132,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCliente0()
+    public function getClienteFactura()
     {
         return $this->hasOne(Clientes::className(), ['id_cliente' => 'id_cliente']);
     }
@@ -137,5 +143,22 @@ class FacturaVenta extends \yii\db\ActiveRecord
     public function getTipoFactura()
     {
         return $this->hasOne(TipoFacturaVenta::className(), ['id_tipo_factura' => 'id_tipo_factura']);
+    }
+    
+    public function getFormaPago() {
+        if($this->forma_pago == 1){
+            $formapago = 'CONTADO';
+        }else{
+            $formapago = 'CREDITO';
+        }
+        return $formapago;
+    }
+    public function getAutorizadofactura() {
+        if($this->autorizado == 0){
+            $autorizadofactura = 'NO';
+        }else{
+            $autorizadofactura = 'SI';
+        }
+        return $autorizadofactura;
     }
 }

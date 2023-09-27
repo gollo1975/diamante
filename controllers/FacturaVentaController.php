@@ -30,6 +30,7 @@ use app\models\Clientes;
 use app\models\AgentesComerciales;
 use app\models\FiltroBusquedaPedidos;
 use app\models\Pedidos;
+use app\models\FacturaVentaDetalle;
 /**
  * FacturaVentaController implements the CRUD actions for FacturaVenta model.
  */
@@ -142,10 +143,13 @@ class FacturaVentaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id, $token)
     {
+        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'detalle_factura' => $detalle_factura,
+            'token' => $token,
         ]);
     }
 
@@ -174,17 +178,40 @@ class FacturaVentaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $token)
     {
         $model = $this->findModel($id);
-
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_factura]);
+            $model->user_name_editado = Yii::$app->user->identity->username;
+            $model->fecha_editada = date('Y-m-d');
+            $model->save(false);
+            $this->DescuentoFactura($id);
+            $this->ActualizarConceptosTributarios($id);
+            return $this->redirect(['view', 'id' => $model->id_factura, 'token'=> $token]);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'id' => $id,
+            'token' => $token,
         ]);
+    }
+    //PROCESO QUE PERMITE PONER EL DECUENTO A LA FACTURA
+    
+    protected function DescuentoFactura($id) {
+        $factura = FacturaVenta::findOne($id);
+        $dato = 0;
+        $dato = round($factura->valor_bruto * $factura->porcentaje_descuento)/100; 
+        $factura->descuento = $dato;
+        $factura->subtotal_factura = $factura->valor_bruto - $dato;
+        $factura->impuesto = round($factura->subtotal_factura * $factura->porcentaje_iva)/100;
+        $factura->total_factura = $factura->subtotal_factura +  $factura->impuesto;
+        $factura->saldo_factura = $factura->total_factura;
+        $factura->save(false);
     }
 
     /**
@@ -201,7 +228,7 @@ class FacturaVentaController extends Controller
         return $this->redirect(['index']);
     }
     //CREAR FACTURA DESDE PEDIDO
-    public function actionImportar_pedido_factura($id_pedido) {
+    public function actionImportar_pedido_factura($id_pedido, $token = 0) {
         $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
         $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
         $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->one();
@@ -232,7 +259,7 @@ class FacturaVentaController extends Controller
             $table->porcentaje_rete_iva = 0;
         }
         if($empresa->sugiere_retencion == 0){
-            if($pedido->clientePedido->tipo_regimen == 1){
+           if($pedido->clientePedido->tipo_regimen == 1){
                 $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
             }else{
                 $table->porcentaje_rete_fuente = 0; 
@@ -244,13 +271,20 @@ class FacturaVentaController extends Controller
         $table->plazo_pago = $pedido->clientePedido->plazo;
         $table->user_name = Yii::$app->user->identity->username;
         $table->save();
+        $model = FacturaVenta::find()->orderBy('id_factura DESC')->one();
+        $id = $model->id_factura;
+        $this->CrearDetalleFactura($id_pedido, $id);
+        $this->ActualizarSaldosTotales($id);
+        $this->ActualizarConceptosTributarios($id);
+        return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
+        
     }
-
-    protected function CrearDetalleFactura($id_pedido, $model) {
-        $detalle_pedido = \app\models\PedidoDetalles::find(['=','id_pedido', $id_pedido])->all();
+  //PROCESO QUE QUE TOTALIZA SALDOS
+    protected function CrearDetalleFactura($id_pedido, $id) {
+        $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->all();
         foreach ($detalle_pedido as $detalle):
             $base = new FacturaVentaDetalle();
-            $base->id_factura = $model->id_factura;
+            $base->id_factura = $id;
             $base->id_inventario = $detalle->id_inventario;
             $base->codigo_producto = $detalle->inventario->codigo_producto;
             $base->producto = $detalle->inventario->nombre_producto;
@@ -259,8 +293,75 @@ class FacturaVentaController extends Controller
             $base->subtotal = $detalle->subtotal;
             $base->impuesto = $detalle->impuesto;
             $base->total_linea = $detalle->total_linea;
-            $detalle->save();
+            $base->save(false);
         endforeach;
+    }
+    ///PROCESO QUE SUMA LOS TOTALES
+    protected function ActualizarSaldosTotales($id) {
+        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
+        $factura = FacturaVenta::findOne($id);
+        $subtotal = 0; $impuesto = 0; $total = 0;
+        foreach ($detalle_factura as $detalle):
+            $subtotal += $detalle->subtotal;
+            $impuesto += $detalle->impuesto;
+            $total += $detalle->total_linea;
+        endforeach;
+        $factura->valor_bruto = $subtotal;
+        $factura->subtotal_factura = $subtotal;
+        $factura-> impuesto= $impuesto;
+        $factura->total_factura = $total;
+        $factura->saldo_factura = $total;
+        $factura->valor_retencion = 0;
+        $factura->valor_reteiva = 0;
+        $factura->save(false);
+    }
+    //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS
+    protected function ActualizarConceptosTributarios($id) {
+        $factura = FacturaVenta::findOne($id);
+        $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
+        $reteiva = 0; $retecion = 0;
+        $reteiva = round($factura->impuesto * $factura->porcentaje_rete_iva)/100; 
+        if($factura->subtotal_factura > $tipo_factura->base_retencion){
+           $retecion = round($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100;     
+        }else{
+           $retecion = 0; 
+        }
+        $factura->valor_retencion = $retecion;
+        $factura->valor_reteiva = $reteiva;
+        $factura->total_factura = round(($factura->subtotal_factura + $factura->impuesto) - ($factura->valor_retencion + $factura->valor_reteiva));
+        $factura->save(false);
+    }
+    
+    //REGERAR FACTURA
+    public function actionRegenerar_factura($id, $token) {
+        $this->ActualizarSaldosTotales($id);
+        $this->ActualizarConceptosTributarios($id);
+        $this->redirect(["view", 'id' => $id,'token' => $token]);
+    }
+    //PROCESO QUE AUTORIZADO O DESAUTORIZA
+    public function actionAutorizado($id, $token) {
+        $factura = FacturaVenta::findOne($id);
+            if($factura->autorizado == 0){
+                $factura->autorizado = 1;
+            }else{
+                $factura->autorizado = 0;
+            }
+            $factura->save();
+            $this->redirect(["view", 'id' => $id,'token' => $token]);
+    }
+    //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA
+     public function actionGenerar_factura($id, $id_pedido, $token) {
+        //proceso de generar consecutivo
+         $pedido = Pedidos::findOne($id_pedido);
+        $consecutivo = \app\models\Consecutivos::findOne(6);
+        $factura = FacturaVenta::findOne($id);
+        $factura->numero_factura = $consecutivo->numero_inicial + 1;
+        $factura->save(false);
+        $consecutivo->numero_inicial = $factura->numero_factura;
+        $consecutivo->save(false);
+        $pedido->facturado = 1;
+        $pedido->save();
+        $this->redirect(["view", 'id' => $id, 'token' => $token]);  
     }
     /**
      * Finds the FacturaVenta model based on its primary key value.
