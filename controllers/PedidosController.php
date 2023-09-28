@@ -1053,94 +1053,94 @@ class PedidosController extends Controller
     }
     
       //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
-    public function actionExcelconsultaPedidos($tableexcel) {                
-        $objPHPExcel = new \PHPExcel();
-        // Set document properties
-        $objPHPExcel->getProperties()->setCreator("EMPRESA")
-            ->setLastModifiedBy("EMPRESA")
-            ->setTitle("Office 2007 XLSX Test Document")
-            ->setSubject("Office 2007 XLSX Test Document")
-            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-            ->setKeywords("office 2007 openxml php")
-            ->setCategory("Test result file");
-        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
-        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        public function actionExcelconsultaPedidos($tableexcel) {                
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
 
-        $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'ID')
-                    ->setCellValue('B1', 'No PEDIDO')
-                    ->setCellValue('C1', 'DOCUMENTO')
-                    ->setCellValue('D1', 'CLIENTE')
-                    ->setCellValue('E1', 'FECHA PEDIDO')
-                    ->setCellValue('F1', 'CANTIDAD')
-                    ->setCellValue('G1', 'SUBTOTAL')
-                    ->setCellValue('H1', 'IVA')
-                    ->setCellValue('I1', 'TOTAL')
-                    ->setCellValue('J1', 'VENDEDOR')    
-                    ->setCellValue('K1', 'USER NAME')
-                    ->setCellValue('L1', 'AUTORIZADO')
-                    ->setCellValue('M1', 'CERRADO')
-                    ->setCellValue('N1', 'FACTURADO')
-                    ->setCellValue('O1', 'APLICA PRESUPUESTO')
-                    ->setCellValue('P1', 'VALOR PRESUPUESTO');
-        $i = 2;
-        
-        foreach ($tableexcel as $val) {
-                                  
             $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue('A' . $i, $val->id_pedido)
-                    ->setCellValue('B' . $i, $val->numero_pedido)
-                    ->setCellValue('C' . $i, $val->documento)
-                    ->setCellValue('D' . $i, $val->cliente)
-                    ->setCellValue('E' . $i, $val->fecha_proceso)
-                    ->setCellValue('F' . $i, $val->cantidad)
-                    ->setCellValue('G' . $i, $val->subtotal)
-                    ->setCellValue('H' . $i, $val->impuesto)
-                    ->setCellValue('I' . $i, $val->gran_total)
-                    ->setCellValue('J' . $i, $val->agentePedido->nombre_completo)
-                    ->setCellValue('K' . $i, $val->usuario)
-                    ->setCellValue('L' . $i, $val->autorizadoPedido)
-                    ->setCellValue('M' . $i, $val->pedidoAbierto)
-                    ->setCellValue('N' . $i, $val->pedidoFacturado)
-                    ->setCellValue('O' . $i, $val->presupuestoPedido)
-                    ->setCellValue('P' . $i, $val->valor_presupuesto);
-            $i++;
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'No PEDIDO')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'FECHA PEDIDO')
+                        ->setCellValue('F1', 'CANTIDAD')
+                        ->setCellValue('G1', 'SUBTOTAL')
+                        ->setCellValue('H1', 'IVA')
+                        ->setCellValue('I1', 'TOTAL')
+                        ->setCellValue('J1', 'VENDEDOR')    
+                        ->setCellValue('K1', 'USER NAME')
+                        ->setCellValue('L1', 'AUTORIZADO')
+                        ->setCellValue('M1', 'CERRADO')
+                        ->setCellValue('N1', 'FACTURADO')
+                        ->setCellValue('O1', 'APLICA PRESUPUESTO')
+                        ->setCellValue('P1', 'VALOR PRESUPUESTO');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_pedido)
+                        ->setCellValue('B' . $i, $val->numero_pedido)
+                        ->setCellValue('C' . $i, $val->documento)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->fecha_proceso)
+                        ->setCellValue('F' . $i, $val->cantidad)
+                        ->setCellValue('G' . $i, $val->subtotal)
+                        ->setCellValue('H' . $i, $val->impuesto)
+                        ->setCellValue('I' . $i, $val->gran_total)
+                        ->setCellValue('J' . $i, $val->agentePedido->nombre_completo)
+                        ->setCellValue('K' . $i, $val->usuario)
+                        ->setCellValue('L' . $i, $val->autorizadoPedido)
+                        ->setCellValue('M' . $i, $val->pedidoAbierto)
+                        ->setCellValue('N' . $i, $val->pedidoFacturado)
+                        ->setCellValue('O' . $i, $val->presupuestoPedido)
+                        ->setCellValue('P' . $i, $val->valor_presupuesto);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Pedidos.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
         }
-
-        $objPHPExcel->getActiveSheet()->setTitle('Listado');
-        $objPHPExcel->setActiveSheetIndex(0);
-
-        // Redirect output to a client’s web browser (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Pedidos.xlsx"');
-        header('Cache-Control: max-age=0');
-        // If you're serving to IE 9, then the following may be needed
-        header('Cache-Control: max-age=1');
-        // If you're serving to IE over SSL, then the following may be needed
-        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header ('Pragma: public'); // HTTP/1.0
-        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
-        $objWriter->save('php://output');
-        exit;
-    }
     //EXCELEES // PERMITE EXPORTAR A EXCEL EL PEDIDO
     public function actionExcel_pedido($id) {                
         $detalle  = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all(); 

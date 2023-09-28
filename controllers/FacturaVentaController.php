@@ -54,15 +54,77 @@ class FacturaVentaController extends Controller
      * Lists all FacturaVenta models.
      * @return mixed
      */
-    public function actionIndex()
-    {
-        $searchModel = new FacturaVentaSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+    public function actionIndex($token = 0) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',52])->all()){
+                $form = new FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $vendedores = null; $saldo = null; $numero_factura = null;
+               if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $saldo = Html::encode($form->saldo);
+                        $numero_factura = Html::encode($form->numero_factura);
+                        $table = FacturaVenta::find()
+                            ->andFilterWhere(['=', 'nit_cedula', $documento])
+                            ->andFilterWhere(['=', 'id_cliente', $cliente])
+                            ->andFilterWhere(['between','fecha_inicio', $fecha_inicio, $fecha_corte])
+                            ->andFilterWhere(['=','numero_factura', $numero_factura])
+                            ->andFilterWhere(['>', 'saldo_factura', $saldo])     
+                           ->andFilterWhere(['=','id_agente', $vendedores]);
+                        $table = $table->orderBy('id_factura DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaFactura($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = FacturaVenta::find()->orderBy('id_factura DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaFactura($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('index', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                            
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
     }
 
     //PROCESO QUE CREA LA FACTURA DE VENTA
@@ -229,55 +291,62 @@ class FacturaVentaController extends Controller
     }
     //CREAR FACTURA DESDE PEDIDO
     public function actionImportar_pedido_factura($id_pedido, $token = 0) {
-        $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
-        $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
-        $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->one();
-        $iva = \app\models\ConfiguracionIva::findOne(1);
-        $empresa = \app\models\MatriculaEmpresa::findOne(1);
-        $fecha_actual = date('Y-m-d');
-        $table = new FacturaVenta();
-        $table->id_pedido = $id_pedido;
-        $table->id_cliente = $pedido->id_cliente;
-        $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
-        $table->nit_cedula = $pedido->documento;
-        $table->dv = $pedido->dv;
-        $table->cliente = $pedido->cliente;
-        $table->direccion = $pedido->clientePedido->direccion;
-        $table->telefono_cliente = $pedido->clientePedido->celular;
-        $table->numero_resolucion = $resolucion->numero_resolucion;
-        $table->desde = $resolucion->desde;
-        $table->hasta = $resolucion->hasta;
-        $table->consecutivo = $resolucion->consecutivo;
-        $table->fecha_inicio = $fecha_actual;
-        $dias = $pedido->clientePedido->plazo;
-        $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
-        $table->fecha_generada = $fecha_actual;
-        $table->porcentaje_iva = $iva->valor_iva;
-        if($pedido->clientePedido->autoretenedor == 1){
-            $table->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
+        if($factura = FacturaVenta::find()->where(['=','id_pedido', $id_pedido])->one()){
+            Yii::$app->getSession()->setFlash('warning', 'Este pedido esta en proceso de facturacion. Consulte con el administrador.'); 
+            return $this->redirect(["factura-venta/crear_factura"]);
+            
         }else{
-            $table->porcentaje_rete_iva = 0;
-        }
-        if($empresa->sugiere_retencion == 0){
-           if($pedido->clientePedido->tipo_regimen == 1){
-                $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+           $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
+            $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
+            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->one();
+            $iva = \app\models\ConfiguracionIva::findOne(1);
+            $empresa = \app\models\MatriculaEmpresa::findOne(1);
+            $fecha_actual = date('Y-m-d');
+            $table = new FacturaVenta();
+            $table->id_pedido = $id_pedido;
+            $table->id_cliente = $pedido->id_cliente;
+            $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
+            $table->nit_cedula = $pedido->documento;
+            $table->dv = $pedido->dv;
+            $table->cliente = $pedido->cliente;
+            $table->direccion = $pedido->clientePedido->direccion;
+            $table->telefono_cliente = $pedido->clientePedido->celular;
+            $table->numero_resolucion = $resolucion->numero_resolucion;
+            $table->desde = $resolucion->desde;
+            $table->hasta = $resolucion->hasta;
+            $table->consecutivo = $resolucion->consecutivo;
+            $table->fecha_inicio = $fecha_actual;
+            $dias = $pedido->clientePedido->plazo;
+            $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
+            $table->fecha_generada = $fecha_actual;
+            $table->porcentaje_iva = $iva->valor_iva;
+            if($pedido->clientePedido->autoretenedor == 1){
+                $table->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
+            }else{
+                $table->porcentaje_rete_iva = 0;
+            }
+            if($empresa->sugiere_retencion == 0){
+               if($pedido->clientePedido->tipo_regimen == 1){
+                    $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+                }else{
+                    $table->porcentaje_rete_fuente = 0; 
+                }
             }else{
                 $table->porcentaje_rete_fuente = 0; 
             }
-        }else{
-            $table->porcentaje_rete_fuente = 0; 
+            $table->forma_pago = $pedido->clientePedido->forma_pago;        
+            $table->plazo_pago = $pedido->clientePedido->plazo;
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save();
+            $model = FacturaVenta::find()->orderBy('id_factura DESC')->one();
+            $id = $model->id_factura;
+            $this->CrearDetalleFactura($id_pedido, $id);
+            $this->ActualizarSaldosTotales($id);
+            $this->ActualizarConceptosTributarios($id);
+            return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
         }
-        $table->forma_pago = $pedido->clientePedido->forma_pago;        
-        $table->plazo_pago = $pedido->clientePedido->plazo;
-        $table->user_name = Yii::$app->user->identity->username;
-        $table->save();
-        $model = FacturaVenta::find()->orderBy('id_factura DESC')->one();
-        $id = $model->id_factura;
-        $this->CrearDetalleFactura($id_pedido, $id);
-        $this->ActualizarSaldosTotales($id);
-        $this->ActualizarConceptosTributarios($id);
-        return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
-        
+                
+                
     }
   //PROCESO QUE QUE TOTALIZA SALDOS
     protected function CrearDetalleFactura($id_pedido, $id) {
@@ -329,6 +398,7 @@ class FacturaVentaController extends Controller
         $factura->valor_retencion = $retecion;
         $factura->valor_reteiva = $reteiva;
         $factura->total_factura = round(($factura->subtotal_factura + $factura->impuesto) - ($factura->valor_retencion + $factura->valor_reteiva));
+        $factura->saldo_factura = $factura->total_factura;
         $factura->save(false);
     }
     

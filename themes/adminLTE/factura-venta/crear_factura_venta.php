@@ -146,7 +146,7 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['/pedidos/actionexcelconsultapedidos','class' => 'btn btn-primary btn-sm']); ?>                
                    <?php $form->end() ?>
         </div>
      </div>

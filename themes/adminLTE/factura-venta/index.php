@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
 
-$this->title = 'LISTADO DE PEDIDOS';
+$this->title = 'FACTURA DE VENTA';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ]);
 $vendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])
-                                                  ->andwhere(['>','cupo_asignado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -53,36 +53,36 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
             <?= $formulario->field($form, "documento")->input("search") ?>
-            <?= $formulario->field($form, 'id_cliente')->widget(Select2::classname(), [
+            <?= $formulario->field($form, "numero_factura")->input("search") ?>
+            <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todaHighlight' => true]])
+            ?>
+            <?= $formulario->field($form, 'fecha_corte')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todayHighlight' => true]])
+            ?>
+             <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
                 'data' => $cliente,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ]); ?>
-            <?= $formulario->field($form, 'id_agente')->widget(Select2::classname(), [
+             <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
                 'data' => $vendedor,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ]); ?>
-            <?= $formulario->field($form, "materia_prima")->input("search") ?>
-              <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                'value' => date('d-M-Y', strtotime('+2 days')),
-                'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                'pluginOptions' => [
-                    'format' => 'yyyy-m-d',
-                    'todayHighlight' => true]])
-            ?>
-            <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                'value' => date('d-M-Y', strtotime('+2 days')),
-                'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                'pluginOptions' => [
-                    'format' => 'yyyy-m-d',
-                    'todayHighlight' => true]])
-            ?>
-                     
+            <?= $formulario->field($form, 'saldo')->dropDownList(['0' => 'SI'],['prompt' => 'Seleccione una opcion ...']) ?>         
         </div>
         
         <div class="panel-footer text-right">
@@ -107,32 +107,58 @@ $form = ActiveForm::begin([
             <thead>
                 <tr style ='font-size: 90%;'>         
                 
-                <th scope="col" style='background-color:#B9D5CE;'>No pedido</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Fecha pedido</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Vr. pedido</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
-                <th score="col" style='background-color:#B9D5CE;'></th>                              
+                                          
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
-            <tr style ='font-size: 90%;'>                
-              
-                <td><?= $val->codigo_materia_prima?></td>
-                <td><?= $val->materia_prima?></td>
-                <td><?= $val->medida->descripcion?></td>
-                <td><?= $val->fecha_entrada?></td>
-                <td><?= $val->fecha_vencimiento?></td>
-                <td><?= $val->aplicaInventario?></td>
-                <td><?= $val->InventarioInicial?></td>
-                <td style="text-align: right"><?= ''.number_format($val->total_cantidad,0)?></td>
-                <td style= 'width: 25px; height: 10px;'>
-                    <a href="<?= Url::toRoute(["materia-primas/view", "id" => $val->id_materia_prima, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                </td>
-            </tr>            
+            <?php
+            $fecha_dia = date('Y-m-d');
+            foreach ($model as $val):?>
+                <tr style ='font-size: 90%;'>                
+                    <td><?= $val->numero_factura?></td>
+                    <td><?= $val->nit_cedula?></td>
+                    <td><?= $val->clienteFactura->nombre_completo?></td>
+                    <td><?= $val->agenteFactura->nombre_completo?></td>
+                    <td><?= $val->fecha_inicio?></td>
+                    <td><?= $val->fecha_vencimiento?></td>
+                    <td style="text-align: right"><?= ''.number_format($val->subtotal_factura,0)?></td>
+                    <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
+                    <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
+                    <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
+                        $f_vcto = date_create($val->fecha_vencimiento);
+                        $fecha_final = date_create($fecha_dia);
+                        $contador = date_diff($f_vcto, $fecha_final);
+                        $differenceFormat = '%a';
+                        
+                        ?>  
+                        <td style="text-align: right; background-color:#F5B7B1;"><?= ''.number_format($val->saldo_factura,0)?></td>
+                        <td style="color: #E74C3C"><b><?= $contador->format($differenceFormat)?></b></td>
+                    <?php }else{
+                        $f_vcto = date_create($val->fecha_vencimiento);
+                        $fecha_final = date_create($fecha_dia);
+                        $contador = date_diff($f_vcto, $fecha_final);
+                        $differenceFormat = '%a';
+                        
+                        ?>
+                        <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
+                        <td><?= $contador->format($differenceFormat) * -1?></td>
+                    <?php }?>    
+                    <td style= 'width: 25px; height: 25px;'>
+                         <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                    </td>
+               </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 

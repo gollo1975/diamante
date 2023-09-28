@@ -303,9 +303,10 @@
                                             'icon' => 'book',
                                             'url' => '#',
                                             'items' => [
-                                                ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
-                                                
-                                            ],
+                                                ['label' => 'Cargar factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
+                                                ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
+                                               
+                                             ],
                                         ]
                                     ],
                                 ],

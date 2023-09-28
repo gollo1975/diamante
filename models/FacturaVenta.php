@@ -61,7 +61,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
         return [
             [['id_pedido', 'user_name'], 'required'],
             [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
-                'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto'], 'integer'],
+                'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente'], 'integer'],
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada','fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento'], 'number'],
             [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
@@ -72,7 +72,9 @@ class FacturaVenta extends \yii\db\ActiveRecord
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
             [['id_tipo_factura'], 'exist', 'skipOnError' => true, 'targetClass' => TipoFacturaVenta::className(), 'targetAttribute' => ['id_tipo_factura' => 'id_tipo_factura']],
-        ];
+            [['id_agente'], 'exist', 'skipOnError' => true, 'targetClass' => AgentesComerciales::className(), 'targetAttribute' => ['id_agente' => 'id_agente']],
+ 
+            ];
     }
 
     /**
@@ -118,6 +120,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'fecha_editada' => 'fecha_editada',
             'user_name_editado' => 'user_name_editado',
+            'id_agente' => 'Vendedor:',
         ];
     }
 
@@ -135,6 +138,11 @@ class FacturaVenta extends \yii\db\ActiveRecord
     public function getClienteFactura()
     {
         return $this->hasOne(Clientes::className(), ['id_cliente' => 'id_cliente']);
+    }
+
+     public function getAgenteFactura()
+    {
+        return $this->hasOne(AgentesComerciales::className(), ['id_agente' => 'id_agente']);
     }
 
     /**
