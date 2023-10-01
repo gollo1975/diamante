@@ -224,7 +224,83 @@ class InventarioProductosController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    //REGLA COMERCIAL DE PRODUCTO
     
+    public function actionRegla_comercial() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',53])->all()){
+                $form = new FiltroBusquedaInventario();
+                $codigo = null;
+                $inventario_inicial = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $grupo = null;
+                $producto = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $codigo = Html::encode($form->codigo);
+                        $inventario_inicial = Html::encode($form->inventario_inicial);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $producto = Html::encode($form->producto);
+                        $grupo = Html::encode($form->grupo);
+                        $table = InventarioProductos::find()
+                                ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
+                                ->andFilterWhere(['=', 'id_grupo', $grupo])
+                                ->andWhere(['=', 'aplica_regla_comercial', 1]);
+                        
+                        $table = $table->orderBy('id_inventario DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_inventario  DESC']);
+                            $this->actionExcelConsultaInventario($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = InventarioProductos::find()->andWhere(['=', 'aplica_regla_comercial', 1])
+                            ->orderBy('id_inventario DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelConsultaInventario($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_regla_comercial', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
     
     /**
      * Displays a single InventarioProductos model.
@@ -263,7 +339,57 @@ class InventarioProductosController extends Controller
             'token' => $token,
             ]);
     }
-
+    
+    //vista de la regla
+       public function actionView_regla($id)
+    {
+        $regla_comercial = \app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $id])->orderBy('id_regla DESC')->all();
+        $model =  $this->findModel($id);
+        if(isset($_POST["actualizaregla"])){
+            if(isset($_POST["listado_regla"])){
+                $intIndice = 0;
+                foreach ($_POST["listado_regla"] as $intCodigo):
+                    $table = \app\models\ProductoReglaComercial::find()->where(['=','id_regla', $intCodigo])->one();
+                    $table->limite_venta = $_POST["limite_venta"]["$intIndice"];
+                    $table->limite_presupuesto = $_POST["limite_presupuesto"]["$intIndice"];
+                    $table->estado_regla = $_POST["estado_regla"]["$intIndice"];
+                    $table->save(false);
+                    $intIndice++;
+                endforeach;
+                return $this->redirect(['view_regla','id' =>$id]);
+            }
+        }   
+        return $this->render('view_regla', [
+            'model' => $model,
+            'regla_comercial' => $regla_comercial,
+            ]);
+    }
+   // nuevo regla comercial
+    public function actionNueva_regla_producto($id) {
+        $model = new \app\models\FormModeloNuevaRegla();
+        
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if (isset($_POST["crear_regla_comercial"])) {
+                    $table = new \app\models\ProductoReglaComercial();
+                    $table->id_inventario = $id;
+                    $table->limite_venta = $model->limite_venta;
+                    $table->limite_presupuesto = $model->limite_presupuesto;
+                    $table->fecha_cierre = $model->fecha_cierre;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save(false);
+                    $this->redirect(["inventario-productos/view_regla", 'id' => $id]);
+                }  
+            }else{
+                $model->getErrors();
+            }    
+        }
+        return $this->renderAjax('new_regla_comercial', [
+            'model' => $model,
+            'id' => $id,
+        ]);
+    } 
+    
     /**
      * Creates a new InventarioProductos model.
      * If creation is successful, the browser will be redirected to the 'view' page.

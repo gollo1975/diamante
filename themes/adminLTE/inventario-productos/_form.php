@@ -88,7 +88,10 @@ $porcentaje = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DES
         </div>
         <div class="row">
              <?= $form->field($model, 'venta_publico')->dropDownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione una opcion...']) ?>
-            <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+            <?= $form->field($model, 'aplica_regla_comercial')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
+        </div> 
+        <div class="row">
+             <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div> 
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("inventario-productos/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>

@@ -65,16 +65,19 @@ class ClientesController extends Controller
                 $nombre_completo = null;
                 $activo = null;
                 $vendedor = null;
+                $tipo_cliente = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $nitcedula = Html::encode($form->nitcedula);
                         $nombre_completo = Html::encode($form->nombre_completo);
                         $vendedor = Html::encode($form->vendedor);
                         $activo = Html::encode($form->activo);
+                        $tipo_cliente = Html::encode($form->tipo_cliente);
                         $table = Clientes::find()
                                 ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
                                 ->andFilterWhere(['=', 'estado_cliente', $activo])
                                 ->andFilterWhere(['=', 'id_agente', $vendedor])
+                                ->andFilterWhere(['=', 'id_tipo_cliente', $tipo_cliente])
                                 ->andFilterWhere(['like', 'nombre_completo', $nombre_completo]);
                         $table = $table->orderBy('id_cliente DESC');
                         $tableexcel = $table->all();
@@ -215,7 +218,6 @@ class ClientesController extends Controller
                         $table->valor_cupo = $_POST["valor_cupo"]["$intIndice"];
                         $table->estado_registro = $_POST["estado_registro"]["$intIndice"];
                         $table->save(false);
-                       var_dump($table->estado_registro);
                         if($table->estado_registro == 1){
                             $cliente = Clientes::findOne($id);
                             $cliente->cupo_asignado = 0;

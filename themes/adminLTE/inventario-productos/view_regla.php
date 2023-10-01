@@ -23,18 +23,12 @@ use yii\filters\AccessControl;
 $this->title = 'Detalle';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario producto', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_inventario;
-$view = 'inventario-productos';
 ?>
 <div class="operarios-view">
 
     <!--<?= Html::encode($this->title) ?>-->
     <p>
-        <?php if($token == 0){?>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?php }else{ ?>
-                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_inventario'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?php }?>
-        <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 8, 'codigo' => $model->id_inventario,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['regla_comercial'], ['class' => 'btn btn-primary btn-sm']) ?>
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -84,9 +78,7 @@ $view = 'inventario-productos';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
                     <td><?= Html::encode($model->aplicaInventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_iva') ?></th>
-                    <td><?= Html::encode($model->porcentaje_iva) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Aplica_presupuesto') ?></th>
-                    <td><?= Html::encode($model->aplicaPresupuesto) ?></td>
+                    <td colspan="3"><?= Html::encode($model->porcentaje_iva) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_inventario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_inventario,0)) ?></td>
                 </tr>
@@ -99,10 +91,18 @@ $view = 'inventario-productos';
             </table>
         </div>
     </div>
+         <?php $form = ActiveForm::begin([
+    'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+    'fieldConfig' => [
+        'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+        'labelOptions' => ['class' => 'col-sm-3 control-label'],
+        'options' => []
+    ],
+    ]);?>
     <!--INICIO LOS TABS-->
     <div>
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#ordenproduccion" aria-controls="ordenproduccion" role="tab" data-toggle="tab">Lotes de producción <span class="badge"><?= $pagination->totalCount ?></span></a></li>
+            <li role="presentation" class="active"><a href="#regla_comercial" aria-controls="regla_comercial" role="tab" data-toggle="tab">Regla comercial <span class="badge"><?= count($regla_comercial) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="ordenproduccion">
@@ -113,43 +113,64 @@ $view = 'inventario-productos';
                                 <thead>
                                     <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE;'>Id</th>                      
-                                        <th scope="col" style='background-color:#B9D5CE;'>Orden produccion</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Codigo</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Lote</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha_vencimiento</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'></th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Limite compra</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Limite presupuesto</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Activo</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha cierre</th> 
+                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha registro</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>User_name</th> 
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($detalle_entrada as $val):
-                                        $detalle = app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $val->id_orden_produccion])->all();
-                                        foreach ($detalle as $detalles): ?>
-                                            <tr style="font-size: 90%;">
-                                                <td><?= $detalles->id_detalle ?></td>  
-                                                <td><?= $val->numero_orden ?></td>
-                                                <td><?= $detalles->codigo_producto ?></td>
-                                                <td><?= $detalles->descripcion ?></td>
-                                                <td style="text-align: right"><?= $detalles->cantidad ?></td>
-                                                <td><?= $detalles->numero_lote ?></td>
-                                                <td><?= $detalles->fecha_vencimiento ?></td>
-                                                <td style= 'width: 20px; height: 20px;'>
-                                                    <?php if($token == 1){?>
-                                                        <a href="<?= Url::toRoute(["/orden-produccion/imprimirordenproduccion",'id'=>$val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-print" title="Imprimir orden de produccion "></span></a>
-                                                    <?php }?>
-                                                </td>        
-                                            </tr>
-                                        <?php endforeach;    
-                                     endforeach;?>
+                                    
+                                    <?php foreach ($regla_comercial as $val): ?>
+                                        <tr style="font-size: 90%;">
+                                            <td><?= $val->id_regla ?></td>  
+                                            <td style="padding-right: 1;padding-right: 0; text-align: right"> <input type="text" name="limite_venta[]" value="<?= $val->limite_venta ?>" style="text-align: right" size="9" > </td> 
+                                            <td style="padding-right: 1;padding-right: 0; text-align: right"> <input type="text" name="limite_presupuesto[]" value="<?= $val->limite_presupuesto ?>" style="text-align: right" size="9" > </td> 
+                                            <td align="center"><select name="estado_regla[]" style="width: 70px">
+                                                        <?php if ($val->estado_regla == 0){
+                                                             echo 'SI';   
+                                                            } else {
+                                                              echo 'NO';
+                                                         }?>    
+                                                        <option value="<?= $val->estado_regla ?>"><?= $val->estadoRegla ?></option>
+                                                        <option value="0">SI</option>
+                                                        <option value="1">NO</option>
+                                            </select></td>
+                                            <td><?= $val->fecha_cierre?></td>
+                                             <td><?= $val->fecha_registro?></td>
+                                            <td><?= $val->user_name ?></td>
+                                             <input type="hidden" name="listado_regla[]" value="<?= $val->id_regla?>">  
+       
+                                        </tr>
+                                    <?php endforeach;?>
                                 </tbody>      
                             </table>
                         </div>
+                         <div class="panel-footer text-right" >  
+                                <!-- Inicio Nuevo Detalle proceso -->
+                                  <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear regla',
+                                      ['/inventario-productos/nueva_regla_producto','id' => $model->id_inventario],
+                                      [
+                                          'title' => 'Crear regla de venta para el producto',
+                                          'data-toggle'=>'modal',
+                                          'data-target'=>'#modalreglaventa'.$model->id_inventario,
+                                          'class' => 'btn btn-info btn-sm'
+                                      ])    
+                                 ?>
+                                <div class="modal remote fade" id="modalreglaventa<?= $model->id_inventario ?>">
+                                    <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                         <div class="modal-content"></div>
+                                    </div>
+                                </div> 
+                                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizaregla']);?>    
+                            </div>   
                     </div>   
                 </div>
             </div>
             <!--INICIO EL OTRO TABS -->
         </div>
-    </div>    
+    </div> 
+      <?php ActiveForm::end(); ?>  
 </div>
-<?= LinkPager::widget(['pagination' => $pagination]) ?>

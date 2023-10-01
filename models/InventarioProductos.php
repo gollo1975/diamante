@@ -63,7 +63,8 @@ class InventarioProductos extends \yii\db\ActiveRecord
         return [
             [['codigo_producto','fecha_proceso','id_grupo','id_presentacion'], 'required'],
             [['codigo_producto', 'costo_unitario', 'unidades_entradas', 'stock_unidades', 'id_grupo', 'id_detalle', 'aplica_iva', 'inventario_inicial', 'aplica_inventario',
-                'subtotal', 'valor_iva', 'total_inventario', 'precio_venta_uno', 'precio_venta_dos', 'precio_venta_tres', 'codigo_ean','venta_publico','id_presentacion','aplica_presupuesto'], 'integer'],
+                'subtotal', 'valor_iva', 'total_inventario', 'precio_venta_uno', 'precio_venta_dos', 'precio_venta_tres', 'codigo_ean',
+                'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_vencimiento', 'fecha_creacion', 'fecha_proceso'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -108,6 +109,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'venta_publico' => 'Venta publico:',
             'id_presentacion' => 'Presentacion producto:',
             'aplica_presupuesto' => 'aplica_presupuesto',
+            'aplica_regla_comercial' => 'Aplica regla comercial:',
         ];
     }
 
@@ -171,5 +173,14 @@ class InventarioProductos extends \yii\db\ActiveRecord
             $aplicapresupuesto = 'SI';
         }
         return $aplicapresupuesto;
+    }
+    
+     public function getAplicaRegla() {
+        if($this->aplica_regla_comercial == 0){
+           $aplicareglacomercial = 'NO';
+        }else{
+            $aplicareglacomercial = 'SI';
+        }
+        return $aplicareglacomercial;
     }
 }

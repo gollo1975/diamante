@@ -90,7 +90,7 @@ class FacturaVentaController extends Controller
                                 ->limit($pages->limit)
                                     ->all();
                         if(isset($_POST['excel'])){                    
-                            $this->actionExcelconsultaFactura($tableexcel);
+                            $this->actionExcelFacturaVenta($tableexcel);
                         }
                     } else {
                         $form->getErrors();
@@ -108,7 +108,7 @@ class FacturaVentaController extends Controller
                             ->limit($pages->limit)
                             ->all();
                     if(isset($_POST['excel'])){                    
-                            $this->actionExcelconsultaFactura($tableexcel);
+                            $this->actionExcelFacturaVenta($tableexcel);
                     }
                 }
                 $to = $count->count();
@@ -267,13 +267,23 @@ class FacturaVentaController extends Controller
     protected function DescuentoFactura($id) {
         $factura = FacturaVenta::findOne($id);
         $dato = 0;
-        $dato = round($factura->valor_bruto * $factura->porcentaje_descuento)/100; 
-        $factura->descuento = $dato;
-        $factura->subtotal_factura = $factura->valor_bruto - $dato;
-        $factura->impuesto = round($factura->subtotal_factura * $factura->porcentaje_iva)/100;
-        $factura->total_factura = $factura->subtotal_factura +  $factura->impuesto;
-        $factura->saldo_factura = $factura->total_factura;
-        $factura->save(false);
+        if($factura->porcentaje_descuento > 0){
+              $dato = round($factura->valor_bruto * $factura->porcentaje_descuento)/100; 
+              $factura->subtotal_factura = $factura->valor_bruto - $dato;
+              $factura->descuento = $dato;
+              $factura->impuesto = round($factura->subtotal_factura * $factura->porcentaje_iva)/100;
+              $factura->total_factura = $factura->subtotal_factura +  $factura->impuesto;
+              $factura->saldo_factura = $factura->total_factura;
+              $factura->save(false);
+        }else{
+            $dato = 0;
+            $factura->subtotal_factura = $factura->valor_bruto;
+            $factura->descuento = $dato;
+            $factura->impuesto = $factura->impuesto;
+            $factura->total_factura = $factura->total_factura ;
+            $factura->saldo_factura = $factura->total_factura;
+            $factura->save(false);
+        }      
     }
 
     /**
@@ -305,6 +315,7 @@ class FacturaVentaController extends Controller
             $table = new FacturaVenta();
             $table->id_pedido = $id_pedido;
             $table->id_cliente = $pedido->id_cliente;
+            $table->id_agente = $pedido->id_agente;
             $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
             $table->nit_cedula = $pedido->documento;
             $table->dv = $pedido->dv;
@@ -448,4 +459,233 @@ class FacturaVentaController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    //IMPRESIONES
+    public function actionImprimir_factura_venta($id, $token) {
+        $model = FacturaVenta::findOne($id);
+         Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.');
+          return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
+    /*    return $this->render('../formatos/reporte_factura_venta', [
+            'model' => $model,
+        ]);*/
+    }
+    //proceso de excel
+    //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
+    public function actionExcelconsultaPedidos($tableexcel) {                
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'No PEDIDO')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'FECHA PEDIDO')
+                        ->setCellValue('F1', 'CANTIDAD')
+                        ->setCellValue('G1', 'SUBTOTAL')
+                        ->setCellValue('H1', 'IVA')
+                        ->setCellValue('I1', 'TOTAL')
+                        ->setCellValue('J1', 'VENDEDOR')    
+                        ->setCellValue('K1', 'USER NAME')
+                        ->setCellValue('L1', 'AUTORIZADO')
+                        ->setCellValue('M1', 'CERRADO')
+                        ->setCellValue('N1', 'FACTURADO')
+                        ->setCellValue('O1', 'APLICA PRESUPUESTO')
+                        ->setCellValue('P1', 'VALOR PRESUPUESTO');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_pedido)
+                        ->setCellValue('B' . $i, $val->numero_pedido)
+                        ->setCellValue('C' . $i, $val->documento)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->fecha_proceso)
+                        ->setCellValue('F' . $i, $val->cantidad)
+                        ->setCellValue('G' . $i, $val->subtotal)
+                        ->setCellValue('H' . $i, $val->impuesto)
+                        ->setCellValue('I' . $i, $val->gran_total)
+                        ->setCellValue('J' . $i, $val->agentePedido->nombre_completo)
+                        ->setCellValue('K' . $i, $val->usuario)
+                        ->setCellValue('L' . $i, $val->autorizadoPedido)
+                        ->setCellValue('M' . $i, $val->pedidoAbierto)
+                        ->setCellValue('N' . $i, $val->pedidoFacturado)
+                        ->setCellValue('O' . $i, $val->presupuestoPedido)
+                        ->setCellValue('P' . $i, $val->valor_presupuesto);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Pedidos.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        }
+    //PROCESO QUE EXPORTA FACTURAS
+     //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
+        public function actionExcelFacturaVenta($tableexcel) {                
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('X')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Y')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Z')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AC')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'No FACTURA')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'VENDEDOR')
+                        ->setCellValue('F1', 'TIPO FACTURA')
+                        ->setCellValue('G1', 'No PEDIDO')
+                        ->setCellValue('H1', 'FECHA INICIO')
+                        ->setCellValue('I1', 'FECHA VENCIMIENTO')
+                        ->setCellValue('J1', 'F. ENVIADA DIAN')    
+                        ->setCellValue('K1', 'FORMA PAGO')
+                        ->setCellValue('L1', 'PLAZO')
+                        ->setCellValue('M1', 'VR. BRUTO')
+                        ->setCellValue('N1', 'DESCUENTO')
+                        ->setCellValue('O1', 'SUBTOTAL')
+                        ->setCellValue('P1', 'IVA')
+                        ->setCellValue('Q1', 'RETENCION')
+                        ->setCellValue('R1', 'RETE IVA')
+                        ->setCellValue('S1', 'TOTAL PAGAR')
+                        ->setCellValue('T1', 'SALDO FACTURA')
+                        ->setCellValue('U1', '% IVA')
+                        ->setCellValue('V1', '% RETENCION')
+                        ->setCellValue('W1', '% RETE IVA')
+                        ->setCellValue('X1', '% DESCUENTO')
+                        ->setCellValue('Y1', 'USER CREADOR')
+                        ->setCellValue('Z1', 'USER EDITADO')
+                        ->setCellValue('AA1', 'F. EDITADO')
+                        ->setCellValue('AB1', 'AUTORIZADO')
+                        ->setCellValue('AC1', 'OBSERVACION');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_factura)
+                        ->setCellValue('B' . $i, $val->numero_factura)
+                        ->setCellValue('C' . $i, $val->nit_cedula)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->agenteFactura->nombre_completo)
+                        ->setCellValue('F' . $i, $val->tipoFactura->descripcion)
+                        ->setCellValue('G' . $i, $val->pedido->numero_pedido)
+                        ->setCellValue('H' . $i, $val->fecha_inicio)
+                        ->setCellValue('I' . $i, $val->fecha_vencimiento)
+                        ->setCellValue('J' . $i, $val->fecha_enviada)
+                        ->setCellValue('K' . $i, $val->formaPago)
+                        ->setCellValue('L' . $i, $val->plazo_pago)
+                        ->setCellValue('M' . $i, $val->valor_bruto)
+                        ->setCellValue('N' . $i, $val->descuento)
+                        ->setCellValue('O' . $i, $val->subtotal_factura)
+                        ->setCellValue('P' . $i, $val->impuesto)
+                        ->setCellValue('Q' . $i, $val->valor_retencion)
+                        ->setCellValue('R' . $i, $val->valor_reteiva)
+                        ->setCellValue('S' . $i, $val->total_factura)
+                        ->setCellValue('T' . $i, $val->saldo_factura)
+                        ->setCellValue('U' . $i, $val->porcentaje_iva)
+                        ->setCellValue('V' . $i, $val->porcentaje_rete_fuente)
+                        ->setCellValue('W' . $i, $val->porcentaje_rete_iva)
+                        ->setCellValue('X' . $i, $val->porcentaje_descuento)
+                        ->setCellValue('Y' . $i, $val->user_name)
+                        ->setCellValue('Z' . $i, $val->user_name_editado)
+                        ->setCellValue('AA' . $i, $val->fecha_editada)
+                        ->setCellValue('AB' . $i, $val->autorizadofactura)
+                        ->setCellValue('AC' . $i, $val->observacion);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Factura_venta.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        }   
+        
 }

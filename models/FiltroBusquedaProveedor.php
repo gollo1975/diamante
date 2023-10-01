@@ -15,12 +15,13 @@ class FiltroBusquedaProveedor extends Model
     public $nombre_completo;
     public $activo;
     public $vendedor;
+    public $tipo_cliente;
     
     public function rules()
     {
         return [  
           
-            [['vendedor','activo'], 'integer'],
+            [['vendedor','activo','tipo_cliente'], 'integer'],
             [['nitcedula','nombre_completo'], 'string'],
         ];
     }
@@ -32,6 +33,7 @@ class FiltroBusquedaProveedor extends Model
             'nombre_completo' => 'Razon social:',
             'activo' => 'Activo:',
             'vendedor' => 'Agente comercial:',
+            'tipo_cliente' => 'Tipo cliente:',
 
         ];
     }

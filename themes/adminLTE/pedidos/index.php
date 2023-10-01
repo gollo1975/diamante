@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
@@ -47,11 +47,17 @@ if($tokenAcceso == 3){
                                                 ->andWhere(['=','id_agente', $agente->id_agente])
                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
 }else{
-     $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
+    if($tokenAcceso == 1){
+        $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
+                                                  ->andWhere(['=','id_tipo_cliente', 2])
+                                                  ->orWhere(['=','id_tipo_cliente', 3])
                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+    }else{
+        $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
+                                                    ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+        $vendedores = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+    }    
 }
-$vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -83,18 +89,17 @@ $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0]
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
-            ]); ?> 
-            <?php if($tokenAcceso == 3){
-            }else{?>
+            ]);?>
+             <?php if($tokenAcceso == 2){?>
                 <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
-                'data' => $vendedor,
+                'data' => $vendedores,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
-                    'allowClear' => true
+                'allowClear' => true
                 ],
-                ]);
-            }
-            ?> 
+            ]);?>
+            <?php }?>           
+           
             <?= $formulario->field($form, 'pedido_cerrado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
             <?= $formulario->field($form, 'facturado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
             <?= $formulario->field($form, 'presupuesto')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
@@ -118,7 +123,7 @@ $form = ActiveForm::begin([
     <div class="panel-heading">
         Registros <span class="badge"><?= $pagination->totalCount ?></span>
     </div>
-    <?php if($tokenAcceso == 3){
+    <?php if($tokenAcceso == 3 || $tokenAcceso == 1){
          ?>
         <table class="table table-responsive">
             <thead>
@@ -226,7 +231,7 @@ $form = ActiveForm::begin([
                        <td style='background-color:#8FA5D5; color: black'><?= $val->presupuestoPedido ?></td>
                     <?php }?>   
                     <td style= 'width: 25px; height: 25px;'>
-                        <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }else{ ?>
                         <td style='background-color:#F0F3EF;'><?= $val->numero_pedido ?></td>
@@ -246,7 +251,7 @@ $form = ActiveForm::begin([
                            <td style='background-color:#8FA5D5; color: black'><?= $val->presupuestoPedido ?></td>
                         <?php }?>   
                         <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
-                            <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                 <?php }?>        
             </tr>

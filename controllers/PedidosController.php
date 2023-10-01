@@ -34,6 +34,7 @@ use app\models\FiltroBusquedaPedidos;
 use app\models\InventarioProductos;
 use app\models\FormModeloBuscar;
 use app\models\PedidoPresupuestoComercial;
+use app\models\FacturaVenta;
 
 /**
  * PedidosController implements the CRUD actions for Pedidos model.
@@ -82,7 +83,7 @@ class PedidosController extends Controller
                         $pedido_cerrado = Html::encode($form->pedido_cerrado);
                         $numero_pedido = Html::encode($form->numero_pedido);
                         $presupuesto = Html::encode($form->presupuesto);
-                        if($vendedor){
+                        if($tokenAcceso == 3 || $tokenAcceso == 1){
                             $table = Pedidos::find()
                                     ->andFilterWhere(['=', 'documento', $documento])
                                     ->andFilterWhere(['=', 'id_cliente', $cliente])
@@ -91,7 +92,6 @@ class PedidosController extends Controller
                                     ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
                                     ->andFilterWhere(['=','numero_pedido', $numero_pedido])
                                      ->andFilterWhere(['=','presupuesto', $presupuesto])
-                                    ->andWhere(['=','autorizado', 1])
                                     ->andWhere(['=','id_agente', $vendedor->id_agente]);
                         }else{
                             $table = Pedidos::find()
@@ -102,7 +102,6 @@ class PedidosController extends Controller
                                     ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
                                     ->andFilterWhere(['=','numero_pedido', $numero_pedido])
                                      ->andFilterWhere(['=','presupuesto', $presupuesto])
-                                    ->andWhere(['=','autorizado', 1])
                                     ->andFilterWhere(['=','id_agente', $vendedores]);
                         }    
                         $table = $table->orderBy('id_pedido DESC');
@@ -124,10 +123,14 @@ class PedidosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    if($vendedor){
+                    if($tokenAcceso == 3){
                         $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])->orderBy('id_pedido DESC');
-                    }else{
-                        $table = Pedidos::find()->Where(['=','autorizado', 1])->orderBy('id_pedido DESC');
+                    }
+                    if($tokenAcceso == 1){
+                        $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])->orderBy('id_pedido DESC');
+                    }
+                    if($tokenAcceso == 2){
+                       $table = Pedidos::find()->orderBy('id_pedido DESC');
                     }
                     $count = clone $table;
                     $pages = new Pagination([
@@ -167,22 +170,29 @@ class PedidosController extends Controller
                 $form = new FiltroBusquedaProveedor();
                 $nitcedula = null;
                 $nombre_completo = null;
+                $tokenAcceso = Yii::$app->user->identity->role;
                 $vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $nitcedula = Html::encode($form->nitcedula);
                         $nombre_completo = Html::encode($form->nombre_completo);
-                        if($vendedor){
+                        if($tokenAcceso == 3){
                             $table = Clientes::find()
                                     ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
                                     ->andFilterWhere(['like', 'nombre_completo', $nombre_completo])
                                     ->andWhere(['=', 'estado_cliente', 0])
+                                    ->andWhere(['=', 'id_tipo_cliente', 1])
                                     ->andWhere(['=','id_agente', $vendedor->id_agente]);
-                        }else{
+                        }
+                        if($tokenAcceso == 1 || $tokenAcceso == 2){
                             $table = Clientes::find()
-                                    ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
-                                    ->andFilterWhere(['like', 'nombre_completo', $nombre_completo])
-                                    ->andWhere(['=', 'estado_cliente', 0]);
+                                ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
+                                ->andFilterWhere(['like', 'nombre_completo', $nombre_completo])
+                                ->andWhere(['=','id_agente', $vendedor->id_agente])    
+                                ->andWhere(['=', 'estado_cliente', 0])
+                                ->andWhere(['=', 'id_tipo_cliente', 3])
+                                ->orWhere(['=', 'id_tipo_cliente', 2])
+                                ->orWhere(['=', 'id_tipo_cliente', 4]);    
                         }    
                         $table = $table->orderBy('nombre_completo ASC');
                         $tableexcel = $table->all();
@@ -203,13 +213,19 @@ class PedidosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    if($vendedor){
+                    if($tokenAcceso == 3){
                         $table = Clientes::find()->where(['=','estado_cliente', 0])
                             ->andWhere(['=','id_agente', $vendedor->id_agente])
+                             ->andWhere(['=', 'id_tipo_cliente', 1])    
                             ->orderBy('nombre_completo ASC');
-                    }else{
+                    }
+                    if($tokenAcceso == 1 || $tokenAcceso == 2){
                         $table = Clientes::find()->where(['=','estado_cliente', 0])
-                                ->orderBy('nombre_completo ASC');
+                            ->andWhere(['=','id_agente', $vendedor->id_agente])
+                            ->andWhere(['=', 'id_tipo_cliente', 2])    
+                            ->orWhere(['=', 'id_tipo_cliente', 3]) 
+                            ->orWhere(['=', 'id_tipo_cliente', 4])      
+                            ->orderBy('nombre_completo ASC');   
                     }
                     $count = clone $table;
                     $pages = new Pagination([
@@ -231,6 +247,7 @@ class PedidosController extends Controller
                             'form' => $form,
                             'pagination' => $pages,
                             'vendedor' => $vendedor,
+                            'tokenAcceso' => $tokenAcceso,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -248,8 +265,6 @@ class PedidosController extends Controller
                 $cliente = null; $fecha_corte = null;
                 $facturado = null; $pedido_cerrado = null;
                 $vendedores = null; $numero_pedido = null;
-                $tokenAcceso = Yii::$app->user->identity->role;
-                $tokenAgente = Yii::$app->user->identity->username; 
                 $presupuesto = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
@@ -270,8 +285,8 @@ class PedidosController extends Controller
                             ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
                             ->andFilterWhere(['=','numero_pedido', $numero_pedido])
                              ->andFilterWhere(['=','presupuesto', $presupuesto])
-                            ->andWhere(['=','autorizado', 1])
-                            ->andFilterWhere(['=','id_agente', $vendedores]);
+                            ->andFilterWhere(['=','id_agente', $vendedores])
+                             ->andWhere(['=','autorizado', 1]) ;
                         $table = $table->orderBy('id_pedido DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -292,7 +307,7 @@ class PedidosController extends Controller
                     }
                 } else {
                     $table = Pedidos::find()->Where(['=','autorizado', 1])->andWhere(['=','cerrar_pedido', 1])->orderBy('id_pedido DESC');
-                    $count = clone $table;
+                   $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 20,
                         'totalCount' => $count->count(),
@@ -306,7 +321,7 @@ class PedidosController extends Controller
                             $this->actionExcelconsultaPedidos($tableexcel);
                     }
                 }
-                $to = $count->count();
+                echo $to = $count->count();
                 return $this->render('search_pedidos', [
                             'model' => $model,
                             'form' => $form,
@@ -353,19 +368,39 @@ class PedidosController extends Controller
       }
     //PROCESO QUE CREA NUEVO PEDIDO
     public function actionCrear_nuevo_pedido($id) {
-       //valide cupo
-       $cliente = Clientes::find()->where(['=','id_cliente', $id])->andWhere(['>','cupo_asignado', 0])->one();
-       if($cliente){
-           $table = new Pedidos();
-           $table->id_cliente = $id;
-           $table->documento = $cliente->nit_cedula;
-           $table->dv = $cliente->dv;
-           $table->cliente = $cliente->nombre_completo;
-           $table->usuario = Yii::$app->user->identity->username;
-           $table->fecha_proceso = date('Y-m-d');
-           $table->id_agente = $cliente->id_agente;
-           $table->save();
-           return $this->redirect(['/pedidos/index']);
+        //valide cupo
+        $cliente = Clientes::find()->where(['=','id_cliente', $id])->andWhere(['>','cupo_asignado', 0])->one();
+        if($cliente){
+            $contar = 0;
+            $fecha_actual = date('Y-m-d');
+            $facturas = FacturaVenta::find()->where(['=','id_cliente', $id])->andWhere(['>','saldo_factura', 0])->all();
+            foreach ($facturas as $factura):
+               $contar += $factura->saldo_factura;
+            endforeach;
+            if($contar <= $cliente->cupo_asignado){
+                $factura_mora = FacturaVenta::find()->where(['=','id_cliente', $id])->andWhere(['>','saldo_factura', 0])
+                                                ->andWhere(['<','fecha_vencimiento', $fecha_actual])->orderBy('id_factura ASC')->one();
+               
+                if(!$factura_mora || $cliente->aplicar_venta_mora == 1){
+                    $table = new Pedidos();
+                    $table->id_cliente = $id;
+                    $table->documento = $cliente->nit_cedula;
+                    $table->dv = $cliente->dv;
+                    $table->cliente = $cliente->nombre_completo;
+                    $table->usuario = Yii::$app->user->identity->username;
+                    $table->fecha_proceso = date('Y-m-d');
+                    $table->id_agente = $cliente->id_agente;
+                    $table->save();
+                    return $this->redirect(['/pedidos/index']);
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'El cliente '.$cliente->nombre_completo.' Se encuentra en mora con la factura No '. $factura_mora->numero_factura .' por un valor de ( $'.number_format($factura_mora->saldo_factura).'). Favor contactar a cartera.'); 
+                    return $this->redirect(['listado_clientes']);
+                }    
+            }else{
+
+            Yii::$app->getSession()->setFlash('warning', 'El cliente '.$cliente->nombre_completo.' NO tiene mas cupo para hacer pedidos. Favor contactar a cartera.'); 
+            return $this->redirect(['listado_clientes']);
+            }    
        }else{
            Yii::$app->getSession()->setFlash('warning', 'El cliente NO TIENE cupo asignado.'); 
            return $this->redirect(['listado_clientes']);
@@ -386,8 +421,8 @@ class PedidosController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
             'token' => $token,
-            'pedido_presupuesto' => $pedido_presupuesto,
             'detalle_pedido' => $detalle_pedido,
+            'pedido_presupuesto' => $pedido_presupuesto,
             'cliente' => $cliente,
         ]);   
     }
@@ -477,7 +512,9 @@ class PedidosController extends Controller
     
     //PROCESO QUE MUESTRAS EL LISTADO DE INVENTARIO ACTIVO
     public function actionAdicionar_productos($id, $tokenAcceso, $token) {
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
         $model = Pedidos::findOne($id);
+        $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
         $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
                                                  ->andWhere(['>','stock_unidades', 0])->orderBy('nombre_producto ASC')->all();
@@ -580,11 +617,48 @@ class PedidosController extends Controller
              'pagination' => $pages,
             'detalle_pedido' => $detalle_pedido,
             'token' => $token,
+            'pedido_presupuesto' => $pedido_presupuesto,
+            'cliente' => $cliente,
         ]);
+    }
+    //ADICIONAR PRODUCTOS A PRESUPUESTO A TRAVES DE LA REGLA DEL PRODUCTO
+    public function actionCrear_regla_pedido($id, $tokenAcceso, $token, $sw, $id_inventario) {
+        //consulta para no duplicar
+        $model = Pedidos::findOne($id);
+        $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $id_inventario])->one(); //permite buscar la cantidad de unidades
+        $registro = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])
+                                                       ->andWhere(['=','id_inventario', $id_inventario])->one();
+        if(!$registro){
+            $cantidad = 0;
+            $regla = \app\models\ProductoReglaComercial::find()->where(['=','estado_regla', 0])->andWhere(['=','id_inventario', $id_inventario])->one();
+                if ($pedido_detalle->cantidad % $regla->limite_venta == 0){
+                    $cantidad =  ($pedido_detalle->cantidad * $regla->limite_presupuesto)/$regla->limite_venta;    
+                }else{
+                    $cantidad = floor(($pedido_detalle->cantidad * $regla->limite_presupuesto)/$regla->limite_venta);     
+                }
+            $producto = InventarioProductos::findOne($id_inventario);
+            $presupuesto = \app\models\PresupuestoEmpresarial::findOne(1);
+            $table = new PedidoPresupuestoComercial();
+            $table->id_pedido = $id;
+            $table->id_inventario = $id_inventario;
+            $table->id_presupuesto = $presupuesto->id_presupuesto;
+            $table->cantidad = $cantidad;
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->fecha_registro = date('Y-m-d');
+            $table->save(false);
+            $datos = $id_inventario;
+            $token = 0;
+            $this->ActualizarInventarioPrecio($datos, $id, $token);
+            $this->TotalPresupuestoPedido($id, $sw);
+            return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso]);
+        } else{
+            Yii::$app->getSession()->setFlash('info', 'Este producto ya esta ingresado en el presupuesto comercial.');
+            return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso]); 
+        }   
     }
     
     //PROCESO QUE INCORPORA PRESUPUESTO AL PEDID
-    public function actionAdicionar_presupuesto($id, $token, $sw) {
+    public function actionAdicionar_presupuesto($id, $token, $sw, $tokenAcceso) {
         $model = Pedidos::findOne($id);
         $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
                                                  ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])->orderBy('nombre_producto ASC')->all();
@@ -612,7 +686,7 @@ class PedidosController extends Controller
                 $count = clone $conSql;
                 $to = $count->count();
                 $pages = new Pagination([
-                    'pageSize' => 10,
+                    'pageSize' => 6,
                     'totalCount' => $count->count()
                 ]);
                 $variable = $conSql
@@ -628,7 +702,7 @@ class PedidosController extends Controller
             $tableexcel = $inventario->all();
             $count = clone $inventario;
             $pages = new Pagination([
-                        'pageSize' => 10,
+                        'pageSize' => 6,
                         'totalCount' => $count->count(),
             ]);
              $variable = $inventario
@@ -665,21 +739,22 @@ class PedidosController extends Controller
                                     $table->save(false);
                                     $datos = 0;
                                     $datos = $intCodigo;
+                                    $token = 0;
                                     $this->ActualizarInventarioPrecio($datos, $id, $token);
                                     $this->TotalPresupuestoPedido($id, $sw);
                                 }else{
                                     Yii::$app->getSession()->setFlash('error', 'Las unidades vendidas es mayor que el STOCK de inventarios. Favor validar las cantidades.');
-                                    return $this->redirect(['view','id' => $id, 'token' => $token]);
+                                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso]);
                                 }    
                             }else{
                                 Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.');
-                                return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token]);
+                                return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso]);
                             }
                         }    
                     }    
                     $intIndice ++;
                 endforeach;
-                return $this->redirect(['view','id' => $id, 'token' => $token]);
+                return $this->redirect(['adicionar_productos','id' => $id, 'token' => 1, 'tokenAcceso' =>$tokenAcceso, 'sw' => $sw]);
             }
         }
         return $this->render('listado_productos_presupuesto', [ 
@@ -689,6 +764,8 @@ class PedidosController extends Controller
             'model' => $model,
             'form' => $form,
             'pagination' => $pages,
+            'tokenAcceso' => $tokenAcceso,
+            'sw' => $sw,
             ]);
     }
    
@@ -723,13 +800,12 @@ class PedidosController extends Controller
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::findOne($pedido->id_cliente);
         $inventario = InventarioProductos::find()->where(['=','id_inventario', $datos])->one();
-        if($token == 0){
-            $detalle_pedido = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $datos])->one();
-        }else{
+        if($token == 1){
             $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $datos])->one();
+        }else{
+            $detalle_pedido = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $datos])->one();
         }
-        
-        if($inventario->aplica_inventario === 0){
+        if($inventario->aplica_inventario == 0){
             $auxiliar = $inventario->stock_unidades - $detalle_pedido->cantidad;    
         }else{
             $auxiliar = $inventario->stock_unidades;
@@ -767,7 +843,7 @@ class PedidosController extends Controller
         }else{
             Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.'); 
         }
-        $detalle_pedido->save(false);
+       $detalle_pedido->save(false);
     }
     
     //ACTUALIZA LOS SUBTOTALES
@@ -840,19 +916,19 @@ class PedidosController extends Controller
     }
     
    //ELIMINAR DETALLES DEL PRESUPUESTO
-      public function actionEliminar_detalle_presupuesto($id,$detalle, $token, $sw) 
+      public function actionEliminar_detalle_presupuesto($id,$detalle, $token, $sw, $tokenAcceso) 
     {                                
-        $detalle = PedidoPresupuestoComercial::findOne($detalle);
+        $detalles = PedidoPresupuestoComercial::findOne($detalle);
         $this->DevolucionProductosPresupuesto($id, $detalle);
-        $detalle->delete();
+        $detalles->delete();
         $this->SumarPresupuesto($detalle, $id);
-        $this->redirect(["view",'id' => $id, 'token' => $token]);        
+        $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso]);        
     }
     protected function SumarPresupuesto($detalle, $id) {
         $suma = 0;
         $pedido = Pedidos::findOne($id);
-        $detalle = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
-        foreach ($detalle as $detalles):
+        $detalle_pres = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        foreach ($detalle_pres as $detalles):
             $suma += $detalles->total_linea;
         endforeach;
         $pedido->valor_presupuesto = $suma;
@@ -872,7 +948,7 @@ class PedidosController extends Controller
     //DEVUCION PRODUCTO PRESUPUESTO
      protected function DevolucionProductosPresupuesto($id, $detalle) {
         $auxiliar = 0; $valor = 0;
-        $detalles = \app\models\PedidoPresupuestoComercial::findOne($detalle);
+        $detalles = PedidoPresupuestoComercial::findOne($detalle);
         $detalles->id_inventario;
         $inventario = InventarioProductos::find()->where(['=','id_inventario', $detalles->id_inventario])->one();
         $auxiliar = $detalles->cantidad;
@@ -895,7 +971,7 @@ class PedidosController extends Controller
     }
     
     //PROCESO QUE CIERRA EL PEDIDO
-    public function actionCerrar_pedido($id, $token) {
+    public function actionCerrar_pedido($id, $token, $tokenAcceso) {
         $suma = 0;
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::findOne($pedido->id_cliente);
@@ -904,7 +980,7 @@ class PedidosController extends Controller
         $cliente->save();
         $pedido->cerrar_pedido = 1;
         $pedido->save(false);
-        $this->redirect(["view",'id' => $id, 'token' => $token]);    
+        $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso]);    
     }
     
     public function actionCrear_observacion($id, $token, $tokenAcceso) {

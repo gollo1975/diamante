@@ -15,6 +15,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 use app\models\AgentesComerciales;
+use app\models\TipoCliente;
 
 
 $this->title = 'CLIENTES';
@@ -43,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->all(), 'id_tipo_cliente', 'concepto');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -56,6 +58,13 @@ $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0]
             <?= $formulario->field($form, "nombre_completo")->input("search") ?>
             <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
                 'data' => $vendedor,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+             <?= $formulario->field($form, 'tipo_cliente')->widget(Select2::classname(), [
+                'data' => $tipoCliente,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true

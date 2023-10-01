@@ -153,13 +153,17 @@ $view = 'pedidos';
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
-                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>User name</th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
                                     </thead>
                                     <body>
                                          <?php
-                                         foreach ($pedido_presupuesto as $val):?>
+                                         $subtotal = 0; $impuesto = 0; $total = 0;
+                                         foreach ($pedido_presupuesto as $val):
+                                              $subtotal += $val->subtotal;
+                                            $impuesto += $val->impuesto;
+                                            $total += $val->total_linea;
+                                             ?>
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->inventario->codigo_producto ?></td>
                                                 <td><?= $val->inventario->nombre_producto ?></td>
@@ -174,7 +178,6 @@ $view = 'pedidos';
                                                 <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
-                                                <td><?= $val->user_name ?></td>
                                                 <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                 <td style= 'width: 25px; height: 25px;'>
                                                     <?php if($model->cerrar_pedido == 0){?>
@@ -191,6 +194,24 @@ $view = 'pedidos';
                                             </tr>
                                          <?php endforeach;?>          
                                     </body>
+                                    <tr>
+                                        <td colspan="7"></td>
+                                        <td style="text-align: right;"><b>Subtotal:</b></td>
+                                        <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7"></td>
+                                        <td style="text-align: right;"><b>Impuesto:</b></td>
+                                        <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                     <tr>
+                                        <td colspan="7"></td>
+                                        <td style="text-align: right;"><b>Total:</b></td>
+                                        <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
+                                        <td colspan="2"></td>
+                                    </tr>
                                 </table>
                             </div>
                             <?php
@@ -267,7 +288,7 @@ $view = 'pedidos';
                                    <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right" style="width: 15%" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                        <td align="right" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>

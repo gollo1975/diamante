@@ -18,12 +18,12 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\filters\AccessControl;
 
-$this->title = 'Inventario de productos  ('. $model->cliente. ')';
+$this->title = 'Regla comercial(Productos)';
 $this->params['breadcrumbs'][] = ['label' => 'Presupuesto producto', 'url' => ['adicionar_presupuesto', 'id'=> $id, 'token' => $token]];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
 <p>
-    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view','id' =>$id, 'token' => $token], ['class' => 'btn btn-primary btn-sm']) ?>
+    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['adicionar_productos','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso], ['class' => 'btn btn-primary btn-sm']) ?>
 </p>
     <div class="panel-body">
         <script language="JavaScript">
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         </script>
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token]),
+            "action" => Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'sw' => $sw]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
 
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -71,14 +71,14 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         ]); ?>
         <div>
             <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#presupuesto" aria-controls="presupuesto" role="tab" data-toggle="tab">Inventarios <span class="badge"><?= $pagination->totalCount ?></span></a></li>
+                <li role="presentation" class="active"><a href="#presupuesto" aria-controls="presupuesto" role="tab" data-toggle="tab">Inventarios presupuesto<span class="badge"><?= $pagination->totalCount ?></span></a></li>
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="presupuesto">
                     <div class="table-responsive">
                         <div class="panel panel-success">
                            <div class="panel-body">
-                                 <table class="table table-bordered table-striped table-hover">
+                                 <table class="table table-responsive">
                                     <thead>
                                         <tr style="font-size: 90%;">
                                              <th scope="col" style='background-color:#B9D5CE;'>Código</th>
@@ -89,12 +89,26 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($variable as $val): ?>
+                                        <?php
+                                         $cadena = '';
+                                        $item = \app\models\Documentodir::findOne(8);
+                                        foreach ($variable as $val):
+                                            $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                                            ?>
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->nombre_producto ?></td>
                                                 <td style="background-color:#CBAAE3; color: black"><?= $val->stock_unidades ?></td>
-                                                <td><?= 1 ?></td>
+                                                <?php if($valor){
+                                                  $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
+                                                  if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
+                                                     <td style="width: 100px; border: 0px solid grey;" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '65px;', 'height' => '70px;'])?></td>
+                                                  <?php }else {?>
+                                                      <td><?= 'NOT FOUND'?></td>
+                                                  <?php } 
+                                                }else{?>
+                                                      <td></td>
+                                                <?php }?>     
                                                 <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" style="text-align: right" size="7" maxlength="true"> </td> 
                                                 <input type="hidden" name="nuevo_producto_presupueso[]" value="<?= $val->id_inventario?>"> 
                                             </tr>     

@@ -22,9 +22,8 @@ $this->title = 'Nuevo pedido';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
- 
-        <p>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+     <div class="btn-group btn-sm" role="group">
+          <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
             <?php if($model->autorizado == 0 && $model->numero_pedido == 0){?>
                 <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token], ['class' => 'btn btn-default btn-sm']);?>
             <?php }else{
@@ -45,10 +44,26 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                <div class="modal-content"></div>
                            </div>
                     </div>
-                <?php }
+                <?php }else{
+                    if($model->cerrar_pedido == 0){
+                        echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso],['class' => 'btn btn-warning btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
+                    }else{?>
+                        <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           Imprimir
+                           <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                                <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Pedido', ['imprimir_pedido', 'id' => $model->id_pedido]) ?></li>
+                                <?php if($model->presupuesto > 0){?>
+                                    <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Presupuesto pedido', ['imprimir_presupuesto', 'id' => $model->id_pedido]) ?></li>
+                                <?php }?>    
+                        </ul>
+                    <?php }    
+                } 
             
             }?>
-        </p>
+     </div>
 <div class="panel panel-success">
     <div class="panel-body">
         <script language="JavaScript">
@@ -85,6 +100,23 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                 </div>
             </div>
         </div>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                DETALLES DEL PEDIDO
+            </div>
+            <div class="panel-body">
+                <table class="table table-responsive">
+                    <tr style="font-size: 90%;">
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "Documento") ?></th>
+                        <td><?= Html::encode($model->documento) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?></th>
+                        <td><?= Html::encode($model->cliente) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
+                        <td><?= Html::encode($model->fecha_proceso) ?></td>
+                        </tr>
+                </table>    
+            </div>   
+        </div>    
         <?php $formulario->end() ?>
         <?php $form = ActiveForm::begin([
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
@@ -98,6 +130,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#listadoproductos" aria-controls="listadoproductos" role="tab" data-toggle="tab">Inventarios <span class="badge"><?= $pagination->totalCount ?></span></a></li>
                 <li role="presentation"><a href="#detallepedido" aria-controls="detallepedido" role="tab" data-toggle="tab">Detalle del pedido <span class="badge"><?= count($detalle_pedido) ?></span></a></li>
+                <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto comercial <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="listadoproductos">
@@ -112,6 +145,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <th scope="col" style='background-color:#B9D5CE;'>Imagen</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica regla comercial">Ar.</span></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -119,6 +153,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     $cadena = '';
                                     $item = \app\models\Documentodir::findOne(8);
                                     foreach ($variable as $val): 
+                                        $regla = app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $val->id_inventario])->andWhere(['=','estado_regla', 0])->one();
                                         $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
                                         ?>
                                         <tr style="font-size: 90%;">
@@ -127,7 +162,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <?php if($valor){
                                                   $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
                                                   if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                                            <td style="width: 100px; border: 0px solid grey;" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '65px;', 'height' => '70px;'])?></td>
+                                                     <td style="width: 100px; border: 0px solid grey;" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '65px;', 'height' => '70px;'])?></td>
                                                   <?php }else {?>
                                                       <td><?= 'NOT FOUND'?></td>
                                                   <?php } 
@@ -136,6 +171,11 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                 <?php }?>     
                                             <td style="background-color:#EDF5F3; color: black"><?= $val->stock_unidades ?></td>
                                             <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_productos[]"  style="text-align: right" size="7" maxlength="true"> </td> 
+                                            <?php if($regla){?>
+                                            <td style="color: red"><?= 'SI' ?></td> 
+                                            <?php }else{?>
+                                               <td></td>
+                                            <?php }?>   
                                             <input type="hidden" name="nuevo_producto[]" value="<?= $val->id_inventario?>"> 
                                         </tr>
                                     </tbody>
@@ -163,8 +203,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                            <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
                                            <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Subtotal.</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Total</th>
+                                           <th scope="col" style='background-color:#B9D5CE; width: 12%'>Impuesto</th>
+                                           <th scope="col" style='background-color:#B9D5CE; width: 14%'>Total</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'></th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
                                        </tr>
                                    </thead>
@@ -172,6 +213,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                    <?php
                                    $subtotal = 0; $impuesto = 0; $total = 0;
                                    foreach ($detalle_pedido as $val):
+                                       $regla = app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $val->id_inventario])
+                                                                                         ->andWhere(['=','estado_regla', 0])->one();
+                                       
                                        $subtotal += $val->subtotal;
                                        $impuesto += $val->impuesto;
                                        $total += $val->total_linea;
@@ -183,6 +227,22 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                        <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                        <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
                                        <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
+                                       <?php if($tokenAcceso == 3){?>
+                                            <td style= 'width: 25px; height: 25px;'>
+                                                <?php if($regla && $regla->limite_venta <= $val->cantidad){?>
+                                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario], [
+                                                                   'class' => '',
+                                                                   'title' => 'Proceso que permite agregar el producto al presupuesto comercial.', 
+                                                                   'data' => [
+                                                                       'confirm' => 'Este pruducto hace parte de la regla de bonificables. ¿Desea agregarlo al presupuesto comercial?',
+                                                                       'method' => 'post',
+                                                                   ],
+                                                     ])?>
+                                                <?php }?>
+                                             </td>
+                                        <?php }else{?>
+                                             <td style= 'width: 25px; height: 25px;'></td> 
+                                        <?php }?>     
                                        <td style= 'width: 25px; height: 25px;'>
                                             <?php if($model->autorizado == 0){?>
                                                 <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'tokenAcceso' => $tokenAcceso, 'token' => 1], [
@@ -201,7 +261,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                    <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right" style="width: 15%" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                        <td align="right" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>
@@ -226,19 +286,101 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                     <?php ActiveForm::end(); ?>
             </div>        
              <!-- TERMINA TABS-->
+               <div role="tabpanel" class="tab-pane" id="presupuestocomercial">
+                    <div class="table-responsive">
+                        <div class="panel panel-success">
+                            <div class="panel-body">
+                                <table class="table table-responsive">
+                                    <thead>
+                                        <tr style="font-size: 90%;">
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
+                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unit.</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE; '>Subtotal</th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 12%'>Impuesto</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 14%'>Total</th> 
+                                            <th scope="col" style='background-color:#B9D5CE;'></th> 
+                                        </tr>
+                                    </thead>
+                                    <body>
+                                         <?php
+                                          $subtotal = 0; $impuesto = 0; $total = 0;
+                                         foreach ($pedido_presupuesto as $val):
+                                            $subtotal += $val->subtotal;
+                                            $impuesto += $val->impuesto;
+                                            $total += $val->total_linea;?>
+                                            <tr style="font-size: 90%;">
+                                                <td><?= $val->inventario->nombre_producto ?></td>
+                                                <?php if($val->cantidad == 0){?>
+                                                      <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
+                                                <?php }else{?>
+                                                      <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                <?php }?>      
+                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
+                                                <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
+                                                <td style= 'width: 20px; height: 20px;'>
+                                                    <?php if($model->cerrar_pedido == 0){?>
+                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_presupuesto', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'token' => $token, 'sw' => 1, 'tokenAcceso' => $tokenAcceso], [
+                                                                    'class' => '',
+                                                                    'data' => [
+                                                                        'confirm' => 'Esta seguro de eliminar este producto del presupuesto comercial?',
+                                                                        'method' => 'post',
+                                                                    ],
+                                                                ])
+                                                        ?>
+                                                    <?php }?>
+                                               </td>
+                                            </tr>
+                                         <?php endforeach;?>          
+                                    </body>
+                                    <tr>
+                                        <td colspan="4"></td>
+                                        <td style="text-align: right;"><b>Subtotal:</b></td>
+                                        <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                        <td colspan="1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4"></td>
+                                        <td style="text-align: right;"><b>Impuesto:</b></td>
+                                        <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
+                                        <td colspan="1"></td>
+                                    </tr>
+                                     <tr>
+                                        <td colspan="4"></td>
+                                        <td style="text-align: right;"><b>Total:</b></td>
+                                        <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
+                                        <td colspan="1"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <?php
+                            if($cliente->presupuesto_comercial == 0 ){
+                                Yii::$app->getSession()->setFlash('info', 'No se le asignado presupuesto a este cliente. Contactar al representante de ventas');     
+                            }else{   
+                                if($cliente->presupuesto_comercial >= $cliente->gasto_presupuesto_comercial){
+                                    if($model->cerrar_pedido == 0){?>
+                                        <div class="panel-footer text-right">
+                                           <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Adicionar', ['pedidos/adicionar_presupuesto', 'id' => $model->id_pedido, 'token' => $token, 'sw' => 0, 'tokenAcceso' => $tokenAcceso],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                                        </div>     
+                                    <?php }
+                                }else{
+                                    Yii::$app->getSession()->setFlash('info', 'Ha superado el presupuesto comercial. Favor eliminar productos o solicitar autorizacion de presupuesto.');     
+                                }
+                            }    
+                            if($model->cerrar_pedido == 1){?>    
+                                    <div class="panel-footer text-right">
+                                        <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido_presupuesto', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);?>
+                                    </div>                           
+                            <?php }?>
+                                
+                        </div>
+                    </div>
+                </div>  
+             <!--TERMINA TABS-->
         </div>     
     </div>        
 </div> 
-<script type="text/javascript">
-	function marcar(source) 
-	{
-		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
-		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
-		{
-			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
-			{
-				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
-			}
-		}
-	}
-</script>
+
