@@ -137,14 +137,11 @@ $form = ActiveForm::begin([
                     <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                     <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
                     <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
-                        $f_vcto = date_create($val->fecha_vencimiento);
-                        $fecha_final = date_create($fecha_dia);
-                        $contador = date_diff($f_vcto, $fecha_final);
-                        $differenceFormat = '%a';
-                        
+                        $total = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento );
+                        $total = round($total / 86400)-1;
                         ?>  
                         <td style="text-align: right; background-color:#F5B7B1;"><?= ''.number_format($val->saldo_factura,0)?></td>
-                        <td style="color: #E74C3C"><b><?= $contador->format($differenceFormat)?></b></td>
+                        <td style="color: #E74C3C"><b><?= $total?></b></td>
                     <?php }else{
                         $f_vcto = date_create($val->fecha_vencimiento);
                         $fecha_final = date_create($fecha_dia);

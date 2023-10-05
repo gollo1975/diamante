@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [                
                 'attribute' => 'almacen',
-                'contentOptions' => ['class' => 'col-lg-6'],
+                'contentOptions' => ['class' => 'col-lg-5'],
             ],
              [                
                 'attribute' => 'fecha_registro',

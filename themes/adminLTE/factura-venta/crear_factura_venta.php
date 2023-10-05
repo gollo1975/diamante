@@ -132,7 +132,7 @@ $form = ActiveForm::begin([
                 <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                 <td style="text-align: right"><?= ''.number_format($val->gran_total,0)?></td>
                 <td style= 'width: 25px; height: 25px;'>
-                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['importar_pedido_factura', 'id_pedido' => $val->id_pedido], [
+                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span>', ['importar_pedido_factura', 'id_pedido' => $val->id_pedido], [
                             'class' => '',
                             'title' => 'Permite crear la factura de venta a este pedido.',
                             'data' => [

@@ -7,7 +7,7 @@ use yii\helpers\ArrayHelper;
 /* @var $searchModel app\models\MunicipioSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'TIPO FACTURA DE VENTA';
+$this->title = 'TIPO DOCUMENTO';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="tipo-factura-venta-index">

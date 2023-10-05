@@ -304,7 +304,6 @@ class FacturaVentaController extends Controller
         if($factura = FacturaVenta::find()->where(['=','id_pedido', $id_pedido])->one()){
             Yii::$app->getSession()->setFlash('warning', 'Este pedido esta en proceso de facturacion. Consulte con el administrador.'); 
             return $this->redirect(["factura-venta/crear_factura"]);
-            
         }else{
            $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);

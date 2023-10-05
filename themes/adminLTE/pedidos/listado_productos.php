@@ -25,10 +25,10 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
      <div class="btn-group btn-sm" role="group">
           <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
             <?php if($model->autorizado == 0 && $model->numero_pedido == 0){?>
-                <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token], ['class' => 'btn btn-default btn-sm']);?>
+                <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente], ['class' => 'btn btn-default btn-sm']);?>
             <?php }else{
                 if($model->autorizado == 1  && $model->numero_pedido == 0){?>
-                    <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token], ['class' => 'btn btn-default btn-sm']);?>
+                    <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente], ['class' => 'btn btn-default btn-sm']);?>
                     <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token],['class' => 'btn btn-warning btn-sm',
                                'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
                      <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Observaciones',
@@ -230,7 +230,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                        <?php if($tokenAcceso == 3){?>
                                             <td style= 'width: 25px; height: 25px;'>
                                                 <?php if($regla && $regla->limite_venta <= $val->cantidad){?>
-                                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario], [
+                                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario,'id_cliente' => $model->id_cliente], [
                                                                    'class' => '',
                                                                    'title' => 'Proceso que permite agregar el producto al presupuesto comercial.', 
                                                                    'data' => [
@@ -358,7 +358,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                             </div>
                             <?php
                             if($cliente->presupuesto_comercial == 0 ){
-                                Yii::$app->getSession()->setFlash('info', 'No se le asignado presupuesto a este cliente. Contactar al representante de ventas');     
+                                Yii::$app->getSession()->setFlash('info', 'El cliente '.$model->cliente.' NO tiene presupuesto comercial asignado. Contactar al representante de ventas');     
                             }else{   
                                 if($cliente->presupuesto_comercial >= $cliente->gasto_presupuesto_comercial){
                                     if($model->cerrar_pedido == 0){?>

@@ -53,7 +53,7 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
     {
         return [
             'id_tipo_factura' => 'Codigo',
-            'descripcion' => 'Tipo factura',
+            'descripcion' => 'Tipo documento',
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha registro',
             'porcentaje_retencion' => '% Retencion',
