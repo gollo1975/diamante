@@ -43,7 +43,17 @@ $this->params['breadcrumbs'][] = $model->id_resolucion;
                     <td><?= Html::encode($model->fecha_vence) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'estado_resolucion') ?>:</th>
                     <td><?= Html::encode($model->activo) ?></td>                    
-                </tr>                
+                </tr>     
+                <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'rango_inicio') ?>:</th>
+                    <td><?= Html::encode($model->rango_inicio) ?></td>    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'rango_final') ?>:</th>
+                    <td><?= Html::encode($model->rango_final) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'vigencia') ?>:</th>
+                    <td><?= Html::encode($model->vigencia) ?></td>
+                    <th style='background-color:#F0F3EF;'></th>
+                    <td></td>                    
+                </tr>       
             </table>
         </div>
     </div>

@@ -461,11 +461,9 @@ class FacturaVentaController extends Controller
     //IMPRESIONES
     public function actionImprimir_factura_venta($id, $token) {
         $model = FacturaVenta::findOne($id);
-         Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.');
-          return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
-    /*    return $this->render('../formatos/reporte_factura_venta', [
+        return $this->render('../formatos/reporte_factura_venta', [
             'model' => $model,
-        ]);*/
+        ]);
     }
     //proceso de excel
     //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 

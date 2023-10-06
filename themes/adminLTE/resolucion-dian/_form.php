@@ -57,11 +57,21 @@ use kartik\date\DatePicker;
                                'todayHighlight' => true]])
             ?> 					
         </div>  
+          <div class="row">
+            <?= $form->field($model, 'rango_inicio')->textInput(['maxlength' => true]) ?>    
+        </div>
+          <div class="row">
+            <?= $form->field($model, 'rango_final')->textInput(['maxlength' => true]) ?>    
+        </div>
+          <div class="row">
+            <?= $form->field($model, 'vigencia')->textInput(['maxlength' => true]) ?>    
+        </div>
         <?php if($sw == 1 ){?>
             <div class="row">
                 <?= $form->field($model, 'estado_resolucion')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
             </div>
         <?php } ?>
+        
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("resolucion-dian/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

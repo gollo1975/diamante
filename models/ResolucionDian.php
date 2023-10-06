@@ -44,7 +44,7 @@ class ResolucionDian extends \yii\db\ActiveRecord
         return [
             [['numero_resolucion', 'desde', 'hasta', 'fecha_vence'], 'required'],
             [['desde', 'hasta', 'fecha_vence', 'fecha_registro'], 'safe'],
-            [['estado_resolucion'], 'integer'],
+            [['estado_resolucion','rango_inicio','rango_final','vigencia'], 'integer'],
             [['numero_resolucion'], 'string', 'max' => 30],
             [['consecutivo'], 'string', 'max' => 3],
             [['user_name'], 'string', 'max' => 15],
@@ -66,6 +66,9 @@ class ResolucionDian extends \yii\db\ActiveRecord
             'fecha_registro' => 'Fecha Registro',
             'user_name' => 'User Name',
             'estado_resolucion' => 'Activo',
+            'rango_inicio' => 'Rango inicio',
+            'rango_final' => 'Rango final',
+            'vigencia' => 'Vigencia',
         ];
     }
     
