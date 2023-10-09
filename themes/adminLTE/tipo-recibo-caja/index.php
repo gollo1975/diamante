@@ -2,16 +2,15 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
-use app\models\Departamentos;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\MunicipioSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'MUNICIPIOS';
+$this->title = 'TIPO RECIBO DE CAJA';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="municipios-index">
+<div class="tipo-recibo-caja-index">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <?=  $this->render('_search', ['model' => $searchModel]); ?>
@@ -23,34 +22,26 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             [                
-                'attribute' => 'codigo_municipio',
+                'attribute' => 'id_tipo',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [                
-                'attribute' => 'municipio',
-                'contentOptions' => ['class' => 'col-lg-4'],
+                'attribute' => 'concepto',
+                'contentOptions' => ['class' => 'col-lg-3'],
             ],
+            
             [
-                'attribute' => 'codigo_departamento',
-                'value' => function($model){
-                    $dpto = \app\models\Departamentos::findOne($model->codigo_departamento);
-                    return $dpto->departamento;
+                'attribute' => 'resta',
+                'value' => function($model) {
+                    $dato = app\models\TipoReciboCaja::findOne($model->id_tipo);
+                    return $dato->restarecibo;
                 },
-                'filter' => ArrayHelper::map(\app\models\Departamentos::find()->orderBy('departamento ASC')->all(),'codigo_departamento','departamento'),
-                'contentOptions' => ['class' => 'col-lg-4'],
+                'filter' => ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'restarecibo'),
+                'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [                
-                'attribute' => 'usuario_creador',
-                'contentOptions' => ['class' => 'col-lg-1'],
-            ],
-           [
-                'attribute' => 'estado_registro',
-                'value' => function($model) {
-                    $estado = app\models\Municipios::findOne($model->codigo_municipio);
-                    return $estado->activo;
-                },
-                'filter' => ArrayHelper::map(app\models\Municipios::find()->all(), 'estado_registro', 'activo'),
-                'contentOptions' => ['class' => 'col-lg-1'],
+                'attribute' => 'user_name',
+                'contentOptions' => ['class' => 'col-lg-3'],
             ],
              [
                 'class' => 'yii\grid\ActionColumn', 
@@ -71,5 +62,8 @@ $this->params['breadcrumbs'][] = $this->title;
         
     ]); ?>
 </div>
+
+
+
 
 

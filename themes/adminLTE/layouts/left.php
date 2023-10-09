@@ -312,7 +312,50 @@
                                     ],
                                 ],
                                 //TERMINA FACTURACION
-                                
+                                //INICIO MODULO DE CARTERA
+                                [
+                                    'label' => 'CARTERA',
+                                    'icon' => 'list',
+                                    'url' => '#',
+                                    'items' => [
+                                        [
+                                            'label' => 'Administración',
+                                            'icon' => 'database',
+                                            'url' => '#',
+                                            'items' => [
+                                               ['label' => 'Tipo recibos', 'icon' => 'plus-square-o', 'url' => ['/tipo-recibo-caja/index']],  
+                                             
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Utilidades',
+                                            'icon' => 'cube',
+                                            'url' => '#',
+                                            'items' => [
+                                                //['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Consultas',
+                                            'icon' => 'question',
+                                            'url' => '#',
+                                            'items' => [
+                                            //    ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/search_consulta_clientes']],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Movimientos',
+                                            'icon' => 'book',
+                                            'url' => '#',
+                                            'items' => [
+                                                ['label' => 'Cargar cartera', 'icon' => 'plus-square-o', 'url' => ['/recibo-caja/cargar_cartera']],
+                                               // ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
+                                               
+                                             ],
+                                        ]
+                                    ],
+                                ],
+                                //TERMINA ACRTERA
                                 //MODULO GENERAL
                                 [
                                     'label' => 'GENERAL',

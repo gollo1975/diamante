@@ -59,7 +59,7 @@ class AgentesComerciales extends \yii\db\ActiveRecord
     {
         return [
             [['id_tipo_documento', 'dv','nit_cedula', 'primer_nombre', 'primer_apellido', 'codigo_departamento', 'codigo_municipio', 'id_cargo','id_coordinador'], 'required'],
-            [['id_tipo_documento', 'id_cargo','estado','dv','gestion_diaria','id_coordinador','hacer_pedido'], 'integer'],
+            [['id_tipo_documento', 'id_cargo','estado','dv','gestion_diaria','id_coordinador','hacer_pedido','hacer_recibo_caja'], 'integer'],
             [['fecha_registro'], 'safe'],
             ['email_agente', 'email'],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'user_name'], 'string', 'max' => 15],
@@ -101,8 +101,9 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             'nombre_completo' => 'Agente comercial:',
             'gestion_diaria' => 'Gestion comercial diaria:',
             'id_coordinador' => 'Coordinador:',
-            'hacer_pedido' => 'Gestiona pedidos:'
-        ];
+            'hacer_pedido' => 'Gestiona pedidos:',
+            'hacer_recibo_caja' => 'Hacer recibo de caja:',
+         ];
     }
 
     /**
@@ -165,5 +166,13 @@ class AgentesComerciales extends \yii\db\ActiveRecord
             $gestionapedido = 'NO';
         }
         return $gestionapedido;
+    }
+    public function getHacerRecibo() {
+        if($this->hacer_recibo_caja== 0){
+            $hacerrecibo = 'SI';
+        }else{
+            $hacerrecibo = 'NO';
+        }
+        return $hacerrecibo;
     }
 }

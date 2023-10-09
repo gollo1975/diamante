@@ -205,9 +205,9 @@ class MunicipiosController extends Controller
             $this->redirect(["municipios/index"]);
         } catch (IntegrityException $e) {
             $this->redirect(["municipios/index"]);
-            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el departamento, tiene registros asociados en otros procesos');
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el municipio, tiene registros asociados en otros procesos');
         } catch (\Exception $e) {            
-            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el departamento, tiene registros asociados en otros procesos');
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el municipio, tiene registros asociados en otros procesos');
             $this->redirect(["municipios/index"]);
         }
     }
