@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td style="text-align: center"><?= '$'.number_format($suma,0)?></td>
                                 <td style= 'width: 25px; right: 25px;'>
                                    <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span>',
-                                        ['/recibo-caja/crear_nuevo_recibo','id_cliente' =>$val->id_cliente],
+                                        ['/recibo-caja/crear_nuevo_recibo','id_cliente' =>$val->id_cliente, 'tokenAcceso' => $tokenAcceso],
                                           ['title' => 'Crear recibo de caja al clinte',
                                            'data-toggle'=>'modal',
                                            'data-target'=>'#modalcrearrecibocaja',

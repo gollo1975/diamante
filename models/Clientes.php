@@ -75,7 +75,6 @@ class Clientes extends \yii\db\ActiveRecord
                 'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente'], 'integer'],
             [['fecha_creacion', 'fecha_editado'], 'safe'],
             [['observacion'], 'string'],
-       
             ['email_cliente', 'email'],
             [['nit_cedula', 'telefono', 'celular', 'user_name', 'user_name_editar'], 'string', 'max' => 15],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 12],

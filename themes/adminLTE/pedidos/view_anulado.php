@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                 <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
                                                 <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
                                                 <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Registro eliminado">R. eliminado</span></th> 
-                                                 <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
+                                                 <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"></th>
                                             </tr>
                                         </thead>
                                         <body>

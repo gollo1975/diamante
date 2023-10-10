@@ -34,14 +34,12 @@ $view = 'recibo-caja';
         <?php }else{?>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_clientes'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?php }?> 
-        <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 10, 'codigo' => $model->id_recibo,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']) ?>
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
            CLIENTES
         </div>
         <div class="panel-body">
-           <?php if($tokenAcceso == 3){?>
                  <table class="table table-bordered table-striped table-hover">
                     <tr style="font-size: 90%;">
                         <th style='background-color:#F0F3EF;'>Numero recibo:</th>
@@ -56,50 +54,6 @@ $view = 'recibo-caja';
                         <td style="text-align: right"><?= ''.number_format($model->valor_pago,0) ?></td>
                     </tr>
                  </table>    
-           <?php }else{?>
-                <table class="table table-bordered table-striped table-hover">
-                    <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'>Id:</th>
-                        <td><?= $model->id_recibo ?></td>
-                        <th style='background-color:#F0F3EF;'>Numero recibo:</th>
-                        <td><?= $model->numero_recibo ?></td>
-                        <th style='background-color:#F0F3EF;'>Tipo recibo:</th>
-                        <td><?= $model->tipo->concepto ?></td>
-                        <th style='background-color:#F0F3EF;' >Fecha_pago:</th>
-                        <td><?= $model->fecha_pago ?></td>
-                        <th style='background-color:#F0F3EF;' >Valor pago:</th>
-                        <td style="text-align: right"><?= ''.number_format($model->valor_pago,0) ?></td>
-                    </tr>
-                    <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'>Tipo documento:</th>
-                        <td><?= $model->clienteRecibo->tipoDocumento->tipo_documento ?></td>
-                        <th style='background-color:#F0F3EF;'>Documento:</th>
-                        <td><?= $model->clienteRecibo->nit_cedula ?></td>
-                        <th style='background-color:#F0F3EF;'>Cliente</th>
-                        <td><?= $model->cliente ?></td>
-                        <th style='background-color:#F0F3EF;'>Departamento</th>
-                        <td><?= $model->codigoMunicipio->codigoDepartamento->departamento ?></td>
-                        <th style='background-color:#F0F3EF;' >Municipio:</th>
-                        <td><?= $model->codigoMunicipio->municipio?></td>
-                    </tr>
-                     <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'>Banco:</th>
-                        <td><?= $model->codigoBanco->entidad_bancaria ?></td>
-                        <th style='background-color:#F0F3EF;'>Fecha_proceso:</th>
-                        <td><?= $model->fecha_proceso ?></td>
-                        <th style='background-color:#F0F3EF;'>User_name:</th>
-                        <td><?= $model->user_name ?></td>
-                        <th style='background-color:#F0F3EF;'>Autorizado:</th>
-                        <td><?= $model->autorizado ?></td>
-                        <th style='background-color:#F0F3EF;'></th>
-                        <td></td>
-                    </tr>
-                    <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'>Observación:</th>
-                        <td colspan="9"><?= $model->observacion ?></td>
-                    </tr>
-                </table>
-           <?php }?>
         </div>
     </div>
       <?php $form = ActiveForm::begin([

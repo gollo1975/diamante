@@ -46,6 +46,7 @@ class ReciboCaja extends \yii\db\ActiveRecord
             [['fecha_pago', 'fecha_proceso'], 'safe'],
             [['codigo_municipio', 'codigo_banco'], 'string', 'max' => 10],
             [['observacion'], 'string', 'max' => 100],
+            [['cliente','direccion_cliente'], 'string', 'max' => 50],
             [['user_name'], 'string', 'max' => 15],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
             [['id_tipo'], 'exist', 'skipOnError' => true, 'targetClass' => TipoReciboCaja::className(), 'targetAttribute' => ['id_tipo' => 'id_tipo']],
@@ -60,25 +61,27 @@ class ReciboCaja extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_recibo' => 'Id Recibo',
-            'numero_recibo' => 'Numero Recibo',
-            'id_cliente' => 'Id Cliente',
-            'id_tipo' => 'Id Tipo',
-            'fecha_pago' => 'Fecha Pago',
-            'fecha_proceso' => 'Fecha Proceso',
-            'valor_pago' => 'Valor Pago',
+            'id_recibo' => 'Id',
+            'numero_recibo' => 'Numero recibo',
+            'id_cliente' => 'Cliente',
+            'id_tipo' => 'Tipo recibo',
+            'fecha_pago' => 'Fecha pago',
+            'fecha_proceso' => 'Fecha proceso',
+            'valor_pago' => 'Valor pago',
             'autorizado' => 'Autorizado',
-            'codigo_municipio' => 'Codigo Municipio',
-            'codigo_banco' => 'Codigo Banco',
+            'codigo_municipio' => 'Municipio',
+            'codigo_banco' => 'Entidad bancaria',
             'observacion' => 'Observacion',
             'user_name' => 'User Name',
+            'cliente' => 'Cliente',
+            'direccion_cliente' => 'Direccion',
         ];
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCliente()
+    public function getClienteRecibo()
     {
         return $this->hasOne(Clientes::className(), ['id_cliente' => 'id_cliente']);
     }
@@ -105,5 +108,13 @@ class ReciboCaja extends \yii\db\ActiveRecord
     public function getCodigoBanco()
     {
         return $this->hasOne(EntidadBancarias::className(), ['codigo_banco' => 'codigo_banco']);
+    }
+    public function getAutorizado() {
+        if($this->autorizado == 0){
+            $autorizado = 'NO';
+        }else{
+            $autorizado = 'SI';
+        }
+        return $autorizado;
     }
 }
