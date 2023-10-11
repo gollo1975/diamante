@@ -41,7 +41,7 @@ class ReciboCaja extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_recibo', 'id_cliente', 'id_tipo', 'valor_pago', 'autorizado'], 'integer'],
+            [['numero_recibo', 'id_cliente', 'id_tipo', 'valor_pago', 'autorizado','recibo_cerrado'], 'integer'],
             [['id_tipo', 'fecha_pago', 'codigo_banco'], 'required'],
             [['fecha_pago', 'fecha_proceso'], 'safe'],
             [['codigo_municipio', 'codigo_banco'], 'string', 'max' => 10],
@@ -75,6 +75,7 @@ class ReciboCaja extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'cliente' => 'Cliente',
             'direccion_cliente' => 'Direccion',
+            'recibo_cerrado' => 'Recibo cerrado',
         ];
     }
 
@@ -116,5 +117,13 @@ class ReciboCaja extends \yii\db\ActiveRecord
             $autorizado = 'SI';
         }
         return $autorizado;
+    }
+    public function getReciboCerrado() {
+        if($this->recibo_cerrado == 0){
+            $recibocerrado = 'NO';
+        }else{
+            $recibocerrado = 'SI';
+        }
+        return $recibocerrado;
     }
 }

@@ -140,6 +140,25 @@ class ReciboCajaController extends Controller
     public function actionView_cliente($id, $token, $tokenAcceso)
     {
         $detalle_recibo = ReciboCajaDetalles::find()->where(['=','id_recibo', $id])->all();
+          if(isset($_POST["actualizasaldorecibo"])){
+            if(isset($_POST["actualizar_saldo"])){
+                $intIndice = 0;
+                $auxiliar = 0;
+                foreach ($_POST["actualizar_saldo"] as $intCodigo):
+                    $table = ReciboCajaDetalles::findOne($intCodigo);
+                    $auxiliar = $table->saldo_factura; 
+                    if($_POST["abono_factura"]["$intIndice"] > $auxiliar){
+                        Yii::$app->getSession()->setFlash('warning', 'El valor del abono no puede ser mayor que el saldo.'); 
+                    }else{    
+                        $table->abono_factura = $_POST["abono_factura"]["$intIndice"];
+                        $table->save(false);
+                    }    
+                    $intIndice++;
+                endforeach;
+               return $this->redirect(['view_cliente','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
+            }
+            
+        }
         return $this->render('view_cliente', [
             'model' => $this->findModel($id),
             'token' => $token,
@@ -312,6 +331,58 @@ class ReciboCajaController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+    
+    //proceso que autoriza y desautoriza
+    public function actionAutorizado($id, $token, $tokenAcceso) {
+         $model = $this->findModel($id);
+         if($model->autorizado == 0){
+             $model->autorizado = 1;
+             $model->save();
+         }else{
+             $model->autorizado = 0;
+             $model->save();
+         }
+          return $this->redirect(['view_cliente','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
+    }
+    //CREAR EL CONSECUTIVO DEL RECIBO DE PAGO
+     public function actionGenerar_recibo_pago($id, $token, $tokenAcceso) {
+        //proceso que actuliza saldos
+        $this->ActualizarSaldoFacturas($id);
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(7);
+        $recibo = ReciboCaja::findOne($id);
+        $recibo->numero_recibo = $consecutivo->numero_inicial + 1;
+        $recibo->recibo_cerrado = 1;
+        $recibo->save(false);
+        $consecutivo->numero_inicial = $recibo->numero_recibo;
+        $consecutivo->save(false);
+        $this->redirect(["view_cliente", 'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso]);  
+    }
+    //PROCESO QUE ACTUALIZA LOS SALDOS DE LA FACTURA
+    protected function ActualizarSaldoFacturas($id) {
+        $detalle_recibo = ReciboCajaDetalles::find()->where(['=','id_recibo', $id])->all();
+        $recibo = ReciboCaja::findOne($id);
+        $contar = 0; 
+         foreach ($detalle_recibo as $detalle):
+            $saldo = 0; 
+            $factura = FacturaVenta::find()->where(['=','id_factura', $detalle->id_factura])->one();
+            if($factura){
+                $saldo = $detalle->saldo_factura;
+                $factura->saldo_factura = $saldo - $detalle->abono_factura;
+                if($factura->saldo_factura <= 0){
+                    $factura->estado_factura = 2;
+                }else{
+                    $factura->estado_factura = 1;
+                }
+                $factura->save(false);
+                $contar += $detalle->abono_factura;
+                $detalle->saldo_factura = $factura->saldo_factura;
+                $detalle->save(false);
+             }
+         endforeach;
+         $recibo->valor_pago = $contar;
+         $recibo->save();
     }
 
     /**

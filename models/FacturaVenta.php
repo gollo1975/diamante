@@ -61,7 +61,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
         return [
             [['id_pedido', 'user_name'], 'required'],
             [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
-                'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente'], 'integer'],
+                'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente','estado_factura'], 'integer'],
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada','fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento'], 'number'],
             [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
@@ -121,6 +121,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'fecha_editada' => 'fecha_editada',
             'user_name_editado' => 'user_name_editado',
             'id_agente' => 'Vendedor:',
+            'estado_factura' => 'Estado factura:',
         ];
     }
 
@@ -168,5 +169,18 @@ class FacturaVenta extends \yii\db\ActiveRecord
             $autorizadofactura = 'SI';
         }
         return $autorizadofactura;
+    }
+    
+    public function getEstadofactura() {
+        if($this->estado_factura == 0){
+            $estadofactura = 'ACTIVA';
+        }else{
+            if($this->estado_factura == 1){    
+                $estadofactura = 'ABONADA';
+            }else{
+                $estadofactura = 'CANCELADA';
+            }    
+        }
+        return $estadofactura;
     }
 }
