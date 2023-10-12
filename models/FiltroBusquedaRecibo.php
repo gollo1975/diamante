@@ -18,7 +18,7 @@ class FiltroBusquedaRecibo extends Model
     public $hasta;
     public $banco;
     public $municipio;
-    public $vendedor;
+    public $vendedores;
     public $documento;
 
 
@@ -26,7 +26,7 @@ class FiltroBusquedaRecibo extends Model
     {
         return [  
           
-            [['numero','tipo_recibo','vendedor'], 'integer'],
+            [['numero','tipo_recibo','vendedores'], 'integer'],
             [['banco','municipio','documento','cliente'], 'string'],
             [['desde','hasta'], 'safe'],
         ];
@@ -42,7 +42,7 @@ class FiltroBusquedaRecibo extends Model
             'municipio' => 'Municipio de pago:',
             'desde' => 'Fecha inicio:',
             'hasta' => 'Fecha corte:',
-            'vendedor' => 'Agente comercial:',
+            'vendedores' => 'Agente comercial:',
             'documento' => 'Nit / Cedula:',
 
         ];

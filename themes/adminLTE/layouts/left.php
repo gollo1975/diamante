@@ -349,7 +349,7 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Cargar cartera', 'icon' => 'plus-square-o', 'url' => ['/recibo-caja/cargar_cartera']],
-                                               // ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
+                                                ['label' => 'Recibo de caja', 'icon' => 'plus-square-o', 'url' => ['/recibo-caja/index']],
                                                
                                              ],
                                         ]

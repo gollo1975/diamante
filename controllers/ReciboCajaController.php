@@ -52,28 +52,44 @@ class ReciboCajaController extends Controller
             ],
         ];
     }
-
-   //LISTA TODOS LOS CLIENTES CON CARTERA PARA CADA VENDEDOR
-    public function actionCargar_cartera() {
+   //index de los procesos
+    public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',55])->all()){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',56])->all()){
                 $form = new FiltroBusquedaRecibo();
-                $documento= null;
                 $cliente = null;
+                $numero = null;
+                $banco = null;
+                $tipo_recibo = null;
+                $desde = null;
+                $hasta = null;
                 $tokenAcceso = Yii::$app->user->identity->role;
                 $vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
-                        $documento = Html::encode($form->documento);
+                        $numero = Html::encode($form->numero);
                         $cliente = Html::encode($form->cliente);
-                        $table = FacturaVenta::find()
-                                    ->andFilterWhere(['=', 'nit_cedula', $documento])
-                                    ->andFilterWhere(['like', 'cliente', $cliente])
-                                    ->andWhere(['>', 'saldo_factura', 0])
-                                    ->andWhere(['=', 'autorizado', 1])
-                                    ->andWhere(['>', 'numero_factura', 0])
-                                    ->andWhere(['=','id_agente', $vendedor->id_agente]);
-                        $table = $table->orderBy('cliente ASC');
+                        $banco = Html::encode($form->banco);
+                        $tipo_recibo = Html::encode($form->tipo_recibo);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);  
+                        if($tokenAcceso == 3){
+                            $table = ReciboCaja::find()
+                                        ->andFilterWhere(['like', 'cliente', $cliente])
+                                        ->andFilterWhere(['=', 'numero_recibo', $numero])
+                                        ->andFilterWhere(['=', 'codigo_banco', $banco])
+                                        ->andFilterWhere(['=', 'id_tipo', $tipo_recibo])
+                                        ->andFilterWhere(['between', 'fecha_pago', $desde, $hasta])
+                                        ->andWhere(['=','user_name', $vendedor->nit_cedula]);
+                        }else{
+                            $table = ReciboCaja::find()
+                                        ->andFilterWhere(['like', 'cliente', $cliente])
+                                        ->andFilterWhere(['=', 'numero_recibo', $numero])
+                                        ->andFilterWhere(['=', 'codigo_banco', $banco])
+                                        ->andFilterWhere(['=', 'id_tipo', $tipo_recibo])
+                                        ->andFilterWhere(['between', 'fecha_pago', $desde, $hasta]);
+                        }    
+                        $table = $table->orderBy('id_recibo DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
                         $to = $count->count();
@@ -90,12 +106,12 @@ class ReciboCajaController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                        $table = FacturaVenta::find()->Where(['>', 'saldo_factura', 0])
-                                    ->andWhere(['=', 'autorizado', 1])
-                                    ->andWhere(['>', 'numero_factura', 0])
-                                    ->andWhere(['=','id_agente', $vendedor->id_agente])    
-                                    ->orderBy('cliente ASC');
-                    $count = clone $table;
+                     if($tokenAcceso == 3){  
+                        $table = ReciboCaja::find()->Where(['=','user_name', $vendedor->nit_cedula])->orderBy('id_recibo DESC');   
+                     }else{
+                         $table = ReciboCaja::find()->orderBy('id_recibo DESC');  
+                     }           
+                     $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 15,
                         'totalCount' => $count->count(),
@@ -107,11 +123,11 @@ class ReciboCajaController extends Controller
                             ->all();
                 }
                 $to = $count->count();
-                return $this->render('cargar_cliente_cartera', [
+                return $this->render('index', [
                             'model' => $model,
                             'form' => $form,
                             'pagination' => $pages,
-                            'vendedor' => $vendedor,
+                            'token' => $token,
                             'tokenAcceso' => $tokenAcceso,
                 ]);
             }else{
@@ -121,7 +137,108 @@ class ReciboCajaController extends Controller
             return $this->redirect(['site/login']);
         }
     }
-
+    
+   //LISTA TODOS LOS CLIENTES CON CARTERA PARA CADA VENDEDOR
+    public function actionCargar_cartera() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',55])->all()){
+                $form = new FiltroBusquedaRecibo();
+                $documento= null;
+                $cliente = null;
+                $vendedores = null;
+                $desde = null;
+                $hasta = null;
+                $numero = null;
+                $tokenAcceso = Yii::$app->user->identity->role;
+                $vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        if($tokenAcceso == 3){
+                            $table = FacturaVenta::find()
+                                ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                ->andFilterWhere(['like', 'cliente', $cliente])
+                                ->andWhere(['>', 'saldo_factura', 0])
+                                ->andWhere(['=', 'autorizado', 1])
+                                ->andWhere(['>', 'numero_factura', 0])
+                                ->andWhere(['=','id_agente', $vendedor->id_agente]);
+                        }else{
+                            $table = FacturaVenta::find()
+                                ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                ->andFilterWhere(['like', 'cliente', $cliente])
+                                ->andFilterWhere(['=', 'id_agente', $vendedores])
+                                ->andFilterWhere(['=', 'numero_factura', $numero])  
+                                ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
+                                ->andWhere(['>', 'saldo_factura', 0])
+                                ->andWhere(['=', 'autorizado', 1])
+                                ->andWhere(['>', 'numero_factura', 0]);
+                        }    
+                        $table = $table->orderBy('id_factura DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    if($tokenAcceso == 3){
+                        $table = FacturaVenta::find()->Where(['>', 'saldo_factura', 0])
+                            ->andWhere(['=', 'autorizado', 1])
+                            ->andWhere(['>', 'numero_factura', 0])
+                            ->andWhere(['=','id_agente', $vendedor->id_agente])    
+                            ->orderBy('id_factura ASC');
+                    }else{
+                        $table = FacturaVenta::find()->Where(['>', 'saldo_factura', 0])
+                            ->andWhere(['=', 'autorizado', 1])
+                            ->andWhere(['>', 'numero_factura', 0])
+                            ->orderBy('id_factura ASC');
+                    }    
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }
+                $to = $count->count();
+                if($tokenAcceso == 3){
+                    return $this->render('cargar_cliente_cartera', [
+                                'model' => $model,
+                                'form' => $form,
+                                'pagination' => $pages,
+                                'vendedor' => $vendedor,
+                                'tokenAcceso' => $tokenAcceso,
+                    ]);
+                }else{ 
+                   return $this->render('cargar_cliente_cartera_admon', [
+                                'model' => $model,
+                                'form' => $form,
+                                'pagination' => $pages,
+                                'tokenAcceso' => $tokenAcceso,
+                    ]); 
+                }   
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+        
     /**
      * Displays a single ReciboCaja model.
      * @param integer $id
@@ -164,6 +281,7 @@ class ReciboCajaController extends Controller
             'token' => $token,
             'tokenAcceso' => $tokenAcceso,
             'detalle_recibo' => $detalle_recibo,
+            'id' => $id,
         ]);
     }
     //PERMITE CREAR EL NUEVO RECIBO DE CAJA
