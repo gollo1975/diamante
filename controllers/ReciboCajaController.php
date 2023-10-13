@@ -65,6 +65,12 @@ class ReciboCajaController extends Controller
                 $hasta = null;
                 $tokenAcceso = Yii::$app->user->identity->role;
                 $vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
+                if ($vendedor){
+                    $agente = $vendedor->id_agente;
+                }else{
+                    $agente = null;
+                }
+                
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero = Html::encode($form->numero);
@@ -129,6 +135,7 @@ class ReciboCajaController extends Controller
                             'pagination' => $pages,
                             'token' => $token,
                             'tokenAcceso' => $tokenAcceso,
+                            'agente' => $agente,                    
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -248,6 +255,25 @@ class ReciboCajaController extends Controller
      public function actionView($id, $token)
     {
         $detalle_recibo = ReciboCajaDetalles::find()->where(['=','id_recibo', $id])->all();
+          if(isset($_POST["actualizarecibo"])){
+            if(isset($_POST["actualizar_recibo_caja"])){
+                $intIndice = 0;
+                $auxiliar = 0;
+                foreach ($_POST["actualizar_recibo_caja"] as $intCodigo):
+                    $table = ReciboCajaDetalles::findOne($intCodigo);
+                    $auxiliar = $table->saldo_factura; 
+                    if($_POST["abono_factura"]["$intIndice"] > $auxiliar){
+                        Yii::$app->getSession()->setFlash('warning', 'El valor del abono no puede ser mayor que el saldo.'); 
+                    }else{    
+                        $table->abono_factura = $_POST["abono_factura"]["$intIndice"];
+                        $table->save(false);
+                    }    
+                    $intIndice++;
+                endforeach;
+               return $this->redirect(['view','id' =>$id, 'token' => $token]);
+            }
+            
+        }
         return $this->render('view', [
             'model' => $this->findModel($id),
             'token' => $token,
@@ -257,7 +283,7 @@ class ReciboCajaController extends Controller
     public function actionView_cliente($id, $token, $tokenAcceso)
     {
         $detalle_recibo = ReciboCajaDetalles::find()->where(['=','id_recibo', $id])->all();
-          if(isset($_POST["actualizasaldorecibo"])){
+        if(isset($_POST["actualizasaldorecibo"])){
             if(isset($_POST["actualizar_saldo"])){
                 $intIndice = 0;
                 $auxiliar = 0;
@@ -399,6 +425,86 @@ class ReciboCajaController extends Controller
             'id_cliente' => $id_cliente,
         ]);
     }
+    
+      public function actionBuscar_facturas_admon($id, $id_cliente, $token) {
+        $facturas = FacturaVenta::find()->where(['=','id_cliente', $id_cliente])
+                                        ->andWhere(['>','saldo_factura', 0])
+                                        ->andWhere(['>','numero_factura', 0])->orderBy('id_factura ASC')->all();
+        $model = ReciboCaja::findOne($id);
+        $form = new \app\models\FormModeloBuscar();
+        $q = null;
+        if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $q = Html::encode($form->q);                                
+                $conSql = FacturaVenta::find()
+                        ->where(['like','numero_factura', $q])
+                        ->andwhere(['=','id_cliente', $id_cliente])
+                        ->andWhere(['>','saldo_factura', 0])
+                        ->andWhere(['>','numero_factura', 0]);
+                
+                $conSql = $conSql->orderBy('id_factura ASC');  
+                $count = clone $conSql;
+                $to = $count->count();
+                $pages = new Pagination([
+                    'pageSize' => 10 ,
+                    'totalCount' => $count->count()
+                ]);
+                $factura = $conSql
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();         
+            } else {
+                $form->getErrors();
+            }                    
+        }else{
+            $facturas = FacturaVenta::find()->where(['=','id_cliente', $id_cliente])
+                                        ->andWhere(['>','saldo_factura', 0])
+                                        ->andWhere(['>','numero_factura', 0])->orderBy('id_factura ASC');
+            $tableexcel = $facturas->all();
+            $count = clone $facturas;
+            $pages = new Pagination([
+                        'pageSize' => 10,
+                        'totalCount' => $count->count(),
+            ]);
+             $factura = $facturas
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+        }
+        if (isset($_POST["enviar_factura_admon"])) {
+            if(isset($_POST["pago_factura"])){
+                $intIndice = 0;
+                foreach ($_POST["pago_factura"] as $intCodigo) {
+                    $conFactura = FacturaVenta::find()->where(['=','id_factura', $intCodigo])->one();
+                    $detalle = ReciboCajaDetalles::find()
+                            ->where(['=', 'id_factura', $intCodigo])
+                            ->andWhere(['=', 'id_recibo', $id])
+                            ->all();
+                    if(count($detalle)== 0){
+                        $table = new ReciboCajaDetalles();
+                        $table->id_recibo = $id;
+                        $table->id_factura = $intCodigo;
+                        $table->numero_factura= $conFactura->numero_factura;
+                        $table->retencion= $conFactura->valor_retencion;
+                        $table->reteiva= $conFactura->valor_reteiva;
+                        $table->saldo_factura = $conFactura->saldo_factura;
+                        $table->save(false);
+                    }    
+                     $intIndice++;
+                }
+                return $this->redirect(['view','id' => $id, 'token' => $token]);
+            }
+        }
+        return $this->render('listado_facturas_admon', [ 
+            'id' => $id,
+            'model' => $model,
+            'factura' => $factura,
+            'form' => $form,
+            'pagination' => $pages,
+            'token' => $token,
+            'id_cliente' => $id_cliente,
+        ]);
+    }
     /**
      * Creates a new ReciboCaja model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -424,16 +530,21 @@ class ReciboCajaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate_cliente($id, $agente)
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_recibo]);
+            $cliente = Clientes::findOne($model->id_cliente);
+            $model->cliente = $cliente->nombre_completo;
+            $model->direccion_cliente = $cliente->direccion;
+            $model->save();
+            return $this->redirect(['index']);
         }
 
-        return $this->render('update', [
+        return $this->render('update_cliente', [
             'model' => $model,
+            'agente' => $agente,
         ]);
     }
 
@@ -444,12 +555,19 @@ class ReciboCajaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
+   //eliminar la factura del recibo de caja
+        public function actionEliminar_factura($id,$detalle, $token)
+       {                                
+           $detalle = ReciboCajaDetalles::findOne($detalle);
+           $detalle->delete();
+           $this->redirect(["view",'id' => $id, 'token' => $token]);        
+       }
+       public function actionEliminar_factura_cliente($id,$detalle, $token, $tokenAcceso)
+       {                                
+           $detalle = ReciboCajaDetalles::findOne($detalle);
+           $detalle->delete();
+           $this->redirect(["view_cliente",'id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);        
+       }
     
     //proceso que autoriza y desautoriza
     public function actionAutorizado($id, $token, $tokenAcceso) {
@@ -462,6 +580,18 @@ class ReciboCajaController extends Controller
              $model->save();
          }
           return $this->redirect(['view_cliente','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
+    }
+    
+     public function actionAutorizado_admon($id, $token) {
+         $model = $this->findModel($id);
+         if($model->autorizado == 0){
+             $model->autorizado = 1;
+             $model->save();
+         }else{
+             $model->autorizado = 0;
+             $model->save();
+         }
+          return $this->redirect(['view','id' => $id, 'token' => $token]);
     }
     //CREAR EL CONSECUTIVO DEL RECIBO DE PAGO
      public function actionGenerar_recibo_pago($id, $token, $tokenAcceso) {
@@ -476,6 +606,19 @@ class ReciboCajaController extends Controller
         $consecutivo->numero_inicial = $recibo->numero_recibo;
         $consecutivo->save(false);
         $this->redirect(["view_cliente", 'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso]);  
+    }
+    public function actionGenerar_recibo_pago_admon($id, $token) {
+        //proceso que actuliza saldos
+        $this->ActualizarSaldoFacturas($id);
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(7);
+        $recibo = ReciboCaja::findOne($id);
+        $recibo->numero_recibo = $consecutivo->numero_inicial + 1;
+        $recibo->recibo_cerrado = 1;
+        $recibo->save(false);
+        $consecutivo->numero_inicial = $recibo->numero_recibo;
+        $consecutivo->save(false);
+        $this->redirect(["view", 'id' => $id, 'token' => $token]);  
     }
     //PROCESO QUE ACTUALIZA LOS SALDOS DE LA FACTURA
     protected function ActualizarSaldoFacturas($id) {
@@ -517,5 +660,14 @@ class ReciboCajaController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+    //IMPRESIONES
+    public function actionImprimir_recibo_caja($id, $token) {
+        $model = ReciboCaja::findOne($id);
+        Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo..');
+      /*  return $this->render('../formatos/reporte_recibo_caja', [
+            'model' => $model,
+        ]);*/
     }
 }

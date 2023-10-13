@@ -18,7 +18,8 @@ use kartik\depdrop\DepDrop;
 $this->title = 'RECIBOS DE CAJA';
 $this->params['breadcrumbs'][] = $this->title;
 
-
+$banco = ArrayHelper::map(app\models\EntidadBancarias::find()->orderBy ('entidad_bancaria ASC')->all(), 'codigo_banco', 'entidad_bancaria');
+$tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'concepto');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -41,25 +42,70 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 ?>
+<?php if($tokenAcceso == 3){?>
+    <div class="panel panel-success panel-filters">
+        <div class="panel-heading" onclick="mostrarfiltro()">
+            Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
+        </div>
 
+        <div class="panel-body" id="filtrocliente" style="display:none">
+            <div class="row" >
+                <?= $formulario->field($form, "numero")->input("search") ?>
+                <?= $formulario->field($form, "cliente")->input("search") ?>
+
+            </div>
+            <div class="panel-footer text-right">
+                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
+                <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            </div>
+        </div>
+    </div>
+<?php }else{?>
 <div class="panel panel-success panel-filters">
-    <div class="panel-heading" onclick="mostrarfiltro()">
-        Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
-    </div>
-	
-    <div class="panel-body" id="filtrocliente" style="display:none">
-        <div class="row" >
-            <?= $formulario->field($form, "numero")->input("search") ?>
-            <?= $formulario->field($form, "cliente")->input("search") ?>
-        
+        <div class="panel-heading" onclick="mostrarfiltro()">
+            Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
         </div>
-        <div class="panel-footer text-right">
-            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
-        </div>
-    </div>
-</div>
 
+        <div class="panel-body" id="filtrocliente" style="display:none">
+            <div class="row" >
+                <?= $formulario->field($form, "numero")->input("search") ?>
+                <?= $formulario->field($form, "cliente")->input("search") ?>
+                <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todaHighlight' => true]])
+            ?>
+            <?= $formulario->field($form, 'hasta')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todayHighlight' => true]])
+            ?>
+            <?= $formulario->field($form, 'banco')->widget(Select2::classname(), [
+                'data' => $banco,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+                <?= $formulario->field($form, 'tipo_recibo')->widget(Select2::classname(), [
+                'data' => $tipo,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+            </div>
+            <div class="panel-footer text-right">
+                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
+                <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            </div>
+        </div>
+    </div>
+<?php }?>
 <?php $formulario->end() ?>
 
 <div class="table-responsive">
@@ -95,7 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                    <a href="<?= Url::toRoute(["recibo-caja/view_cliente", "id" => $val->id_recibo, 'token' => $token, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                                 </td>
                                 <td style= 'width: 20px; right: 20px;'>
-                                   <a href="<?= Url::toRoute(["recibo-caja/update_cliente", "id" => $val->id_recibo, 'token' => $token, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                                   <a href="<?= Url::toRoute(["recibo-caja/update_cliente", "id" => $val->id_recibo, 'agente' => $agente]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                                 </td>
                             <?php }else{ ?>
                                 <td style= 'width: 20px; right: 20px;'>
@@ -107,16 +153,16 @@ $this->params['breadcrumbs'][] = $this->title;
                </tbody>        
             </table>
        <?php }else{ ?>
-           <table class="table table-responsive">
+           <table class="table table-bordered table-striped table-hover">
                 <thead>
                     <tr style="font-size: 90%;">    
                          <th scope="col" style='background-color:#B9D5CE;'>No recibo</th>
                          <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                         <th scope="col" style='background-color:#B9D5CE;'>Tipo recibo/<th>
-                         <th scope="col" style='background-color:#B9D5CE;'>Banco/<th>    
+                         <th scope="col" style='background-color:#B9D5CE;'>Tipo recibo</th>
+                         <th scope="col" style='background-color:#B9D5CE;'>Banco</th>    
                          <th scope="col" style='background-color:#B9D5CE;'>F. pago</th>
                          <th scope="col" style='background-color:#B9D5CE;'>Vr pago</th>
-                         <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span>/<th>
+                         <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span></th>
                          <th scope="col" style='background-color:#B9D5CE;'></th>  
                          <th scope="col" style='background-color:#B9D5CE;'></th>  
 
@@ -127,25 +173,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 foreach ($model as $val):
                     $detalle = app\models\ReciboCajaDetalles::find()->where(['=','id_recibo', $val->id_recibo])->all();
                     ?>
-                        <tr style="font-size: 95%;">                   
+                        <tr style="font-size: 90%;">                   
                             <td><?= $val->numero_recibo ?></td>
                             <td><?= $val->cliente ?></td>
                             <td><?= $val->tipo->concepto ?></td>
                             <td><?= $val->codigoBanco->entidad_bancaria ?></td>
                             <td><?= $val->fecha_pago ?></td>
-                            <td style="text-align: center"><?= '$'.number_format($val->valor_pago,0)?></td>
-                            td><?= $val->autorizado ?></td>
+                            <td style="text-align: right"><?= '$'.number_format($val->valor_pago,0)?></td>
+                            <td><?= $val->autorizadoRecibo ?></td>
                             <?php if(count($detalle)<= 0){?>
                                 <td style= 'width: 20px; right: 20px;'>
-                                   <a href="<?= Url::toRoute(["recibo-caja/view_cliente", "id" => $val->id_recibo, 'token' => $token, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                                   <a href="<?= Url::toRoute(["recibo-caja/view", "id" => $val->id_recibo, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                                 </td>
                                 <td style= 'width: 20px; right: 20px;'>
-                                   <a href="<?= Url::toRoute(["recibo-caja/update_cliente", "id" => $val->id_recibo, 'token' => $token, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                            <a href="<?= Url::toRoute(["recibo-caja/update", "id" => $val->id_recibo, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                                 </td>
                             <?php }else{ ?>
                                 <td style= 'width: 20px; right: 20px;'>
-                                   <a href="<?= Url::toRoute(["recibo-caja/view_cliente", "id" => $val->id_recibo, 'token' => $token, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                                   <a href="<?= Url::toRoute(["recibo-caja/view", "id" => $val->id_recibo, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                                 </td>
+                                <td style= 'width: 20px; right: 20px;'></td>
                             <?php }?>    
                         </tr>
                 <?php endforeach;?>

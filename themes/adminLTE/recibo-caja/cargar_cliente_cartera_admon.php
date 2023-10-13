@@ -93,6 +93,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
            <tr style="font-size: 95%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>  
             </tr>
@@ -111,6 +112,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
                         <tr style="font-size: 95%;">                   
                             <td><?= $val->nit_cedula ?></td>
                             <td><?= $val->cliente ?></td>
+                            <td><?= $val->clienteFactura->codigoMunicipio->municipio?> - <?= $val->clienteFactura->codigoMunicipio->codigoDepartamento->departamento?></td>
                             <td style="text-align: right"><?= '$'.number_format($suma,0)?></td>
                             <td style= 'width: 25px; right: 25px;'>
                                <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span>',

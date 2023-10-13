@@ -29,34 +29,29 @@ $view = 'recibo-caja';
 
     <!--<?= Html::encode($this->title) ?>-->
     <p>
-        <?php if($token == 0){?>
+     <?php if($token == 0){?>
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?php }else{?>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_clientes'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?php }?> 
-        <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 10, 'codigo' => $model->id_recibo,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']) ?>
+        <?php if ($model->autorizado == 0 && $model->recibo_cerrado == 0) { ?>
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado_admon', 'id' => $model->id_recibo, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);
+        }else{
+            if ($model->autorizado == 1 && $model->recibo_cerrado == 0){?>
+                <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado_admon', 'id' => $model->id_recibo, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);?>
+                <?= Html::a('<span class="glyphicon glyphicon-book"></span> Generar recibo', ['generar_recibo_pago_admon', 'id' => $model->id_recibo, 'token' =>$token],['class' => 'btn btn-default btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de generar el recibo de pago al cliente '.$model->cliente.'.', 'method' => 'post']]);
+            }else{
+               echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_recibo_caja', 'id' => $model->id_recibo,'token' => $token], ['class' => 'btn btn-default btn-sm']);             
+               echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 13, 'codigo' => $model->id_recibo,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);               
+            }      
+        }?>
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
            CLIENTES
         </div>
         <div class="panel-body">
-           <?php if($tokenAcceso == 3){?>
-                 <table class="table table-bordered table-striped table-hover">
-                    <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'>Numero recibo:</th>
-                        <td><?= $model->numero_recibo ?></td>
-                        <th style='background-color:#F0F3EF;'>Tipo recibo:</th>
-                        <td><?= $model->tipo->concepto ?></td>
-                    </tr>
-                     <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;' >Fecha pago:</th>
-                        <td><?= $model->fecha_pago ?></td>
-                        <th style='background-color:#F0F3EF;' >Valor pago:</th>
-                        <td style="text-align: right"><?= ''.number_format($model->valor_pago,0) ?></td>
-                    </tr>
-                 </table>    
-           <?php }else{?>
                 <table class="table table-bordered table-striped table-hover">
                     <tr style="font-size: 90%;">
                         <th style='background-color:#F0F3EF;'>Id:</th>
@@ -90,7 +85,7 @@ $view = 'recibo-caja';
                         <th style='background-color:#F0F3EF;'>User_name:</th>
                         <td><?= $model->user_name ?></td>
                         <th style='background-color:#F0F3EF;'>Autorizado:</th>
-                        <td><?= $model->autorizado ?></td>
+                        <td><?= $model->autorizadoRecibo ?></td>
                         <th style='background-color:#F0F3EF;'></th>
                         <td></td>
                     </tr>
@@ -99,7 +94,6 @@ $view = 'recibo-caja';
                         <td colspan="9"><?= $model->observacion ?></td>
                     </tr>
                 </table>
-           <?php }?>
         </div>
     </div>
       <?php $form = ActiveForm::begin([
@@ -128,6 +122,7 @@ $view = 'recibo-caja';
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha vcto</th>                        
                                         <th scope="col" style='background-color:#B9D5CE;'>Saldo</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Abono</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         
                                     </tr>
                                 </thead>
@@ -139,17 +134,30 @@ $view = 'recibo-caja';
                                          <td> <?= $detalle->facturaRecibo->fecha_inicio?></td>
                                         <td> <?= $detalle->facturaRecibo->fecha_vencimiento?></td>
                                         <td style="text-align: right"> <?= '$'.number_format($detalle->saldo_factura,0)?></td>
-                                        <td style="padding-right: 1;padding-right: 0; text-align: right"> <input type="text" name="abono_factura[]" value="<?= $detalle->saldo_factura?>" style="text-align: right" size="9" required="true"> </td> 
-                                        <input type="hidden" name="actualizar_saldo[]" value="<?= $detalle->id_detalle?>">  
+                                        <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="abono_factura[]" value="<?= $detalle->abono_factura?>" style="text-align: right" size="9" required="true"> </td> 
+                                        <input type="hidden" name="actualizar_recibo_caja[]" value="<?= $detalle->id_detalle?>">  
+                                        <td style= 'width: 25px; height: 25px;'>
+                                            <?php if($model->autorizado == 0){?>
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_factura', 'id' => $model->id_recibo, 'detalle' => $detalle->id_detalle, 'token' => $token], [
+                                                              'class' => '',
+                                                              'data' => [
+                                                                  'confirm' => 'Esta seguro de eliminar el registro?',
+                                                                  'method' => 'post',
+
+                                                              ],
+                                                          ])?>
+
+                                                <?php }?>         
+                                        </td>     
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>      
                             </table>
                         </div>
-                        <?php if($token == 0){?>
+                          <?php if($token == 0 && $model->autorizado == 0){?>
                             <div class="panel-footer text-right" >  
-                               <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizasaldos']);?>    
-                               <?= Html::a('<span class="glyphicon glyphicon-search"></span>Facturas', ['recibo-caja/buscar_facturas', 'id' => $model->id_recibo, 'id_cliente' =>$model->id_cliente, 'token' => $token, 'tokenAcceso' => $tokenAcceso],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                               <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarecibo']);?>    
+                               <?= Html::a('<span class="glyphicon glyphicon-search"></span>Facturas', ['recibo-caja/buscar_facturas_admon', 'id' => $model->id_recibo, 'id_cliente' =>$model->id_cliente, 'token' => $token],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                             </div>     
                         <?php }?>
                     </div>   

@@ -110,7 +110,7 @@ class ReciboCaja extends \yii\db\ActiveRecord
     {
         return $this->hasOne(EntidadBancarias::className(), ['codigo_banco' => 'codigo_banco']);
     }
-    public function getAutorizado() {
+    public function getAutorizadoRecibo() {
         if($this->autorizado == 0){
             $autorizado = 'NO';
         }else{

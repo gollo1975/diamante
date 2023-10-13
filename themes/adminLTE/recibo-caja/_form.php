@@ -2,42 +2,64 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
+use yii\helpers\Url;
+use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
+use kartik\date\DatePicker;
 /* @var $this yii\web\View */
-/* @var $model app\models\ReciboCaja */
+/* @var $model app\models\Municipio */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="recibo-caja-form">
-
-    <?php $form = ActiveForm::begin(); ?>
-
-    <?= $form->field($model, 'numero_recibo')->textInput() ?>
-
-    <?= $form->field($model, 'id_cliente')->textInput() ?>
-
-    <?= $form->field($model, 'id_tipo')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_pago')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_proceso')->textInput() ?>
-
-    <?= $form->field($model, 'valor_pago')->textInput() ?>
-
-    <?= $form->field($model, 'autorizado')->textInput() ?>
-
-    <?= $form->field($model, 'codigo_municipio')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'codigo_banco')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'observacion')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'user_name')->textInput(['maxlength' => true]) ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    <?php $form = ActiveForm::begin([
+		'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+	'fieldConfig' => [
+                    'template' => '{label}<div class="col-sm-6 form-group">{input}{error}</div>',
+                    'labelOptions' => ['class' => 'col-sm-3 control-label'],
+                    'options' => []
+                ],
+	]); ?>
+<?php
+$tipo = ArrayHelper::map(\app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'concepto');
+$cliente = ArrayHelper::map(\app\models\Clientes::find()->where(['=','id_agente', $agente])->orderBy('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        <h4>RECIBO DE CAJA</h4>
     </div>
+    <div class="panel-body">  
+       <div class="row">
+             <?= $form->field($model, 'id_cliente')->widget(Select2::classname(), [
+                'data' => $cliente,
+                'options' => ['prompt' => 'Seleccione un registro ...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+        </div>        
+        <div class="row">
+             <?= $form->field($model, 'id_tipo')->widget(Select2::classname(), [
+                'data' => $tipo,
+                'options' => ['prompt' => 'Seleccione un registro ...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+        </div>
+        <div class="row">
+             <?= $form->field($model, 'fecha_pago')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todayHighlight' => true]])
+            ?>
+        </div>
 
-    <?php ActiveForm::end(); ?>
-
+        <div class="panel-footer text-right">            
+            <a href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		
+        </div>
+    </div>
 </div>
+<?php ActiveForm::end(); ?>
