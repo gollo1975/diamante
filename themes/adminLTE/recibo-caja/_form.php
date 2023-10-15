@@ -21,6 +21,7 @@ use kartik\date\DatePicker;
 	]); ?>
 <?php
 $tipo = ArrayHelper::map(\app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'concepto');
+$banco = ArrayHelper::map(\app\models\EntidadBancarias::find()->where(['=','convenio_empresa', 1])->all(), 'codigo_banco', 'entidad_bancaria');
 $cliente = ArrayHelper::map(\app\models\Clientes::find()->where(['=','id_agente', $agente])->orderBy('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
 ?>
 <div class="panel panel-success">
@@ -36,7 +37,16 @@ $cliente = ArrayHelper::map(\app\models\Clientes::find()->where(['=','id_agente'
                     'allowClear' => true
                 ],
             ]); ?>
-        </div>        
+        </div>  
+        <div class="row">
+             <?= $form->field($model, 'codigo_banco')->widget(Select2::classname(), [
+                'data' => $banco,
+                'options' => ['prompt' => 'Seleccione un registro ...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+        </div>
         <div class="row">
              <?= $form->field($model, 'id_tipo')->widget(Select2::classname(), [
                 'data' => $tipo,
