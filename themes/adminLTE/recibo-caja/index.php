@@ -70,34 +70,37 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
             <div class="row" >
                 <?= $formulario->field($form, "numero")->input("search") ?>
                 <?= $formulario->field($form, "cliente")->input("search") ?>
-                <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                'value' => date('d-M-Y', strtotime('+2 days')),
-                'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                'pluginOptions' => [
-                    'format' => 'yyyy-m-d',
-                    'todaHighlight' => true]])
-            ?>
-            <?= $formulario->field($form, 'hasta')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                'value' => date('d-M-Y', strtotime('+2 days')),
-                'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                'pluginOptions' => [
-                    'format' => 'yyyy-m-d',
-                    'todayHighlight' => true]])
-            ?>
-            <?= $formulario->field($form, 'banco')->widget(Select2::classname(), [
-                'data' => $banco,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?>
-                <?= $formulario->field($form, 'tipo_recibo')->widget(Select2::classname(), [
-                'data' => $tipo,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?>
+                 <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                    'value' => date('d-M-Y', strtotime('+2 days')),
+                    'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                    'pluginOptions' => [
+                        'format' => 'yyyy-m-d',
+                        'todayHighlight' => true]])
+                ?>
+                <?= $formulario->field($form, 'hasta')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                    'value' => date('d-M-Y', strtotime('+2 days')),
+                    'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                    'pluginOptions' => [
+                        'format' => 'yyyy-m-d',
+                        'todayHighlight' => true]])
+                ?>
+                <?= $formulario->field($form, 'banco')->widget(Select2::classname(), [
+                    'data' => $banco,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?>
+                    <?= $formulario->field($form, 'tipo_recibo')->widget(Select2::classname(), [
+                    'data' => $tipo,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?>
+            </div>
+             <div class="row checkbox checkbox-success" align ="center">
+                <?= $formulario->field($form, 'recibo_detalle')->checkbox(['label' => 'Detalle recibo de caja por fechas', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'recibo_detalle']) ?>
             </div>
             <div class="panel-footer text-right">
                 <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
@@ -153,6 +156,10 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
                </tbody>        
             </table>
        <?php }else{ ?>
+        <?php $form = ActiveForm::begin([
+                    "method" => "post",                            
+                ]);
+        ?>
            <table class="table table-bordered table-striped table-hover">
                 <thead>
                     <tr style="font-size: 90%;">    
@@ -186,7 +193,7 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
                                    <a href="<?= Url::toRoute(["recibo-caja/view", "id" => $val->id_recibo, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                                 </td>
                                 <td style= 'width: 20px; right: 20px;'>
-                            <a href="<?= Url::toRoute(["recibo-caja/update", "id" => $val->id_recibo, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                            <a href="<?= Url::toRoute(["recibo-caja/update_cliente", "id" => $val->id_recibo, 'agente' => $agente]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                                 </td>
                             <?php }else{ ?>
                                 <td style= 'width: 20px; right: 20px;'>
@@ -198,9 +205,26 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
                 <?php endforeach;?>
                </tbody>        
             </table>
-       <?php } ?>
+        <?php } 
+        if($tokenAcceso <> 3){?>
+            <div class="panel-footer text-right" >  
+                <div class="btn-group btn-sm" role="group">    
+                       <button type="button" class="btn btn-success  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           Exportar excel
+                           <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li> <?= Html::submitButton("<span class='glyphicon glyphicon-book'></span> Recibos", ['name' => 'excel']); ?> </li>
+                            <?php if($recibo_detalle == 1 && $desde <> '' && $hasta <> ''){?>
+                                <li><?= Html::a('<span class="glyphicon glyphicon-export"></span> Detalle', ['excel_recibo_detalle', 'desde' => $desde, 'hasta' => $hasta]) ?></li>
+                            <?php }?>    
+                        </ul>
+                </div>  
+            </div>  
+     <?php $form->end() ?>
+         <?php }?>  
+    
     </div>
-
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>
 

@@ -38,7 +38,7 @@ class ReciboCajaDetalles extends \yii\db\ActiveRecord
         return [
             [['id_recibo', 'id_factura', 'numero_factura', 'retencion', 'reteiva', 'saldo_factura', 'abono_factura'], 'integer'],
             [['numero_factura'], 'required'],
-            [['fecha_registro'], 'safe'],
+            [['fecha_registro','fecha_pago'], 'safe'],
             [['id_recibo'], 'exist', 'skipOnError' => true, 'targetClass' => ReciboCaja::className(), 'targetAttribute' => ['id_recibo' => 'id_recibo']],
             [['id_factura'], 'exist', 'skipOnError' => true, 'targetClass' => FacturaVenta::className(), 'targetAttribute' => ['id_factura' => 'id_factura']],
         ];
@@ -59,6 +59,7 @@ class ReciboCajaDetalles extends \yii\db\ActiveRecord
             'saldo_factura' => 'Saldo Factura',
             'abono_factura' => 'Abono Factura',
             'fecha_registro' => 'Fecha Registro',
+            'fecha_pago' => 'Fecha pago',
         ];
     }
 

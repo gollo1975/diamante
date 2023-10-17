@@ -20,13 +20,14 @@ class FiltroBusquedaRecibo extends Model
     public $municipio;
     public $vendedores;
     public $documento;
+    public $recibo_detalle;
 
 
     public function rules()
     {
         return [  
           
-            [['numero','tipo_recibo','vendedores'], 'integer'],
+            [['numero','tipo_recibo','vendedores','recibo_detalle'], 'integer'],
             [['banco','municipio','documento','cliente'], 'string'],
             [['desde','hasta'], 'safe'],
         ];
@@ -44,6 +45,7 @@ class FiltroBusquedaRecibo extends Model
             'hasta' => 'Fecha corte:',
             'vendedores' => 'Agente comercial:',
             'documento' => 'Nit / Cedula:',
+            'recibo_detalle' => 'recibo_detalle',
 
         ];
     }

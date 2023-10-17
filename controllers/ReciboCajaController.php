@@ -63,12 +63,13 @@ class ReciboCajaController extends Controller
                 $tipo_recibo = null;
                 $desde = null;
                 $hasta = null;
+                $recibo_detalle = 0;
                 $tokenAcceso = Yii::$app->user->identity->role;
                 $vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
                 if ($vendedor){
                     $agente = $vendedor->id_agente;
                 }else{
-                    $agente = null;
+                    $agente = 0;
                 }
                 
                 if ($form->load(Yii::$app->request->get())) {
@@ -79,6 +80,7 @@ class ReciboCajaController extends Controller
                         $tipo_recibo = Html::encode($form->tipo_recibo);
                         $desde = Html::encode($form->desde);
                         $hasta = Html::encode($form->hasta);  
+                        $recibo_detalle = Html::encode($form->recibo_detalle);
                         if($tokenAcceso == 3){
                             $table = ReciboCaja::find()
                                         ->andFilterWhere(['like', 'cliente', $cliente])
@@ -107,6 +109,9 @@ class ReciboCajaController extends Controller
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                 ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelRecibos($tableexcel);
+                        }
                         
                     } else {
                         $form->getErrors();
@@ -127,15 +132,22 @@ class ReciboCajaController extends Controller
                             ->offset($pages->offset)
                             ->limit($pages->limit)
                             ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelRecibos($tableexcel);
+                    }
                 }
                 $to = $count->count();
                 return $this->render('index', [
-                            'model' => $model,
-                            'form' => $form,
-                            'pagination' => $pages,
-                            'token' => $token,
-                            'tokenAcceso' => $tokenAcceso,
-                            'agente' => $agente,                    
+                        'model' => $model,
+                        'form' => $form,
+                        'pagination' => $pages,
+                        'token' => $token,
+                        'tokenAcceso' => $tokenAcceso,
+                        'agente' => $agente,        
+                        'recibo_detalle' => $recibo_detalle,
+                        'desde' => $desde,
+                        'hasta' => $hasta,
+                           
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -162,6 +174,10 @@ class ReciboCajaController extends Controller
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
                         $cliente = Html::encode($form->cliente);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        $vendedores = Html::encode($form->vendedores);
+                        $numero = Html::encode($form->numero);
                         if($tokenAcceso == 3){
                             $table = FacturaVenta::find()
                                 ->andFilterWhere(['=', 'nit_cedula', $documento])
@@ -407,6 +423,7 @@ class ReciboCajaController extends Controller
                         $table->retencion= $conFactura->valor_retencion;
                         $table->reteiva= $conFactura->valor_reteiva;
                         $table->saldo_factura = $conFactura->saldo_factura;
+                        $table->fecha_pago = $model->fecha_pago;
                         $table->save(false);
                     }    
                      $intIndice++;
@@ -426,7 +443,7 @@ class ReciboCajaController extends Controller
         ]);
     }
     
-      public function actionBuscar_facturas_admon($id, $id_cliente, $token) {
+    public function actionBuscar_facturas_admon($id, $id_cliente, $token) {
         $facturas = FacturaVenta::find()->where(['=','id_cliente', $id_cliente])
                                         ->andWhere(['>','saldo_factura', 0])
                                         ->andWhere(['>','numero_factura', 0])->orderBy('id_factura ASC')->all();
@@ -505,23 +522,7 @@ class ReciboCajaController extends Controller
             'id_cliente' => $id_cliente,
         ]);
     }
-    /**
-     * Creates a new ReciboCaja model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new ReciboCaja();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_recibo]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
+   
 
     /**
      * Updates an existing ReciboCaja model.
@@ -670,4 +671,176 @@ class ReciboCajaController extends Controller
             'model' => $model,
         ]);*/
     }
+    
+    //exportaciones a excel
+     public function actionExcelRecibos($tableexcel) { // EXPORTAR PEDIDOS                
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'NRO RECIBO')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'MUNICIPIO')
+                        ->setCellValue('F1', 'TIPO RECIBO')
+                        ->setCellValue('G1', 'FECHA PAGO')
+                        ->setCellValue('H1', 'FECHA PROCESO')
+                        ->setCellValue('I1', 'BANCO')
+                        ->setCellValue('J1', 'VALOR PAGO')
+                        ->setCellValue('K1', 'AUTORIZADO')    
+                        ->setCellValue('L1', 'USER NAME')
+                        ->setCellValue('M1', 'CERRADO')
+                        ->setCellValue('N1', 'OBSERVACION');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_recibo)
+                        ->setCellValue('B' . $i, $val->numero_recibo)
+                        ->setCellValue('C' . $i, $val->clienteRecibo->nit_cedula)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->clienteRecibo->codigoMunicipio->municipio )
+                        ->setCellValue('F' . $i, $val->tipo->concepto)
+                        ->setCellValue('G' . $i, $val->fecha_pago)
+                        ->setCellValue('H' . $i, $val->fecha_proceso)
+                        ->setCellValue('I' . $i, $val->codigoBanco->entidad_bancaria)
+                        ->setCellValue('J' . $i, $val->valor_pago)
+                        ->setCellValue('K' . $i, $val->autorizadoRecibo)
+                        ->setCellValue('L' . $i, $val->user_name)
+                        ->setCellValue('M' . $i, $val->reciboCerrado)
+                        ->setCellValue('N' . $i, $val->observacion);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Recibos_caja.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        }
+    
+    //PROCESO QUE EXPORTA EL DETALLE DEL RECIBO
+     public function actionExcel_recibo_detalle($desde, $hasta) { // EXPORTAR PEDIDOS                
+       $detalle = ReciboCajaDetalles::find()->where(['between', 'fecha_pago', $desde, $hasta])->all();  
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'NRO RECIBO')
+                    ->setCellValue('B1', 'DOCUMENTO')
+                    ->setCellValue('C1', 'CLIENTE')
+                    ->setCellValue('D1', 'MUNICIPIO')
+                    ->setCellValue('E1', 'TIPO RECIBO')
+                    ->setCellValue('F1', 'FECHA PAGO')
+                    ->setCellValue('G1', 'FECHA PROCESO')
+                    ->setCellValue('H1', 'BANCO')
+                    ->setCellValue('I1', 'VALOR PAGO')
+                    ->setCellValue('J1', 'SALDO FACTURA')
+                    ->setCellValue('K1', 'NRO FACTURA')
+                    ->setCellValue('L1', 'AUTORIZADO')    
+                    ->setCellValue('M1', 'USER NAME')
+                    ->setCellValue('N1', 'CERRADO')
+                    ->setCellValue('O1', 'OBSERVACION');
+        $i = 2;
+
+        foreach ($detalle as $val) {
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->recibo->numero_recibo)
+                    ->setCellValue('B' . $i, $val->facturaRecibo->nit_cedula)
+                    ->setCellValue('C' . $i, $val->facturaRecibo->cliente)
+                    ->setCellValue('D' . $i, $val->recibo->clienteRecibo->codigoMunicipio->municipio)
+                    ->setCellValue('E' . $i, $val->recibo->tipo->concepto )
+                    ->setCellValue('F' . $i, $val->fecha_pago)
+                    ->setCellValue('G' . $i, $val->fecha_registro)
+                    ->setCellValue('H' . $i, $val->recibo->codigoBanco->entidad_bancaria)
+                    ->setCellValue('I' . $i, $val->abono_factura)
+                    ->setCellValue('J' . $i, $val->saldo_factura)
+                    ->setCellValue('K' . $i, $val->facturaRecibo->numero_factura)
+                    ->setCellValue('L' . $i, $val->recibo->autorizadoRecibo)
+                    ->setCellValue('M' . $i, $val->recibo->user_name)
+                    ->setCellValue('N' . $i, $val->recibo->reciboCerrado)
+                    ->setCellValue('O' . $i, $val->recibo->observacion);
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Detalle');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Recibos_caja_detalle.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }    
+        
 }
