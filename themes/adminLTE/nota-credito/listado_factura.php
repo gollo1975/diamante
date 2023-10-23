@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
 
-$this->title = 'FACTURA DE VENTA';
+$this->title = 'FACTURA ELECTRONICA';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("factura-venta/index"),
+    "action" => Url::toRoute("nota-credito/listado_factura"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -82,12 +82,12 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
                     'allowClear' => true
                 ],
             ]); ?>
-            <?= $formulario->field($form, 'saldo')->dropDownList(['0' => 'SI'],['prompt' => 'Seleccione una opcion ...']) ?>         
+     
         </div>
         
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("factura-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("nota-credito/listado_factura") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -118,8 +118,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Estado factura">Est.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
             </tr>
@@ -127,7 +126,6 @@ $form = ActiveForm::begin([
             <tbody>
             <?php
             if($model){
-                $fecha_dia = date('Y-m-d');
                 foreach ($model as $val):?>
                     <tr style ='font-size: 90%;'>                
                         <td><?= $val->numero_factura?></td>
@@ -139,35 +137,24 @@ $form = ActiveForm::begin([
                         <td style="text-align: right"><?= ''.number_format($val->subtotal_factura,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
-                        <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
-                            $total = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento );
-                            $total = round($total / 86400);
-                            ?>  
-                            <td style="text-align: right; background-color:#F5B7B1;"><?= ''.number_format($val->saldo_factura,0)?></td>
-                            <td style="color: #E74C3C"><b><?= $total?></b></td>
-                        <?php }else{
-                            $f_vcto = date_create($val->fecha_vencimiento);
-                            $fecha_final = date_create($fecha_dia);
-                            $contador = date_diff($f_vcto, $fecha_final);
-                            $differenceFormat = '%a';
-
-                            ?>
-                            <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
-                            <td><?= $contador->format($differenceFormat) * -1?></td>
-                        <?php }?>    
+                        <td><?= $val->estadoFactura?></td>
                         <td style= 'width: 25px; height: 25px;'>
-                             <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                             <?= Html::a('<span class="glyphicon glyphicon-book"></span>', ['crear_nota_credito', 'id_factura' => $val->id_factura], [
+                            'class' => '',
+                            'title' => 'Permite crear la NOTA CREDITO a la factura de venta.',
+                            'data' => [
+                                'confirm' => '¿Esta seguro que se desea crear la NOTA CREDITO  a la factura de venta No '.$val->numero_factura.' ?',
+                                'method' => 'post',
+                            ],
+                            ])?>
                         </td>
                    </tr>            
                 <?php endforeach;
             }?>
             </tbody>    
         </table> 
-        <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-                   <?php $form->end() ?>
-        </div>
-     </div>
+        <?php $form->end() ?>
+    </div>
 </div>
  <?php if($model){?>
      <?= LinkPager::widget(['pagination' => $pagination]) ?>

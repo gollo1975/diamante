@@ -666,10 +666,9 @@ class ReciboCajaController extends Controller
     //IMPRESIONES
     public function actionImprimir_recibo_caja($id, $token) {
         $model = ReciboCaja::findOne($id);
-        Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo..');
-      /*  return $this->render('../formatos/reporte_recibo_caja', [
+        return $this->render('../formatos/reporte_recibo_caja', [
             'model' => $model,
-        ]);*/
+        ]);
     }
     
     //exportaciones a excel

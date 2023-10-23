@@ -61,6 +61,8 @@ class FacturaVentaController extends Controller
                 $documento = null; $fecha_inicio = null;
                 $cliente = null; $fecha_corte = null;
                 $vendedores = null; $saldo = null; $numero_factura = null;
+                $model = null;
+                $pages = null;
                if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -95,23 +97,7 @@ class FacturaVentaController extends Controller
                     } else {
                         $form->getErrors();
                     }
-                } else {
-                    $table = FacturaVenta::find()->orderBy('id_factura DESC');
-                    $count = clone $table;
-                    $pages = new Pagination([
-                        'pageSize' => 20,
-                        'totalCount' => $count->count(),
-                    ]);
-                    $tableexcel = $table->all();
-                    $model = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-                    if(isset($_POST['excel'])){                    
-                            $this->actionExcelFacturaVenta($tableexcel);
-                    }
                 }
-                $to = $count->count();
                 return $this->render('index', [
                             'model' => $model,
                             'form' => $form,

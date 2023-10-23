@@ -178,7 +178,11 @@ class FacturaVenta extends \yii\db\ActiveRecord
             if($this->estado_factura == 1){    
                 $estadofactura = 'ABONADA';
             }else{
-                $estadofactura = 'CANCELADA';
+                if($this->estado_factura == 2){ 
+                  $estadofactura = 'CANCELADA';
+                }else{
+                  $estadofactura = 'ANULADA';  
+                }  
             }    
         }
         return $estadofactura;

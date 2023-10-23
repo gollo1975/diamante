@@ -304,8 +304,10 @@
                                             'icon' => 'book',
                                             'url' => '#',
                                             'items' => [
-                                                ['label' => 'Cargar factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
+                                                ['label' => 'Cargar pedidos', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
                                                 ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
+                                                ['label' => 'Cargar facturas', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/listado_factura']],
+                                                ['label' => 'Nota crédito', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/index']],
                                                
                                              ],
                                         ]
@@ -355,7 +357,7 @@
                                         ]
                                     ],
                                 ],
-                                //TERMINA ACRTERA
+                                //TERMINA CARTERA
                                 //MODULO GENERAL
                                 [
                                     'label' => 'GENERAL',
