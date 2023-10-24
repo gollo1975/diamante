@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $id_factura;
         ]); ?>
         <div>
             <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle factura<span class="badge"><?= $pagination->totalCount ?></span></a></li>
+                <li role="presentation" class="active"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle factura <span class="badge"><?= $pagination->totalCount ?></span></a></li>
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="detalle">
@@ -86,7 +86,9 @@ $this->params['breadcrumbs'][] = $id_factura;
                                             <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Vr. unitario</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                                            <th scope="col" style='background-color:#B9D5CE; text-align: center'>Cantida a devolver</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'>Total</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -95,11 +97,12 @@ $this->params['breadcrumbs'][] = $id_factura;
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->producto ?></td>
-                                                <td><?= $val->cantidad ?></td>
-                                                <td><?= $val->valor_unitario ?></td>
-                                                <td><?= $val->subtotal ?></td>
-                                                <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_devolver[]" style="text-align: right" size="7" maxlength="true"> </td> 
-                                                <input type="hidden" name="devolucion_factura_detalle[]" value="<?= $val->id_detalle?>"> 
+                                                <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
+                                                <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="devolucion_factura_detalle[]" value="<?= $val->id_detalle ?>"></td> 
                                             </tr>     
                                         <?php endforeach; ?>
                                     </tbody>     
@@ -117,3 +120,16 @@ $this->params['breadcrumbs'][] = $id_factura;
         </div>    
         <?php ActiveForm::end(); ?>
     </div>        
+<script type="text/javascript">
+	function marcar(source) 
+	{
+		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
+		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
+		{
+			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
+			{
+				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
+			}
+		}
+	}
+</script>

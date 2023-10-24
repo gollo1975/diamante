@@ -211,30 +211,19 @@ class NotaCreditoController extends Controller
                     $nota = NotaCreditoDetalle::find()->where(['=','id_nota', $id])
                                                                    ->andWhere(['=','id_inventario', $factura_detalle->id_inventario])->one();
                     if(!$nota){
-                        if($_POST["cantidad_devolver"]["$intIndice"] > 0){
-                                $valor = 0;
-                                $valor = $factura_detalle->cantidad;
-                                if($_POST["cantidad_devolver"]["$intIndice"] <= $valor ){
-                                    $table = new NotaCreditoDetalle();
-                                    $table->id_nota = $id;
-                                    $table->id_inventario = $factura_detalle->id_inventario;
-                                    $table->codigo_producto = $factura_detalle->codigo_producto;
-                                    $table->producto = $factura_detalle->producto;
-                                    $table->cantidad = $_POST["cantidad_devolver"]["$intIndice"];
-                                    $table->valor_unitario = $factura_detalle->valor_unitario;  
-                                    $table->subtotal = $factura_detalle->subtotal;
-                                    $table->impuesto = $factura_detalle->impuesto;
-                                    $table->total_linea = $factura_detalle->total_linea;
-                                    $table->save(false);
-                                    $datos = $intCodigo;
-                                    $token = 0;
-                                //    $this->ActualizarInventarioPrecio($datos, $id, $token);
-                                  //  $this->TotalPresupuestoPedido($id, $sw);
-                                }else{
-                                    Yii::$app->getSession()->setFlash('error', 'Las unidades a devolver son  mayores que las cantidad vendidas. Favor validar las cantidades.');
-                                    return $this->redirect(['listar_detalle_factura','id' => $id, 'id_factura' => $id_factura]);
-                                }    
-                        }
+                        $table = new NotaCreditoDetalle();
+                        $table->id_nota = $id;
+                        $table->id_inventario = $factura_detalle->id_inventario;
+                        $table->codigo_producto = $factura_detalle->codigo_producto;
+                        $table->producto = $factura_detalle->producto;
+                        $table->cantidad = $factura_detalle->cantidad;
+                        $table->valor_unitario = $factura_detalle->valor_unitario;  
+                        $table->subtotal = $factura_detalle->subtotal;
+                        $table->impuesto = $factura_detalle->impuesto;
+                        $table->total_linea = $factura_detalle->total_linea;
+                        $table->save(false);
+                        $this->ActualizarLineaDetalleNota($id, $id_factura);
+                      //  $this->TotalPresupuestoPedido($id, $sw);
                     }    
                     $intIndice ++;
                 endforeach;
@@ -249,21 +238,63 @@ class NotaCreditoController extends Controller
             'pagination' => $pages,
             ]);
     }
-
-    /**
-     * Deletes an existing NotaCredito model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+   //proceso que actualiza totales
+   protected function ActualizarLineaDetalleNota($id, $id_factura) {
+       $factura = FacturaVenta::findOne($id_factura);
+       $nota = NotaCredito::findOne($id);
+       $detalle_nota = NotaCreditoDetalle::find()->where(['=','id_nota', $id])->all();
+       $subtotal = 0; $impuesto = 0; $retencion = 0; $rete_iva = 0; $total = 0;
+       foreach ($detalle_nota as $detalle):
+           $subtotal += $detalle->subtotal;
+           $impuesto += $detalle->impuesto;
+       endforeach;
+       $retencion = round($subtotal * $factura->porcentaje_rete_fuente)/100; 
+       $rete_iva = round($impuesto * $factura->porcentaje_rete_iva)/100;
+       $total = (($subtotal+$impuesto) - ($retencion + $rete_iva));
+       $nota->valor_bruto = $subtotal;
+       $nota->impuesto = $impuesto;
+       $nota->retencion = $retencion;
+       $nota->rete_iva = $rete_iva;
+       $nota->valor_total_devolucion = $total;
+       $nota->valor_devolucion = $total;
+       $nota->nuevo_saldo = $factura->saldo_factura - $total;
+       $nota->save();
+       if($nota->nuevo_saldo < 0){
+           Yii::$app->getSession()->setFlash('error', 'La nota credito tiene saldo en rojos. El valor de la nota credito es mayor que el saldo de la factura.');
+       }
+   }
+   //eliminar detalle de la nota credito
+     public function actionEliminar_detalle($id,$detalle, $id_factura)
+    {                                
+        $detalle = NotaCreditoDetalle::findOne($detalle);
+        $detalle->delete();
+        $this->ActualizarLineaDetalleNota($id, $id_factura);
+        $this->redirect(["view",'id' => $id]);        
     }
-
+    //PROCESO QUE EDITA LA LIENA DEL DETALLE
+    public function actionEditar_linea_nota($id, $detalle, $id_factura) {
+        $model = new \app\models\FormModeloEditarCantidad();
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["editar_cantidad_linea"])) {
+                    $nota_detalle = NotaCreditoDetalle::findOne($detalle);
+                    $nota_detalle->cantidad = $model->cantidad;
+                    $nota_detalle->save(false);
+                    $this->ActualizarLineaDetalleNota($id, $id_factura);
+                    $this->redirect(["nota-credito/view", 'id' => $id]);
+                }
+            } else {
+                $model->getErrors();
+            }
+        }
+        return $this->renderAjax('form_editar_cantidad', [
+                    'model' => $model,
+                    'id' => $id,
+                   
+        ]);
+    }
+   
+    
     /**
      * Finds the NotaCredito model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

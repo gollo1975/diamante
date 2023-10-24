@@ -181,7 +181,11 @@ class FacturaVenta extends \yii\db\ActiveRecord
                 if($this->estado_factura == 2){ 
                   $estadofactura = 'CANCELADA';
                 }else{
-                  $estadofactura = 'ANULADA';  
+                    if($this->estado_factura == 3){ 
+                       $estadofactura = 'ANULADA';  
+                    }else{
+                        $estadofactura = 'NOTA CREDITO';  
+                    }   
                 }  
             }    
         }

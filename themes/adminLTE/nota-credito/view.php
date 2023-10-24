@@ -77,8 +77,13 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                     <td><?= Html::encode($model->fecha_factura) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura') ?></th>
                     <td><?= Html::encode($model->tipoFactura->descripcion) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_motivo') ?></th>
-                    <td><?= Html::encode($model->motivo->concepto) ?></td>
+                    <?php if($model->id_motivo == ''){?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_motivo') ?></th>
+                        <td style="background-color: moccasin"><?= Html::encode('NO FOUND') ?></td>
+                    <?php }else{?>    
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_motivo') ?></th>
+                        <td><?= Html::encode($model->motivo->concepto) ?></td>
+                    <?php }?>    
                                     
                 </tr>
                 <tr style="font-size: 90%;">
@@ -88,8 +93,9 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                     <td><?= Html::encode($model->cerrarNota) ?> </td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name')?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Saldo') ?></th>
-                      <td style="text-align: right"><?= Html::encode('$ '.number_format($model->nuevo_saldo,0)) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Saldo_factura') ?>:</th>
+                            <td style="text-align: right;"><?= Html::encode('$ '.number_format($model->factura->saldo_factura,0)) ?></td>
+     
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
@@ -128,6 +134,8 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                             <th scope="col"  style='background-color:#B9D5CE;'>Subtotal</th>                        
                                             <th scope="col"  style='background-color:#B9D5CE; width: 12%'>Impuesto</th>  
                                             <th scope="col" style='background-color:#B9D5CE; width: 12%'>Total linea</th> 
+                                            <th scope="col" style='background-color:#B9D5CE;'></th> 
+                                            <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
                                     </thead>
                                     <body>
@@ -136,16 +144,40 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->producto ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad[]" value="<?= $val->cantidad ?>" style="text-align: right" size="9" required="true"> </td> 
                                                 <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
                                                 <td style="text-align: right"><?= '$'.number_format($val->total_linea,0) ?></td>
+                                                <td style= 'width: 20px; height: 20px;'>
+                                                    <?= Html::a('<span class="glyphicon glyphicon-refresh"></span>',
+                                                    ['/nota-credito/editar_linea_nota','id' =>$model->id_nota, 'detalle' => $val->id_detalle, 'id_factura' => $model->id_factura],
+                                                      ['title' => 'Modificar las cantidades a devolver',
+                                                       'data-toggle'=>'modal',
+                                                       'data-target'=>'#modaleditarlineanota',
+                                                      ])    
+                                                    ?>
+                                                    <div class="modal remote fade" id="modaleditarlineanota">
+                                                        <div class="modal-dialog modal-lg" style ="width: 435px;">    
+                                                             <div class="modal-content"></div>
+                                                        </div>
+                                                    </div>   
+                                                </td>
+                                                <td style= 'width: 20px; height: 20px;'>
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_nota, 'detalle' => $val->id_detalle, 'id_factura' => $model->id_factura], [
+                                                        'class' => '',
+                                                        'data' => [
+                                                            'confirm' => 'Esta seguro de eliminar el registro?',
+                                                            'method' => 'post',
+                                                        ],
+                                                    ])
+                                                   ?>
+                                            </td>    
                                            </tr>
                                          <?php endforeach;?>          
                                     </body>
                                     <tr style="font-size: 90%; background-color:#B9D5CE">
-                                        <td colspan="5"></td>
+                                        <td colspan="7"></td>
                                         <td style="text-align: right;"><b></b></td>
                                         <td></td>
                                     </tr>
@@ -154,26 +186,36 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                         <td colspan="5"></td>
                                         <td style="text-align: left; background-color:#F0F3EF"><b>Subtotal:</b></td>
                                         <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                     <tr style="font-size: 95%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: left; background-color:#F0F3EF"><b>Impuesto (<?= $model->factura->porcentaje_iva?> %) :</b></td>
                                         <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                         <td></td>
+                                         <td></td>
                                     </tr>
                                     <tr style="font-size: 95%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: left; background-color:#F0F3EF"><b>Retención (<?= $model->factura->porcentaje_rete_fuente?> %) :</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->retencion,0); ?></b></td>
+                                         <td></td>
+                                         <td></td>
                                     </tr>
                                     <tr style="font-size: 95%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: left; background-color:#F0F3EF"><b>Rete Iva (<?= $model->factura->porcentaje_rete_iva?> %) :</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->rete_iva,0); ?></b></td>
+                                         <td></td>
+                                         <td></td>
                                     </tr>
                                     <tr style="font-size: 95%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: left; background-color:#F0F3EF"><b>Total nota crédito:</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_total_devolucion,0); ?></b></td>
+                                         <td></td>
+                                         <td></td>
                                     </tr>
                                 </table>
                                 <div class="panel-footer text-right">
