@@ -201,23 +201,6 @@ class FacturaVentaController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new FacturaVenta model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new FacturaVenta();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_factura]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
 
     /**
      * Updates an existing FacturaVenta model.
