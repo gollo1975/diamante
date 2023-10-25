@@ -39,12 +39,27 @@ $this->params['breadcrumbs'][] = $model->id_nota;
     <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?php if ($model->autorizado == 0 && $model->numero_nota_credito == 0) { ?>
-            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_nota], ['class' => 'btn btn-default btn-sm']);
-        } else {
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_nota, 'id_factura' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);?>
+           <!--Comienza el ajas-->
+            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar nota',
+                    ['/nota-credito/editar_nota', 'id' => $model->id_nota],
+                    [
+                        'title' => 'Permite editar los campors de motivo y observaciones',
+                        'data-toggle'=>'modal',
+                        'data-target'=>'#modaleditarnota',
+                        'class' => 'btn btn-default btn-sm'
+                    ])    
+                    ?>
+             <div class="modal remote fade" id="modaleditarnota">
+                       <div class="modal-dialog modal-lg" style ="width: 485px;"> 
+                         <div class="modal-content"></div>
+                     </div>
+             </div>
+        <?php } else {
             if ($model->autorizado == 1 && $model->numero_nota_credito == 0){
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_nota], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar nota', ['generar_nota', 'id' => $model->id_nota,'id_factura' => $model->id_factura],['class' => 'btn btn-default btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de generar la Nota Creidto  al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_nota, 'id_factura' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);
+                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar nota crédito', ['generar_nota_credito', 'id' => $model->id_nota,'id_factura' => $model->id_factura],['class' => 'btn btn-default btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de generar la Nota Credito  al cliente '.$model->cliente.' para ser enviada a la Dian. Despues de este proceso No se puede modificar el documento.', 'method' => 'post']]);
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_nota_credito', 'id' => $model->id_nota], ['class' => 'btn btn-default btn-sm']);            
             }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_nota_credito', 'id' => $model->id_nota], ['class' => 'btn btn-default btn-sm']);            
@@ -61,7 +76,7 @@ $this->params['breadcrumbs'][] = $model->id_nota;
             <table class="table table-bordered table-striped table-hover">
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_nota") ?></th>
-                    <td><?= Html::encode($model->id_factura) ?></td>
+                    <td><?= Html::encode($model->id_nota) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "numero_nota_credito") ?></th>
                     <td><?= Html::encode($model->numero_nota_credito) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nit_cedula') ?></th>
@@ -144,35 +159,40 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->producto ?></td>
-                                                <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad[]" value="<?= $val->cantidad ?>" style="text-align: right" size="9" required="true"> </td> 
+                                                <td style="text-align: right"> <?= ''.number_format($val->cantidad,0) ?> </td> 
                                                 <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
                                                 <td style="text-align: right"><?= '$'.number_format($val->total_linea,0) ?></td>
-                                                <td style= 'width: 20px; height: 20px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-refresh"></span>',
-                                                    ['/nota-credito/editar_linea_nota','id' =>$model->id_nota, 'detalle' => $val->id_detalle, 'id_factura' => $model->id_factura],
-                                                      ['title' => 'Modificar las cantidades a devolver',
-                                                       'data-toggle'=>'modal',
-                                                       'data-target'=>'#modaleditarlineanota',
-                                                      ])    
-                                                    ?>
-                                                    <div class="modal remote fade" id="modaleditarlineanota">
-                                                        <div class="modal-dialog modal-lg" style ="width: 435px;">    
-                                                             <div class="modal-content"></div>
-                                                        </div>
-                                                    </div>   
-                                                </td>
-                                                <td style= 'width: 20px; height: 20px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_nota, 'detalle' => $val->id_detalle, 'id_factura' => $model->id_factura], [
-                                                        'class' => '',
-                                                        'data' => [
-                                                            'confirm' => 'Esta seguro de eliminar el registro?',
-                                                            'method' => 'post',
-                                                        ],
-                                                    ])
-                                                   ?>
-                                            </td>    
+                                                <?php if($model->autorizado == 0){?>
+                                                    <td style= 'width: 20px; height: 20px;'>
+                                                        <?= Html::a('<span class="glyphicon glyphicon-refresh"></span>',
+                                                        ['/nota-credito/editar_linea_nota','id' =>$model->id_nota, 'detalle' => $val->id_detalle, 'id_factura' => $model->id_factura],
+                                                          ['title' => 'Modificar las cantidades a devolver',
+                                                           'data-toggle'=>'modal',
+                                                           'data-target'=>'#modaleditarlineanota',
+                                                          ])    
+                                                        ?>
+                                                        <div class="modal remote fade" id="modaleditarlineanota">
+                                                            <div class="modal-dialog modal-lg" style ="width: 435px;">    
+                                                                 <div class="modal-content"></div>
+                                                            </div>
+                                                        </div>   
+                                                    </td>
+                                                    <td style= 'width: 20px; height: 20px;'>
+                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_nota, 'detalle' => $val->id_detalle, 'id_factura' => $model->id_factura], [
+                                                            'class' => '',
+                                                            'data' => [
+                                                                'confirm' => 'Esta seguro de eliminar el registro?',
+                                                                'method' => 'post',
+                                                            ],
+                                                        ])
+                                                        ?>
+                                                   </td>    
+                                                <?php }else{?>
+                                                   <td style= 'width: 20px; height: 20px;'></td>
+                                                   <td style= 'width: 20px; height: 20px;'></td>
+                                                <?php }?>   
                                            </tr>
                                          <?php endforeach;?>          
                                     </body>
@@ -218,9 +238,11 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                          <td></td>
                                     </tr>
                                 </table>
-                                <div class="panel-footer text-right">
-                                           <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Cargar detalle', ['nota-credito/listar_detalle_factura', 'id' => $model->id_nota, 'id_factura' => $model->id_factura ],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
-                                </div>    
+                                <?php if($model->autorizado == 0){?>
+                                    <div class="panel-footer text-right">
+                                          <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Cargar detalle', ['nota-credito/listar_detalle_factura', 'id' => $model->id_nota, 'id_factura' => $model->id_factura ],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                                    </div>
+                                <?php }?>
                             </div>
                         </div>
                     </div>

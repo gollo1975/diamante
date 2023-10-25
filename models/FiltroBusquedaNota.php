@@ -8,27 +8,24 @@ use yii\base\Model;
 /**
  * ContactForm is the model behind the contact form.
  */
-class FiltroBusquedaRecibo extends Model
+class FiltroBusquedaNota extends Model
 {        
    
     public $numero;
     public $cliente;
-    public $tipo_recibo;
+    public $motivo;
     public $desde;
     public $hasta;
-    public $banco;
-    public $municipio;
-    public $vendedores;
     public $documento;
-    public $recibo_detalle;
+    public $factura;
 
 
     public function rules()
     {
         return [  
           
-            [['numero','tipo_recibo','vendedores','recibo_detalle'], 'integer'],
-            [['banco','municipio','documento','cliente'], 'string'],
+            [['numero','motivo','factura'], 'integer'],
+            [['documento','cliente'], 'string'],
             [['desde','hasta'], 'safe'],
         ];
     }
@@ -36,16 +33,13 @@ class FiltroBusquedaRecibo extends Model
     public function attributeLabels()
     {
         return [   
-            'numero' => 'Numero recibo:',
+            'numero' => 'Numero nota:',
             'cliente' => 'Cliente:',
-            'tipo_recibo' => 'Tipo recibo:',
-            'banco' => 'Entidad bancaria:',
-            'municipio' => 'Municipio de pago:',
+            'motivo' => 'Motivo dian:',
             'desde' => 'Fecha inicio:',
             'hasta' => 'Fecha corte:',
-            'vendedores' => 'Agente comercial:',
             'documento' => 'Nit/Cedula:',
-            'recibo_detalle' => 'recibo_detalle',
+            'factura' => 'Numero factura:',
 
         ];
     }

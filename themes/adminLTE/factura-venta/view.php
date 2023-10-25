@@ -105,8 +105,10 @@ $view = 'factura-venta';
                     <td><?= Html::encode($model->autorizadoFactura) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Estado') ?>:</th>
+                    <td><?= Html::encode($model->estadoFactura) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
-                    <td colspan="7"><?= Html::encode($model->observacion) ?></td>
+                    <td colspan="6"><?= Html::encode($model->observacion) ?></td>
                 </tr>
               
             </table>

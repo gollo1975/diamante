@@ -150,11 +150,14 @@ $form = ActiveForm::begin([
                             $fecha_final = date_create($fecha_dia);
                             $contador = date_diff($f_vcto, $fecha_final);
                             $differenceFormat = '%a';
-
                             ?>
                             <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
-                            <td><?= $contador->format($differenceFormat) * -1?></td>
-                        <?php }?>    
+                            <?php  if($val->saldo_factura <> 0 ){?>
+                                <td><?= $contador->format($differenceFormat) * -1?></td>
+                            <?php }else{?>
+                                <td></td>    
+                            <?php }    
+                        }?>    
                         <td style= 'width: 25px; height: 25px;'>
                              <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
                         </td>

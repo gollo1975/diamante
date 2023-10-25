@@ -51,7 +51,85 @@ class NotaCreditoController extends Controller
             ],
         ];
     }
-
+    /* index 
+     */
+     public function actionIndex() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',58])->all()){
+                $form = new \app\models\FiltroBusquedaNota();
+                $cliente = null;
+                $numero = null;
+                $motivo = null;
+                $desde = null;
+                $hasta = null;
+                $documento = null;
+                $factura = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero = Html::encode($form->numero);
+                        $cliente = Html::encode($form->cliente);
+                        $documento = Html::encode($form->documento);
+                        $motivo = Html::encode($form->motivo);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);  
+                        $factura = Html::encode($form->factura);
+                        $table = NotaCredito::find()
+                                        ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                        ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                        ->andFilterWhere(['=', 'numero_nota_credito', $numero])
+                                        ->andFilterWhere(['=', 'numero_factura', $factura])
+                                        ->andFilterWhere(['=', 'id_motivo', $motivo])
+                                        ->andFilterWhere(['between', 'fecha_nota_credito', $desde, $hasta]);
+                         
+                        $table = $table->orderBy('id_nota DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelNotaCredito($tableexcel);
+                        }
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = NotaCredito::find()->orderBy('id_nota DESC');  
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelNotaCredito($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('index', [
+                        'model' => $model,
+                        'form' => $form,
+                        'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+      
     /**
      * Lists all NotaCredito models.
      * @return mixed
@@ -136,7 +214,7 @@ class NotaCreditoController extends Controller
             Yii::$app->getSession()->setFlash('warning', 'Esta factura esta en proceso de nota credito. Consulte con el administrador.'); 
             return $this->redirect(["nota-credito/listado_factura"]);
         }else{
-           $factura = FacturaVenta::find()->where(['=','id_factura', $id_factura])->one();
+            $factura = FacturaVenta::findOne($id_factura);
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(3);
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
             $fecha_actual = date('Y-m-d');
@@ -145,6 +223,7 @@ class NotaCreditoController extends Controller
             $table->nit_cedula = $factura->nit_cedula;
             $table->cliente = $factura->cliente;
             $table->id_factura = $id_factura;
+            $table->numero_factura = $factura->numero_factura;
             $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
             $table->fecha_factura = $factura->fecha_inicio;
             $table->fecha_nota_credito = $fecha_actual;
@@ -258,7 +337,7 @@ class NotaCreditoController extends Controller
        $nota->valor_total_devolucion = $total;
        $nota->valor_devolucion = $total;
        $nota->nuevo_saldo = $factura->saldo_factura - $total;
-       $nota->save();
+       $nota->save(false);
        if($nota->nuevo_saldo < 0){
            Yii::$app->getSession()->setFlash('error', 'La nota credito tiene saldo en rojos. El valor de la nota credito es mayor que el saldo de la factura.');
        }
@@ -280,6 +359,7 @@ class NotaCreditoController extends Controller
                     $nota_detalle = NotaCreditoDetalle::findOne($detalle);
                     $nota_detalle->cantidad = $model->cantidad;
                     $nota_detalle->save(false);
+                    $this->ActualizarSubtotal($detalle, $id_factura);
                     $this->ActualizarLineaDetalleNota($id, $id_factura);
                     $this->redirect(["nota-credito/view", 'id' => $id]);
                 }
@@ -293,8 +373,89 @@ class NotaCreditoController extends Controller
                    
         ]);
     }
-   
-    
+    //proceso que actualiza valor unitario x cantidad
+    protected function ActualizarSubtotal($detalle, $id_factura) {
+        $nota_detalle = NotaCreditoDetalle::findOne($detalle);
+        $factura = FacturaVenta::findOne($id_factura);
+        $subtotal = 0; $total = 0; $porcentaje = 0; $iva = 0;
+        $total = round($nota_detalle->cantidad * $nota_detalle->valor_unitario);
+        $porcentaje = $factura->porcentaje_iva /100;
+        $iva = round($total * $porcentaje);
+        $nota_detalle->total_linea = $total;
+        $nota_detalle->impuesto = $iva;
+        $nota_detalle->subtotal = $total - $iva;
+        $nota_detalle->save();
+    }
+    //PROCESO QUE EDITA LA NOTA
+    public function actionEditar_nota($id) {
+        $model = new \app\models\FormModeloEditarCantidad();
+        $table = NotaCredito::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["editar_nota_credito"])) {
+                    $nota = NotaCredito::findOne($id);
+                    $nota->id_motivo = $model->motivo;
+                    $nota->observacion = $model->observacion;
+                    $nota->save(false);
+                    $this->redirect(["nota-credito/view", 'id' => $id]);
+                }
+            } else {
+                $model->getErrors();
+            }
+        }
+         if (Yii::$app->request->get()) {
+            $model->motivo = $table->id_motivo;
+            $model->observacion = $table->observacion;
+         }
+        return $this->renderAjax('form_editar_nota', [
+                    'model' => $model,
+                    'id' => $id,
+                   
+        ]);
+    }
+    //proceso que se autoriza el documento
+    public function actionAutorizado($id, $id_factura) {
+        $model = NotaCredito::findOne($id);
+        $factura = FacturaVenta::findOne($id_factura);
+        if($model->valor_total_devolucion <= $factura->saldo_factura){
+            if($model->autorizado == 0){
+                $model->autorizado = 1;
+                $model->save();
+                 $this->redirect(["nota-credito/view", 'id' => $id]);
+            } else{
+                $model->autorizado = 0;
+                $model->save();
+                $this->redirect(["nota-credito/view", 'id' => $id]);
+            }
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'La nota credito tiene saldo en rojos. El valor de la nota credito es mayor que el saldo de la factura.'); 
+            $this->redirect(["nota-credito/view", 'id' => $id]);
+        }
+    }
+    //PROCESO QUE GENERA EL NUMERO DE LA NOTA CREDITO Y CARGA LAS UNIDADES AL INVENTARIO
+    public function actionGenerar_nota_credito($id, $id_factura) {
+        $model = NotaCredito::findOne($id);
+        //proceso que actualiza saldos de facturas
+        $this->ActualizarSaldoFacturas($id, $id_factura);
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(8);
+        $model->numero_nota_credito = $consecutivo->numero_inicial + 1;
+        $model->cerrar_nota = 1;
+        $model->save(false);
+        $consecutivo->numero_inicial = $model->numero_nota_credito;
+        $consecutivo->save(false);
+        $this->redirect(["view", 'id' => $id]);  
+    }
+    //SALDO DE FACTURAS
+    protected function ActualizarSaldoFacturas($id, $id_factura) {
+        $factura = FacturaVenta::findOne($id_factura);
+        $model = NotaCredito::findOne($id);
+        $saldo = 0;    
+        $saldo = $factura->saldo_factura - $model->valor_total_devolucion;
+        $factura->saldo_factura = $saldo;
+        $factura->estado_factura = 4;
+        $factura->save(false);
+    }
     /**
      * Finds the NotaCredito model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -310,4 +471,110 @@ class NotaCreditoController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    //PROCESO QUE EXPORTA FACTURAS
+    public function actionExcelNotaCredito($tableexcel){          
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'No NOTA')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'MOTIVO DIAN')
+                        ->setCellValue('F1', 'CUFE FACTURA')
+                        ->setCellValue('G1', 'No FACTURA')
+                        ->setCellValue('H1', 'FECHA FACTURA')
+                        ->setCellValue('I1', 'TIPO DOCUMENTO')    
+                        ->setCellValue('J1', 'FECHA NOTA CREDITO')
+                        ->setCellValue('K1', 'FECHA ENVIADA DIAN')
+                        ->setCellValue('L1', 'VR. SUBTOTAL')
+                        ->setCellValue('M1', 'IVA')
+                        ->setCellValue('N1', 'RETENCION')
+                        ->setCellValue('O1', 'RETE IVA')
+                        ->setCellValue('P1', 'TOTAL NOTA CREDITO')
+                        ->setCellValue('Q1', 'SALDO FACTURA')
+                        ->setCellValue('R1', 'USER CREADOR')
+                        ->setCellValue('S1', 'AUTORIZADO')
+                        ->setCellValue('T1', 'CERRADO')
+                        ->setCellValue('U1', 'OBSERVACION');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_nota)
+                        ->setCellValue('B' . $i, $val->numero_nota_credito)
+                        ->setCellValue('C' . $i, $val->nit_cedula)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->motivo->concepto)
+                        ->setCellValue('F' . $i, $val->cufe_factura)
+                        ->setCellValue('G' . $i, $val->numero_factura)
+                        ->setCellValue('H' . $i, $val->fecha_factura)
+                        ->setCellValue('I' . $i, $val->tipoFactura->descripcion)
+                        ->setCellValue('J' . $i, $val->fecha_nota_credito)
+                        ->setCellValue('K' . $i, $val->fecha_enviada)
+                        ->setCellValue('L' . $i, $val->valor_bruto)
+                        ->setCellValue('M' . $i, $val->impuesto)
+                        ->setCellValue('N' . $i, $val->retencion)
+                        ->setCellValue('O' . $i, $val->rete_iva)
+                        ->setCellValue('P' . $i, $val->valor_total_devolucion)
+                        ->setCellValue('Q' . $i, $val->nuevo_saldo)
+                        ->setCellValue('R' . $i, $val->user_name)
+                        ->setCellValue('S' . $i, $val->autorizadoNota)
+                        ->setCellValue('T' . $i, $val->cerrarNota)
+                        ->setCellValue('U' . $i, $val->observacion);
+                        
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Notas_credito.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        }
 }

@@ -51,7 +51,8 @@ class NotaCredito extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_nota_credito', 'id_cliente', 'id_motivo', 'id_factura', 'id_tipo_factura', 'valor_devolucion', 'valor_bruto', 'impuesto', 'retencion', 'rete_iva', 'valor_total_devolucion', 'autorizado', 'cerrar_nota', 'nuevo_saldo'], 'integer'],
+            [['numero_nota_credito', 'id_cliente', 'id_motivo', 'id_factura', 'id_tipo_factura', 'valor_devolucion', 'valor_bruto', 'impuesto', 'retencion', 'rete_iva',
+                'valor_total_devolucion', 'autorizado', 'cerrar_nota', 'nuevo_saldo','numero_factura'], 'integer'],
             [['fecha_factura', 'fecha_nota_credito', 'fecha_enviada'], 'safe'],
             [['nit_cedula', 'user_name'], 'string', 'max' => 15],
             [['cliente'], 'string', 'max' => 50],
@@ -93,6 +94,7 @@ class NotaCredito extends \yii\db\ActiveRecord
             'cerrar_nota' => 'Cerrado:',
             'nuevo_saldo' => 'Nuevo saldo:',
             'observacion' => 'Observacion',
+            'numero_factura' => 'Numero factura',
         ];
     }
 

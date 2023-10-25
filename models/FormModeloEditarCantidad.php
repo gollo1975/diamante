@@ -12,12 +12,15 @@ use yii\base\Model;
 class FormModeloEditarCantidad extends Model
 {
     public $cantidad;
+    public $observacion;
+    public $motivo;
 
     public function rules()
     {
         return [
 
-           [['cantidad'], 'integer'],
+           [['cantidad','motivo'], 'integer'],
+            [['observacion'], 'string'],
         ];
     }
 
@@ -25,7 +28,8 @@ class FormModeloEditarCantidad extends Model
     {
         return [
             'cantidad' => 'Nueva cantidad:',
-            
+            'motivo' => 'Motivo dian:',
+            'observacion' => 'Observaciones:',
 
         ];
     }

@@ -40,9 +40,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$vendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-$cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])
-                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+$motivo = ArrayHelper::map(app\models\MotivoNotaCredito::find()->orderBy ('id_motivo ASC')->all(), 'id_motivo', 'concepto');
+$cliente = ArrayHelper::map(app\models\Clientes::find()->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -52,22 +51,23 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
 	
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
-            <?= $formulario->field($form, "documento")->input("search") ?>
-            <?= $formulario->field($form, "numero_factura")->input("search") ?>
-            <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+            <?= $formulario->field($form, "numero")->input("search") ?>
+            <?= $formulario->field($form, "factura")->input("search") ?>
+            <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),
                 'options' => ['placeholder' => 'Seleccione una fecha ...'],
                 'pluginOptions' => [
                     'format' => 'yyyy-m-d',
                     'todaHighlight' => true]])
             ?>
-            <?= $formulario->field($form, 'fecha_corte')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+            <?= $formulario->field($form, 'hasta')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),
                 'options' => ['placeholder' => 'Seleccione una fecha ...'],
                 'pluginOptions' => [
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
+             <?= $formulario->field($form, "documento")->input("search") ?>
              <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
                 'data' => $cliente,
                 'options' => ['prompt' => 'Seleccione...'],
@@ -75,8 +75,8 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
                     'allowClear' => true
                 ],
             ]); ?>
-             <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
-                'data' => $vendedor,
+            <?= $formulario->field($form, 'motivo')->widget(Select2::classname(), [
+                'data' => $motivo,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -101,48 +101,45 @@ $form = ActiveForm::begin([
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        <?php if($model){?>
-            Registros <span class="badge"><?= count($model) ?></span>
-        <?php }?>    
+        Registros <span class="badge"><?= count($model) ?></span>
     </div>
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 90%;'>         
                 
-                <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No nota</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Estado factura">Est.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'>Motivo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Fecha creación</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total nota crédito</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
             </tr>
             </thead>
             <tbody>
             <?php
-            if($model){
                 foreach ($model as $val):?>
                     <tr style ='font-size: 90%;'>                
+                        <td><?= $val->numero_nota_credito?></td>
                         <td><?= $val->numero_factura?></td>
                         <td><?= $val->nit_cedula?></td>
-                        <td><?= $val->clienteFactura->nombre_completo?></td>
-                        <td><?= $val->agenteFactura->nombre_completo?></td>
-                        <td><?= $val->fecha_inicio?></td>
-                        <td><?= $val->fecha_vencimiento?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->subtotal_factura,0)?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
+                        <td><?= $val->cliente?></td>
+                        <?php if($val->id_motivo == ''){?>
+                           <td style="background-color: moccasin"><?= 'NO FOUND'?></td>
+                        <?php }else{?>
+                           <td><?= $val->motivo->concepto?></td>
+                        <?php }?>   
+                        <td><?= $val->fecha_nota_credito?></td>
+                        <td style="text-align: right"><?= ''.number_format($val->valor_total_devolucion,0)?></td>
+                        <td><?= $val->cerrarNota?></td>
                         <td style= 'width: 25px; height: 25px;'>
-                             <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                             <a href="<?= Url::toRoute(["nota-credito/view", "id" => $val->id_nota]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la nota credito y el detalle"></span></a>
                         </td>
                    </tr>            
-                <?php endforeach;
-            }?>
+                <?php endforeach;?>
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
@@ -151,6 +148,4 @@ $form = ActiveForm::begin([
         </div>
      </div>
 </div>
- <?php if($model){?>
-     <?= LinkPager::widget(['pagination' => $pagination]) ?>
- <?php }?>
+<?= LinkPager::widget(['pagination' => $pagination]) ?>

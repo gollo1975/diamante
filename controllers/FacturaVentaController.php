@@ -542,8 +542,7 @@ class FacturaVentaController extends Controller
             exit;
         }
     //PROCESO QUE EXPORTA FACTURAS
-     //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
-        public function actionExcelFacturaVenta($tableexcel) {                
+    public function actionExcelFacturaVenta($tableexcel) {                
             $objPHPExcel = new \PHPExcel();
             // Set document properties
             $objPHPExcel->getProperties()->setCreator("EMPRESA")
