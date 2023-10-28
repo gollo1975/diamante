@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $model->id_nota;
             }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_nota_credito', 'id' => $model->id_nota], ['class' => 'btn btn-default btn-sm']);            
                 echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_nota_dian', 'id' => $model->id_nota],['class' => 'btn btn-success btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de enviar la Nota Crédito a la Dian.', 'method' => 'post']]);
+                           'data' => ['confirm' => 'Esta seguro que desea enviar la Nota Crédito a la Dian. Tener presente que este documento ya no se puede modificar.', 'method' => 'post']]);
             }
         }?>        
     </p>  

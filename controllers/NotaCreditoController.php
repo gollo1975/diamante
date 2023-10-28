@@ -80,7 +80,6 @@ class NotaCreditoController extends Controller
                                         ->andFilterWhere(['=', 'numero_factura', $factura])
                                         ->andFilterWhere(['=', 'id_motivo', $motivo])
                                         ->andFilterWhere(['between', 'fecha_nota_credito', $desde, $hasta]);
-                         
                         $table = $table->orderBy('id_nota DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -102,7 +101,7 @@ class NotaCreditoController extends Controller
                     }
                 } else {
                     $table = NotaCredito::find()->orderBy('id_nota DESC');  
-                    $count = clone $table;
+                    $count = clone $table->limit(1);
                     $pages = new Pagination([
                         'pageSize' => 15,
                         'totalCount' => $count->count(),
@@ -197,7 +196,8 @@ class NotaCreditoController extends Controller
      */
     public function actionView($id)
     {
-        $detalle_nota = NotaCreditoDetalle::find()->where(['=','id_nota', $id])->limit (2)->all();
+        
+        $detalle_nota = NotaCreditoDetalle::find()->where(['=','id_nota', $id])->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
             'detalle_nota' => $detalle_nota,
@@ -470,6 +470,14 @@ class NotaCreditoController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+     //IMPRESIONES
+    public function actionImprimir_nota_credito($id) {
+        $model = NotaCredito::findOne($id);
+        return $this->render('../formatos/reporte_nota_credito', [
+            'model' => $model,
+        ]);
     }
     
     //PROCESO QUE EXPORTA FACTURAS

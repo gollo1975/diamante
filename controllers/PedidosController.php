@@ -132,6 +132,7 @@ class PedidosController extends Controller
                     if($tokenAcceso == 2){
                        $table = Pedidos::find()->orderBy('id_pedido DESC');
                     }
+                   
                     $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 15,
