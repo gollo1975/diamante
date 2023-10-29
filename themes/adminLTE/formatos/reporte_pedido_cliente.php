@@ -22,35 +22,35 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(53, 9);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("EMPRESA:"), 0, 0, 'l', 1);
+        $this->Cell(30, 5, utf8_decode("Empresa:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->razon_social_completa), 0, 0, 'L', 1);
         $this->SetXY(30, 5);
         //FIN
         $this->SetXY(53, 13);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("NIT:"), 0, 0, 'l', 1);
+        $this->Cell(30, 5, utf8_decode("Nit:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->nit_empresa." - ".$config->dv), 0, 0, 'L', 1);
         $this->SetXY(40, 5);
         //FIN
         $this->SetXY(53, 17);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("DIRECCION:"), 0, 0, 'l', 1);
+        $this->Cell(30, 5, utf8_decode("Dirección:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->direccion), 0, 0, 'L', 1);
         $this->SetXY(40, 5);
         //FIN
         $this->SetXY(53, 21);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("TELEFONO:"), 0, 0, 'l', 1);
+        $this->Cell(30, 5, utf8_decode("Teléfono:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->telefono), 0, 0, 'L', 1);
         $this->SetXY(40, 5);
         //FIN
         $this->SetXY(53, 25);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("MUNICIPIO:"), 0, 0, 'l', 1);
+        $this->Cell(30, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->codigoMunicipio->municipio." - ".$config->codigoDepartamento->departamento), 0, 0, 'L', 1);
         $this->SetXY(40, 5);
@@ -69,41 +69,41 @@ class PDF extends FPDF {
         //FIN
         $this->SetXY(10, 49);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("NIT:"), 0, 0, 'L', 1);
+        $this->Cell(26, 5, utf8_decode("Nit:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(80, 5, utf8_decode($pedido->documento.'-'.$pedido->dv), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("CLIENTE:"), 0, 0, 'c', 1);
+        $this->Cell(17, 5, utf8_decode("Cliente:"), 0, 0, 'c', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(67, 5, utf8_decode($pedido->cliente), 0, 0, 'c', 1);
         //FIN
          $this->SetXY(10, 53);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("DEPARTAMENTO:"), 0, 0, 'l', 1);
+        $this->Cell(26, 5, utf8_decode("Departamento:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(80, 5, utf8_decode($pedido->clientePedido->codigoDepartamento->departamento), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("MUNICIPIO:"), 0, 0, 'l', 1);
+        $this->Cell(17, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(67, 5, utf8_decode($pedido->agentePedido->codigoMunicipio->municipio), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(10, 57);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("FECHA PROCESO:"), 0, 0, 'l', 1);
+        $this->Cell(26, 5, utf8_decode("Fecha proceso:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(80, 5, utf8_decode($pedido->fecha_proceso), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("VENDEDOR:"), 0, 0, 'l', 1);
+        $this->Cell(17, 5, utf8_decode("Vendedor:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(67, 5, utf8_decode($pedido->agentePedido->nombre_completo), 0, 0, 'L', 1);
          // FIN
         $this->SetXY(10, 61);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("AUTORIZADO.:"), 0, 0, 'L', 1);
+        $this->Cell(26, 5, utf8_decode("Autorizado.:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(80, 5, utf8_decode($pedido->autorizadoPedido), 0, 0, 'l', 1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("USER NAME:"), 0, 0, 'J', 1);
+        $this->Cell(17, 5, utf8_decode("User name:"), 0, 0, 'J', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(67, 5, utf8_decode($pedido->usuario), 0, 0, 'L', 1);
         //FIN

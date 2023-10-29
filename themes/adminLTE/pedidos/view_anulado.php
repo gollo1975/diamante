@@ -31,9 +31,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
     <p>    
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['anular_pedidos'], ['class' => 'btn btn-primary btn-sm']); 
             if($model->pedido_anulado == 0 ){ ?>         
-            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> Anular pedido', ['anular_pedido_total', 'id' => $model->id_pedido],['class' => 'btn btn-danger btn-sm',
+            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> Anular pedido', ['anular_pedido_total', 'id' => $model->id_pedido, 'pedido_virtual' => $pedido_virtual],['class' => 'btn btn-danger btn-sm',
                            'data' => ['confirm' => 'Esta seguro de anular este pedido para el cliente  '. $model->cliente.'.', 'method' => 'post']]);?>
-            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Actualizar saldos', ['actualizar_saldos', 'id' => $model->id_pedido],['class' => 'btn btn-success btn-sm',
+            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Actualizar saldos', ['actualizar_saldos', 'id' => $model->id_pedido, 'pedido_virtual' => $pedido_virtual],['class' => 'btn btn-success btn-sm',
                            'data' => ['confirm' => 'Esta seguro de actualizar los saldos de pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
             } ?>
     </p>    

@@ -16,8 +16,8 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
-            'template' => '{label}<div class="col-sm-9 form-group">{input}{error}</div>',
-            'labelOptions' => ['class' => 'col-sm-3 control-label'],
+            'template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>',
+            'labelOptions' => ['class' => 'col-sm-4 control-label'],
             'options' => []
         ],
         ]);
@@ -41,6 +41,9 @@ if($tokenAcceso == 3){
                 <div class="panel-body">
                     <div class="row">
                         <?= $form->field($model, 'cliente')->dropDownList($cliente, ['prompt' => 'Seleccione...']) ?>
+                    </div>
+                    <div class="row">
+                        <?= $form->field($model, 'pedido_virtual')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
                     </div>
                 </div>  
                     <div class="panel-footer text-right">

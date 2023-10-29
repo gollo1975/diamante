@@ -139,6 +139,7 @@ $view = 'clientes';
              ?>
             <li role="presentation" class="active"><a href="#asignacioncupo" aria-controls="asignacioncupo" role="tab" data-toggle="tab">Asignacion de cupo  <span class="badge"><?= count($cupo) ?></span></a></li>
             <li role="presentation"><a href="#anotaciones" aria-controls="anotaciones" role="tab" data-toggle="tab">Anotaciones  <span class="badge"><?= count($cupo) ?></span></a></li>
+            <li role="presentation"><a href="#contactos" aria-controls="contactos" role="tab" data-toggle="tab">Contactos  <span class="badge"><?= count($Concontacto) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="asignacioncupo">
@@ -191,7 +192,7 @@ $view = 'clientes';
                                 </tbody>      
                             </table>
                         </div>
-                        <?php if($token == 0){?>
+                        <?php if($token == 0 && $model->forma_pago == 2){?>
                             <div class="panel-footer text-right" >  
                                 <!-- Inicio Nuevo Detalle proceso -->
                                   <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear cupo',
@@ -264,6 +265,80 @@ $view = 'clientes';
                 </div>
             </div>  
             <!--TERMINA TABS-->
+                <div role="tabpanel" class="tab-pane" id="contactos">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style='font-size:90%;'>
+                                        <th scope="col" style='background-color:#B9D5CE; '>Nombres</th>                        
+                                        <th scope="col" style='background-color:#B9D5CE; '>Apellidos</th> 
+                                        <th scope="col" style='background-color:#B9D5CE; '>Celular</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Email</th>    
+                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha nacimiento</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Cargo</th>
+                                         <th scope="col" style='background-color:#B9D5CE;'></th>
+                                    </tr>
+                                </thead>
+                                <body>
+                                    <?php 
+                                    foreach ($Concontacto as $val):?>
+                                    <tr style='font-size:90%;'>
+                                        <td> <?= $val->nombres?></td>
+                                        <td> <?= $val->apellidos?></td>
+                                        <td> <?= $val->celular?></td>
+                                        <td> <?= $val->email?></td>
+                                        <td> <?= $val->fecha_nacimiento?></td>
+                                        <td> <?= $val->cargo->nombre_cargo?></td>
+                                         <?php if($token == 0){?>
+                                            <td style= 'width: 25px; height: 20px;'>
+                                               <!-- Inicio Nuevo Detalle proceso -->
+                                                  <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',
+                                                      ['/clientes/editar_contacto','id' => $model->id_cliente, 'token' =>$token, 'detalle' => $val->id_contacto],
+                                                      [
+                                                          'title' => 'Editar los contactos del cliente',
+                                                          'data-toggle'=>'modal',
+                                                          'data-target'=>'#modaleditarcontacto'.$model->id_cliente,
+                                                      ])    
+                                                 ?>
+                                                <div class="modal remote fade" id="modaleditarcontacto<?= $model->id_cliente ?>">
+                                                    <div class="modal-dialog modal-lg" style ="width: 530px;">
+                                                         <div class="modal-content"></div>
+                                                    </div>
+                                                </div> 
+                                            </td>   
+                                        <?php }else{?>
+                                            <td style= 'width: 25px; height: 20px;'></td>
+                                        <?php }?>    
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </body>    
+                            </table>
+                        </div>
+                        <?php if($token == 0){?>
+                            <div class="panel-footer text-right" >  
+                                <!-- Inicio Nuevo Detalle proceso -->
+                                  <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Contactos',
+                                      ['/clientes/new_contacto','id' => $model->id_cliente, 'token' =>$token],
+                                      [
+                                          'title' => 'Crea los contactos del cliente',
+                                          'data-toggle'=>'modal',
+                                          'data-target'=>'#modalcrearcontacto'.$model->id_cliente,
+                                          'class' => 'btn btn-success btn-sm'
+                                      ])    
+                                 ?>
+                                <div class="modal remote fade" id="modalcrearcontacto<?= $model->id_cliente ?>">
+                                    <div class="modal-dialog modal-lg" style ="width: 530px;">
+                                         <div class="modal-content"></div>
+                                    </div>
+                                </div> 
+                            </div>   
+                        <?php }?>
+                    </div>
+                </div>
+            </div> 
+            <!-- TERMINA TABS-->
         </div>
     </div> 
     <?php ActiveForm::end(); ?>  

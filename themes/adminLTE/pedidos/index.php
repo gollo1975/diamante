@@ -103,6 +103,7 @@ if($tokenAcceso == 3){
             <?= $formulario->field($form, 'pedido_cerrado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
             <?= $formulario->field($form, 'facturado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
             <?= $formulario->field($form, 'presupuesto')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+             <?= $formulario->field($form, 'pedido_anulado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
         
         </div>
         <div class="panel-footer text-right">
@@ -130,8 +131,10 @@ $form = ActiveForm::begin([
                 <tr style="font-size: 90%;">   
                     <th scope="col" style='background-color:#B9D5CE;'>No pedido</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido cerrado">Cer.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido facturado">Fact.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido virtual">P.v.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido anulado">P.a.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
@@ -145,6 +148,8 @@ $form = ActiveForm::begin([
                         <td><?= $val->cliente ?></td>
                         <td><?= $val->pedidoAbierto ?></td>
                         <td><?= $val->pedidoFacturado ?></td>
+                        <td><?= $val->pedidoVirtual ?></td>
+                         <td><?= $val->pedidoAnulado ?></td>
                         <td style= 'width: 25px; height: 25px;'>
                             <?php if($val->gran_total == 0 ){?>   
                                 <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
@@ -156,7 +161,7 @@ $form = ActiveForm::begin([
                                         ])    
                                    ?>
                                 <div class="modal remote fade" id="modaleditarcliente<?= $val->id_pedido ?>">
-                                    <div class="modal-dialog modal-lg" style ="width: 400px;">
+                                    <div class="modal-dialog modal-lg" style ="width: 430px;">
                                         <div class="modal-content"></div>
                                     </div>
                                 </div>
@@ -165,11 +170,11 @@ $form = ActiveForm::begin([
                         <?php
                         if($val->numero_pedido == 0 ){?>   
                             <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
+                                <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
                             </td>
                         <?php }else{  ?>    
                             <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
+                                <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
                             </td>
                             <td style= 'width: 25px; height: 25px;'>
                                 <a href="<?= Url::toRoute(["pedidos/imprimir_pedido", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-print"></span></a>
@@ -181,10 +186,20 @@ $form = ActiveForm::begin([
                     <td style='background-color:#F0F3EF;'><?= $val->cliente ?></td>
                     <td style='background-color:#F0F3EF;'><?= $val->pedidoAbierto ?></td>
                     <td style='background-color:#F0F3EF;'><?= $val->pedidoFacturado ?></td>
+                    <?php if($val->pedido_virtual == 0){?>
+                        <td style='background-color:#F0F3EF;'><?= $val->pedidoVirtual ?></td>
+                    <?php }else{?>
+                        <td style='background-color:#E1E9F9; color: black'><?= $val->pedidoVirtual ?></td>
+                    <?php }  
+                    if($val->pedido_anulado == 0){?>
+                       <td style='background-color:#F0F3EF;'><?= $val->pedidoAnulado ?></td>
+                    <?php }else{?>
+                       <td style='background-color:#F7F3E1; color: black'><?= $val->pedidoAnulado ?></td>
+                    <?php }?>      
                     <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
                     </td>
                     <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
-                        <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }?>        
             </tr>
@@ -203,10 +218,12 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Iva</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Vr. Presup.</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Vr. presup.</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido facturado">Fact.</span></th>
-                     <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica presupuesto al cliente">A.p.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica presupuesto al cliente">A.p.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido virtual">P.v.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido anulado">Anu.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
                 </tr>
             </thead>
@@ -226,12 +243,23 @@ $form = ActiveForm::begin([
                     <td><?= $val->pedidoAbierto ?></td>
                     <td><?= $val->pedidoFacturado ?></td>
                     <?php if($val->valor_presupuesto == 0){?>
-                       <td><?= $val->presupuestoPedido ?></td>
+                       <td style='background-color:#F0F3EF;'><?= $val->presupuestoPedido ?></td>
                     <?php }else{?>
                        <td style='background-color:#8FA5D5; color: black'><?= $val->presupuestoPedido ?></td>
-                    <?php }?>   
+                    <?php }
+                    if($val->pedido_virtual == 0){?>
+                       <td><?= $val->pedidoVirtual ?></td>
+                    <?php }else{?>
+                       <td style='background-color:#E1E9F9; color: black'><?= $val->pedidoVirtual ?></td>
+                    <?php }
+                     if($val->pedido_anulado == 0){?>
+                       <td style='background-color:#F0F3EF;'><?= $val->pedidoAnulado ?></td>
+                    <?php }else{?>
+                       <td style='background-color:#F7F3E1; color: black'><?= $val->pedidoAnulado ?></td>
+                    <?php }?>  
+                    
                     <td style= 'width: 25px; height: 25px;'>
-                        <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }else{ ?>
                         <td style='background-color:#F0F3EF;'><?= $val->numero_pedido ?></td>
@@ -249,7 +277,17 @@ $form = ActiveForm::begin([
                             <td style='background-color:#F0F3EF;'><?= $val->presupuestoPedido ?></td>
                         <?php }else{?>
                            <td style='background-color:#8FA5D5; color: black'><?= $val->presupuestoPedido ?></td>
-                        <?php }?>   
+                        <?php }
+                        if($val->pedido_virtual == 0){?>
+                            <td style='background-color:#F0F3EF;'><?= $val->pedidoVirtual ?></td>
+                        <?php }else{?>
+                               <td style='background-color:#E1E9F9; color: black'><?= $val->pedidoVirtual ?></td>
+                        <?php }
+                         if($val->pedido_anulado == 0){?>
+                            <td style='background-color:#F0F3EF;'><?= $val->pedidoAnulado ?></td>
+                        <?php }else{?>
+                            <td style='background-color:#F7F3E1; color: black'><?= $val->pedidoAnulado ?></td>
+                        <?php }?> 
                         <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
                             <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
