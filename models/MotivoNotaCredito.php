@@ -19,7 +19,15 @@ class MotivoNotaCredito extends \yii\db\ActiveRecord
     {
         return 'motivo_nota_credito';
     }
-
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->concepto = strtoupper($this->concepto); 
+ 
+        return true;
+    }
     /**
      * {@inheritdoc}
      */
@@ -37,7 +45,7 @@ class MotivoNotaCredito extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_motivo' => 'Id Motivo',
+            'id_motivo' => 'Codigo',
             'concepto' => 'Concepto',
         ];
     }

@@ -280,7 +280,7 @@
                                                ['label' => 'Resolucion fiscal', 'icon' => 'plus-square-o', 'url' => ['/resolucion-dian/index']],  
                                                ['label' => 'Tipo de factura', 'icon' => 'plus-square-o', 'url' => ['/tipo-factura-venta/index']], 
                                                ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
-                                              
+                                               ['label' => 'Motivo nota credito', 'icon' => 'plus-square-o', 'url' => ['/motivo-nota-credito/index']], 
                                             ],
                                         ],
                                         [
@@ -342,7 +342,7 @@
                                             'icon' => 'question',
                                             'url' => '#',
                                             'items' => [
-                                            //    ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/search_consulta_clientes']],
+                                               ['label' => 'Facturas x pagar', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_factura_cartera']],
                                             ],
                                         ],
                                         [

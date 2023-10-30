@@ -3,11 +3,14 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\MotivoNotaCredito;
-use app\models\MotivoNotaCreditoSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+//MODELS
+use app\models\MotivoNotaCredito;
+use app\models\MotivoNotaCreditoSearch;
+use app\models\UsuarioDetalle;
+
 
 /**
  * MotivoNotaCreditoController implements the CRUD actions for MotivoNotaCredito model.
@@ -35,13 +38,21 @@ class MotivoNotaCreditoController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new MotivoNotaCreditoSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',59])->all()){
+                $searchModel = new MotivoNotaCreditoSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            } 
+        }else{
+            return $this->redirect(['site/login']);
+        }
     }
 
     /**
@@ -67,7 +78,7 @@ class MotivoNotaCreditoController extends Controller
         $model = new MotivoNotaCredito();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_motivo]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +98,7 @@ class MotivoNotaCreditoController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_motivo]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
@@ -104,10 +115,19 @@ class MotivoNotaCreditoController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["motivo-nota-credito/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["motivo-nota-credito/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+            $this->redirect(["motivo-nota-credito/index"]);
+        }
     }
+    
 
     /**
      * Finds the MotivoNotaCredito model based on its primary key value.

@@ -31,7 +31,10 @@ use kartik\select2\Select2;
         <div class="row">
                <?= $form->field($model, 'porcentaje_retencion')->textInput(['maxlength' => true]) ?>  
         </div>
-          <div class="row">
+        <div class="row">
+               <?= $form->field($model, 'porcentaje_mora')->textInput(['maxlength' => true]) ?>  
+        </div>
+        <div class="row">
                <?= $form->field($model, 'base_retencion')->textInput(['maxlength' => true]) ?>  
         </div>
         <div class="panel-footer text-right">            

@@ -61,7 +61,7 @@ class MotivoNotaCreditoSearch extends MotivoNotaCredito
             'id_motivo' => $this->id_motivo,
         ]);
 
-        $query->andFilterWhere(['like', 'concepto', $this->cencepto]);
+        $query->andFilterWhere(['like', 'concepto', $this->concepto]);
 
         return $dataProvider;
     }

@@ -40,6 +40,14 @@ $this->params['breadcrumbs'][] = $model->id_tipo_factura;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_retencion') ?>:</th>
                     <td style="text-align: right"><?= Html::encode($model->porcentaje_retencion) ?></td>
               </tr>
+               <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_mora') ?>:</th>
+                    <td><?= Html::encode($model->porcentaje_mora) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_interes_mora') ?>:</th>
+                    <td><?= Html::encode($model->aplicaInteres) ?></td>
+                    <th style='background-color:#F0F3EF;'></th>
+                    <td style="text-align: right"></td>
+              </tr>
             </table>
         </div>
     </div>

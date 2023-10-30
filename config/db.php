@@ -1,17 +1,17 @@
 <?php
 
 return [
-    /*'class' => 'yii\db\Connection',
+   'class' => 'yii\db\Connection',
     'dsn' => 'mysql:host=localhost;dbname=erpdiamante',
     'username' => 'root',
     'password' => '',
-    'charset' => 'utf8',*/
+    'charset' => 'utf8',
     
-    'class' => 'yii\db\Connection',
+   /* 'class' => 'yii\db\Connection',
     'dsn' => 'mysql:host=192.168.1.2;dbname=erpdiamante',
     'username' => 'desarrollo',
     'password' => 'm@quil@1119',
-    'charset' => 'utf8',
+    'charset' => 'utf8',*/
 
     // Schema cache options (for production environment)
     //'enableSchemaCache' => true,

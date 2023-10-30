@@ -31,6 +31,7 @@ use app\models\AgentesComerciales;
 use app\models\FiltroBusquedaPedidos;
 use app\models\Pedidos;
 use app\models\FacturaVentaDetalle;
+use app\models\TipoFacturaVenta;
 /**
  * FacturaVentaController implements the CRUD actions for FacturaVenta model.
  */
@@ -115,7 +116,7 @@ class FacturaVentaController extends Controller
 
     //PROCESO QUE CREA LA FACTURA DE VENTA
     
-     public function actionCrear_factura() {
+    public function actionCrear_factura() {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',51])->all()){
                 $form = new FiltroBusquedaPedidos();
@@ -184,6 +185,107 @@ class FacturaVentaController extends Controller
         }else{
             return $this->redirect(['site/login']);
         }
+    }
+    
+    //LISTA TODOS LOS CLIENTES CON CARTERA PARA CADA VENDEDOR
+    public function actionSearch_factura_cartera() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',60])->all()){
+                $form = new \app\models\FiltroBusquedaPedidos();
+                $documento= null;
+                $cliente = null;
+                $vendedores = null;
+                $desde = null;
+                $hasta = null;
+                $numero = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $desde = Html::encode($form->fecha_inicio);
+                        $hasta = Html::encode($form->fecha_corte);
+                        $vendedores = Html::encode($form->vendedor);
+                        $numero = Html::encode($form->numero_factura);
+                        $table = FacturaVenta::find()
+                                ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                ->andFilterWhere(['like', 'cliente', $cliente])
+                                ->andFilterWhere(['=', 'id_agente', $vendedores])
+                                ->andFilterWhere(['=', 'numero_factura', $numero])  
+                                ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
+                                ->andWhere(['>', 'saldo_factura', 0])
+                                ->andWhere(['>', 'numero_factura', 0]);
+                        $table = $table->orderBy('id_factura DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = FacturaVenta::find()->Where(['>', 'saldo_factura', 0])
+                                                 ->andWhere(['>', 'numero_factura', 0])
+                                                 ->orderBy('id_factura DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    $this->CargarDiasInteresMora($model);
+                }
+                
+               return $this->render('search_factura_cartera', [
+                                'model' => $model,
+                                'form' => $form,
+                                'pagination' => $pages,
+                    ]); 
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
+    protected function CargarDiasInteresMora($model)
+   {
+        $tipo_factura = TipoFacturaVenta::findOne(1);
+        $fecha_dia = date('Y-m-d');
+        $total_dias = 0;
+        $intereses = 0;
+        $porcentaje_dia = 0;
+        $iva_interes = 0;
+        foreach ($model as $val):
+            if($tipo_factura->aplica_interes_mora == 0){
+                if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
+                    $total_dias = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento);
+                    $total_dias = round($total_dias / 86400)-1;
+                    $porcentaje_dia = $tipo_factura->porcentaje_mora / 30;
+                    $intereses = round((($val->saldo_factura * $porcentaje_dia)/100) * $total_dias);
+                    $iva_interes = round(($intereses * $val->porcentaje_iva)/100);
+                    $val->dias_mora = $total_dias;
+                    $val->valor_intereses_mora = $intereses;
+                    $val->iva_intereses_mora = $iva_interes;
+                    $val->subtotal_interes_masiva = $intereses + $iva_interes;
+                    $val->porcentaje_mora = $val->porcentaje_iva;
+                    $val->save(false);
+                }
+            }    
+                
+        endforeach;
     }
     /**
      * Displays a single FacturaVenta model.

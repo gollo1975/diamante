@@ -40,8 +40,8 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             [['fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 30],
             [['user_name'], 'string', 'max' => 15],
-            [['porcentaje_retencion'], 'number'],
-            [['base_retencion'], 'integer'],
+            [['porcentaje_retencion','porcentaje_mora'], 'number'],
+            [['base_retencion','aplica_interes_mora'], 'integer'],
             
         ];
     }
@@ -58,6 +58,17 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             'fecha_registro' => 'Fecha registro',
             'porcentaje_retencion' => '% Retencion',
             'base_retencion' => 'Base retencion',
+            'porcentaje_mora' => 'Porcentaje de mora',
+            'aplica_interes_mora' => 'Aplica interes mora',
         ];
+    }
+    
+    public function getAplicaInteres() {
+       if($this->aplica_interes_mora == 0){
+           $aplicainteres = 'SI';
+       }else{
+           $aplicainteres = 'NO';
+       }
+       return $aplicainteres;
     }
 }
