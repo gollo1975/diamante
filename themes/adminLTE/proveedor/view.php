@@ -127,11 +127,10 @@ $view = 'proveedor';
                             <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr style='font-size:85%;'>
-                                        <th scope="col" style='background-color:#B9D5CE;'>Código</th>                        
-                                        <th scope="col" style='background-color:#B9D5CE;'>Descripción de maquina</th>                        
-                                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Usuario</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'></th>                        
+                                        <th scope="col" style='background-color:#B9D5CE;'>  </th>                        
+                                        <th scope="col" style='background-color:#B9D5CE;'> </th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'></th> 
                                           <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         
                                     </tr>

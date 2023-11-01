@@ -231,6 +231,7 @@
                                                   ['label' => 'Anular pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/anular_pedidos']],
                                                 ['label' => 'Indicador comercial', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/index']],
                                                 ['label' => 'Regla comercial', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/regla_comercial']],
+                                                ['label' => 'Citas prospectos', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/listado_cita_prospecto']],
                                             ],
                                         ],
                                         [
@@ -260,6 +261,7 @@
                                                 ['label' => 'Programacion de citas', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/index']],
                                                 ['label' => 'Gestion comercial', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/gestion_comercial']],
                                                 ['label' => 'Crear pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/listado_clientes']],
+                                                ['label' => 'Prospectos', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/index']],
                                                 
                                             ],
                                         ]
