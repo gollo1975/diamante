@@ -85,4 +85,34 @@ class ProspectoCitas extends \yii\db\ActiveRecord
     {
         return $this->hasOne(AgentesComerciales::className(), ['id_agente' => 'id_agente']);
     }
+    public function getCitaCumplida() {
+        if($this->cumplida == Null){
+            $citacumplida = 'NO SE HIZO';
+        }else{
+            if($this->cumplida == 1){
+                $citacumplida = 'SI';
+            }else{
+                $citacumplida = 'NO';
+            }    
+        }
+        return $citacumplida;
+    }
+    
+    public function getVisitaCliente() {
+        if($this->tipo_visita == 1){
+            $visitacliente = 'TELEFONICA';
+        }else{
+            if($this->tipo_visita == 2){
+               $visitacliente = 'VIRTUAL';
+            }else{
+                if($this->tipo_visita == 3){
+                   $visitacliente = 'PRESENCIAL';
+                }else{
+                    $visitacliente = 'NO REALIZADA';
+                }
+                
+            }
+        }
+        return $visitacliente;
+    }
 }

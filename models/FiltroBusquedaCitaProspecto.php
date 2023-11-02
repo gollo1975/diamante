@@ -15,12 +15,13 @@ class FiltroBusquedaCitaProspecto extends Model
     public $fecha_inicio;
     public $fecha_corte;
     public $tipo_visita;
+    public $vendedor;
     
     public function rules()
     {
         return [  
           
-            [['prospecto','tipo_visita'], 'integer'],
+            [['prospecto','tipo_visita','vendedor'], 'integer'],
             [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -32,6 +33,7 @@ class FiltroBusquedaCitaProspecto extends Model
             'tipo_visita' => 'Tipo visita:',
             'fecha_corte' => 'Fecha corte:',
             'fecha_inicio' => 'Fecha inicio:',
+            'vendedor' => 'Agente de venta:'
        ];
     }
     

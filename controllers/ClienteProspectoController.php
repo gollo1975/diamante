@@ -28,6 +28,8 @@ use app\models\ClienteProspectoSearch;
 use app\models\Clientes;
 use app\models\UsuarioDetalle;
 use app\models\Municipios;
+use app\models\FiltroBusquedaCitaProspecto;
+use app\models\ProspectoCitas;
 
 
 /**
@@ -141,7 +143,7 @@ class ClienteProspectoController extends Controller
                         $table = \app\models\ProspectoCitas::find()
                                 ->andFilterWhere(['=', 'id_prospecto', $prospecto])
                                 ->andWhere(['=', 'id_agente', $agente])
-                                ->andFilterWhere(['=', 'tipo_visita', $tipo_visita])
+                                ->andFilterWhere(['=', 'id_tipo_visita', $tipo_visita])
                                 ->andFilterWhere(['between', 'fecha_cita', $fecha_inicio, $fecha_corte]);
                         $table = $table->orderBy('id_cita_prospecto DESC');
                         $tableexcel = $table->all();
@@ -192,7 +194,62 @@ class ClienteProspectoController extends Controller
             return $this->redirect(['site/login']);
         }
     }
-
+   
+    //CONSULTA DE CITAS PROSPECTOS
+     public function actionSearch_cita_prospecto() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',62])->all()){
+                $form = new FiltroBusquedaCitaProspecto();
+                $prospecto = null;
+                $tipo_visita = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $vendedor = null;
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $prospecto = Html::encode($form->prospecto);
+                        $tipo_visita = Html::encode($form->tipo_visita);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $vendedor = Html::encode($form->vendedor);
+                        $table = ProspectoCitas::find()
+                                ->andFilterWhere(['=', 'id_prospecto', $prospecto])
+                                ->andFilterWhere(['=', 'id_agente', $vendedor])
+                                ->andFilterWhere(['=', 'id_tipo_visita', $tipo_visita])
+                                ->andFilterWhere(['between', 'fecha_cita', $fecha_inicio, $fecha_corte]);
+                        $table = $table->orderBy('id_cita_prospecto DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaCitaProspecto($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('search_cita_prospecto', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
     /**
      * Displays a single ClienteProspecto model.
      * @param integer $id
@@ -305,8 +362,9 @@ class ClienteProspectoController extends Controller
                         $table->hora_cita = $model->hora_visita;
                         $table->fecha_cita = $model->fecha_cita;
                         $table->nota = $model->nota;
+                        $table->user_name = Yii::$app->user->identity->username;
                         $table->save(false);
-                        $this->redirect(["cliente-prospecto/listado_cita_prospecto"]);
+                        $this->redirect(["cliente-prospecto/index"]);
                     } else {
                         Yii::$app->getSession()->setFlash('warning', 'Lo siento, hay una cita a la misma hora. Intente cambiar la hora de la cita.  ');
                         $this->redirect(["cliente-prospecto/index"]);
@@ -320,6 +378,36 @@ class ClienteProspectoController extends Controller
                     'model' => $model,
                     'id' => $id,
                     'agente' => $agente,
+        ]);
+    }
+    
+    ///PROCESO QUE CREA LA GESTION DE LAS CITAS DEL PROSPECTO
+    public function actionGestion_cita_prospecto($id) {
+
+        $model = new \app\models\ModeloGestionComercial();
+        $table = \app\models\ProspectoCitas::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["gestion_comercial"])) {
+                    $table->cumplida = $model->cumplida;
+                    $table->fecha_hora_informe = date('Y-m-d h:i:s');
+                    $table->descripcion_gestion = $model->observacion;
+                    $table->tipo_visita = $model->tipo_visita;
+                    $table->save(false);
+                    $this->redirect(["cliente-prospecto/listado_cita_prospecto"]);
+                }
+            } else {
+                $model->getErrors();
+            }
+        }
+        if ($model->load(Yii::$app->request->get())) {
+            $model->cumplida = $table->cumplida;
+            $model->tipo_visita = $table->tipo_visita;
+            $model->observacion = $table->descripcion_gestion;
+        }
+        return $this->renderAjax('gestion_cita_prospecto', [
+                    'model' => $model,
+                    'id' => $id,
         ]);
     }
     /**
@@ -350,5 +438,86 @@ class ClienteProspectoController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+     public function actionExcelconsultaCitaProspecto($tableexcel) {
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A1', 'No PROGRAMACION')
+                ->setCellValue('B1', 'DOCUMENTO')
+                ->setCellValue('C1', 'PROSPECTO')
+                ->setCellValue('D1', 'MUNICIPIO')
+                ->setCellValue('E1', 'TIPO VISITA')
+                ->setCellValue('F1', 'HORA VISITA')
+                ->setCellValue('G1', 'FECHA PROGRAMADA')
+                ->setCellValue('H1', 'MOTIVO')
+                ->setCellValue('I1', 'USER NAME')
+                ->setCellValue('J1', 'CITA CUMPLIDA')
+                ->setCellValue('K1', 'FECHA INFORME')
+                ->setCellValue('L1', 'INFORME')
+                ->setCellValue('M1', 'AGENTE COMERCIAL')
+                ->setCellValue('N1', 'MEDIO VISITA');
+        $i = 2;
+
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_cita_prospecto)
+                    ->setCellValue('B' . $i, $val->prospecto->nit_cedula)
+                    ->setCellValue('C' . $i, $val->prospecto->nombre_completo)
+                    ->setCellValue('D' . $i, $val->prospecto->codigoMunicipio->municipio)
+                    ->setCellValue('E' . $i, $val->tipoVisita->nombre_visita)
+                    ->setCellValue('F' . $i, $val->hora_cita)
+                    ->setCellValue('G' . $i, $val->fecha_cita)
+                    ->setCellValue('H' . $i, $val->nota)
+                    ->setCellValue('I' . $i, $val->user_name)
+                    ->setCellValue('J' . $i, $val->citaCumplida)
+                    ->setCellValue('K' . $i, $val->fecha_hora_informe)
+                    ->setCellValue('L' . $i, $val->descripcion_gestion)
+                    ->setCellValue('M' . $i, $val->agenteCita->nombre_completo)
+                    ->setCellValue('N' . $i, $val->visitaCliente);
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Citas_prospectos.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }

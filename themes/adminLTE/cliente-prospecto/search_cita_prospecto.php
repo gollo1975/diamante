@@ -18,7 +18,7 @@ use app\models\AgentesComerciales;
 use app\models\TipoCliente;
 
 
-$this->title = 'GESTION CITAS PROSPECTOS';
+$this->title = 'CONSULTA - CITAS PROSPECTOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 
@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista proveedor</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("cliente-prospecto/listado_cita_prospecto"),
+    "action" => Url::toRoute("cliente-prospecto/search_cita_prospecto"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -43,7 +43,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$prospecto = ArrayHelper::map(app\models\ClienteProspecto::find()->where(['=','id_agente', $agente])->orderBy('nombre_completo ASC')->all(), 'id_prospecto', 'nombre_completo');
+$agente = ArrayHelper::map(app\models\AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$prospecto = ArrayHelper::map(app\models\ClienteProspecto::find()->orderBy('nombre_completo ASC')->all(), 'id_prospecto', 'nombre_completo');
 $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('nombre_visita ASC')->all(), 'id_tipo_visita', 'nombre_visita');
 ?>
 
@@ -82,11 +83,18 @@ $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
+            <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
+                'data' => $agente,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("cliente-prospecto/listado_cita_prospecto") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("cliente-prospecto/search_cita_prospecto") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -96,49 +104,42 @@ $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        Registros <span class="badge"><?= $pagination->totalCount ?></span>
+        <?php if($model){?>
+            Registros <span class="badge"><?= count($model) ?></span>
+        <?php }?>    
     </div>
         <table class="table table-bordered table-hover">
             <thead>
            <tr style="font-size: 90%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Agente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>H. visita</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha visita</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Fecha/hora gestión</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo visita</th>
-                <th scope="col" style='background-color:#B9D5CE;'></th>  
+                <th scope="col" style='background-color:#B9D5CE;'>Forma visita</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Cumplida</th>
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
-            <tr style="font-size: 90%;">                   
-                <td><?= $val->prospecto->nit_cedula ?></td>
-                <td><?= $val->prospecto->nombre_completo ?></td>
-                <td><?= $val->hora_cita ?></td>
-                <td><?= $val->fecha_cita ?></td>
-                <td><?= $val->tipoVisita->nombre_visita ?></td>
-                <?php if($val->cumplida == null ){?>
-                    <td style= 'width: 25px; height: 25px;'>
-                        <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span>',
-                        ['/cliente-prospecto/gestion_cita_prospecto','id' =>$val->id_cita_prospecto],
-                          ['title' => 'Gestion de citas a prospectos',
-                           'data-toggle'=>'modal',
-                           'data-target'=>'#modalgestioncitaprospecto',
-                          ])    
-                        ?>
-                        <div class="modal remote fade" id="modalgestioncitaprospecto">
-                            <div class="modal-dialog modal-lg" style ="width: 435px;">    
-                                 <div class="modal-content"></div>
-                            </div>
-                        </div>   
-                    </td>
-                <?php }else{?>
-                     <td style= 'width: 25px; height: 25px;'>
-                    </td>
-                <?php }?> 
-            </tr>
-            </tbody>
-            <?php endforeach; ?>
+                <?php
+                if($model){
+                    foreach ($model as $val): ?>
+                        <tr style="font-size: 90%;">                   
+                            <td><?= $val->prospecto->nit_cedula ?></td>
+                            <td><?= $val->prospecto->nombre_completo ?></td>
+                             <td><?= $val->agenteCita->nombre_completo ?></td>
+                            <td><?= $val->hora_cita ?></td>
+                            <td><?= $val->fecha_cita ?></td>
+                             <td><?= $val->fecha_hora_informe ?></td>
+                            <td><?= $val->tipoVisita->nombre_visita ?></td>
+                             <td><?= $val->visitaCliente ?></td>
+                            <td><?= $val->citaCumplida ?></td> 
+                        </tr>
+                    <?php endforeach; 
+                }?>
+            </tbody>        
         </table>
         <div class="panel-footer text-right" >
              <?php
@@ -146,10 +147,12 @@ $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('
                             "method" => "post",                            
                         ]);
                 ?>    
-            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
               <?php $form->end() ?>
             
         </div>
     </div>
 </div>
-<?= LinkPager::widget(['pagination' => $pagination]) ?>
+<?php if($model){?>
+     <?= LinkPager::widget(['pagination' => $pagination]) ?>
+ <?php }?>

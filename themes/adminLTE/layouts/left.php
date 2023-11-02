@@ -251,6 +251,7 @@
                                                     
                                                 ]],
                                                 ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedidos']], 
+                                                ['label' => 'Citas prospecto', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/search_cita_prospecto']], 
                                             ],
                                         ],
                                         [

@@ -112,6 +112,6 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
                 $visitacliente = 'PRESENCIAL';
             }
         }
-        return $tipovisita;
+        return $visitacliente;
     }
 }
