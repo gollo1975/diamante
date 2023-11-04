@@ -559,7 +559,8 @@ class PedidosController extends Controller
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
         $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
-                                                 ->andWhere(['>','stock_unidades', 0])->orderBy('nombre_producto ASC')->all();
+                                                 ->andWhere(['>','stock_unidades', 0])
+                                                 ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC')->all();
         $form = new FormModeloBuscar();
         $q = null;
         $nombre = null;
@@ -594,7 +595,8 @@ class PedidosController extends Controller
             }                    
         }else{
             $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
-                                                 ->andWhere(['>','stock_unidades', 0])->orderBy('nombre_producto ASC');
+                                                 ->andWhere(['>','stock_unidades', 0])
+                                                 ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC');
             $tableexcel = $inventario->all();
             $count = clone $inventario;
             $pages = new Pagination([
@@ -710,7 +712,8 @@ class PedidosController extends Controller
     public function actionAdicionar_presupuesto($id, $token, $sw, $tokenAcceso, $pedido_virtual) {
         $model = Pedidos::findOne($id);
         $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
-                                                 ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])->orderBy('nombre_producto ASC')->all();
+                                                 ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])
+                                                 ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC')->all();
         $form = new FormModeloBuscar();
         $q = null;
         $nombre = null;
@@ -747,7 +750,8 @@ class PedidosController extends Controller
             }                    
         }else{
             $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
-                                                 ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])->orderBy('nombre_producto ASC');
+                                                 ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])
+                                                 ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC');
             $tableexcel = $inventario->all();
             $count = clone $inventario;
             $pages = new Pagination([

@@ -1,5 +1,5 @@
 Swal.fire({
-    title: 'Bienvenido al sistema.',
+    title: 'Bienvenido al sistema de pedidos.',
     icon: 'success',
     confirmButtonText: 'Entrar'
 });

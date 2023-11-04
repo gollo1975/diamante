@@ -178,6 +178,8 @@
                                                     ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
                                                     ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/validador_imagen']],
                                                 ]],
+                                                ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 
+                                                ['label' => 'Devolucion productos', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/index']], 
                                             ],
                                         ],
                                         [

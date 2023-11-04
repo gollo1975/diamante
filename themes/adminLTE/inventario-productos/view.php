@@ -91,8 +91,10 @@ $view = 'inventario-productos';
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_inventario,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'activar_producto_venta') ?></th>
+                    <td><?= Html::encode($model->activarProducto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion_producto') ?></th>
-                    <td colspan="9"><?= Html::encode($model->descripcion_producto)?></td>
+                    <td colspan="7"><?= Html::encode($model->descripcion_producto)?></td>
                 </tr>
                 
                 

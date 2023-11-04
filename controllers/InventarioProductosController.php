@@ -78,12 +78,14 @@ class InventarioProductosController extends Controller
                                         ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                         ->andFilterWhere(['like', 'nombre_producto', $producto])
                                         ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
+                                        ->andWhere(['=', 'activar_producto_venta', 1])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }else{
                             $table = InventarioProductos::find()
                                     ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                     ->andFilterWhere(['between', 'fecha_vencimiento', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                    ->andWhere(['=', 'activar_producto_venta', 1])
                                     ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }    
@@ -107,7 +109,7 @@ class InventarioProductosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = InventarioProductos::find()
+                    $table = InventarioProductos::find()->Where(['=', 'activar_producto_venta', 1])
                             ->orderBy('id_inventario DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
@@ -164,6 +166,7 @@ class InventarioProductosController extends Controller
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                         ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                        ->andWhere(['=', 'activar_producto_venta', 1])
                                         ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }else{
@@ -171,6 +174,7 @@ class InventarioProductosController extends Controller
                                     ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                     ->andFilterWhere(['between', 'fecha_vencimiento', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                    ->andWhere(['=', 'activar_producto_venta', 1])
                                     ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }    
@@ -194,7 +198,7 @@ class InventarioProductosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = InventarioProductos::find()
+                    $table = InventarioProductos::find()->Where(['=', 'activar_producto_venta', 1])
                             ->orderBy('id_inventario DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
@@ -234,8 +238,7 @@ class InventarioProductosController extends Controller
                 $inventario_inicial = null;
                 $fecha_inicio = null;
                 $fecha_corte = null;
-                $grupo = null;
-                $producto = null;
+                $nota_credito = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -249,6 +252,7 @@ class InventarioProductosController extends Controller
                                 ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                 ->andFilterWhere(['like', 'nombre_producto', $producto])
                                 ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
+                                ->andWhere(['=', 'activar_producto_venta', 1])
                                 ->andFilterWhere(['=', 'id_grupo', $grupo])
                                 ->andWhere(['=', 'aplica_regla_comercial', 1]);
                         
@@ -272,8 +276,9 @@ class InventarioProductosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = InventarioProductos::find()->andWhere(['=', 'aplica_regla_comercial', 1])
-                            ->orderBy('id_inventario DESC');
+                    $table = InventarioProductos::find()->Where(['=', 'aplica_regla_comercial', 1])
+                                                        ->andWhere(['=', 'activar_producto_venta', 1])
+                                                        ->orderBy('id_inventario DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
@@ -302,6 +307,62 @@ class InventarioProductosController extends Controller
         }    
     }
     
+    //CARGAR NOTA CREDITO DEVOLUCION PRODUCTOS
+      public function actionCargar_nota_credito() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',63])->all()){
+                $form = new \app\models\FiltroBusquedaNota();
+                $cliente = null;
+                $numero = null;
+                $desde = null;
+                $hasta = null;
+                $documento = null;
+                $factura = null;
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero = Html::encode($form->numero);
+                        $cliente = Html::encode($form->cliente);
+                        $documento = Html::encode($form->documento);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);  
+                        $factura = Html::encode($form->factura);
+                        $table = \app\models\NotaCredito::find()
+                                        ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                        ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                        ->andFilterWhere(['=', 'numero_nota_credito', $numero])
+                                        ->andFilterWhere(['=', 'numero_factura', $factura])
+                                        ->andFilterWhere(['between', 'fecha_nota_credito', $desde, $hasta]);
+                        $table = $table->orderBy('id_nota DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('cargar_nota_credito', [
+                        'model' => $model,
+                        'form' => $form,
+                        'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
     /**
      * Displays a single InventarioProductos model.
      * @param integer $id
@@ -641,6 +702,34 @@ class InventarioProductosController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    // CREAR DEVOLUCION DE PRODUCTOS AL INVENTARIO
+    public function actionCrear_devolucion_producto($id_nota) {
+        $nota_credito = \app\models\NotaCredito::findOne($id_nota);
+        if(\app\models\DevolucionProductos::find()->where(['=','id_nota', $id_nota])->one()){
+            Yii::$app->getSession()->setFlash('infor', 'En estos momentos se esta procesando la devolucion desde esta nota credito.');
+            $this->redirect(["inventario-productos/cargar_nota_credito"]);
+        }else{
+            $table = new \app\models\DevolucionProductos();
+            $table->id_cliente = $nota_credito->id_cliente;
+            $table->id_nota = $id_nota;
+            $table->fecha_devolucion = date('Y-m-d');
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save(false);
+            $devolucion = \app\models\DevolucionProductos::find()->orderBy('id_devolucion DESC')->one();
+            //DATOS DEL DETALLE
+            $detalle = \app\models\NotaCreditoDetalle::find()->where(['=', 'id_nota', $id_nota])->all();
+            foreach ($detalle as $detalles):
+                $table = new \app\models\DevolucionProductoDetalle();
+                $table->id_inventario = $detalles->id_inventario;
+                $table->id_devolucion = $devolucion->id_devolucion;
+                $table->codigo_producto = $detalles->codigo_producto;
+                $table->nombre_producto = $detalles->producto;
+                $table->save(false);
+            endforeach;
+            $this->redirect(["devolucion-productos/view", 'id' => $devolucion->id_devolucion]);
+        }
+    }
+    
     /**
      * Finds the InventarioProductos model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
