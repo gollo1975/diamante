@@ -26,6 +26,7 @@ use app\models\UsuarioDetalle;
 use app\models\InventarioProductos;
 use app\models\TipoDevolucionProductos;
 use app\models\Clientes;
+use app\models\DevolucionProductoDetalle;
 
 /**
  * DevolucionProductosController implements the CRUD actions for DevolucionProductos model.
@@ -125,11 +126,49 @@ class DevolucionProductosController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id, $token)
     {
+        $detalle_devolucion = \app\models\DevolucionProductoDetalle::find()->where(['=','id_devolucion', $id])->all(); 
+        if(isset($_POST["actualizacantidades"])){
+            if(isset($_POST["actualizar_cantidades"])){
+                $intIndice = 0; $cantDevolucion = 0; $cantAveria = 0; $total = 0;
+                foreach ($_POST["actualizar_cantidades"] as $intCodigo):  
+                    $table = DevolucionProductoDetalle::findOne($intCodigo);
+                    $cantDevolucion = $_POST["cantidad_inventario"]["$intIndice"];
+                    $cantAveria = $_POST["cantidad_averias"]["$intIndice"];
+                    $total = $cantAveria + $cantDevolucion;
+                    if($total <= $table->cantidad){
+                        $table->cantidad_devolver = $cantDevolucion;
+                        $table->cantidad_averias = $cantAveria;
+                        $table->id_tipo_devolucion = $_POST["tipo_devolucion"]["$intIndice"];
+                        $table->save(false);
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'En el producto ' .$table->nombre_producto . ', la cantidad de unidades a devolver es mayor que las cantidades entregadas.');
+                    } 
+                   $intIndice++; 
+                endforeach;
+                $this->CalcularUnidades($id);
+                return $this->redirect(['view','id' =>$id, 'token' => $token]);
+            }
+        }
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'detalle_devolucion' => $detalle_devolucion,
+            'token' => $token,
         ]);
+    }
+    //PROCESO QUE SUMA LAS UNIDADES
+    protected function CalcularUnidades($id) {
+        $model = DevolucionProductos::findOne($id);
+        $detalle_devolucion = \app\models\DevolucionProductoDetalle::find()->where(['=','id_devolucion', $id])->all(); 
+        $conAveria = 0; $conInventario = 0;
+        foreach ($detalle_devolucion as $detalle):
+            $conInventario += $detalle->cantidad_devolver; 
+            $conAveria += $detalle->cantidad_averias;        
+        endforeach;
+        $model->cantidad_inventario = $conInventario;
+        $model->cantidad_averias = $conAveria;
+        $model->save();
     }
 
     /**
@@ -183,7 +222,68 @@ class DevolucionProductosController extends Controller
 
         return $this->redirect(['index']);
     }
-
+    //PROCESO QUE AUTORIZA LA DEVOLUCION
+     public function actionAutorizado($id, $token) {
+         $model = $this->findModel($id);
+         if($model->autorizado == 0){
+             $model->autorizado = 1;
+             $model->save();
+         }else{
+             $model->autorizado = 0;
+             $model->save();
+         }
+          return $this->redirect(['view','id' => $id, 'token' => $token]);
+    }
+    
+    //PROCESO QUE GENERA LA DEVOLUCION
+     public function actionGenerar_devolucion_inventario($id, $token) {
+        //proceso que actuliza saldos en inventario
+        $this->SaldoInventario($id);
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(9);
+        $devolucion = DevolucionProductos::findOne($id);
+        $devolucion->numero_devolucion = $consecutivo->numero_inicial + 1;
+        $devolucion->save(false);
+        $consecutivo->numero_inicial = $devolucion->numero_devolucion;
+        $consecutivo->save(false);
+        $this->redirect(["view", 'id' => $id, 'token' => $token]);  
+    }
+   //PROCESO QUE ACTUALIZAD SALDOS EN INVENTARIO
+   protected function SaldoInventario($id) {
+       $detalle_nota = DevolucionProductoDetalle::find()->where(['=','id_devolucion', $id])->all();
+       foreach ($detalle_nota as $detalle):
+            $codigo = $detalle->id_inventario;
+            if($inventario = InventarioProductos::findOne($detalle->id_inventario)){
+                 $inventario->stock_unidades += $detalle->cantidad_devolver; 
+                 $inventario->save(false);
+                 $this->ActualizarTotalesProducto($codigo);
+            }
+       endforeach;
+   }
+   protected function ActualizarTotalesProducto($codigo) {
+       $inventario = InventarioProductos::findOne($codigo);
+       $subtotal =0;
+       $impuesto = 0;
+       $total = 0;
+       $subtotal = $inventario->stock_unidades * $inventario->costo_unitario;
+       if($inventario->aplica_iva == 0){
+          $impuesto = round($subtotal * $inventario->porcentaje_iva)/100;    
+       }else{
+           $impuesto = 0;
+       }
+       $inventario->subtotal = $subtotal;
+       $inventario->valor_iva = $impuesto;
+       $inventario->total_inventario = $subtotal + $impuesto;
+       $inventario->save(false);
+       }
+     
+    //IMPRESIONES
+    public function actionImprimir_devolucion_producto($id) {
+        $model = DevolucionProductos::findOne($id);
+        return $this->render('../formatos/reporte_devolucion_producto', [
+            'model' => $model,
+        ]);
+    }   
     /**
      * Finds the DevolucionProductos model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -199,4 +299,5 @@ class DevolucionProductosController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
 }

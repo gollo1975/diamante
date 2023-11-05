@@ -488,7 +488,7 @@ class InventarioProductosController extends Controller
        $subtotal =0;
        $impuesto = 0;
        $total = 0;
-       $subtotal = $inventario->unidades_entradas *$inventario->costo_unitario;
+       $subtotal = $inventario->stock_unidades * $inventario->costo_unitario;
        if($inventario->aplica_iva == 0){
           $impuesto = round($subtotal * $inventario->porcentaje_iva)/100;    
        }else{
@@ -703,7 +703,7 @@ class InventarioProductosController extends Controller
         }    
     }
     // CREAR DEVOLUCION DE PRODUCTOS AL INVENTARIO
-    public function actionCrear_devolucion_producto($id_nota) {
+    public function actionCrear_devolucion_producto($id_nota, $token = 0) {
         $nota_credito = \app\models\NotaCredito::findOne($id_nota);
         if(\app\models\DevolucionProductos::find()->where(['=','id_nota', $id_nota])->one()){
             Yii::$app->getSession()->setFlash('infor', 'En estos momentos se esta procesando la devolucion desde esta nota credito.');
@@ -724,9 +724,10 @@ class InventarioProductosController extends Controller
                 $table->id_devolucion = $devolucion->id_devolucion;
                 $table->codigo_producto = $detalles->codigo_producto;
                 $table->nombre_producto = $detalles->producto;
+                $table->cantidad = $detalles->cantidad;
                 $table->save(false);
             endforeach;
-            $this->redirect(["devolucion-productos/view", 'id' => $devolucion->id_devolucion]);
+            $this->redirect(["devolucion-productos/view", 'id' => $devolucion->id_devolucion, 'token' => $token]);
         }
     }
     

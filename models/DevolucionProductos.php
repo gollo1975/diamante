@@ -35,7 +35,7 @@ class DevolucionProductos extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_cliente', 'id_nota', 'cantidad','numero_devolucion','autorizado'], 'integer'],
+            [['id_cliente', 'id_nota', 'cantidad_inventario','cantidad_averias','numero_devolucion','autorizado'], 'integer'],
             [['fecha_registro','fecha_devolucion'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 150],
@@ -52,14 +52,15 @@ class DevolucionProductos extends \yii\db\ActiveRecord
         return [
             'id_devolucion' => 'Codigo',
             'id_cliente' => 'Cliente:',
-            'id_nota' => 'Nota crédigo:',
+            'id_nota' => 'Nota crédito:',
             'fecha_devolucion' => 'Fecha devolucion:',
-            'cantidad' => 'Cantidad:',
+            'cantidad_inventario' => 'Cantidad inventario:',
             'fecha_registro' => 'Fecha registro:',
             'user_name' => 'User Name:',
             'observacion' => 'Observacion:',
             'numero_devolucion' => 'Numero devolución:',
             'autorizado' => 'Autorizado:',
+            'cantidad_averias' => 'Cantidad averias:',
         ];
     }
 

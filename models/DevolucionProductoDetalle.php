@@ -36,7 +36,7 @@ class DevolucionProductoDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'id_devolucion', 'id_tipo_devolucion', 'codigo_producto', 'cantidad'], 'integer'],
+            [['id_inventario', 'id_devolucion', 'id_tipo_devolucion', 'codigo_producto', 'cantidad','cantidad_averias'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -59,6 +59,7 @@ class DevolucionProductoDetalle extends \yii\db\ActiveRecord
             'nombre_producto' => 'Nombre Producto',
             'cantidad' => 'Cantidad',
             'fecha_registro' => 'Fecha Registro',
+            'cantidad_averias' => 'cantidad_averias',
         ];
     }
 

@@ -104,7 +104,8 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Nota credito</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha devolución</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Cant. inventario</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Cant. averias</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Autorizado</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
@@ -119,7 +120,8 @@ $form = ActiveForm::begin([
                         <td><?= $val->cliente->nombre_completo?></td>
                         <td><?= $val->nota->numero_nota_credito?></td>
                         <td><?= $val->fecha_devolucion?></td>
-                        <td><?= $val->cantidad?></td>
+                        <td style="text-align: right"><?= ''.number_format($val->cantidad_inventario,0)?></td>
+                        <td style="text-align: right"><?= ''.number_format($val->cantidad_averias,0)?></td>
                         <td><?= $val->autorizadoProceso?></td>
                         <td style= 'width: 20px; height: 20px;'>
                             <a href="<?= Url::toRoute(["devolucion-productos/view", "id" => $val->id_devolucion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
