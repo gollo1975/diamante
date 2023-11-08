@@ -33,7 +33,7 @@ $tipo_devolucion = ArrayHelper::map(app\models\TipoDevolucionProductos::find()->
         <?php if($token == 0){?>
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?php }else{ ?>
-                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_inventario'], ['class' => 'btn btn-primary btn-sm']) ?>
+                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_devolucion'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?php }?>
         <?php if ($model->autorizado == 0 && $model->numero_devolucion == 0) { ?>
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_devolucion, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);

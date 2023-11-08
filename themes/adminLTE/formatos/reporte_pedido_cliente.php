@@ -99,9 +99,9 @@ class PDF extends FPDF {
          // FIN
         $this->SetXY(10, 61);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("Autorizado.:"), 0, 0, 'L', 1);
+        $this->Cell(26, 5, utf8_decode("Fecha entrega:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(80, 5, utf8_decode($pedido->autorizadoPedido), 0, 0, 'l', 1);
+        $this->Cell(80, 5, utf8_decode($pedido->fecha_entrega), 0, 0, 'l', 1);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("User name:"), 0, 0, 'J', 1);
         $this->SetFont('Arial', '', 8);

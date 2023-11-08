@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
 
-$this->title = 'DEVOLUCION PRODUCTOS';
+$this->title = 'CONSULTA - DEVOLUCION PRODUCTOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("devolucion-productos/index"),
+    "action" => Url::toRoute("devolucion-productos/search_consulta_devolucion"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -72,13 +72,14 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->orderBy ('nombre_comple
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
-         
-     
+        </div>
+        <div class="row checkbox checkbox-success" align ="center">
+                <?= $formulario->field($form, 'seleccion')->checkbox(['label' => 'Exportar detalle', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'seleccion']) ?>
         </div>
         
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("devolucion-productos/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("devolucion-productos/search_consulta_devolucion") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -124,14 +125,21 @@ $form = ActiveForm::begin([
                         <td style="text-align: right"><?= ''.number_format($val->cantidad_averias,0)?></td>
                         <td><?= $val->autorizadoProceso?></td>
                         <td style= 'width: 20px; height: 20px;'>
-                            <a href="<?= Url::toRoute(["devolucion-productos/view", "id" => $val->id_devolucion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-lis" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                            <a href="<?= Url::toRoute(["devolucion-productos/view", "id" => $val->id_devolucion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                         </td> 
                    </tr>            
             <?php endforeach;?>
             </tbody>    
         </table> 
-           <?php $form->end() ?>
-       
+        <div class="panel-footer text-right" >
+            <?php if($seleccion == 0){?>
+                <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+                <?php $form->end() ?>
+            <?php }else{?>
+               <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar detalle", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+             <?php $form->end() ?>
+            <?php } ?>
+        </div>
      </div>
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>

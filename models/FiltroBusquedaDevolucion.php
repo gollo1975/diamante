@@ -15,10 +15,11 @@ class FiltroBusquedaDevolucion extends Model
     public $numero;
     public $fecha_inicio;
     public $fecha_corte;
+    public $seleccion;
     public function rules()
     {
         return [  
-           [['numero','cliente'], 'integer'],
+           [['numero','cliente','seleccion'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -30,6 +31,7 @@ class FiltroBusquedaDevolucion extends Model
             'numero' => 'Numero devolución:',
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
+            'seleccion' => 'Exportar detalle',
 
         ];
     }

@@ -52,7 +52,7 @@ class DevolucionProductosController extends Controller
      * Lists all DevolucionProductos models.
      * @return mixed
      */
-  public function actionIndex($token = 0) {
+    public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',64])->all()){
                 $form = new \app\models\FiltroBusquedaDevolucion();
@@ -82,10 +82,6 @@ class DevolucionProductosController extends Controller
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                 ->all();
-                        if (isset($_POST['excel'])) {
-                            $check = isset($_REQUEST['id_inventario  DESC']);
-                            $this->actionExcelConsultaDevolucion($tableexcel);
-                        }
                     } else {
                         $form->getErrors();
                     }
@@ -101,9 +97,6 @@ class DevolucionProductosController extends Controller
                             ->offset($pages->offset)
                             ->limit($pages->limit)
                             ->all();
-                    if (isset($_POST['excel'])) {
-                        $this->actionExcelConsultaInventario($tableexcel);
-                    }
                 }
                 $to = $count->count();
                 return $this->render('index', [
@@ -111,6 +104,87 @@ class DevolucionProductosController extends Controller
                             'form' => $form,
                             'pagination' => $pages,
                             'token' => $token,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+  
+  //consulta de devoluciones
+    public function actionSearch_consulta_devolucion($token = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',65])->all()){
+                $form = new \app\models\FiltroBusquedaDevolucion();
+                $numero = null;
+                $cliente = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $seleccion = 0;
+                $sw = 0;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero = Html::encode($form->numero);
+                        $cliente = Html::encode($form->cliente);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $seleccion = Html::encode($form->seleccion);
+                        $table = DevolucionProductos::find()
+                                    ->andFilterWhere(['=', 'numero_devolucion', $numero])
+                                    ->andFilterWhere(['between', 'fecha_devolucion', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                    ->andWhere(['>', 'numero_devolucion', 0]);
+                        $table = $table->orderBy('id_devolucion DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if ($seleccion == 0){
+                            if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id_devolucion  DESC']);
+                                $this->actionExcelDevolucion($tableexcel);
+                            }
+                        }else{
+                           if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id_devolucion  DESC']);
+                                $this->actionExcel_devolucion_detalle($tableexcel);
+                            } 
+                        }    
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = DevolucionProductos::find()->Where(['>', 'numero_devolucion', 0])->orderBy('id_devolucion DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelDevolucion($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_consulta_devolucion', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                            'seleccion' => $seleccion,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -299,5 +373,170 @@ class DevolucionProductosController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-    
+    //EXPORTACIONES}
+    public function actionExcelDevolucion($tableexcel) {
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'No DEVOLUCION')
+                    ->setCellValue('C1', 'DOCUMENTO')
+                    ->setCellValue('D1', 'CLIENTE')
+                    ->setCellValue('E1', 'FECHA DEVOUCION')
+                    ->setCellValue('F1', 'FECHA REGISTRO')
+                    ->setCellValue('G1', 'No NOTA CREDITO')
+                    ->setCellValue('H1', 'CANT. INVENTARIO')
+                    ->setCellValue('I1', 'CANT. AVERIAS')
+                    ->setCellValue('J1', 'AUTORIZADO')
+                    ->setCellValue('K1', 'USER NAME')
+                    ->setCellValue('L1', 'OBSERVACION');
+        $i = 2;
+
+        foreach ($tableexcel as $val) {
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_devolucion)
+                    ->setCellValue('B' . $i, $val->numero_devolucion)
+                    ->setCellValue('C' . $i, $val->cliente->nit_cedula)
+                    ->setCellValue('D' . $i, $val->cliente->nombre_completo)
+                    ->setCellValue('E' . $i, $val->fecha_devolucion)
+                    ->setCellValue('F' . $i, $val->fecha_registro)
+                    ->setCellValue('G' . $i, $val->nota->numero_nota_credito)
+                    ->setCellValue('H' . $i, $val->cantidad_inventario)
+                    ->setCellValue('I' . $i, $val->cantidad_averias)
+                    ->setCellValue('J' . $i, $val->autorizadoProceso)
+                    ->setCellValue('K' . $i, $val->user_name)
+                    ->setCellValue('L' . $i, $val->observacion);
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Devolucion_productos.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+    //EXCEL DETALLE DEVOLUCION
+    public function actionExcel_devolucion_detalle($tableexcel) {
+       $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'No DEVOLUCION')
+                    ->setCellValue('C1', 'DOCUMENTO')
+                    ->setCellValue('D1', 'CLIENTE')
+                    ->setCellValue('E1', 'FECHA DEVOUCION')
+                    ->setCellValue('F1', 'FECHA REGISTRO')
+                    ->setCellValue('G1', 'No NOTA CREDITO')
+                    ->setCellValue('H1', 'TOTAL UNIDADES')
+                    ->setCellValue('I1', 'CANT. INVENTARIO')
+                    ->setCellValue('J1', 'CANT. AVERIAS')
+                    ->setCellValue('K1', 'CODIGO')
+                    ->setCellValue('L1', 'PRODUCTO')
+                    ->setCellValue('M1', 'TIPO DEVOUCION')
+                    ->setCellValue('N1', 'AUTORIZADO')
+                    ->setCellValue('O1', 'USER NAME')
+                    ->setCellValue('P1', 'OBSERVACION');
+        $i = 2;
+
+        foreach ($tableexcel as $devolucion) {
+            $detalle = DevolucionProductoDetalle::find()->where(['=','id_devolucion', $devolucion->id_devolucion])->all();
+            foreach ($detalle as $val){
+                $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_devolucion)
+                    ->setCellValue('B' . $i, $devolucion->numero_devolucion)
+                    ->setCellValue('C' . $i, $devolucion->cliente->nit_cedula)
+                    ->setCellValue('D' . $i, $devolucion->cliente->nombre_completo)
+                    ->setCellValue('E' . $i, $devolucion->fecha_devolucion)
+                    ->setCellValue('F' . $i, $devolucion->fecha_registro)
+                    ->setCellValue('G' . $i, $devolucion->nota->numero_nota_credito)
+                    ->setCellValue('H' . $i, $val->cantidad)     
+                    ->setCellValue('I' . $i, $val->cantidad_devolver)
+                    ->setCellValue('J' . $i, $val->cantidad_averias)
+                    ->setCellValue('K' . $i, $val->codigo_producto)
+                    ->setCellValue('L' . $i, $val->nombre_producto)
+                    ->setCellValue('M' . $i, $val->tipoDevolucion->concepto)     
+                    ->setCellValue('N' . $i, $devolucion->autorizadoProceso)
+                    ->setCellValue('O' . $i, $devolucion->user_name)
+                    ->setCellValue('P' . $i, $devolucion->observacion);
+                $i++;
+           }
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Devolucion_productos_detalle.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
 }

@@ -363,12 +363,13 @@ class PedidosController extends Controller
                 if(isset($_POST['excel'])){                    
                         $this->actionExcelconsultaPedidos($tableexcel);
                 }
-            }
-            //$to = $count->count();
-            return $this->render('anular_pedidos', [
+                 return $this->render('anular_pedidos', [
                         'model' => $model,
                         'pagination' => $pages,
-            ]);
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }           
         }else{
             return $this->redirect(['site/login']);
         }
@@ -1070,12 +1071,14 @@ class PedidosController extends Controller
                 if (isset($_POST["crear_observaciones"])) {
                     $table = Pedidos::findOne($id);
                     $table->observacion = $model->observacion;
+                    $table->fecha_entrega = $model->fecha_entrega;
                     $table->save(false);
                     return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual]);
                 }
         }
         if (Yii::$app->request->get()) {
             $model->observacion= $pedido->observacion;
+            $model->fecha_entrega= $pedido->fecha_entrega;
         }
         
        return $this->renderAjax('crear_observaciones', [
@@ -1239,6 +1242,7 @@ class PedidosController extends Controller
             $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
 
             $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('A1', 'ID')
@@ -1246,17 +1250,18 @@ class PedidosController extends Controller
                         ->setCellValue('C1', 'DOCUMENTO')
                         ->setCellValue('D1', 'CLIENTE')
                         ->setCellValue('E1', 'FECHA PEDIDO')
-                        ->setCellValue('F1', 'CANTIDAD')
-                        ->setCellValue('G1', 'SUBTOTAL')
-                        ->setCellValue('H1', 'IVA')
-                        ->setCellValue('I1', 'TOTAL')
-                        ->setCellValue('J1', 'VENDEDOR')    
-                        ->setCellValue('K1', 'USER NAME')
-                        ->setCellValue('L1', 'AUTORIZADO')
-                        ->setCellValue('M1', 'CERRADO')
-                        ->setCellValue('N1', 'FACTURADO')
-                        ->setCellValue('O1', 'APLICA PRESUPUESTO')
-                        ->setCellValue('P1', 'VALOR PRESUPUESTO');
+                        ->setCellValue('F1', 'FECHA ENTREGA')
+                        ->setCellValue('G1', 'CANTIDAD')
+                        ->setCellValue('H1', 'SUBTOTAL')
+                        ->setCellValue('I1', 'IVA')
+                        ->setCellValue('J1', 'TOTAL')
+                        ->setCellValue('K1', 'VENDEDOR')    
+                        ->setCellValue('L1', 'USER NAME')
+                        ->setCellValue('M1', 'AUTORIZADO')
+                        ->setCellValue('N1', 'CERRADO')
+                        ->setCellValue('O1', 'FACTURADO')
+                        ->setCellValue('P1', 'APLICA PRESUPUESTO')
+                        ->setCellValue('Q1', 'VALOR PRESUPUESTO');
             $i = 2;
 
             foreach ($tableexcel as $val) {
@@ -1267,17 +1272,18 @@ class PedidosController extends Controller
                         ->setCellValue('C' . $i, $val->documento)
                         ->setCellValue('D' . $i, $val->cliente)
                         ->setCellValue('E' . $i, $val->fecha_proceso)
-                        ->setCellValue('F' . $i, $val->cantidad)
-                        ->setCellValue('G' . $i, $val->subtotal)
-                        ->setCellValue('H' . $i, $val->impuesto)
-                        ->setCellValue('I' . $i, $val->gran_total)
-                        ->setCellValue('J' . $i, $val->agentePedido->nombre_completo)
-                        ->setCellValue('K' . $i, $val->usuario)
-                        ->setCellValue('L' . $i, $val->autorizadoPedido)
-                        ->setCellValue('M' . $i, $val->pedidoAbierto)
-                        ->setCellValue('N' . $i, $val->pedidoFacturado)
-                        ->setCellValue('O' . $i, $val->presupuestoPedido)
-                        ->setCellValue('P' . $i, $val->valor_presupuesto);
+                        ->setCellValue('F' . $i, $val->fecha_entrega)
+                        ->setCellValue('G' . $i, $val->cantidad)
+                        ->setCellValue('H' . $i, $val->subtotal)
+                        ->setCellValue('I' . $i, $val->impuesto)
+                        ->setCellValue('J' . $i, $val->gran_total)
+                        ->setCellValue('K' . $i, $val->agentePedido->nombre_completo)
+                        ->setCellValue('L' . $i, $val->usuario)
+                        ->setCellValue('M' . $i, $val->autorizadoPedido)
+                        ->setCellValue('N' . $i, $val->pedidoAbierto)
+                        ->setCellValue('O' . $i, $val->pedidoFacturado)
+                        ->setCellValue('P' . $i, $val->presupuestoPedido)
+                        ->setCellValue('Q' . $i, $val->valor_presupuesto);
                 $i++;
             }
 
@@ -1327,6 +1333,7 @@ class PedidosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -1334,15 +1341,16 @@ class PedidosController extends Controller
                     ->setCellValue('C1', 'DOCUMENTO')
                     ->setCellValue('D1', 'CLIENTE')
                     ->setCellValue('E1', 'FECHA PEDIDO')
-                    ->setCellValue('F1', 'CODIGO PRODUCTO')
-                    ->setCellValue('G1', 'PRODUCTO')
-                    ->setCellValue('H1', 'CANTIDAD')
-                    ->setCellValue('I1', 'VR. UNIT.')
-                    ->setCellValue('J1', 'SUBTOTAL')
-                    ->setCellValue('K1', 'IVA')
-                    ->setCellValue('L1', 'TOTAL')
-                    ->setCellValue('M1', 'USER NAME')
-                    ->setCellValue('N1', 'FECHA REGISTRO');
+                    ->setCellValue('F1', 'FECHA ENTREGA')
+                    ->setCellValue('G1', 'CODIGO PRODUCTO')
+                    ->setCellValue('H1', 'PRODUCTO')
+                    ->setCellValue('I1', 'CANTIDAD')
+                    ->setCellValue('J1', 'VR. UNIT.')
+                    ->setCellValue('K1', 'SUBTOTAL')
+                    ->setCellValue('L1', 'IVA')
+                    ->setCellValue('M1', 'TOTAL')
+                    ->setCellValue('N1', 'USER NAME')
+                    ->setCellValue('O1', 'FECHA REGISTRO');
         $i = 2;
         
         foreach ($detalle as $val) {
@@ -1353,15 +1361,16 @@ class PedidosController extends Controller
                     ->setCellValue('C' . $i, $val->pedido->documento)
                     ->setCellValue('D' . $i, $val->pedido->cliente)
                     ->setCellValue('E' . $i, $val->pedido->fecha_proceso)
-                    ->setCellValue('F' . $i, $val->inventario->codigo_producto)
-                    ->setCellValue('G' . $i, $val->inventario->nombre_producto)
-                    ->setCellValue('H' . $i, $val->cantidad)
-                    ->setCellValue('I' . $i, $val->valor_unitario)
-                    ->setCellValue('J' . $i, $val->subtotal)
-                    ->setCellValue('K' . $i, $val->impuesto)
-                    ->setCellValue('L' . $i, $val->total_linea)
-                    ->setCellValue('M' . $i, $val->user_name)
-                    ->setCellValue('N' . $i, $val->fecha_registro);
+                    ->setCellValue('F' . $i, $val->pedido->fecha_entrega)
+                    ->setCellValue('G' . $i, $val->inventario->codigo_producto)
+                    ->setCellValue('H' . $i, $val->inventario->nombre_producto)
+                    ->setCellValue('I' . $i, $val->cantidad)
+                    ->setCellValue('J' . $i, $val->valor_unitario)
+                    ->setCellValue('K' . $i, $val->subtotal)
+                    ->setCellValue('L' . $i, $val->impuesto)
+                    ->setCellValue('M' . $i, $val->total_linea)
+                    ->setCellValue('N' . $i, $val->user_name)
+                    ->setCellValue('O' . $i, $val->fecha_registro);
             $i++;
         }
 

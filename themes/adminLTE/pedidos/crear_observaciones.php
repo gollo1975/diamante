@@ -16,7 +16,7 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
-            'template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>',
+            'template' => '{label}<div class="col-sm-9 form-group">{input}{error}</div>',
             'labelOptions' => ['class' => 'col-sm-3 control-label'],
             'options' => []
         ],
@@ -37,6 +37,15 @@ $form = ActiveForm::begin([
                     <div class="row">
                       <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-9 form-group">{input}{error}</div>'])->textarea(['rows' => 3, 'maxlength' => true, 'size' => 150, 'required' => true]) ?>
                     </div> 
+                    <div class="row">
+                        <?=  $form->field($model, 'fecha_entrega')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                               'value' => date('Y-m-d', strtotime('+2 days')),
+                               'options' => ['placeholder' => 'Seleccione una fecha ...', 'required' => 'true'],
+                               'pluginOptions' => [
+                                   'format' => 'yyyy-m-d',
+                                   'todayHighlight' => true]])
+                        ?>
+                   </div>
                 </div>  
                     <div class="panel-footer text-right">
                        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'crear_observaciones']) ?>                    

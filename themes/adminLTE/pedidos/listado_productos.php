@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                     <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-sm']);?>
                     <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
                                'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
-                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Observaciones',
+                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
                                               ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],
                                                 ['title' => 'Crear observaciones al pedido',
                                                  'data-toggle'=>'modal',
@@ -113,7 +113,14 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                         <td><?= Html::encode($model->cliente) ?></td>
                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                         <td><?= Html::encode($model->fecha_proceso) ?></td>
-                        </tr>
+                    </tr>
+                    <tr style="font-size: 90%;">
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "fecha_entrega") ?></th>
+                        <td><?= Html::encode($model->fecha_entrega) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
+                        <td colspan="4"><?= Html::encode($model->observacion) ?></td>
+                        
+                    </tr>
                 </table>    
             </div>   
         </div>    
@@ -200,10 +207,10 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                    <thead>
                                        <tr style="font-size: 90%;">
                                             <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                                           <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
                                            <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Subtotal.</th>
-                                           <th scope="col" style='background-color:#B9D5CE; width: 12%'>Impuesto</th>
+                                           <th scope="col" style='background-color:#B9D5CE; width: 12%'>Iva</th>
                                            <th scope="col" style='background-color:#B9D5CE; width: 14%'>Total</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -261,19 +268,19 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                    <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                        <td align="right" ><b><?= '$'.number_format($subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>
                                         <td colspan="4"></td>
-                                        <td style="text-align: right;"><b>Impuesto:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
+                                        <td style="text-align: right;"><b>Iva:</b></td>
+                                        <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                      <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Total:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
+                                        <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                </table>
@@ -297,7 +304,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unit.</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE; '>Subtotal</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 12%'>Impuesto</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 12%'>Iva</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE; width: 14%'>Total</th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
@@ -339,19 +346,19 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                        <td align="right"><b><?= '$'.number_format($subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>
                                         <td colspan="4"></td>
-                                        <td style="text-align: right;"><b>Impuesto:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
+                                        <td style="text-align: right;"><b>Iva:</b></td>
+                                        <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                      <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Total:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
+                                        <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                 </table>

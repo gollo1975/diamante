@@ -187,10 +187,23 @@
                                             'icon' => 'question',
                                             'url' => '#',
                                             'items' => [
-                                                ['label' => 'Materias primas', 'icon' => 'plus-square-o', 'url' => ['/materia-primas/search_consulta_materias']],
-                                                ['label' => 'Inventario de productos', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/search_consulta_inventario']],
-                                                ['label' => 'Entrada de materias    ', 'icon' => 'plus-square-o', 'url' => ['/entrada-materia-prima/search_consulta_entradas']],
-                                                ['label' => 'Orden producción    ', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/search_consulta_orden']],
+                                                [
+                                                'label' => 'Materias prima',
+                                                'icon' => 'cart-plus',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Materias primas', 'icon' => 'plus-square-o', 'url' => ['/materia-primas/search_consulta_materias']],
+                                                    ['label' => 'Entrada de materias    ', 'icon' => 'plus-square-o', 'url' => ['/entrada-materia-prima/search_consulta_entradas']],
+                                                ]],
+                                                [
+                                                'label' => 'Inventario productos',
+                                                'icon' => 'cart-plus',
+                                                'url' => '#',
+                                                'items' => [
+                                                     ['label' => 'Inventario de productos', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/search_consulta_inventario']],
+                                                    ['label' => 'Orden producción    ', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/search_consulta_orden']],
+                                                ]],
+                                                ['label' => 'Devolucion productos    ', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/search_consulta_devolucion']],
                                             ],
                                         ],
                                       

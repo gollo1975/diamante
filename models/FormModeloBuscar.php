@@ -13,6 +13,7 @@ class FormModeloBuscar extends Model
     public $q;   
     public $nombre;
     public $observacion;
+    public $fecha_entrega;
 
     public function rules()
     {
@@ -20,6 +21,7 @@ class FormModeloBuscar extends Model
 
             [['q','nombre'], 'match', 'pattern' => '/^[a-z0-9\s]+$/i', 'message' => 'Sólo se aceptan números y letras'],  
             [['observacion'], 'string'],
+            [['fecha_entrega'], 'safe'],
         ];
     }
 
@@ -29,6 +31,7 @@ class FormModeloBuscar extends Model
             'q' => 'Dato a Buscar:',  
             'nombre' =>'Producto:',
             'observacion' => 'Observacion:',
+            'fecha_entrega' => 'F. entrega:',
 
         ];
     }
