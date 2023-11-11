@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 use app\models\AgentesComerciales;
 
-$this->title = 'GENERAR CARTERA';
+$this->title = 'CONSULTA FACTURA DE VENTA';
 $this->params['breadcrumbs'][] = $this->title;
 
 $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
@@ -31,7 +31,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
 <!--<h1>Lista proveedor</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("factura-venta/search_factura_cartera"),
+    "action" => Url::toRoute("factura-venta/search_factura_venta"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -77,7 +77,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("factura-venta/search_factura_cartera") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("factura-venta/search_factura_venta") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -92,7 +92,9 @@ $form = ActiveForm::begin([
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        Registros <span class="badge"><?= $pagination->totalCount ?></span>
+        <?php if($model){?>
+            Registros <span class="badge"><?= $pagination->totalCount ?></span>
+        <?php }?>
     </div>
         <table class="table table-bordered table-hover">
             <thead>
@@ -105,41 +107,34 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora factura">D.M.</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Valor intereses a factura">V. int.</span></th>   
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Valor iva a intereses">Iva. int.</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Valor total mora interese mas iva">T. mora</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Valor total mora interese mas iva">% Mora</span></th>
+                 <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
             <tbody>
                 <?php 
-                $fecha_dia = date('Y-m-d');
-                foreach ($model as $val): ?>
-                    <tr style="font-size: 90%;">
-                        <td><?= $val->numero_factura ?></td>
-                        <td><?= $val->cliente ?></td>
-                        <td><?= $val->clienteFactura->codigoMunicipio->municipio?> - <?= $val->clienteFactura->codigoMunicipio->codigoDepartamento->departamento?></td>
-                        <td><?= $val->fecha_inicio ?></td>
-                        <td><?= $val->fecha_vencimiento ?></td>
-                        <td style="text-align: right"><?= '$'.number_format($val->total_factura,0)?></td>
-                        <?php if($val->dias_mora > 0){ ?>  
-                            <td style="text-align: right; background-color:#FAE4D7;"><?= '$'.number_format($val->saldo_factura,0)?></td>
-                            <td style="text-align: right"><?= $val->dias_mora ?></td>
-                            <td style="text-align: right"><?= '$'.number_format($val->valor_intereses_mora,0) ?></td>
-                             <td style="text-align: right"><?= '$'.number_format($val->iva_intereses_mora,0) ?></td>
-                             <td style="text-align: right"><?= '$'.number_format($val->subtotal_interes_masiva,0) ?></td>
-                             <td style="text-align: right"><?= $val->porcentaje_mora?> %</td>
-                        <?php }else{ ?>
-                            <td style="text-align: right;"><?= '$'.number_format($val->saldo_factura,0)?></td>
-                             <td style="text-align: right"><?= $val->dias_mora ?></td>
-                             <td style="text-align: right"><?= '$'.number_format($val->valor_intereses_mora,0) ?></td>
-                             <td style="text-align: right"><?= '$'.number_format($val->iva_intereses_mora,0) ?></td>
-                             <td style="text-align: right"><?= '$'.number_format($val->subtotal_interes_masiva,0) ?></td>
-                             <td style="text-align: right"><?= $val->porcentaje_mora?> %</td>
-                        <?php }?>    
-                          
-                    </tr>
-                <?php endforeach;?>
+                if($model){
+                    $fecha_dia = date('Y-m-d');
+                    foreach ($model as $val): ?>
+                        <tr style="font-size: 90%;">
+                            <td><?= $val->numero_factura ?></td>
+                            <td><?= $val->cliente ?></td>
+                            <td><?= $val->clienteFactura->codigoMunicipio->municipio?> - <?= $val->clienteFactura->codigoMunicipio->codigoDepartamento->departamento?></td>
+                            <td><?= $val->fecha_inicio ?></td>
+                            <td><?= $val->fecha_vencimiento ?></td>
+                            <td style="text-align: right"><?= '$'.number_format($val->total_factura,0)?></td>
+                            <?php if($val->dias_mora > 0){ ?>  
+                                <td style="text-align: right; background-color:#FAE4D7;"><?= '$'.number_format($val->saldo_factura,0)?></td>
+                                <td style="text-align: right"><?= $val->dias_mora ?></td>
+                            <?php }else{ ?>
+                                <td style="text-align: right;"><?= '$'.number_format($val->saldo_factura,0)?></td>
+                                 <td style="text-align: right"><?= $val->dias_mora ?></td>
+                            <?php }?>    
+                            <td style= 'width: 20px; height: 20px;'>
+                                <a href="<?= Url::toRoute(["factura-venta/imprimir_factura_venta", "id" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-print" title="Permite imprimir la factura de venta"></span></a>
+                            </td>
+                        </tr>
+                    <?php endforeach;
+                } ?>
             </tbody>        
         </table>
      <div class="panel-footer text-right" >            
@@ -149,6 +144,8 @@ $form = ActiveForm::begin([
     </div>
 
 </div>
-<?= LinkPager::widget(['pagination' => $pagination]) ?>
+<?php if($model){ ?>
+    <?= LinkPager::widget(['pagination' => $pagination]) ?>
+<?php }?>
 
 

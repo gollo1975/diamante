@@ -32,6 +32,9 @@ use kartik\select2\Select2;
                <?= $form->field($model, 'porcentaje_retencion')->textInput(['maxlength' => true]) ?>  
         </div>
         <div class="row">
+                <?= $form->field($model, 'aplica_interes_mora')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+            </div>
+        <div class="row">
                <?= $form->field($model, 'porcentaje_mora')->textInput(['maxlength' => true]) ?>  
         </div>
         <div class="row">

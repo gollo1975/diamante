@@ -664,7 +664,7 @@ class ReciboCajaController extends Controller
     }
     
     //IMPRESIONES
-    public function actionImprimir_recibo_caja($id, $token) {
+    public function actionImprimir_recibo_caja($id) {
         $model = ReciboCaja::findOne($id);
         return $this->render('../formatos/reporte_recibo_caja', [
             'model' => $model,

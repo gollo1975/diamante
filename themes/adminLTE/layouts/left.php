@@ -315,7 +315,8 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/search_consulta_clientes']],
-                                            ],
+                                                ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
+                                            ],  
                                         ],
                                         [
                                             'label' => 'Movimientos',
@@ -352,7 +353,7 @@
                                             'icon' => 'cube',
                                             'url' => '#',
                                             'items' => [
-                                                //['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
+                                                ['label' => 'Generar cartera', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_factura_cartera']],
                                             ],
                                         ],
                                         [
@@ -360,7 +361,7 @@
                                             'icon' => 'question',
                                             'url' => '#',
                                             'items' => [
-                                               ['label' => 'Facturas x pagar', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_factura_cartera']],
+                                               ['label' => 'Facturas de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_factura_venta']],
                                             ],
                                         ],
                                         [

@@ -65,9 +65,9 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
     
     public function getAplicaInteres() {
        if($this->aplica_interes_mora == 0){
-           $aplicainteres = 'SI';
-       }else{
            $aplicainteres = 'NO';
+       }else{
+           $aplicainteres = 'SI';
        }
        return $aplicainteres;
     }
