@@ -21,6 +21,15 @@ class TipoDevolucionProductos extends \yii\db\ActiveRecord
     {
         return 'tipo_devolucion_productos';
     }
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->concepto = strtoupper($this->concepto); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -41,7 +50,7 @@ class TipoDevolucionProductos extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_tipo_devolucion' => 'Id Tipo Devolucion',
+            'id_tipo_devolucion' => 'Código',
             'concepto' => 'Concepto',
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',

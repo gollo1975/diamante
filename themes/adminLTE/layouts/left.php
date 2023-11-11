@@ -161,6 +161,7 @@
                                                ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],  
                                                ['label' => 'Grupo productos', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
                                                ['label' => 'Presentacion productos', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
+                                               ['label' => 'Tipo devolucion', 'icon' => 'plus-square-o', 'url' => ['tipo-devolucion-productos/index']], 
                                             ],
                                         ],
                                         [

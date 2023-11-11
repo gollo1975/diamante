@@ -22,18 +22,14 @@ use kartik\select2\Select2;
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
-        <h4>TIPO DE ORDENES</h4>
+        <h4>TIPO DEVOLUCION</h4>
     </div>
     <div class="panel-body">        														   		
         <div class="row">
-            <?= $form->field($model, 'descripcion_orden')->textInput(['maxlength' => true]) ?>  					
+            <?= $form->field($model, 'concepto')->textInput(['maxlength' => true]) ?>  					
         </div>
-        <div class="row">
-            <?= $form->field($model, 'abreviatura')->textInput(['maxlength' => true]) ?>  					
-        </div>
-
         <div class="panel-footer text-right">            
-            <a href="<?= Url::toRoute("tipo-orden-compra/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <a href="<?= Url::toRoute("tipo-devolucion-productos/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		
         </div>
     </div>

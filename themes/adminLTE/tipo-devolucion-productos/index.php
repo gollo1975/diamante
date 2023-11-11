@@ -7,10 +7,10 @@ use yii\helpers\ArrayHelper;
 /* @var $searchModel app\models\MunicipioSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'TIPO DE ORDENES';
+$this->title = 'TIPO DEVOLUCIONES';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tipo-orden-compra-index">
+<div class="tipo-devolucion-productos-index">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <?=  $this->render('_search', ['model' => $searchModel]); ?>
@@ -22,17 +22,22 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             [                
-                'attribute' => 'id_tipo_orden',
+                'attribute' => 'id_tipo_devolucion',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [                
-                'attribute' => 'descripcion_orden',
-                'contentOptions' => ['class' => 'col-lg-6'],
+                'attribute' => 'concepto',
+                'contentOptions' => ['class' => 'col-lg-3'],
             ],
             [                
-                'attribute' => 'abreviatura',
+                'attribute' => 'user_name',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
+            [                
+                'attribute' => 'fecha_registro',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            
              [
                 'class' => 'yii\grid\ActionColumn', 
                  'contentOptions' => ['class' => 'col-lg-1'],

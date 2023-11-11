@@ -29,6 +29,8 @@ $this->params['breadcrumbs'][] = $model->id_tipo_orden;
                     <td><?= Html::encode($model->id_tipo_orden) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Descripción') ?>:</th>
                     <td><?= Html::encode($model->descripcion_orden) ?></td>
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'abreviatura') ?>:</th>
+                    <td><?= Html::encode($model->abreviatura) ?></td>
               </tr>
             </table>
         </div>

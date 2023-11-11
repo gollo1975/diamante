@@ -26,6 +26,7 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
         }
      
         $this->descripcion_orden = strtoupper($this->descripcion_orden); 
+        $this->abreviatura = strtoupper($this->abreviatura); 
  
         return true;
     }
@@ -38,6 +39,7 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
         return [
             [['descripcion_orden'], 'required'],
             [['descripcion_orden'], 'string', 'max' => 30],
+             [['abreviatura'], 'string', 'max' => 3],
         ];
     }
 
@@ -49,6 +51,7 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
         return [
             'id_tipo_orden' => 'Código',
             'descripcion_orden' => 'Descripción',
+            'abreviatura' => 'Abreviatura',
         ];
     }
 }

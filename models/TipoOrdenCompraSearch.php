@@ -18,7 +18,7 @@ class TipoOrdenCompraSearch extends TipoOrdenCompra
     {
         return [
             [['id_tipo_orden'], 'integer'],
-            [['descripcion_orden'], 'safe'],
+            [['descripcion_orden','abreviatura'], 'string'],
         ];
     }
 
@@ -59,9 +59,11 @@ class TipoOrdenCompraSearch extends TipoOrdenCompra
         // grid filtering conditions
         $query->andFilterWhere([
             'id_tipo_orden' => $this->id_tipo_orden,
+            'abreviatura' => $this->abreviatura,
         ]);
 
         $query->andFilterWhere(['like', 'descripcion_orden', $this->descripcion_orden]);
+        $query->andFilterWhere(['like', 'abreviatura', $this->abreviatura]);
 
         return $dataProvider;
     }

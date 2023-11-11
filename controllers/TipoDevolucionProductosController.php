@@ -3,11 +3,13 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\TipoDevolucionProductos;
-use app\models\TipoDevolucionProductosSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+//models
+use app\models\TipoDevolucionProductos;
+use app\models\TipoDevolucionProductosSearch;
+use app\models\UsuarioDetalle;
 
 /**
  * TipoDevolucionProductosController implements the CRUD actions for TipoDevolucionProductos model.
@@ -33,15 +35,23 @@ class TipoDevolucionProductosController extends Controller
      * Lists all TipoDevolucionProductos models.
      * @return mixed
      */
-    public function actionIndex()
+     public function actionIndex()
     {
-        $searchModel = new TipoDevolucionProductosSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',68])->all()){
+                $searchModel = new TipoDevolucionProductosSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            } 
+        }else{
+            return $this->redirect(['site/login']);
+        }
     }
 
     /**
@@ -67,7 +77,9 @@ class TipoDevolucionProductosController extends Controller
         $model = new TipoDevolucionProductos();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_tipo_devolucion]);
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +99,7 @@ class TipoDevolucionProductosController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_tipo_devolucion]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
@@ -102,11 +114,19 @@ class TipoDevolucionProductosController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["tipo-devolucion-productos/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["tipo-devolucion-productos/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+            $this->redirect(["tipo-devolucion-productos/index"]);
+        }
     }
 
     /**
