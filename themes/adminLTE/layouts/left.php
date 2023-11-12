@@ -213,9 +213,22 @@
                                             'icon' => 'book',
                                             'url' => '#',
                                             'items' => [
-                                                ['label' => 'Materias prima', 'icon' => 'plus-square-o', 'url' => ['/materia-primas/index']],
-                                                 ['label' => 'Inventario de productos', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/index']],
-                                                ['label' => 'Entrada materia prima', 'icon' => 'plus-square-o', 'url' => ['/entrada-materia-prima/index']],
+                                                [
+                                                'label' => 'Materias prima',
+                                                'icon' => 'cart-plus',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Inventario', 'icon' => 'plus-square-o', 'url' => ['/materia-primas/index']],
+                                                    ['label' => 'Entradas', 'icon' => 'plus-square-o', 'url' => ['/entrada-materia-prima/index']],
+                                                ]],
+                                                [
+                                                'label' => 'Producto terminado',
+                                                'icon' => 'cart-plus',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Inventario', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/index']],
+                                                    ['label' => 'Entradas', 'icon' => 'plus-square-o', 'url' => ['/entrada-producto-terminado/index']],
+                                                ]],
                                                 ['label' => 'Orden produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index']],
                                             ],
                                         ],

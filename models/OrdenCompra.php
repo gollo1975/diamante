@@ -44,7 +44,7 @@ class OrdenCompra extends \yii\db\ActiveRecord
             [['id_tipo_orden', 'id_proveedor', 'fecha_creacion','fecha_entrega'], 'required'],
             [['id_tipo_orden', 'id_proveedor', 'subtotal', 'impuesto', 'total_orden', 'autorizado', 'numero_orden'], 'integer'],
             [['fecha_creacion', 'fecha_proceso'], 'safe'],
-            [['observacion','descripcion'], 'string'],
+            [['observacion','descripcion','abreviatura'], 'string'],
             [['numero_solicitud', 'user_name'], 'string', 'max' => 15],
             [['id_tipo_orden'], 'exist', 'skipOnError' => true, 'targetClass' => TipoOrdenCompra::className(), 'targetAttribute' => ['id_tipo_orden' => 'id_tipo_orden']],
             [['id_proveedor'], 'exist', 'skipOnError' => true, 'targetClass' => Proveedor::className(), 'targetAttribute' => ['id_proveedor' => 'id_proveedor']],
@@ -71,6 +71,7 @@ class OrdenCompra extends \yii\db\ActiveRecord
             'numero_orden' => 'Numero orden:',
             'observacion' => 'Observacion:',
             'fecha_entrega' => 'Fecha entrega:',
+            'abreviatura' => 'Abreviatura:',
         ];
     }
 

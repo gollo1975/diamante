@@ -257,6 +257,7 @@ class OrdenCompraController extends Controller
             $model->user_name = Yii::$app->user->identity->username;
             $orden = \app\models\TipoOrdenCompra::findOne($model->id_tipo_orden);
             $model->descripcion = $orden->descripcion_orden;
+            $model->abreviatura = $orden->abreviatura;
             $model->update();
             return $this->redirect(['view', 'id' => $model->id_orden_compra, 'token' => $token]);
         }
@@ -285,6 +286,7 @@ class OrdenCompraController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $orden = \app\models\TipoOrdenCompra::findOne($model->id_tipo_orden);
             $model->descripcion = $orden->descripcion_orden;
+            $model->abreviatura = $orden->abreviatura;
             $model->update();
             return $this->redirect(['index']);
         }

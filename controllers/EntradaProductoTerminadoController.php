@@ -21,20 +21,19 @@ use yii\helpers\ArrayHelper;
 use Codeception\Lib\HelperModule;
 
 //models
-use app\models\EntradaMateriaPrima;
-use app\models\EntradaMateriaPrimaSearch;
-use app\models\EntradaMateriaPrimaDetalle;
+use app\models\EntradaProductoTerminado;
+use app\models\EntradaProductoTerminadoSearch;
 use app\models\UsuarioDetalle;
 use app\models\FiltroBusquedaEntradaMateria;
 use app\models\OrdenCompraDetalle;
 use app\models\OrdenCompra;
-use app\models\MateriaPrimas;
-
+use app\models\InventarioProductos;
+use app\models\EntradaProductoTerminadoDetalle;
 
 /**
- * EntradaMateriaPrimaController implements the CRUD actions for EntradaMateriaPrima model.
+ * EntradaProductoTerminadoController implements the CRUD actions for EntradaProductoTerminado model.
  */
-class EntradaMateriaPrimaController extends Controller
+class EntradaProductoTerminadoController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -52,13 +51,12 @@ class EntradaMateriaPrimaController extends Controller
     }
 
     /**
-     * Lists all EntradaMateriaPrima models.
+     * Lists all EntradaProductoTerminado models.
      * @return mixed
      */
     public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',12])->all()){
-                
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',69])->all()){
                 $form = new FiltroBusquedaEntradaMateria();
                 $id_entrada= null;
                 $fecha_inicio = null;
@@ -70,7 +68,7 @@ class EntradaMateriaPrimaController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $proveedor = Html::encode($form->proveedor);
-                        $table = EntradaMateriaPrima::find()
+                        $table = EntradaProductoTerminado::find()
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'id_orden_compra', $id_entrada])
                                     ->andFilterWhere(['=', 'id_proveedor', $proveedor]);
@@ -94,7 +92,7 @@ class EntradaMateriaPrimaController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = EntradaMateriaPrima::find()
+                    $table = EntradaProductoTerminado::find()
                             ->orderBy('id_entrada DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
@@ -124,100 +122,27 @@ class EntradaMateriaPrimaController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
-    
-  // PROCESO DE CONSULTA DE ENTRADAS DE MATERIAS PRIMAS
-     public function actionSearch_consulta_entradas($token = 1) {
-        if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',22])->all()){
-                
-                $form = new FiltroBusquedaEntradaMateria();
-                $id_entrada= null;
-                $fecha_inicio = null;
-                $fecha_corte = null;
-                $proveedor = null;
-                if ($form->load(Yii::$app->request->get())) {
-                    if ($form->validate()) {
-                        $id_entrada = Html::encode($form->id_entrada);
-                        $fecha_inicio = Html::encode($form->fecha_inicio);
-                        $fecha_corte = Html::encode($form->fecha_corte);
-                        $proveedor = Html::encode($form->proveedor);
-                        $table = EntradaMateriaPrima::find()
-                                    ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['=', 'id_orden_compra', $id_entrada])
-                                    ->andFilterWhere(['=', 'id_proveedor', $proveedor]);
-                        $table = $table->orderBy('id_entrada DESC');
-                        $tableexcel = $table->all();
-                        $count = clone $table;
-                        $to = $count->count();
-                        $pages = new Pagination([
-                            'pageSize' => 15,
-                            'totalCount' => $count->count()
-                        ]);
-                        $model = $table
-                                ->offset($pages->offset)
-                                ->limit($pages->limit)
-                                ->all();
-                        if (isset($_POST['excel'])) {
-                            $check = isset($_REQUEST['id_entrada  DESC']);
-                            $this->actionExcelConsultaEntrada($tableexcel);
-                        }
-                    } else {
-                        $form->getErrors();
-                    }
-                } else {
-                    $table = EntradaMateriaPrima::find()
-                            ->orderBy('id_entrada DESC');
-                    $tableexcel = $table->all();
-                    $count = clone $table;
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count(),
-                    ]);
-                    $model = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-                    if (isset($_POST['excel'])) {
-                        $this->actionExcelConsultaEntrada($tableexcel);
-                    }
-                }
-                $to = $count->count();
-                return $this->render('search_consulta_entradas', [
-                            'model' => $model,
-                            'form' => $form,
-                            'pagination' => $pages,
-                            'token' => $token,
-                ]);
-            }else{
-                return $this->redirect(['site/sinpermiso']);
-            }
-        }else{
-            return $this->redirect(['site/login']);
-        }    
-    }
+
     /**
-     * Displays a single EntradaMateriaPrima model.
+     * Displays a single EntradaProductoTerminado model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id, $token, $sw = 0)
+    public function actionView($id, $token)
     {
-        $detalle_entrada = \app\models\EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->orderBy('id_detalle DESC')->all();
-        if (count($detalle_entrada) > 0){
-            $sw = 1;
-        }else{
-            $sw = 0;
-        }
-        $materiaprima = \app\models\MateriaPrimas::find()->orderBy('materia_prima ASC')->all();
+        $inventario = InventarioProductos::find()->orderBy('nombre_producto ASC')->all();
+        $models = new \app\models\ModeloEntradaProducto();
+        $detalle_entrada = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all();
+        //proceso que actualizar
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["detalle_entrada"])){
                 $intIndice = 0;
                 $auxiliar = 0;
                 $iva = 0 ;
                 foreach ($_POST["detalle_entrada"] as $intCodigo):
-                    $table = EntradaMateriaPrimaDetalle::findOne($intCodigo);
-                    $table->id_materia_prima = $_POST["id_materia_prima"]["$intIndice"];
+                    $table = EntradaProductoTerminadoDetalle::findOne($intCodigo);
+                    $table->id_inventario= $_POST["id_inventario"]["$intIndice"];
                     $table->cantidad = $_POST["cantidad"]["$intIndice"];
                     $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
                     $table->porcentaje_iva = $_POST["porcentaje_iva"]["$intIndice"];
@@ -234,22 +159,186 @@ class EntradaMateriaPrimaController extends Controller
                     $intIndice++;
                 endforeach;
                 $this->ActualizarLineas($id);
-                return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
+                return $this->redirect(['view','id' =>$id, 'token' => $token]);
             }
             
         }
+     
+       // proceso manual
+        
+        if(isset($_POST["agregar_linea"])){
+            $table = new EntradaProductoTerminadoDetalle();
+            $table->id_inventario = $models->codigo_producto;
+            $table->cantidad = $models->cantidad;
+            $table->save(false);
+            return $this->redirect(['view','id' =>$id, 'token' => $token]);
+        }    
         return $this->render('view', [
             'model' => $this->findModel($id),
-            'token'=> $token,
-            'sw' => $sw,
+            'token' => $token,
             'detalle_entrada' => $detalle_entrada,
-            'materiaprima' => ArrayHelper::map($materiaprima, "id_materia_prima", "materiasPrimas"),
+            'inventario' => ArrayHelper::map($inventario, "id_inventario", "inventario"),
+            'models' => $models,
         ]);
     }
+
+    /**
+     * Creates a new EntradaProductoTerminado model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
+     */
+    public function actionCreate($sw)
+    {
+        $model = new EntradaProductoTerminado();
+        $ordenes = \app\models\OrdenCompra::find()->orderBy('id_orden_compra desc')->all(); 
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->user_name_crear= Yii::$app->user->identity->username;
+            $model->update();
+            $token = 0;
+            return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
+        }
+
+        return $this->render('create', [
+            'model' => $model,
+            'sw' => $sw,
+            'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
+        ]);
+    }
+    //importar lineas de la orden de compra
+    public function actionImportardetallecompra($id, $id_orden, $token)
+    {                                
+        $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $id_orden])->all();
+        foreach ( $detalle_compra as $detalle_compras):
+                $table = new EntradaProductoTerminadoDetalle();
+                $table->id_entrada = $id;
+                $table->fecha_vencimiento = date('Y-m-d');
+                $table->porcentaje_iva = $detalle_compras->porcentaje;
+                $table->cantidad = $detalle_compras->cantidad;
+                $table->valor_unitario = $detalle_compras->valor;
+                $table->insert();
+        endforeach;
+        $this->redirect(["view",'id' => $id, 'token' => $token]);  
+        
+             
+    } 
+    
+    /**
+     * Updates an existing EntradaProductoTerminado model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+        $ordenes = \app\models\OrdenCompra::find()->where(['=','abreviatura', 'IPT'])->orderBy('id_orden_compra desc')->all(); 
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->user_name_edit= Yii::$app->user->identity->username;
+            $model->update();
+            return $this->redirect(['index']);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+            'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
+        ]);
+    }
+     
+    //NUEVA LINEA
+    public function actionNuevalinea($id, $token) {
+        $table = new EntradaProductoTerminadoDetalle();
+        $table->id_entrada = $id;
+        $table->fecha_vencimiento = date('Y-m-d');
+        $table->insert();
+        return $this->redirect(['view', 'id' => $id, 'token' => $token]);
+    }
+    //AUTORIZAR ENTRADA
+     public function actionAutorizado($id, $token) {
+        $model = $this->findModel($id);
+        if ($model->autorizado == 0) {                        
+                $model->autorizado = 1;            
+               $model->update();
+               $this->redirect(["entrada-producto-terminado/view", 'id' => $id, 'token' =>$token]);  
+
+        } else{
+                $model->autorizado = 0;
+                $model->update();
+                $this->redirect(["entrada-producto-terminado/view", 'id' => $id, 'token' =>$token]);  
+        }    
+    }
+    
+    /**
+     * Deletes an existing EntradaProductoTerminado model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+     //ELIMINAR DETALLES  
+    public function actionEliminar($id,$detalle, $token)
+    {                                
+        $detalle = EntradaProductoTerminadoDetalle::findOne($detalle);
+        $detalle->delete();
+        $this->ActualizarLineas($id);
+        $this->redirect(["view",'id' => $id, 'token' => $token]);        
+    } 
+    
+    //actualizar inventario
+     public function actionEnviarinventario($id, $token , $id_compra) {
+        $model = $this->findModel($id);
+        $orden = OrdenCompra::find()->where(['=','id_orden_compra', $id_compra])->one();
+        $detalle = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all(); // carga el detalle
+        $codigo = 0;
+        foreach ($detalle as $detalles):
+            $inventario = InventarioProductos::find()->where(['=','id_inventario', $detalles->id_inventario])->one();
+            if($inventario){
+                $codigo = $inventario->id_inventario;
+                $inventario->fecha_vencimiento = $detalles->fecha_vencimiento;
+                if($detalles->actualizar_precio == 1){
+                   $inventario->costo_unitario  = $detalles->valor_unitario;
+                   $inventario->unidades_entradas += $detalles->cantidad; 
+                   $inventario->stock_unidades += $detalles->cantidad;
+                } else {
+                   $inventario->unidades_entradas += $detalles->cantidad;   
+                   $inventario->stock_unidades += $detalles->cantidad;
+                } 
+                $inventario->save(false);
+                $this->ActualizarCostoInventario($codigo);
+            }
+        endforeach;
+        $model->enviar_materia_prima = 1;
+        $model->save();
+        $orden->importado = 1;
+        $orden->save();
+        $this->redirect(["entrada-producto-terminado/view", 'id' => $id, 'token' =>$token]);
+    }
+    
+   //proceso para multiplicar inventario
+    protected function ActualizarCostoInventario($codigo) {
+        $iva = 0; $subtotal = 0;
+        $inventario = InventarioProductos::find()->where(['=','id_inventario', $codigo])->one();
+        $subtotal = round($inventario->stock_unidades * $inventario->costo_unitario);
+        $iva = round(($subtotal * $inventario->porcentaje_iva)/100);
+        $inventario->subtotal = $subtotal;
+        $inventario->valor_iva = $iva;
+        $inventario->total_inventario = $subtotal + $iva;
+        $inventario->save(false);
+    }
+    
+    
     //proceso que suma los totales
     protected function ActualizarLineas($id) {
-        $entrada = EntradaMateriaPrima::findOne($id);
-        $detalle = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->all();
+        $entrada = EntradaProductoTerminado::findOne($id);
+        $detalle = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all();
         $subtotal = 0; $iva = 0; $total = 0;
         foreach ($detalle as $detalles):
             $subtotal += $detalles->subtotal;
@@ -261,39 +350,12 @@ class EntradaMateriaPrimaController extends Controller
         $entrada->total_salida = $total;
         $entrada->save(false);
     }
-
-    /**
-     * Creates a new EntradaMateriaPrima model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new EntradaMateriaPrima();
-        $ordenes = \app\models\OrdenCompra::find()->orderBy('id_orden_compra desc')->all(); 
-        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
-        }
-        $token = 0;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->user_name_crear= Yii::$app->user->identity->username;
-            $model->update();
-            return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-             'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
-        ]);
-    }
     
-    //PROCESO DE ORDEN DE COMPRAS
-    
-     public function actionOrdencompra($id){
+    //proceso que lleva el combo con las ordenes de cada proveedor
+    public function actionOrdencompra($id){
         $rows = \app\models\OrdenCompra::find()->where(['=','id_proveedor', $id])
                                                ->andWhere(['=','importado', 0])
-                                               ->andWhere(['=','abreviatura', 'MP'])->orderBy('descripcion desc')->all();
+                                               ->andWhere(['=','abreviatura', 'IPT'])->orderBy('descripcion desc')->all();
 
         echo "<option value='' required>Seleccione una orden...</option>";
         if(count($rows)>0){
@@ -302,138 +364,24 @@ class EntradaMateriaPrimaController extends Controller
             }
         }
     }
-    /**
-     * Updates an existing EntradaMateriaPrima model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-        $ordenes = \app\models\OrdenCompra::find()->orderBy('id_orden_compra desc')->all(); 
-         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
-        }
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-             $model->user_name_edit= Yii::$app->user->identity->username;
-            $model->update();
-            return $this->redirect(['index']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-            'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
-        ]);
-    }
-    //NUEVA LINEA
-    public function actionNuevalinea($id, $token) {
-        $table = new EntradaMateriaPrimaDetalle();
-        $table->id_entrada = $id;
-        $table->fecha_vencimiento = date('Y-m-d');
-        $table->insert();
-        return $this->redirect(['view', 'id' => $id, 'token' => $token]);
-      }
-     //ACTUALIZAR LINEA
-    public function actionImportardetallecompra($sw = 0, $id, $id_orden, $token)
-    {                                
-        $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $id_orden])->all();
-        foreach ( $detalle_compra as $detalle_compras):
-                $table = new EntradaMateriaPrimaDetalle();
-                $table->id_entrada = $id;
-                $table->fecha_vencimiento = date('Y-m-d');
-                $table->porcentaje_iva = $detalle_compras->porcentaje;
-                $table->cantidad = $detalle_compras->cantidad;
-                $table->valor_unitario = $detalle_compras->valor;
-                $table->insert();
-        endforeach;
-        $sw = 1;
-        $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]);  
-        
-             
-    } 
-      
-    //ELIMINAR DETALLES  
-    public function actionEliminar($id,$detalle, $token)
-    {                                
-        $detalle = EntradaMateriaPrimaDetalle::findOne($detalle);
-        $detalle->delete();
-        $this->ActualizarLineas($id);
-        $this->redirect(["view",'id' => $id, 'token' => $token]);        
-    } 
-
-     public function actionAutorizado($id, $token) {
-        $model = $this->findModel($id);
-        if ($model->autorizado == 0) {                        
-                $model->autorizado = 1;            
-               $model->update();
-               $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
-
-        } else{
-                $model->autorizado = 0;
-                $model->update();
-                $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
-        }    
-    }
     
-    public function actionEnviarmateriales($id, $token , $id_compra) {
-        $model = $this->findModel($id);
-        $orden = OrdenCompra::find()->where(['=','id_orden_compra', $id_compra])->one();
-        $detalle = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->all(); // carga el detalle
-        $codigo = 0;
-        foreach ($detalle as $detalles):
-            $materia = MateriaPrimas::find()->where(['=','id_materia_prima', $detalles->id_materia_prima])->one();
-            if($materia){
-                $codigo = $materia->id_materia_prima;
-                $materia->fecha_vencimiento = $detalles->fecha_vencimiento;
-                if($detalles->actualizar_precio == 1){
-                   $materia->valor_unidad = $detalles->valor_unitario;
-                   $materia->total_cantidad += $detalles->cantidad; 
-                   $materia->stock += $detalles->cantidad;
-                } else {
-                   $materia->total_cantidad += $detalles->cantidad;   
-                   $materia->stock += $detalles->cantidad;
-                } 
-                $materia->save(false);
-                $this->ActualizarCostoMateriaPrima($codigo);
-            }
-        endforeach;
-        $model->enviar_materia_prima = 1;
-        $model->save();
-        $orden->importado = 1;
-        $orden->save();
-        $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);
-    }
-    //proceso para multiplicar inventario
-    protected function ActualizarCostoMateriaPrima($codigo) {
-        $iva = 0; $subtotal = 0;
-        $materia = MateriaPrimas::find()->where(['=','id_materia_prima', $codigo])->one();
-        $iva = round((($materia->total_cantidad * $materia->stock)* $materia->porcentaje_iva)/100);
-        $subtotal = round($materia->stock * $materia->valor_unidad);
-        $materia->valor_iva = $iva;
-        $materia->subtotal = $subtotal;
-        $materia->total_materia_prima = $subtotal + $iva;
-        $materia->save(false);
-    }
     /**
-     * Finds the EntradaMateriaPrima model based on its primary key value.
+     * Finds the EntradaProductoTerminado model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return EntradaMateriaPrima the loaded model
+     * @return EntradaProductoTerminado the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = EntradaMateriaPrima::findOne($id)) !== null) {
+        if (($model = EntradaProductoTerminado::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
     
-    //EXCELES
+     //EXCELES
     
     public function actionExcelconsultaEntrada($tableexcel) {                
         $objPHPExcel = new \PHPExcel();
@@ -461,42 +409,62 @@ class EntradaMateriaPrimaController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
                     ->setCellValue('B1', 'PROVEEDOR')
                     ->setCellValue('C1', 'TIPO ORDEN')
-                    ->setCellValue('D1', 'SOPORTE')
+                    ->setCellValue('D1', 'DOCUMENTO')
                     ->setCellValue('E1', 'FECHA ENTRADA')
                     ->setCellValue('F1', 'FECHA REGISTRO')
-                    ->setCellValue('G1', 'USER NAME CREADOR')
-                    ->setCellValue('H1', 'USER NAME EDITADO')
-                    ->setCellValue('I1', 'AUTORIZADO')
-                    ->setCellValue('J1', 'ENVIADO')
-                    ->setCellValue('K1', 'SUBTOTAL')
-                    ->setCellValue('L1', 'IVA')
-                    ->setCellValue('M1', 'TOTAL')
-                    ->setCellValue('N1', 'OBSERVACION');
+                    ->setCellValue('G1', 'CODIGO PRODUCTO')
+                    ->setCellValue('H1', 'PRODUCTO')
+                    ->setCellValue('I1', 'FECHA VCTO')
+                    ->setCellValue('J1', 'ACT. PRECIO')
+                    ->setCellValue('K1', 'CANT. ENTRADAS')
+                    ->setCellValue('L1', 'VR. UNITARIO')
+                    ->setCellValue('M1', 'SUBTOTAL')
+                    ->setCellValue('N1', 'IVA')
+                    ->setCellValue('O1', 'TOTAL')
+                    ->setCellValue('P1', 'AUTORIZADO')
+                    ->setCellValue('Q1', 'ENVIADO')
+                    ->setCellValue('R1', 'USER NAME CREADOR')
+                    ->setCellValue('S1', 'USER NAME EDITADO')
+                    ->setCellValue('T1', 'OBSERVACION');
         $i = 2;
         
         foreach ($tableexcel as $val) {
-                                  
-            $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue('A' . $i, $val->id_entrada)
-                    ->setCellValue('B' . $i, $val->proveedor->nombre_completo)
-                    ->setCellValue('C' . $i, $val->ordenCompra->tipoOrden->descripcion_orden)
-                    ->setCellValue('D' . $i, $val->numero_soporte)
-                    ->setCellValue('E' . $i, $val->fecha_proceso)
-                    ->setCellValue('F' . $i, $val->fecha_registro)
-                    ->setCellValue('G' . $i, $val->user_name_crear)
-                    ->setCellValue('H' . $i, $val->user_name_edit)
-                    ->setCellValue('I' . $i, $val->autorizadoCompra)
-                    ->setCellValue('J' . $i, $val->enviarMateria)
-                    ->setCellValue('K' . $i, $val->subtotal)
-                    ->setCellValue('L' . $i, $val->impuesto)
-                    ->setCellValue('M' . $i, $val->total_salida)
-                    ->setCellValue('N' . $i, $val->observacion);
-            $i++;
+            $detalle = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $val->id_entrada])->all();
+            foreach ($detalle as $detalles){
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_entrada)
+                        ->setCellValue('B' . $i, $val->proveedor->nombre_completo)
+                        ->setCellValue('C' . $i, $val->ordenCompra->tipoOrden->descripcion_orden)
+                        ->setCellValue('D' . $i, $val->numero_soporte)
+                        ->setCellValue('E' . $i, $val->fecha_proceso)
+                        ->setCellValue('F' . $i, $val->fecha_registro)
+                        ->setCellValue('G' . $i, $detalles->inventario->codigo_producto)
+                        ->setCellValue('H' . $i, $detalles->inventario->nombre_producto)
+                        ->setCellValue('I' . $i, $detalles->fecha_vencimiento)
+                        ->setCellValue('J' . $i, $detalles->actualizarPrecio)
+                        ->setCellValue('K' . $i, $detalles->cantidad)
+                        ->setCellValue('L' . $i, $detalles->valor_unitario)
+                        ->setCellValue('M' . $i, $detalles->subtotal)
+                        ->setCellValue('N' . $i, $detalles->total_iva)
+                        ->setCellValue('O' . $i, $detalles->total_entrada)
+                        ->setCellValue('P' . $i, $val->autorizadoCompra)
+                        ->setCellValue('Q' . $i, $val->enviarMateria)
+                        ->setCellValue('R' . $i, $val->user_name_crear)
+                        ->setCellValue('S' . $i, $val->user_name_edit)
+                        ->setCellValue('T' . $i, $val->observacion);
+                $i++;
+            }    
         }
 
         $objPHPExcel->getActiveSheet()->setTitle('Entradas');
@@ -504,7 +472,7 @@ class EntradaMateriaPrimaController extends Controller
 
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Entrada_Materias.xlsx"');
+        header('Content-Disposition: attachment;filename="Entrada_Producto_Terminado.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');

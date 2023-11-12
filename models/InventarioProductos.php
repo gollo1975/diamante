@@ -133,6 +133,12 @@ class InventarioProductos extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrdenProduccionProductos::className(), ['id_detalle' => 'id_detalle']);
     }
+    //proceso que incrita varios valores
+     public function getInventario()
+    {
+        return "{$this->codigo_producto} - {$this->nombre_producto}";
+    }
+    
     public function getAplicaIva() {
         if($this->aplica_iva == 0){
            $aplicaiva = 'SI';
