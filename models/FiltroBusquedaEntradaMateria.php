@@ -15,10 +15,12 @@ class FiltroBusquedaEntradaMateria extends Model
     public $fecha_inicio;
     public $fecha_corte;
     public $proveedor;
+    public $tipo_entrada;
+    public $orden;
     public function rules()
     {
         return [  
-           [['id_entrada','proveedor'], 'integer'],
+           [['id_entrada','proveedor','tipo_entrada','orden'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -30,6 +32,8 @@ class FiltroBusquedaEntradaMateria extends Model
             'proveedor' => 'Proveedor:',
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
+            'orden' => 'Tipo de orden:',
+            'tipo_entrada' => 'Tipo entrada:',
             
        
         ];

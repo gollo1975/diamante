@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')->all(), 'id_proveedor', 'nombre_completo');
+$orden_compra = ArrayHelper::map(OrdenCompra::find()->orderBy ('descripcion ASC')->all(), 'id_orden_compra', 'descripcion');
 
 ?>
 
@@ -55,9 +56,16 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
 	
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
-             <?= $formulario->field($form, "id_entrada")->input("search") ?>
+            
              <?= $formulario->field($form, 'proveedor')->widget(Select2::classname(), [
                 'data' => $proveedor,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+            <?= $formulario->field($form, 'orden')->widget(Select2::classname(), [
+                'data' => $orden_compra,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -77,7 +85,8 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
-          
+            <?= $formulario->field($form, 'tipo_entrada')->dropdownList(['1' => 'ORDEN DE COMPRA', '2' => 'MANUAL'], ['prompt' => 'Seleccione...']) ?>
+            
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -103,6 +112,7 @@ $form = ActiveForm::begin([
                 
                 <th scope="col" style='background-color:#B9D5CE;'>No Orden</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Entrada</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Soporte</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrada</th>
@@ -126,6 +136,7 @@ $form = ActiveForm::begin([
                 <?php }else{?>    
                     <td><?= $val->ordenCompra->tipoOrden->descripcion_orden?></td>
                 <?php } ?>    
+                   <td><?= $val->tipoEntrada?></td>    
                 <td><?= $val->proveedor->nombre_completo?></td>
                 <td><?= $val->numero_soporte?></td>
                 <td><?= $val->fecha_proceso?></td>
@@ -134,23 +145,37 @@ $form = ActiveForm::begin([
                 <td style="text-align: right"><?= ''.number_format($val->total_salida,0)?></td>
                 <td><?= $val->user_name_crear?></td>
                 <td><?= $val->autorizadoCompra?></td>
-                <td style= 'width: 25px; height: 10px;'>
-                    <a href="<?= Url::toRoute(["entrada-producto-terminado/view", "id" => $val->id_entrada, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                </td>
-                <?php if(!$detalle){?>
-                    <td style= 'width: 25px; height: 10px;'>
-                       <a href="<?= Url::toRoute(["entrada-producto-terminado/update", "id" => $val->id_entrada]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                <?php if($val->tipo_entrada == 1){?>
+                    <td style= 'width: 20px; height: 20px;'>
+                        <a href="<?= Url::toRoute(["entrada-producto-terminado/view", "id" => $val->id_entrada, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
-                <?php }else{?>
-                    <td style= 'width: 25px; height: 10px;'></td>
-                <?php }?>    
+                <?php }else{?>    
+                    <td style= 'width: 20px; height: 20px;'>
+                        <a href="<?= Url::toRoute(["entrada-producto-terminado/codigo_barra_ingreso", "id" => $val->id_entrada]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                    </td>
+                <?php }    
+                if(!$detalle && $val->tipo_entrada == 1){?>
+                    <td style= 'width: 20px; height: 20px;'>
+                       <a href="<?= Url::toRoute(["entrada-producto-terminado/update", "id" => $val->id_entrada, 'sw' => 0]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                    </td>
+                <?php }else{
+                        if(!$detalle && $val->tipo_entrada == 2){?>
+                            <td style= 'width: 20px; height: 20px;'>
+                                <a href="<?= Url::toRoute(["entrada-producto-terminado/update", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                            </td>
+                        <?php }else{?>    
+                            <td style= 'width: 20px; height: 20px;'>
+                                <a href="<?= Url::toRoute(["entrada-producto-terminado/imprimir_entrada_producto", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-print"></span></a>                   
+                            </td>
+                        <?php }    
+                }?>  
             </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-            <a align="right" href="<?= Url::toRoute(["entrada-producto-terminado/create", 'sw' => 1]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+            <a align="right" href="<?= Url::toRoute(["entrada-producto-terminado/create", 'sw' => 1]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo sin OC</a>
             <a align="right" href="<?= Url::toRoute(["entrada-producto-terminado/create", 'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo con OC</a>
         <?php $form->end() ?>
         </div>

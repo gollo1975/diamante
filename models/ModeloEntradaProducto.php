@@ -25,7 +25,7 @@ class ModeloEntradaProducto extends Model
     {
         return [   
             'cantidad' => 'Cantidad unidades:',
-            'codigo_producto' => 'Codigo producto:',
+            'codigo_producto' => 'Codigo del producto:',
           
        
         ];

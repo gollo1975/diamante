@@ -62,15 +62,20 @@ class EntradaProductoTerminadoController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $proveedor = null;
+                $orden = null;
+                $tipo_entrada = null;       
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $id_entrada = Html::encode($form->id_entrada);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $proveedor = Html::encode($form->proveedor);
+                        $orden = Html::encode($form->orden);
+                        $tipo_entrada = Html::encode($form->tipo_entrada);
                         $table = EntradaProductoTerminado::find()
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['=', 'id_orden_compra', $id_entrada])
+                                    ->andFilterWhere(['=', 'id_orden_compra', $orden])
+                                    ->andFilterWhere(['=', 'tipo_entrada', $tipo_entrada])
                                     ->andFilterWhere(['=', 'id_proveedor', $proveedor]);
                         $table = $table->orderBy('id_entrada DESC');
                         $tableexcel = $table->all();
@@ -199,7 +204,12 @@ class EntradaProductoTerminadoController extends Controller
             $model->user_name_crear= Yii::$app->user->identity->username;
             $model->update();
             $token = 0;
-            return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
+            if($sw == 0){
+                return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
+            }else{
+                return $this->redirect(['codigo_barra_ingreso', 'id' => $model->id_entrada]);
+            }
+            
         }
 
         return $this->render('create', [
@@ -233,7 +243,7 @@ class EntradaProductoTerminadoController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $sw)
     {
         $model = $this->findModel($id);
         $ordenes = \app\models\OrdenCompra::find()->where(['=','abreviatura', 'IPT'])->orderBy('id_orden_compra desc')->all(); 
@@ -243,13 +253,17 @@ class EntradaProductoTerminadoController extends Controller
         }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $model->user_name_edit= Yii::$app->user->identity->username;
-            $model->update();
+            if($sw == 1){
+                $model->id_orden_compra = null;
+            }
+            $model->update(false);
             return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
             'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
+            'sw' => $sw,
         ]);
     }
      
@@ -276,6 +290,21 @@ class EntradaProductoTerminadoController extends Controller
         }    
     }
     
+     //AUTORIZAR ENTRADA SIN OC
+     public function actionAutorizado_sinoc($id) {
+        $model = $this->findModel($id);
+        if ($model->autorizado == 0) {                        
+                $model->autorizado = 1;            
+               $model->update();
+               $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso", 'id' => $id]);  
+
+        } else{
+                $model->autorizado = 0;
+                $model->update();
+                $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso", 'id' => $id]);  
+        }    
+    }
+    
     /**
      * Deletes an existing EntradaProductoTerminado model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -290,6 +319,14 @@ class EntradaProductoTerminadoController extends Controller
         $detalle->delete();
         $this->ActualizarLineas($id);
         $this->redirect(["view",'id' => $id, 'token' => $token]);        
+    } 
+    //ELIMINAR DETALLES  
+    public function actionEliminar_manual($id,$detalle)
+    {                                
+        $detalle = EntradaProductoTerminadoDetalle::findOne($detalle);
+        $detalle->delete();
+        $this->ActualizarLineas($id);
+        $this->redirect(["codigo_barra_ingreso",'id' => $id]);        
     } 
     
     //actualizar inventario
@@ -320,6 +357,34 @@ class EntradaProductoTerminadoController extends Controller
         $orden->importado = 1;
         $orden->save();
         $this->redirect(["entrada-producto-terminado/view", 'id' => $id, 'token' =>$token]);
+    }
+    //ACTUALIZAR INVENTARIO SIN OC
+    
+    //actualizar inventario
+     public function actionActualizar_inventario($id) {
+        $model = $this->findModel($id);
+        $detalle = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all(); // carga el detalle
+        $codigo = 0;
+        foreach ($detalle as $detalles):
+            $inventario = InventarioProductos::find()->where(['=','id_inventario', $detalles->id_inventario])->one();
+            if($inventario){
+                $codigo = $inventario->id_inventario;
+                $inventario->fecha_vencimiento = $detalles->fecha_vencimiento;
+                if($detalles->actualizar_precio == 1){
+                   $inventario->costo_unitario  = $detalles->valor_unitario;
+                   $inventario->unidades_entradas += $detalles->cantidad; 
+                   $inventario->stock_unidades += $detalles->cantidad;
+                } else {
+                   $inventario->unidades_entradas += $detalles->cantidad;   
+                   $inventario->stock_unidades += $detalles->cantidad;
+                } 
+                $inventario->save(false);
+                $this->ActualizarCostoInventario($codigo);
+            }
+        endforeach;
+        $model->enviar_materia_prima = 1;
+        $model->save();
+        $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso", 'id' => $id]);
     }
     
    //proceso para multiplicar inventario
@@ -363,6 +428,75 @@ class EntradaProductoTerminadoController extends Controller
                 echo "<option value='$row->id_orden_compra' required>$row->descripcion</option>";
             }
         }
+    }
+    
+    //PROCESO QUE INGRESA CON CODIGO DE BARRAS
+    public function actionCodigo_barra_ingreso($id) {
+        $form = new \app\models\ModeloEntradaProducto();
+        $model = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all();
+        $codigo_producto = 0;
+        if ($form->load(Yii::$app->request->get())) {
+            $codigo_producto = Html::encode($form->codigo_producto);
+            if ($codigo_producto > 0) {
+                $table = InventarioProductos::find()->Where(['=','codigo_producto', $codigo_producto])->one();
+                if($table){
+                    $entrada = new EntradaProductoTerminadoDetalle();
+                    $entrada->id_entrada = $id;
+                    $entrada->id_inventario = $table->id_inventario;
+                    $entrada->fecha_vencimiento = date('Y-m-d');
+                    $entrada->porcentaje_iva = $table->porcentaje_iva;
+                    $entrada->valor_unitario = $table->costo_unitario;
+                    $entrada->save(false);
+                    $model = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all(); 
+                    $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso",'id' => $id]);
+                    if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_entrada  DESC']);
+                            $this->actionExcelConsultaEntrada($tableexcel);
+                    }
+                }else{
+                    Yii::$app->getSession()->setFlash('info', 'El código del producto no se encuentra en el sistema.');
+                }
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe digitar codigo del producto a buscar.');
+            }    
+        }
+        if(isset($_POST["actualizarlineas"])){
+            if(isset($_POST["detalle_entrada"])){
+                $intIndice = 0;
+                $auxiliar = 0;
+                $iva = 0 ;
+                foreach ($_POST["detalle_entrada"] as $intCodigo):
+                    $table = EntradaProductoTerminadoDetalle::findOne($intCodigo);
+                    $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
+                    $table->cantidad = $_POST["cantidad"]["$intIndice"];
+                    $table->fecha_vencimiento = $_POST["fecha_vcto"]["$intIndice"];
+                    if($_POST["actualizar_precio"]["$intIndice"] == 1){
+                       $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
+                       $auxiliar =  $table->cantidad * $table->valor_unitario;
+                       $iva = round(($auxiliar * $table->porcentaje_iva)/100);
+                    }else{
+                       $auxiliar =  $table->cantidad * $table->valor_unitario;
+                       $iva = round(($auxiliar * $table->porcentaje_iva)/100);
+                    }
+                    $table->total_iva = $iva;
+                    $table->subtotal = $auxiliar;
+                    $table->total_entrada = $iva + $auxiliar;
+                    $table->save(false);
+                    $auxiliar = 0;
+                    $iva = 0;   
+                    $intIndice++;
+                endforeach;
+                $this->ActualizarLineas($id);
+                return $this->redirect(['codigo_barra_ingreso','id' =>$id]);
+            }
+            
+        }
+        return $this->render('_form_codigo_barras', [
+                    'model' => $model,
+                    'form' => $form,
+                    'id' => $id,
+        ]);
+        
     }
     
     /**

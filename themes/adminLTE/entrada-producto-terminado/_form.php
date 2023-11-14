@@ -55,7 +55,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
              
         </div>
          <div class="row">
-           <?= $form->field($model, 'tipo_entrada')->dropdownList(['1' => 'ORDEN DE COMPRA', '2' => 'MANUAL'], ['prompt' => 'Seleccione...', 'onchange' => 'fpago()', 'id' => 'forma_pago']) ?>
+            <?= $form->field($model, 'tipo_entrada')->dropdownList(['1' => 'ORDEN DE COMPRA', '2' => 'MANUAL'], ['prompt' => 'Seleccione...']) ?>
             <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div>    
         <div class="panel-footer text-right">			
