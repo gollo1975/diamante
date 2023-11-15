@@ -30,7 +30,7 @@ class FiltroBusquedaProveedor extends Model
     {
         return [   
             'nitcedula' => 'Documento:',
-            'nombre_completo' => 'Razon social:',
+            'nombre_completo' => 'Nombre del cliente:',
             'activo' => 'Activo:',
             'vendedor' => 'Agente comercial:',
             'tipo_cliente' => 'Tipo cliente:',

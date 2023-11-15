@@ -38,9 +38,9 @@ class LoginForm extends Model
     public function attributeLabels()
     {
         return [
-            'username' => 'Usuario:',
+            'username' => 'Digite el usuario',
             'rememberMe' => 'Recordarme:',
-            'password' => 'Clave:',
+            'password' => 'Digite la clave',
         ];
     }
 

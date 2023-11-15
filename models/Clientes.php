@@ -123,7 +123,7 @@ class Clientes extends \yii\db\ActiveRecord
             'fecha_editado' => 'Fecha Editado:',
             'observacion' => 'Observacion:',
             'id_posicion' => 'Posicion venta:',
-            'nombre_completo' => 'Razon social:',
+            'nombre_completo' => 'Nombre del cliente:',
             'estado_cliente' => 'Activo',
             'cupo_asignado' => 'Cupo asignado:',
             'id_agente'=> 'Agente comercial:',

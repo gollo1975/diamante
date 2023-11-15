@@ -128,13 +128,15 @@ class PedidosController extends Controller
                     }
                 } else {
                     if($tokenAcceso == 3){
-                        $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])->orderBy('id_pedido DESC');
+                        $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])
+                                               ->andWhere(['=','facturado', 0])->orderBy('id_pedido DESC');
                     }
                     if($tokenAcceso == 1){
-                        $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])->orderBy('id_pedido DESC');
+                        $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])
+                                                ->andWhere(['=','facturado', 0])->orderBy('id_pedido DESC');
                     }
                     if($tokenAcceso == 2){
-                       $table = Pedidos::find()->orderBy('id_pedido DESC');
+                       $table = Pedidos::find()->Where(['=','facturado', 0])->orderBy('id_pedido DESC');
                     }
                    
                     $count = clone $table;

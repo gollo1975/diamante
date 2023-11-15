@@ -84,7 +84,9 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        Registros <span class="badge"><?= $pagination->totalCount ?></span>
+        <?php if($model){?> 
+            Registros <span class="badge"><?= $pagination->totalCount ?></span>
+        <?php } ?>     
     </div>
         <table class="table table-bordered table-hover">
             <thead>
@@ -105,7 +107,9 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
+            <?php
+            if($model){ 
+                foreach ($model as $val): ?>
             <tr style="font-size: 90%;">                   
                  <td><?= $val->tipoDocumento->tipo_documento ?></td>
                 <td><?= $val->nit_cedula ?></td>
@@ -143,19 +147,26 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
                 </td>
             </tr>
             </tbody>
-            <?php endforeach; ?>
+            <?php endforeach; 
+            }?>
         </table>
         <div class="panel-footer text-right" >
              <?php
                 $form = ActiveForm::begin([
                             "method" => "post",                            
                         ]);
-                ?>    
-            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
-            <a align="right" href="<?= Url::toRoute("clientes/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+                ?> 
+             <?php if($model){?> 
+                <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
+                <a align="right" href="<?= Url::toRoute("clientes/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+             <?php }else{ ?>     
+                <a align="right" href="<?= Url::toRoute("clientes/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>   
+             <?php }?>   
               <?php $form->end() ?>
             
         </div>
     </div>
 </div>
-<?= LinkPager::widget(['pagination' => $pagination]) ?>
+ <?php if($model){?> 
+   <?= LinkPager::widget(['pagination' => $pagination]) ?>
+ <?php } ?> 

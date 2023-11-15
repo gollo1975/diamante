@@ -67,6 +67,8 @@ class ClientesController extends Controller
                 $activo = null;
                 $vendedor = null;
                 $tipo_cliente = null;
+                $model = null;
+                $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $nitcedula = Html::encode($form->nitcedula);
@@ -98,24 +100,7 @@ class ClientesController extends Controller
                     } else {
                         $form->getErrors();
                     }
-                } else {
-                    $table = Clientes::find()
-                            ->orderBy('id_cliente desc');
-                    $count = clone $table;
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count(),
-                    ]);
-                    $tableexcel = $table->all();
-                    $model = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-                    if(isset($_POST['excel'])){                    
-                            $this->actionExcelconsultaClientes($tableexcel);
-                    }
-                }
-                $to = $count->count();
+                } 
                 return $this->render('index', [
                             'model' => $model,
                             'form' => $form,

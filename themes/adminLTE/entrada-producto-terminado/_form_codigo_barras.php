@@ -54,7 +54,7 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
 
         <div class="panel-body" id="codigo_barra">
             <div class="row" >
-                <?= $formulario->field($form, "codigo_producto")->input(["search", 'id' => 'codigo_producto']) ?>
+                <?= $formulario->field($form, "codigo_producto")->input(["search"])?>
            </div>
         </div>    
         <div class="panel-footer text-right">
@@ -138,19 +138,4 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
        
 </div>
 <?php $formulario->end() ?>
-<script type="text/javascript">
-    function mostrarcampo(){
-        var actualizar_precio = document.getElementById('actualizar_precio').value;
-        if(actualizar_precio == '0'){
-           valor_unitario.style.display = "block";
-        } else {
-            valor_unitario.style.display = "none";
-           
-        }
-    }
-</script>    
-
-    
-
-
 
