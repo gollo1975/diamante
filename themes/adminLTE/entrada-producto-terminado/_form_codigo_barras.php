@@ -31,7 +31,8 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                            'data' => ['confirm' => 'Esta seguro de subir esta entrada al inventario de producto terminado.', 'method' => 'post']]);?>
             <?php }
     }?>        
-</p>    
+</p>  
+
 <!--<h1>Lista Facturas</h1>-->
 
 <?php $formulario = ActiveForm::begin([
@@ -46,15 +47,17 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                 ],
 
 ]);?>
+ 
 <?php if($entrada->autorizado == 0){?>
+
     <div class="panel panel-success panel-filters">
         <div class="panel-heading">
             Busqueda por codigo de barras
         </div>
 
-        <div class="panel-body" id="codigo_barra">
+        <div class="panel-body" id="entrada_producto">
             <div class="row" >
-                <?= $formulario->field($form, "codigo_producto")->input(["search"])?>
+                <?= $formulario->field($form, 'codigo_producto',['inputOptions' =>['autofocus' => 'autofocus', 'class' => 'form-control']])?>
            </div>
         </div>    
         <div class="panel-footer text-right">
@@ -62,6 +65,8 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
         </div>
 
     </div>
+    
+
 <?php }
  $formulario->end() ?>
 <?php
@@ -114,7 +119,7 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                         <input type="hidden" name="detalle_entrada[]" value="<?= $val->id_detalle ?>">
                         <?php if($entrada->autorizado == 0){?>
                             <td style= 'width: 1%; height: 1%;'>
-                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_manual', 'id' => $id, 'detalle' => $val->id_detalle], [
+                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_manual', 'id' => $id, 'detalle_manual' => $val->id_detalle], [
                                            'class' => '',
                                            'data' => [
                                                'confirm' => 'Esta seguro de eliminar el registro?',
@@ -135,7 +140,7 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                 <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
             </div>    
         <?php }?>   
-       
+      <?php $formulario->end() ?>       
 </div>
-<?php $formulario->end() ?>
+
 

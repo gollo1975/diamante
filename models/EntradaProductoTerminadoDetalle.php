@@ -41,6 +41,7 @@ class EntradaProductoTerminadoDetalle extends \yii\db\ActiveRecord
             [['id_entrada', 'id_inventario', 'actualizar_precio', 'cantidad', 'valor_unitario', 'total_iva', 'subtotal', 'total_entrada'], 'integer'],
             [['fecha_vencimiento'], 'safe'],
             [['porcentaje_iva'], 'number'],
+            ['codigo_producto', 'string'],
             [['id_entrada'], 'exist', 'skipOnError' => true, 'targetClass' => EntradaProductoTerminado::className(), 'targetAttribute' => ['id_entrada' => 'id_entrada']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
         ];
@@ -63,6 +64,7 @@ class EntradaProductoTerminadoDetalle extends \yii\db\ActiveRecord
             'total_iva' => 'Total Iva',
             'subtotal' => 'Subtotal',
             'total_entrada' => 'Total Entrada',
+            'codigo_producto' => 'Codigo producto:',
         ];
     }
 

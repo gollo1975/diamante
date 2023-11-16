@@ -315,15 +315,15 @@ class EntradaProductoTerminadoController extends Controller
      //ELIMINAR DETALLES  
     public function actionEliminar($id,$detalle, $token)
     {                                
-        $detalle = EntradaProductoTerminadoDetalle::findOne($detalle);
-        $detalle->delete();
+        $detalles = EntradaProductoTerminadoDetalle::findOne($detalle);
+        $detalles->delete();
         $this->ActualizarLineas($id);
         $this->redirect(["view",'id' => $id, 'token' => $token]);        
     } 
     //ELIMINAR DETALLES  
-    public function actionEliminar_manual($id,$detalle)
+    public function actionEliminar_manual($id, $detalle_manual)
     {                                
-        $detalle = EntradaProductoTerminadoDetalle::findOne($detalle);
+        $detalle = EntradaProductoTerminadoDetalle::findOne($detalle_manual);
         $detalle->delete();
         $this->ActualizarLineas($id);
         $this->redirect(["codigo_barra_ingreso",'id' => $id]);        
@@ -440,24 +440,34 @@ class EntradaProductoTerminadoController extends Controller
             if ($codigo_producto > 0) {
                 $table = InventarioProductos::find()->Where(['=','codigo_producto', $codigo_producto])->one();
                 if($table){
-                    $entrada = new EntradaProductoTerminadoDetalle();
-                    $entrada->id_entrada = $id;
-                    $entrada->id_inventario = $table->id_inventario;
-                    $entrada->fecha_vencimiento = date('Y-m-d');
-                    $entrada->porcentaje_iva = $table->porcentaje_iva;
-                    $entrada->valor_unitario = $table->costo_unitario;
-                    $entrada->save(false);
-                    $model = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all(); 
-                    $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso",'id' => $id]);
-                    if (isset($_POST['excel'])) {
-                            $check = isset($_REQUEST['id_entrada  DESC']);
-                            $this->actionExcelConsultaEntrada($tableexcel);
-                    }
+                    $conDato = EntradaProductoTerminadoDetalle::find()->where(['=','codigo_producto', $codigo_producto])
+                                                                      ->andWhere(['=','id_entrada', $id])->one();
+                    if(!$conDato){
+                        $entrada = new EntradaProductoTerminadoDetalle();
+                        $entrada->id_entrada = $id;
+                        $entrada->id_inventario = $table->id_inventario;
+                        $entrada->codigo_producto = $codigo_producto;
+                        $entrada->fecha_vencimiento = date('Y-m-d');
+                        $entrada->porcentaje_iva = $table->porcentaje_iva;
+                        $entrada->valor_unitario = $table->costo_unitario;
+                        $entrada->save(false);
+                        $model = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all(); 
+                        $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso",'id' => $id]);
+                        if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id_entrada  DESC']);
+                                $this->actionExcelConsultaEntrada($tableexcel);
+                        }
+                    }else{
+                        Yii::$app->getSession()->setFlash('success', 'El código digitado ya se en cuentra agregado a esta entrada.');
+                     return $this->redirect(['codigo_barra_ingreso','id' =>$id]);
+                    }    
                 }else{
-                    Yii::$app->getSession()->setFlash('info', 'El código del producto no se encuentra en el sistema.');
+                     Yii::$app->getSession()->setFlash('info', 'El código del producto no se encuentra en el sistema.');
+                     return $this->redirect(['codigo_barra_ingreso','id' =>$id]);
                 }
             }else{
                 Yii::$app->getSession()->setFlash('warning', 'Debe digitar codigo del producto a buscar.');
+                return $this->redirect(['codigo_barra_ingreso','id' =>$id]);
             }    
         }
         if(isset($_POST["actualizarlineas"])){
