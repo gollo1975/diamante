@@ -105,7 +105,9 @@ $view = 'inventario-productos';
     <div>
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#ordenproduccion" aria-controls="ordenproduccion" role="tab" data-toggle="tab">Lotes de producción <span class="badge"><?= $pagination->totalCount ?></span></a></li>
+            <li role="presentation" ><a href="#entrada_producto" aria-controls="entrada_producto" role="tab" data-toggle="tab">Entradas productos <span class="badge"><?= count($entradas) ?></span></a></li>
         </ul>
+        
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="ordenproduccion">
                 <div class="table-responsive">
@@ -150,7 +152,51 @@ $view = 'inventario-productos';
                     </div>   
                 </div>
             </div>
+            <!--FIN TABS-->
             <!--INICIO EL OTRO TABS -->
+             <div role="tabpanel" class="tab-pane " id="entrada_producto">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style='font-size:85%;'>
+                                        <th scope="col" style='background-color:#B9D5CE;'>No entrada</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>T. Entrada</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Soporte</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>F. entrada</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Vr. Unit.</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Total </th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>User name </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($entradas as $val): ?>
+                                            <tr style ='font-size: 90%;'>                
+                                                <td><?= $val->id_entrada?></td>
+                                                <td><?= $val->entrada->tipoEntrada?></td>    
+                                                <td><?= $val->entrada->proveedor->nombre_completo?></td>
+                                                <td><?= $val->entrada->numero_soporte?></td>
+                                                <td><?= $val->entrada->fecha_proceso?></td>
+                                                <td style="text-align: right;"><?= ''.number_format($val->cantidad,0)?></td>
+                                                <td style="text-align: right;"><?= ''.number_format($val->valor_unitario,0)?></td>
+                                                <td style="text-align: right;"><?= ''.number_format($val->subtotal,0    )?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->total_iva,0)?></td>
+                                                <td style="text-align: right"><?= ''.number_format($val->total_entrada,0)?></td>
+                                                <td><?= $val->entrada->user_name_crear?></td>
+                                            </tr>            
+                                        <?php endforeach;?>
+                                </tbody>      
+                            </table>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+            <!-- FIN TABS-->
         </div>
     </div>    
 </div>

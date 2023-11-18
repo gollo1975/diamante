@@ -51,7 +51,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
     {
         return [
             [['numero_orden', 'id_almacen', 'id_grupo', 'numero_lote', 'subtotal', 'iva', 'total_orden', 'autorizado', 'cerrar_orden',
-                'tipo_orden', 'unidades', 'costo_unitario'], 'integer'],
+                'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado'], 'integer'],
             [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
@@ -87,6 +87,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             'unidades' => 'Unidades:',
             'costo_unitario' => 'Costo unitario:',
             'responsable' => 'Responsable:',
+            'producto_aprobado' => 'Producto aprobado:',
         ];
     }
 
@@ -123,12 +124,21 @@ class OrdenProduccion extends \yii\db\ActiveRecord
         }
         return $cerrarorden;
     }
-     public function getTipoOrden() {
+    
+    public function getTipoOrden() {
         if($this->tipo_orden == 0 ){
             $tipoorden = 'REPROGRAMACION';
         }else{
             $tipoorden = 'PRODUCTO NUEVO';
         }
         return $tipoorden;
+    }
+    public function getProductoAprobado() {
+        if($this->producto_aprobado == 0 ){
+            $productoaprobado = 'NO';
+        }else{
+            $productoaprobado = 'SI';
+        }
+        return $productoaprobado;
     }
 }

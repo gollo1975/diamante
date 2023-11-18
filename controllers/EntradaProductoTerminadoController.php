@@ -508,7 +508,13 @@ class EntradaProductoTerminadoController extends Controller
         ]);
         
     }
-    
+    //IMPRESIONES
+    public function actionImprimir_entrada_producto($id) {
+        $model = EntradaProductoTerminado::findOne($id);
+        return $this->render('../formatos/reporte_entrada_producto', [
+            'model' => $model,
+        ]);
+    }
     /**
      * Finds the EntradaProductoTerminado model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -588,8 +594,15 @@ class EntradaProductoTerminadoController extends Controller
             foreach ($detalle as $detalles){
                 $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('A' . $i, $val->id_entrada)
-                        ->setCellValue('B' . $i, $val->proveedor->nombre_completo)
-                        ->setCellValue('C' . $i, $val->ordenCompra->tipoOrden->descripcion_orden)
+                        ->setCellValue('B' . $i, $val->proveedor->nombre_completo);
+                        if($val->id_orden_compra == null){
+                            $objPHPExcel->setActiveSheetIndex(0) 
+                            ->setCellValue('C' . $i, 'NO FOUND');        
+                        }else {
+                             $objPHPExcel->setActiveSheetIndex(0) 
+                             ->setCellValue('C' . $i, $val->ordenCompra->tipoOrden->descripcion_orden);  
+                        }
+                        $objPHPExcel->setActiveSheetIndex(0) 
                         ->setCellValue('D' . $i, $val->numero_soporte)
                         ->setCellValue('E' . $i, $val->fecha_proceso)
                         ->setCellValue('F' . $i, $val->fecha_registro)

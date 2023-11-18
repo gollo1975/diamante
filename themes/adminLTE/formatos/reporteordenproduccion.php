@@ -177,7 +177,7 @@ class PDF extends FPDF {
 		
         foreach ($producto as $detalle) {                                                           
             $pdf->Cell(23, 4, $detalle->codigo_producto, 0, 0, 'L');
-            $pdf->Cell(63, 4, $detalle->descripcion, 0, 0, 'L');
+            $pdf->Cell(63, 4, utf8_decode($detalle->descripcion), 0, 0, 'L');
             $pdf->Cell(23, 4, $detalle->cantidad, 0, 0, 'C');
             $pdf->Cell(28, 4, $detalle->numero_lote, 0, 0, 'C');
             $pdf->Cell(30, 4, $detalle->medidaProducto->descripcion, 0, 0, 'C');
@@ -206,9 +206,9 @@ class PDF extends FPDF {
         $pdf->SetFont('Arial', '', 7);
         foreach ($materiales as $detalle) {                                    
             $pdf->Cell(23, 4, $detalle->materiaPrima->codigo_materia_prima, 0, 0, 'L');            
-            $pdf->Cell(100, 4, $detalle->materiaPrima->materia_prima, 0, 0, 'L');
+            $pdf->Cell(100, 4, utf8_decode($detalle->materiaPrima->materia_prima), 0, 0, 'L');
             $pdf->Cell(35, 4, ' '.number_format($detalle->cantidad, 0), 0, 0, 'R');
-            $pdf->Cell(34, 4, $detalle->materiaPrima->medida->descripcion, 0, 0, 'C');
+            $pdf->Cell(34, 4, utf8_decode($detalle->materiaPrima->medida->descripcion), 0, 0, 'C');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }

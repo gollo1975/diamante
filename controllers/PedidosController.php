@@ -273,6 +273,8 @@ class PedidosController extends Controller
                 $facturado = null; $pedido_cerrado = null;
                 $vendedores = null; $numero_pedido = null;
                 $presupuesto = null;
+                $model = null;
+                $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -312,23 +314,7 @@ class PedidosController extends Controller
                     } else {
                         $form->getErrors();
                     }
-                } else {
-                    $table = Pedidos::find()->Where(['=','autorizado', 1])->andWhere(['=','cerrar_pedido', 1])->orderBy('id_pedido DESC');
-                   $count = clone $table;
-                    $pages = new Pagination([
-                        'pageSize' => 20,
-                        'totalCount' => $count->count(),
-                    ]);
-                    $tableexcel = $table->all();
-                    $model = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-                    if(isset($_POST['excel'])){                    
-                            $this->actionExcelconsultaPedidos($tableexcel);
-                    }
-                }
-                echo $to = $count->count();
+                } 
                 return $this->render('search_pedidos', [
                             'model' => $model,
                             'form' => $form,

@@ -106,7 +106,9 @@ $form = ActiveForm::begin([
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
+        <?php if($model){?>
         Registros <span class="badge"><?= $pagination->totalCount ?></span>
+        <?php }?>
     </div>
         <table class="table table-bordered table-hover">
             <thead>
@@ -128,7 +130,8 @@ $form = ActiveForm::begin([
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
+            <?php if($model){
+            foreach ($model as $val): ?>
             <tr style="font-size: 90%;">  
                     <td><?= $val->numero_pedido ?></td>
                     <td><?= $val->cliente ?></td>
@@ -159,13 +162,19 @@ $form = ActiveForm::begin([
                         <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
             </tr>
-            <?php endforeach; ?>
+            <?php endforeach;
+            }?>
             </tbody>
         </table>
-     <div class="panel-footer text-right" >            
-        <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-        <?php $form->end() ?>
-    </div>
+     <?php if($model){?>
+        <div class="panel-footer text-right" >            
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+         
+       </div>
+     <?php } ?>
+      <?php $form->end() ?>
     </div>
 </div>
-<?= LinkPager::widget(['pagination' => $pagination]) ?>
+ <?php if($model){?>
+   <?= LinkPager::widget(['pagination' => $pagination]) ?>
+ <?php }?>

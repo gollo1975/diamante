@@ -119,14 +119,11 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                         <input type="hidden" name="detalle_entrada[]" value="<?= $val->id_detalle ?>">
                         <?php if($entrada->autorizado == 0){?>
                             <td style= 'width: 1%; height: 1%;'>
-                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_manual', 'id' => $id, 'detalle_manual' => $val->id_detalle], [
-                                           'class' => '',
-                                           'data' => [
-                                               'confirm' => 'Esta seguro de eliminar el registro?',
-                                               'method' => 'post',
-                                           ],
-                                       ])
-                                ?>
+                                <a href="<?= Url::toRoute(["entrada-producto-terminado/eliminar_manual", 'id' => $id, 'detalle_manual' => $val->id_detalle])?>"
+                                        <span class='glyphicon glyphicon-trash'></span> </a>
+                                
+                                
+                                
                             </td>    
                         <?php }else{?>
                             <td style= 'width: 1%; height: 1%;'></td>

@@ -384,11 +384,13 @@ class InventarioProductosController extends Controller
                 ->limit($pages->limit)
                 ->all();
         $to = $count->count();
+        $entradas = \app\models\EntradaProductoTerminadoDetalle::find()->where(['=','id_inventario', $id])->all();
         return $this->render('view', [
             'model' => $model,
             'token' => $token,
             'detalle_entrada' => $detalle_entrada,
             'pagination' => $pages,
+            'entradas' => $entradas,
         ]);
     }
     //VISTA PARA SUBIR ARCHIOS DE IMAGEN
