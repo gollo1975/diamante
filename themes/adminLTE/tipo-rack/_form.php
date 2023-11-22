@@ -2,32 +2,53 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
-/* @var $this yii\web\View */
-/* @var $model app\models\TipoRack */
-/* @var $form yii\widgets\ActiveForm */
+use yii\helpers\Url;
+use yii\helpers\ArrayHelper;
+use yii\widgets\LinkPager;
+use kartik\select2\Select2;
+?>
+<!--<h1>Nuevo proveedor</h1>-->
+<?php
+$form = ActiveForm::begin([
+            "method" => "post",
+            'id' => 'formulario',
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+                'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-3 control-label'],
+                'options' => []
+            ],
+        ]);
 ?>
 
-<div class="tipo-rack-form">
-
-    <?php $form = ActiveForm::begin(); ?>
-
-    <?= $form->field($model, 'numero_rack')->textInput() ?>
-
-    <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'medida_ancho')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'media_alto')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'total_peso')->textInput() ?>
-
-    <?= $form->field($model, 'user_name')->textInput(['maxlength' => true]) ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        RACKS
     </div>
-
-    <?php ActiveForm::end(); ?>
-
+    <div class="panel-body">
+         
+        <div class="row">
+            <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>
+        </div>   
+        <div class="row">
+             <?= $form->field($model, 'medidas')->textInput(['maxlength' => true]) ?>
+        </div>
+       
+         <div class="row">
+            <?= $form->field($model, 'capacidad_instalada')->input("text", ["maxlength" => 11]) ?> 
+        </div>
+        <?php if($sw == 1){?>
+            <div class="row">
+                <?= $form->field($model, 'estado')->dropdownList(['0' => 'ACTIVO', '1' => 'INACTIVO'], ['prompt' => 'Seleccione...']) ?>
+            </div>
+        <?php }?>
+        
+    </div>
+    <div class="panel-footer text-right">
+        <a href="<?= Url::toRoute("tipo-rack/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>        
+    </div>
 </div>
+<?php $form->end() ?>

@@ -3,11 +3,13 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Posiciones;
-use app\models\PosicionesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+//models
+use app\models\Posiciones;
+use app\models\PosicionesSearch;
+use app\models\UsuarioDetalle;
 
 /**
  * PosicionesController implements the CRUD actions for Posiciones model.
@@ -33,15 +35,23 @@ class PosicionesController extends Controller
      * Lists all Posiciones models.
      * @return mixed
      */
-    public function actionIndex()
+      public function actionIndex()
     {
-        $searchModel = new PosicionesSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',70])->all()){
+                $searchModel = new PosicionesSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            } 
+        }else{
+            return $this->redirect(['site/login']);
+        }
     }
 
     /**
@@ -67,7 +77,7 @@ class PosicionesController extends Controller
         $model = new Posiciones();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_posicion]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +97,7 @@ class PosicionesController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_posicion]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
@@ -102,11 +112,19 @@ class PosicionesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+   public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["posiciones/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["posiciones/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+            $this->redirect(["posiciones/index"]);
+        }
     }
 
     /**

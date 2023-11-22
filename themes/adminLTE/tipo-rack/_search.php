@@ -21,11 +21,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'descripcion') ?>
 
-    <?= $form->field($model, 'medida_ancho') ?>
+    <?= $form->field($model, 'medidas') ?>
 
-    <?= $form->field($model, 'media_alto') ?>
+    <?= $form->field($model, 'capacidad_instalada') ?>
 
-    <?php // echo $form->field($model, 'total_peso') ?>
+    <?php // echo $form->field($model, 'capacidad_actual') ?>
+
+    <?php // echo $form->field($model, 'fecha_creacion') ?>
 
     <?php // echo $form->field($model, 'user_name') ?>
 

@@ -17,9 +17,8 @@ class TipoRackSearch extends TipoRack
     public function rules()
     {
         return [
-            [['id_rack', 'numero_rack'], 'integer'],
-            [['descripcion', 'user_name'], 'safe'],
-            [['medida_ancho', 'media_alto', 'total_peso'], 'number'],
+            [['id_rack', 'numero_rack', 'capacidad_instalada', 'capacidad_actual'], 'integer'],
+            [['descripcion', 'medidas', 'fecha_creacion', 'user_name'], 'safe'],
         ];
     }
 
@@ -61,12 +60,13 @@ class TipoRackSearch extends TipoRack
         $query->andFilterWhere([
             'id_rack' => $this->id_rack,
             'numero_rack' => $this->numero_rack,
-            'medida_ancho' => $this->medida_ancho,
-            'media_alto' => $this->media_alto,
-            'total_peso' => $this->total_peso,
+            'capacidad_instalada' => $this->capacidad_instalada,
+            'capacidad_actual' => $this->capacidad_actual,
+            'fecha_creacion' => $this->fecha_creacion,
         ]);
 
         $query->andFilterWhere(['like', 'descripcion', $this->descripcion])
+            ->andFilterWhere(['like', 'medidas', $this->medidas])
             ->andFilterWhere(['like', 'user_name', $this->user_name]);
 
         return $dataProvider;

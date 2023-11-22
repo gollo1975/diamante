@@ -235,6 +235,52 @@
                                     ],
                                 ],
                                 //TERMINA 
+                                //INICIO MODULO DE FACTURACION
+                                [
+                                    'label' => 'LOGISTICA',
+                                    'icon' => 'automobile',
+                                    'url' => '#',
+                                    'items' => [
+                                        [
+                                            'label' => 'Administración',
+                                            'icon' => 'database',
+                                            'url' => '#',
+                                            'items' => [
+                                               ['label' => 'Posiciones', 'icon' => 'plus-square-o', 'url' => ['/posiciones/index']],  
+                                               ['label' => 'Tipo de racks ', 'icon' => 'plus-square-o', 'url' => ['/tipo-rack/index']], 
+                                                
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Utilidades',
+                                            'icon' => 'cube',
+                                            'url' => '#',
+                                            'items' => [
+                                                //['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Consultas',
+                                            'icon' => 'question',
+                                            'url' => '#',
+                                            'items' => [
+                                             //   ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/search_consulta_clientes']],
+                                               // ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
+                                            ],  
+                                        ],
+                                        [
+                                            'label' => 'Movimientos',
+                                            'icon' => 'book',
+                                            'url' => '#',
+                                            'items' => [
+                                              //  ['label' => 'Cargar pedidos', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
+                                               // ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
+                                                                                              
+                                             ],
+                                        ]
+                                    ],
+                                ],
+                                //TERMINA LOGISTICA
                                 //INICIO MODULO CRM COMERCIAL
                                 [
                                     'label' => 'CRM COMERCIAL',

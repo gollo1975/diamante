@@ -19,6 +19,15 @@ class Posiciones extends \yii\db\ActiveRecord
     {
         return 'posiciones';
     }
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->posicion = strtoupper($this->posicion); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -37,7 +46,7 @@ class Posiciones extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_posicion' => 'Id Posicion',
+            'id_posicion' => 'Codigo',
             'posicion' => 'Posicion',
         ];
     }
