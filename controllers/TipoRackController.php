@@ -170,15 +170,27 @@ class TipoRackController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-
-        if ($model->load(Yii::$app->request->post())) {
+       if ($model->load(Yii::$app->request->post())) {
             $table = TipoRack::findOne($id);
             $table->descripcion = $model->descripcion;
             $table->medidas = $model->medidas;
             $table->capacidad_instalada = $model->capacidad_instalada;
-            $table->estado = $model->estado;
-            $table->save(false);
-            return $this->redirect(['index']);
+            if($model->estado == 0){ 
+                $table->estado = $model->estado;
+                $table->save(false);
+                return $this->redirect(['index']);
+            }else{
+               
+                if($table->capacidad_actual <= 0){
+                    $table->estado = $model->estado;
+                    $table->save(false);
+                    return $this->redirect(['index']);
+                }else{
+                    Yii::$app->getSession()->setFlash('info', 'No se puede INACTIVAR  este RACK porque tiene unidades almacenadas.');
+                    return $this->redirect(['index']);
+                }
+            }    
+            
         }
 
         return $this->render('update', [

@@ -811,7 +811,7 @@ class OrdenProduccionController extends Controller
                  $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
             }else{
                 $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
-                Yii::$app->getSession()->setFlash('warning', 'Los productos que se generon en esta orden de produccion ya se importaron.'); 
+                Yii::$app->getSession()->setFlash('warning', 'Los productos que se crearon en esta orden de produccion ya fueron importados al modulo de inventario.'); 
             }    
         }else{
             if(count($detalle) > 0){
@@ -832,7 +832,7 @@ class OrdenProduccionController extends Controller
                     $table->fecha_proceso = $orden->fecha_proceso;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->codigo_ean = $detalles->codigo_producto;
-                    $table->insert();
+                    $table->save(false);
                     $detalles->importado = 1;
                     $detalles->save();
                     $registro = InventarioProductos::find()->orderBy('id_inventario DESC')->one();
@@ -842,7 +842,7 @@ class OrdenProduccionController extends Controller
                 $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
             }else{
                $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
-                Yii::$app->getSession()->setFlash('warning', 'Los productos que se generon en esta orden de produccion ya se importaro al modulo de inventario.');  
+                Yii::$app->getSession()->setFlash('warning', 'Los productos que se crearon en esta orden de produccion ya fueron importados al modulo de inventario.');  
             }    
         }
     }
@@ -856,7 +856,7 @@ class OrdenProduccionController extends Controller
                     if($materia->aplica_inventario == 1){
                         $materia->stock_salida += $detalles->cantidad;
                         $materia->stock -= $detalles->cantidad;
-                        $materia->save();
+                        $materia->save(false);
                         $detalles->importado = 1;
                         $detalles->save();
                         $this->ActualizarCostoMateriaPrima($materia);

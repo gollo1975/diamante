@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th scope="col" style='background-color:#B9D5CE;'>Descripcion</th>
                  <th scope="col" style='background-color:#B9D5CE;'>Medidas</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Capacidad instalada</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Unidades actuales</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Unidades almacenadas</th>
                 <th scope="col" style='background-color:#B9D5CE;'>User name</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Activo</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -89,8 +89,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?= $val->numero_rack ?></td>
                 <td><?= $val->descripcion ?></td>
                 <td><?= $val->medidas ?></td>
-                <td><?= $val->capacidad_instalada ?></td>
-                <td><?= $val->capacidad_actual ?></td>
+                <td style="text-align: right"><?= $val->capacidad_instalada ?></td>
+                <td style ="text-align: right"><?= $val->capacidad_actual ?></td>
                 <td><?= $val->user_name?></td>
                 <td><?= $val->estadoActivo?></td>
                 <td style= 'width: 25px; height: 10px;'>

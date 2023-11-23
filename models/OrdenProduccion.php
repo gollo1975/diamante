@@ -51,7 +51,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
     {
         return [
             [['numero_orden', 'id_almacen', 'id_grupo', 'numero_lote', 'subtotal', 'iva', 'total_orden', 'autorizado', 'cerrar_orden',
-                'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado'], 'integer'],
+                'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado','producto_almacenado'], 'integer'],
             [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
@@ -88,6 +88,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             'costo_unitario' => 'Costo unitario:',
             'responsable' => 'Responsable:',
             'producto_aprobado' => 'Producto aprobado:',
+            'producto_almacenado' => 'Producto almacenado:',
         ];
     }
 
@@ -133,6 +134,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
         }
         return $tipoorden;
     }
+   
     public function getProductoAprobado() {
         if($this->producto_aprobado == 0 ){
             $productoaprobado = 'NO';
@@ -140,5 +142,13 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             $productoaprobado = 'SI';
         }
         return $productoaprobado;
+    }
+    public function getProductoAlmacenado() {
+        if($this->producto_almacenado == 0 ){
+            $productoalmacenado = 'NO';
+        }else{
+            $productoalmacenado = 'SI';
+        }
+        return $productoalmacenado;
     }
 }

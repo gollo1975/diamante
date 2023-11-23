@@ -273,7 +273,7 @@
                                             'icon' => 'book',
                                             'url' => '#',
                                             'items' => [
-                                              //  ['label' => 'Cargar pedidos', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
+                                                ['label' => 'Cargar orden produccion', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/cargar_orden_produccion']],
                                                // ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
                                                                                               
                                              ],
