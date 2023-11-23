@@ -126,7 +126,40 @@ class AlmacenamientoProductoController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
-
+    //VISTA DE ALMACENAMIENTO
+    public function actionView_almacenamiento($id_orden)
+    {
+        $detalle = AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        $model = OrdenProduccion::findOne($id_orden);
+        return $this->render('view_almacenamiento', [
+            'detalle' => $detalle,
+            'id_orden' => $id_orden,
+            'model' => $model,
+        ]);
+    }
+    //CREAR DOCUMENTO
+    public function actionSubir_documento($id, $id_orden) {
+        $model = new \app\models\ModeloDocumento(); 
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["nuevo_documento"])) {
+                   $table = AlmacenamientoProducto::findOne($id) ;
+                   $table->id_documento = $model->documento;
+                   $table->save();
+                   return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]);
+                }
+            }else{
+              $model->getErrors();  
+            }
+             
+         }
+          return $this->renderAjax('form_subir_almacenamiento', [
+                    'model' => $model,
+                    'id' => $id,
+                    'id_orden' => $id_orden, 
+                    
+        ]);
+    }
     /**
      * Creates a new AlmacenamientoProducto model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -144,7 +177,26 @@ class AlmacenamientoProductoController extends Controller
             'model' => $model,
         ]);
     }
-
+    ///PROCESO QUE CARGA EL PROCESO PARA ALMACENAR.
+    public function actionEnviar_lote_almacenar($id_orden) {
+        $lotes = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        $con = 0;
+        foreach ($lotes as $detalle):
+            $table = new AlmacenamientoProducto();
+            $table->id_orden_produccion = $id_orden;
+            $table->codigo_producto = $detalle->codigo_producto;
+            $table->nombre_producto = $detalle->descripcion;
+            $table->unidades_producidas = $detalle->cantidad;
+            $table->fecha_almacenamiento = date('Y-m-d');
+            $table->numero_lote = $detalle->numero_lote;
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save(false);
+            $con += 1;
+        endforeach;
+        Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lotes de la orden de produccion No ('. $id_orden.') al modulo de almacenamiento con éxito.');
+        return $this->redirect(['cargar_orden_produccion']);
+    }
+    
     /**
      * Updates an existing AlmacenamientoProducto model.
      * If update is successful, the browser will be redirected to the 'view' page.

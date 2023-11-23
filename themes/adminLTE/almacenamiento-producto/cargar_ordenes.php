@@ -86,36 +86,45 @@ $form = ActiveForm::begin([
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 90%;'>         
-                
+                 <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No Orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Grupo producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Bodega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total unidades</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Unidades fabricadas</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                          
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
+            <?php foreach ($model as $val): 
+                $almacenar = app\models\AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $val->id_orden_produccion])->orderBy('id_orden_produccion DESC')->one();
+                 ?>
             <tr style ='font-size: 90%;'>                
+                <td><?= $val->id_orden_produccion?></td>
                 <td><?= $val->numero_orden?></td>
                 <td><?= $val->grupo->nombre_grupo?></td>
                  <td><?= $val->almacen->almacen?></td>
                 <td><?= $val->numero_lote?></td>
                 <td><?= $val->fecha_proceso?></td>
                 <td style="text-align: right"><?= ''.number_format($val->unidades, 0)?></td>
-                <td style= 'width: 25px; height: 10px;'>
-                     <?= Html::a('<span class="glyphicon glyphicon-list"></span>', ['enviar_lotes', 'id_orden' => $val->id_orden_produccion], [
-                            'class' => '',
-                            'title' => 'Permite almacenar los lotes de la orden de produccion',
-                            'data' => [
-                                'confirm' => '¿Esta seguro que se desea ALMACENAR  los lotes que estan creados en la OP No ( '.$val->numero_orden.') ?',
-                                'method' => 'post',
-                            ],
-                            ])?>
-                </td>
+                <?php if($almacenar){?>
+                    <td style= 'width: 20px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de los lotes"></span></a>
+                    </td>
+                <?php }else{ ?>
+                    <td style= 'width: 20px; height: 20px;'>
+                         <?= Html::a('<span class="glyphicon glyphicon-list"></span>', ['enviar_lote_almacenar', 'id_orden' => $val->id_orden_produccion], [
+                                'class' => '',
+                                'title' => 'Permite almacenar los lotes de la orden de produccion',
+                                'data' => [
+                                    'confirm' => '¿Esta seguro que se desea ALMACENAR  los lotes que estan creados en la OP No ( '.$val->numero_orden.') ?',
+                                    'method' => 'post',
+                                ],
+                                ])?>
+                    </td>
+                <?php }?>    
             </tr>            
             <?php endforeach; ?>
             </tbody>    

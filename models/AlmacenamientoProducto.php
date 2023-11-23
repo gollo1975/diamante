@@ -39,13 +39,12 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_documento', 'id_rack', 'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes'], 'integer'],
+            [['id_orden_produccion', 'id_documento', 'numero_lote', 'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes'], 'integer'],
             [['fecha_almacenamiento'], 'safe'],
             [['codigo_producto', 'user_name'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_documento'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoAlmacenamiento::className(), 'targetAttribute' => ['id_documento' => 'id_documento']],
-            [['id_rack'], 'exist', 'skipOnError' => true, 'targetClass' => TipoRack::className(), 'targetAttribute' => ['id_rack' => 'id_rack']],
         ];
     }
 
@@ -58,7 +57,7 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
             'id_almacenamiento' => 'Id Almacenamiento',
             'id_orden_produccion' => 'Id Orden Produccion',
             'id_documento' => 'Id Documento',
-            'id_rack' => 'Id Rack',
+            'numero_lote' => 'Numero lote',
             'codigo_producto' => 'Codigo Producto',
             'nombre_producto' => 'Nombre Producto',
             'unidades_producidas' => 'Unidades Producidas',
@@ -85,11 +84,4 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
         return $this->hasOne(DocumentoAlmacenamiento::className(), ['id_documento' => 'id_documento']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getRack()
-    {
-        return $this->hasOne(TipoRack::className(), ['id_rack' => 'id_rack']);
-    }
 }
