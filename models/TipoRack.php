@@ -41,11 +41,12 @@ class TipoRack extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_rack', 'capacidad_instalada', 'capacidad_actual','estado'], 'integer'],
-            [['descripcion'], 'required'],
+            [['numero_rack', 'capacidad_instalada', 'capacidad_actual','estado','id_piso'], 'integer'],
+            [['descripcion','id_piso'], 'required'],
             [['fecha_creacion'], 'safe'],
             [['descripcion', 'medidas'], 'string', 'max' => 30],
             [['user_name'], 'string', 'max' => 15],
+            [['id_piso'], 'exist', 'skipOnError' => true, 'targetClass' => Pisos::className(), 'targetAttribute' => ['id_piso' => 'id_piso']],
         ];
     }
 
@@ -64,8 +65,14 @@ class TipoRack extends \yii\db\ActiveRecord
             'fecha_creacion' => 'Fecha creacion:',
             'user_name' => 'User Name:',
             'estado' => 'Activo:',
+            'id_piso' => 'Numero piso:',
         ];
     }
+     public function getPisos()
+    {
+        return $this->hasOne(Pisos::className(), ['id_piso' => 'id_piso']);
+    }
+    
     public function getEstadoActivo() {
         if($this->estado == 0){
             $estadoactivo = 'SI';
@@ -73,5 +80,11 @@ class TipoRack extends \yii\db\ActiveRecord
             $estadoactivo = 'NO';
         }
         return $estadoactivo;
+    }
+    
+    //proceso que incrita varios valores
+     public function getTiporack()
+    {
+        return "{$this->numero_rack} - {$this->descripcion}";
     }
 }

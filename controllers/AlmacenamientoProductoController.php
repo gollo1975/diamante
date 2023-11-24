@@ -24,6 +24,7 @@ use app\models\AlmacenamientoProducto;
 use app\models\AlmacenamientoProductoSearch;
 use app\models\UsuarioDetalle;
 use app\models\OrdenProduccion;
+use app\models\AlmacenamientoProductoDetalles;
 
 
 /**
@@ -130,11 +131,13 @@ class AlmacenamientoProductoController extends Controller
     public function actionView_almacenamiento($id_orden)
     {
         $detalle = AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        $conAlmacenado = AlmacenamientoProductoDetalles::find()->where(['=','id_orden_produccion', $id_orden])->all();
         $model = OrdenProduccion::findOne($id_orden);
         return $this->render('view_almacenamiento', [
             'detalle' => $detalle,
             'id_orden' => $id_orden,
             'model' => $model,
+            'conAlmacenado' => $conAlmacenado,
         ]);
     }
     //CREAR DOCUMENTO
@@ -151,15 +154,113 @@ class AlmacenamientoProductoController extends Controller
             }else{
               $model->getErrors();  
             }
-             
          }
           return $this->renderAjax('form_subir_almacenamiento', [
                     'model' => $model,
                     'id' => $id,
                     'id_orden' => $id_orden, 
-                    
         ]);
     }
+    //ENVIAR UNIDADES AL RACK
+    public function actionCrear_almacenamiento($id_orden, $id) {
+        $model = new \app\models\ModeloEnviarUnidadesRack();
+        $racks = \app\models\TipoRack::find()->where(['=','estado', 0])->all();
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if(isset($_POST["crear_almacenamiento"])){
+                    $total = 0; $cant = 0; $id_rack = 0;
+                    $conProducto = AlmacenamientoProducto::findOne($id);
+                    if($model->cantidad <= $conProducto->unidades_producidas){
+                        if($conProducto->unidades_almacenadas == 0){
+                             $table = new AlmacenamientoProductoDetalles();
+                            $table->id_almacenamiento = $id;
+                            $table->id_orden_produccion = $id_orden;
+                            $table->id_rack = $model->rack;
+                            $table->id_piso = $model->piso;
+                            $table->id_posicion = $model->posicion; 
+                            $table->cantidad = $model->cantidad;
+                            $table->codigo_producto = $conProducto->codigo_producto;
+                            $table->producto = $conProducto->nombre_producto;
+                            $table->numero_lote = $conProducto->numero_lote;
+                            $table->save(false);
+                            $cant = $model->cantidad;
+                            $id_rack = $model->rack;
+                            $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                            $this->SumarUnidadesRack($id_rack, $cant);
+                            return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                        }else{
+                            $total = $conProducto->unidades_faltantes;
+                            if($model->cantidad <= $total){
+                                $table = new AlmacenamientoProductoDetalles();
+                                $table->id_almacenamiento = $id;
+                                $table->id_orden_produccion = $id_orden;
+                                $table->id_rack = $model->rack;
+                                $table->id_piso = $model->piso;
+                                $table->id_posicion = $model->posicion; 
+                                $table->cantidad = $model->cantidad;
+                                $table->codigo_producto = $conProducto->codigo_producto;
+                                $table->producto = $conProducto->nombre_producto;
+                                $table->numero_lote = $conProducto->numero_lote;
+                                $table->save(false);
+                                $cant = $model->cantidad;
+                                $id_rack = $model->rack;
+                                $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                 $this->SumarUnidadesRack($id_rack, $cant);
+                                return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                            }else{
+                                Yii::$app->getSession()->setFlash('info', 'las unidades que se van a ALMACENAR son mayores con las unidades PRODUCIDAS.!');
+                                return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                            }
+                        }    
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'Las unidades ENVIADAS son mayores que las unidades RESTANTES.!');
+                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                    }    
+                }
+            }else{
+                $model->getErrors();
+            }
+        }
+        return $this->renderAjax('_enviar_unidades_almacenamiento', [
+                    'model' => $model,
+                    'id' => $id,
+                    'id_orden' => $id_orden, 
+                    'tipo_rack' => ArrayHelper::map($racks, "id_rack", "tiporack"),
+        ]);
+    }
+    
+    //PROCESO QUE ACUTLIZA UNIDADES
+    protected function ActualizarUnidadesAlmacenadas($id, $id_orden) {
+        $almacenamiento = AlmacenamientoProducto::findOne($id);
+        $detalle = AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $id])->all();
+        $suma = 0;
+        foreach ($detalle as $detalles):
+            $suma += $detalles->cantidad;    
+        endforeach;
+        $almacenamiento->unidades_almacenadas = $suma;
+        $almacenamiento->unidades_faltantes = $almacenamiento->unidades_producidas - $suma;
+        $almacenamiento->save();
+    }
+    //RELACION DE PISOS CON RACKS
+    
+     public function actionPiso_rack($id){
+        $rows = \app\models\TipoRack::find()->where(['=','id_piso', $id])
+                                               ->andWhere(['=','estado', 0])->all();
+
+        echo "<option value='' required>Seleccione el rack...</option>";
+        if(count($rows)>0){
+            foreach($rows as $row){
+                echo "<option value='$row->id_rack' required>$row->numero_rack - $row->descripcion</option>";
+            }
+        }
+    }
+    ///PROCESO QUE SUMA  LAS UNIDADES EN CADA RACK
+    protected function SumarUnidadesRack($id_rack, $cant) {
+        $rack = \app\models\TipoRack::findOne($id_rack);
+        $rack->capacidad_actual =  $rack->capacidad_actual +  $cant;
+        $rack->save(false);
+    }
+    
     /**
      * Creates a new AlmacenamientoProducto model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -224,11 +325,36 @@ class AlmacenamientoProductoController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+    //ELIMINAR ALMACENAMIENTO
+      public function actionEliminar_detalle_almacenamiento($id_orden, $detalle)
+    {                                
+        $conBuscar = AlmacenamientoProducto::findOne($detalle);
+        $conBuscar->delete();
+        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden]);        
+    }
+    
+    //ELIMINAR ALMACENAMIENTO RACKS
+      public function actionEliminar_items_rack($id_orden, $id_detalle)
+    {                                
+        $conBuscar = AlmacenamientoProductoDetalles::findOne($id_detalle);
+        $conBuscar->delete();
+        $codigo = $conBuscar->id_almacenamiento;
+        $this->ActualizarUnidadesEliminadas($id_detalle, $id_orden, $codigo);
+        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden]);        
+    }
+    
+    //PROCESO QUE ACTUALIZA UNIDADES ALMACENADAS CUANDO SE ELIMINA
+    protected function ActualizarUnidadesEliminadas($id_detalle, $id_orden, $codigo) {
+        $almacenamiento = AlmacenamientoProducto::findOne($codigo);
+        $detalle = AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $codigo])->all();
+        $suma = 0; $total = 0;
+        foreach ($detalle as $detalles):
+            $suma += $detalles->cantidad;    
+        endforeach;
+        $total = $almacenamiento->unidades_producidas;
+        $almacenamiento->unidades_faltantes = $total - $suma;
+        $almacenamiento->unidades_almacenadas = $suma;
+        $almacenamiento->save();
     }
 
     /**
