@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $id_orden;
     <p>
       <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['cargar_orden_produccion'], ['class' => 'btn btn-primary btn-sm']);?>
       <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Cerrar orden produccion', ['cerrar_orden_produccion', 'id_orden' => $model->id_orden_produccion],['class' => 'btn btn-success btn-sm',
-                               'data' => ['confirm' => 'Esta seguro de CERRAR la Orden de produccion No ('.$model->numero_orden.').', 'method' => 'post']]);?>
+                               'data' => ['confirm' => 'Esta seguro de CERRAR la Orden de produccion No ('.$model->numero_orden.'). Tener presente que todas las unidades deben de estar almacendas.', 'method' => 'post']]);?>
     </p>  
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -87,7 +87,9 @@ $this->params['breadcrumbs'][] = $id_orden;
                                 </thead>
                                 <body>
                                      <?php
-                                     foreach ($detalle as $val):?>
+                                     foreach ($detalle as $val):
+                                         $conDato = app\models\AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $val->id_almacenamiento])->one();
+                                         ?>
                                         <tr style="font-size: 90%;">
                                             <td><?= $val->codigo_producto ?></td>
                                             <td><?= $val->nombre_producto ?></td>
@@ -129,6 +131,11 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                         </div>
                                                    </div>
                                                 </td>       
+                                            <?php }else{?>
+                                                    <td style= 'width: 20px; height: 20px;'></td>
+                                                    <td style= 'width: 20px; height: 20px;'></td>
+                                            <?php }  
+                                            if (!$conDato){?>    
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_almacenamiento', 'id_orden' => $model->id_orden_produccion, 'detalle' => $val->id_almacenamiento,], [
                                                                  'class' => '',
@@ -138,12 +145,11 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                                  ],
                                                              ])
                                                      ?>
-                                               </td>
-                                            <?php }else{?>
-                                               <td style= 'width: 20px; height: 20px;'></td>
-                                               <td style= 'width: 20px; height: 20px;'></td>
-                                               <td style= 'width: 20px; height: 20px;'></td>
-                                            <?php }?>   
+                                                </td>
+                                            <?php }else {?>
+                                                <td style= 'width: 20px; height: 20px;'></td>
+                                            <?php }?>    
+                                                    
                                        </tr>
                                      <?php endforeach;?>          
                                 </body>

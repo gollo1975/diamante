@@ -14,12 +14,14 @@ class FiltroBusquedaTipoRack extends Model
     public $numero;
      public $descripcion;
     public $estado;
+    public $piso;
+    
     
     public function rules()
     {
         return [  
           
-           [['numero'], 'integer'],
+           [['numero','piso'], 'integer'],
            [['descripcion','estado'], 'string'],
         ];
     }
@@ -30,6 +32,7 @@ class FiltroBusquedaTipoRack extends Model
             'numero' => 'Numero rack:',
             'descripcion' => 'Descricion:',
             'estado' => 'Activo:',
+            'piso' => 'Numero piso',
 
         ];
     }

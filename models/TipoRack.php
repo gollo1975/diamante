@@ -41,7 +41,7 @@ class TipoRack extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_rack', 'capacidad_instalada', 'capacidad_actual','estado','id_piso'], 'integer'],
+            [['numero_rack', 'capacidad_instalada', 'capacidad_actual','estado','id_piso','controlar_capacidad'], 'integer'],
             [['descripcion','id_piso'], 'required'],
             [['fecha_creacion'], 'safe'],
             [['descripcion', 'medidas'], 'string', 'max' => 30],
@@ -61,11 +61,12 @@ class TipoRack extends \yii\db\ActiveRecord
             'descripcion' => 'Descripcion:',
             'medidas' => 'Medidas:',
             'capacidad_instalada' => 'Capacidad instalada:',
-            'capacidad_actual' => 'Capacidad actual:',
+            'capacidad_actual' => 'Unidades almacenadas:',
             'fecha_creacion' => 'Fecha creacion:',
             'user_name' => 'User Name:',
             'estado' => 'Activo:',
             'id_piso' => 'Numero piso:',
+            'controlar_capacidad' => 'Controlar capacidad:',
         ];
     }
      public function getPisos()
@@ -80,6 +81,15 @@ class TipoRack extends \yii\db\ActiveRecord
             $estadoactivo = 'NO';
         }
         return $estadoactivo;
+    }
+    
+    public function getControlarcapacidad() {
+        if($this->controlar_capacidad == 0){
+            $controlarcapaciadad = 'NO';
+        }else{
+            $controlarcapaciadad = 'SI';
+        }
+        return $controlarcapaciadad;
     }
     
     //proceso que incrita varios valores

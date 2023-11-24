@@ -54,15 +54,18 @@ class TipoRackController extends Controller
                 $numero = null;
                 $descripcion = null;
                 $estado = null;
+                $piso = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero = Html::encode($form->numero);
                         $descripcion = Html::encode($form->descripcion);
                         $estado = Html::encode($form->estado);
+                        $piso = Html::encode($form->piso);
                         $table = TipoRack::find()
                                 ->andFilterWhere(['=', 'numero_rack', $numero])
                                 ->andFilterWhere(['like', 'descripcion', $descripcion])
-                                ->andFilterWhere(['=', 'estado', $estado]);
+                                ->andFilterWhere(['=', 'estado', $estado])
+                                ->andFilterWhere(['=', 'id_piso', $piso]);
                         $table = $table->orderBy('id_rack ASC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -145,6 +148,8 @@ class TipoRackController extends Controller
             $table->descripcion = $model->descripcion;
             $table->capacidad_instalada = $model->capacidad_instalada;
             $table->medidas = $model->medidas;
+            $table->id_piso = $model->id_piso;
+            $table->controlar_capacidad = $model->controlar_capacidad;
             $table->user_name = Yii::$app->user->identity->username;
             $table->save();
             return $this->redirect(['index']);
@@ -174,6 +179,8 @@ class TipoRackController extends Controller
             $table = TipoRack::findOne($id);
             $table->descripcion = $model->descripcion;
             $table->medidas = $model->medidas;
+            $table->id_piso = $model->id_piso;
+            $table->controlar_capacidad = $model->controlar_capacidad;
             $table->capacidad_instalada = $model->capacidad_instalada;
             if($model->estado == 0){ 
                 $table->estado = $model->estado;
@@ -254,6 +261,8 @@ class TipoRackController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
         
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'CODIGO')
@@ -262,9 +271,11 @@ class TipoRackController extends Controller
                     ->setCellValue('D1', 'MEDIDAS')
                     ->setCellValue('E1', 'CAPACIDAD INSTALADA')
                     ->setCellValue('F1', 'CAPACIDAD ACTUAL')
-                    ->setCellValue('G1', 'USER NAME')
-                    ->setCellValue('H1', 'ACTIVO')
-                    ->setCellValue('I1', 'FECHA_REGISTRO');
+                    ->setCellValue('G1', 'NUMERO PISO')
+                    ->setCellValue('H1', 'USER NAME')
+                    ->setCellValue('I1', 'ACTIVO')
+                    ->setCellValue('J1', 'FECHA CREACION')
+                    ->setCellValue('K1', 'CONTROLA CAPACIDAD');
         $i = 2;
         
         foreach ($tableexcel as $val) {
@@ -276,9 +287,11 @@ class TipoRackController extends Controller
                     ->setCellValue('D' . $i, $val->medidas)
                     ->setCellValue('E' . $i, $val->capacidad_instalada)
                     ->setCellValue('F' . $i, $val->capacidad_actual)
-                    ->setCellValue('G' . $i, $val->user_name)
-                    ->setCellValue('H' . $i, $val->estadoActivo)
-                    ->setCellValue('I' . $i, $val->fecha_registro);
+                    ->setCellValue('G' . $i, $val->pisos->descripcion)
+                    ->setCellValue('H' . $i, $val->user_name)
+                    ->setCellValue('I' . $i, $val->estadoActivo)
+                    ->setCellValue('J' . $i, $val->fecha_creacion)
+                    ->setCellValue('K' . $i, $val->controlarCapacidad);
                     
             $i++;
         }

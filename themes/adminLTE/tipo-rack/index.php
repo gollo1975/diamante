@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-    
+$pisos = ArrayHelper::map(\app\models\Pisos::find()->all(), 'id_piso', 'descripcion'); 
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -52,6 +52,13 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row" >
             <?= $formulario->field($form, "numero")->input("search") ?>
             <?= $formulario->field($form, "descripcion")->input("search") ?>
+            <?= $formulario->field($form, 'piso')->widget(Select2::classname(), [
+                   'data' => $pisos,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+            ]); ?> 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
@@ -76,6 +83,8 @@ $this->params['breadcrumbs'][] = $this->title;
                  <th scope="col" style='background-color:#B9D5CE;'>Medidas</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Capacidad instalada</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Unidades almacenadas</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Numero piso</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Controla capacidad</th>
                 <th scope="col" style='background-color:#B9D5CE;'>User name</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Activo</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -91,6 +100,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?= $val->medidas ?></td>
                 <td style="text-align: right"><?= $val->capacidad_instalada ?></td>
                 <td style ="text-align: right"><?= $val->capacidad_actual ?></td>
+                <td><?= $val->pisos->descripcion?></td>
+                 <td><?= $val->controlarCapacidad?></td>
                 <td><?= $val->user_name?></td>
                 <td><?= $val->estadoActivo?></td>
                 <td style= 'width: 25px; height: 10px;'>

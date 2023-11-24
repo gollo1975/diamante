@@ -21,6 +21,7 @@ $form = ActiveForm::begin([
                 'options' => []
             ],
         ]);
+$pisos = ArrayHelper::map(\app\models\Pisos::find()->all(), 'id_piso', 'descripcion');
 ?>
 
 <div class="panel panel-success">
@@ -39,6 +40,18 @@ $form = ActiveForm::begin([
          <div class="row">
             <?= $form->field($model, 'capacidad_instalada')->input("text", ["maxlength" => 11]) ?> 
         </div>
+        <div class="row">
+            <?= $form->field($model, 'id_piso')->widget(Select2::classname(), [
+                   'data' => $pisos,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+            ]); ?> 
+        </div>    
+        <div class="row">
+                <?= $form->field($model, 'controlar_capacidad')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+            </div>
         <?php if($sw == 1){?>
             <div class="row">
                 <?= $form->field($model, 'estado')->dropdownList(['0' => 'ACTIVO', '1' => 'INACTIVO'], ['prompt' => 'Seleccione...']) ?>

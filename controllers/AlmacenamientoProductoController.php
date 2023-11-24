@@ -221,12 +221,18 @@ class AlmacenamientoProductoController extends Controller
                 $model->getErrors();
             }
         }
-        return $this->renderAjax('_enviar_unidades_almacenamiento', [
-                    'model' => $model,
-                    'id' => $id,
-                    'id_orden' => $id_orden, 
-                    'tipo_rack' => ArrayHelper::map($racks, "id_rack", "tiporack"),
-        ]);
+        $conDato = AlmacenamientoProducto::findOne($id);
+        if($conDato->id_documento == null){
+             Yii::$app->getSession()->setFlash('warning', 'Debe de  crear primero el DOCUMENTO de almacenamiento.');
+             return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+        }else{
+            return $this->renderAjax('_enviar_unidades_almacenamiento', [
+                        'model' => $model,
+                        'id' => $id,
+                        'id_orden' => $id_orden, 
+                        'tipo_rack' => ArrayHelper::map($racks, "id_rack", "tiporack"),
+            ]);
+        }    
     }
     
     //PROCESO QUE ACUTLIZA UNIDADES
@@ -339,12 +345,15 @@ class AlmacenamientoProductoController extends Controller
         $conBuscar = AlmacenamientoProductoDetalles::findOne($id_detalle);
         $conBuscar->delete();
         $codigo = $conBuscar->id_almacenamiento;
-        $this->ActualizarUnidadesEliminadas($id_detalle, $id_orden, $codigo);
+        $rack = $conBuscar->id_rack;
+        $cantidades = $conBuscar->cantidad;
+        $this->ActualizarUnidadesEliminadas($codigo);
+        $this->DescontarUnidadesRack($rack, $cantidades);
         return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden]);        
     }
     
     //PROCESO QUE ACTUALIZA UNIDADES ALMACENADAS CUANDO SE ELIMINA
-    protected function ActualizarUnidadesEliminadas($id_detalle, $id_orden, $codigo) {
+    protected function ActualizarUnidadesEliminadas($codigo) {
         $almacenamiento = AlmacenamientoProducto::findOne($codigo);
         $detalle = AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $codigo])->all();
         $suma = 0; $total = 0;
@@ -356,7 +365,21 @@ class AlmacenamientoProductoController extends Controller
         $almacenamiento->unidades_almacenadas = $suma;
         $almacenamiento->save();
     }
+    
+    //PROCESO QUE DESCUENTA LAS UNIDADES EL RACK CUANDO SE ELIMINA
+    protected function DescontarUnidadesRack($rack, $cantidades) {
+        $tipo_rac = \app\models\TipoRack::findOne($rack);
+        $tipo_rac->capacidad_actual = $tipo_rac->capacidad_actual - $cantidades;
+        $tipo_rac->save();
+    }
 
+    //PROCES QUE CIERRA LA ORDEN PRODUCCION
+    public function actionCerrar_orden_produccion($id_orden) {
+        $orden = OrdenProduccion::findOne($id_orden);
+        $orden->producto_almacenado = 1;
+        $orden->save(false);
+        return $this->redirect(["cargar_orden_produccion"]);
+    }
     /**
      * Finds the AlmacenamientoProducto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
