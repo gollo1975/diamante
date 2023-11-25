@@ -41,6 +41,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
             [['id_almacenamiento', 'id_rack', 'id_posicion', 'id_piso', 'cantidad', 'numero_lote','id_orden_produccion'], 'integer'],
             [['codigo_producto'], 'string', 'max' => 15],
             [['producto'], 'string', 'max' => 40],
+            ['fecha_almacenamiento', 'safe'],
             [['id_almacenamiento'], 'exist', 'skipOnError' => true, 'targetClass' => AlmacenamientoProducto::className(), 'targetAttribute' => ['id_almacenamiento' => 'id_almacenamiento']],
             [['id_rack'], 'exist', 'skipOnError' => true, 'targetClass' => TipoRack::className(), 'targetAttribute' => ['id_rack' => 'id_rack']],
             [['id_posicion'], 'exist', 'skipOnError' => true, 'targetClass' => Posiciones::className(), 'targetAttribute' => ['id_posicion' => 'id_posicion']],
@@ -65,6 +66,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
             'producto' => 'Producto',
             'numero_lote' => 'Numero Lote',
             'id_orden_produccion' => 'Orden produccion:',
+            'fecha_almacenamiento' => 'Fecha almacenamiento',
         ];
     }
 

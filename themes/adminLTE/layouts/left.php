@@ -264,7 +264,7 @@
                                             'icon' => 'question',
                                             'url' => '#',
                                             'items' => [
-                                             //   ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/search_consulta_clientes']],
+                                                ['label' => 'Almacenamiento', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/index']],
                                                // ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
                                             ],  
                                         ],

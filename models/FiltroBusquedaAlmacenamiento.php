@@ -15,11 +15,18 @@ class FiltroBusquedaAlmacenamiento extends Model
     public $fecha_inicio;
     public $fecha_corte;
     public $lote;
+    public $piso;
+    public $posicion;
+    public $rack;
+    public $codigo;
+    public $producto;
+    
     public function rules()
     {
         return [  
-           [['orden', 'lote'], 'integer'],
+           [['orden', 'lote','piso','rack','posicion'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
+            [['producto','codigo'], 'string'],
         ];
     }
 
@@ -30,6 +37,11 @@ class FiltroBusquedaAlmacenamiento extends Model
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
             'lote' => 'Número lote:',
+            'piso' => 'Numero piso:',
+            'rack' => 'Numero rack:',
+            'posicion' => 'Posicion:',
+            'producto' => 'Nombre producto:',
+            'codigo' => 'Codigo producto',
         ];
     }
     
