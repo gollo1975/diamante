@@ -111,7 +111,7 @@ $form = ActiveForm::begin([
                 <td style="text-align: right"><?= ''.number_format($val->unidades, 0)?></td>
                 <?php if($almacenar){?>
                     <td style= 'width: 20px; height: 20px;'>
-                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de los lotes"></span></a>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de los lotes"></span></a>
                     </td>
                 <?php }else{ ?>
                     <td style= 'width: 20px; height: 20px;'>

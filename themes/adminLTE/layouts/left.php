@@ -256,7 +256,7 @@
                                             'icon' => 'cube',
                                             'url' => '#',
                                             'items' => [
-                                                //['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
+                                                ['label' => 'Listar pedidos', 'icon' => 'plus-square-o', 'url' => ['almacenamiento-producto/listar_pedidos']],
                                             ],
                                         ],
                                         [

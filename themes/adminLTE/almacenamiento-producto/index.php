@@ -104,55 +104,64 @@ $form = ActiveForm::begin([
             ]);
     ?>
 <div class="table-responsive">
-<div class="panel panel-success ">
-    <div class="panel-heading">
-        <?php if($model){?>
-          Registros <span class="badge"><?= $pagination->totalCount ?></span>
-        <?php }?>  
-    </div>
+    <div class="panel panel-success ">
+        <div class="panel-heading">
+            <?php if($model){?>
+              Registros <span class="badge"><?= $pagination->totalCount ?></span>
+            <?php }?>  
+        </div>
         <table class="table table-bordered table-hover">
-            <thead>
-                <tr style ='font-size: 90%;'>         
-                <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Piso</th> 
-                <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Capacidad</th>
-                <th scope="col" style='background-color:#B9D5CE;'>U. rack</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Posición</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Op</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
-               
-                         
-            </tr>
-            </thead>
-            <tbody>
-            <?php 
-            if($model){
-                foreach ($model as $val):?>
-                    <tr style ='font-size: 90%;'>                
-                        <td><?= $val->id_almacenamiento?></td>
-                        <td><?= $val->piso->descripcion?></td>
-                        <td><?= $val->rack->descripcion?></td>
-                        <td><?= $val->rack->capacidad_instalada?></td>
-                        <td><?= $val->rack->capacidad_actual?></td>
-                         <td><?= $val->posicion->posicion?></td>
-                        <td><?= $val->ordenProduccion->numero_orden?></td>
-                        <td><?= $val->numero_lote?></td>
-                        <td><?= $val->fecha_almacenamiento?></td>
-                        <td><?= $val->codigo_producto?></td>
-                        <td><?= $val->producto?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
-                    </tr>            
-                <?php endforeach; 
-            }   ?>
-            </tbody>    
-        </table> 
-        <?php $form->end() ?>
-     </div>
+        <thead>
+            <tr style ='font-size: 90%;'>         
+            <th scope="col" style='background-color:#B9D5CE;'>Id alm.</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Piso</th> 
+            <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
+             <th scope="col" style='background-color:#B9D5CE;'>Capacidad</th>
+            <th scope="col" style='background-color:#B9D5CE;'>U. rack</th>
+             <th scope="col" style='background-color:#B9D5CE;'>Posición</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Op</th>
+            <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
+            <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+             <th scope="col" style='background-color:#B9D5CE;'></th>
+
+
+        </tr>
+        </thead>
+        <tbody>
+        <?php 
+        if($model){
+            foreach ($model as $val):?>
+                <tr style ='font-size: 90%;'>                
+                    <td><?= $val->id_almacenamiento?></td>
+                    <td><?= $val->piso->descripcion?></td>
+                    <td><?= $val->rack->descripcion?></td>
+                    <td><?= $val->rack->capacidad_instalada?></td>
+                    <td><?= $val->rack->capacidad_actual?></td>
+                     <td><?= $val->posicion->posicion?></td>
+                    <td><?= $val->ordenProduccion->numero_orden?></td>
+                    <td><?= $val->numero_lote?></td>
+                    <td><?= $val->fecha_almacenamiento?></td>
+                    <td><?= $val->codigo_producto?></td>
+                    <td><?= $val->producto?></td>
+                    <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
+                    <td style= 'width: 25px; height: 20px;'>
+                         <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                    </td>
+                </tr>            
+            <?php endforeach; 
+        }   ?>
+        </tbody>    
+    </table> 
+        <div class="panel-footer text-right" >
+           <?php if($model){?>
+               <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
+           <?php }
+           $form->end() ?>
+        </div>
+    </div>    
 </div>
 <?php if($model){?>
     <?= LinkPager::widget(['pagination' => $pagination]) ?>

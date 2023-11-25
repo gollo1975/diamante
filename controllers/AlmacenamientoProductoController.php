@@ -97,6 +97,10 @@ class AlmacenamientoProductoController extends Controller
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                 ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id  DESC']);
+                            $this->actionExcelAlmacenamiento($tableexcel);
+                        }
                     } else {
                         $form->getErrors();
                     }
@@ -114,6 +118,81 @@ class AlmacenamientoProductoController extends Controller
         }    
     }
     
+    //PROCESO QUE LISTA O SEPARA EL PRODUCTO QUE CONTIENE EL PEDIDO
+    public function actionListar_pedidos() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',74])->all()){
+                $form = new \app\models\FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $vendedores = null; $numero_pedido = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $numero_pedido = Html::encode($form->numero_pedido);
+                        $table = \app\models\Pedidos::find()
+                            ->andFilterWhere(['=', 'documento', $documento])
+                            ->andFilterWhere(['=', 'id_cliente', $cliente])
+                            ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                            ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                            ->andFilterWhere(['=','id_agente', $vendedores])
+                            ->andWhere(['=','cerrar_pedido', 1])
+                            ->andWhere(['=', 'pedido_anulado', 0])
+                            ->andWhere(['=', 'facturado', 0]);
+                        $table = $table->orderBy('id_pedido DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                    
+                }else{
+                    $table = \app\models\Pedidos::find()->Where(['=','cerrar_pedido', 1])
+                            ->andWhere(['=', 'facturado', 0])
+                            ->andWhere(['=', 'pedido_anulado', 0])
+                            ->orderBy('id_pedido DESC');   
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 10,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                        $this->actionExcelconsultaPedidos($tableexcel); 
+                    }
+                } 
+                return $this->render('listar_pedidos', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
     //PROCESO QUE CARGA LAS OP
      public function actionCargar_orden_produccion() {
         if (Yii::$app->user->identity){
@@ -148,6 +227,7 @@ class AlmacenamientoProductoController extends Controller
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                 ->all();
+                        
                     } else {
                         $form->getErrors();
                     }
@@ -185,14 +265,9 @@ class AlmacenamientoProductoController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
+    
     //VISTA DE ALMACENAMIENTO
-    public function actionView_almacenamiento($id_orden)
+    public function actionView_almacenamiento($id_orden, $token)
     {
         $detalle = AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $id_orden])->all();
         $conAlmacenado = AlmacenamientoProductoDetalles::find()->where(['=','id_orden_produccion', $id_orden])->all();
@@ -202,10 +277,11 @@ class AlmacenamientoProductoController extends Controller
             'id_orden' => $id_orden,
             'model' => $model,
             'conAlmacenado' => $conAlmacenado,
+            'token' =>$token,
         ]);
     }
     //CREAR DOCUMENTO
-    public function actionSubir_documento($id, $id_orden) {
+    public function actionSubir_documento($id, $id_orden,$token) {
         $model = new \app\models\ModeloDocumento(); 
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
@@ -213,7 +289,7 @@ class AlmacenamientoProductoController extends Controller
                    $table = AlmacenamientoProducto::findOne($id) ;
                    $table->id_documento = $model->documento;
                    $table->save();
-                   return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]);
+                   return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token,]);
                 }
             }else{
               $model->getErrors();  
@@ -226,7 +302,7 @@ class AlmacenamientoProductoController extends Controller
         ]);
     }
     //ENVIAR UNIDADES AL RACK
-    public function actionCrear_almacenamiento($id_orden, $id) {
+    public function actionCrear_almacenamiento($id_orden, $id, $token) {
         $model = new \app\models\ModeloEnviarUnidadesRack();
         $racks = TipoRack::find()->where(['=','estado', 0])->all();
         if ($model->load(Yii::$app->request->post())) {
@@ -258,10 +334,10 @@ class AlmacenamientoProductoController extends Controller
                                     $id_rack = $model->rack;
                                     $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
                                     $this->SumarUnidadesRack($id_rack, $cant);
-                                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]);  
+                                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]);  
                                 }else{
                                     Yii::$app->getSession()->setFlash('warning', 'El RACK seleccionado tiene un cupo de almacenamiento de ('.$tipo_rack->capacidad_instalada.') unidades. Solo tiene capacidad para almacenar ('.$Capacidad_requerida.') unidades.!');
-                                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]); 
                                 }
                             }else{
                                 $table = new AlmacenamientoProductoDetalles();
@@ -280,7 +356,7 @@ class AlmacenamientoProductoController extends Controller
                                 $id_rack = $model->rack;
                                 $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
                                 $this->SumarUnidadesRack($id_rack, $cant);
-                                return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                                return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]); 
                             }    
                         }else{
                             $total = $conProducto->unidades_faltantes;
@@ -307,10 +383,10 @@ class AlmacenamientoProductoController extends Controller
                                         $id_rack = $model->rack;
                                         $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
                                         $this->SumarUnidadesRack($id_rack, $cant);
-                                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]); 
                                     }else{
                                         Yii::$app->getSession()->setFlash('warning', 'El RACK seleccionado tiene un cupo de almacenamiento de ('.$tipo_rack->capacidad_instalada.') unidades. Solo tiene capacidad para almacenar ('.$Capacidad_requerida.') unidades.!');
-                                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]); 
                                     } 
                                 }else{
                                     $table = new AlmacenamientoProductoDetalles();
@@ -329,16 +405,16 @@ class AlmacenamientoProductoController extends Controller
                                     $id_rack = $model->rack;
                                     $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
                                     $this->SumarUnidadesRack($id_rack, $cant);
-                                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]);  
+                                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]);  
                                 }    
                             }else{
                                 Yii::$app->getSession()->setFlash('info', 'Las unidades que se van a ALMACENAR son mayores con las unidades PRODUCIDAS.!');
-                                return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                                return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]); 
                             }
                         }    
                     }else{
                         Yii::$app->getSession()->setFlash('warning', 'Las unidades ENVIADAS son mayores que las unidades RESTANTES.!');
-                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token]); 
                     }    
                 }
             }else{
@@ -348,12 +424,13 @@ class AlmacenamientoProductoController extends Controller
         $conDato = AlmacenamientoProducto::findOne($id);
         if($conDato->id_documento == null){
              Yii::$app->getSession()->setFlash('warning', 'Debe de  crear primero el DOCUMENTO de almacenamiento.');
-             return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden]); 
+             return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden,'token' =>$token]); 
         }else{
             return $this->renderAjax('_enviar_unidades_almacenamiento', [
                         'model' => $model,
                         'id' => $id,
                         'id_orden' => $id_orden, 
+                        'token' =>$token,
                         'tipo_rack' => ArrayHelper::map($racks, "id_rack", "tiporack"),
             ]);
         }    
@@ -396,18 +473,7 @@ class AlmacenamientoProductoController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
-    {
-        $model = new AlmacenamientoProducto();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_almacenamiento]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
+   
     ///PROCESO QUE CARGA EL PROCESO PARA ALMACENAR.
     public function actionEnviar_lote_almacenar($id_orden) {
         $lotes = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all();
@@ -428,26 +494,7 @@ class AlmacenamientoProductoController extends Controller
         return $this->redirect(['cargar_orden_produccion']);
     }
     
-    /**
-     * Updates an existing AlmacenamientoProducto model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_almacenamiento]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
+   
     /**
      * Deletes an existing AlmacenamientoProducto model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -456,15 +503,15 @@ class AlmacenamientoProductoController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     //ELIMINAR ALMACENAMIENTO
-      public function actionEliminar_detalle_almacenamiento($id_orden, $detalle)
+      public function actionEliminar_detalle_almacenamiento($id_orden, $detalle, $token)
     {                                
         $conBuscar = AlmacenamientoProducto::findOne($detalle);
         $conBuscar->delete();
-        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden]);        
+        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden, 'token' =>$token]);        
     }
     
     //ELIMINAR ALMACENAMIENTO RACKS
-      public function actionEliminar_items_rack($id_orden, $id_detalle)
+      public function actionEliminar_items_rack($id_orden, $id_detalle, $token)
     {                                
         $conBuscar = AlmacenamientoProductoDetalles::findOne($id_detalle);
         $conBuscar->delete();
@@ -473,7 +520,7 @@ class AlmacenamientoProductoController extends Controller
         $cantidades = $conBuscar->cantidad;
         $this->ActualizarUnidadesEliminadas($codigo);
         $this->DescontarUnidadesRack($rack, $cantidades);
-        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden]);        
+        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden, 'token' =>$token]);        
     }
     
     //PROCESO QUE ACTUALIZA UNIDADES ALMACENADAS CUANDO SE ELIMINA
@@ -518,5 +565,89 @@ class AlmacenamientoProductoController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+     public function actionExcelAlmacenamiento($tableexcel) {                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID ALMACENAMIENTO')
+                    ->setCellValue('B1', 'TIPO DOCUMENTO')
+                    ->setCellValue('C1', 'NRO PISO')
+                    ->setCellValue('D1', 'NRO RACK')
+                    ->setCellValue('E1', 'CAPACIDAD')
+                    ->setCellValue('F1', 'U. ALMACENADAS')
+                    ->setCellValue('G1', 'STOCK')
+                    ->setCellValue('H1', 'POSICION')
+                    ->setCellValue('I1', 'OP')
+                    ->setCellValue('J1', 'CODIGO PRODUCTO')
+                    ->setCellValue('K1', 'NOMBRE PRODUCTO')
+                    ->setCellValue('L1', 'NRO LOTE')
+                    ->setCellValue('M1', 'FECHA ALMACENAMIENTO')
+                    ->setCellValue('N1', 'USER NAME');
+                   
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A' . $i, $val->id_almacenamiento)
+                ->setCellValue('B' . $i, $val->almacenamiento->documento->concepto)
+                ->setCellValue('C' . $i, $val->piso->descripcion)
+                ->setCellValue('D' . $i, $val->rack->descripcion)
+                ->setCellValue('E' . $i, $val->rack->capacidad_instalada)
+                ->setCellValue('F' . $i, $val->rack->capacidad_actual)
+                ->setCellValue('G' . $i, $val->cantidad)
+                ->setCellValue('H' . $i, $val->posicion->posicion)
+                ->setCellValue('I' . $i, $val->ordenProduccion->numero_orden)
+                ->setCellValue('J' . $i, $val->codigo_producto)
+                ->setCellValue('K' . $i, $val->producto)
+                ->setCellValue('L' . $i, $val->numero_lote)
+                ->setCellValue('M' . $i, $val->fecha_almacenamiento)
+                ->setCellValue('N' . $i, $val->almacenamiento->user_name);
+        $i++;
+             
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Almacenamiento');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Producto_almacenado.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }
