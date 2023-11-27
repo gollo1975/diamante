@@ -1322,6 +1322,9 @@ class PedidosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -1338,7 +1341,11 @@ class PedidosController extends Controller
                     ->setCellValue('L1', 'IVA')
                     ->setCellValue('M1', 'TOTAL')
                     ->setCellValue('N1', 'USER NAME')
-                    ->setCellValue('O1', 'FECHA REGISTRO');
+                    ->setCellValue('O1', 'FECHA REGISTRO')
+                    ->setCellValue('P1', 'LINEA VALIDADA')
+                    ->setCellValue('Q1', 'HISTORICO CANTIDAD VENDIDA')
+                    ->setCellValue('R1', 'CANTIDAD DESPACHADA');
+                ;
         $i = 2;
         
         foreach ($detalle as $val) {
@@ -1358,7 +1365,10 @@ class PedidosController extends Controller
                     ->setCellValue('L' . $i, $val->impuesto)
                     ->setCellValue('M' . $i, $val->total_linea)
                     ->setCellValue('N' . $i, $val->user_name)
-                    ->setCellValue('O' . $i, $val->fecha_registro);
+                    ->setCellValue('O' . $i, $val->fecha_registro)
+                    ->setCellValue('P' . $i, $val->lineaValidada)
+                    ->setCellValue('Q' . $i, $val->historico_cantidad_vendida)
+                    ->setCellValue('R' . $i, $val->cantidad_despachada);
             $i++;
         }
 

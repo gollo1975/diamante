@@ -149,7 +149,7 @@ $form = ActiveForm::begin([
                         <?php }?>   
                        
                         <td style= 'width: 25px; height: 25px;'>
-                            <a href="<?= Url::toRoute(["almacenamiento-producto/view_listar", "id" => $val->id_pedido]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="<?= Url::toRoute(["almacenamiento-producto/view_listar", "id_pedido" => $val->id_pedido]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                     </tr>            
                 <?php endforeach; ?>

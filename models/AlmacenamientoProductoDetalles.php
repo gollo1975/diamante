@@ -47,6 +47,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
             [['id_posicion'], 'exist', 'skipOnError' => true, 'targetClass' => Posiciones::className(), 'targetAttribute' => ['id_posicion' => 'id_posicion']],
             [['id_piso'], 'exist', 'skipOnError' => true, 'targetClass' => Pisos::className(), 'targetAttribute' => ['id_piso' => 'id_piso']],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
+            [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
         ];
     }
 
@@ -67,6 +68,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
             'numero_lote' => 'Numero Lote',
             'id_orden_produccion' => 'Orden produccion:',
             'fecha_almacenamiento' => 'Fecha almacenamiento',
+            'id_inventario' => 'id_inventario',
         ];
     }
 
@@ -81,6 +83,10 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
     public function getOrdenProduccion()
     {
         return $this->hasOne(OrdenProduccion::className(), ['id_orden_produccion' => 'id_orden_produccion']);
+    }
+     public function getInventarioProducto()
+    {
+        return $this->hasOne(InventarioProductos::className(), ['id_inventario' => 'id_inventario']);
     }
 
     /**

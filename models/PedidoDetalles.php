@@ -36,7 +36,8 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado'], 'integer'],
+            [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado','cantidad_despachada',
+                'historico_cantidad_vendida','linea_validada','regenerar_linea'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
@@ -61,6 +62,10 @@ class PedidoDetalles extends \yii\db\ActiveRecord
             'fecha_registro' => 'Fecha Registro',
             'subtotal' => 'subtotal',
             'registro_eliminado' => 'Registro eliminado:',
+            'cantidad_despachada' => 'cantidad_despachada',
+            'historico_cantidad_vendida' => 'historico_cantidad_vendida',
+            'linea_validada' => 'linea_validada',
+            'regenerar_linea' => 'regenerar_linea',
         ];
     }
 
@@ -79,6 +84,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     {
         return $this->hasOne(InventarioProductos::className(), ['id_inventario' => 'id_inventario']);
     }
+    
     public function getRegistroEliminado() {
       if($this->registro_eliminado ==0){
           $registroeliminado = 'NO';
@@ -86,5 +92,23 @@ class PedidoDetalles extends \yii\db\ActiveRecord
           $registroeliminado = 'SI';
       }
       return $registroeliminado;
+   }
+  
+   public function getLineaValidada() {
+      if($this->linea_validada == 0){
+          $lineavalidada = 'NO';
+      }else{
+          $lineavalidada = 'SI';
+      }
+      return $lineavalidada;
+   }
+   
+   public function getRegenerarLinea() {
+      if($this-> regenerar_linea == 0){
+           $regenerarlinea = 'NO';
+      }else{
+          $regenerarlinea = 'SI';
+      }
+      return $regenerarlinea;
    }
 }

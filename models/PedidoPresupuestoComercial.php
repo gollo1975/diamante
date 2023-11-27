@@ -39,7 +39,8 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado'], 'integer'],
+            [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado',
+                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -66,6 +67,10 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',
             'registro_eliminado' => 'Registro eliminado:',
+            'cantidad_despachada' => 'cantidad_despachada',
+            'historico_cantidad_vendida' => 'historico_cantidad_vendida',
+            'linea_validada' => 'linea_validada',
+            'regenerar_linea' => 'regenerar_linea',
         ];
     }
 
@@ -100,5 +105,22 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
           $registroeliminado = 'SI';
       }
       return $registroeliminado;
+   }
+   public function getLineaValidada() {
+      if($this->linea_validada == 0){
+          $lineavalidada = 'NO';
+      }else{
+          $lineavalidada = 'SI';
+      }
+      return $lineavalidada;
+   }
+   
+   public function getRegenerarLinea() {
+      if($this-> regenerar_linea == 0){
+           $regenerarlinea = 'NO';
+      }else{
+          $regenerarlinea = 'SI';
+      }
+      return $regenerarlinea;
    }
 }

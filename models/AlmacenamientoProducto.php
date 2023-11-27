@@ -39,12 +39,13 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_documento', 'numero_lote', 'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes'], 'integer'],
+            [['id_orden_produccion', 'id_documento', 'numero_lote', 'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes','id_inventario'], 'integer'],
             [['fecha_almacenamiento'], 'safe'],
             [['codigo_producto', 'user_name'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_documento'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoAlmacenamiento::className(), 'targetAttribute' => ['id_documento' => 'id_documento']],
+            [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
         ];
     }
 
@@ -65,6 +66,7 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
             'unidades_faltantes' => 'Unidades Faltantes',
             'fecha_almacenamiento' => 'Fecha Almacenamiento',
             'user_name' => 'User Name',
+            'id_inventario' => 'id_inventario',
         ];
     }
 
@@ -74,6 +76,10 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
     public function getOrdenProduccion()
     {
         return $this->hasOne(OrdenProduccion::className(), ['id_orden_produccion' => 'id_orden_produccion']);
+    }
+    public function getInventario()
+    {
+        return $this->hasOne(InventarioProductos::className(), ['id_inventario' => 'id_inventario']);
     }
 
     /**

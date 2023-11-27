@@ -26,6 +26,9 @@ use app\models\UsuarioDetalle;
 use app\models\OrdenProduccion;
 use app\models\AlmacenamientoProductoDetalles;
 use app\models\TipoRack;
+use app\models\Pedidos;
+use app\models\PedidoDetalles;
+use app\models\PedidoPresupuestoComercial;
 
 
 /**
@@ -194,7 +197,7 @@ class AlmacenamientoProductoController extends Controller
         }
     }
     //PROCESO QUE CARGA LAS OP
-     public function actionCargar_orden_produccion() {
+    public function actionCargar_orden_produccion() {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',72])->all()){
                 $form = new \app\models\FiltroBusquedaAlmacenamiento();
@@ -259,12 +262,6 @@ class AlmacenamientoProductoController extends Controller
         }    
     }
 
-    /**
-     * Displays a single AlmacenamientoProducto model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     
     //VISTA DE ALMACENAMIENTO
     public function actionView_almacenamiento($id_orden, $token)
@@ -280,6 +277,113 @@ class AlmacenamientoProductoController extends Controller
             'token' =>$token,
         ]);
     }
+    //VISTA QUE LISTAS LOS PEDIDOS
+    public function actionView_listar($id_pedido){
+        $model = Pedidos::findOne($id_pedido);
+        $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->all();  
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id_pedido])->all();
+        if(isset($_POST["regenerar_linea"])){
+            if(isset($_POST["numero_linea"])){
+                foreach ($_POST["numero_linea"] as $intCodigo){
+                    $table = PedidoDetalles::findOne($intCodigo);
+                    $table->cantidad = $table->cantidad_despachada;
+                    $table->regenerar_linea = 0;
+                    $table->save();
+                    $this->ActualizarLineaDetallePedido($intCodigo);
+                }
+                $this->ActualizarTotalesPedido($id_pedido);
+                return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+            }
+        }
+        return $this->render('view_listar', [
+            'model' => $model,
+            'pedido_detalle' => $pedido_detalle,
+            'pedido_presupuesto' => $pedido_presupuesto,
+        ]);
+    }
+    
+    /// PROCESO QUE ACTUALIZA PRECIOS DE SUBTOTALES
+    protected function ActualizarLineaDetallePedido($intCodigo) {
+        $table = PedidoDetalles::findOne($intCodigo);
+        $inventario = \app\models\InventarioProductos::findOne($table->id_inventario);
+        $subtotal = 0; $iva = 0; $total = 0; $porcentaje = 0; 
+        if($inventario->aplica_iva == 0){
+            $porcentaje = ''.number_format($inventario->porcentaje_iva /100, 2);
+            $total = round($table->cantidad * $table->valor_unitario); 
+            $iva = round($total  * $porcentaje);
+            $subtotal  = $total - $iva;
+            $table->subtotal = $subtotal;
+            $table->impuesto = $iva;
+            $table->total_linea = $total;
+            $table->save();       
+        }
+    }
+    
+    //ACTUALIZA LOS SUBTOTALES
+    protected function ActualizarTotalesPedido($id_pedido) {
+        $subtotal = 0; $impuesto = 0; $total = 0; $cantidad = 0;
+        $model = Pedidos::findOne($id_pedido);
+        $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->all();
+        foreach ( $detalle as $detalles):
+            $subtotal += $detalles->subtotal;    
+            $impuesto += $detalles->impuesto;
+            $total += $detalles->total_linea;
+            $cantidad += $detalles->cantidad;
+        endforeach;
+        $model->cantidad = $cantidad;
+        $model->subtotal = $subtotal;    
+        $model->impuesto = $impuesto;
+        $model->gran_total = $total;
+        $model->save(false);
+     
+    }
+    //PERMITE SUBIR LAS UNIDADES A DESPACHAR
+    public function actionUnidades_despachadas($id_pedido, $id_detalle, $sw){
+        $model = new \app\models\ModeloDocumento(); 
+        if($sw == 0){
+             $detalle = PedidoDetalles::findOne($id_detalle);
+        }else{
+            $detalle = PedidoPresupuestoComercial::findOne($id_detalle);
+        }
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if(isset($_POST["unidades_despachadas"])){
+                    if($model->cantidad_despachada > 0 && $model->cantidad_despachada == ''){
+                        if($model->cantidad_despachada <= $detalle->cantidad){ 
+                            $detalle->cantidad_despachada = $model->cantidad_despachada;
+                            $detalle->historico_cantidad_vendida = $detalle->cantidad;
+                            $detalle->linea_validada = 1;
+                            if($detalle->cantidad <> $model->cantidad_despachada){
+                                $detalle->regenerar_linea = 1;
+                            }else{
+                               $detalle->regenerar_linea = 0; 
+                            }
+                            $detalle->save();
+                            return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                        }else{
+                            Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayore que las unidades vendidas.');
+                             return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                        }  
+                    }else{
+                        Yii::$app->getSession()->setFlash('info', 'Debe de indicar las unidades a despachar para este producto.');
+                         return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                    }     
+                }
+            }else{
+                $model->getErrors();
+            }
+        }
+        if (Yii::$app->request->get()) {
+           $model->cantidad_vendida = $detalle->cantidad;
+        }
+        return $this->renderAjax('_unidades_despachadas', [
+                        'model' => $model,
+                        'id_pedido' => $id_pedido,
+                        'sw' => $sw,
+                        'detalle' => $detalle,
+        ]);
+    }
+    
     //CREAR DOCUMENTO
     public function actionSubir_documento($id, $id_orden,$token) {
         $model = new \app\models\ModeloDocumento(); 
@@ -325,6 +429,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->id_piso = $model->piso;
                                     $table->id_posicion = $model->posicion; 
                                     $table->cantidad = $model->cantidad;
+                                    $table->id_inventario = $conProducto->id_inventario;
                                     $table->codigo_producto = $conProducto->codigo_producto;
                                     $table->producto = $conProducto->nombre_producto;
                                     $table->numero_lote = $conProducto->numero_lote;
@@ -347,6 +452,7 @@ class AlmacenamientoProductoController extends Controller
                                 $table->id_piso = $model->piso;
                                 $table->id_posicion = $model->posicion;     
                                 $table->cantidad = $model->cantidad;
+                                $table->id_inventario = $conProducto->id_inventario;
                                 $table->codigo_producto = $conProducto->codigo_producto;
                                 $table->producto = $conProducto->nombre_producto;
                                 $table->numero_lote = $conProducto->numero_lote;
@@ -374,6 +480,7 @@ class AlmacenamientoProductoController extends Controller
                                         $table->id_piso = $model->piso;
                                         $table->id_posicion = $model->posicion; 
                                         $table->cantidad = $model->cantidad;
+                                         $table->id_inventario = $conProducto->id_inventario;
                                         $table->codigo_producto = $conProducto->codigo_producto;
                                         $table->producto = $conProducto->nombre_producto;
                                         $table->numero_lote = $conProducto->numero_lote;
@@ -396,6 +503,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->id_piso = $model->piso;
                                     $table->id_posicion = $model->posicion; 
                                     $table->cantidad = $model->cantidad;
+                                     $table->id_inventario = $conProducto->id_inventario;
                                     $table->codigo_producto = $conProducto->codigo_producto;
                                     $table->producto = $conProducto->nombre_producto;
                                     $table->numero_lote = $conProducto->numero_lote;
@@ -457,7 +565,7 @@ class AlmacenamientoProductoController extends Controller
         echo "<option value='' required>Seleccione el rack...</option>";
         if(count($rows)>0){
             foreach($rows as $row){
-                echo "<option value='$row->id_rack' required>$row->numero_rack - $row->descripcion</option>";
+                echo "<option value='$row->id_rack' required>$row->numero_rack - $row->descripcion 'Stock' $row->capacidad_actual</option>";
             }
         }
     }
@@ -479,8 +587,10 @@ class AlmacenamientoProductoController extends Controller
         $lotes = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all();
         $con = 0;
         foreach ($lotes as $detalle):
+            $dato = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $detalle->codigo_producto])->one();
             $table = new AlmacenamientoProducto();
             $table->id_orden_produccion = $id_orden;
+            $table->id_inventario = $dato->id_inventario;
             $table->codigo_producto = $detalle->codigo_producto;
             $table->nombre_producto = $detalle->descripcion;
             $table->unidades_producidas = $detalle->cantidad;

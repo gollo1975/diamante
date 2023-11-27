@@ -8,16 +8,18 @@ use yii\base\Model;
 /**
  * ContactForm is the model behind the contact form.
  */
-//ESTE PROCESO SIRVE PARA EL CUPO AL CLIENTE Y EL NUEVO PRECIO DE VENTA PARA INVENTARIO DIRECTO
+//este proceso sirve para subir el documento de produccion y subir las cantidades despachas
 class ModeloDocumento extends Model
 {
     public $documento;
+    public $cantidad_vendida;
+    public $cantidad_despachada;
 
     public function rules()
     {
         return [
 
-           [['documento'], 'integer'],
+           [['documento','cantidad_vendida','cantidad_despachada'], 'integer'],
         ];
     }
 
@@ -25,6 +27,8 @@ class ModeloDocumento extends Model
     {
         return [
             'documento' => 'Documento produccion:',
+            'cantidad_despachada' => 'Cantidad despachada:',
+            'cantidad_vendida' => 'Cantidad vendida:',
 
         ];
     }
