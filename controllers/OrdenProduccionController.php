@@ -833,7 +833,9 @@ class OrdenProduccionController extends Controller
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->codigo_ean = $detalles->codigo_producto;
                     $table->save(false);
+                    $indice = InventarioProductos::find()->orderBy('id_inventario DESC')->one();
                     $detalles->importado = 1;
+                    $detalles->id_inventario = $indice->id_inventario;
                     $detalles->save();
                     $registro = InventarioProductos::find()->orderBy('id_inventario DESC')->one();
                     $auxiliar = $registro->id_inventario;

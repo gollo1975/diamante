@@ -337,51 +337,85 @@ class AlmacenamientoProductoController extends Controller
         $model->save(false);
      
     }
-    //PERMITE SUBIR LAS UNIDADES A DESPACHAR
-    public function actionUnidades_despachadas($id_pedido, $id_detalle, $sw){
+    
+   //PROCESO QUE PERMITE SUBIR LAS UNIDADES A DESPACHAR 
+    public function actionCantidad_despachada($id_pedido, $id_detalle){
         $model = new \app\models\ModeloDocumento(); 
-        if($sw == 0){
-             $detalle = PedidoDetalles::findOne($id_detalle);
-        }else{
-            $detalle = PedidoPresupuestoComercial::findOne($id_detalle);
+        $detalle = PedidoDetalles::findOne($id_detalle);
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
         }
         if ($model->load(Yii::$app->request->post())) {
-            if($model->validate()){
-                if(isset($_POST["unidades_despachadas"])){
-                    if($model->cantidad_despachada > 0 && $model->cantidad_despachada == ''){
-                        if($model->cantidad_despachada <= $detalle->cantidad){ 
-                            $detalle->cantidad_despachada = $model->cantidad_despachada;
-                            $detalle->historico_cantidad_vendida = $detalle->cantidad;
-                            $detalle->linea_validada = 1;
-                            if($detalle->cantidad <> $model->cantidad_despachada){
-                                $detalle->regenerar_linea = 1;
+            if(isset($_POST["cantidaddespachada"])){
+                if($model->cantidad_despachada <= $detalle->cantidad){ 
+                   if(isset($_POST["seleccione_item"])){
+                       $valor = 0 ;
+                        foreach ($_POST["seleccione_item"] as $intCodigo):
+                            $cantidad = 0; $sobrante = 0; $restar = 0; $unidad_inventario = 0;
+                            $base = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                            if($base->cantidad < $model->cantidad_despachada){
+                                $cantidad = $base->cantidad;
+                                $sobrante = $model->cantidad_despachada - $cantidad;
+                                $restar = $cantidad - ($model->cantidad_despachada - $sobrante);
+                                $base->cantidad = $restar;
+                                $valor = $sobrante;
+                                $unidad_inventario = $restar;
                             }else{
-                               $detalle->regenerar_linea = 0; 
+                                if($valor > 0){
+                                    $cantidad = $base->cantidad - $valor;
+                                    $base->cantidad = $cantidad;
+                                    $valor = 0;
+                                    $unidad_inventario = $valor;
+                                }else{
+                                    $cantidad = $base->cantidad - $model->cantidad_despachada;
+                                    $base->cantidad = $cantidad;
+                                    $unidad_inventario = $model->cantidad_despachada;
+                                }   
                             }
-                            $detalle->save();
-                            return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                            $base->save(false);
+                            $id_rack = $base->id_rack;
+                            $unidades = $unidad_inventario;
+                            $this->ActualizarUnidadesRack($id_rack, $unidades);
+                        endforeach;
+                        $detalle->cantidad_despachada = $model->cantidad_despachada;
+                        $detalle->historico_cantidad_vendida = $detalle->cantidad;
+                        $detalle->linea_validada = 1;
+                        if($detalle->cantidad <> $model->cantidad_despachada){
+                            $detalle->regenerar_linea = 1;
                         }else{
-                            Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayore que las unidades vendidas.');
-                             return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
-                        }  
-                    }else{
-                        Yii::$app->getSession()->setFlash('info', 'Debe de indicar las unidades a despachar para este producto.');
-                         return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
-                    }     
-                }
-            }else{
-                $model->getErrors();
+                           $detalle->regenerar_linea = 0; 
+                        }
+                        $detalle->save(false);
+                        return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                   }else{
+                       Yii::$app->getSession()->setFlash('info', 'Debe se chequear el RACK para descargar el inventario.');
+                        return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                   }
+                }else{
+                    Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayor que las unidades vendidas.');
+                    return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                }  
             }
         }
         if (Yii::$app->request->get()) {
            $model->cantidad_vendida = $detalle->cantidad;
         }
-        return $this->renderAjax('_unidades_despachadas', [
+        return $this->render('_form_cantidad_despachada', [
                         'model' => $model,
                         'id_pedido' => $id_pedido,
-                        'sw' => $sw,
                         'detalle' => $detalle,
-        ]);
+        ]); 
+        
+    }
+    
+    //ACTUALIZAR UNIDADES RACK
+    protected function ActualizarUnidadesRack($id_rack, $unidades) {
+        $rack = TipoRack::findOne($id_rack);
+        $suma = 0;
+        $suma = $rack->capacidad_actual - $unidades;
+        $rack->capacidad_actual = $suma;
+        $rack->save();
     }
     
     //CREAR DOCUMENTO

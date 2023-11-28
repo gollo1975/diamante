@@ -107,21 +107,14 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <td style="text-align: right"><?= ''.number_format($pedido->impuesto,0) ?></td>
                                             <td style="text-align: right"><?= ''.number_format($pedido->total_linea,0) ?></td>
                                             <td><?= $pedido->lineaValidada ?></td>
-                                            <td style= 'width: 20px; height: 20px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',
-                                                   ['/almacenamiento-producto/unidades_despachadas', 'id_pedido' => $model->id_pedido, 'id_detalle' =>$pedido->id_detalle, 'sw' => 0],
-                                                     ['title' => 'Permite subir las cantidades a despachar.',
-                                                      'data-toggle'=>'modal',
-                                                      'data-target'=>'#modalnidadesdespachadas',
-                                                     ])    
-                                               ?>
-                                               <div class="modal remote fade" id="modalnidadesdespachadas">
-                                                    <div class="modal-dialog modal-lg" style ="width:780px;">    
-                                                        <div class="modal-content"></div>
-                                                    </div>
-                                               </div>
-                                            </td> 
-                                            <?php if($pedido->regenerar_linea == 1){?>
+                                            <?php if($pedido->linea_validada == 0){?>
+                                                <td style= 'width: 20px; height: 20px;'>
+                                                   <a href="<?= Url::toRoute(["almacenamiento-producto/cantidad_despachada", "id_pedido" => $pedido->id_pedido, 'id_detalle' => $pedido->id_detalle]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                                                </td> 
+                                            <?php }else {?>    
+                                                <td style= 'width: 20px; height: 20px;'></td>                                                
+                                            <?php }    
+                                            if($pedido->regenerar_linea == 1){?>
                                                 <td style= 'width: 20px; height: 20px;'><input type="checkbox" name="numero_linea[]" value="<?= $pedido->id_detalle ?>"></td> 
                                             <?php }else{?>
                                                 <td style= 'width: 20px; height: 20px;'></td>
