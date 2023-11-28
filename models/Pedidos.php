@@ -145,6 +145,13 @@ class Pedidos extends \yii\db\ActiveRecord
         }
         return $pedidovirtual;
     }
-    
+     public function getPedidoValidado() {
+        if($this->pedido_validado == 0 ){
+            $pedidovalidado = 'NO';
+        }else{
+            $pedidovalidado = 'SI';
+        }
+        return $pedidovalidado;
+    }
     
 }

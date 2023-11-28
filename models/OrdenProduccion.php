@@ -51,7 +51,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
     {
         return [
             [['numero_orden', 'id_almacen', 'id_grupo', 'numero_lote', 'subtotal', 'iva', 'total_orden', 'autorizado', 'cerrar_orden',
-                'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado','producto_almacenado'], 'integer'],
+                'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado','producto_almacenado','exportar_inventario','exportar_materia_prima'], 'integer'],
             [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
@@ -89,6 +89,9 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             'responsable' => 'Responsable:',
             'producto_aprobado' => 'Producto aprobado:',
             'producto_almacenado' => 'Producto almacenado:',
+            'exportar_materia_prima' => 'exportar_materia_prima',
+            'exportar_inventario' => 'exportar_inventario',
+            
         ];
     }
 

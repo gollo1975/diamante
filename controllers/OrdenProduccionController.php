@@ -805,6 +805,8 @@ class OrdenProduccionController extends Controller
                         $inventario->save();
                         $detalles->importado = 1;
                         $detalles->save();
+                        $orden->exportar_inventario = 1;
+                        $orden->save();
                         $this->ActualizarSaldoTotales($auxiliar);
                     }
                 endforeach;
@@ -837,6 +839,8 @@ class OrdenProduccionController extends Controller
                     $detalles->importado = 1;
                     $detalles->id_inventario = $indice->id_inventario;
                     $detalles->save();
+                    $orden->exportar_inventario = 1;
+                    $orden->save();
                     $registro = InventarioProductos::find()->orderBy('id_inventario DESC')->one();
                     $auxiliar = $registro->id_inventario;
                     $this->ActualizarSaldoTotales($auxiliar);
@@ -850,6 +854,7 @@ class OrdenProduccionController extends Controller
     }
     //PROCESO QUE DESCARGA LA MATERIA PRIMA
     public function actionDescargarmateriaprima($id, $token) {
+        $orden = OrdenProduccion::findOne($id);
         $detalle = OrdenProduccionMateriaPrima::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','importado', 0])->all();
         if(count($detalle) > 0){
             foreach ($detalle as $detalles):
@@ -864,6 +869,8 @@ class OrdenProduccionController extends Controller
                         $this->ActualizarCostoMateriaPrima($materia);
                     }
                 }
+                $orden->exportar_materia_prima = 1;
+                $orden->save(false);
             endforeach;
             $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
         }else{

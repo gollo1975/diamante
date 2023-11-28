@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <script language="JavaScript">
     function mostrarfiltro() {
         divC = document.getElementById("filtro");
-        if (divC.style.display == "none"){divC.style.display = "block";}else{divC.style.display = "none";}
+        if (divC.style.display == "none"){divC.style.display = "block";}else{divC.style.display = "block";}
     }
 </script>
 
@@ -49,7 +49,7 @@ $conPiso = ArrayHelper::map(app\models\Pisos::find()->all(), 'id_piso', 'descrip
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtro" style="display:none">
+    <div class="panel-body" id="filtro" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "codigo")->input("search") ?>
             <?= $formulario->field($form, "producto")->input("search") ?>
@@ -121,7 +121,7 @@ $form = ActiveForm::begin([
              <th scope="col" style='background-color:#B9D5CE;'>Posición</th>
             <th scope="col" style='background-color:#B9D5CE;'>Op</th>
             <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
-            <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+            <th scope="col" style='background-color:#B9D5CE;'>F. almacenamiento</th>
             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
             <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>

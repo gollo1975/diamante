@@ -78,14 +78,12 @@ class InventarioProductosController extends Controller
                                         ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                         ->andFilterWhere(['like', 'nombre_producto', $producto])
                                         ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
-                                        ->andWhere(['=', 'activar_producto_venta', 1])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }else{
                             $table = InventarioProductos::find()
                                     ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                     ->andFilterWhere(['between', 'fecha_vencimiento', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['like', 'nombre_producto', $producto])
-                                    ->andWhere(['=', 'activar_producto_venta', 1])
                                     ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }    
@@ -109,8 +107,7 @@ class InventarioProductosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = InventarioProductos::find()->Where(['=', 'activar_producto_venta', 1])
-                            ->orderBy('id_inventario DESC');
+                    $table = InventarioProductos::find() ->orderBy('id_inventario DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([

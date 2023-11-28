@@ -60,11 +60,26 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                 }else{
                     if($token == 0){
                         echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
-                        echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 7, 'codigo' => $model->id_orden_produccion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);?>
-                        <?= Html::a('<span class="glyphicon glyphicon-export"></span> Exportar a inventarios', ['exportarinventarios', 'id' => $model->id_orden_produccion, 'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
-                                   'data' => ['confirm' => 'Esta seguro de exportar esta orden produccion al modulo de inventarios de productos!.', 'method' => 'post']]);?>
-                         <?= Html::a('<span class="glyphicon glyphicon-import"></span> Descargar materia prima', ['descargarmateriaprima', 'id' => $model->id_orden_produccion, 'token'=> $token],['class' => 'btn btn-success btn-sm',
+                        echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 7, 'codigo' => $model->id_orden_produccion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
+                        if($model->exportar_inventario == 0 && $model->exportar_materia_prima == 0){
+                            echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar a inventarios', ['exportarinventarios', 'id' => $model->id_orden_produccion, 'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
+                                   'data' => ['confirm' => 'Esta seguro de exportar esta orden produccion al modulo de inventarios de productos!.', 'method' => 'post']]);
+                         echo Html::a('<span class="glyphicon glyphicon-import"></span> Descargar materia prima', ['descargarmateriaprima', 'id' => $model->id_orden_produccion, 'token'=> $token],['class' => 'btn btn-success btn-sm',
                                    'data' => ['confirm' => 'Esta seguro de enviar el proceso de descargue de materias primas al modulo de inventario de materia prima!.', 'method' => 'post']]); 
+                        }else{
+                            if($model->exportar_inventario == 0 && $model->exportar_materia_prima == 1){
+                                 echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar a inventarios', ['exportarinventarios', 'id' => $model->id_orden_produccion, 'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
+                                   'data' => ['confirm' => 'Esta seguro de exportar esta orden produccion al modulo de inventarios de productos!.', 'method' => 'post']]);
+                            }else{
+                                if($model->exportar_materia_prima == 0){
+                                    echo Html::a('<span class="glyphicon glyphicon-import"></span> Descargar materia prima', ['descargarmateriaprima', 'id' => $model->id_orden_produccion, 'token'=> $token],['class' => 'btn btn-success btn-sm',
+                                       'data' => ['confirm' => 'Esta seguro de enviar el proceso de descargue de materias primas al modulo de inventario de materia prima!.', 'method' => 'post']]);
+                            
+                                }
+                            }    
+                        }
+                        
+                        
                     }else{
                          echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
                         echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 7, 'codigo' => $model->id_orden_produccion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);?>

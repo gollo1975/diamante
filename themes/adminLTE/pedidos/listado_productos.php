@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         </script>
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token]),
+            "action" => Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
 
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>

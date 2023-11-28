@@ -339,9 +339,14 @@ class AlmacenamientoProductoController extends Controller
     }
     
    //PROCESO QUE PERMITE SUBIR LAS UNIDADES A DESPACHAR 
-    public function actionCantidad_despachada($id_pedido, $id_detalle){
+    public function actionCantidad_despachada($id_pedido, $id_detalle, $sw){
         $model = new \app\models\ModeloDocumento(); 
-        $detalle = PedidoDetalles::findOne($id_detalle);
+        if($sw == 0){
+           $detalle = PedidoDetalles::findOne($id_detalle); 
+        }else{
+            $detalle = PedidoPresupuestoComercial::findOne($id_detalle);
+        }
+        
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
@@ -405,6 +410,7 @@ class AlmacenamientoProductoController extends Controller
                         'model' => $model,
                         'id_pedido' => $id_pedido,
                         'detalle' => $detalle,
+                        'sw' => $sw,
         ]); 
         
     }
@@ -468,6 +474,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->producto = $conProducto->nombre_producto;
                                     $table->numero_lote = $conProducto->numero_lote;
                                     $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                    $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
                                     $table->save(false);
                                     $cant = $model->cantidad;
                                     $id_rack = $model->rack;
@@ -491,6 +498,7 @@ class AlmacenamientoProductoController extends Controller
                                 $table->producto = $conProducto->nombre_producto;
                                 $table->numero_lote = $conProducto->numero_lote;
                                 $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
                                 $table->save(false);
                                 $cant = $model->cantidad;
                                 $id_rack = $model->rack;
@@ -519,6 +527,7 @@ class AlmacenamientoProductoController extends Controller
                                         $table->producto = $conProducto->nombre_producto;
                                         $table->numero_lote = $conProducto->numero_lote;
                                         $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                        $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
                                         $table->save(false);
                                         $cant = $model->cantidad;
                                         $id_rack = $model->rack;
@@ -542,6 +551,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->producto = $conProducto->nombre_producto;
                                     $table->numero_lote = $conProducto->numero_lote;
                                     $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                    $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
                                     $table->save(false);
                                     $cant = $model->cantidad;
                                     $id_rack = $model->rack;
@@ -694,6 +704,14 @@ class AlmacenamientoProductoController extends Controller
         $orden->producto_almacenado = 1;
         $orden->save(false);
         return $this->redirect(["cargar_orden_produccion"]);
+    }
+    
+    // CERRAR PEDIDO PARA FACTURACION
+    public function actionPedido_validado_facturacion($id_pedido) {
+        $pedido = Pedidos::findOne($id_pedido);
+        $pedido->pedido_validado = 1;
+         $pedido->save();
+        return $this->redirect(["listar_pedidos"]);
     }
     /**
      * Finds the AlmacenamientoProducto model based on its primary key value.

@@ -109,10 +109,9 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. pedido</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Iva</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Vr. Presup.</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido validado">P. val.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica presupuesto al cliente">A.p.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
                     <th scope="col" style='background-color:#B9D5CE;'></th> 
@@ -128,11 +127,14 @@ $form = ActiveForm::begin([
                         <td><?= $val->clientePedido->codigoDepartamento->departamento ?></td>
                         <td><?= $val->clientePedido->codigoMunicipio->municipio ?></td>
                         <td><?= $val->fecha_proceso ?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
                         <td style="text-align: right"><?= ''.number_format($val->gran_total,0) ?></td>
                         <td style="text-align: right"><?= ''.number_format($val->valor_presupuesto,0) ?></td>
-                        <?php if($val->valor_presupuesto == 0){?>
+                        <?php if($val->pedido_validado == 0){ ?>
+                        <td style='background-color:#B9D5CE;'><?= $val->pedidoValidado ?></td>
+                        <?php }else{?>
+                            <td><?= $val->pedidoValidado ?></td>
+                        <?php }
+                        if($val->valor_presupuesto == 0){?>
                            <td><?= $val->presupuestoPedido ?></td>
                            <td style= 'width: 25px; height: 25px;'>
                                 <a href="<?= Url::toRoute(["pedidos/imprimir_pedido", "id" => $val->id_pedido]) ?>" ><span class="glyphicon glyphicon-print"></span></a>

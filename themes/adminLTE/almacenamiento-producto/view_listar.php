@@ -25,9 +25,13 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
 
 <div class="almacenamiento-producto-view_lsitar">
-    <div class="btn-group btn-sm" role="group">    
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['listar_pedidos'], ['class' => 'btn btn-primary btn-sm']) ?>
-    </div>    
+    <p>    
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['listar_pedidos'], ['class' => 'btn btn-primary btn-sm']);
+        if($model->pedido_validado == 0){
+            echo Html::a('<span class="glyphicon glyphicon-ok"></span> Pedido validado', ['pedido_validado_facturacion', 'id_pedido' => $model->id_pedido],['class' => 'btn btn-warning btn-sm',
+                           'data' => ['confirm' => 'Este pedido queda listo para facturacion. Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
+        }?>    
+    </p>    
         <div class="panel panel-success">
             <div class="panel-heading">
                 DETALLES DEL PEDIDO
@@ -109,7 +113,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <td><?= $pedido->lineaValidada ?></td>
                                             <?php if($pedido->linea_validada == 0){?>
                                                 <td style= 'width: 20px; height: 20px;'>
-                                                   <a href="<?= Url::toRoute(["almacenamiento-producto/cantidad_despachada", "id_pedido" => $pedido->id_pedido, 'id_detalle' => $pedido->id_detalle]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                                                   <a href="<?= Url::toRoute(["almacenamiento-producto/cantidad_despachada", "id_pedido" => $pedido->id_pedido, 'id_detalle' => $pedido->id_detalle, 'sw' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                                                 </td> 
                                             <?php }else {?>    
                                                 <td style= 'width: 20px; height: 20px;'></td>                                                
@@ -175,21 +179,14 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <td style="text-align: right"><?= ''.number_format($pedido->impuesto,0) ?></td>
                                             <td style="text-align: right"><?= ''.number_format($pedido->total_linea,0) ?></td>
                                             <td><?= $pedido->lineaValidada ?></td>
-                                            <td style= 'width: 20px; height: 20px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',
-                                                   ['/almacenamiento-producto/unidades_despachadas', 'id_pedido' => $model->id_pedido, 'id_detalle' =>$pedido->id_detalle, 'sw' => 1],
-                                                     ['title' => 'Permite subir las cantidades a despachar.',
-                                                      'data-toggle'=>'modal',
-                                                      'data-target'=>'#modalunidadesdespachadas',
-                                                     ])    
-                                               ?>
-                                               <div class="modal remote fade" id="modalunidadesdespachadas">
-                                                    <div class="modal-dialog modal-lg" style ="width: 550px;">    
-                                                        <div class="modal-content"></div>
-                                                    </div>
-                                               </div>
-                                            </td> 
-                                            <?php if($pedido->regenerar_linea == 1){?>
+                                            <?php if($pedido->linea_validada == 0){?>
+                                                <td style= 'width: 20px; height: 20px;'>
+                                                   <a href="<?= Url::toRoute(["almacenamiento-producto/cantidad_despachada", "id_pedido" => $pedido->id_pedido, 'id_detalle' => $pedido->id_detalle, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                                                </td> 
+                                            <?php }else {?>    
+                                                <td style= 'width: 20px; height: 20px;'></td>                                                
+                                            <?php }    
+                                            if($pedido->regenerar_linea == 1){?>
                                                 <td style= 'width: 20px; height: 20px;'><input type="checkbox" name="numero_linea[]" value="<?= $pedido->id_detalle ?>"></td> 
                                             <?php }else{?>
                                                 <td style= 'width: 20px; height: 20px;'></td>

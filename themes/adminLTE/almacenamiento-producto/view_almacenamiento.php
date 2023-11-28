@@ -176,6 +176,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero rack</th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Ubicación</th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero lote</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Fecha lote</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Codigo</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Unidades</th>
@@ -190,6 +191,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <td><?= $dato->rack->numero_rack ?> - <?= $dato->rack->descripcion ?></td>
                                             <td><?= $dato->posicion->posicion ?></td>
                                             <td><?= $dato->numero_lote ?></td>
+                                            <td><?= $dato->fecha_proceso_lote ?></td>
                                             <td><?= $dato->codigo_producto ?></td>
                                             <td><?= $dato->producto ?></td>
                                             <td style="text-align: right"><?= ''.number_format($dato->cantidad,0) ?></td>

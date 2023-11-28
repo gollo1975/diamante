@@ -561,12 +561,14 @@ class PedidosController extends Controller
                     $conSql = InventarioProductos::find()
                             ->Where(['like','nombre_producto', $nombre])
                             ->andwhere(['=','venta_publico', 0])
-                            ->andwhere(['>','stock_unidades', 0]);
+                            ->andwhere(['>','stock_unidades', 0])
+                            ->andWhere(['=','activar_producto_venta', 1]);
                 }else{
                     $conSql = InventarioProductos::find()
                         ->where(['=','codigo_producto', $q])
                         ->andwhere(['=','venta_publico', 0])
-                        ->andwhere(['>','stock_unidades', 0]);
+                        ->andwhere(['>','stock_unidades', 0])
+                        ->andWhere(['=','activar_producto_venta', 1]);
                 }    
                 $conSql = $conSql->orderBy('nombre_producto ASC');  
                 $count = clone $conSql;
@@ -740,7 +742,8 @@ class PedidosController extends Controller
         }else{
             $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
                                                  ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])
-                                                 ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC');
+                                                 ->andWhere(['=','activar_producto_venta', 1])
+                                                 ->orderBy('nombre_producto ASC');
             $tableexcel = $inventario->all();
             $count = clone $inventario;
             $pages = new Pagination([
