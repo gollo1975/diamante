@@ -78,7 +78,7 @@ class Proveedor extends \yii\db\ActiveRecord
     {
         return [
             [['id_tipo_documento', 'nit_cedula', 'direccion', 'email', 'telefono', 'codigo_departamento', 'codigo_municipio', 'id_naturaleza','dv','forma_pago','autoretenedor','tipo_regimen'], 'required'],
-            [['id_tipo_documento', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'tipo_transacion', 'id_empresa','dv'], 'integer'],
+            [['id_tipo_documento', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'tipo_transacion', 'id_empresa','dv','predeterminado'], 'integer'],
             [['fecha_creacion'], 'safe'],
             [['nit_cedula', 'telefono', 'celular', 'celular_contacto', 'producto', 'user_name'], 'string', 'max' => 15],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 12],
@@ -134,6 +134,7 @@ class Proveedor extends \yii\db\ActiveRecord
             'fecha_creacion' => 'Fecha Creacion',
             'id_empresa' => 'Empresa',
             'observacion' => 'Observacion:',
+            'predeterminado' => 'Predeterminado:',
             
         ];
     }
@@ -237,5 +238,13 @@ class Proveedor extends \yii\db\ActiveRecord
             $tipotransacion = 'ABONO A CTA AHORRO';
         }
         return $tipotransacion;
+    }
+    public function getProveedorPredeterminado() {
+        if($this->predeterminado == 0){
+           $proveedorpredeterminado = 'NO';
+        }else{
+            $proveedorpredeterminado = 'SI';
+        }
+        return $proveedorpredeterminado;
     }
 }

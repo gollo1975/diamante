@@ -104,8 +104,10 @@ $view = 'proveedor';
                     <td><?= $model->tipoTransacion ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'>Predeterminado</th>
+                    <td><?= $model->proveedorPredeterminado ?></td>
                     <th style='background-color:#F0F3EF;'>Observación</th>
-                    <td colspan="10"><?= $model->observacion ?></td>
+                    <td colspan="8"><?= $model->observacion ?></td>
                 </tr>
             </table>
         </div>

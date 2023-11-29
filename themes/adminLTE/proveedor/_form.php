@@ -115,6 +115,7 @@ $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza
         </div>  
         <div class="row">
             <div class="field-tblproveedor-observaciones_proveedor has-success">
+                <?= $form->field($model, 'predeterminado')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
                 <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
             </div>
         </div> 	

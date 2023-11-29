@@ -93,8 +93,10 @@ $view = 'inventario-productos';
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'activar_producto_venta') ?></th>
                     <td><?= Html::encode($model->activarProducto) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proveedor') ?></th>
+                    <td><?= Html::encode($model->proveedor->nombre_completo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion_producto') ?></th>
-                    <td colspan="7"><?= Html::encode($model->descripcion_producto)?></td>
+                    <td colspan="5"><?= Html::encode($model->descripcion_producto)?></td>
                 </tr>
                 
                 

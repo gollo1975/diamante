@@ -242,6 +242,7 @@ class ProveedorController extends Controller
                 $table->tipo_cuenta = $model->tipo_cuenta;
                 $table->producto = $model->producto;
                 $table->tipo_transacion = $model->tipo_transacion;
+                 $table->predeterminado = $model->predeterminado;
                 $table->user_name = Yii::$app->user->identity->username;
                 $table->id_empresa = $empresa->nit_empresa;
                 $table->observacion = $model->observacion;
@@ -311,6 +312,7 @@ class ProveedorController extends Controller
                     $table->tipo_cuenta = $model->tipo_cuenta;
                     $table->producto = $model->producto;
                     $table->tipo_transacion = $model->tipo_transacion;
+                    $table->predeterminado = $model->predeterminado;
                     $table->observacion = $model->observacion;
                     if ($model->id_tipo_documento == 1 || $model->id_tipo_documento == 2 ) {
                        $table->nombre_completo = strtoupper($model->primer_nombre . " " . $model->segundo_nombre . " " . $model->primer_apellido . " " . $model->segundo_apellido);
@@ -362,6 +364,7 @@ class ProveedorController extends Controller
                 $model->tipo_cuenta = $table->tipo_cuenta;
                 $model->producto = $table->producto;
                 $model->tipo_transacion = $table->tipo_transacion;
+                $model->predeterminado = $table->predeterminado;
                 $model->observacion = $table->observacion;
 
             } else {

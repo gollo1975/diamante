@@ -73,6 +73,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccionProductos::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
             [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => PresentacionProducto::className(), 'targetAttribute' => ['id_presentacion' => 'id_presentacion']],
+            [['id_proveedor'], 'exist', 'skipOnError' => true, 'targetClass' => Proveedor::className(), 'targetAttribute' => ['id_proveedor' => 'id_proveedor']],
         ];
     }
 
@@ -85,7 +86,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'id_inventario' => 'Id',
             'codigo_producto' => 'Codigo producto:',
             'nombre_producto' => 'Nombre producto:',
-            'descripcion_producto' => 'Descripcion producto:',
+            'descripcion_producto' => 'Descripcion:',
             'costo_unitario' => 'Costo unitario:',
             'unidades_entradas' => 'Cantidad:',
             'stock_unidades' => 'Stock:',
@@ -107,11 +108,13 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'user_name' => 'User name:',
             'codigo_ean' => 'Codigo Ean:',
             'venta_publico' => 'Venta publico:',
-            'id_presentacion' => 'Presentacion producto:',
+            'id_presentacion' => 'Presentacion:',
             'aplica_presupuesto' => 'aplica_presupuesto',
             'aplica_regla_comercial' => 'Aplica regla comercial:',
             'activar_producto_venta' => 'Producto activado:',
-        ];
+            'id_proveedor' => 'Proveedor:',
+           
+         ];
     }
 
     /**
@@ -125,6 +128,11 @@ class InventarioProductos extends \yii\db\ActiveRecord
     public function getPresentacion()
     {
         return $this->hasOne(PresentacionProducto::className(), ['id_presentacion' => 'id_presentacion']);
+    }
+    
+    public function getProveedor()
+    {
+        return $this->hasOne(Proveedor::className(), ['id_proveedor' => 'id_proveedor']);
     }
     /**
      * @return \yii\db\ActiveQuery

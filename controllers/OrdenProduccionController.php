@@ -817,6 +817,7 @@ class OrdenProduccionController extends Controller
             }    
         }else{
             if(count($detalle) > 0){
+                $proveedor = \app\models\Proveedor::find()->where(['=','predeterminado', 1])->one();
                 foreach ($detalle as $detalles):
                     $auxiliar = 0;
                     $table = new InventarioProductos();
@@ -834,6 +835,7 @@ class OrdenProduccionController extends Controller
                     $table->fecha_proceso = $orden->fecha_proceso;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->codigo_ean = $detalles->codigo_producto;
+                    $table->id_proveedor = $proveedor->id_proveedor;
                     $table->save(false);
                     $indice = InventarioProductos::find()->orderBy('id_inventario DESC')->one();
                     $detalles->importado = 1;
@@ -874,6 +876,8 @@ class OrdenProduccionController extends Controller
             endforeach;
             $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
         }else{
+            $orden->exportar_materia_prima = 1;
+            $orden->save(false);
             $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
             Yii::$app->getSession()->setFlash('warning', 'Las materias primas que se utilizaron en esta orden de produccion ya se importaron.'); 
         }    

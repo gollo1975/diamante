@@ -13,6 +13,7 @@ use kartik\depdrop\DepDrop;
 //model
 use app\models\GrupoProducto;
 use app\models\ConfiguracionIva;
+use app\models\Proveedor;
 
 ?>
 
@@ -35,6 +36,7 @@ $form = ActiveForm::begin([
 $presentacion = ArrayHelper::map(app\models\PresentacionProducto::find()->where(['=','id_grupo', $model->id_grupo])->orderBy ('descripcion ASC')->all(), 'id_presentacion', 'descripcion');
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
 $porcentaje = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DESC')->all(), 'valor_iva', 'valor_iva');
+$provedor = ArrayHelper::map(Proveedor::find()->orderBy('nombre_completo ASC')->all(), 'id_proveedor', 'nombre_completo');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -87,10 +89,17 @@ $porcentaje = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DES
              <?= $form->field($model, 'aplica_inventario')->dropDownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione una opcion...']) ?>
         </div>
         <div class="row">
-             <?= $form->field($model, 'venta_publico')->dropDownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione una opcion...']) ?>
+            <?= $form->field($model, 'venta_publico')->dropDownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione una opcion...']) ?>
             <?= $form->field($model, 'aplica_regla_comercial')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
         </div> 
         <div class="row">
+            <?= $form->field($model, 'id_proveedor')->widget(Select2::classname(), [
+                   'data' => $provedor,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+               ]); ?> 
              <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div> 
         <div class="panel-footer text-right">			
