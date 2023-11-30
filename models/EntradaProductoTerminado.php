@@ -42,7 +42,7 @@ class EntradaProductoTerminado extends \yii\db\ActiveRecord
     {
         return [
             [['id_proveedor'], 'required'],
-            [['id_proveedor', 'id_orden_compra', 'subtotal', 'impuesto', 'total_salida', 'autorizado', 'enviar_materia_prima','tipo_entrada'], 'integer'],
+            [['id_proveedor', 'id_orden_compra', 'subtotal', 'impuesto', 'total_salida', 'autorizado', 'enviar_materia_prima','tipo_entrada','producto_almacenado'], 'integer'],
             [['fecha_proceso', 'fecha_registro'], 'safe'],
             [['observacion'], 'string'],
             [['numero_soporte'], 'string', 'max' => 10],
@@ -73,6 +73,7 @@ class EntradaProductoTerminado extends \yii\db\ActiveRecord
             'user_name_edit' => 'User name editado:',
             'observacion' => 'Observacion:',
             'tipo_entrada' => 'Tipo entrada:',
+            'producto_almacenado'=> 'Producto almacenado:',
         ];
     }
 
@@ -114,6 +115,15 @@ class EntradaProductoTerminado extends \yii\db\ActiveRecord
             $tipoentrada = 'MANUAL';
         }
         return $tipoentrada;
+    }
+    
+    public function getProductoAlmacenado() {
+        if($this->producto_almacenado == 0){
+            $productoalmacenado = 'NO';
+        }else{
+            $productoalmacenado = 'SI';
+        }
+        return $productoalmacenado;
     }
     
 }

@@ -29,6 +29,7 @@ use app\models\TipoRack;
 use app\models\Pedidos;
 use app\models\PedidoDetalles;
 use app\models\PedidoPresupuestoComercial;
+use app\models\EntradaProductoTerminado;
 
 
 /**
@@ -205,7 +206,6 @@ class AlmacenamientoProductoController extends Controller
                 $lote = null;
                 $fecha_inicio = null;
                 $fecha_corte = null;
-                $orden = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $orden = Html::encode($form->orden);
@@ -261,7 +261,136 @@ class AlmacenamientoProductoController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
-
+    
+    // PROCESO QUE CARGA LAS ENTRADAS DE PRODUCTOS PARA ALMACENAR
+    public function actionCargar_entrada_producto() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',75])->all()){
+                $form = new \app\models\FiltroBusquedaAlmacenamiento();
+                $tipo_entrada = null;
+                $proveedor = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $tipo_entrada = Html::encode($form->tipo_entrada);
+                        $proveedor = Html::encode($form->proveedor);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $table = EntradaProductoTerminado::find()
+                                    ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'id_proveedor', $proveedor])
+                                    ->andFilterWhere(['=','tipo_entrada', $tipo_entrada])
+                                    ->andWhere(['=', 'enviar_materia_prima', 1])
+                                    ->andWhere(['=', 'producto_almacenado', 0]);
+                        $table = $table->orderBy('id_entrada DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = EntradaProductoTerminado::find()->Where(['=', 'enviar_materia_prima', 1])->andWhere(['=', 'producto_almacenado', 0])
+                                                    ->orderBy('id_entrada DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }
+                return $this->render('cargar_entrada_producto', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+    
+    //CONSULTA ALMACENAIMIENTO DESDE LA ENTRADA DE PRODUCTOS
+    public function actionSearch_almacenamiento_entrada() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',76])->all()){
+                $form = new \app\models\FiltroBusquedaAlmacenamiento();
+                $codigo = null;
+                $lote = null;
+                $rack = null;
+                $piso = null;
+                $posicion = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $producto = null;
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $codigo = Html::encode($form->codigo);
+                        $producto = Html::encode($form->producto);
+                        $piso = Html::encode($form->piso);
+                        $posicion = Html::encode($form->posicion);
+                        $lote = Html::encode($form->lote);
+                        $rack = Html::encode($form->rack);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $table = \app\models\AlmacenamientoProductoEntradaDetalles::find()
+                                    ->andFilterWhere(['between', 'fecha_almacenamiento', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'numero_lote', $lote])
+                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                    ->andFilterWhere(['like', 'producto', $producto])
+                                    ->andFilterWhere(['=', 'id_piso', $piso])
+                                    ->andfilterWhere(['=', 'id_rack', $rack])
+                                    ->andfilterWhere(['=', 'id_posicion', $posicion]);
+                        $table = $table->orderBy('id DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id  DESC']);
+                            $this->actionExcelAlmacenamientoEntrada($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('search_almacenamiento_entrada', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
     
     //VISTA DE ALMACENAMIENTO
     public function actionView_almacenamiento($id_orden, $token)
@@ -277,6 +406,23 @@ class AlmacenamientoProductoController extends Controller
             'token' =>$token,
         ]);
     }
+    
+    //
+     //VISTA DE ALMACENAMIENTO DE ENTRADAS
+    public function actionView_almacenamiento_entrada($id_orden, $token)
+    {
+        $detalle = \app\models\AlmacenamientoProductoEntrada::find()->where(['=','id_entrada', $id_orden])->all();
+        $conAlmacenado = \app\models\AlmacenamientoProductoEntradaDetalles::find()->where(['=','id_entrada', $id_orden])->all();
+        $model = EntradaProductoTerminado::findOne($id_orden);
+        return $this->render('view_almacenamiento_entrada', [
+            'detalle' => $detalle,
+            'id_orden' => $id_orden,
+            'model' => $model,
+            'conAlmacenado' => $conAlmacenado,
+            'token' =>$token,
+        ]);
+    }
+    
     //VISTA QUE LISTAS LOS PEDIDOS
     public function actionView_listar($id_pedido){
         $model = Pedidos::findOne($id_pedido);
@@ -430,7 +576,7 @@ class AlmacenamientoProductoController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
                 if (isset($_POST["nuevo_documento"])) {
-                   $table = AlmacenamientoProducto::findOne($id) ;
+                   $table = AlmacenamientoProductoentr::findOne($id) ;
                    $table->id_documento = $model->documento;
                    $table->save();
                    return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token,]);
@@ -445,6 +591,29 @@ class AlmacenamientoProductoController extends Controller
                     'id_orden' => $id_orden, 
         ]);
     }
+    
+    //subir documento entrada
+     public function actionSubir_documento_entrada($id, $id_orden,$token) {
+        $model = new \app\models\ModeloDocumento(); 
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["nuevo_documento"])) {
+                   $table = \app\models\AlmacenamientoProductoEntrada::findOne($id) ;
+                   $table->id_documento = $model->documento;
+                   $table->save();
+                   return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token,]);
+                }
+            }else{
+              $model->getErrors();  
+            }
+         }
+          return $this->renderAjax('form_subir_almacenamiento', [
+                    'model' => $model,
+                    'id' => $id,
+                    'id_orden' => $id_orden, 
+        ]);
+    }
+    
     //ENVIAR UNIDADES AL RACK
     public function actionCrear_almacenamiento($id_orden, $id, $token) {
         $model = new \app\models\ModeloEnviarUnidadesRack();
@@ -588,16 +757,155 @@ class AlmacenamientoProductoController extends Controller
         }    
     }
     
+    //ENVIAR UNIDADES AL RACK DE ENTRADAS
+     public function actionCrear_almacenamiento_entradas($id_orden, $id, $token) {
+        $model = new \app\models\ModeloEnviarUnidadesRack();
+        $racks = TipoRack::find()->where(['=','estado', 0])->all();
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if(isset($_POST["crear_almacenamiento"])){
+                    $total = 0; $cant = 0; $id_rack = 0; $capacidad = 0; $actual = 0; $Capacidad_requerida = 0;
+                    $conProducto = \app\models\AlmacenamientoProductoEntrada::findOne($id);
+                    if($model->cantidad <= $conProducto->unidad_producidas){
+                        if($conProducto->unidades_almacenadas == 0){
+                            $tipo_rack = TipoRack::findOne($model->rack);
+                            if($tipo_rack->controlar_capacidad == 1){
+                                $capacidad = $tipo_rack->capacidad_instalada;
+                                $actual = $tipo_rack->capacidad_actual + $model->cantidad;
+                                $Capacidad_requerida = $capacidad - $tipo_rack->capacidad_actual;
+                                if($actual <= $capacidad){
+                                    $table = new \app\models\AlmacenamientoProductoEntradaDetalles();
+                                    $table->id_almacenamiento = $id;
+                                    $table->id_entrada = $id_orden;
+                                    $table->id_rack = $model->rack;
+                                    $table->id_piso = $model->piso;
+                                    $table->id_posicion = $model->posicion; 
+                                    $table->cantidad = $model->cantidad;
+                                    $table->id_inventario = $conProducto->id_inventario;
+                                    $table->codigo_producto = $conProducto->codigo_producto;
+                                    $table->producto = $conProducto->nombre_producto;
+                                    $table->numero_lote = $conProducto->numero_soporte;
+                                    $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                    $table->save(false);
+                                    $cant = $model->cantidad;
+                                    $id_rack = $model->rack;
+                                    $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                    $this->SumarUnidadesRack($id_rack, $cant);
+                                    return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]);  
+                                }else{
+                                    Yii::$app->getSession()->setFlash('warning', 'El RACK seleccionado tiene un cupo de almacenamiento de ('.$tipo_rack->capacidad_instalada.') unidades. Solo tiene capacidad para almacenar ('.$Capacidad_requerida.') unidades.!');
+                                    return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
+                                }
+                            }else{
+                                $table = new \app\models\AlmacenamientoProductoEntradaDetalles();
+                                $table->id_almacenamiento = $id;
+                                $table->id_entrada = $id_orden;
+                                $table->id_rack = $model->rack;
+                                $table->id_piso = $model->piso;
+                                $table->id_posicion = $model->posicion;     
+                                $table->cantidad = $model->cantidad;
+                                $table->id_inventario = $conProducto->id_inventario;
+                                $table->codigo_producto = $conProducto->codigo_producto;
+                                $table->producto = $conProducto->nombre_producto;
+                                $table->numero_lote = $conProducto->numero_soporte;
+                                $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                $table->save(false);
+                                $cant = $model->cantidad;
+                                $id_rack = $model->rack;
+                                $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                $this->SumarUnidadesRack($id_rack, $cant);
+                                return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
+                            }    
+                        }else{
+                            $total = $conProducto->unidades_faltantes;
+                            if($model->cantidad <= $total){
+                                $tipo_rack = TipoRack::findOne($model->rack);
+                                if($tipo_rack->controlar_capacidad == 1){
+                                    $capacidad = $tipo_rack->capacidad_instalada;
+                                    $actual = $tipo_rack->capacidad_actual + $model->cantidad;
+                                    $Capacidad_requerida = $capacidad - $tipo_rack->capacidad_actual;
+                                    if($actual <= $capacidad){
+                                        $table = new \app\models\AlmacenamientoProductoEntradaDetalles();
+                                        $table->id_almacenamiento = $id;
+                                        $table->id_entrada = $id_orden;
+                                        $table->id_rack = $model->rack;
+                                        $table->id_piso = $model->piso;
+                                        $table->id_posicion = $model->posicion; 
+                                        $table->cantidad = $model->cantidad;
+                                         $table->id_inventario = $conProducto->id_inventario;
+                                        $table->codigo_producto = $conProducto->codigo_producto;
+                                        $table->producto = $conProducto->nombre_producto;
+                                        $table->numero_lote = $conProducto->numero_soporte;
+                                        $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                        $table->save(false);
+                                        $cant = $model->cantidad;
+                                        $id_rack = $model->rack;
+                                        $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                        $this->SumarUnidadesRack($id_rack, $cant);
+                                        return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
+                                    }else{
+                                        Yii::$app->getSession()->setFlash('warning', 'El RACK seleccionado tiene un cupo de almacenamiento de ('.$tipo_rack->capacidad_instalada.') unidades. Solo tiene capacidad para almacenar ('.$Capacidad_requerida.') unidades.!');
+                                        return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
+                                    } 
+                                }else{
+                                    $table = new \app\models\AlmacenamientoProductoEntradaDetalles();
+                                    $table->id_almacenamiento = $id;
+                                    $table->id_entrada = $id_orden;
+                                    $table->id_rack = $model->rack;
+                                    $table->id_piso = $model->piso;
+                                    $table->id_posicion = $model->posicion; 
+                                    $table->cantidad = $model->cantidad;
+                                     $table->id_inventario = $conProducto->id_inventario;
+                                    $table->codigo_producto = $conProducto->codigo_producto;
+                                    $table->producto = $conProducto->nombre_producto;
+                                    $table->numero_lote = $conProducto->numero_soporte;
+                                    $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                    $table->save(false);
+                                    $cant = $model->cantidad;
+                                    $id_rack = $model->rack;
+                                    $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                    $this->SumarUnidadesRack($id_rack, $cant);
+                                    return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]);  
+                                }    
+                            }else{
+                                Yii::$app->getSession()->setFlash('info', 'Las unidades que se van a ALMACENAR son mayores con las unidades PRODUCIDAS.!');
+                                return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
+                            }
+                        }    
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'Las unidades ENVIADAS son mayores que las unidades RESTANTES.!');
+                        return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
+                    }    
+                }
+            }else{
+                $model->getErrors();
+            }
+        }
+        $conDato = \app\models\AlmacenamientoProductoEntrada::findOne($id);
+        if($conDato->id_documento == null){
+             Yii::$app->getSession()->setFlash('warning', 'Debe de  crear primero el DOCUMENTO de almacenamiento.');
+             return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden,'token' =>$token]); 
+        }else{
+            return $this->renderAjax('_enviar_unidades_almacenamiento', [
+                        'model' => $model,
+                        'id' => $id,
+                        'id_orden' => $id_orden, 
+                        'token' =>$token,
+                        'tipo_rack' => ArrayHelper::map($racks, "id_rack", "tiporack"),
+            ]);
+        }    
+    }
+    
     //PROCESO QUE ACUTLIZA UNIDADES
     protected function ActualizarUnidadesAlmacenadas($id, $id_orden) {
-        $almacenamiento = AlmacenamientoProducto::findOne($id);
-        $detalle = AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $id])->all();
+        $almacenamiento = \app\models\AlmacenamientoProductoEntrada::findOne($id);
+        $detalle = \app\models\AlmacenamientoProductoEntradaDetalles::find()->where(['=','id_almacenamiento', $id])->all();
         $suma = 0;
         foreach ($detalle as $detalles):
             $suma += $detalles->cantidad;    
         endforeach;
         $almacenamiento->unidades_almacenadas = $suma;
-        $almacenamiento->unidades_faltantes = $almacenamiento->unidades_producidas - $suma;
+        $almacenamiento->unidades_faltantes = $almacenamiento->unidad_producidas - $suma;
         $almacenamiento->save();
     }
     //RELACION DE PISOS CON RACKS
@@ -627,25 +935,49 @@ class AlmacenamientoProductoController extends Controller
      */
    
     ///PROCESO QUE CARGA EL PROCESO PARA ALMACENAR.
-    public function actionEnviar_lote_almacenar($id_orden) {
-        $lotes = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all();
+    public function actionEnviar_lote_almacenar($id_orden, $sw) {
+        if($sw == 0){
+            $lotes = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        }else{
+            $lotes = \app\models\EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id_orden])->all();
+        }    
         $con = 0;
         foreach ($lotes as $detalle):
-            $dato = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $detalle->codigo_producto])->one();
-            $table = new AlmacenamientoProducto();
-            $table->id_orden_produccion = $id_orden;
-            $table->id_inventario = $dato->id_inventario;
-            $table->codigo_producto = $detalle->codigo_producto;
-            $table->nombre_producto = $detalle->descripcion;
-            $table->unidades_producidas = $detalle->cantidad;
-            $table->fecha_almacenamiento = date('Y-m-d');
-            $table->numero_lote = $detalle->numero_lote;
-            $table->user_name = Yii::$app->user->identity->username;
-            $table->save(false);
-            $con += 1;
+            if($sw == 0){ // proceso que almacena ordenes de produccion
+                $dato = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $detalle->codigo_producto])->one();
+                $table = new AlmacenamientoProducto();
+                $table->id_orden_produccion = $id_orden;
+                $table->id_inventario = $dato->id_inventario;
+                $table->codigo_producto = $detalle->codigo_producto;
+                $table->nombre_producto = $detalle->descripcion;
+                $table->unidades_producidas = $detalle->cantidad;
+                $table->fecha_almacenamiento = date('Y-m-d');
+                $table->numero_lote = $detalle->numero_lote;
+                $table->user_name = Yii::$app->user->identity->username;
+                $table->save(false);
+                $con += 1;
+            }else{ //proceso que almacena entradas de producto
+                $dato = \app\models\InventarioProductos::find()->where(['=','id_inventario', $detalle->id_inventario])->one();
+                $table = new \app\models\AlmacenamientoProductoEntrada();
+                $table->id_entrada = $id_orden;
+                $table->numero_soporte = $detalle->entrada->numero_soporte;
+                $table->id_inventario = $dato->id_inventario;
+                $table->codigo_producto = $detalle->codigo_producto;
+                $table->nombre_producto = $dato->nombre_producto;
+                $table->unidad_producidas = $detalle->cantidad;
+                $table->fecha_almacenamiento = date('Y-m-d');
+                $table->user_name = Yii::$app->user->identity->username;
+                $table->save(false);
+                $con += 1;
+            }    
         endforeach;
-        Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lotes de la orden de produccion No ('. $id_orden.') al modulo de almacenamiento con éxito.');
-        return $this->redirect(['cargar_orden_produccion']);
+        if($sw == 0){
+            Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lotes de la orden de produccion No ('. $id_orden.') al modulo de almacenamiento con éxito.');
+            return $this->redirect(['cargar_orden_produccion']);
+        }else{
+            Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lineas de la entrada No ('. $id_orden.') al modulo de almacenamiento con éxito.');
+            return $this->redirect(['cargar_entrada_producto']);
+        }    
     }
     
    
@@ -704,6 +1036,14 @@ class AlmacenamientoProductoController extends Controller
         $orden->producto_almacenado = 1;
         $orden->save(false);
         return $this->redirect(["cargar_orden_produccion"]);
+    }
+    
+    //PROCES QUE CIERRA LA ORDEN PRODUCCION
+    public function actionCerrar_entrada_producto($id_orden) {
+        $orden = EntradaProductoTerminado::findOne($id_orden);
+        $orden->producto_almacenado = 1;
+        $orden->save(false);
+        return $this->redirect(["cargar_entrada_producto"]);
     }
     
     // CERRAR PEDIDO PARA FACTURACION

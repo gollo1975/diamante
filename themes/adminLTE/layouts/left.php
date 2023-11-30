@@ -265,6 +265,7 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Almacenamiento', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/index']],
+                                                ['label' => 'Almacenamiento entradas', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/search_almacenamiento_entrada']],
                                                // ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
                                             ],  
                                         ],
@@ -274,6 +275,7 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Cargar orden produccion', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/cargar_orden_produccion']],
+                                                ['label' => 'Cargar entrada producto', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/cargar_entrada_producto']],
                                                // ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
                                                                                               
                                              ],

@@ -15,7 +15,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-$this->title = 'CONSULTA (ALMACENAMIENTO CON OP )';
+$this->title = 'CONSULTA (ALMACENAMIENTO ENTRADAS )';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("almacenamiento-producto/index"),
+    "action" => Url::toRoute("almacenamiento-producto/search_almacenamiento_entrada"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -92,7 +92,7 @@ $conPiso = ArrayHelper::map(app\models\Pisos::find()->all(), 'id_piso', 'descrip
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("almacenamiento-producto/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("almacenamiento-producto/search_almacenamiento_entrada") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -113,13 +113,13 @@ $form = ActiveForm::begin([
         <table class="table table-bordered table-hover">
         <thead>
             <tr style ='font-size: 90%;'>         
-            <th scope="col" style='background-color:#B9D5CE;'>Id alm.</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Id</th>
             <th scope="col" style='background-color:#B9D5CE;'>Piso</th> 
             <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
              <th scope="col" style='background-color:#B9D5CE;'>Capacidad</th>
             <th scope="col" style='background-color:#B9D5CE;'>U. rack</th>
              <th scope="col" style='background-color:#B9D5CE;'>Posición</th>
-            <th scope="col" style='background-color:#B9D5CE;'>Op</th>
+            <th scope="col" style='background-color:#B9D5CE;'>Entrada</th>
             <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
             <th scope="col" style='background-color:#B9D5CE;'>F. almacenamiento</th>
             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
@@ -141,14 +141,14 @@ $form = ActiveForm::begin([
                     <td><?= $val->rack->capacidad_instalada?></td>
                     <td><?= $val->rack->capacidad_actual?></td>
                      <td><?= $val->posicion->posicion?></td>
-                    <td><?= $val->ordenProduccion->numero_orden?></td>
+                    <td><?= $val->entrada->id_entrada?></td>
                     <td><?= $val->numero_lote?></td>
                     <td><?= $val->fecha_almacenamiento?></td>
                     <td><?= $val->codigo_producto?></td>
                     <td><?= $val->producto?></td>
                     <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
                     <td style= 'width: 25px; height: 20px;'>
-                         <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                         <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento_entrada", "id_orden" => $val->id_entrada, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 </tr>            
             <?php endforeach; 
