@@ -308,7 +308,6 @@ $form = ActiveForm::begin([
         if($model){?>
             <div class="panel-footer text-right" >            
                <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-               <?php $form->end() ?>
            </div>
         <?php }?>
     </div>
@@ -316,3 +315,4 @@ $form = ActiveForm::begin([
 <?php if($model){?>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>
 <?php } ?>
+  <?php $form->end() ?>

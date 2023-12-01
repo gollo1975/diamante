@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <?php if($val->unidades_almacenadas <>  $val->unidades_producidas){?>
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-floppy-disk"></span>',
-                                                       ['/almacenamiento-producto/subir_documento', 'id_orden' => $model->id_orden_produccion, 'id' => $val->id_almacenamiento, 'token' =>$token],
+                                                       ['/almacenamiento-producto/subir_documento', 'id_orden' => $model->id_orden_produccion, 'id' => $val->id_almacenamiento, 'token' =>$token, 'sw' =>0],
                                                          ['title' => 'Subir el documento del almacenamiento',
                                                           'data-toggle'=>'modal',
                                                           'data-target'=>'#modalsubirdocumento',
@@ -143,7 +143,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <?php }  
                                             if (!$conDato){?>    
                                                 <td style= 'width: 20px; height: 20px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_almacenamiento', 'id_orden' => $model->id_orden_produccion, 'detalle' => $val->id_almacenamiento, 'token' =>$token], [
+                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_almacenamiento', 'id_orden' => $model->id_orden_produccion, 'detalle' => $val->id_almacenamiento, 'token' =>$token, 'sw' =>0], [
                                                                  'class' => '',
                                                                  'data' => [
                                                                      'confirm' => 'Esta seguro de eliminar este producto del proceso de almacenamiento?',
@@ -197,7 +197,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <td style="text-align: right"><?= ''.number_format($dato->cantidad,0) ?></td>
                                             <?php if($model->producto_almacenado == 0){?>
                                                 <td style= 'width: 20px; height: 20px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_items_rack', 'id_orden' => $model->id_orden_produccion, 'id_detalle' => $dato->id, 'token' =>$token,], [
+                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_items_rack', 'id_orden' => $model->id_orden_produccion, 'id_detalle' => $dato->id, 'token' =>$token, 'sw' => 0], [
                                                                  'class' => '',
                                                                  'data' => [
                                                                      'confirm' => 'Esta seguro de eliminar este producto del proceso de almacenamiento?',

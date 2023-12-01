@@ -38,7 +38,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
         return [
             [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado','cantidad_despachada',
                 'historico_cantidad_vendida','linea_validada','regenerar_linea'], 'integer'],
-            [['fecha_registro'], 'safe'],
+            [['fecha_registro','fecha_alistamiento'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -66,6 +66,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
             'historico_cantidad_vendida' => 'historico_cantidad_vendida',
             'linea_validada' => 'linea_validada',
             'regenerar_linea' => 'regenerar_linea',
+            'fecha_alistamiento' => 'Fecha alistamiento:',
         ];
     }
 

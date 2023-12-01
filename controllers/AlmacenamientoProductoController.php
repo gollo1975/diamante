@@ -532,6 +532,7 @@ class AlmacenamientoProductoController extends Controller
                         $detalle->cantidad_despachada = $model->cantidad_despachada;
                         $detalle->historico_cantidad_vendida = $detalle->cantidad;
                         $detalle->linea_validada = 1;
+                        $detalle->fecha_alistamiento = date('Y-m-d');
                         if($detalle->cantidad <> $model->cantidad_despachada){
                             $detalle->regenerar_linea = 1;
                         }else{
@@ -571,43 +572,29 @@ class AlmacenamientoProductoController extends Controller
     }
     
     //CREAR DOCUMENTO
-    public function actionSubir_documento($id, $id_orden,$token) {
+    public function actionSubir_documento($id, $id_orden,$token, $sw) {
         $model = new \app\models\ModeloDocumento(); 
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
                 if (isset($_POST["nuevo_documento"])) {
-                   $table = AlmacenamientoProductoentr::findOne($id) ;
-                   $table->id_documento = $model->documento;
-                   $table->save();
-                   return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token,]);
+                    if($sw == 0){
+                        $table = \app\models\AlmacenamientoProducto::findOne($id) ;
+                        $table->id_documento = $model->documento;
+                        $table->save();
+                        return $this->redirect(['view_almacenamiento', 'id_orden' => $id_orden, 'token' =>$token,]);
+                    }else{
+                        $table = \app\models\AlmacenamientoProductoEntrada::findOne($id) ;
+                        $table->id_documento = $model->documento;
+                        $table->save();
+                        return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token,]);
+                    }
+                   
                 }
             }else{
               $model->getErrors();  
             }
          }
-          return $this->renderAjax('form_subir_almacenamiento', [
-                    'model' => $model,
-                    'id' => $id,
-                    'id_orden' => $id_orden, 
-        ]);
-    }
-    
-    //subir documento entrada
-     public function actionSubir_documento_entrada($id, $id_orden,$token) {
-        $model = new \app\models\ModeloDocumento(); 
-        if ($model->load(Yii::$app->request->post())) {
-            if ($model->validate()) {
-                if (isset($_POST["nuevo_documento"])) {
-                   $table = \app\models\AlmacenamientoProductoEntrada::findOne($id) ;
-                   $table->id_documento = $model->documento;
-                   $table->save();
-                   return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token,]);
-                }
-            }else{
-              $model->getErrors();  
-            }
-         }
-          return $this->renderAjax('form_subir_almacenamiento', [
+         return $this->renderAjax('form_subir_almacenamiento', [
                     'model' => $model,
                     'id' => $id,
                     'id_orden' => $id_orden, 
@@ -789,7 +776,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->save(false);
                                     $cant = $model->cantidad;
                                     $id_rack = $model->rack;
-                                    $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                    $this->ActualizarUnidadesAlmacenadasEntradas($id, $id_orden);
                                     $this->SumarUnidadesRack($id_rack, $cant);
                                     return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]);  
                                 }else{
@@ -812,7 +799,7 @@ class AlmacenamientoProductoController extends Controller
                                 $table->save(false);
                                 $cant = $model->cantidad;
                                 $id_rack = $model->rack;
-                                $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                $this->ActualizarUnidadesAlmacenadasEntradas($id, $id_orden);
                                 $this->SumarUnidadesRack($id_rack, $cant);
                                 return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
                             }    
@@ -840,7 +827,7 @@ class AlmacenamientoProductoController extends Controller
                                         $table->save(false);
                                         $cant = $model->cantidad;
                                         $id_rack = $model->rack;
-                                        $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                        $this->ActualizarUnidadesAlmacenadasEntradas($id, $id_orden);
                                         $this->SumarUnidadesRack($id_rack, $cant);
                                         return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]); 
                                     }else{
@@ -863,7 +850,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->save(false);
                                     $cant = $model->cantidad;
                                     $id_rack = $model->rack;
-                                    $this->ActualizarUnidadesAlmacenadas($id, $id_orden);
+                                    $this->ActualizarUnidadesAlmacenadasEntradas($id, $id_orden);
                                     $this->SumarUnidadesRack($id_rack, $cant);
                                     return $this->redirect(['view_almacenamiento_entrada', 'id_orden' => $id_orden, 'token' =>$token]);  
                                 }    
@@ -896,8 +883,21 @@ class AlmacenamientoProductoController extends Controller
         }    
     }
     
-    //PROCESO QUE ACUTLIZA UNIDADES
+    //PROCESO QUE ACUTLIZA UNIDADES DE ORDEN DE PRODUCCION
     protected function ActualizarUnidadesAlmacenadas($id, $id_orden) {
+        $almacenamiento = \app\models\AlmacenamientoProducto::findOne($id);
+        $detalle = \app\models\AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $id])->all();
+        $suma = 0;
+        foreach ($detalle as $detalles):
+            $suma += $detalles->cantidad;    
+        endforeach;
+        $almacenamiento->unidades_almacenadas = $suma;
+        $almacenamiento->unidades_faltantes = $almacenamiento->unidades_producidas - $suma;
+        $almacenamiento->save();
+    }
+    
+     //PROCESO QUE ACTULIZA UNIDADES DE ENTRADAS
+    protected function ActualizarUnidadesAlmacenadasEntradas($id, $id_orden) {
         $almacenamiento = \app\models\AlmacenamientoProductoEntrada::findOne($id);
         $detalle = \app\models\AlmacenamientoProductoEntradaDetalles::find()->where(['=','id_almacenamiento', $id])->all();
         $suma = 0;
@@ -989,37 +989,65 @@ class AlmacenamientoProductoController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     //ELIMINAR ALMACENAMIENTO
-      public function actionEliminar_detalle_almacenamiento($id_orden, $detalle, $token)
+      public function actionEliminar_detalle_almacenamiento($id_orden, $detalle, $token, $sw)
     {                                
-        $conBuscar = AlmacenamientoProducto::findOne($detalle);
+        if($sw == 0){
+            $conBuscar = AlmacenamientoProducto::findOne($detalle);
+        } else{
+            $conBuscar = \app\models\AlmacenamientoProductoEntrada::findOne($detalle);
+        }
         $conBuscar->delete();
-        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden, 'token' =>$token]);        
+        if($sw == 0){
+            return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden, 'token' =>$token]);        
+        }else{
+            return $this->redirect(["view_almacenamiento_entrada", 'id_orden' => $id_orden, 'token' =>$token]);        
+        }
+        
     }
     
     //ELIMINAR ALMACENAMIENTO RACKS
-      public function actionEliminar_items_rack($id_orden, $id_detalle, $token)
+      public function actionEliminar_items_rack($id_orden, $id_detalle, $token, $sw)
     {                                
-        $conBuscar = AlmacenamientoProductoDetalles::findOne($id_detalle);
+        if($sw == 0){
+            $conBuscar = AlmacenamientoProductoDetalles::findOne($id_detalle);
+        }else{
+            $conBuscar = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_detalle);
+        }
         $conBuscar->delete();
         $codigo = $conBuscar->id_almacenamiento;
         $rack = $conBuscar->id_rack;
         $cantidades = $conBuscar->cantidad;
-        $this->ActualizarUnidadesEliminadas($codigo);
+        $this->ActualizarUnidadesEliminadas($codigo, $sw);
         $this->DescontarUnidadesRack($rack, $cantidades);
-        return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden, 'token' =>$token]);        
+        if($sw == 0){
+            return $this->redirect(["view_almacenamiento", 'id_orden' => $id_orden, 'token' =>$token]);        
+        }else{
+            return $this->redirect(["view_almacenamiento_entrada", 'id_orden' => $id_orden, 'token' =>$token]);        
+        }    
     }
     
     //PROCESO QUE ACTUALIZA UNIDADES ALMACENADAS CUANDO SE ELIMINA
-    protected function ActualizarUnidadesEliminadas($codigo) {
-        $almacenamiento = AlmacenamientoProducto::findOne($codigo);
-        $detalle = AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $codigo])->all();
+    protected function ActualizarUnidadesEliminadas($codigo, $sw) {
+        if($sw == 0){
+            $almacenamiento = AlmacenamientoProducto::findOne($codigo);
+            $detalle = AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $codigo])->all();
+        }else{
+            $almacenamiento = \app\models\AlmacenamientoProductoEntrada::findOne($codigo);
+            $detalle = \app\models\AlmacenamientoProductoEntradaDetalles::find()->where(['=','id_almacenamiento', $codigo])->all();
+        }
         $suma = 0; $total = 0;
         foreach ($detalle as $detalles):
             $suma += $detalles->cantidad;    
         endforeach;
-        $total = $almacenamiento->unidades_producidas;
-        $almacenamiento->unidades_faltantes = $total - $suma;
-        $almacenamiento->unidades_almacenadas = $suma;
+        if($sw == 0){
+             $total = $almacenamiento->unidades_producidas;
+            $almacenamiento->unidades_faltantes = $total - $suma;
+            $almacenamiento->unidades_almacenadas = $suma;
+        }else{
+            $total = $almacenamiento->unidad_producidas;
+            $almacenamiento->unidades_faltantes = $total - $suma;
+            $almacenamiento->unidades_almacenadas = $suma;
+        }    
         $almacenamiento->save();
     }
     

@@ -634,7 +634,7 @@ class FacturaVentaController extends Controller
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA
      public function actionGenerar_factura($id, $id_pedido, $token) {
         //proceso de generar consecutivo
-         $pedido = Pedidos::findOne($id_pedido);
+        $pedido = Pedidos::findOne($id_pedido);
         $consecutivo = \app\models\Consecutivos::findOne(6);
         $factura = FacturaVenta::findOne($id);
         $factura->numero_factura = $consecutivo->numero_inicial + 1;
@@ -642,7 +642,7 @@ class FacturaVentaController extends Controller
         $consecutivo->numero_inicial = $factura->numero_factura;
         $consecutivo->save(false);
         $pedido->facturado = 1;
-        $pedido->save();
+        $pedido->save(false);
         $this->redirect(["view", 'id' => $id, 'token' => $token]);  
     }
     /**
