@@ -275,6 +275,7 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Cargar orden produccion', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/cargar_orden_produccion']],
+                                                ['label' => 'Mover posicion', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/mover_posiciones']],
                                                 ['label' => 'Cargar entrada producto', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/cargar_entrada_producto']],
                                                // ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
                                                                                               

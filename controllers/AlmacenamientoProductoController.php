@@ -122,6 +122,73 @@ class AlmacenamientoProductoController extends Controller
         }    
     }
     
+    //MOVER POSICION DE ALAMCENAMIENTO
+     //INDEX DE CONSULTA
+    public function actionMover_posiciones() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',77])->all()){
+                $form = new \app\models\FiltroBusquedaAlmacenamiento();
+                $codigo = null;
+                $lote = null;
+                $rack = null;
+                $piso = null;
+                $posicion = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $producto = null;
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $codigo = Html::encode($form->codigo);
+                        $producto = Html::encode($form->producto);
+                        $piso = Html::encode($form->piso);
+                        $posicion = Html::encode($form->posicion);
+                        $lote = Html::encode($form->lote);
+                        $rack = Html::encode($form->rack);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $table = AlmacenamientoProductoDetalles::find()
+                                    ->andFilterWhere(['between', 'fecha_almacenamiento', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'numero_lote', $lote])
+                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                    ->andFilterWhere(['like', 'producto', $producto])
+                                    ->andFilterWhere(['=', 'id_piso', $piso])
+                                    ->andfilterWhere(['=', 'id_rack', $rack])
+                                    ->andfilterWhere(['=', 'id_posicion', $posicion]);
+                        $table = $table->orderBy('id DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id  DESC']);
+                            $this->actionExcelAlmacenamiento($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('mover_posicion', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+    
     //PROCESO QUE LISTA O SEPARA EL PRODUCTO QUE CONTIENE EL PEDIDO
     public function actionListar_pedidos() {
         if (Yii::$app->user->identity){
@@ -448,6 +515,16 @@ class AlmacenamientoProductoController extends Controller
         ]);
     }
     
+    //VISTA DE MOVER POSICIONES
+    public function actionView_posiciones($id_posicion) {
+        $model = AlmacenamientoProductoDetalles::findOne($id_posicion);
+        $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id', $id_posicion])->all();
+        return $this->render('view_mover_posiciones', [
+            'model' => $model,
+            'posiciones' => $posiciones,
+        ]); 
+    }
+    
     /// PROCESO QUE ACTUALIZA PRECIOS DE SUBTOTALES
     protected function ActualizarLineaDetallePedido($intCodigo) {
         $table = PedidoDetalles::findOne($intCodigo);
@@ -598,6 +675,53 @@ class AlmacenamientoProductoController extends Controller
                     'model' => $model,
                     'id' => $id,
                     'id_orden' => $id_orden, 
+        ]);
+    }
+    
+    //CAMBIAR DE POSICION
+     public function actionCambiar_posicion($id_posicion, $sw) {
+        $model = new \app\models\ModeloDocumento(); 
+        if($sw == 0){
+            $table = \app\models\AlmacenamientoProductoDetalles::findOne($id_posicion) ;
+        }else{
+            $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
+        }
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["nueva_posicion"])) {
+                    if($sw == 0){
+                        $table = \app\models\AlmacenamientoProductoDetalles::findOne($id_posicion) ;
+                        $modelo = new \app\models\PosicionAlmacenamiento();
+                        $modelo->id_piso = $table->id_piso;
+                        $modelo->id_rack = $table->id_rack;
+                        $modelo->id_posicion = $table->id_posicion;
+                        $modelo->id_posicion_nueva = $model->documento;
+                        $modelo->codigo = $table->codigo_producto;
+                        $modelo->producto = $table->producto;
+                        $modelo->fecha_proceso = date('Y-m-d');
+                        $modelo->user_name = Yii::$app->user->identity->username;
+                        $modelo->id = $id_posicion;
+                        $modelo->save();
+                        $table->id_posicion = $model->documento;
+                        $table->save();
+                        return $this->redirect(['mover_posiciones']);
+                    }else{
+                        $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
+                        $table->id_posicion = $model->documento;
+                        $table->save();
+                        return $this->redirect(['mover_posicion_entrada']);
+                    }
+                }
+            }else{
+              $model->getErrors();  
+            }
+         }
+         if ($model->load(Yii::$app->request->get())) {
+            $model->documento = $table->id_posicion;
+         }    
+         return $this->renderAjax('form_mover_posicion', [
+                    'model' => $model,
+                    'id_posicion' => $id_posicion, 
         ]);
     }
     
