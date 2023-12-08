@@ -21,7 +21,7 @@ $form = ActiveForm::begin([
             'options' => []
         ],
         ]);
-$posicion = ArrayHelper::map(Posiciones::find()->orderBy('posicion ASC')->all(), 'id_posicion', 'posicion');
+$tipo_posicion = ArrayHelper::map(Posiciones::find()->orderBy('posicion ASC')->all(), 'id_posicion', 'posicion');
 ?>
 
     <div class="modal-header">
@@ -36,7 +36,7 @@ $posicion = ArrayHelper::map(Posiciones::find()->orderBy('posicion ASC')->all(),
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <?= $form->field($model, 'documento')->dropDownList($posicion, ['prompt' => 'Seleccione...','required' => 'true']) ?>
+                        <?= $form->field($model, 'posicion')->dropDownList($tipo_posicion, ['prompt' => 'Seleccione...','required' => 'true']) ?>
                     </div>
                 </div>  
                     <div class="panel-footer text-right">

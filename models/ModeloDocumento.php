@@ -14,12 +14,13 @@ class ModeloDocumento extends Model
     public $documento;
     public $cantidad_vendida;
     public $cantidad_despachada;
+    public $posicion;
 
     public function rules()
     {
         return [
 
-           [['documento','cantidad_vendida','cantidad_despachada'], 'integer'],
+           [['documento','cantidad_vendida','cantidad_despachada','posicion'], 'integer'],
         ];
     }
 
@@ -29,6 +30,7 @@ class ModeloDocumento extends Model
             'documento' => 'Documento produccion:',
             'cantidad_despachada' => 'Cantidad despachada:',
             'cantidad_vendida' => 'Cantidad vendida:',
+            'posicion' => 'Posiciones:',
 
         ];
     }

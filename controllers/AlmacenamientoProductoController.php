@@ -518,7 +518,7 @@ class AlmacenamientoProductoController extends Controller
     //VISTA DE MOVER POSICIONES
     public function actionView_posiciones($id_posicion) {
         $model = AlmacenamientoProductoDetalles::findOne($id_posicion);
-        $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id', $id_posicion])->all();
+        $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id', $id_posicion])->orderBy('id_movimiento DESC')->all();
         return $this->render('view_mover_posiciones', [
             'model' => $model,
             'posiciones' => $posiciones,
@@ -570,7 +570,7 @@ class AlmacenamientoProductoController extends Controller
             $detalle = PedidoPresupuestoComercial::findOne($id_detalle);
         }
         
-         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
@@ -683,46 +683,151 @@ class AlmacenamientoProductoController extends Controller
         $model = new \app\models\ModeloDocumento(); 
         if($sw == 0){
             $table = \app\models\AlmacenamientoProductoDetalles::findOne($id_posicion) ;
+            $posicion_anterior = $table->posicion->posicion;
         }else{
             $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
                 if (isset($_POST["nueva_posicion"])) {
-                    if($sw == 0){
-                        $table = \app\models\AlmacenamientoProductoDetalles::findOne($id_posicion) ;
-                        $modelo = new \app\models\PosicionAlmacenamiento();
-                        $modelo->id_piso = $table->id_piso;
-                        $modelo->id_rack = $table->id_rack;
-                        $modelo->id_posicion = $table->id_posicion;
-                        $modelo->id_posicion_nueva = $model->documento;
-                        $modelo->codigo = $table->codigo_producto;
-                        $modelo->producto = $table->producto;
-                        $modelo->fecha_proceso = date('Y-m-d');
-                        $modelo->user_name = Yii::$app->user->identity->username;
-                        $modelo->id = $id_posicion;
-                        $modelo->save();
-                        $table->id_posicion = $model->documento;
-                        $table->save();
-                        return $this->redirect(['mover_posiciones']);
+                    if($model->posicion <> ''){
+                        if($sw == 0){
+                            $table = \app\models\AlmacenamientoProductoDetalles::findOne($id_posicion) ;
+                            $modelo = new \app\models\PosicionAlmacenamiento();
+                            $modelo->id_piso = $table->id_piso;
+                            $modelo->id_rack = $table->id_rack;
+                            $modelo->id_posicion = $table->id_posicion;
+                            $modelo->id_posicion_nueva = $model->posicion;
+                            $modelo->codigo = $table->codigo_producto;
+                            $modelo->producto = $table->producto;
+                            $modelo->fecha_proceso = date('Y-m-d');
+                            $modelo->user_name = Yii::$app->user->identity->username;
+                            $modelo->id = $id_posicion;
+                            $modelo->save();
+                            $table->id_posicion = $model->posicion;
+                            $table->save();
+                            return $this->redirect(['mover_posiciones']);
+                        }else{
+                            $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
+                            $table->id_posicion = $model->posicion;
+                            $table->save();
+                            return $this->redirect(['mover_posicion_entrada']);
+                        }
                     }else{
-                        $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
-                        $table->id_posicion = $model->documento;
-                        $table->save();
-                        return $this->redirect(['mover_posicion_entrada']);
-                    }
+                         Yii::$app->getSession()->setFlash('info', 'Debe se seleccionar una posicion para el cambio de almacenamiento.');
+                        return $this->redirect(['mover_posiciones']);  
+                       
+                    }    
                 }
             }else{
               $model->getErrors();  
             }
          }
-         if ($model->load(Yii::$app->request->get())) {
-            $model->documento = $table->id_posicion;
+         if (Yii::$app->request->get()) {
+            $model->posicion = $table->id_posicion;
          }    
          return $this->renderAjax('form_mover_posicion', [
                     'model' => $model,
                     'id_posicion' => $id_posicion, 
+                    'posicion_anterior' => $posicion_anterior,
         ]);
+    }
+    
+    //CAMBIAR O MOVER DE RACK Y POSICION
+    public function actionCambiar_almacenamiento_rack($id_rack) {
+        $model = new \app\models\ModeloMoverPosicionRack();
+        $conRacks = AlmacenamientoProductoDetalles::find()->where(['=','id_rack', $id_rack])->all(); 
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {
+            if(isset($_POST["cambiar_posicion"])){
+                if(isset($_POST["seleccione_item"])){
+                    if($model->nuevo_rack <> ''){
+                        foreach ($_POST["seleccione_item"] as $intCodigo):
+                            $valor = 0;
+                            $descontar = 0;
+                            $table = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                            $Racks = TipoRack::findOne($model->nuevo_rack);
+                            $rackSaliente = TipoRack::findOne($table->id_rack);
+                            if($Racks->controlar_capacidad == 1){ //controla el stock en el rack
+                                $valor = $table->cantidad + $Racks->capacidad_actual;
+                                if($valor <= $Racks->capacidad_instalada){
+                                    $cambio = new \app\models\PosicionAlmacenamiento();
+                                    $cambio->id_piso = $table->id_piso;
+                                    $cambio->id_rack = $table->id_rack;
+                                    $cambio->id_rack_nuevo = $model->nuevo_rack;
+                                    $cambio->id_posicion = $table->id_posicion;
+                                    $cambio->id_posicion_nueva = $model->nueva_posicion;
+                                    $cambio->codigo = $table->codigo_producto;
+                                    $cambio->producto = $table->producto;
+                                    $cambio->cantidad = $table->cantidad;
+                                    $cambio->fecha_proceso = date('Y-m-d');
+                                    $cambio->user_name = Yii::$app->user->identity->username;
+                                    $cambio->id = $intCodigo;
+                                    $cambio->save(); 
+                                    //actualiza rack
+                                    $Racks->capacidad_actual = $valor;
+                                    $Racks->save();
+                                    //descuenta del rack saliente
+                                    $descontar = $rackSaliente->capacidad_actual - $table->cantidad;
+                                    $rackSaliente->capacidad_actual = $descontar;
+                                    $rackSaliente->save();
+                                    //hace el cambio
+                                    $table->id_rack = $model->nuevo_rack;
+                                    if($model->nueva_posicion <> ''){
+                                        $table->id_posicion = $model->nueva_posicion;
+                                    }
+                                    $table->save();
+                                }
+                            }else{
+                                $valor = $table->cantidad + $Racks->capacidad_actual;
+                                $cambio = new \app\models\PosicionAlmacenamiento();
+                                $cambio->id_piso = $table->id_piso;
+                                $cambio->id_rack = $table->id_rack;
+                                $cambio->id_rack_nuevo = $model->nuevo_rack;
+                                $cambio->id_posicion = $table->id_posicion;
+                                $cambio->id_posicion_nueva = $model->nueva_posicion;
+                                $cambio->codigo = $table->codigo_producto;
+                                $cambio->producto = $table->producto;
+                                $cambio->cantidad = $table->cantidad;
+                                $cambio->fecha_proceso = date('Y-m-d');
+                                $cambio->user_name = Yii::$app->user->identity->username;
+                                $cambio->id = $intCodigo;
+                                $cambio->save(); 
+                                //actualiza rack
+                                $Racks->capacidad_actual = $valor;
+                                $Racks->save();
+                                //descuenta del rack saliente
+                                $descontar = $rackSaliente->capacidad_actual - $table->cantidad;
+                                $rackSaliente->capacidad_actual = $descontar;
+                                $rackSaliente->save();
+                                //hace el cambio
+                                $table->id_rack = $model->nuevo_rack;
+                                if($model->nueva_posicion <> ''){
+                                    $table->id_posicion = $model->nueva_posicion;
+                                }
+                                $table->save();
+                            }
+                        endforeach;
+                        return $this->redirect(['mover_posiciones']); 
+                    }else{
+                       Yii::$app->getSession()->setFlash('warning','Debe de seleccionar el NUEVO RACK para hacer el cambio.');
+                       return $this->redirect(['cambiar_almacenamiento_rack', 'id_rack' => $id_rack]); 
+                    }    
+                    
+                }else{
+                    Yii::$app->getSession()->setFlash('info','Debe de seleccionar un registro de la tabla para procesar el cambio.');
+                    return $this->redirect(['cambiar_almacenamiento_rack', 'id_rack' => $id_rack]);
+                }
+            }
+        }    
+            return $this->render('cambiar_rack', [
+                    'model' =>$model,
+                    'conRacks' => $conRacks,
+                    'id_rack' => $id_rack,
+            ]);
     }
     
     //ENVIAR UNIDADES AL RACK

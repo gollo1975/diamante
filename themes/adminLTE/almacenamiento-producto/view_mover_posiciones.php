@@ -77,8 +77,9 @@ $this->params['breadcrumbs'][] = $model->id;
                                         <th scope="col"  style='background-color:#B9D5CE;'>Nueva posicion</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Rack anterior</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Nuevo rack</th>  
-                                         <th scope="col"  style='background-color:#B9D5CE;'>Cantidad</th>  
-                                        <th scope="col"  style='background-color:#B9D5CE;'></th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Cant.</th>  
+                                        <th scope="col"  style='background-color:#B9D5CE;'>F. movimiento</th>  
+                                        
                                     </tr>
                                 </thead>
                                 <body>
@@ -99,7 +100,8 @@ $this->params['breadcrumbs'][] = $model->id;
                                             <?php }else{?>
                                                 <td><?= $val->rackNuevo->descripcion?></td>
                                             <?php }?>
-                                            <td style="text-align: right"><?= ''.number_format($val->cantidad,0)?></td>                                                                                               
+                                            <td style="text-align: right"><?= ''.number_format($val->cantidad,0)?></td>  
+                                            <td><?= $val->fecha_proceso ?></td>
                                        </tr>
                                      <?php endforeach;?>          
                                 </body>
