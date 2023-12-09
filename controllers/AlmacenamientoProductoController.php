@@ -459,6 +459,64 @@ class AlmacenamientoProductoController extends Controller
         }    
     }
     
+    //CONSULTA DE PEDIDOS LISTAD POR LOGISTICA
+    public function actionSearch_pedidos_listados() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',79])->all()){
+                $form = new \app\models\FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $vendedores = null; $numero_pedido = null;
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $numero_pedido = Html::encode($form->numero_pedido);
+                        $table = Pedidos::find()
+                            ->andFilterWhere(['=', 'documento', $documento])
+                            ->andFilterWhere(['=', 'id_cliente', $cliente])
+                            ->andFilterWhere(['between','fecha_cierre_alistamiento', $fecha_inicio, $fecha_corte])
+                            ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                            ->andFilterWhere(['=','id_agente', $vendedores])
+                            ->andWhere(['=','pedido_validado', 1]);
+                        $table = $table->orderBy('id_pedido DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                    
+                }
+                return $this->render('pedidos_listados', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     //VISTA DE ALMACENAMIENTO
     public function actionView_almacenamiento($id_orden, $token)
     {
@@ -525,6 +583,20 @@ class AlmacenamientoProductoController extends Controller
         ]); 
     }
     
+    // VISTA QUE LISTA LOS PEDIDOS LISTADOS
+    public function actionView_pedido_listado($id) {
+        
+        $model = Pedidos::findOne($id);
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->All();
+        $detalle_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->All();
+        return $this->render('view_pedidos_listados', [
+            'model' => $model,   
+            'detalle_pedido' => $detalle_pedido,
+            'detalle_presupuesto' => $detalle_presupuesto,
+        ]); 
+    }
+
+
     /// PROCESO QUE ACTUALIZA PRECIOS DE SUBTOTALES
     protected function ActualizarLineaDetallePedido($intCodigo) {
         $table = PedidoDetalles::findOne($intCodigo);
@@ -784,7 +856,7 @@ class AlmacenamientoProductoController extends Controller
                             }else{
                                 $valor = $table->cantidad + $Racks->capacidad_actual;
                                 $cambio = new \app\models\PosicionAlmacenamiento();
-                                $cambio->id_piso = $table->id_piso;
+                                $cambio->id_piso = $table->id_piso;    
                                 $cambio->id_rack = $table->id_rack;
                                 $cambio->id_rack_nuevo = $model->nuevo_rack;
                                 $cambio->id_posicion = $table->id_posicion;
@@ -823,11 +895,24 @@ class AlmacenamientoProductoController extends Controller
                 }
             }
         }    
-            return $this->render('cambiar_rack', [
-                    'model' =>$model,
-                    'conRacks' => $conRacks,
-                    'id_rack' => $id_rack,
-            ]);
+        return $this->render('cambiar_rack', [
+                'model' =>$model,
+                'conRacks' => $conRacks,
+                'id_rack' => $id_rack,
+        ]);
+    }
+    
+    //proceso que llena los rack dependiendo el piso
+    public function actionLlenaracks($id){
+        $rows = TipoRack::find()->where(['=','id_piso', $id])
+                                ->andWhere(['=','estado', 0])->all();
+
+        echo "<option value='' required>Seleccione el rack...</option>";
+        if(count($rows)>0){
+            foreach($rows as $row){
+                echo "<option value='$row->id_rack' required>$row->descripcion</option>";
+            }
+        }
     }
     
     //ENVIAR UNIDADES AL RACK
@@ -1307,7 +1392,8 @@ class AlmacenamientoProductoController extends Controller
     public function actionPedido_validado_facturacion($id_pedido) {
         $pedido = Pedidos::findOne($id_pedido);
         $pedido->pedido_validado = 1;
-         $pedido->save();
+        $pedido->fecha_cierre_alistamiento = date('Y-m-d');
+        $pedido->save();
         return $this->redirect(["listar_pedidos"]);
     }
     /**
@@ -1409,4 +1495,100 @@ class AlmacenamientoProductoController extends Controller
         $objWriter->save('php://output');
         exit;
     }
+    
+    //PERMITE EXPORTAR A EXCEL LOS PEDIDOS ALISTADOS 
+        public function actionExcelconsultaPedidos($tableexcel) {                
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'No PEDIDO')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'FECHA PEDIDO')
+                        ->setCellValue('F1', 'FECHA ENTREGA')
+                        ->setCellValue('G1', 'FECHA VALIDADO')
+                        ->setCellValue('H1', 'CANTIDAD')
+                        ->setCellValue('I1', 'SUBTOTAL')
+                        ->setCellValue('J1', 'IVA')
+                        ->setCellValue('K1', 'TOTAL')
+                        ->setCellValue('L1', 'VENDEDOR')    
+                        ->setCellValue('M1', 'USER NAME')
+                        ->setCellValue('N1', 'AUTORIZADO')
+                        ->setCellValue('O1', 'CERRADO')
+                        ->setCellValue('P1', 'FACTURADO')
+                        ->setCellValue('Q1', 'APLICA PRESUPUESTO')
+                        ->setCellValue('R1', 'VALOR PRESUPUESTO');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_pedido)
+                        ->setCellValue('B' . $i, $val->numero_pedido)
+                        ->setCellValue('C' . $i, $val->documento)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->fecha_proceso)
+                        ->setCellValue('F' . $i, $val->fecha_entrega)
+                        ->setCellValue('G' . $i, $val->fecha_cierre_alistamiento)
+                        ->setCellValue('H' . $i, $val->cantidad)
+                        ->setCellValue('I' . $i, $val->subtotal)
+                        ->setCellValue('J' . $i, $val->impuesto)
+                        ->setCellValue('K' . $i, $val->gran_total)
+                        ->setCellValue('L' . $i, $val->agentePedido->nombre_completo)
+                        ->setCellValue('M' . $i, $val->usuario)
+                        ->setCellValue('N' . $i, $val->autorizadoPedido)
+                        ->setCellValue('O' . $i, $val->pedidoAbierto)
+                        ->setCellValue('P' . $i, $val->pedidoFacturado)
+                        ->setCellValue('Q' . $i, $val->presupuestoPedido)
+                        ->setCellValue('R' . $i, $val->valor_presupuesto);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Pedidos_listados.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        }
 }

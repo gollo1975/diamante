@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $id_rack;
         ]);
 $conPosicion = ArrayHelper::map(app\models\Posiciones::find()->all(), 'id_posicion', 'posicion');
 $tipo_rack = ArrayHelper::map(app\models\TipoRack::find()->all(), 'id_rack', 'descripcion');
+$conPiso = ArrayHelper::map(app\models\Pisos::find()->all(), 'id_piso', 'descripcion');
 ?>
 
 <div class="panel panel-success">
@@ -39,13 +40,12 @@ $tipo_rack = ArrayHelper::map(app\models\TipoRack::find()->all(), 'id_rack', 'de
     </div>
     <div class="panel-body">
         <div class="row">
-           <?= $form->field($model, 'nuevo_rack')->widget(Select2::classname(), [
-                'data' => $tipo_rack,
-                'options' => ['prompt' => 'Seleccione un registro ...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?>
+            <?= $form->field($model, 'nuevo_piso')->dropDownList($conPiso,['prompt'=>'Seleccione el piso...', 'onchange'=>' $.get( "'.Url::toRoute('almacenamiento-producto/llenaracks').'", { id: $(this).val() } ) .done(function( data ) {
+            $( "#'.Html::getInputId($model, 'nuevo_rack',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
+            <?= $form->field($model, 'nuevo_rack')->dropDownList(['prompt' => 'Seleccione...']) ?>
+        </div>
+        
+        <div class="row">
             <?= $form->field($model, 'nueva_posicion')->widget(Select2::classname(), [
                 'data' => $conPosicion,
                 'options' => ['prompt' => 'Seleccione un registro ...'],

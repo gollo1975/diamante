@@ -15,12 +15,13 @@ class ModeloMoverPosicionRack extends Model
     public $nuevo_rack;
     public $posicion_anterior;
     public $nueva_posicion;
+    public $nuevo_piso;
 
     public function rules()
     {
         return [
 
-           [['rack_anterior','nuevo_rack','posicion_anterior','nueva_posicion'], 'integer'],
+           [['rack_anterior','nuevo_rack','posicion_anterior','nueva_posicion','nuevo_piso'], 'integer'],
         ];
     }
 
@@ -31,6 +32,7 @@ class ModeloMoverPosicionRack extends Model
             'nuevo_rack' => 'Nuevo rack:',
             'posicion_anterior' => 'Posicion anterior:',
             'nueva_posicion' => 'Nueva posicion:',
+            'nuevo_piso' => 'Nuevo piso:',
 
         ];
     }

@@ -19,6 +19,15 @@ class Pisos extends \yii\db\ActiveRecord
     {
         return 'pisos';
     }
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->descripcion = strtoupper($this->descripcion); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -37,8 +46,8 @@ class Pisos extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_piso' => 'Id Piso',
-            'descripcion' => 'Descripcion',
+            'id_piso' => 'Codigo',
+            'descripcion' => 'Nombre del piso',
         ];
     }
 }

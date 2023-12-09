@@ -247,6 +247,7 @@
                                             'url' => '#',
                                             'items' => [
                                                ['label' => 'Posiciones', 'icon' => 'plus-square-o', 'url' => ['/posiciones/index']],  
+                                               ['label' => 'Pisos', 'icon' => 'plus-square-o', 'url' => ['/pisos/index']],
                                                ['label' => 'Tipo de racks ', 'icon' => 'plus-square-o', 'url' => ['/tipo-rack/index']], 
                                                 
                                             ],
@@ -266,7 +267,7 @@
                                             'items' => [
                                                 ['label' => 'Almacenamiento', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/index']],
                                                 ['label' => 'Almacenamiento entradas', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/search_almacenamiento_entrada']],
-                                               // ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
+                                                ['label' => 'Pedidos listados', 'icon' => 'plus-square-o', 'url' => ['/almacenamiento-producto/search_pedidos_listados']],
                                             ],  
                                         ],
                                         [

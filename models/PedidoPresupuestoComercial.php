@@ -40,7 +40,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     {
         return [
             [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado',
-                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea'], 'integer'],
+                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','numero_lote'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -72,6 +72,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
             'linea_validada' => 'linea_validada',
             'regenerar_linea' => 'regenerar_linea',
             'fecha_alistamiento' => 'Fecha alistamiento:',
+            'numero_lote' => 'numero_lote',
         ];
     }
 

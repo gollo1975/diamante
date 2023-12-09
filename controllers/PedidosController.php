@@ -1328,6 +1328,8 @@ class PedidosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -1347,7 +1349,9 @@ class PedidosController extends Controller
                     ->setCellValue('O1', 'FECHA REGISTRO')
                     ->setCellValue('P1', 'LINEA VALIDADA')
                     ->setCellValue('Q1', 'HISTORICO CANTIDAD VENDIDA')
-                    ->setCellValue('R1', 'CANTIDAD DESPACHADA');
+                    ->setCellValue('R1', 'CANTIDAD DESPACHADA')
+                    ->setCellValue('S1', 'FECHA VALIDADO')
+                    ->setCellValue('T1', 'NUMERO LOTE');
                 ;
         $i = 2;
         
@@ -1371,7 +1375,9 @@ class PedidosController extends Controller
                     ->setCellValue('O' . $i, $val->fecha_registro)
                     ->setCellValue('P' . $i, $val->lineaValidada)
                     ->setCellValue('Q' . $i, $val->historico_cantidad_vendida)
-                    ->setCellValue('R' . $i, $val->cantidad_despachada);
+                    ->setCellValue('R' . $i, $val->cantidad_despachada)
+                    ->setCellValue('S' . $i, $val->fecha_alistamiento)
+                    ->setCellValue('T' . $i, $val->numero_lote);
             $i++;
         }
 
