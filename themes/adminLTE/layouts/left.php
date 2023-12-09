@@ -64,14 +64,7 @@
                                             'url' => '#',
                                             'items' => [
                                           //  ['label' => 'Cliente', 'icon' => 'plus-square-o', 'url' => ['/clientes/index']],
-                                            [
-                                                'label' => 'Demandas',
-                                                'icon' => 'cube',
-                                                'url' => '#',
-                                                'items' => [
-                                                  //  ['label' => 'Juez', 'icon' => 'plus-square-o', 'url' => ['juez/index']],
-                                                  
-                                            ]],
+                                            
                                             
                                         ]        
                                         ],

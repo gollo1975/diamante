@@ -22,7 +22,6 @@ $this->title = 'Nuevo pedido';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
-     <div class="btn-group btn-sm" role="group">
           <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
             <?php if($model->autorizado == 0 && $model->numero_pedido == 0){?>
                 <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-sm']);?>
@@ -31,7 +30,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                     <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-sm']);?>
                     <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
                                'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
-                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
+                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Observacion',
                                               ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],
                                                 ['title' => 'Crear observaciones al pedido',
                                                  'data-toggle'=>'modal',
@@ -49,6 +48,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                         echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
                     }else{?>
+                    <div class="btn-group btn-sm" role="group">
                         <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                            Imprimir
                            <span class="caret"></span>
@@ -59,11 +59,11 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Presupuesto pedido', ['imprimir_presupuesto', 'id' => $model->id_pedido]) ?></li>
                                 <?php }?>    
                         </ul>
+                    </div>    
                     <?php }    
                 } 
             
             }?>
-     </div>
 <div class="panel panel-success">
     <div class="panel-body">
         <script language="JavaScript">

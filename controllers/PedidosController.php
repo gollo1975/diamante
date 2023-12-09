@@ -1401,7 +1401,8 @@ class PedidosController extends Controller
     }
     
     //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
-    public function actionExcel_pedido_presupuesto($id) {                
+    public function actionExcel_pedido_presupuesto($id) {   
+        $pedido = Pedidos::findOne($id);
         $detalle  = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all(); 
         $objPHPExcel = new \PHPExcel();
         // Set document properties
@@ -1428,6 +1429,11 @@ class PedidosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -1443,7 +1449,12 @@ class PedidosController extends Controller
                     ->setCellValue('K1', 'IVA')
                     ->setCellValue('L1', 'TOTAL')
                     ->setCellValue('M1', 'USER NAME')
-                    ->setCellValue('N1', 'FECHA REGISTRO');
+                    ->setCellValue('N1', 'FECHA REGISTRO')
+                    ->setCellValue('O1', 'FECHA ENTREGA')
+                    ->setCellValue('P1', 'FECHA VALIDADO')
+                    ->setCellValue('Q1', 'CANTIDAD DESPACHADA')
+                    ->setCellValue('R1', 'CANTIDAD VENDIDA')
+                    ->setCellValue('S1', 'NUMERO LOTE');
         $i = 2;
         
         foreach ($detalle as $val) {
@@ -1462,7 +1473,12 @@ class PedidosController extends Controller
                     ->setCellValue('K' . $i, $val->impuesto)
                     ->setCellValue('L' . $i, $val->total_linea)
                     ->setCellValue('M' . $i, $val->user_name)
-                    ->setCellValue('N' . $i, $val->fecha_registro);
+                    ->setCellValue('N' . $i, $val->fecha_registro)
+                    ->setCellValue('O' . $i, $val->pedido->fecha_entrega)
+                    ->setCellValue('P' . $i, $val->fecha_alistamiento)
+                    ->setCellValue('Q' . $i, $val->cantidad_despachada)
+                    ->setCellValue('R' . $i, $val->historico_cantidad_vendida)
+                    ->setCellValue('S' . $i, $val->numero_lote);
             $i++;
         }
 
@@ -1471,7 +1487,7 @@ class PedidosController extends Controller
 
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Presupues_pedido.xlsx"');
+        header('Content-Disposition: attachment;filename="Presupuesto_pedido.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');

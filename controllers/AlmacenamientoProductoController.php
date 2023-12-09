@@ -681,6 +681,7 @@ class AlmacenamientoProductoController extends Controller
                         $detalle->cantidad_despachada = $model->cantidad_despachada;
                         $detalle->historico_cantidad_vendida = $detalle->cantidad;
                         $detalle->linea_validada = 1;
+                        $detalle->numero_lote = $base->numero_lote;
                         $detalle->fecha_alistamiento = date('Y-m-d');
                         if($detalle->cantidad <> $model->cantidad_despachada){
                             $detalle->regenerar_linea = 1;

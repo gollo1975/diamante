@@ -75,7 +75,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Cliente:"), 0, 0, 'c', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($pedido->cliente), 0, 0, 'c', 1);
+        $this->Cell(69, 5, utf8_decode($pedido->cliente), 0, 0, 'c', 1);
         //FIN
          $this->SetXY(10, 53);
         $this->SetFont('Arial', 'B', 8);
@@ -85,7 +85,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($pedido->agentePedido->codigoMunicipio->municipio), 0, 0, 'L', 1);
+        $this->Cell(69, 5, utf8_decode($pedido->agentePedido->codigoMunicipio->municipio), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(10, 57);
         $this->SetFont('Arial', 'B', 8);
@@ -95,23 +95,24 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Vendedor:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($pedido->agentePedido->nombre_completo), 0, 0, 'L', 1);
+        $this->Cell(69, 5, utf8_decode($pedido->agentePedido->nombre_completo), 0, 0, 'L', 1);
          // FIN
         $this->SetXY(10, 61);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("Autorizado:"), 0, 0, 'L', 1);
+        $this->Cell(26, 5, utf8_decode("Fecha entrega:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(80, 5, utf8_decode($pedido->autorizadoPedido), 0, 0, 'l', 1);
+        $this->Cell(80, 5, utf8_decode($pedido->fecha_entrega), 0, 0, 'l', 1);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("User name:"), 0, 0, 'J', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($pedido->usuario), 0, 0, 'L', 1);
+        $this->Cell(69, 5, utf8_decode($pedido->usuario), 0, 0, 'L', 1);
         //FIN
         //Lineas del encabezado
         $this->Line(10,68,10,188);
-        $this->Line(23,68,23,188);
-        $this->Line(100,68,100,188);
-        $this->Line(119,68,119,188);
+        $this->Line(25,68,25,188);
+        $this->Line(85,68,85,188);
+        $this->Line(104,68,104,188);
+        $this->Line(118,68,118,188);
         $this->Line(137,68,137,188);
         $this->Line(157,68,157,188);
         $this->Line(177,68,177,188);
@@ -131,7 +132,7 @@ class PDF extends FPDF {
 
     function EncabezadoDetalles() {
         $this->Ln(7);
-        $header = array('CODIGO', 'NOMBRE PRODUCTO', 'CANTIDAD', 'VLR UNIT','SUBTOTAL', 'IVA', 'TOTAL');
+       $header = array('CODIGO', 'NOMBRE PRODUCTO', 'LOTE','CANT.', 'VLR UNIT','SUBTOTAL', 'IVA', 'TOTAL');
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
         $this->SetDrawColor(0, 0, 0);
@@ -139,7 +140,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 8);
 
         //creamos la cabecera de la tabla.
-        $w = array(13, 77, 19,  18, 20, 20, 25);
+        $w = array(15, 60, 19, 14, 19, 20, 20, 25);
         for ($i = 0; $i < count($header); $i++)
             if ($i == 0 || $i == 1)
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -164,11 +165,12 @@ class PDF extends FPDF {
             $iva += $detalle->impuesto;
             $total += $detalle->total_linea;
             $pdf->SetFont('Arial', '', 7);
-            $pdf->Cell(13, 4, $detalle->inventario->codigo_producto, 0, 0, 'L');
+            $pdf->Cell(15, 4, $detalle->inventario->codigo_producto, 0, 0, 'L');
             $pdf->SetFont('Arial', '', 7);
-            $pdf->Cell(77, 4, $detalle->inventario->nombre_producto , 0, 0, 'L');
-            $pdf->Cell(19, 4, $detalle->cantidad, 0, 0, 'R');
-            $pdf->Cell(18, 4, number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
+            $pdf->Cell(60, 4, utf8_decode($detalle->inventario->nombre_producto) , 0, 0, 'L');
+            $pdf->Cell(19, 4, $detalle->numero_lote, 0, 0, 'R');
+            $pdf->Cell(14, 4, $detalle->cantidad, 0, 0, 'R');
+            $pdf->Cell(19, 4, number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
             $pdf->Cell(20, 4, number_format($detalle->subtotal, 0, '.', ','), 0, 0, 'R');
             $pdf->Cell(20, 4, number_format($detalle->impuesto, 0, '.', ','), 0, 0, 'R');
             $pdf->Cell(25, 4, number_format($detalle->total_linea, 0, '.', ','), 0, 0, 'R');            
@@ -230,6 +232,9 @@ $pdf->AliasNbPages();
 $pdf->AddPage();
 if($model->pedido_anulado == 1){
     $pdf->Image('dist/images/logos/documentoanulado.png' , 20 ,198.5, 130 , 28,'PNG');
+} 
+if($model->pedido_validado == 1){
+    $pdf->Image('dist/images/logos/documentovalidado.png' , 20 ,198.5, 130 , 28,'PNG');
 } 
 $pdf->Body($pdf,$model);
 $pdf->AliasNbPages();
