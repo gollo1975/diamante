@@ -192,8 +192,6 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                                    ],
                                                                ])
                                                         ?>
-
-                                                        </div>    
                                                     </td>    
                                                 <?php }else{ ?>
                                                     <td style= 'width: 25px; height: 25px;'></td>

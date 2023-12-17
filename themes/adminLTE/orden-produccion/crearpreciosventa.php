@@ -78,8 +78,10 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                     <th scope="col" style='background-color:#B9D5CE;'>Codigo producto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Nombre del Grupo</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Fabricadas</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Existencias</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Pv. Deptal</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Pv. Mayorista</th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     
@@ -95,6 +97,8 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                             <td><?= $val->grupo->nombre_grupo ?></td>
                             <td style="text-align: right"><?= ''.number_format($val->unidades_entradas,0)?></td>
                             <td style="text-align: right"><?= ''.number_format($val->stock_unidades,0)?></td>
+                            <td style="text-align: right"><?= ''.number_format($val->precio_deptal,0)?></td>
+                            <td style="text-align: right"><?= ''.number_format($val->precio_mayorista,0)?></td>
                             <td style="width: 25px; height: 25px;">
                                 <a href="<?= Url::toRoute(["orden-produccion/crearprecioventaproducto", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-share-alt" title="Permite crear varios precios de venta para publico"></span></a>
                             </td>

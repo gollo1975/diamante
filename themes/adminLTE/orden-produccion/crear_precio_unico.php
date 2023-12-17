@@ -1,12 +1,13 @@
 <?php
 //modelos
-
+use app\models\TipoVenta;
 //clases
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
 use kartik\date\DatePicker;
 use kartik\select2\Select2;
+$tipoventa = ArrayHelper::map(TipoVenta::find()->where(['=','abreviatura', 'PV'])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -16,8 +17,8 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
-            'template' => '{label}<div class="col-sm-6 form-group">{input}{error}</div>',
-            'labelOptions' => ['class' => 'col-sm-3 control-label'],
+            'template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>',
+            'labelOptions' => ['class' => 'col-sm-4 control-label'],
             'options' => []
         ],
         ]);
@@ -31,9 +32,12 @@ $form = ActiveForm::begin([
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                  NUEVO PRECIO VENTA
+                  PRECIOS DE PUNTO DE VENTA
                 </div>
                 <div class="panel-body">
+                    <div class="row">
+                        <?= $form->field($model, 'tipo_precio')->dropDownList($tipoventa, ['prompt' => 'Seleccione...']) ?>
+                    </div>
                     <div class="row">
                         <?= $form->field($model, 'nuevo_precio')->input('text'); ?>
                     </div>

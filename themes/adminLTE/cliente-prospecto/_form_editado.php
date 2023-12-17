@@ -88,5 +88,6 @@ $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_pro
         </div>
     </div>
 <?php $form->end() ?>
+</body>
 
 

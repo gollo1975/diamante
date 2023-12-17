@@ -101,6 +101,21 @@ class FacturaVentaController extends Controller
                     } else {
                         $form->getErrors();
                     }
+                }else{
+                    $table = FacturaVenta::find()->Where(['=','numero_factura', 0])->orderBy('id_factura DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelFacturaVenta($tableexcel);
+                    }
                 }
                 return $this->render('index', [
                             'model' => $model,
@@ -446,15 +461,131 @@ class FacturaVentaController extends Controller
             'recibo_caja' => $recibo_caja,
         ]);
     }
+    // VISTA DE FACTURA DE PUNTO
+    public function actionView_factura_venta($id_factura_punto)
+    {
+        $form = new \app\models\ModeloEntradaProducto();
+        $codigo_producto = 0;
+        $factura = FacturaVenta::findOne($id_factura_punto);
+        $inventario = \app\models\InventarioProductos::find()->where(['>','stock_unidades', 0])
+                                                          ->andWhere(['=','venta_publico', 0])
+                                                          ->orderBy('nombre_producto ASC')->all();
+        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
+        if ($form->load(Yii::$app->request->get())) {
+            $codigo_producto = Html::encode($form->codigo_producto);
+            if ($codigo_producto > 0) {
+                $table = \app\models\InventarioProductos::find()->Where(['=','codigo_producto', $codigo_producto])->one();
+                if($table){
+                    $conDato = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])
+                                                          ->andWhere(['=','codigo_producto', $codigo_producto])->one();
+                    if(!$conDato){
+                        $porcentaje = 0;
+                        $producto = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $codigo_producto])->one();
+                        $table = new FacturaVentaDetalle();
+                        $table->id_factura = $id_factura_punto;
+                        $table->id_inventario = $producto->id_inventario;
+                        $table->codigo_producto = $codigo_producto;
+                        $table->producto = $producto->nombre_producto;
+                        $table->cantidad = 1;
+                        if($factura->id_tipo_venta == 3){
+                           $table->valor_unitario = $producto->precio_deptal;    
+                        }else{
+                            $table->valor_unitario = $producto->precio_mayorista;    
+                        }
+                        /////falta codificar
+                        $table->porcentaje_descuento = 0;
+                        $table->valor_descuento = 0;
+                        $porcentaje = number_format($factura->porcentaje_iva/100,2);
+                        $table->total_linea = round($table->cantidad * $table->valor_unitario);
+                        $table->impuesto = round($table->total_linea * $porcentaje);
+                        $table->subtotal = round($table->total_linea - $table->impuesto); 
+                        $table->save();
+                        $id = $id_factura_punto;
+                        $this->ActualizarSaldosTotales($id);
+                        $this->ActualizarConceptosTributarios($id);
+                        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
+                        $this->redirect(["factura-venta/view_factura_venta",'id_factura_punto' => $id_factura_punto, 'detalle_factura' => $detalle_factura]);
+                    }else{
+                        Yii::$app->getSession()->setFlash('success', 'Este producto ya se encuentra registrado en la factura de venta.');
+                        return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+                    }
+                }else{
+                    Yii::$app->getSession()->setFlash('info', 'El código del producto NO se encuentra en el sistema.');
+                    return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+                }
+                
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe digitar codigo del producto a buscar.');
+                return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+            }
+        }
+        return $this->render('view_factura_venta', [
+            'model' => $this->findModel($id_factura_punto),
+             'form' => $form,
+            'inventario' => ArrayHelper::map($inventario, "id_inventario", "inventario"),
+            'detalle_factura' => $detalle_factura,
+            
+            
+        ]);
+    }
+    
+    //CREAR FACTURAS PUNTO D EVENTA
+    public function actionCreate() {
+        $model = new FacturaVenta();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $cliente = Clientes::findOne($model->id_cliente);
+                $iva = \app\models\ConfiguracionIva::findOne(1);
+                $empresa = \app\models\MatriculaEmpresa::findOne(1);
+                $tipo_factura = \app\models\TipoFacturaVenta::findOne(4);
+                $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])
+                                                                ->andWhere(['=','abreviatura', 'PV'])->one();
+                $model->id_tipo_factura = 4;
+                $model->id_agente = $cliente->id_agente;
+                $model->nit_cedula = $cliente->nit_cedula;
+                $model->dv = $cliente->dv;
+                $model->cliente = $cliente->nombre_completo;
+                $model->direccion = $cliente->direccion;
+                $model->telefono_cliente = $cliente->telefono;
+                $model->numero_resolucion = $resolucion->numero_resolucion;
+                $model->desde = $resolucion->desde;
+                $model->hasta = $resolucion->hasta;
+                $model->consecutivo = $resolucion->consecutivo;
+                $model->fecha_inicio = date('Y-m-d');
+                $model->fecha_vencimiento = date('Y-m-d');
+                $model->fecha_generada = date('Y-m-d');
+                $model->porcentaje_iva = $iva->valor_iva;
+                $model->forma_pago = $cliente->forma_pago;
+                $model->plazo_pago = $cliente->plazo;
+                $model->user_name = Yii::$app->user->identity->username;
+                if($cliente->autoretenedor == 1){
+                    $model->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
+                }else{
+                    $model->porcentaje_rete_iva = 0;
+                }
+                if($empresa->sugiere_retencion == 0){
+                   if($cliente->tipo_regimen == 1){
+                        $model->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+                    }else{
+                        $model->porcentaje_rete_fuente = 0; 
+                    }
+                }else{
+                    $model->porcentaje_rete_fuente = 0; 
+                }
+                $model->save(false);
+                $table = $this->findModel($model->id_factura);
+                return $this->redirect(['view_factura_venta','id_factura_punto' => $table->id_factura]);
+        }
+        return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
 
 
-    /**
-     * Updates an existing FacturaVenta model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    //actualiza la fecha
     public function actionUpdate($id, $token)
     {
         $model = $this->findModel($id);
@@ -477,6 +608,52 @@ class FacturaVentaController extends Controller
             'token' => $token,
         ]);
     }
+    ///ACTUALIZAR LA FACTURA
+    public function actionUpdate_factura_venta($id_factura_punto){
+        
+        $model = $this->findModel($id_factura_punto);
+        $factura = FacturaVenta::findOne($id_factura_punto);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $empresa = \app\models\MatriculaEmpresa::findOne(1);
+            $tipo_factura = \app\models\TipoFacturaVenta::findOne(4);
+            $cliente = Clientes::findOne($model->id_cliente);
+            $model->id_agente = $cliente->id_agente;
+            $model->nit_cedula = $cliente->nit_cedula;
+            $model->dv = $cliente->dv;
+            $model->cliente = $cliente->nombre_completo;
+            $model->direccion = $cliente->direccion;
+            $model->telefono_cliente = $cliente->telefono;
+            $model->forma_pago = $cliente->forma_pago;
+            $model->plazo_pago = $cliente->plazo;
+            if($cliente->autoretenedor == 1){
+                $model->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
+            }else{
+                $model->porcentaje_rete_iva = 0;
+            }
+            if($empresa->sugiere_retencion == 0){
+               if($cliente->tipo_regimen == 1){
+                    $model->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+                }else{
+                    $model->porcentaje_rete_fuente = 0; 
+                }
+            }else{
+                $model->porcentaje_rete_fuente = 0; 
+            }
+            $model->save(false);
+            return $this->redirect(['view_factura_venta','id_factura_punto' => $id_factura_punto]);
+         }
+        
+        return $this->render('update_factura_venta', [
+            'model' => $model,
+            'id_factura_punto' => $id_factura_punto,
+
+        ]);  
+    }
+    
     //PROCESO QUE PERMITE PONER EL DECUENTO A LA FACTURA
     
     protected function DescuentoFactura($id) {
@@ -509,15 +686,17 @@ class FacturaVentaController extends Controller
         }else{
            $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
-            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->one();
+            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','abreviatura', 'F'])->one();
             $iva = \app\models\ConfiguracionIva::findOne(1);
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
+            $venta = \app\models\TipoVenta::findOne(1);
             $fecha_actual = date('Y-m-d');
             $table = new FacturaVenta();
             $table->id_pedido = $id_pedido;
             $table->id_cliente = $pedido->id_cliente;
             $table->id_agente = $pedido->id_agente;
             $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
+            $table->id_tipo_venta = $venta->id_tipo_venta;
             $table->nit_cedula = $pedido->documento;
             $table->dv = $pedido->dv;
             $table->cliente = $pedido->cliente;
@@ -599,7 +778,11 @@ class FacturaVentaController extends Controller
     //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS
     protected function ActualizarConceptosTributarios($id) {
         $factura = FacturaVenta::findOne($id);
-        $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
+        if($factura->id_tipo_factura == 4){
+            $tipo_factura = \app\models\TipoFacturaVenta::findOne(4);
+        }else{
+            $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
+        }
         $reteiva = 0; $retecion = 0;
         $reteiva = round($factura->impuesto * $factura->porcentaje_rete_iva)/100; 
         if($factura->subtotal_factura > $tipo_factura->base_retencion){
@@ -645,6 +828,14 @@ class FacturaVentaController extends Controller
         $pedido->save(false);
         $this->redirect(["view", 'id' => $id, 'token' => $token]);  
     }
+    //ELIMINAR LINEA DE FACTURA DE PUNTO DE VENTA
+    public function actionEliminar_linea_factura($id_factura_punto, $id_detalle)
+    {                                
+        $detalle = FacturaVentaDetalle::findOne($id_detalle);
+        $detalle->delete();
+        $this->redirect(["view_factura_venta",'id_factura_punto' => $id_factura_punto]);        
+    } 
+    
     /**
      * Finds the FacturaVenta model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

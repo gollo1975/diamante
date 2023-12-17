@@ -121,9 +121,6 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                             <td style= 'width: 1%; height: 1%;'>
                                 <a href="<?= Url::toRoute(["entrada-producto-terminado/eliminar_manual", 'id' => $id, 'detalle_manual' => $val->id_detalle])?>"
                                         <span class='glyphicon glyphicon-trash'></span> </a>
-                                
-                                
-                                
                             </td>    
                         <?php }else{?>
                             <td style= 'width: 1%; height: 1%;'></td>
@@ -137,7 +134,8 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                 <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
             </div>    
         <?php }?>   
-      <?php $formulario->end() ?>       
 </div>
+</div>    
+ <?php $formulario->end() ?>   
 
 

@@ -66,6 +66,9 @@ use kartik\date\DatePicker;
           <div class="row">
             <?= $form->field($model, 'vigencia')->textInput(['maxlength' => true]) ?>    
         </div>
+        <div class="row">
+            <?= $form->field($model, 'abreviatura')->dropdownList(['F' => 'FABRICANTE', 'PV' => 'PUNTO DE VENTA'], ['prompt' => 'Seleccione...']) ?> 					
+        </div>
         <?php if($sw == 1 ){?>
             <div class="row">
                 <?= $form->field($model, 'estado_resolucion')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>

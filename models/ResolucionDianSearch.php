@@ -18,7 +18,7 @@ class ResolucionDianSearch extends ResolucionDian
     {
         return [
             [['id_resolucion', 'estado_resolucion'], 'integer'],
-            [['numero_resolucion', 'desde', 'hasta', 'fecha_vence', 'consecutivo', 'fecha_registro', 'user_name'], 'safe'],
+            [['numero_resolucion', 'desde', 'hasta', 'fecha_vence', 'consecutivo', 'fecha_registro', 'user_name', 'abreviatura'], 'safe'],
         ];
     }
 
@@ -64,6 +64,7 @@ class ResolucionDianSearch extends ResolucionDian
             'fecha_vence' => $this->fecha_vence,
             'fecha_registro' => $this->fecha_registro,
             'estado_resolucion' => $this->estado_resolucion,
+            'abreviatura' => $this->abreviatura,
         ]);
 
         $query->andFilterWhere(['like', 'numero_resolucion', $this->numero_resolucion])

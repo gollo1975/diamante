@@ -107,6 +107,8 @@ $view = 'factura-venta';
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Estado') ?>:</th>
                     <td><?= Html::encode($model->estadoFactura) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_venta') ?></th>
+                    <td><?= Html::encode($model->tipoVenta->concepto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="6"><?= Html::encode($model->observacion) ?></td>
                 </tr>

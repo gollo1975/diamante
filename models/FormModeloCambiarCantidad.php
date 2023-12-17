@@ -12,6 +12,7 @@ class FormModeloCambiarCantidad extends Model
 {
     public $cantidades;  
     public $fecha;
+    public $tipo_precio;
     public $nuevo_precio;
     public $cliente;
     public $pedido_virtual;
@@ -19,9 +20,8 @@ class FormModeloCambiarCantidad extends Model
     {
         return [
 
-           [['cantidades','nuevo_precio','cliente'], 'match', 'pattern' => '/^[0-9\s]+$/i', 'message' => 'Sólo se aceptan números'],
+           [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual'], 'integer'],
            ['fecha', 'safe'], 
-           ['pedido_virtual', 'integer'],
         ];
     }
 
@@ -33,6 +33,7 @@ class FormModeloCambiarCantidad extends Model
             'nuevo_precio' => 'Nuevo precio:',
             'cliente' => 'Cliente:',
             'pedido_virtual' => 'Pedido virtual:',
+            'tipo_precio' => 'Tipo precio venta:',
 
         ];
     }

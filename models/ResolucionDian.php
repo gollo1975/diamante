@@ -46,7 +46,7 @@ class ResolucionDian extends \yii\db\ActiveRecord
             [['desde', 'hasta', 'fecha_vence', 'fecha_registro'], 'safe'],
             [['estado_resolucion','rango_inicio','rango_final','vigencia'], 'integer'],
             [['numero_resolucion'], 'string', 'max' => 30],
-            [['consecutivo'], 'string', 'max' => 3],
+            [['consecutivo','abreviatura'], 'string', 'max' => 3],
             [['user_name'], 'string', 'max' => 15],
         ];
     }
@@ -69,6 +69,7 @@ class ResolucionDian extends \yii\db\ActiveRecord
             'rango_inicio' => 'Rango inicio',
             'rango_final' => 'Rango final',
             'vigencia' => 'Vigencia',
+            'abreviatura' => 'Tipo proceso',
         ];
     }
     
@@ -84,5 +85,13 @@ class ResolucionDian extends \yii\db\ActiveRecord
             $estado = 'NO';
         }
         return $estado;
+    }
+    public function getAbreviaturaResolucion() {
+        if ($this->abreviatura == 'F'){
+            $abreviaturaresolucion = 'FABRICANTE';
+        }else{
+            $abreviaturaresolucion = 'PUNTO DE VENTA';
+        }
+        return $abreviaturaresolucion;
     }
 }

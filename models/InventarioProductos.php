@@ -63,7 +63,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
         return [
             [['codigo_producto','fecha_proceso','id_grupo','id_presentacion'], 'required'],
             [['codigo_producto', 'costo_unitario', 'unidades_entradas', 'stock_unidades', 'id_grupo', 'id_detalle', 'aplica_iva', 'inventario_inicial', 'aplica_inventario',
-                'subtotal', 'valor_iva', 'total_inventario', 'precio_venta_uno', 'precio_venta_dos', 'precio_venta_tres', 'codigo_ean',
+                'subtotal', 'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 'codigo_ean',
                 'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial','activar_producto_venta'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_vencimiento', 'fecha_creacion', 'fecha_proceso'], 'safe'],
@@ -99,9 +99,8 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'subtotal' => 'Subtotal:',
             'valor_iva' => 'Impuesto:',
             'total_inventario' => 'Total inventario:',
-            'precio_venta_uno' => 'Precio venta uno:',
-            'precio_venta_dos' => 'Precio venta dos:',
-            'precio_venta_tres' => 'Precio venta tres:',
+            'precio_deptal' => 'Precio deptar:',
+            'precio_mayorista' => 'Precio mayorista:',
             'fecha_vencimiento' => 'Fecha vencimiento:',
             'fecha_creacion' => 'Fecha creacion:',
             'fecha_proceso' => 'Fecha proceso:',
@@ -147,6 +146,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
         return "{$this->codigo_producto} - {$this->nombre_producto}";
     }
     
+        
     public function getAplicaIva() {
         if($this->aplica_iva == 0){
            $aplicaiva = 'SI';

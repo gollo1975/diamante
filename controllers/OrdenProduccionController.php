@@ -770,15 +770,17 @@ class OrdenProduccionController extends Controller
         $model = new \app\models\FormModeloCambiarCantidad();
         $table = InventarioProductos::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
-            if (isset($_POST["crear_precio_unico"])) { 
-                $table->precio_venta_uno = $model->nuevo_precio;
-                $table->save(false);
-                $this->redirect(["orden-produccion/crear_precio_venta", 'id' => $id]);
-            }    
+            if (isset($_POST["crear_precio_unico"])) {
+                if($model->tipo_precio == 2){//mayorista
+                    $table->precio_mayorista = $model->nuevo_precio;
+                }else{
+                    $table->precio_deptal = $model->nuevo_precio;
+                }    
+            $table->save(false);
+            $this->redirect(["orden-produccion/crear_precio_venta", 'id' => $id]);
+            }
+                
         }
-         if (Yii::$app->request->get()) {
-            $model->nuevo_precio = $table->precio_venta_uno;
-         }
         return $this->renderAjax('crear_precio_unico', [
             'model' => $model,
             'id' => $id,

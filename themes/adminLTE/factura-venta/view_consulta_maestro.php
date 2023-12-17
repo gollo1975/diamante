@@ -40,8 +40,7 @@ $view = 'factura-venta';
     <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_maestro_factura'], ['class' => 'btn btn-primary btn-sm']) ?>
         <?=  Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);?>            
-        <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);?>
-        
+       
     </p>  
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -103,6 +102,8 @@ $view = 'factura-venta';
                  <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Porcentaje_mora') ?>:</th>
                     <td><?= Html::encode($model->porcentaje_mora) ?> %</td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_venta') ?></th>
+                    <td><?= Html::encode($model->tipoVenta->concepto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="6"><?= Html::encode($model->observacion) ?></td>
                 </tr>

@@ -108,27 +108,28 @@ $form = ActiveForm::begin([
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 90%;'>         
-                
-                <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'></th>
-                                          
-            </tr>
+                    <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                </tr>
             </thead>
             <tbody>
             <?php
             if($model){
                 $fecha_dia = date('Y-m-d');
-                foreach ($model as $val):?>
+                foreach ($model as $val):
+                    $dato = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $val->id_factura])->all();
+                    ?>
                     <tr style ='font-size: 90%;'>                
                         <td><?= $val->numero_factura?></td>
                         <td><?= $val->nit_cedula?></td>
@@ -157,10 +158,27 @@ $form = ActiveForm::begin([
                             <?php }else{?>
                                 <td></td>    
                             <?php }    
-                        }?>    
-                        <td style= 'width: 25px; height: 25px;'>
-                             <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
-                        </td>
+                        }    
+                        if($val->id_tipo_factura == 4){
+                            if(!$dato){?>    
+                                <td style= 'width: 20px; height: 20px;'>    
+                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                </td>
+                                <td style= 'width: 20px; height: 20px;'>
+                                    <a href="<?= Url::toRoute(["factura-venta/update_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar la factura de venta"></span></a>
+                                </td>    
+                            <?php }else{?>
+                                 <td style= 'width: 20px; height: 20px;'>    
+                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                </td>
+                                <td></td>
+                            <?php }
+                        }else{ ?>
+                            <td style= 'width: 20px; height: 20px;'>
+                                <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                            </td>
+                            <td></td>
+                        <?php }?>    
                    </tr>            
                 <?php endforeach;
             }?>
@@ -168,10 +186,11 @@ $form = ActiveForm::begin([
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-                   <?php $form->end() ?>
+           <a href="<?= Url::toRoute("factura-venta/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva factura</a>   
         </div>
      </div>
 </div>
+<?php $form->end() ?>
  <?php if($model){?>
      <?= LinkPager::widget(['pagination' => $pagination]) ?>
  <?php }?>
