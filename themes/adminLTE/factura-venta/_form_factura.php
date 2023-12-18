@@ -6,6 +6,7 @@ use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
 use yii\widgets\LinkPager;
 use kartik\select2\Select2;
+use kartik\date\DatePicker;
 //models
 use app\models\Municipios;
 use app\models\Departamentos;
@@ -55,6 +56,13 @@ $form = ActiveForm::begin([
             ]); ?> 
         </div>
         <div class="row">
+            <?=  $form->field($model, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                           'value' => date('Y-m-d', strtotime('+2 days')),
+                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                           'pluginOptions' => [
+                               'format' => 'yyyy-m-d',
+                               'todayHighlight' => true]])
+            ?>
             <div class="field-tblproveedor-observaciones_proveedor has-success">
                 <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
             </div>    

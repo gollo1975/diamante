@@ -479,7 +479,7 @@ class FacturaVentaController extends Controller
                     $conDato = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])
                                                           ->andWhere(['=','codigo_producto', $codigo_producto])->one();
                     if(!$conDato){
-                        $porcentaje = 0;
+                        $porcentaje = 0; $subtotal = 0; $total = 0; $iva = 0; $descuento = 0;
                         $producto = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $codigo_producto])->one();
                         $table = new FacturaVentaDetalle();
                         $table->id_factura = $id_factura_punto;
@@ -492,13 +492,36 @@ class FacturaVentaController extends Controller
                         }else{
                             $table->valor_unitario = $producto->precio_mayorista;    
                         }
-                        /////falta codificar
-                        $table->porcentaje_descuento = 0;
-                        $table->valor_descuento = 0;
                         $porcentaje = number_format($factura->porcentaje_iva/100,2);
-                        $table->total_linea = round($table->cantidad * $table->valor_unitario);
-                        $table->impuesto = round($table->total_linea * $porcentaje);
-                        $table->subtotal = round($table->total_linea - $table->impuesto); 
+                        $total = round($table->cantidad * $table->valor_unitario);
+                        $iva = round($total * $porcentaje);
+                        $subtotal = round($total - $iva);
+                        if($producto->aplica_descuento == 1){ //aplicar descuento comercial
+                            $fecha_actual = date('Y-m-d');
+                            $regla = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $producto->id_inventario])->one();
+                            if($regla->tipo_descuento == 1 && $regla->fecha_inicio <= $fecha_actual && $regla->fecha_final >= $fecha_actual){
+                                $descuento = round(($subtotal * $regla->nuevo_valor)/100);
+                                $table->total_linea = round($total - $descuento);
+                                $table->impuesto = round($iva);
+                                $table->subtotal = round($subtotal);
+                                $table->porcentaje_descuento = $regla->nuevo_valor;
+                                $table->valor_descuento = $descuento;
+                            }else{
+                                $descuento = 0;
+                                $table->total_linea = round($total);
+                                $table->impuesto = round($iva);
+                                $table->subtotal = round($subtotal);
+                                $table->porcentaje_descuento = 0;
+                                $table->valor_descuento = $descuento;
+                            }
+                        }else{
+                            $descuento = 0;
+                            $table->total_linea = $total;
+                            $table->impuesto = $iva;
+                            $table->subtotal = $subtotal;
+                            $table->porcentaje_descuento = 0;
+                            $table->valor_descuento = $descuento;
+                        }
                         $table->save();
                         $id = $id_factura_punto;
                         $this->ActualizarSaldosTotales($id);
@@ -506,8 +529,25 @@ class FacturaVentaController extends Controller
                         $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
                         $this->redirect(["factura-venta/view_factura_venta",'id_factura_punto' => $id_factura_punto, 'detalle_factura' => $detalle_factura]);
                     }else{
-                        Yii::$app->getSession()->setFlash('success', 'Este producto ya se encuentra registrado en la factura de venta.');
-                        return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+                        //si existe el producto
+                        $detalle = FacturaVentaDetalle::findOne($conDato->id_detalle);
+                        $cantidad = 0; $subtotal = 0; $descuento = 0; $iva = 0; $total = 0;
+                       //proceso de variables
+                       echo $cantidad = $conDato->cantidad + 1;
+                        $subtotal = $conDato->subtotal * $cantidad;
+                        $iva = $conDato->impuesto * $cantidad;
+                        $descuento = $conDato->valor_descuento * $cantidad;
+                        $total = $conDato->total_linea * $cantidad;
+                        $detalle->cantidad = $cantidad;
+                        $detalle->subtotal = $subtotal;
+                        $detalle->valor_descuento = $descuento;
+                        $detalle->impuesto = $iva;
+                        $detalle->total_linea = $total;
+                        $detalle->save();
+                        $id = $id_factura_punto;
+                        $this->ActualizarSaldosTotales($id);
+                        $this->ActualizarConceptosTributarios($id);
+                       return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
                     }
                 }else{
                     Yii::$app->getSession()->setFlash('info', 'El código del producto NO se encuentra en el sistema.');
@@ -529,7 +569,7 @@ class FacturaVentaController extends Controller
         ]);
     }
     
-    //CREAR FACTURAS PUNTO D EVENTA
+    //CREAR FACTURAS PARA PUNTOS DE VENTA
     public function actionCreate() {
         $model = new FacturaVenta();
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
@@ -554,7 +594,8 @@ class FacturaVentaController extends Controller
                 $model->desde = $resolucion->desde;
                 $model->hasta = $resolucion->hasta;
                 $model->consecutivo = $resolucion->consecutivo;
-                $model->fecha_inicio = date('Y-m-d');
+                $model->fecha_inicio = $model->fecha_inicio;
+                $model->fecha_vencimiento = $model->fecha_inicio;
                 $model->fecha_vencimiento = date('Y-m-d');
                 $model->fecha_generada = date('Y-m-d');
                 $model->porcentaje_iva = $iva->valor_iva;
@@ -585,7 +626,7 @@ class FacturaVentaController extends Controller
     }
 
 
-    //actualiza la fecha
+    //actualiza la fecha de la factura
     public function actionUpdate($id, $token)
     {
         $model = $this->findModel($id);
@@ -629,6 +670,8 @@ class FacturaVentaController extends Controller
             $model->telefono_cliente = $cliente->telefono;
             $model->forma_pago = $cliente->forma_pago;
             $model->plazo_pago = $cliente->plazo;
+            $model->fecha_inicio = $model->fecha_inicio;
+            $model->fecha_vencimiento = $model->fecha_inicio;
             if($cliente->autoretenedor == 1){
                 $model->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
             }else{
@@ -760,11 +803,12 @@ class FacturaVentaController extends Controller
     protected function ActualizarSaldosTotales($id) {
         $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
         $factura = FacturaVenta::findOne($id);
-        $subtotal = 0; $impuesto = 0; $total = 0;
+        $subtotal = 0; $impuesto = 0; $total = 0; $descuento = 0;
         foreach ($detalle_factura as $detalle):
             $subtotal += $detalle->subtotal;
             $impuesto += $detalle->impuesto;
             $total += $detalle->total_linea;
+            $descuento += $detalle->valor_descuento;
         endforeach;
         $factura->valor_bruto = $subtotal;
         $factura->subtotal_factura = $subtotal;
@@ -773,6 +817,7 @@ class FacturaVentaController extends Controller
         $factura->saldo_factura = $total;
         $factura->valor_retencion = 0;
         $factura->valor_reteiva = 0;
+        $factura->descuento = $descuento;
         $factura->save(false);
     }
     //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS
@@ -792,7 +837,7 @@ class FacturaVentaController extends Controller
         }
         $factura->valor_retencion = $retecion;
         $factura->valor_reteiva = $reteiva;
-        $factura->total_factura = round(($factura->subtotal_factura + $factura->impuesto) - ($factura->valor_retencion + $factura->valor_reteiva));
+        $factura->total_factura = round(($factura->subtotal_factura + $factura->impuesto) - ($factura->valor_retencion + $factura->valor_reteiva + $factura->descuento));
         $factura->saldo_factura = $factura->total_factura;
         $factura->save(false);
     }
@@ -833,9 +878,12 @@ class FacturaVentaController extends Controller
     {                                
         $detalle = FacturaVentaDetalle::findOne($id_detalle);
         $detalle->delete();
+        $id =  $id_factura_punto;
+        $this->ActualizarSaldosTotales($id);
+        $this->ActualizarConceptosTributarios($id);
         $this->redirect(["view_factura_venta",'id_factura_punto' => $id_factura_punto]);        
     } 
-    
+      
     /**
      * Finds the FacturaVenta model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

@@ -134,6 +134,12 @@ $this->params['breadcrumbs'][] = $this->title;
             </tr>
             <tr style="font-size: 90%;">
                 <td colspan="7"></td>
+                <td style="text-align: right; background-color:#F0F3EF"><b>DSCTO:</b></td>
+                <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->descuento,0); ?></b></td>
+                <td></td>
+            </tr>
+            <tr style="font-size: 90%;">
+                <td colspan="7"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>IMPUESTO (<?= $model->porcentaje_iva?> %) :</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
                 <td></td>

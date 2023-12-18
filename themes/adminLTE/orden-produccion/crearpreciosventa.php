@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
 
-$this->title = 'CREAR PRECIO DE VENTA';
+$this->title = 'REGLAS Y PRECIOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -84,13 +84,16 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                     <th scope="col" style='background-color:#B9D5CE;'>Pv. Mayorista</th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
+                    <th scope="col" style='background-color:#B9D5CE;'></th>
                     
                 </tr>
             </thead>
             <tbody>
                 <?php 
                 if($sw <> 0){
-                    foreach ($model as $val):?>
+                    foreach ($model as $val):
+                        $concodigo = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $val->id_inventario])->one();
+                        ?>
                         <tr style='font-size:90%;'>             
                             <td><?= $val->codigo_producto ?></td>    
                             <td><?= $val->nombre_producto ?></td>
@@ -118,6 +121,28 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                                     </div>
                                 </div>
                             </td>
+                            <?php if(!$concodigo){?>
+                                <td style="width: 25px; height: 25px;">
+                                   <a href="<?= Url::toRoute(["orden-produccion/crear_reglas_descuento", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
+                                </td>
+                            <?php }else{?>
+                                <!-- Inicio Nuevo Detalle proceso -->
+                                <td style="width: 25px; height: 25px;">
+                                    <?= Html::a('<span class="glyphicon glyphicon-minus-sign"></span> ',
+                                          ['/orden-produccion/editar_regla_descuento', 'id' => $val->id_inventario],
+                                          [
+                                              'title' => 'Permite editar la regla del descuento comercial',
+                                              'data-toggle'=>'modal',
+                                              'data-target'=>'#modaleditarregladescuento'.$val->id_inventario,
+                                          ])    
+                                     ?>
+                                    <div class="modal remote fade" id="modaleditarregladescuento<?= $val->id_inventario ?>">
+                                        <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                            <div class="modal-content"></div>
+                                        </div>
+                                    </div>
+                                </td>    
+                            <?php }?>    
                         </tr>  
                     <?php endforeach;
                 }?>

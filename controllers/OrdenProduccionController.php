@@ -259,9 +259,8 @@ class OrdenProduccionController extends Controller
         }    
     }
     
-    //PERMITE CREAR LOS PRECIOS DE VENTA
-    
-     public function actionCrearprecioventaproducto($id) {
+    //PERMITE CREAR LOS PRECIOS DE VENTA PARA CADA PRODUCTO PARA VENDER AL POR MAYOR
+    public function actionCrearprecioventaproducto($id) {
        $model = InventarioProductos::findOne($id);
        $listado_precio = \app\models\InventarioPrecioVenta::find()->where(['=','id_inventario', $id])->all();
        if(isset($_POST["actualizar_precio_venta"])){
@@ -285,6 +284,31 @@ class OrdenProduccionController extends Controller
                              'listado_precio' => $listado_precio,
                 ]);
     }
+    
+    //PERMITE CREAR LAS REGLAS DE DESCUENTO
+    
+    //PERMITE CREAR LOS PRECIOS DE VENTA PARA CADA PRODUCTO PARA VENDER AL POR MAYOR
+     public function actionCrear_reglas_descuento($id) {
+        $model = new \app\models\InventarioReglaDescuento();
+        $table = InventarioProductos::findOne($id);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->id_inventario = $id;
+            $model->save();
+            $table->aplica_descuento = 1;
+            $table->save();
+            return $this->redirect(['crear_precio_venta']);
+        }
+        return $this->render('view_regla_descuento', [
+               'model' => $model,
+               'table' => $table,
+               ]);
+    }
+    
     //PROCESO QUE CREA EL NUEVO PRECIO
     public function actionNuevo_precio_venta($id) {
         $model = new \app\models\FormModeloAsignarPrecioVenta();
@@ -765,7 +789,6 @@ class OrdenProduccionController extends Controller
     }
     
     //PERMITE CREAR EL PRECIO UNICO PARA VENTA AL DEPTA
-    
     public function actionCrear_precio_unico($id) {
         $model = new \app\models\FormModeloCambiarCantidad();
         $table = InventarioProductos::findOne($id);
@@ -782,6 +805,46 @@ class OrdenProduccionController extends Controller
                 
         }
         return $this->renderAjax('crear_precio_unico', [
+            'model' => $model,
+            'id' => $id,
+        ]);
+    }
+    
+    // PERMITE MODIFICAR LA REGLA COMERCIAL O DESCUENTOS
+    public function actionEditar_regla_descuento($id) {
+        $model = new \app\models\ModeloEditarReglaDescuento();
+        $table = InventarioProductos::findOne($id);
+        $regla = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $id])->one();
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if (isset($_POST["editar_regla_descuento"])) {
+                   $regla->fecha_inicio =  $model->fecha_inicio;
+                   $regla->fecha_final = $model->fecha_final;
+                   $regla->nuevo_valor = $model->nuevo_valor;
+                   $regla->tipo_descuento = $model->tipo_descuento;
+                   $regla->estado_regla = $model->estado;
+                   $regla->save();
+                   if($model->estado == 1){
+                        $table->aplica_descuento = 0;
+                        $table->save();
+                    }else{
+                        $table->aplica_descuento = 1;
+                        $table->save();
+                    }     
+                   $this->redirect(["orden-produccion/crear_precio_venta"]);
+                }
+            }else{
+                $model->getErrors();
+            }    
+        }
+        if (Yii::$app->request->get()) {
+            $model->fecha_inicio = $regla->fecha_inicio;
+            $model->fecha_final = $regla->fecha_final;
+            $model->nuevo_valor = $regla->nuevo_valor;
+            $model->tipo_descuento = $regla->tipo_descuento;
+            $model->estado = $regla->estado_regla;
+        }
+        return $this->renderAjax('_form_editar_descuento', [
             'model' => $model,
             'id' => $id,
         ]);
