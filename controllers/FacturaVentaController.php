@@ -946,12 +946,38 @@ class FacturaVentaController extends Controller
         //proceso de generar consecutivo
         $consecutivo = \app\models\Consecutivos::findOne(6);
         $factura = FacturaVenta::findOne($id);
+        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
+        foreach ($detalle_factura as $detalle):
+            $auxiliar = 0; $codigo = 0;
+            $producto = \app\models\InventarioProductos::findOne($detalle->id_inventario);
+            if($producto){
+                $auxiliar = $producto->stock_unidades;
+                $producto->stock_unidades = $auxiliar - $detalle->cantidad;
+                $producto->save();
+                $codigo = $producto->id_inventario;
+                $this->ActualizaCostoInventario($codigo);
+            }
+        endforeach;
         $factura->numero_factura = $consecutivo->numero_inicial + 1;
         $factura->save(false);
         $consecutivo->numero_inicial = $factura->numero_factura;
         $consecutivo->save(false);
         $this->redirect(["view_factura_venta", 'id_factura_punto' => $id]);  
     }
+    
+    //PROCESO QUE ACTUALIZA EL INVENTARIO
+    protected function ActualizaCostoInventario($codigo) {
+         $iva = 0; $subtotal = 0;$total = 0;
+         $inventario = \app\models\InventarioProductos::findOne($codigo);
+         $subtotal = round($inventario->costo_unitario * $inventario->stock_unidades);
+         $iva = round(($subtotal * $inventario->porcentaje_iva)/100);
+         $total = $subtotal + $iva;
+         $inventario->subtotal = $subtotal;
+         $inventario->valor_iva = $iva;
+         $inventario->total_inventario = $total;
+         $inventario->save();
+    }
+    
     //ELIMINAR LINEA DE FACTURA DE MAYORISTA
     public function actionEliminar_linea_factura_mayorista($id_factura_punto, $id_detalle)
     {                                

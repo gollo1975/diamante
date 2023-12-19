@@ -11,11 +11,11 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
 $this->title = 'REGLAS Y DESCUENTOS';
-$this->params['breadcrumbs'][] = ['label' => 'Reglas y descuentos', 'url' => ['crear_precio_venta']];
+$this->params['breadcrumbs'][] = ['label' => 'Reglas y descuentos', 'url' => ['crear_regla_descuento_distribuidor', 'id' => $table->id_inventario]];
 $this->params['breadcrumbs'][] = $table->codigo_producto;
 ?>
 <div class="btn-group btn-sm" role="group">    
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['crear_precio_venta'], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view_regla_descuento','id' => $id], ['class' => 'btn btn-primary btn-sm']) ?>
  </div>  
 <?php $form = ActiveForm::begin([
             "method" => "post",
@@ -58,7 +58,7 @@ $this->params['breadcrumbs'][] = $table->codigo_producto;
         </div>
     </div> 
     <div class="panel-footer text-right">
-                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Grabar", ["class" => "btn btn-success btn-sm", 'name' => 'cambiar_posicion']) ?>     
+                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Grabar", ["class" => "btn btn-success btn-sm", 'name' => 'grabar_descuento_distribuidor']) ?>     
     </div> 
 </div>
 <?php $form->end() ?>  

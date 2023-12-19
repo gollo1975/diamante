@@ -112,7 +112,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                                       [
                                           'title' => 'Crear precio unico para venta al deptal',
                                           'data-toggle'=>'modal',
-                                          'data-target'=>'#modalcrearpreciounico'.$val->id_inventario,
+                                          'data-targcrear_reglas_descuentoet'=>'#modalcrearpreciounico'.$val->id_inventario,
                                       ])    
                                  ?>
                                 <div class="modal remote fade" id="modalcrearpreciounico<?= $val->id_inventario ?>">
@@ -123,7 +123,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                             </td>
                             <?php if(!$concodigo){?>
                                 <td style="width: 25px; height: 25px;">
-                                   <a href="<?= Url::toRoute(["orden-produccion/crear_reglas_descuento", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
+                                   <a href="<?= Url::toRoute(["orden-produccion/view_regla_descuento", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
                                 </td>
                             <?php }else{?>
                                 <!-- Inicio Nuevo Detalle proceso -->

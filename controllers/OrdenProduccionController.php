@@ -214,8 +214,20 @@ class OrdenProduccionController extends Controller
         }    
     }
     
-    //CREAR PRECIOS DE VENTA
+    // VISTA DE REGLAS Y DESCUENTOS
+    public function actionView_regla_descuento($id){
+        $model = InventarioProductos::findOne($id);
+        $regla_punto = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $id])->all();
+        $regla_distribuidor = \app\models\ReglaDescuentoDistribuidor::find()->where(['=','id_inventario', $id])->all();
+        return $this->render('view_crear_regla_descuento', [
+                            'model' => $model,
+                            'regla_punto' => $regla_punto,
+                            'regla_distribuidor' => $regla_distribuidor,
+                            'id' => $id,
+        ]);
+    }
     
+    //CREAR PRECIOS DE VENTA
     public function actionCrear_precio_venta() {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',27])->all()){
@@ -285,10 +297,10 @@ class OrdenProduccionController extends Controller
                 ]);
     }
     
-    //PERMITE CREAR LAS REGLAS DE DESCUENTO
+    
     
     //PERMITE CREAR LOS PRECIOS DE VENTA PARA CADA PRODUCTO PARA VENDER AL POR MAYOR
-     public function actionCrear_reglas_descuento($id) {
+     public function actionCrear_reglas_descuento_punto($id) {
         $model = new \app\models\InventarioReglaDescuento();
         $table = InventarioProductos::findOne($id);
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
