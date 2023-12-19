@@ -40,7 +40,7 @@ class FacturaVentaDetalle extends \yii\db\ActiveRecord
     {
         return [
             [['id_factura', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea'], 'integer'],
-            [['porcentaje_descuento'], 'number'],
+            [['porcentaje_descuento','porcentaje_iva'], 'number'],
             [['producto'], 'string', 'max' => 40],
             [['id_factura'], 'exist', 'skipOnError' => true, 'targetClass' => FacturaVenta::className(), 'targetAttribute' => ['id_factura' => 'id_factura']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -65,6 +65,7 @@ class FacturaVentaDetalle extends \yii\db\ActiveRecord
             'valor_descuento' => 'Valor Descuento',
             'impuesto' => 'Impuesto',
             'total_linea' => 'Total Linea',
+            'porcentaje_iva' => 'porcentaje_iva',
         ];
     }
 

@@ -474,54 +474,57 @@ class FacturaVentaController extends Controller
         if ($form->load(Yii::$app->request->get())) {
             $codigo_producto = Html::encode($form->codigo_producto);
             if ($codigo_producto > 0) {
-                $table = \app\models\InventarioProductos::find()->Where(['=','codigo_producto', $codigo_producto])->one();
-                if($table){
+                $conCodigo = \app\models\InventarioProductos::find()->Where(['=','codigo_producto', $codigo_producto])->one();
+                if($conCodigo){
                     $conDato = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])
                                                           ->andWhere(['=','codigo_producto', $codigo_producto])->one();
+                    //declaracion de variables
+                    $porcentaje = 0; $subtotal = 0; $total = 0; $iva = 0; $descuento = 0; $cantidad = 0;
                     if(!$conDato){
-                        $porcentaje = 0; $subtotal = 0; $total = 0; $iva = 0; $descuento = 0;
                         $producto = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $codigo_producto])->one();
                         $table = new FacturaVentaDetalle();
                         $table->id_factura = $id_factura_punto;
                         $table->id_inventario = $producto->id_inventario;
                         $table->codigo_producto = $codigo_producto;
                         $table->producto = $producto->nombre_producto;
-                        $table->cantidad = 1;
                         if($factura->id_tipo_venta == 3){
-                           $table->valor_unitario = $producto->precio_deptal;    
-                        }else{
-                            $table->valor_unitario = $producto->precio_mayorista;    
-                        }
-                        $porcentaje = number_format($factura->porcentaje_iva/100,2);
-                        $total = round($table->cantidad * $table->valor_unitario);
-                        $iva = round($total * $porcentaje);
-                        $subtotal = round($total - $iva);
-                        if($producto->aplica_descuento == 1){ //aplicar descuento comercial
-                            $fecha_actual = date('Y-m-d');
-                            $regla = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $producto->id_inventario])->one();
-                            if($regla->tipo_descuento == 1 && $regla->fecha_inicio <= $fecha_actual && $regla->fecha_final >= $fecha_actual){
-                                $descuento = round(($subtotal * $regla->nuevo_valor)/100);
-                                $table->total_linea = round($total - $descuento);
-                                $table->impuesto = round($iva);
-                                $table->subtotal = round($subtotal);
-                                $table->porcentaje_descuento = $regla->nuevo_valor;
-                                $table->valor_descuento = $descuento;
+                            $table->cantidad = 1;
+                            $table->valor_unitario = $producto->precio_deptal;    
+                        
+                            $porcentaje = number_format($conCodigo->porcentaje_iva/100,2);
+                            $total = round($table->cantidad * $table->valor_unitario);
+                            $iva = round($total * $porcentaje);
+                            $subtotal = round($total - $iva);
+                            if($producto->aplica_descuento == 1){ //aplicar descuento comercial para punto de venta
+                                $fecha_actual = date('Y-m-d');
+                                $regla = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $producto->id_inventario])->one();
+                                if($regla->tipo_descuento == 1 && $regla->fecha_inicio <= $fecha_actual && $regla->fecha_final >= $fecha_actual){
+                                    $descuento = round(($subtotal * $regla->nuevo_valor)/100);
+                                    $table->total_linea = round($total - $descuento);
+                                    $table->impuesto = round($iva);
+                                    $table->subtotal = round($subtotal);
+                                    $table->porcentaje_descuento = $regla->nuevo_valor;
+                                    $table->valor_descuento = $descuento;
+                                    $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
+                                }else{
+                                    $descuento = 0;
+                                    $table->total_linea = round($total);
+                                    $table->impuesto = round($iva);
+                                    $table->subtotal = round($subtotal);
+                                    $table->porcentaje_descuento = 0;
+                                    $table->valor_descuento = $descuento;
+                                    $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
+                                }
                             }else{
                                 $descuento = 0;
-                                $table->total_linea = round($total);
-                                $table->impuesto = round($iva);
-                                $table->subtotal = round($subtotal);
+                                $table->total_linea = $total;
+                                $table->impuesto = $iva;
+                                $table->subtotal = $subtotal;
                                 $table->porcentaje_descuento = 0;
                                 $table->valor_descuento = $descuento;
+                                $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
                             }
-                        }else{
-                            $descuento = 0;
-                            $table->total_linea = $total;
-                            $table->impuesto = $iva;
-                            $table->subtotal = $subtotal;
-                            $table->porcentaje_descuento = 0;
-                            $table->valor_descuento = $descuento;
-                        }
+                        }    
                         $table->save();
                         $id = $id_factura_punto;
                         $this->ActualizarSaldosTotales($id);
@@ -529,25 +532,47 @@ class FacturaVentaController extends Controller
                         $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
                         $this->redirect(["factura-venta/view_factura_venta",'id_factura_punto' => $id_factura_punto, 'detalle_factura' => $detalle_factura]);
                     }else{
-                        //si existe el producto
-                        $detalle = FacturaVentaDetalle::findOne($conDato->id_detalle);
-                        $cantidad = 0; $subtotal = 0; $descuento = 0; $iva = 0; $total = 0;
-                       //proceso de variables
-                       echo $cantidad = $conDato->cantidad + 1;
-                        $subtotal = $conDato->subtotal * $cantidad;
-                        $iva = $conDato->impuesto * $cantidad;
-                        $descuento = $conDato->valor_descuento * $cantidad;
-                        $total = $conDato->total_linea * $cantidad;
-                        $detalle->cantidad = $cantidad;
-                        $detalle->subtotal = $subtotal;
-                        $detalle->valor_descuento = $descuento;
-                        $detalle->impuesto = $iva;
-                        $detalle->total_linea = $total;
-                        $detalle->save();
-                        $id = $id_factura_punto;
-                        $this->ActualizarSaldosTotales($id);
-                        $this->ActualizarConceptosTributarios($id);
-                       return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+                        if($factura->id_tipo_venta == 2){
+                            Yii::$app->getSession()->setFlash('warning', 'Este producto ya se encuentra registrado en esta factura, favor subir las unidades faltantes por  la opcion de MAS');
+                            return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+                        }else{
+                            //si existe el producto
+                            $valor_unitario = 0;
+                            $detalle = FacturaVentaDetalle::findOne($conDato->id_detalle);
+                            $producto = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $codigo_producto])->one();
+                            if($factura->id_tipo_venta == 2){
+                                $valor_unitario = $producto->precio_mayorista;    
+                            }else{
+                                $valor_unitario = $producto->precio_deptal;   
+
+                            }
+                            $pInicio = 0; $pTotal = 0; $pIva = 0; $pSubtotal = 0; $pDescuento = 0;
+                            $pInicio = $detalle->porcentaje_iva;
+                            $pDescuento = $detalle->porcentaje_descuento;
+                            $pTotal = round($valor_unitario);
+                            $pIva = round($pTotal * $pInicio)/100;
+                            $pSubtotal = round($pTotal - $pIva);
+                           //proceso de variables
+                            $cantidad = $conDato->cantidad + 1;
+                            $subtotal = $conDato->subtotal + $pSubtotal;
+                            $iva = $conDato->impuesto + $pIva;
+                            if($pDescuento > 0){
+                                $descuento = round(($pSubtotal * $pDescuento)/100);
+                            }else{
+                               $descuento = 0;  
+                            }
+                            //asignacion
+                            $detalle->cantidad = $cantidad;
+                            $detalle->subtotal = $detalle->subtotal + $pSubtotal;
+                            $detalle->valor_descuento = $detalle->valor_descuento + $descuento;
+                            $detalle->impuesto = $detalle->impuesto + $pIva;
+                            $detalle->total_linea = $detalle->total_linea + $pTotal - $descuento;
+                            $detalle->save();
+                            $id = $id_factura_punto;
+                            $this->ActualizarSaldosTotales($id);
+                            $this->ActualizarConceptosTributarios($id);
+                           return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+                        }   
                     }
                 }else{
                     Yii::$app->getSession()->setFlash('info', 'El código del producto NO se encuentra en el sistema.');
@@ -566,6 +591,45 @@ class FacturaVentaController extends Controller
             'detalle_factura' => $detalle_factura,
             
             
+        ]);
+    }
+    //modificar cantidades a vender
+    public function actionAdicionar_cantidades($id_factura_punto, $id_detalle) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $table = FacturaVentaDetalle::findOne($id_detalle);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["adicionar_cantidades"])) {
+                $iva = 0; $subtotal = 0; $total = 0; $valor_unitario = 0; $dscto = 0;
+                $producto = \app\models\InventarioProductos::findOne($table->id_inventario);
+                $porcentaje = number_format($producto->porcentaje_iva / 100, 2);
+                $valor_unitario = $producto->precio_mayorista;
+                $total = ($valor_unitario * $model->cantidades);
+                $iva = round($total * $porcentaje);
+                $subtotal = ($total - $iva);
+                $table->cantidad = $model->cantidades;
+                $table->valor_unitario = $valor_unitario;
+                $table->subtotal = $subtotal;
+                $table->impuesto = $iva;
+                if($model->descuento > 0){
+                   $dscto = round(($subtotal * $model->descuento)/100);
+                   $table->total_linea = $total - $dscto;
+                   $table->porcentaje_descuento = $model->descuento;
+                   $table->valor_descuento = $dscto;
+                }else{
+                    $table->total_linea = $total;
+                    $table->porcentaje_descuento = 0;
+                    $table->valor_descuento = 0;
+                    $table->porcentaje_iva = $producto->porcentaje_iva;
+                }        
+                $table->save();
+                $id = $id_factura_punto;
+                $this->ActualizarSaldosTotales($id);
+                $this->ActualizarConceptosTributarios($id);
+               return $this->redirect(['view_factura_venta','id_factura_punto' =>$id_factura_punto]);
+            }    
+        }
+        return $this->renderAjax('_form_adicionar_cantidad', [
+            'model' => $model,
         ]);
     }
     
@@ -624,7 +688,6 @@ class FacturaVentaController extends Controller
             'model' => $model,
         ]);
     }
-
 
     //actualiza la fecha de la factura
     public function actionUpdate($id, $token)
@@ -857,7 +920,12 @@ class FacturaVentaController extends Controller
                 $factura->autorizado = 0;
             }
             $factura->save();
-            $this->redirect(["view", 'id' => $id,'token' => $token]);
+            if($token == 0){
+               $this->redirect(["view", 'id' => $id,'token' => $token]);    
+            }else{
+                $this->redirect(["view_factura_venta", 'id_factura_punto' => $id]);
+            }
+            
     }
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA
      public function actionGenerar_factura($id, $id_pedido, $token) {
@@ -873,11 +941,53 @@ class FacturaVentaController extends Controller
         $pedido->save(false);
         $this->redirect(["view", 'id' => $id, 'token' => $token]);  
     }
-    //ELIMINAR LINEA DE FACTURA DE PUNTO DE VENTA
-    public function actionEliminar_linea_factura($id_factura_punto, $id_detalle)
+    //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA PUNTO DE VENTA
+     public function actionGenerar_factura_punto($id) {
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(6);
+        $factura = FacturaVenta::findOne($id);
+        $factura->numero_factura = $consecutivo->numero_inicial + 1;
+        $factura->save(false);
+        $consecutivo->numero_inicial = $factura->numero_factura;
+        $consecutivo->save(false);
+        $this->redirect(["view_factura_venta", 'id_factura_punto' => $id]);  
+    }
+    //ELIMINAR LINEA DE FACTURA DE MAYORISTA
+    public function actionEliminar_linea_factura_mayorista($id_factura_punto, $id_detalle)
     {                                
         $detalle = FacturaVentaDetalle::findOne($id_detalle);
         $detalle->delete();
+        $id =  $id_factura_punto;
+        $this->ActualizarSaldosTotales($id);
+        $this->ActualizarConceptosTributarios($id);
+        $this->redirect(["view_factura_venta",'id_factura_punto' => $id_factura_punto]);        
+    } 
+    
+    //ELIMINAR LINEA DE FACTURA DE PUNTO DE VENTA
+    public function actionEliminar_linea_factura_punto($id_factura_punto, $id_detalle)
+    {                                
+        $detalle = FacturaVentaDetalle::findOne($id_detalle);
+        if($detalle->cantidad == 1){
+           $detalle->delete();    
+        }else{
+            $cantidad = 0; $vrl_unitario = 0; $total = 0; $subtotal = 0; $descuento = 0; $porcentaje_dscto = 0; $porcentaje_iva = 0; $iva = 0;
+           $producto = \app\models\InventarioProductos::findOne($detalle->id_inventario);
+           $cantidad = $detalle->cantidad - 1;
+           $vrl_unitario = $producto->precio_deptal;
+           $porcentaje_dscto = $detalle->porcentaje_descuento;
+           $porcentaje_iva = number_format($detalle->porcentaje_iva / 100,2);
+           $total = round($cantidad * $vrl_unitario);
+           $iva = round($total * $porcentaje_iva);
+           $subtotal = round($total - $iva);
+           $descuento = round($subtotal * $porcentaje_dscto /100);
+           //asignacion
+           $detalle->cantidad = $cantidad;
+           $detalle->subtotal = $subtotal;
+           $detalle->impuesto = $iva;
+           $detalle->valor_descuento = $descuento;
+           $detalle->total_linea = round($total - $descuento);
+           $detalle->save();
+        }
         $id =  $id_factura_punto;
         $this->ActualizarSaldosTotales($id);
         $this->ActualizarConceptosTributarios($id);

@@ -16,11 +16,12 @@ class FormModeloCambiarCantidad extends Model
     public $nuevo_precio;
     public $cliente;
     public $pedido_virtual;
+    public $descuento;
     public function rules()
     {
         return [
 
-           [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual'], 'integer'],
+           [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual','descuento'], 'integer'],
            ['fecha', 'safe'], 
         ];
     }
@@ -34,6 +35,7 @@ class FormModeloCambiarCantidad extends Model
             'cliente' => 'Cliente:',
             'pedido_virtual' => 'Pedido virtual:',
             'tipo_precio' => 'Tipo precio venta:',
+            'descuento' => 'Descto comercial:',
 
         ];
     }
