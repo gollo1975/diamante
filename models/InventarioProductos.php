@@ -64,7 +64,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             [['codigo_producto','fecha_proceso','id_grupo','id_presentacion'], 'required'],
             [['codigo_producto', 'costo_unitario', 'unidades_entradas', 'stock_unidades', 'id_grupo', 'id_detalle', 'aplica_iva', 'inventario_inicial', 'aplica_inventario',
                 'subtotal', 'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 'codigo_ean',
-                'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial','activar_producto_venta','aplica_descuento'], 'integer'],
+                'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial','activar_producto_venta','aplica_descuento','aplica_descuento_distribuidor'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_vencimiento', 'fecha_creacion', 'fecha_proceso'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -113,6 +113,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'activar_producto_venta' => 'Producto activado:',
             'id_proveedor' => 'Proveedor:',
             'aplica_descuento' => 'Aplica descuento:',
+            'aplica_descuento_distribuidor' => 'aplica_descuento_distribuidor',
            
          ];
     }
@@ -217,4 +218,14 @@ class InventarioProductos extends \yii\db\ActiveRecord
         }
         return $aplicadescuento;
     }
+    
+    public function getDescuentoDistribuidor() {
+        if($this->aplica_descuento_distribuidor == 0){
+           $aplicadescuentodistribuidor = 'NO';
+        }else{
+            $aplicadescuentodistribuidor = 'SI';
+        }
+        return $aplicadescuentodistribuidor;
+    }
+    
 }

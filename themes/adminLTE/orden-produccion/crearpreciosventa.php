@@ -107,42 +107,23 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                             </td>
                             <td style="width: 25px; height: 25px;">
                                 <!-- Inicio Nuevo Detalle proceso -->
-                                  <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ',
-                                      ['/orden-produccion/crear_precio_unico', 'id' => $val->id_inventario],
-                                      [
-                                          'title' => 'Crear precio unico para venta al deptal',
-                                          'data-toggle'=>'modal',
-                                          'data-targcrear_reglas_descuentoet'=>'#modalcrearpreciounico'.$val->id_inventario,
-                                      ])    
-                                 ?>
-                                <div class="modal remote fade" id="modalcrearpreciounico<?= $val->id_inventario ?>">
+                                <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ',
+                                    ['/orden-produccion/crear_precio_unico','id' => $val->id_inventario],
+                                    [
+                                        'title' => 'Crear precio unico para venta al deptal',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalcrearpreciopuntomayorista'.$val->id_inventario,
+                                    ])    
+                                ?>
+                                <div class="modal remote fade" id="modalcrearpreciopuntomayorista<?= $val->id_inventario ?>">
                                     <div class="modal-dialog modal-lg" style ="width: 500px;">
-                                        <div class="modal-content"></div>
+                                         <div class="modal-content"></div>
                                     </div>
-                                </div>
+                                </div> 
                             </td>
-                            <?php if(!$concodigo){?>
-                                <td style="width: 25px; height: 25px;">
-                                   <a href="<?= Url::toRoute(["orden-produccion/view_regla_descuento", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
-                                </td>
-                            <?php }else{?>
-                                <!-- Inicio Nuevo Detalle proceso -->
-                                <td style="width: 25px; height: 25px;">
-                                    <?= Html::a('<span class="glyphicon glyphicon-minus-sign"></span> ',
-                                          ['/orden-produccion/editar_regla_descuento', 'id' => $val->id_inventario],
-                                          [
-                                              'title' => 'Permite editar la regla del descuento comercial',
-                                              'data-toggle'=>'modal',
-                                              'data-target'=>'#modaleditarregladescuento'.$val->id_inventario,
-                                          ])    
-                                     ?>
-                                    <div class="modal remote fade" id="modaleditarregladescuento<?= $val->id_inventario ?>">
-                                        <div class="modal-dialog modal-lg" style ="width: 500px;">
-                                            <div class="modal-content"></div>
-                                        </div>
-                                    </div>
-                                </td>    
-                            <?php }?>    
+                            <td style="width: 25px; height: 25px;">
+                               <a href="<?= Url::toRoute(["orden-produccion/view_regla_descuento", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
+                            </td>
                         </tr>  
                     <?php endforeach;
                 }?>

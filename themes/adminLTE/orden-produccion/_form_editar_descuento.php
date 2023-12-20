@@ -57,12 +57,14 @@ $form = ActiveForm::begin([
                                'todayHighlight' => true]])
                        ?>
                     </div>
-                    <div class="row">
-                        <?= $form->field($model, 'estado')->dropdownList(['0' => 'ACTIVO', '1' => 'INACTIVO'], ['prompt' => 'Seleccione...']) ?>
-                    </div>
+                    <?php if($sw == 1){?>
+                        <div class="row">
+                            <?= $form->field($model, 'estado')->dropdownList(['0' => 'ACTIVO', '1' => 'INACTIVO'], ['prompt' => 'Seleccione...']) ?>
+                        </div>
+                    <?php }?>
                 </div>  
                     <div class="panel-footer text-right">
-                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-primary", 'name' => 'editar_regla_descuento']) ?>                    
+                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-primary", 'name' => 'regla_distribuidor']) ?>                    
                    </div>
                 
             </div>

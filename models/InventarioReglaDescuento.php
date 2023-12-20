@@ -69,4 +69,20 @@ class InventarioReglaDescuento extends \yii\db\ActiveRecord
     {
         return $this->hasOne(InventarioProductos::className(), ['id_inventario' => 'id_inventario']);
     }
+    public function getTipoDescuento() {
+        if($this->tipo_descuento == 1){
+            $tipodescuento = 'PORCENTAJE';
+        }else{
+            $tipodescuento = 'VALORES';
+        }
+        return $tipodescuento;
+    }
+     public function getEstadoRegla() {
+        if($this->estado_regla == 0){
+            $estadoregla = 'SI';
+        }else{
+            $estadoregla = 'NO';
+        }
+        return $estadoregla;
+    }
 }

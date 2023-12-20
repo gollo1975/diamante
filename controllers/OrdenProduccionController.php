@@ -297,8 +297,6 @@ class OrdenProduccionController extends Controller
                 ]);
     }
     
-    
-    
     //PERMITE CREAR LOS PRECIOS DE VENTA PARA CADA PRODUCTO PARA VENDER AL POR MAYOR
      public function actionCrear_reglas_descuento_punto($id) {
         $model = new \app\models\InventarioReglaDescuento();
@@ -349,7 +347,8 @@ class OrdenProduccionController extends Controller
         ]);
     }    
       
-    
+   
+    //VISTA DE LA ORDEN DE PRODUCCIO
     public function actionView($id, $token)
     {
         $detalle_orden = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
@@ -553,8 +552,7 @@ class OrdenProduccionController extends Controller
         //$this->TotalUnidadesLote($id);
         $this->redirect(["view",'id' => $id, 'token' => $token]);        
     }
-    
-    
+        
     //eliminar detalles de creacion de producto
     
      public function actionEliminar($id,$detalle, $token)
@@ -800,7 +798,7 @@ class OrdenProduccionController extends Controller
         ]);
     }
     
-    //PERMITE CREAR EL PRECIO UNICO PARA VENTA AL DEPTA
+    //PERMITE CREAR EL PRECIO UNICO PARA VENTA AL DEPTA Y DISTRIBUIDOR
     public function actionCrear_precio_unico($id) {
         $model = new \app\models\FormModeloCambiarCantidad();
         $table = InventarioProductos::findOne($id);
@@ -814,22 +812,51 @@ class OrdenProduccionController extends Controller
             $table->save(false);
             $this->redirect(["orden-produccion/crear_precio_venta", 'id' => $id]);
             }
-                
         }
-        return $this->renderAjax('crear_precio_unico', [
+        return $this->renderAjax('_crear_precio_punto_distribuidor', [
             'model' => $model,
             'id' => $id,
         ]);
     }
     
-    // PERMITE MODIFICAR LA REGLA COMERCIAL O DESCUENTOS
-    public function actionEditar_regla_descuento($id) {
+    //CREAR LA REGLA PARA DISTRIBIDOR
+    public function actionCrear_regla_punto($id, $sw = 0) {
+        $model = new \app\models\ModeloEditarReglaDescuento();
+        $inventario = InventarioProductos::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if (isset($_POST["regla_distribuidor"])) {
+                    $table = new \app\models\InventarioReglaDescuento();
+                    $table->id_inventario = $id;
+                    $table->fecha_inicio =  $model->fecha_inicio;
+                    $table->fecha_final = $model->fecha_final;
+                    $table->nuevo_valor = $model->nuevo_valor;
+                    $table->tipo_descuento = $model->tipo_descuento;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save(false);
+                    $inventario->aplica_descuento = 1;
+                    $inventario->save();
+                    $this->redirect(["orden-produccion/view_regla_descuento", 'id' => $id]);
+                }
+            }else{
+                $model->getErrors();
+            }    
+        }
+        return $this->renderAjax('_form_editar_descuento', [
+            'model' => $model,
+            'id' => $id,
+            'sw' => $sw,
+        ]);
+    }
+    
+    // PERMITE MODIFICAR LA REGLA COMERCIAL O DESCUENTOS DEL PUNTO DE VENTA
+    public function actionEditar_regla_punto($id , $sw = 1) {
         $model = new \app\models\ModeloEditarReglaDescuento();
         $table = InventarioProductos::findOne($id);
         $regla = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $id])->one();
         if ($model->load(Yii::$app->request->post())) {
             if($model->validate()){
-                if (isset($_POST["editar_regla_descuento"])) {
+                if (isset($_POST["regla_distribuidor"])) {
                    $regla->fecha_inicio =  $model->fecha_inicio;
                    $regla->fecha_final = $model->fecha_final;
                    $regla->nuevo_valor = $model->nuevo_valor;
@@ -843,7 +870,7 @@ class OrdenProduccionController extends Controller
                         $table->aplica_descuento = 1;
                         $table->save();
                     }     
-                   $this->redirect(["orden-produccion/crear_precio_venta"]);
+                   $this->redirect(["orden-produccion/view_regla_descuento", 'id' => $id]);
                 }
             }else{
                 $model->getErrors();
@@ -859,6 +886,78 @@ class OrdenProduccionController extends Controller
         return $this->renderAjax('_form_editar_descuento', [
             'model' => $model,
             'id' => $id,
+            'sw' => $sw,
+        ]);
+    }
+    
+    //CREAR LA REGLA PARA DISTRIBIDOR
+    public function actionCrear_regla_distribuidor($id, $sw = 0) {
+        $model = new \app\models\ModeloEditarReglaDescuento();
+        $inventario = InventarioProductos::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if (isset($_POST["regla_distribuidor"])) {
+                    $table = new \app\models\ReglaDescuentoDistribuidor();
+                    $table->id_inventario = $id;
+                    $table->fecha_inicio =  $model->fecha_inicio;
+                    $table->fecha_final = $model->fecha_final;
+                    $table->nuevo_valor = $model->nuevo_valor;
+                    $table->tipo_descuento = $model->tipo_descuento;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save(false);
+                    $inventario->aplica_descuento_distribuidor = 1;
+                    $inventario->save();
+                    $this->redirect(["orden-produccion/view_regla_descuento", 'id' => $id]);
+                }
+            }else{
+                $model->getErrors();
+            }    
+        }
+        return $this->renderAjax('_form_editar_descuento', [
+            'model' => $model,
+            'id' => $id,
+            'sw' => $sw,
+        ]);
+    }
+    
+    //EDITAR LA REGLA COMERCIAL DE DESCUENTO PARA DISTRIBUIDORES
+    public function actionEditar_regla_distribuidor($id, $sw = 1) {
+        $model = new \app\models\ModeloEditarReglaDescuento();
+        $table = InventarioProductos::findOne($id);
+        $regla = \app\models\ReglaDescuentoDistribuidor::find()->where(['=','id_inventario', $id])->one();
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if (isset($_POST["regla_distribuidor"])) {
+                   $regla->fecha_inicio =  $model->fecha_inicio;
+                   $regla->fecha_final = $model->fecha_final;
+                   $regla->nuevo_valor = $model->nuevo_valor;
+                   $regla->tipo_descuento = $model->tipo_descuento;
+                   $regla->estado_regla = $model->estado;
+                   $regla->save(false);
+                   if($model->estado == 1){
+                        $table->aplica_descuento_distribuidor = 0;
+                        $table->save();
+                    }else{
+                        $table->aplica_descuento_distribuidor = 1;
+                        $table->save();
+                    }     
+                   $this->redirect(["orden-produccion/view_regla_descuento",'id' => $id]);
+                }
+            }else{
+                $model->getErrors();
+            }    
+        }
+        if (Yii::$app->request->get()) {
+            $model->fecha_inicio = $regla->fecha_inicio;
+            $model->fecha_final = $regla->fecha_final;
+            $model->nuevo_valor = $regla->nuevo_valor;
+            $model->tipo_descuento = $regla->tipo_descuento;
+            $model->estado = $regla->estado_regla;
+        }
+        return $this->renderAjax('_form_editar_descuento', [
+            'model' => $model,
+            'id' => $id,
+            'sw' => $sw,
         ]);
     }
     
@@ -971,8 +1070,7 @@ class OrdenProduccionController extends Controller
         $materia->total_materia_prima = $subtotal + $iva;
         $materia->save(false);
     }
-    
-    
+        
     //PROCESO QUE TOTALIZA EL INVENTARIO
     protected function ActualizarSaldoTotales($auxiliar) {
         $iva = 0;

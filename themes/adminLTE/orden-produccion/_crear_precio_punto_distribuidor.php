@@ -32,11 +32,11 @@ $form = ActiveForm::begin([
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                  PRECIOS DE PUNTO DE VENTA
+                  PRECIOS PARA PUNTO Y DISTRIBUCION
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <?= $form->field($model, 'tipo_precio')->dropDownList($tipoventa, ['prompt' => 'Seleccione...']) ?>
+                          <?= $form->field($model, 'tipo_precio')->dropDownList($tipoventa, ['prompt' => 'Seleccione...']) ?>
                     </div>
                     <div class="row">
                         <?= $form->field($model, 'nuevo_precio')->input('text'); ?>
