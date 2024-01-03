@@ -49,7 +49,7 @@ $form = ActiveForm::begin([
             ]);?> 
             <?= $form->field($model, 'id_tipo_venta')->widget(Select2::classname(), [
                    'data' => $tipo_venta,
-                   'options' => ['prompt' => 'Seleccione...'],
+                   'options' => ['prompt' => 'Seleccione...', 'required' => true],
                    'pluginOptions' => [
                        'allowClear' => true
                    ],

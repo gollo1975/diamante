@@ -640,6 +640,7 @@ class FacturaVentaController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
+        $matricula = \app\models\MatriculaEmpresa::findOne(1);
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
                 $cliente = Clientes::findOne($model->id_cliente);
                 $iva = \app\models\ConfiguracionIva::findOne(1);
@@ -684,9 +685,14 @@ class FacturaVentaController extends Controller
                 $table = $this->findModel($model->id_factura);
                 return $this->redirect(['view_factura_venta','id_factura_punto' => $table->id_factura]);
         }
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        if($matricula->aplica_punto_venta == 1){
+            return $this->render('create', [
+                'model' => $model,
+            ]);
+        }else{
+             Yii::$app->getSession()->setFlash('info', 'No esta autorizado para utilizar este proceso de facturación. Contacte al administrador.');
+             return $this->redirect(['index']);
+        }    
     }
 
     //actualiza la fecha de la factura
