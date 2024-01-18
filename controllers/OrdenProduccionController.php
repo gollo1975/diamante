@@ -242,19 +242,14 @@ class OrdenProduccionController extends Controller
                         $codigo = Html::encode($form->codigo);
                         $grupo = Html::encode($form->grupo);
                         $producto = Html::encode($form->producto);
-                        if($producto == null && $codigo == null && $grupo == null){
-                            $model = null;
-                             Yii::$app->getSession()->setFlash('warning', 'Campos vacios en la consulta. Favor digitar la información.'); 
-                        }else{
-                            $table = InventarioProductos::find()
+                        $table = InventarioProductos::find()
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo])
                                         ->andFilterWhere(['like', 'nombre_producto', $producto])
                                         ->andWhere(['>','stock_unidades', 0])->all(); 
                             $model = $table;
                             $sw = 1;
-                        }    
-                    } else {
+                     } else {
                         $form->getErrors();
                     }
                 }

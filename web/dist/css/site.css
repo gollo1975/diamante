@@ -736,3 +736,21 @@ h4{
     column-width: 105px;
     font-size: 12px;
 }
+#pelicula{
+    display: grid;
+    width: 90%;
+   
+    grid-gap: 30px;
+    
+}
+#pelicula img{
+    width: 50%;
+    height: 80%;
+    transition: all 300ms;
+    position: relative;
+    border-radius: 5px;
+}
+#pelicula img:hover{
+    transform: scale(2.15);
+    
+}

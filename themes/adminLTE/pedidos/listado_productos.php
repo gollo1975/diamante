@@ -64,6 +64,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                 } 
             
             }?>
+
+
+
 <div class="panel panel-success">
     <div class="panel-body">
         <script language="JavaScript">
@@ -145,6 +148,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                         <div class="panel panel-success">
                            <div class="panel-body">
                                  <table class="table table-responsive">
+                                     <link rel="stylesheet" href="dist/css/site.css">
                                     <thead>
                                         <tr style="font-size: 90%;">
                                             <th scope="col" style='background-color:#B9D5CE;'>Código</th>
@@ -153,6 +157,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
                                             <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica regla comercial">Ar.</span></th>
+                                            <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica descuento comercial">%</span></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -162,6 +167,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     foreach ($variable as $val): 
                                         $regla = app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $val->id_inventario])->andWhere(['=','estado_regla', 0])->one();
                                         $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                                        $descuento = app\models\ReglaDescuentoDistribuidor::find()->where(['=','id_inventario', $val->id_inventario])->one();
                                         ?>
                                         <tr style="font-size: 90%;">
                                             <td><?= $val->codigo_producto ?></td>
@@ -169,7 +175,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <?php if($valor){
                                                   $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
                                                   if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                                                     <td style="width: 100px; border: 0px solid grey;" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '65px;', 'height' => '70px;'])?></td>
+                                                     <td id="pelicula"  title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena)?></td>
+
                                                   <?php }else {?>
                                                       <td><?= 'NOT FOUND'?></td>
                                                   <?php } 
@@ -177,11 +184,16 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                       <td></td>
                                                 <?php }?>     
                                             <td style="background-color:#EDF5F3; color: black"><?= $val->stock_unidades ?></td>
-                                            <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_productos[]"  style="text-align: right" size="7" maxlength="true"> </td> 
+                                            <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_productos[]"  style="text-align: right" size="5" maxlength="true"> </td> 
                                             <?php if($regla){?>
                                             <td style="color: red"><?= 'SI' ?></td> 
                                             <?php }else{?>
                                                <td></td>
+                                            <?php }
+                                            if($descuento){?>  
+                                               <td style="color: blue"><?= $descuento->nuevo_valor ?></td>
+                                            <?php }else {?>   
+                                                  <td></td>
                                             <?php }?>   
                                             <input type="hidden" name="nuevo_producto[]" value="<?= $val->id_inventario?>"> 
                                         </tr>
@@ -390,4 +402,3 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         </div>     
     </div>        
 </div> 
-

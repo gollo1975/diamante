@@ -32,7 +32,7 @@ $form = ActiveForm::begin([
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                  PRECIOS PARA PUNTO Y DISTRIBUCION
+                  PRECIOS PARA PUNTO Y MAYORISTA
                 </div>
                 <div class="panel-body">
                     <div class="row">

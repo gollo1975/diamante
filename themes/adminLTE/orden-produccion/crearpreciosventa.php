@@ -110,7 +110,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                                 <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ',
                                     ['/orden-produccion/crear_precio_unico','id' => $val->id_inventario],
                                     [
-                                        'title' => 'Crear precio unico para venta al deptal',
+                                        'title' => 'Crear precio para punto de venta y venta al por mayor',
                                         'data-toggle'=>'modal',
                                         'data-target'=>'#modalcrearpreciopuntomayorista'.$val->id_inventario,
                                     ])    
