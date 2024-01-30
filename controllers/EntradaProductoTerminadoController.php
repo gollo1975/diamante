@@ -219,19 +219,26 @@ class EntradaProductoTerminadoController extends Controller
         ]);
     }
     //importar lineas de la orden de compra
-    public function actionImportardetallecompra($id, $id_orden, $token)
+    public function actionImportardetallecompra($id, $id_orden, $token, $proveedor)
     {                                
-        $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $id_orden])->all();
-        foreach ( $detalle_compra as $detalle_compras):
-                $table = new EntradaProductoTerminadoDetalle();
-                $table->id_entrada = $id;
-                $table->fecha_vencimiento = date('Y-m-d');
-                $table->porcentaje_iva = $detalle_compras->porcentaje;
-                $table->cantidad = $detalle_compras->cantidad;
-                $table->valor_unitario = $detalle_compras->valor;
-                $table->insert();
-        endforeach;
-        $this->redirect(["view",'id' => $id, 'token' => $token]);  
+        $orden_compra = OrdenCompra::find()->where(['=','id_proveedor' , $proveedor])->andWhere(['=','importado', 0])->one();
+        if($orden_compra){
+            $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $orden_compra->id_orden_compra])->all();
+            foreach ( $detalle_compra as $detalle_compras):
+                    $table = new EntradaProductoTerminadoDetalle();
+                    $table->id_entrada = $id;
+                    $table->fecha_vencimiento = date('Y-m-d');
+                    $table->porcentaje_iva = $detalle_compras->porcentaje;
+                    $table->cantidad = $detalle_compras->cantidad;
+                    $table->valor_unitario = $detalle_compras->valor;
+                    $table->insert();
+            endforeach;
+            $this->redirect(["view",'id' => $id, 'token' => $token]);  
+        }else{
+            Yii::$app->getSession()->setFlash('warning', 'El proveedor NO tiene ORDENES DE COMPRA programdas para entregar.');
+             $this->redirect(["view",'id' => $id, 'token' => $token]);  
+        }
+            
         
              
     } 

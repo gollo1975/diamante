@@ -205,7 +205,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>    
                                     <?php }else{?>
                                         <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea', ['entrada-materia-prima/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
-                                        <?= Html::a('<span class="glyphicon glyphicon-export"></span> Cargar items', ['entrada-materia-prima/importardetallecompra','id' => $model->id_entrada, 'id_orden' => $model->id_orden_compra, 'token' => $token],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                                        <?= Html::a('<span class="glyphicon glyphicon-export"></span> Cargar items', ['entrada-materia-prima/importardetallecompra','id' => $model->id_entrada, 'id_orden' => $model->id_orden_compra, 'token' => $token, 'proveedor' => $model->id_proveedor],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                                         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
                                     <?php }
                                                                           

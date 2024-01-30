@@ -204,7 +204,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                     <?php 
                                     if($model->autorizado == 0 && count($detalle_entrada) == 0){?>
                                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea', ['entrada-producto-terminado/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
-                                            <?= Html::a('<span class="glyphicon glyphicon-export"></span> Cargar orden', ['entrada-producto-terminado/importardetallecompra','id' => $model->id_entrada, 'id_orden' => $model->id_orden_compra, 'token' => $token],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                                            <?= Html::a('<span class="glyphicon glyphicon-export"></span> Cargar orden', ['entrada-producto-terminado/importardetallecompra','id' => $model->id_entrada, 'id_orden' => $model->id_orden_compra, 'token' => $token, 'proveedor' => $model->id_proveedor],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
                                    <?php }else{
                                        if($model->autorizado == 0 && count($detalle_entrada) > 0){?>

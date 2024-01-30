@@ -336,23 +336,29 @@ class EntradaMateriaPrimaController extends Controller
         $table->insert();
         return $this->redirect(['view', 'id' => $id, 'token' => $token]);
       }
-     //ACTUALIZAR LINEA
-    public function actionImportardetallecompra($sw = 0, $id, $id_orden, $token)
+   
+      //ACTUALIZAR LINEA
+    public function actionImportardetallecompra($sw = 0, $id, $id_orden, $token, $proveedor)
     {                                
-        $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $id_orden])->all();
-        foreach ( $detalle_compra as $detalle_compras):
-                $table = new EntradaMateriaPrimaDetalle();
-                $table->id_entrada = $id;
-                $table->fecha_vencimiento = date('Y-m-d');
-                $table->porcentaje_iva = $detalle_compras->porcentaje;
-                $table->cantidad = $detalle_compras->cantidad;
-                $table->valor_unitario = $detalle_compras->valor;
-                $table->insert();
-        endforeach;
-        $sw = 1;
-        $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]);  
-        
-             
+        $orden_compra = OrdenCompra::find()->where(['=','id_proveedor' , $proveedor])->andWhere(['=','importado', 0])->one();
+        if($orden_compra){
+            $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $orden_compra->id_orden_compra])->all();
+            foreach ( $detalle_compra as $detalle_compras):
+                    $table = new EntradaMateriaPrimaDetalle();
+                    $table->id_entrada = $id;
+                    $table->fecha_vencimiento = date('Y-m-d');
+                    $table->porcentaje_iva = $detalle_compras->porcentaje;
+                    $table->cantidad = $detalle_compras->cantidad;
+                    $table->valor_unitario = $detalle_compras->valor;
+                    $table->insert();
+            endforeach;
+            $sw = 1;
+            $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]);  
+        }else{
+             Yii::$app->getSession()->setFlash('warning', 'El proveedor NO tiene ORDENES DE COMPRA programdas para entregar.');
+             $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]); 
+        }    
+            
     } 
       
     //ELIMINAR DETALLES  
