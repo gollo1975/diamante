@@ -41,8 +41,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
-                                                ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+if($tokenAcceso == 2 || $tokenAcceso == 1){
+    $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
+                                                    ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+}else{
+    $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])->andWhere(['=','id_agente', $documento_vendedor->id_agente])
+                                                    ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+}
+
 $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 
 ?>
@@ -52,7 +58,7 @@ $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0]
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtropedido" style="display:none">
+    <div class="panel-body" id="filtropedido" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "numero_pedido")->input("search") ?>
             <?= $formulario->field($form, "documento")->input("search") ?>
@@ -77,13 +83,15 @@ $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0]
                     'allowClear' => true
                 ],
             ]); ?> 
-            <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
-                'data' => $vendedor,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-                ]);
+            <?php if($tokenAcceso == 2){?>
+                <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
+                    'data' => $vendedor,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                    ]);
+            }
             ?> 
             <?= $formulario->field($form, 'pedido_cerrado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
             <?= $formulario->field($form, 'facturado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>

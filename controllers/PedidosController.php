@@ -22,6 +22,7 @@ use Codeception\Lib\HelperModule;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\db\Command;
+
 //models
 use app\models\Pedidos;
 use app\models\PedidosSearch;
@@ -85,7 +86,7 @@ class PedidosController extends Controller
                         $numero_pedido = Html::encode($form->numero_pedido);
                         $pedido_anulado = Html::encode($form->pedido_anulado);
                         $presupuesto = Html::encode($form->presupuesto);
-                        if($tokenAcceso == 3 || $tokenAcceso == 1){
+                        if($tokenAcceso == 3){
                             $table = Pedidos::find()
                                     ->andFilterWhere(['=', 'documento', $documento])
                                     ->andFilterWhere(['=', 'id_cliente', $cliente])
@@ -275,6 +276,8 @@ class PedidosController extends Controller
                 $presupuesto = null;
                 $model = null;
                 $pages = null;
+                $tokenAcceso = Yii::$app->user->identity->role;
+                $documento_vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -286,16 +289,29 @@ class PedidosController extends Controller
                         $pedido_cerrado = Html::encode($form->pedido_cerrado);
                         $numero_pedido = Html::encode($form->numero_pedido);
                         $presupuesto = Html::encode($form->presupuesto);
-                        $table = Pedidos::find()
-                            ->andFilterWhere(['=', 'documento', $documento])
-                            ->andFilterWhere(['=', 'id_cliente', $cliente])
-                            ->andFilterWhere(['=', 'facturado', $facturado])
-                            ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
-                            ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
-                            ->andFilterWhere(['=','numero_pedido', $numero_pedido])
-                             ->andFilterWhere(['=','presupuesto', $presupuesto])
-                            ->andFilterWhere(['=','id_agente', $vendedores])
-                             ->andWhere(['=','autorizado', 1]) ;
+                        if($tokenAcceso == 2 || $tokenAcceso == 1 ){ 
+                            $table = Pedidos::find()
+                                ->andFilterWhere(['=', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['=', 'facturado', $facturado])
+                                ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
+                                ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                                 ->andFilterWhere(['=','presupuesto', $presupuesto])
+                                ->andFilterWhere(['=','id_agente', $vendedores])
+                                 ->andWhere(['=','autorizado', 1]) ;
+                        }else{
+                           $table = Pedidos::find()
+                                ->andFilterWhere(['=', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['=', 'facturado', $facturado])
+                                ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
+                                ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                                ->andFilterWhere(['=','presupuesto', $presupuesto])
+                                ->andWhere(['=','autorizado', 1])
+                                ->andWhere(['=','id_agente', $documento_vendedor->id_agente]); 
+                        }    
                         $table = $table->orderBy('id_pedido DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -320,6 +336,68 @@ class PedidosController extends Controller
                             'form' => $form,
                             'pagination' => $pages,
                             'token' => $token,
+                            'tokenAcceso' => $tokenAcceso,
+                            'documento_vendedor' => $documento_vendedor,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
+    // MAESTRO CONSULTA DE VENTAS, PEDIDOS, CLIENTES IA
+    public function actionSearch_maestro_pedidos() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',80])->all()){
+                $form = new \app\models\ModelBusquedaAvanzada();
+                $hasta = null;
+                $desde = null;
+                $busqueda = null; 
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $busqueda = Html::encode($form->busqueda);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        if($busqueda <> null && $desde <> null && $hasta <> null){
+                            if($busqueda == 1){
+                                $query =new Query();
+                                $table = FacturaVenta::find()->select([new Expression('SUM(subtotal_factura) as subtotal_factura, cliente, nit_cedula, total_factura,id_agente'), 'id_cliente'])
+                                            ->where(['between','fecha_inicio', $desde, $hasta])
+                                            ->groupBy('id_cliente')
+                                            ->orderBy('subtotal_factura DESC')
+                                            ->limit (1)
+                                            ->all();       
+                                $model = $table;
+                            }else{
+                                $query =new Query();
+                                $table = FacturaVenta::find()->select([new Expression('SUM(subtotal_factura) as subtotal_factura, cliente, nit_cedula, total_factura,id_agente,id_cliente'), 'id_agente'])
+                                            ->where(['between','fecha_inicio', $desde, $hasta])
+                                            ->groupBy('id_agente')
+                                            ->orderBy('subtotal_factura ASC')
+                                            ->limit (1)
+                                            ->all();       
+                                $model = $table;
+                            }    
+                        }else{
+                            Yii::$app->getSession()->setFlash('info', 'Debe de seleccionar el tipo de busqueda y las fechas. Favor validar la informacion.'); 
+                            return $this->redirect(['search_maestro_pedidos']);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('search_maestro_detalle', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'desde' => $desde,
+                            'hasta' => $hasta,
+                            'busqueda' => $busqueda,
+                           
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -950,7 +1028,7 @@ class PedidosController extends Controller
         }    
     }
     //CREAR EL CONSECUTIVO DEL PEDIDO
-     public function actionCrear_pedido_cliente($id, $tokenAcceso, $token, $pedido_virtual) {
+    public function actionCrear_pedido_cliente($id, $tokenAcceso, $token, $pedido_virtual) {
         //proceso de generar consecutivo
         $consecutivo = \app\models\Consecutivos::findOne(5);
         $pedido = Pedidos::findOne($id);
@@ -961,6 +1039,35 @@ class PedidosController extends Controller
         $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso,'token' => $token, 'pedido_virtual' => $pedido_virtual]);  
     }
     
+    //LISTAR FACTURAS POR CLIENTE
+    public function actionListado_facturas($desde, $hasta, $id_cliente, $busqueda, $id_agente) {
+        if($busqueda == 1){
+            $model = Clientes::findOne($id_cliente);
+            $facturas = FacturaVenta::find()->where(['=','id_cliente', $id_cliente])
+                                            ->andWhere(['between','fecha_inicio', $desde, $hasta])
+                                            ->orderBy('cliente ASC')->all(); 
+            $pedidos = Pedidos::find()->where(['=','id_cliente', $id_cliente])
+                                            ->andWhere(['between','fecha_proceso', $desde, $hasta])
+                                            ->orderBy('cliente ASC')->all(); 
+        }else{
+            $model = AgentesComerciales::findOne($id_agente);
+            $facturas = FacturaVenta::find()->where(['=','id_agente', $id_agente])
+                                            ->andWhere(['between','fecha_inicio', $desde, $hasta])
+                                            ->orderBy('cliente ASC')->all(); 
+            $pedidos = Pedidos::find()->where(['=','id_agente', $id_agente])
+                                            ->andWhere(['between','fecha_proceso', $desde, $hasta])
+                                            ->orderBy('cliente ASC')->all();
+        }    
+        return $this->render('view_listado_facturas', [
+            'model' =>$model,
+            'facturas' => $facturas,
+            'desde' => $desde,
+            'hasta' =>$hasta,
+            'busqueda' => $busqueda,
+            'pedidos' => $pedidos,
+           
+        ]);   
+    }
     /**
      * Deletes an existing Pedidos model.
      * If deletion is successful, the browser will be redirected to the 'index' page.

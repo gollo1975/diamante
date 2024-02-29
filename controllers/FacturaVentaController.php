@@ -1221,8 +1221,15 @@ class FacturaVentaController extends Controller
                         ->setCellValue('C' . $i, $val->nit_cedula)
                         ->setCellValue('D' . $i, $val->cliente)
                         ->setCellValue('E' . $i, $val->agenteFactura->nombre_completo)
-                        ->setCellValue('F' . $i, $val->tipoFactura->descripcion)
-                        ->setCellValue('G' . $i, $val->pedido->numero_pedido)
+                        ->setCellValue('F' . $i, $val->tipoFactura->descripcion);
+                       if($val->id_pedido == null){
+                             $objPHPExcel->setActiveSheetIndex(0)
+                             ->setCellValue('G' . $i, 'NO FOUND');
+                        }else{
+                            $objPHPExcel->setActiveSheetIndex(0)
+                            ->setCellValue('G' . $i, $val->pedido->numero_pedido);
+                        }   
+                        $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('H' . $i, $val->fecha_inicio)
                         ->setCellValue('I' . $i, $val->fecha_vencimiento)
                         ->setCellValue('J' . $i, $val->fecha_enviada)
@@ -1359,7 +1366,15 @@ class FacturaVentaController extends Controller
                         ->setCellValue('C' . $i, $val->nit_cedula)
                         ->setCellValue('D' . $i, $val->cliente)
                         ->setCellValue('E' . $i, $val->agenteFactura->nombre_completo)
-                        ->setCellValue('F' . $i, $val->tipoFactura->descripcion)
+                        ->setCellValue('F' . $i, $val->tipoFactura->descripcion);
+                        if($val->id_pedido == null){
+                             $objPHPExcel->setActiveSheetIndex(0)
+                             ->setCellValue('G' . $i, 'NO FOUND');
+                        }else{
+                            $objPHPExcel->setActiveSheetIndex(0)
+                            ->setCellValue('G' . $i, $val->pedido->numero_pedido);
+                        }   
+                        $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('G' . $i, $val->pedido->numero_pedido)
                         ->setCellValue('H' . $i, $val->fecha_inicio)
                         ->setCellValue('I' . $i, $val->fecha_vencimiento)

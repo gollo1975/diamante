@@ -44,7 +44,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 $agente = ArrayHelper::map(app\models\AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-$prospecto = ArrayHelper::map(app\models\ClienteProspecto::find()->orderBy('nombre_completo ASC')->all(), 'id_prospecto', 'nombre_completo');
+if($tokenAcceso == 2 || $tokenAcceso == 1){
+    $prospecto = ArrayHelper::map(app\models\ClienteProspecto::find()->orderBy('nombre_completo ASC')->all(), 'id_prospecto', 'nombre_completo');
+}else{
+    $prospecto = ArrayHelper::map(app\models\ClienteProspecto::find()->where(['=','id_agente', $documento_vendedor->id_agente])
+                                                                    ->orderBy('nombre_completo ASC')->all(), 'id_prospecto', 'nombre_completo');
+}
+
 $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('nombre_visita ASC')->all(), 'id_tipo_visita', 'nombre_visita');
 ?>
 
@@ -53,7 +59,7 @@ $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtrocliente" style="display:none">
+    <div class="panel-body" id="filtrocliente" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, 'prospecto')->widget(Select2::classname(), [
                 'data' => $prospecto,
@@ -83,13 +89,16 @@ $tipoVisita = ArrayHelper::map(app\models\TipoVisitaComercial::find()->orderBy('
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
+            <?php if($tokenAcceso == 2){?>
             <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
                 'data' => $agente,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
-            ]); ?> 
+            ]);
+            }
+            ?> 
 
         </div>
         <div class="panel-footer text-right">

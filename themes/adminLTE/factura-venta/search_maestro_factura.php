@@ -47,7 +47,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtrocliente" style="display:none">
+    <div class="panel-body" id="filtrocliente" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "numero_factura")->input("search") ?>
             <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [

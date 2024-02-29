@@ -1,0 +1,156 @@
+<?php
+//clases
+use yii\helpers\Html;
+use yii\widgets\DetailView;
+use yii\helpers\Url;
+use yii\web\Session;
+use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
+use yii\db\ActiveQuery;
+use yii\bootstrap\ActiveForm;
+use yii\widgets\LinkPager;
+use yii\bootstrap\Modal;
+use yii\base\Model;
+use yii\web\UploadedFile;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\filters\AccessControl;
+
+/* @var $this yii\web\View */
+/* @var $model app\models\Ordenproduccion */
+
+$this->title = 'Listado de facturas';
+$this->params['breadcrumbs'][] = ['label' => 'Consulta maestro', 'url' => ['search_maestro_pedidos']];
+$this->params['breadcrumbs'][] = $model->nombre_completo;
+?>
+<div class="pedidos-vista-facturas">
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+           LISTADO DE FACTURAS
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered table-striped table-hover">
+                <?php if($busqueda == 1){?>
+                    <tr style="font-size: 90%;">
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "Documento") ?>:</th>
+                        <td><?= Html::encode($model->nit_cedula) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?>:</th>
+                        <td><?= Html::encode($model->nombre_completo) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Vendedor') ?>:</th>
+                        <td><?= Html::encode($model->agenteComercial->nombre_completo) ?></td>
+                    </tr>
+                <?php }else{?>
+                    <tr style="font-size: 90%;">
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "Documento") ?>:</th>
+                        <td><?= Html::encode($model->nit_cedula) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Agente_comercial') ?>:</th>
+                        <td><?= Html::encode($model->nombre_completo) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Municipio') ?>:</th>
+                        <td><?= Html::encode($model->codigoMunicipio->municipio) ?></td>
+                    </tr>
+                <?php }?>     
+            </table>    
+        </div>
+    </div>  
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#listadofactura" aria-controls="listadofactura" role="tab" data-toggle="tab">Listado de facturas <span class="badge"><?= count($facturas) ?></span></a></li>
+            <li role="presentation"><a href="#listadopedidos" aria-controls="listadopedidos" role="tab" data-toggle="tab">Listado de pedidos <span class="badge"><?= count($pedidos) ?></span></a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="listadofactura">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style="font-size: 90%;">
+                                        <th scope="col"  style='background-color:#B9D5CE;'><b>No factura</b></th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Fecha inicio</th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'>fecha vencimiento</th>       
+                                        <?php if($busqueda == 1){?> 
+                                            <th scope="col"  style='background-color:#B9D5CE;'>Agente de venta</th>
+                                        <?php }else{?>
+                                            <th scope="col"  style='background-color:#B9D5CE;'>Nombre del cliente</th>
+                                        <?php }?>    
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Municipio</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Subtotal</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Total factura</th>  
+                                    </tr>
+                                </thead>
+                                <body>
+                                    <?php
+                                    foreach ($facturas as $val):?>
+                                       <tr style="font-size: 90%;">
+                                           <td><?= $val->numero_factura ?></td>
+                                           <td><?= $val->fecha_inicio ?></td>
+                                           <td><?= $val->fecha_vencimiento ?></td>
+                                           <?php if($busqueda == 1){?>
+                                                <td><?= $val->agenteFactura->nombre_completo ?></td>
+                                           <?php }else{?>
+                                                <td><?= $val->clienteFactura->nombre_completo ?></td>
+                                           <?php }?>     
+                                           <td><?= $val->clienteFactura->codigoMunicipio->municipio ?></td>
+                                           <td style="text-align: right"><?= '$'.number_format($val->subtotal_factura,0) ?></td>
+                                           <td style="text-align: right"><?= '$'.number_format($val->total_factura,0) ?></td>
+                                      </tr>
+                                    <?php endforeach;?>          
+                               </body>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- TERMINA TABS-->
+            <div role="tabpanel" class="tab-pane" id="listadopedidos">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style="font-size: 90%;">
+                                        <th scope="col"  style='background-color:#B9D5CE;'><b>No pedido</b></th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Fecha pedido</th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'>fecha entrega</th>       
+                                         <?php if($busqueda == 1){?> 
+                                            <th scope="col"  style='background-color:#B9D5CE;'>Agente de venta</th>
+                                        <?php }else{?>
+                                            <th scope="col"  style='background-color:#B9D5CE;'>Nombre del cliente</th>
+                                        <?php }?>    
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Municipio</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Subtotal</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Total pedido</th>
+                                    </tr>
+                                </thead>
+                                <body>
+                                    <?php
+                                    foreach ($pedidos as $val):?>
+                                       <tr style="font-size: 90%;">
+                                           <td><?= $val->numero_pedido ?></td>
+                                           <td><?= $val->fecha_proceso ?></td>
+                                           <td><?= $val->fecha_entrega ?></td>
+                                           <?php if($busqueda == 1){?>
+                                                <td><?= $val->agentePedido->nombre_completo ?></td>
+                                           <?php }else{?>
+                                                <td><?= $val->clientePedido->nombre_completo ?></td>
+                                           <?php }?>  
+                                           <td><?= $val->clientePedido->codigoMunicipio->municipio ?></td>
+                                           <td style="text-align: right"><?= '$'.number_format($val->subtotal,0) ?></td>
+                                           <td style="text-align: right"><?= '$'.number_format($val->gran_total,0) ?></td>
+                                      </tr>
+                                    <?php endforeach;?>          
+                               </body>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- TERMINA TABS-->
+        </div>        
+    </div>    
+</div>
+

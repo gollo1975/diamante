@@ -324,6 +324,15 @@
                                                 ]],
                                                 ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedidos']], 
                                                 ['label' => 'Citas prospecto', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/search_cita_prospecto']], 
+                                                [
+                                                'label' => 'Maestros IA',
+                                                'icon' => 'connectdevelop',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Maestro pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_maestro_pedidos']],
+                                                    //['label' => 'Graficas', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_vendedor']],
+                                                    
+                                                ]],
                                             ],
                                         ],
                                         [

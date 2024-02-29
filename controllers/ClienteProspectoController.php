@@ -207,6 +207,8 @@ class ClienteProspectoController extends Controller
                 $vendedor = null;
                 $model = null;
                 $pages = null;
+                $tokenAcceso = Yii::$app->user->identity->role;
+                $documento_vendedor = \app\models\AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $prospecto = Html::encode($form->prospecto);
@@ -214,11 +216,19 @@ class ClienteProspectoController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $vendedor = Html::encode($form->vendedor);
-                        $table = ProspectoCitas::find()
-                                ->andFilterWhere(['=', 'id_prospecto', $prospecto])
-                                ->andFilterWhere(['=', 'id_agente', $vendedor])
-                                ->andFilterWhere(['=', 'id_tipo_visita', $tipo_visita])
-                                ->andFilterWhere(['between', 'fecha_cita', $fecha_inicio, $fecha_corte]);
+                        if($tokenAcceso == 2 || $tokenAcceso == 1 ){
+                            $table = ProspectoCitas::find()
+                                    ->andFilterWhere(['=', 'id_prospecto', $prospecto])
+                                    ->andFilterWhere(['=', 'id_agente', $vendedor])
+                                    ->andFilterWhere(['=', 'id_tipo_visita', $tipo_visita])
+                                    ->andFilterWhere(['between', 'fecha_cita', $fecha_inicio, $fecha_corte]);
+                        }else{
+                            $table = ProspectoCitas::find()
+                                    ->andFilterWhere(['=', 'id_prospecto', $prospecto])
+                                    ->andFilterWhere(['=', 'id_tipo_visita', $tipo_visita])
+                                    ->andFilterWhere(['between', 'fecha_cita', $fecha_inicio, $fecha_corte])
+                                    ->andWhere(['=', 'id_agente', $documento_vendedor->id_agente]);
+                        }    
                         $table = $table->orderBy('id_cita_prospecto DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -242,6 +252,8 @@ class ClienteProspectoController extends Controller
                             'model' => $model,
                             'form' => $form,
                             'pagination' => $pages,
+                            'documento_vendedor' =>$documento_vendedor,
+                            'tokenAcceso' => $tokenAcceso,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
