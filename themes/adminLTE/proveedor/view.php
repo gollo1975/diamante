@@ -113,39 +113,5 @@ $view = 'proveedor';
         </div>
     </div>
     <!--INICIO LOS TABS-->
-    <div>
-        <ul class="nav nav-tabs" role="tablist">
-            <?php
-              $contMaquina = 1;
-             ?>
-            <li role="presentation" class="active"><a href="#entradamateria" aria-controls="entradamateria" role="tab" data-toggle="tab">Entradas  <span class="badge"><?= $contMaquina ?></span></a></li>
-
-        </ul>
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="entradamateria">
-                <div class="table-responsive">
-                    <div class="panel panel-success">
-                        <div class="panel-body">
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr style='font-size:85%;'>
-                                        <th scope="col" style='background-color:#B9D5CE;'></th>                        
-                                        <th scope="col" style='background-color:#B9D5CE;'>  </th>                        
-                                        <th scope="col" style='background-color:#B9D5CE;'> </th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'></th> 
-                                          <th scope="col" style='background-color:#B9D5CE;'></th> 
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                  
-                                </tbody>      
-                            </table>
-                        </div>
-                    </div>   
-                </div>
-            </div>
-            <!--INICIO EL OTRO TABS -->
-        </div>
-    </div>    
+   
 </div>

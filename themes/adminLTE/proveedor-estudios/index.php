@@ -9,11 +9,10 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
+use app\models\ProveedorEstudioDetalles;
 
-
-$this->title = 'PROVEEDORES';
+$this->title = 'ESTUDIOS(Proveedores)';
 $this->params['breadcrumbs'][] = $this->title;
-
 
 ?>
 <script language="JavaScript">
@@ -26,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista proveedor</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("proveedor/index"),
+    "action" => Url::toRoute("proveedor-estudios/index"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -50,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("proveedor/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("proveedor-estudios/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -67,42 +66,35 @@ $this->params['breadcrumbs'][] = $this->title;
            <tr style="font-size: 90%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cedula/Nit</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Dirección</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Teléfono</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Celular</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Email</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Requisitos validados">Val.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'>Nombre del proveedor</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total porcentaje</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Validado</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Aprobado</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>  
                 <th scope="col" style='background-color:#B9D5CE;'></th>  
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
+            <?php foreach ($model as $val): 
+                $registro = ProveedorEstudioDetalles::find()->where(['=','id_estudio', $val->id_estudio])->all();
+                ?>
             <tr style="font-size: 90%;">                   
                  <td><?= $val->tipoDocumento->tipo_documento ?></td>
                 <td><?= $val->nit_cedula ?></td>
                 <td><?= $val->nombre_completo ?></td>
-                <td><?= $val->direccion ?></td>
-                <td><?= $val->telefono ?></td>
-                <td><?= $val->celular ?></td>
-                 <td><?= $val->email ?></td>
-                <td><?= $val->codigoDepartamento->departamento ?></td>
-                <td><?= $val->codigoMunicipio->municipio ?></td>
-                <td><?= $val->requisitoValidado ?></td>
-                <?php if($val->email == null || $val->direccion == null || $val->codigo_banco == null){?>
-                    <td style= 'width: 25px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["proveedor/update", "id" => $val->id_proveedor,'msg' => 0])?>" ><span class="glyphicon glyphicon-pencil"></span></a>
-                    </td>
+                <td style="text-align: right"><?= $val->total_porcentaje ?></td>
+                <td><?= $val->validadoEstudio ?></td>
+                <td><?= $val->aprobadoEstudio ?></td>
+                <td><?= $val->procesoCerrado ?>
+                <td style= 'width: 25px; height: 20px;'>
+                    <a href="<?= Url::toRoute(["proveedor-estudios/view", "id" => $val->id_estudio, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                </td>
+                <?php if($registro){?>
                     <td style= 'width: 25px; height: 20px;'></td>
-                <?php }else{ ?>
+                <?php }else{?>    
                     <td style= 'width: 25px; height: 20px;'>
-                            <a href="<?= Url::toRoute(["proveedor/view", "id" => $val->id_proveedor, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                    </td>    
-                    <td style= 'width: 25px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["proveedor/update", "id" => $val->id_proveedor,'msg' => 0])?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                        <a href="<?= Url::toRoute(["proveedor-estudios/update", "id" => $val->id_estudio]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                     </td>
                 <?php }?>    
             </tr>
@@ -116,22 +108,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                 ?>    
             <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
-            <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar proveedor',
-                    ['/proveedor/validar_requisitos'],
-                    [
-                        'title' => 'Permite importa el proveedor validado',
-                        'data-toggle'=>'modal',
-                        'data-target'=>'#modalvalidarrequisitos',
-                        'class' => 'btn btn-success btn-sm'
-                    ])    
-                    ?>
-             <div class="modal remote fade" id="modalvalidarrequisitos">
-                     <div class="modal-dialog modal-lg-centered">
-                         <div class="modal-content"></div>
-                     </div>
-             </div>
-            <a align="right" href="<?= Url::toRoute("proveedor/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
-              <?php $form->end() ?>
+            <a align="right" href="<?= Url::toRoute("proveedor-estudios/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+             <?php $form->end() ?>
             
         </div>
     </div>

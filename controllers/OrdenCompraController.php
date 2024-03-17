@@ -124,6 +124,73 @@ class OrdenCompraController extends Controller
         }    
     }
     
+    //proceso de auditoria
+    public function actionIndex_auditar_compras($token = 0) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',84])->all()){
+                $form = new FiltroBusquedaOrdenCompra();
+                $numero = null;
+                $solicitud = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $proveedor = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero = Html::encode($form->numero);
+                        $solicitud = Html::encode($form->solicitud);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $proveedor = Html::encode($form->proveedor);
+                        $table = OrdenCompra::find()
+                                    ->andFilterWhere(['=', 'numero_orden', $numero])
+                                    ->andFilterWhere(['>=', 'fecha_creacion', $fecha_inicio])
+                                    ->andFilterWhere(['<=', 'fecha_creacion', $fecha_corte])
+                                    ->andFilterWhere(['=', 'id_tipo_orden', $solicitud])
+                                    ->andFilterWhere(['=', 'id_proveedor', $proveedor])
+                                    ->andWhere(['=', 'auditada', 0]) ;
+                        $table = $table->orderBy('id_orden_compra DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = OrdenCompra::find()->Where(['=', 'auditada', 0])
+                            ->orderBy('id_orden_compra DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 10,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }
+                $to = $count->count();
+                return $this->render('index_auditoria', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
     //PROCESO DE CONSULTA DE ORDENES
     
       public function actionSearch_consulta_orden_compra($token = 1) {
@@ -436,6 +503,35 @@ class OrdenCompraController extends Controller
         ]);
     }
     
+    //PROCESO DE AUDITORIA DE ORDEN DE COMPRA
+    
+    public function actionProceso_auditoria($id, $token =0) {
+        $model = OrdenCompra::findOne($id);
+        $table = new \app\models\AuditoriaCompras();
+        $table->id_orden_compra = $model->id_orden_compra;
+        $table->id_tipo_orden = $model->id_tipo_orden;
+        $table->id_proveedor = $model->id_proveedor;
+        $table->fecha_proceso_compra = $model->fecha_proceso;
+        $table->fecha_auditoria = date('Y-m-d');
+        $table->numero_orden = $model->numero_orden;
+        $table->user_name = Yii::$app->user->identity->username;
+        $table->save(false);
+        //PROCESO DE INSERCION AL DETALLE
+        $numero = \app\models\AuditoriaCompras::find()->orderBy('id_auditoria DESC')->limit (1)->one();
+        $modelo = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $id])->all();
+        foreach ($modelo as $detalle):
+            $registro = new \app\models\AuditoriaCompraDetalles();
+            $registro->id_items = $detalle->id_items;
+            $items = Items::findOne($detalle->id_items);
+            $registro->nombre_producto = $items->descripcion;
+            $registro->cantidad = $detalle->cantidad;
+            $registro->valor_unitario = $detalle->valor;
+            $id = $numero->id_auditoria;
+            $registro->id_auditoria = $numero->id_auditoria;
+            $registro->save(false);
+        endforeach;
+         return $this->redirect(["auditoria-compras/view", 'id' => $id,'token' => $token]);
+    }
     protected function findModel($id)
     {
         if (($model = OrdenCompra::findOne($id)) !== null) {

@@ -78,7 +78,7 @@ class Proveedor extends \yii\db\ActiveRecord
     {
         return [
             [['id_tipo_documento', 'nit_cedula', 'direccion', 'email', 'telefono', 'codigo_departamento', 'codigo_municipio', 'id_naturaleza','dv','forma_pago','autoretenedor','tipo_regimen'], 'required'],
-            [['id_tipo_documento', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'tipo_transacion', 'id_empresa','dv','predeterminado'], 'integer'],
+            [['id_tipo_documento', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'tipo_transacion', 'id_empresa','dv','predeterminado','requisito_validado'], 'integer'],
             [['fecha_creacion'], 'safe'],
             [['nit_cedula', 'telefono', 'celular', 'celular_contacto', 'producto', 'user_name'], 'string', 'max' => 15],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 12],
@@ -135,6 +135,7 @@ class Proveedor extends \yii\db\ActiveRecord
             'id_empresa' => 'Empresa',
             'observacion' => 'Observacion:',
             'predeterminado' => 'Predeterminado:',
+            'requisito_validado' => 'requisito_validado',
             
         ];
     }
@@ -246,5 +247,14 @@ class Proveedor extends \yii\db\ActiveRecord
             $proveedorpredeterminado = 'SI';
         }
         return $proveedorpredeterminado;
+    }
+    
+    public function getRequisitoValidado() {
+        if($this->requisito_validado == 0){
+           $requisitovalidado = 'NO';
+        }else{
+            $requisitovalidado = 'SI';
+        }
+        return $requisitovalidado;
     }
 }

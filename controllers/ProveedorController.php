@@ -2,7 +2,30 @@
 
 namespace app\controllers;
 
+
+//clases
 use Yii;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
+use yii\db\ActiveQuery;
+use yii\base\Model;
+use yii\web\Response;
+use yii\web\Session;
+use yii\data\Pagination;
+use yii\filters\AccessControl;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\web\UploadedFile;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use Codeception\Lib\HelperModule;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\db\Command;
+
+//model
 use app\models\Proveedor;
 use app\models\ProveedorSearch;
 use app\models\UsuarioDetalle;
@@ -11,27 +34,7 @@ use app\models\Municipios;
 use app\models\Departamentos;
 use app\models\EntidadBancarias;
 use app\models\NaturalezaSociedad;
-//clases
-use yii\helpers\Url;
-use yii\web\UploadedFile;
-use yii\bootstrap\Modal;
-use yii\helpers\ArrayHelper;
-use yii\base\Model;
-use yii\web\Controller;
-use yii\web\Response;
-use yii\web\Session;
-use yii\data\Pagination;
-use yii\filters\AccessControl;
-use yii\helpers\Html;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\widgets\ActiveForm;
-use Codeception\Lib\HelperModule;
-use kartik\date\DatePicker;
-use kartik\time\TimePicker;
-use kartik\select2\Select2;
-use kartik\depdrop\DepDrop;
-
+use app\models\ListadoRequisitos;
 /**
  * ProveedorController implements the CRUD actions for Proveedor model.
  */
@@ -190,9 +193,11 @@ class ProveedorController extends Controller
      */
     public function actionView($id, $token)
     {
+        $listado = ListadoRequisitos::find()->where(['=','aplica_proveedor', 1])->orderBy('concepto ASC')->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
             'token' => $token,
+            'listado' => $listado,
         ]);
     }
 
@@ -329,7 +334,8 @@ class ProveedorController extends Controller
                 }
             }else{
                 $msg = 1;
-                return $this->redirect(["proveedor/update", 'msg' => $msg, 'id' => $id]);
+                Yii::$app->getSession()->setFlash('warning', 'Debe de llenar todos los campos del proveedor para procesar la informacion.');
+                return $this->redirect(["proveedor/index", 'msg' => $msg, 'id' => $id]);
             }
 
         }
@@ -379,8 +385,56 @@ class ProveedorController extends Controller
             'municipio' => $municipio,
          ]);
     }
-
-   
+    
+    //PROCESO QUE VALIDA SI EL PROVEEDOR TIENE VALIDADO LOS REQUISITOS
+    public function actionValidar_requisitos() {
+        $modelo = new \app\models\ModelValidarRequisitos();
+         if ($modelo->load(Yii::$app->request->post())) {
+               if ($modelo->validate()){
+                    if (isset($_POST["validar"])) {
+                        $sqlConsulta = \app\models\ProveedorEstudios::find()->where(['=','nit_cedula', $modelo->documento])->andWhere(['=','aprobado', 1])->one(); 
+                        if($sqlConsulta){
+                            $empresa = \app\models\MatriculaEmpresa::findOne(1);
+                            $archivo = \app\models\ProveedorEstudios::findOne($sqlConsulta->id_estudio);
+                            $table = new Proveedor();
+                            $table->id_tipo_documento = $archivo->id_tipo_documento;
+                            $table->nit_cedula = $archivo->nit_cedula;
+                            $table->dv = $archivo->dv;
+                            $table->primer_nombre = $archivo->primer_nombre;
+                            $table->segundo_nombre = $archivo->segundo_nombre;
+                            $table->primer_apellido = $archivo->primer_apellido;
+                            $table->segundo_apellido = $archivo->segundo_apellido;
+                            $table->razon_social = $archivo->razon_social;
+                            if ($archivo->id_tipo_documento == 1 || $archivo->id_tipo_documento == 2 ) {
+                                $table->nombre_completo = strtoupper($archivo->primer_nombre . " " . $archivo->segundo_nombre . " " . $archivo->primer_apellido . " " . $archivo->segundo_apellido);
+                                $table->razon_social = null;
+                            } else {
+                                 $table->nombre_completo = strtoupper($table->razon_social); 
+                                 $table->primer_nombre = null;
+                                 $table->segundo_nombre = null;
+                                 $table->primer_apellido = null;
+                                 $table->segundo_apellido = null;
+                            }
+                            $table->codigo_departamento = $empresa->codigo_departamento;
+                            $table->codigo_municipio = $empresa->codigo_municipio;
+                            $table->id_naturaleza = 1;
+                            $table->tipo_regimen = 1;
+                            $table->user_name = Yii::$app->user->identity->username;
+                            $table->save(false);
+                            return $this->redirect(['index']);
+                        
+                        }else{
+                          Yii::$app->getSession()->setFlash('warning', 'Este proveedor NO tiene los requisitos validados ni aprobados en sistema. Consulte con el administrador');  
+                          return $this->redirect(['index']);
+                        }    
+                    }
+               } 
+         }
+        return $this->renderAjax('validar_requisitos', [
+            'modelo' => $modelo,       
+        ]);    
+    }
+      
     /**
      * Finds the Proveedor model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

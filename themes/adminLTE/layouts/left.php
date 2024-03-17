@@ -102,7 +102,8 @@
                                             'icon' => 'database',
                                             'url' => '#',
                                             'items' => [
-                                                 ['label' => 'Tipo ordenes', 'icon' => 'plus-square-o', 'url' => ['/tipo-orden-compra/index']],
+                                                ['label' => 'Requisitos', 'icon' => 'plus-square-o', 'url' => ['/listado-requisitos/index']],
+                                                ['label' => 'Tipo ordenes', 'icon' => 'plus-square-o', 'url' => ['/tipo-orden-compra/index']],
                                                 ['label' => 'Tipos de solicitud', 'icon' => 'plus-square-o', 'url' => ['/tipo-solicitud/index']],
                                                 ['label' => 'Proveedor', 'icon' => 'plus-square-o', 'url' => ['/proveedor/index']],
                                             ],
@@ -112,7 +113,9 @@
                                             'icon' => 'cube',
                                             'url' => '#',
                                             'items' => [
-                                              //  ['label' => 'Contabiizar', 'icon' => 'plus-square-o', 'url' => ['/contabilizar/contabilizar']],
+                                                ['label' => 'Estudios proveedor', 'icon' => 'plus-square-o', 'url' => ['/proveedor-estudios/index']],
+                                                ['label' => 'Aprobar proveedor ', 'icon' => 'plus-square-o', 'url' => ['/proveedor-estudios/aprobar_estudios']],
+                                                ['label' => 'Auditar compras ', 'icon' => 'plus-square-o', 'url' => ['/orden-compra/index_auditar_compras']],
                                             ],
                                         ],
                                         [

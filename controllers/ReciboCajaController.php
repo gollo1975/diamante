@@ -327,7 +327,7 @@ class ReciboCajaController extends Controller
         ]);
     }
     //PERMITE CREAR EL NUEVO RECIBO DE CAJA
-    public function actionCrear_nuevo_recibo($id_cliente, $token = 0, $tokenAcceso) {
+    public function actionCrear_nuevo_recibo($id_cliente, $tokenAcceso) {
 
         $model = new \app\models\FormModeloNuevoRecibo();
         if ($model->load(Yii::$app->request->post())) {
@@ -346,7 +346,7 @@ class ReciboCajaController extends Controller
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->save(false);
                     $recibo = ReciboCaja::find()->orderBy('id_recibo DESC')->one();
-                    $this->redirect(["recibo-caja/view_cliente", 'id' => $recibo->id_recibo,'token' => $token, 'tokenAcceso' => $tokenAcceso]);
+                    $this->redirect(["recibo-caja/view_cliente", 'id' => $recibo->id_recibo, 'tokenAcceso' => $tokenAcceso]);
                 }
             } else {
                 $model->getErrors();
@@ -355,7 +355,7 @@ class ReciboCajaController extends Controller
         return $this->renderAjax('form_nuevo_recibo', [
                     'model' => $model,
                     'id_cliente' => $id_cliente,
-                    //'agenteToken' => $agenteToken,
+
                     'tokenAcceso' => $tokenAcceso,
         ]);
     }

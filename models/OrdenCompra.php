@@ -72,6 +72,7 @@ class OrdenCompra extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'fecha_entrega' => 'Fecha entrega:',
             'abreviatura' => 'Abreviatura:',
+            'auditada' => 'Auditada:',
         ];
     }
 
@@ -106,5 +107,13 @@ class OrdenCompra extends \yii\db\ActiveRecord
             $autorizadocompra = 'SI';
         }
         return $autorizadocompra;
+    }
+    public function getCompraAuditada() {
+        if($this->auditada == 0){
+            $compraauditada = 'NO';
+        }else{
+            $compraauditada = 'SI';
+        }
+        return $compraauditada;
     }
 }

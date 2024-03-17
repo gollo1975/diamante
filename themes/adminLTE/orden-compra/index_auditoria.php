@@ -20,7 +20,7 @@ use app\models\Proveedor;
 
 
 
-$this->title = 'ORDEN DE COMPRA';
+$this->title = 'AUDITORIA OC';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("orden-compra/index"),
+    "action" => Url::toRoute("orden-compra/index_auditar_compras"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -55,7 +55,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtro" style="display:none">
+    <div class="panel-body" id="filtro" style="display:block">
         <div class="row" >
              <?= $formulario->field($form, 'solicitud')->widget(Select2::classname(), [
                 'data' => $tipo,
@@ -89,7 +89,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("orden-compra/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("orden-compra/index_auditar_compras") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -122,7 +122,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Autorizado">Aut.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="compra auditada">Aud.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
-                <th score="col" style='background-color:#B9D5CE;'></th>                              
+                          
             </tr>
             </thead>
             <tbody>
@@ -143,26 +143,26 @@ $form = ActiveForm::begin([
                     <td><?= $val->compraAuditada?></td>
                 <?php }else{?>    
                     <td style='background-color:#D8E1C2;'><?= $val->compraAuditada?></td>
-                <?php }?>    
-                <td style= 'width: 25px; height: 10px;'>
-                    <a href="<?= Url::toRoute(["orden-compra/view", "id" => $val->id_orden_compra, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                </td>
-                <?php if($val->numero_orden == 0){?>
+                <?php }
+                if($val->auditada == 0){?>
                     <td style= 'width: 25px; height: 10px;'>
-                       <a href="<?= Url::toRoute(["orden-compra/update", "id" => $val->id_orden_compra]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span>', ['proceso_auditoria', 'id' => $val->id_orden_compra], [
+                        'class' => '',
+                        'title' => 'Permite crear la auditoria a la orden de compra.',
+                        'data' => [
+                            'confirm' => 'Esta seguro de generar la auditoria a esta ORDEN DE COMPRA.?',
+                            'method' => 'post',
+                        ],
+                        ])?>
                     </td>
                 <?php }else{?>
-                        <td style= 'width: 25px; height: 10px;'></td>
-                 <?php }?>    
+                    <td style= 'width: 25px; height: 10px;'></td>
+                <?php }?>    
             </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 
-        <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-            <a align="right" href="<?= Url::toRoute("orden-compra/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
-        <?php $form->end() ?>
-        </div>
      </div>
+       <?php $form->end() ?>
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>
