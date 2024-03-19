@@ -195,7 +195,7 @@ class OrdenCompraController extends Controller
     
       public function actionSearch_consulta_orden_compra($token = 1) {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',27])->all()){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',23])->all()){
                 $form = new FiltroBusquedaOrdenCompra();
                 $numero = null;
                 $solicitud = null;

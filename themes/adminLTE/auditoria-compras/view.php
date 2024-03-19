@@ -26,7 +26,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'VISTA DE AUDITORIA';
+$this->title = 'DETALLE DE AUDITORIA';
 $this->params['breadcrumbs'][] = ['label' => 'Auditoria de compras', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_auditoria;
 $view = 'auditoria-compras';
@@ -48,8 +48,24 @@ $view = 'auditoria-compras';
             if($model->cerrar_auditoria == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar auditoria', ['cerrarauditoria', 'id' => $model->id_auditoria, 'token'=> $token, 'id_orden' =>$model->id_orden_compra],['class' => 'btn btn-warning btn-sm',
                          'data' => ['confirm' => 'Esta seguro que desea cerrar la auditoria a esta orden de compra.', 'method' => 'post']]);
-            }else{
+               
+                echo Html::a('<span class="glyphicon glyphicon-import"></span> Subir documento',
+                    ['/auditoria-compras/subir_documento_factura','id' =>$model->id_auditoria, 'token' => $token],
+                    [
+                        'title' => 'Permite digitar el documento factura',
+                        'data-toggle'=>'modal',
+                        'data-target'=>'#modalsubirdocumentofactura',
+                        'class' => 'btn btn-info btn-sm'
+                    ])
+                    ?>
+             <div class="modal remote fade" id="modalsubirdocumentofactura">
+                     <div class="modal-dialog modal-lg-centered">
+                         <div class="modal-content"></div>
+                     </div>
+             </div>
+            <?php }else{
                echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' =>17, 'codigo' => $model->id_auditoria,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']); 
+               echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_auditoria_compra', 'id' => $model->id_auditoria], ['class' => 'btn btn-default btn-sm']);                
             }?>
             
                    
@@ -109,9 +125,11 @@ $view = 'auditoria-compras';
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripción</th>                        
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Muetras si la mercancia llego con novedad">E /S</span></th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Estado</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>N. cantidad</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>N. valor</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Nota</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripcion del auditor</th>  
                                            
                                         </tr>
                                     </thead>
@@ -123,9 +141,19 @@ $view = 'auditoria-compras';
                                                 <td><?= $val->nombre_producto ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                <?php if($val->entrada_salida == null){?>
+                                                    <td><?= $val->entrada_salida ?></td>
+                                                <?php }else{
+                                                    if($val->entrada_salida > 0){?>
+                                                        <td style='background-color:#B9D5CE;'><?= $val->entrada_salida ?></td>
+                                                    <?php }else{?>    
+                                                        <td style='background-color:#F7BEC2;'><?= $val->entrada_salida ?></td>
+                                                    <?php }        
+                                                }?>  
+                                                <td><?= $val->comentario ?></td>
                                                 <td style="padding-right: 1;padding-right: 0;"><input type="text" name="nueva_cantidad[]" value="<?= $val->nueva_cantidad ?>" size="9" required="true"> </td> 
                                                 <td style="padding-right: 1;padding-right: 0;"><input type="text" name="nuevo_valor[]" value="<?= $val->nuevo_valor ?>" size="9"> </td> 
-                                                <td style="padding-right: 1;padding-right: 0; width: 40%"><input type="text" name="nota[]" value="<?= $val->nota?>" size="78" maxlength="90" required = "true"> </td> 
+                                                <td style="padding-right: 1;padding-right: 0; width: 40%"><input type="text" name="nota[]" value="<?= $val->nota?>" size="78" maxlength="60" required = "true"> </td> 
                                             <input type="hidden" name="detalle_compra[]" value="<?= $val->id ?>">
                                             </tr>
                                          <?php endforeach;?>          

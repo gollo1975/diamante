@@ -1,13 +1,29 @@
 <?php
 
 namespace app\controllers;
-
+//clases
 use Yii;
-use app\models\AuditoriaCompras;
-use app\models\AuditoriaComprasSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\db\ActiveQuery;
+use yii\base\Model;
+use yii\web\Response;
+use yii\web\Session;
+use yii\data\Pagination;
+use yii\filters\AccessControl;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\web\UploadedFile;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use Codeception\Lib\HelperModule;
+//models
+use app\models\AuditoriaCompras;
+use app\models\AuditoriaComprasSearch;
+use app\models\UsuarioDetalle;
+use app\models\FiltroBusquedaCompraAuditada;
 
 /**
  * AuditoriaComprasController implements the CRUD actions for AuditoriaCompras model.
@@ -33,15 +49,83 @@ class AuditoriaComprasController extends Controller
      * Lists all AuditoriaCompras models.
      * @return mixed
      */
-    public function actionIndex()
-    {
-        $searchModel = new AuditoriaComprasSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+     public function actionIndex($token = 0) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',11])->all()){
+                $form = new FiltroBusquedaCompraAuditada();
+                $numero = null;
+                $tipo = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $proveedor = 0;
+                $tipo_busqueda = 0;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero = Html::encode($form->numero);
+                        $tipo = Html::encode($form->tipo);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $proveedor = Html::encode($form->proveedor);
+                        $tipo_busqueda = Html::encode($form->tipo_busqueda);
+                        $table = AuditoriaCompras::find()
+                                    ->andFilterWhere(['=', 'numero_orden', $numero])
+                                    ->andFilterWhere(['>=', 'fecha_auditoria', $fecha_inicio])
+                                    ->andFilterWhere(['<=', 'fecha_auditoria', $fecha_corte])
+                                    ->andFilterWhere(['=', 'id_tipo_orden', $tipo])
+                                    ->andFilterWhere(['=', 'id_proveedor', $proveedor]);
+                        $table = $table->orderBy('id_auditoria DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_auditoria  DESC']);
+                            $this->actionExcelAuditoriaCompra($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = AuditoriaCompras::find()
+                            ->orderBy('id_auditoria DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelAuditoriaCompra($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('index', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                            'tipo_busqueda' => $tipo_busqueda,
+                            'fecha_inicio' => $fecha_inicio,
+                            'fecha_corte' => $fecha_corte,
+                            'proveedor' => $proveedor,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
     }
 
     /**
@@ -56,11 +140,23 @@ class AuditoriaComprasController extends Controller
         if(isset($_POST["actualizarauditoria"])){
             if(isset($_POST["detalle_compra"])){
                 $intIndice = 0;
+                $suma = 0;
                 foreach ($_POST["detalle_compra"] as $intCodigo):
                     $table = \app\models\AuditoriaCompraDetalles::findOne($intCodigo);
                     $table->nueva_cantidad = $_POST["nueva_cantidad"]["$intIndice"];
                     $table->nuevo_valor = $_POST["nuevo_valor"]["$intIndice"];
                     $table->nota = $_POST["nota"]["$intIndice"];
+                    $suma = ($_POST["nueva_cantidad"]["$intIndice"] - $table->cantidad);
+                    if($suma == 0){
+                        $table->comentario = 'Exacto';
+                    }else{
+                       if($suma < 0){    
+                            $table->comentario = 'Falta';
+                       }else{
+                           $table->comentario = 'Sobra';
+                       }     
+                    }
+                    $table->entrada_salida = $suma;
                     $table->save(false);
                     $intIndice++;
                 endforeach;
@@ -92,6 +188,27 @@ class AuditoriaComprasController extends Controller
         return $this->render('create', [
             'model' => $model,
         ]);
+    }
+    
+    //SUBIR DOCUMENTO FACTURA
+    //PROCESO QUE VALIDA SI EL PROVEEDOR TIENE VALIDADO LOS REQUISITOS
+    public function actionSubir_documento_factura($id, $token) {
+        $model = new \app\models\ModelValidarRequisitos();
+         if ($model->load(Yii::$app->request->post())) {
+               if ($model->validate()){
+                    if (isset($_POST["subirdocumento"])) {
+                        $table = $this->findModel($id);
+                        $table->numero_factura = $model->documento;
+                        $table->save();
+                        return $this->redirect(['view','id' => $id, 'token' => $token]);
+                    }
+               } 
+         }
+        return $this->renderAjax('subir_documento_factura', [
+            'model' => $model,       
+            'id' => $id,
+            'token' => $token,
+        ]);    
     }
 
     /**
@@ -132,14 +249,26 @@ class AuditoriaComprasController extends Controller
     
     public function actionCerrarauditoria($id, $token, $id_orden) {
         $model = $this->findModel($id);
-        $orden = \app\models\OrdenCompra::findOne($id_orden);
-        $model->cerrar_auditoria = 1;
-        $model->save();
-        $orden->auditada = 1;
-        $orden->save();
-      return $this->redirect(['view','id' =>$id, 'token' => $token]);
+        if($model->numero_factura == null){
+            Yii::$app->getSession()->setFlash('error', 'Debe de ingresar el numero de la factura de compra o documento equivalente para cerrar el proceso de auditoria.');
+            return $this->redirect(['view','id' =>$id, 'token' => $token]);
+        }else{
+            $orden = \app\models\OrdenCompra::findOne($id_orden);
+            $model->cerrar_auditoria = 1;
+            $model->save();
+            $orden->auditada = 1;
+            $orden->save();
+          return $this->redirect(['view','id' =>$id, 'token' => $token]);
+        }  
     }
     
+    //IMPRESIONES
+    public function actionImprimir_auditoria_compra($id) {
+        $model = AuditoriaCompras::findOne($id);
+        return $this->render('../formatos/reporte_auditoria_compra', [
+            'model' => $model,
+        ]);
+    }
     /**
      * Finds the AuditoriaCompras model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -154,5 +283,81 @@ class AuditoriaComprasController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+    //ecxceles
+    public function actionExcelAuditoriaCompra($tableexcel) {
+         $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'TIPO ORDEN')
+                    ->setCellValue('C1', 'PROVEEDOR')
+                    ->setCellValue('D1', 'FACTURA')
+                    ->setCellValue('E1', 'FECHA AUDITORIA')
+                    ->setCellValue('F1', 'FECHA SOLICITUD COMPRA')
+                    ->setCellValue('G1', 'USER NAME')
+                    ->setCellValue('H1', 'NUMERO ORDEN')
+                    ->setCellValue('I1', 'CERRADO');
+                 
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_auditoria)
+                    ->setCellValue('B' . $i, $val->tipoOrden->descripcion_orden)
+                    ->setCellValue('C' . $i, $val->proveedor->nombre_completo)
+                    ->setCellValue('D' . $i, $val->numero_factura)
+                    ->setCellValue('E' . $i, $val->fecha_auditoria)
+                    ->setCellValue('F' . $i, $val->fecha_proceso_compra)
+                    ->setCellValue('G' . $i, $val->user_name)
+                    ->setCellValue('H' . $i, $val->numero_orden)
+                    ->setCellValue('I' . $i, $val->cerrarAuditoria);
+                    
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Auditoria_compras.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+    
+    //DETALLES
+     public function actionExceldetalleauditoria($fecha_inicio, $fecha_corte) {
+        echo 'Esta en desarrollo este proceso';
     }
 }

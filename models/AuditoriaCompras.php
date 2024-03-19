@@ -39,7 +39,7 @@ class AuditoriaCompras extends \yii\db\ActiveRecord
         return [
             [['id_orden_compra', 'id_tipo_orden', 'id_proveedor', 'numero_orden', 'cerrar_auditoria'], 'integer'],
             [['fecha_proceso_compra','fecha_auditoria'], 'safe'],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','numero_factura'], 'string', 'max' => 15],
             [['id_orden_compra'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenCompra::className(), 'targetAttribute' => ['id_orden_compra' => 'id_orden_compra']],
             [['id_tipo_orden'], 'exist', 'skipOnError' => true, 'targetClass' => TipoOrdenCompra::className(), 'targetAttribute' => ['id_tipo_orden' => 'id_tipo_orden']],
             [['id_proveedor'], 'exist', 'skipOnError' => true, 'targetClass' => Proveedor::className(), 'targetAttribute' => ['id_proveedor' => 'id_proveedor']],
@@ -61,6 +61,7 @@ class AuditoriaCompras extends \yii\db\ActiveRecord
             'cerrar_auditoria' => 'Auditoria cerrada:',
             'user_name' => 'Usuario',
             'fecha_auditoria' => 'Fecha auditoria:',
+            'numero_factura' => 'Numero factura:',
         ];
     }
 

@@ -36,9 +36,10 @@ class AuditoriaCompraDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_items', 'cantidad', 'valor_unitario', 'nueva_cantidad', 'nuevo_valor', 'id_auditoria'], 'integer'],
+            [['id_items', 'cantidad', 'valor_unitario', 'nueva_cantidad', 'nuevo_valor', 'id_auditoria','entrada_salida'], 'integer'],
             [['nombre_producto'], 'string', 'max' => 40],
             [['nota'], 'string', 'max' => 100],
+            [['comentario'], 'string'],
             [['id_items'], 'exist', 'skipOnError' => true, 'targetClass' => Items::className(), 'targetAttribute' => ['id_items' => 'id_items']],
             [['id_auditoria'], 'exist', 'skipOnError' => true, 'targetClass' => AuditoriaCompras::className(), 'targetAttribute' => ['id_auditoria' => 'id_auditoria']],
         ];
@@ -59,6 +60,8 @@ class AuditoriaCompraDetalles extends \yii\db\ActiveRecord
             'nuevo_valor' => 'Nuevo Valor',
             'nota' => 'Nota',
             'id_auditoria' => 'Id Auditoria',
+            'entrada_salida' => 'entrada_salida',
+            'comentario' => 'comentario',
         ];
     }
 

@@ -116,6 +116,7 @@
                                                 ['label' => 'Estudios proveedor', 'icon' => 'plus-square-o', 'url' => ['/proveedor-estudios/index']],
                                                 ['label' => 'Aprobar proveedor ', 'icon' => 'plus-square-o', 'url' => ['/proveedor-estudios/aprobar_estudios']],
                                                 ['label' => 'Auditar compras ', 'icon' => 'plus-square-o', 'url' => ['/orden-compra/index_auditar_compras']],
+                                                ['label' => 'Compras auditadas ', 'icon' => 'plus-square-o', 'url' => ['/auditoria-compras/index']],
                                             ],
                                         ],
                                         [
