@@ -51,7 +51,7 @@ class AuditoriaComprasController extends Controller
      */
      public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',11])->all()){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',84])->all()){
                 $form = new FiltroBusquedaCompraAuditada();
                 $numero = null;
                 $tipo = null;
