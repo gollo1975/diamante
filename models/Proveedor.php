@@ -248,7 +248,7 @@ class Proveedor extends \yii\db\ActiveRecord
         }
         return $proveedorpredeterminado;
     }
-    
+    //valida el requisito
     public function getRequisitoValidado() {
         if($this->requisito_validado == 0){
            $requisitovalidado = 'NO';
