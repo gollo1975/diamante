@@ -264,14 +264,8 @@ class ProveedorEstudiosController extends Controller
                 $table->aplica = $lista->aplica_requisito;
                 $table->insert();
             endforeach;
+            return $this->redirect(['view', 'id' => $id, 'token' => $token]);
         }    
-        $listado_documento = \app\models\ProveedorEstudioDetalles::find()->where(['=','id_estudio', $id])->orderBy('requisito ASC')->all();
-        return $this->render('view', [
-            'model' => $this->findModel($id),   
-            'token' => $token,
-            'id' => $id,
-            'listado_documento' => $listado_documento,
-             ]);
     }
 
     /**

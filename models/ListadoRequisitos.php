@@ -39,7 +39,7 @@ class ListadoRequisitos extends \yii\db\ActiveRecord
     {
         return [
             [['concepto'], 'required'],
-            [['concepto'], 'string', 'max' => 40],
+            [['concepto'], 'string', 'max' => 34],
             [['porcentaje'], 'number'],
              [['aplica_proveedor','aplica_requisito'], 'integer'],
         ];
