@@ -93,7 +93,12 @@ $view = 'proveedor';
                 </tr>
                  <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'>Banco</th>
-                    <td><?= $model->codigoBanco->entidad_bancaria ?></td>
+                    <?php if($model->codigo_banco == null){?>
+                        <td><?= 'NO FOUND' ?></td>
+                    <?php }else{?>
+                        <td><?= $model->codigoBanco->entidad_bancaria ?></td>
+                    <?php }?>
+                    
                     <th style='background-color:#F0F3EF;'>Tipo cuenta</th>
                     <td><?= $model->tipoCuenta ?></td>
                     <th style='background-color:#F0F3EF;'>Producto</th>
