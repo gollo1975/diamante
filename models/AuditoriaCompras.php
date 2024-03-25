@@ -62,6 +62,7 @@ class AuditoriaCompras extends \yii\db\ActiveRecord
             'user_name' => 'Usuario',
             'fecha_auditoria' => 'Fecha auditoria:',
             'numero_factura' => 'Numero factura:',
+            'estado_producto' => 'Estado:',
         ];
     }
 
@@ -106,4 +107,5 @@ class AuditoriaCompras extends \yii\db\ActiveRecord
         return $cerrarauditoria;
         
     }
+    
 }

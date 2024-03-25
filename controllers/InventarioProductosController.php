@@ -369,7 +369,7 @@ class InventarioProductosController extends Controller
     public function actionView($id, $token)
     {
         $model =  $this->findModel($id);
-        $table = OrdenProduccion::find()->where(['=','id_grupo', $model->id_grupo]);
+        $table = OrdenProduccionProductos::find()->where(['=','id_inventario', $id]);
         $tableexcel = $table->all();
         $count = clone $table;
         $pages = new Pagination([

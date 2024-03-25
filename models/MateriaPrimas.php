@@ -54,7 +54,7 @@ class MateriaPrimas extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['codigo_materia_prima', 'materia_prima', 'id_medida', 'aplica_inventario','total_cantidad','valor_unidad'], 'required'],
+            [['codigo_materia_prima', 'materia_prima', 'id_medida', 'aplica_inventario','valor_unidad'], 'required'],
             [['id_medida', 'aplica_iva', 'valor_iva', 'total_cantidad','stock', 'total_materia_prima', 'aplica_inventario','inventario_inicial', 'subtotal','stock_salida'], 'integer'],
             [['valor_unidad', 'porcentaje_iva'], 'number'],
             [['fecha_entrada', 'fecha_vencimiento', 'fecha_registro'], 'safe'],

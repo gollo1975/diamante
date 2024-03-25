@@ -134,7 +134,7 @@ $view = 'inventario-productos';
                                         foreach ($detalle as $detalles): ?>
                                             <tr style="font-size: 90%;">
                                                 <td><?= $detalles->id_detalle ?></td>  
-                                                <td><?= $val->numero_orden ?></td>
+                                                <td><?= $val->ordenProduccion->numero_orden ?></td>
                                                 <td><?= $detalles->codigo_producto ?></td>
                                                 <td><?= $detalles->descripcion ?></td>
                                                 <td style="text-align: right"><?= $detalles->cantidad ?></td>

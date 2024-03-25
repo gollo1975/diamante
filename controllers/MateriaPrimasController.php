@@ -281,35 +281,39 @@ class MateriaPrimasController extends Controller
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
-                $sumar = 0;
-                $table = new MateriaPrimas();
-                $table->codigo_materia_prima = $model->codigo_materia_prima;
-                $table->materia_prima = $model->materia_prima;
-                $table->fecha_entrada = $model->fecha_entrada;
-                $table->fecha_vencimiento = $model->fecha_vencimiento;
-                $table->id_medida = $model->id_medida;
-                $table->aplica_inventario = $model->aplica_inventario;
-                $table->aplica_iva = $model->aplica_iva;
-                $table->stock= $model->total_cantidad;
-                $table->porcentaje_iva = $model->porcentaje_iva;
-                $table->total_cantidad = $model->total_cantidad; 
-                $table->valor_unidad = $model->valor_unidad;                    
-                if($table->aplica_iva == 1){
-                    $sumar = round((($table->valor_unidad *   $table->stock)* $table->porcentaje_iva)/100);
-                    $table->valor_iva = $sumar;
-                    $table->total_materia_prima = round(($table->valor_unidad *   $table->stock) + $sumar);
+                if($model->total_cantidad == null){
+                     Yii::$app->getSession()->setFlash('warning', 'El campo CANTIDAD debe de ser igual a cero o mayor.');
                 }else{
-                    $sumar = round(($table->valor_unidad *   $table->stock));
-                    $table->valor_iva = 0;
-                    $table->total_materia_prima = round($sumar);
-                 }
-                $table->usuario_creador = Yii::$app->user->identity->username;
-                $table->usuario_editado = Yii::$app->user->identity->username;
-                $table->descripcion = $model->descripcion;
-                $table->codigo_ean = $model->codigo_materia_prima;
-                $table->inventario_inicial = $model->inventario_inicial;
-                $table->save(false);
-                return $this->redirect(['index']);
+                    $sumar = 0;
+                    $table = new MateriaPrimas();
+                    $table->codigo_materia_prima = $model->codigo_materia_prima;
+                    $table->materia_prima = $model->materia_prima;
+                    $table->fecha_entrada = $model->fecha_entrada;
+                    $table->fecha_vencimiento = $model->fecha_vencimiento;
+                    $table->id_medida = $model->id_medida;
+                    $table->aplica_inventario = $model->aplica_inventario;
+                    $table->aplica_iva = $model->aplica_iva;
+                    $table->stock= $model->total_cantidad;
+                    $table->porcentaje_iva = $model->porcentaje_iva;
+                    $table->total_cantidad = $model->total_cantidad; 
+                    $table->valor_unidad = $model->valor_unidad;                    
+                    if($table->aplica_iva == 1){
+                        $sumar = round((($table->valor_unidad *   $table->stock)* $table->porcentaje_iva)/100);
+                        $table->valor_iva = $sumar;
+                        $table->total_materia_prima = round(($table->valor_unidad *   $table->stock) + $sumar);
+                    }else{
+                        $sumar = round(($table->valor_unidad *   $table->stock));
+                        $table->valor_iva = 0;
+                        $table->total_materia_prima = round($sumar);
+                     }
+                    $table->usuario_creador = Yii::$app->user->identity->username;
+                    $table->usuario_editado = Yii::$app->user->identity->username;
+                    $table->descripcion = $model->descripcion;
+                    $table->codigo_ean = $model->codigo_materia_prima;
+                    $table->inventario_inicial = $model->inventario_inicial;
+                    $table->save(false);
+                    return $this->redirect(['index']);
+                }   
             }else{
                 $model->getErrors();
             }    
@@ -336,34 +340,39 @@ class MateriaPrimasController extends Controller
         }
         if ($model->load(Yii::$app->request->post())) {
             if($model->validate()){
-                $table = MateriaPrimas::findOne($id);
-                $table->codigo_materia_prima = $model->codigo_materia_prima;
-                $table->materia_prima = $model->materia_prima;
-                $table->fecha_entrada = $model->fecha_entrada;
-                $table->fecha_vencimiento = $model->fecha_vencimiento;
-                $table->id_medida = $model->id_medida;
-                $table->aplica_inventario = $model->aplica_inventario;
-                $table->aplica_iva = $model->aplica_iva;
-                $table->stock = $model->total_cantidad;
-                $table->total_cantidad = $model->total_cantidad;
-                $table->porcentaje_iva = $model->porcentaje_iva;
-                $table->total_cantidad = $model->total_cantidad; 
-                $table->valor_unidad = $model->valor_unidad;                    
-                if($table->aplica_iva == 1){
-                    $sumar = round((($table->valor_unidad *   $table->stock)* $table->porcentaje_iva)/100);
-                    $table->valor_iva = $sumar;
-                    $table->total_materia_prima = round(($table->valor_unidad *   $table->stock) + $sumar);
+                if($model->total_cantidad == null){
+                     Yii::$app->getSession()->setFlash('warning', 'El campo CANTIDAD debe de ser igual a cero o mayor.');
                 }else{
-                    $sumar = round(($table->valor_unidad *   $table->stock));
-                    $table->valor_iva = 0;
-                    $table->total_materia_prima = round($sumar);
-                 }
-                $table->usuario_editado = Yii::$app->user->identity->username;
-                $table->descripcion = $model->descripcion;
-                $table->codigo_ean = $model->codigo_materia_prima;
-                $table->inventario_inicial = $model->inventario_inicial;
-                $table->save(false);
-                return $this->redirect(['index']);
+                    $table = MateriaPrimas::findOne($id);
+                    $table->codigo_materia_prima = $model->codigo_materia_prima;
+                    $table->materia_prima = $model->materia_prima;
+                    $table->fecha_entrada = $model->fecha_entrada;
+                    $table->fecha_vencimiento = $model->fecha_vencimiento;
+                    $table->id_medida = $model->id_medida;
+                    $table->aplica_inventario = $model->aplica_inventario;
+                    $table->aplica_iva = $model->aplica_iva;
+                    $table->stock = $model->total_cantidad;
+                    $table->total_cantidad = $model->total_cantidad;
+                    $table->porcentaje_iva = $model->porcentaje_iva;
+                    $table->total_cantidad = $model->total_cantidad; 
+                    $table->valor_unidad = $model->valor_unidad;                    
+                    if($table->aplica_iva == 1){
+                        $sumar = round((($table->valor_unidad *   $table->stock)* $table->porcentaje_iva)/100);
+                        $table->valor_iva = $sumar;
+                        $table->total_materia_prima = round(($table->valor_unidad *   $table->stock) + $sumar);
+                    }else{
+                        $sumar = round(($table->valor_unidad *   $table->stock));
+                        $table->valor_iva = 0;
+                        $table->total_materia_prima = round($sumar);
+                     }
+                    $table->usuario_editado = Yii::$app->user->identity->username;
+                    $table->descripcion = $model->descripcion;
+                    $table->codigo_ean = $model->codigo_materia_prima;
+                    $table->inventario_inicial = $model->inventario_inicial;
+                    $table->save(false);
+                    return $this->redirect(['index']);
+                }     
+                
             }else{
              $model->getErrors();      
             }

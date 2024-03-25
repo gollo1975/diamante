@@ -554,8 +554,15 @@ class ProveedorController extends Controller
                     ->setCellValue('P' . $i, $val->plazo)
                     ->setCellValue('Q' . $i, $val->autoretenedorVenta)
                     ->setCellValue('R' . $i, $val->naturaleza->naturaleza)
-                    ->setCellValue('S' . $i, $val->tipoSociedad)
-                    ->setCellValue('T' . $i, $val->codigoBanco->entidad_bancaria)
+                    ->setCellValue('S' . $i, $val->tipoSociedad);
+                    if($val->codigo_banco  == null){
+                        $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('T' . $i, 'REGISTRO NO ENCONTRADO');
+                    }else{
+                        $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('T' . $i, $val->codigoBanco->entidad_bancaria);
+                    }
+                    $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('U' . $i, $val->tipoCuenta)
                     ->setCellValue('V' . $i, $val->producto)
                     ->setCellValue('X' . $i, $val->tipoTransacion)

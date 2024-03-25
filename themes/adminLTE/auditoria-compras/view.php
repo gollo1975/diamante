@@ -128,7 +128,8 @@ $view = 'auditoria-compras';
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Muetras si la mercancia llego con novedad">E /S</span></th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Estado</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>N. cantidad</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>N. valor</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>N. valor</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Estado</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripcion del auditor</th>  
                                            
                                         </tr>
@@ -153,7 +154,12 @@ $view = 'auditoria-compras';
                                                 <td><?= $val->comentario ?></td>
                                                 <td style="padding-right: 1;padding-right: 0;"><input type="text" name="nueva_cantidad[]" value="<?= $val->nueva_cantidad ?>" size="9" required="true"> </td> 
                                                 <td style="padding-right: 1;padding-right: 0;"><input type="text" name="nuevo_valor[]" value="<?= $val->nuevo_valor ?>" size="9"> </td> 
-                                                <td style="padding-right: 1;padding-right: 0; width: 40%"><input type="text" name="nota[]" value="<?= $val->nota?>" size="78" maxlength="60" required = "true"> </td> 
+                                                <td><select name="estado[]" >
+                                                    <option value="<?= $val->estado_producto ?>"><?= $val->estadoProducto?></option>
+                                                    <option value="0">BUENO</option>
+                                                    <option value="1">MALO</option>
+                                                </select></td>
+                                                <td style="padding-right: 1;padding-right: 0; width: 40%"><input type="text" name="nota[]" value="<?= $val->nota?>" size="78" maxlength="66" required = "true"> </td> 
                                             <input type="hidden" name="detalle_compra[]" value="<?= $val->id ?>">
                                             </tr>
                                          <?php endforeach;?>          

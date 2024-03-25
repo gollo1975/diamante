@@ -344,10 +344,11 @@
                                             'icon' => 'book',
                                             'url' => '#',
                                             'items' => [
+                                                ['label' => 'Prospectos', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/index']],
                                                 ['label' => 'Programacion de citas', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/index']],
                                                 ['label' => 'Gestion comercial', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/gestion_comercial']],
                                                 ['label' => 'Crear pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/listado_clientes']],
-                                                ['label' => 'Prospectos', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/index']],
+                                                
                                                 
                                             ],
                                         ]

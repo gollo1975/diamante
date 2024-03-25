@@ -420,6 +420,7 @@ class ProveedorEstudiosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+         $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -434,9 +435,10 @@ class ProveedorEstudiosController extends Controller
                     ->setCellValue('J1', 'DOCUMENTO FISICO')
                     ->setCellValue('K1', 'VALIDADO')
                     ->setCellValue('L1', 'CUMPLIO')
-                    ->setCellValue('M1', 'OBSERVACION')
+                    ->setCellValue('M1', 'NOTA AUDITOR')
                     ->setCellValue('N1', 'USER NAME')
-                    ->setCellValue('O1', 'FECHA REGISTRO');
+                    ->setCellValue('O1', 'FECHA REGISTRO')
+                     ->setCellValue('P1', 'OBSERVACION');
                 ;
         $i = 2;
 
@@ -457,11 +459,12 @@ class ProveedorEstudiosController extends Controller
                         ->setCellValue('K' . $i, $detalles->validadoEstudio)
                         ->setCellValue('L' . $i, $detalles->cumpleRequisito)
                         ->setCellValue('M' . $i, $detalles->observacion)
-                        ->setCellValue('N' . $i, $detalles->user_name)
-                        ->setCellValue('O' . $i, $detalles->fecha_registro);
+                        ->setCellValue('N' . $i, $val->user_name)
+                        ->setCellValue('O' . $i, $val->fecha_registro)
+                        ->setCellValue('P' . $i, $val->observacion);
                 $i++;
             }   
-           
+           $i = $i;
         }
 
         $objPHPExcel->getActiveSheet()->setTitle('Listado');

@@ -87,7 +87,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
             <?= $formulario->field($form, "numero")->input("search") ?>
         </div>
          <div class="row checkbox checkbox-success" align ="center">
-                <?= $formulario->field($form, 'tipo_busqueda')->checkbox(['label' => 'Detalle solo por fechas', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'tipo_busqueda']) ?>
+                <?= $formulario->field($form, 'tipo_busqueda')->checkbox(['label' => 'Detalle por fechas y/o Proveedor', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'tipo_busqueda']) ?>
             </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -155,8 +155,8 @@ $form = ActiveForm::begin([
                     <ul class="dropdown-menu">
                         <li> <?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Excel", ['name' => 'excel']); ?> </li>
                         <?php 
-                        if($tipo_busqueda == 1 && $fecha_inicio <> '' && $fecha_corte <> ''){?>
-                            <li><?= Html::a('<span class="glyphicon glyphicon-export"></span> Detalle', ['exceldetalleauditoria', 'fecha_inicio' => $fecha_inicio, 'fecha_corte' => $fecha_corte]) ?></li>
+                        if($tipo_busqueda == 1 && $fecha_inicio <> '' && $fecha_corte <> ''|| $tipo_busqueda == 1 && $nuevo_proveedor > 0 ){?>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-export"></span> Detalle', ['exceldetalleauditoria', 'fecha_inicio' => $fecha_inicio, 'fecha_corte' => $fecha_corte, 'nuevo_proveedor' =>$nuevo_proveedor]) ?></li>
                         <?php }?> 
                     </ul>
             </div> 
