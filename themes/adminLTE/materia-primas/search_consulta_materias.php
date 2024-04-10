@@ -16,6 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
 use app\models\MedidaMateriaPrima;
+use app\models\TipoSolicitud;
 
 
 
@@ -43,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-
+$conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('id_solicitud ASC')->all(), 'id_solicitud', 'descripcion');
 $medida = ArrayHelper::map(MedidaMateriaPrima::find()->orderBy ('descripcion ASC')->all(), 'id_medida', 'descripcion');
 ?>
 
@@ -79,6 +80,13 @@ $medida = ArrayHelper::map(MedidaMateriaPrima::find()->orderBy ('descripcion ASC
             ]); ?>
             <?= $formulario->field($form, 'aplica_inventario')->dropDownList(['0' => 'NO', '1' => 'SI'],['prompt' => 'Seleccione una opcion ...']) ?>
             <?= $formulario->field($form, "codigo_barra")->input("search") ?>
+            <?= $formulario->field($form, 'tipo_solicitud')->widget(Select2::classname(), [
+                'data' => $conSolicitud,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
         </div>
         <div class="row checkbox checkbox-success" align ="center">
                 <?= $formulario->field($form, 'busqueda_vcto')->checkbox(['label' => 'Aplica fecha vencimiento', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'busqueda_vcto']) ?>
@@ -114,7 +122,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Inventario inicial">Inv. inicial</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Valor total </th>
+                <th scope="col" style='background-color:#B9D5CE;'>Clasificaion</th>
                 <th scope="col" style='background-color:#B9D5CE;'>User name </th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
@@ -136,7 +144,7 @@ $form = ActiveForm::begin([
                 <?php }else{ ?>
                    <td style="text-align: right;"><?= ''.number_format($val->stock,0)?></td>
                 <?php }?>   
-                <td style="text-align: right"><?= '$'.number_format($val->total_materia_prima,0)?></td>
+               <td><?= $val->tipoSolicitud->descripcion?></td>
                  <td><?= $val->usuario_creador?></td>
                 <td style= 'width: 25px; height: 10px;'>
                     <a href="<?= Url::toRoute(["materia-primas/view", "id" => $val->id_materia_prima, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>

@@ -178,7 +178,7 @@ $view = 'solicitud-compra';
                             <div class="panel-footer text-right">  
                                 <?php 
                                 if($model->autorizado == 0){?>
-                                     <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar items', ['solicitud-compra/crearitems', 'id' => $model->id_solicitud_compra, 'token' => $token],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
+                                     <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar items', ['solicitud-compra/crearitems', 'id' => $model->id_solicitud_compra, 'token' => $token, 'id_solicitud' => $model->id_solicitud],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizaregistro']) ?>
                                 <?php }?>
                             </div>   

@@ -19,11 +19,12 @@ class FiltroBusquedaMateriaPrima extends Model
     public $codigo_barra;
     public $aplica_inventario;
     public $busqueda_vcto;
+    public $tipo_solicitud;
     
     public function rules()
     {
         return [  
-           [['busqueda_vcto', 'medida','aplica_inventario'], 'integer'],
+           [['busqueda_vcto', 'medida','aplica_inventario','tipo_solicitud'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
            [['codigo','codigo_barra','materia_prima'], 'string'],
         ];
@@ -40,6 +41,7 @@ class FiltroBusquedaMateriaPrima extends Model
             'codigo' => 'Codigo:',
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
+            'tipo_solicitud' => 'Clasificacion',
             
        
         ];

@@ -83,7 +83,9 @@ $view = 'materia-primas';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
                     <td><?= Html::encode($model->aplicaInventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_iva') ?></th>
-                    <td colspan="3"><?= Html::encode($model->porcentaje_iva) ?></td>
+                    <td><?= Html::encode($model->porcentaje_iva) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?></th>
+                    <td><?= Html::encode($model->tipoSolicitud->descripcion) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_materia_prima') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_materia_prima,0)) ?></td>
                 </tr>

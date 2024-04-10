@@ -64,7 +64,7 @@ class MateriaPrimasController extends Controller
                 $codigo_barra = null;
                 $aplica_inventario = null;
                 $busqueda_vcto = null;
-
+                $tipo_solicitud = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -73,6 +73,7 @@ class MateriaPrimasController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $medida = Html::encode($form->medida);
                         $codigo_barra = Html::encode($form->codigo_barra);
+                        $tipo_solicitud= Html::encode($form->tipo_solicitud);
                         $aplica_inventario = Html::encode($form->aplica_inventario);
                         $busqueda_vcto = Html::encode($form->busqueda_vcto);
                         if ($busqueda_vcto == 0){
@@ -83,6 +84,7 @@ class MateriaPrimasController extends Controller
                                     ->andFilterWhere(['<=', 'fecha_entrada', $fecha_corte])
                                     ->andFilterWhere(['=', 'id_medida', $medida])
                                     ->andFilterWhere(['=', 'codigo_ean', $codigo_barra])
+                                    ->andFilterWhere(['=', 'id_solicitud', $tipo_solicitud])
                                     ->andFilterWhere(['=', 'aplica_inventario', $aplica_inventario]);
                         }else{
                             $table = MateriaPrimas::find()
@@ -92,6 +94,7 @@ class MateriaPrimasController extends Controller
                                     ->andFilterWhere(['<=', 'fecha_vencimiento', $fecha_corte])
                                     ->andFilterWhere(['=', 'id_medida', $medida])
                                     ->andFilterWhere(['=', 'codigo_ean', $codigo_barra])
+                                    ->andFilterWhere(['=', 'id_solicitud', $tipo_solicitud])
                                     ->andFilterWhere(['=', 'aplica_inventario', $aplica_inventario]);
                         }    
                         $table = $table->orderBy('id_materia_prima DESC');
@@ -158,7 +161,7 @@ class MateriaPrimasController extends Controller
                 $codigo_barra = null;
                 $aplica_inventario = null;
                 $busqueda_vcto = null;
-
+                $tipo_solicitud = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -168,6 +171,7 @@ class MateriaPrimasController extends Controller
                         $medida = Html::encode($form->medida);
                         $codigo_barra = Html::encode($form->codigo_barra);
                         $aplica_inventario = Html::encode($form->aplica_inventario);
+                        $tipo_solicitud= Html::encode($form->tipo_solicitud);
                         $busqueda_vcto = Html::encode($form->busqueda_vcto);
                         if ($busqueda_vcto == 0){
                             $table = MateriaPrimas::find()
@@ -177,6 +181,7 @@ class MateriaPrimasController extends Controller
                                     ->andFilterWhere(['<=', 'fecha_entrada', $fecha_corte])
                                     ->andFilterWhere(['=', 'id_medida', $medida])
                                     ->andFilterWhere(['=', 'codigo_ean', $codigo_barra])
+                                     ->andFilterWhere(['=', 'id_solicitud', $tipo_solicitud])
                                     ->andFilterWhere(['=', 'aplica_inventario', $aplica_inventario]);
                         }else{
                             $table = MateriaPrimas::find()
@@ -186,6 +191,7 @@ class MateriaPrimasController extends Controller
                                     ->andFilterWhere(['<=', 'fecha_vencimiento', $fecha_corte])
                                     ->andFilterWhere(['=', 'id_medida', $medida])
                                     ->andFilterWhere(['=', 'codigo_ean', $codigo_barra])
+                                     ->andFilterWhere(['=', 'id_solicitud', $tipo_solicitud])
                                     ->andFilterWhere(['=', 'aplica_inventario', $aplica_inventario]);
                         }    
                         $table = $table->orderBy('id_materia_prima DESC');
@@ -311,6 +317,7 @@ class MateriaPrimasController extends Controller
                     $table->descripcion = $model->descripcion;
                     $table->codigo_ean = $model->codigo_materia_prima;
                     $table->inventario_inicial = $model->inventario_inicial;
+                    $table->id_solicitud = $model->id_solicitud;
                     $table->save(false);
                     return $this->redirect(['index']);
                 }   
@@ -369,6 +376,7 @@ class MateriaPrimasController extends Controller
                     $table->descripcion = $model->descripcion;
                     $table->codigo_ean = $model->codigo_materia_prima;
                     $table->inventario_inicial = $model->inventario_inicial;
+                    $table->id_solicitud = $model->id_solicitud;
                     $table->save(false);
                     return $this->redirect(['index']);
                 }     
@@ -391,6 +399,7 @@ class MateriaPrimasController extends Controller
             $model->aplica_inventario = $table->aplica_inventario;
             $model->descripcion =  $table->descripcion;
             $model->inventario_inicial = $table->inventario_inicial;
+            $model->id_solicitud = $table->id_solicitud;
         }
         return $this->render('update', [
             'model' => $model,
@@ -446,6 +455,7 @@ class MateriaPrimasController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
                                
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -466,7 +476,8 @@ class MateriaPrimasController extends Controller
                     ->setCellValue('P1', 'USER CREADOR')
                     ->setCellValue('Q1', 'USER EDITADO')
                     ->setCellValue('R1', 'DESCRIPCION')
-                    ->setCellValue('S1', 'INV. INICIAL');;
+                    ->setCellValue('S1', 'INV. INICIAL')
+                    ->setCellValue('T1', 'CLASIFICACION');
         $i = 2;
         
         foreach ($tableexcel as $val) {
@@ -490,7 +501,8 @@ class MateriaPrimasController extends Controller
                     ->setCellValue('P' . $i, $val->usuario_creador)
                     ->setCellValue('Q' . $i, $val->usuario_editado)
                     ->setCellValue('R' . $i, $val->descripcion)
-                    ->setCellValue('S' . $i, $val->inventarioInicial);
+                    ->setCellValue('S' . $i, $val->inventarioInicial)
+                    ->setCellValue('T' . $i, $val->tipoSolicitud->descripcion);
             $i++;
         }
 

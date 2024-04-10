@@ -55,13 +55,14 @@ class MateriaPrimas extends \yii\db\ActiveRecord
     {
         return [
             [['codigo_materia_prima', 'materia_prima', 'id_medida', 'aplica_inventario','valor_unidad'], 'required'],
-            [['id_medida', 'aplica_iva', 'valor_iva', 'total_cantidad','stock', 'total_materia_prima', 'aplica_inventario','inventario_inicial', 'subtotal','stock_salida'], 'integer'],
+            [['id_medida', 'aplica_iva', 'valor_iva', 'total_cantidad','stock', 'total_materia_prima', 'aplica_inventario','inventario_inicial', 'subtotal','stock_salida','id_solicitud'], 'integer'],
             [['valor_unidad', 'porcentaje_iva'], 'number'],
             [['fecha_entrada', 'fecha_vencimiento', 'fecha_registro'], 'safe'],
             [['codigo_materia_prima', 'usuario_creador', 'usuario_editado'], 'string', 'max' => 15],
             [['descripcion'], 'string', 'max' => 100],
             [['codigo_ean'], 'string', 'max' => 11],
             [['id_medida'], 'exist', 'skipOnError' => true, 'targetClass' => MedidaMateriaPrima::className(), 'targetAttribute' => ['id_medida' => 'id_medida']],
+            [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSolicitud::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
         ];
     }
 
@@ -93,6 +94,7 @@ class MateriaPrimas extends \yii\db\ActiveRecord
             'inventario_inicial' => 'Inventario inicial:',
             'subtotal' => 'Subtotal:',
             'stock_salida' => 'Stock salida:',
+            'id_solicitud' => 'Clasificacion:',
         ];
     }
 
@@ -103,6 +105,11 @@ class MateriaPrimas extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MedidaMateriaPrima::className(), ['id_medida' => 'id_medida']);
     }
+    public function getTipoSolicitud()
+    {
+        return $this->hasOne(TipoSolicitud::className(), ['id_solicitud' => 'id_solicitud']);
+    }
+    
     //proceso que llama los datos concatenados
     
     public function getMateriasPrimas()

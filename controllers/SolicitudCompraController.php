@@ -318,9 +318,9 @@ class SolicitudCompraController extends Controller
     
     // proceso que busca los nuevos items
     
-    public function actionCrearitems($id, $token)
+    public function actionCrearitems($id, $token, $id_solicitud)
     {
-        $operacion = \app\models\Items::find()->orderBy('descripcion ASC')->all();
+        $operacion = \app\models\Items::find()->where(['=','id_solicitud', $id_solicitud])->orderBy('descripcion ASC')->all();
         $form = new FormModeloBuscar();
         $q = null;
         $mensaje = '';
@@ -329,7 +329,8 @@ class SolicitudCompraController extends Controller
                 $q = Html::encode($form->q);                                
                     $operacion = Items::find()
                             ->where(['like','descripcion',$q])
-                            ->orwhere(['=','id_items',$q]);
+                            ->orwhere(['=','id_items',$q])
+                            ->andWhere(['=','id_solicitud', $id_solicitud]);
                     $operacion = $operacion->orderBy('descripcion ASC');                    
                     $count = clone $operacion;
                     $to = $count->count();
@@ -345,7 +346,7 @@ class SolicitudCompraController extends Controller
                 $form->getErrors();
             }                    
         }else{
-            $table = Items::find()->orderBy('descripcion ASC');
+            $table = Items::find()->where(['=','id_solicitud', $id_solicitud])->orderBy('descripcion ASC');
             $tableexcel = $table->all();
             $count = clone $table;
             $pages = new Pagination([
@@ -386,6 +387,7 @@ class SolicitudCompraController extends Controller
             'id' => $id,
             'form' => $form,
             'token' => $token,
+            'id_solicitud' => $id_solicitud,
 
         ]);
     }

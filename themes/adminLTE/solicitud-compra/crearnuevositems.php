@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $id;
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["solicitud-compra/crearitems", 'id' => $id, 'token' => $token]),
+            "action" => Url::toRoute(["solicitud-compra/crearitems", 'id' => $id, 'token' => $token, 'id_solicitud' => $id_solicitud]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $id;
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["solicitud-compra/crearitems", 'id' => $id, 'token' => $token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["solicitud-compra/crearitems", 'id' => $id, 'token' => $token, 'id_solicitud' => $id_solicitud]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -69,6 +69,7 @@ $this->params['breadcrumbs'][] = $id;
                         <tr>
                             <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Descripción</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Clasificacion</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Porcentaje</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
@@ -78,6 +79,7 @@ $this->params['breadcrumbs'][] = $id;
                         <tr style="font-size: 85%;">
                             <td><?= $val->id_items ?></td>
                             <td><?= $val->descripcion ?></td>
+                             <td><?= $val->tipoSolicitud->descripcion ?></td>
                             <td><?= $val->iva->valor_iva ?>%</td>
                             <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="detalle_items[]" value="<?= $val->id_items ?>"></td> 
                         </tr>

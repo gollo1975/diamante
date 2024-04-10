@@ -13,7 +13,7 @@ use kartik\depdrop\DepDrop;
 //model
 use app\models\MedidaMateriaPrima;
 use app\models\ConfiguracionIva;
-
+use app\models\TipoSolicitud;
 ?>
 
 <?php
@@ -34,6 +34,7 @@ $form = ActiveForm::begin([
 <?php
 $medida = ArrayHelper::map(MedidaMateriaPrima::find()->orderBy ('descripcion ASC')->all(), 'id_medida', 'descripcion');
 $porcentaje = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DESC')->all(), 'valor_iva', 'valor_iva');
+$conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('id_solicitud ASC')->all(), 'id_solicitud', 'descripcion');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -81,12 +82,24 @@ $porcentaje = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DES
         </div>
         <div class="row">
              <?= $form->field($model, 'inventario_inicial')->dropDownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione una opcion...']) ?>
+             <?= $form->field($model, 'id_solicitud')->widget(Select2::classname(), [
+                'data' => $conSolicitud,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+            
+        </div>   
+         <div class="row">
+            
             <?= $form->field($model, 'descripcion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div>    
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("materia-primas/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>
         </div>
+        
     </div>
 </div>
 <?php $form->end() ?>     

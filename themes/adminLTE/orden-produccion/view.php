@@ -139,8 +139,8 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                     <td><?= Html::encode($model->user_name) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'responsable') ?></th>
                     <td><?= Html::encode($model->responsable) ?></td>
-                     <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proceso_produccion') ?></th>
+                    <td><?= Html::encode($model->tipoProceso->nombre_proceso) ?></td>
                      <th style='background-color:#F0F3EF;'></th>
                     <td></td>
                 </tr>
