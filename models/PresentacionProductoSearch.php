@@ -17,7 +17,7 @@ class PresentacionProductoSearch extends PresentacionProducto
     public function rules()
     {
         return [
-            [['id_presentacion', 'id_grupo'], 'integer'],
+            [['id_presentacion', 'id_grupo','id_marca'], 'integer'],
             [['descripcion', 'fecha_registro', 'user_name'], 'safe'],
         ];
     }
@@ -61,10 +61,12 @@ class PresentacionProductoSearch extends PresentacionProducto
             'id_presentacion' => $this->id_presentacion,
             'id_grupo' => $this->id_grupo,
             'fecha_registro' => $this->fecha_registro,
+            'id_marca' => $this->id_marca,
         ]);
 
         $query->andFilterWhere(['like', 'descripcion', $this->descripcion])
-            ->andFilterWhere(['like', 'user_name', $this->user_name]);
+            ->andFilterWhere(['like', 'user_name', $this->user_name])
+            ->andFilterWhere(['=', 'id_marca', $this->id_marca]);
 
         return $dataProvider;
     }

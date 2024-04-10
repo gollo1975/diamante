@@ -37,8 +37,8 @@ $this->params['breadcrumbs'][] = $model->id_presentacion;
                     <td><?= Html::encode($model->user_name) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_registro') ?>:</th>
                     <td><?= Html::encode($model->fecha_registro) ?></td>
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_marca') ?></th>
+                    <td><?= Html::encode($model->marca->marca) ?></td>
           
                 </tr>                
             </table>

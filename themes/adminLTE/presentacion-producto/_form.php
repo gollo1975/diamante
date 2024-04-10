@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 use app\models\GrupoProducto;
+use app\models\Marca;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 /* @var $this yii\web\View */
@@ -21,6 +22,7 @@ use kartik\select2\Select2;
 	]); ?>
 <?php
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$conMarca = ArrayHelper::map(Marca::find()->orderBy('marca ASC')->all(), 'id_marca', 'marca');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -33,6 +35,15 @@ $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy('nombre_grupo ASC')->al
         <div class="row">
            <?= $form->field($model, 'id_grupo')->widget(Select2::classname(), [
                 'data' => $grupo,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+        </div>  
+        <div class="row">
+           <?= $form->field($model, 'id_marca')->widget(Select2::classname(), [
+                'data' => $conMarca,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true

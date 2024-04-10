@@ -52,13 +52,14 @@ class OrdenProduccion extends \yii\db\ActiveRecord
         return [
             [['numero_orden', 'id_almacen', 'id_grupo', 'numero_lote', 'subtotal', 'iva', 'total_orden', 'autorizado', 'cerrar_orden',
                 'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado','producto_almacenado','exportar_inventario','exportar_materia_prima'], 'integer'],
-            [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable'], 'required'],
+            [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable','id_proceso_produccion'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
             ['responsable', 'string', 'max' => 40],
             [['id_almacen'], 'exist', 'skipOnError' => true, 'targetClass' => Almacen::className(), 'targetAttribute' => ['id_almacen' => 'id_almacen']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
+            [['id_proceso_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => TipoProcesoProduccion::className(), 'targetAttribute' => ['id_proceso_produccion' => 'id_proceso_produccion']],
         ];
     }
 
@@ -91,6 +92,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             'producto_almacenado' => 'Producto almacenado:',
             'exportar_materia_prima' => 'exportar_materia_prima',
             'exportar_inventario' => 'exportar_inventario',
+            'id_proceso_produccion' => 'Proceso de produccion:',
             
         ];
     }
@@ -109,6 +111,14 @@ class OrdenProduccion extends \yii\db\ActiveRecord
     public function getGrupo()
     {
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTipoProceso()
+    {
+        return $this->hasOne(TipoProcesoProduccion::className(), ['id_proceso_produccion' => 'id_proceso_produccion']);
     }
     
     public function getAutorizadoOrden() {

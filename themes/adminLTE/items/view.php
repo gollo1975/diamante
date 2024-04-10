@@ -27,8 +27,14 @@ $this->params['breadcrumbs'][] = $model->id_items;
                <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?>:</th>
                     <td><?= Html::encode($model->id_items) ?></td>                    
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Descripción') ?>:</th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Materia_prima') ?>:</th>
                     <td><?= Html::encode($model->descripcion) ?></td>
+              </tr>
+              <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_iva') ?>:</th>
+                    <td><?= Html::encode($model->iva->valor_iva) ?>%</td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?>:</th>
+                    <td><?= Html::encode($model->tipoSolicitud->descripcion) ?></td>
               </tr>
             </table>
         </div>

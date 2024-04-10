@@ -355,6 +355,89 @@
                                     ],
                                 ],
                                 //TERMINA 
+                                   //INICIO MODULO INVENTARIO
+                                [
+                                    'label' => 'INVENTARIO',
+                                    'icon' => 'shopping-cart',
+                                    'url' => '#',
+                                    'items' => [
+                                        [
+                                            'label' => 'Administración',
+                                            'icon' => 'database',
+                                            'url' => '#',
+                                            'items' => [
+                                                ['label' => 'Punto de venta', 'icon' => 'plus-square-o', 'url' => ['/punto-venta/index']],
+                                              //  ['label' => 'Coordinadores', 'icon' => 'plus-square-o', 'url' => ['/coordinadores/index']],
+                                               // ['label' => 'Agentes comerciales', 'icon' => 'plus-square-o', 'url' => ['/agentes-comerciales/index']],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Utilidades',
+                                            'icon' => 'cube',
+                                            'url' => '#',
+                                            'items' => [
+                                               // ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/index']],
+                                               [
+                                                'label' => 'Parametros',
+                                                'icon' => 'connectdevelop',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Precio de venta', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/crear_precio_venta']],
+                                                    ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/validador_imagen']],
+                                                    
+                                                ]],
+                                              //    ['label' => 'Anular pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/anular_pedidos']],
+                                               // ['label' => 'Indicador comercial', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/index']],
+                                               // ['label' => 'Regla comercial', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/regla_comercial']],
+                                                //['label' => 'Citas prospectos', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/listado_cita_prospecto']],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Consultas',
+                                            'icon' => 'question',
+                                            'url' => '#',
+                                            'items' => [
+                                            //   ['label' => 'Agentes comerciales', 'icon' => 'plus-square-o', 'url' => ['/agentes-comerciales/search_consulta_agentes']],
+                                              // ['label' => 'Programacion de citas', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/search_programacion_citas']],
+                                               [
+                                                'label' => 'Indicadores',
+                                                'icon' => 'connectdevelop',
+                                                'url' => '#',
+                                                'items' => [
+                                                //    ['label' => 'General', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_comercial']],
+                                                 //   ['label' => 'Graficas', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_vendedor']],
+                                                    
+                                                ]],
+                                                //['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedidos']], 
+                                                //['label' => 'Citas prospecto', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/search_cita_prospecto']], 
+                                                [
+                                                'label' => 'Maestros IA',
+                                                'icon' => 'connectdevelop',
+                                                'url' => '#',
+                                                'items' => [
+                                                  //  ['label' => 'Maestro pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_maestro_pedidos']],
+                                                    //['label' => 'Graficas', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_vendedor']],
+                                                    
+                                                ]],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Movimientos',
+                                            'icon' => 'book',
+                                            'url' => '#',
+                                            'items' => [
+                                                ['label' => 'Inventarios', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/index']],
+                                              //  ['label' => 'Programacion de citas', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/index']],
+                                               // ['label' => 'Gestion comercial', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/gestion_comercial']],
+                                               // ['label' => 'Crear pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/listado_clientes']],
+                                                
+                                                
+                                            ],
+                                        ],
+                                                                               
+                                    ],
+                                ],
+                                //TERMINA INVENTARIO
                                 //INICIO MODULO DE FACTURACION
                                 [
                                     'label' => 'FACTURACION',
@@ -396,6 +479,7 @@
                                             'items' => [
                                                 ['label' => 'Cargar pedidos', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
                                                 ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
+                                                ['label' => 'Factura punto de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index_factura_punto']],
                                                 ['label' => 'Cargar facturas', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/listado_factura']],
                                                 ['label' => 'Nota crédito', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/index']],
                                                

@@ -701,11 +701,12 @@ class InventarioProductosController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    
     // CREAR DEVOLUCION DE PRODUCTOS AL INVENTARIO
     public function actionCrear_devolucion_producto($id_nota, $token = 0) {
         $nota_credito = \app\models\NotaCredito::findOne($id_nota);
         if(\app\models\DevolucionProductos::find()->where(['=','id_nota', $id_nota])->one()){
-            Yii::$app->getSession()->setFlash('infor', 'En estos momentos se esta procesando la devolucion desde esta nota credito.');
+            Yii::$app->getSession()->setFlash('info', 'En estos momentos se esta procesando la devolucion desde esta nota credito.');
             $this->redirect(["inventario-productos/cargar_nota_credito"]);
         }else{
             $table = new \app\models\DevolucionProductos();

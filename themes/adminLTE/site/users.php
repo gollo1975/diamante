@@ -71,6 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th scope="col" style='background-color:#B9D5CE;'>Nombre Completo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Identificación</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Email</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Perfil</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Estado</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>                               
@@ -87,6 +88,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?= $val->nombrecompleto ?></td>
                 <td><?= $val->documentousuario ?></td>
                 <td><?= $val->emailusuario ?></td>
+                <?php if($val->id_punto == null){?>
+                      <td><?= 'No found'?></td>
+                <?php }else{?>
+                     <td><?= $val->puntoVenta->nombre_punto ?></td>
+                <?php }?>    
                 <td><?= $val->perfil ?></td>
                 <td><?= $val->estado ?></td>
                 <td style="width: 25px;">				

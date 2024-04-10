@@ -28,7 +28,16 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [                
                 'attribute' => 'descripcion',
-                'contentOptions' => ['class' => 'col-lg-6'],
+                'contentOptions' => ['class' => 'col-lg-4'],
+            ],
+            [
+                'attribute' => 'id_solicitud',
+                'value' => function($model){
+                    $solicitud = \app\models\TipoSolicitud::findOne($model->id_solicitud);
+                    return $solicitud->descripcion;
+                },
+                'filter' => ArrayHelper::map(\app\models\TipoSolicitud::find()->all(),'id_solicitud','descripcion'),
+                'contentOptions' => ['class' => 'col-lg-2'],
             ],
             [
                 'attribute' => 'id_iva',

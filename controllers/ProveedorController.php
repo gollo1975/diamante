@@ -250,6 +250,7 @@ class ProveedorController extends Controller
                  $table->predeterminado = $model->predeterminado;
                 $table->user_name = Yii::$app->user->identity->username;
                 $table->id_empresa = $empresa->nit_empresa;
+                $table->requisito_validado = $model->requisito_validado;
                 $table->observacion = $model->observacion;
                 if ($model->id_tipo_documento == 1 || $model->id_tipo_documento == 2 ) {
                    $table->nombre_completo = strtoupper($model->primer_nombre . " " . $model->segundo_nombre . " " . $model->primer_apellido . " " . $model->segundo_apellido);
@@ -319,6 +320,7 @@ class ProveedorController extends Controller
                     $table->tipo_transacion = $model->tipo_transacion;
                     $table->predeterminado = $model->predeterminado;
                     $table->observacion = $model->observacion;
+                    $table->requisito_validado = $model->requisito_validado;
                     if ($model->id_tipo_documento == 1 || $model->id_tipo_documento == 2 ) {
                        $table->nombre_completo = strtoupper($model->primer_nombre . " " . $model->segundo_nombre . " " . $model->primer_apellido . " " . $model->segundo_apellido);
                        $table->razon_social = null;
@@ -372,6 +374,7 @@ class ProveedorController extends Controller
                 $model->tipo_transacion = $table->tipo_transacion;
                 $model->predeterminado = $table->predeterminado;
                 $model->observacion = $table->observacion;
+                $model->requisito_validado = $table->requisito_validado;
 
             } else {
                 return $this->redirect(["proveedor/index"]);
@@ -405,6 +408,7 @@ class ProveedorController extends Controller
                             $table->primer_apellido = $archivo->primer_apellido;
                             $table->segundo_apellido = $archivo->segundo_apellido;
                             $table->razon_social = $archivo->razon_social;
+                            $table->requisito_validado = 1;
                             if ($archivo->id_tipo_documento == 1 || $archivo->id_tipo_documento == 2 ) {
                                 $table->nombre_completo = strtoupper($archivo->primer_nombre . " " . $archivo->segundo_nombre . " " . $archivo->primer_apellido . " " . $archivo->segundo_apellido);
                                 $table->razon_social = null;

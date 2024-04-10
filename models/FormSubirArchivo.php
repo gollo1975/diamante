@@ -15,6 +15,7 @@ class FormSubirArchivo extends Model
     public $codigo;
     public $view;
     public $view_archivo;
+    public $validador_imagen;
     
     public function rules()
     {
@@ -22,11 +23,12 @@ class FormSubirArchivo extends Model
              ['numero', 'default'],
             ['codigo', 'string'],
             ['view_archivo', 'default'],
+            ['validador_imagen', 'default'],
             ['view', 'default'],
             ['file', 'file',
             'skipOnEmpty' => false,
             'uploadRequired' => 'Debe de seleccionar al menos un acrhivo.',    
-            'extensions' => 'pdf,docx,jpeg,jgp,xlsx,png',            
+            'extensions' => 'pdf,docx,jpeg,jpg,xlsx,png',            
             'wrongExtension' => 'El archivo no contiene una extension permitida.',
             'maxFiles' => 4,
             'tooMany' => 'El maximo de archivos permito son (4)',
@@ -42,6 +44,7 @@ class FormSubirArchivo extends Model
             'codigo' => '',
             'view' => '',
             'view_archivo' => '',
+            'validador_imagen' => '',
         ];
     }
 

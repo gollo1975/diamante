@@ -175,7 +175,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <?php if($valor){
                                                   $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
                                                   if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                                                     <td id="pelicula"  title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena)?></td>
+                                                     <td id ="pelicula"  title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($cadena)?></td>
 
                                                   <?php }else {?>
                                                       <td><?= 'NOT FOUND'?></td>

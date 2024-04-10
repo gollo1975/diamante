@@ -67,7 +67,7 @@ class FacturaVentaController extends Controller
                 $vendedores = null; $saldo = null; $numero_factura = null;
                 $model = null;
                 $pages = null;
-               if ($form->load(Yii::$app->request->get())) {
+                if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
                         $cliente = Html::encode($form->cliente);
@@ -685,14 +685,16 @@ class FacturaVentaController extends Controller
                 $table = $this->findModel($model->id_factura);
                 return $this->redirect(['view_factura_venta','id_factura_punto' => $table->id_factura]);
         }
-        if($matricula->aplica_punto_venta == 1){
-            return $this->render('create', [
-                'model' => $model,
-            ]);
-        }else{
-             Yii::$app->getSession()->setFlash('info', 'No esta autorizado para utilizar este proceso de facturación. Contacte al administrador.');
-             return $this->redirect(['index']);
-        }    
+     
+            if($matricula->aplica_factura_produccion == 1){
+                return $this->render('create', [
+                    'model' => $model,
+                ]);
+            }else{
+                 Yii::$app->getSession()->setFlash('info', 'No esta autorizado para utilizar este tipo de factura. Contacte al administrador.');
+                 return $this->redirect(['index']);
+            }    
+               
     }
 
     //actualiza la fecha de la factura

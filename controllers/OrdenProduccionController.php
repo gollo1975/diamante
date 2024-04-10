@@ -65,7 +65,7 @@ class OrdenProduccionController extends Controller
                 $fecha_corte = null;
                 $almacen = null;
                 $autorizado = null;
-                $grupo = null;
+                $grupo = null; $tipo_proceso = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero = Html::encode($form->numero);
@@ -74,6 +74,7 @@ class OrdenProduccionController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $almacen = Html::encode($form->almacen);
                         $grupo = Html::encode($form->grupo);
+                        $tipo_proceso = Html::encode($form->tipo_proceso);
                         $autorizado = Html::encode($form->autorizado);
                         $table = OrdenProduccion::find()
                                     ->andFilterWhere(['=', 'numero_orden', $numero])
@@ -81,6 +82,7 @@ class OrdenProduccionController extends Controller
                                     ->andFilterWhere(['=', 'id_almacen', $almacen])
                                     ->andFilterWhere(['=', 'autorizado', $autorizado])
                                     ->andFilterWhere(['=', 'numero_lote', $lote])
+                                    ->andFilterWhere(['=', 'id_proceso_produccion', $tipo_proceso])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         $table = $table->orderBy('id_orden_produccion DESC');
                         $tableexcel = $table->all();
@@ -144,7 +146,7 @@ class OrdenProduccionController extends Controller
                 $fecha_corte = null;
                 $almacen = null;
                 $autorizado = null;
-                $grupo = null;
+                $grupo = null; $tipo_proceso = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero = Html::encode($form->numero);
@@ -153,6 +155,7 @@ class OrdenProduccionController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $almacen = Html::encode($form->almacen);
                         $grupo = Html::encode($form->grupo);
+                        $tipo_proceso = Html::encode($form->tipo_proceso);
                         $autorizado = Html::encode($form->autorizado);
                         $table = OrdenProduccion::find()
                                     ->andFilterWhere(['=', 'numero_orden', $numero])
@@ -161,6 +164,7 @@ class OrdenProduccionController extends Controller
                                     ->andFilterWhere(['=', 'autorizado', $autorizado])
                                     ->andFilterWhere(['=', 'numero_lote', $lote])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo])
+                                    ->andFilterWhere(['=', 'id_proceso_produccion', $tipo_proceso])
                                     ->andWhere(['=','cerrar_orden', 1]); 
                         $table = $table->orderBy('id_orden_produccion DESC');
                         $tableexcel = $table->all();
@@ -814,7 +818,7 @@ class OrdenProduccionController extends Controller
         ]);
     }
     
-    //CREAR LA REGLA PARA DISTRIBIDOR
+    //CREAR LA REGLA PARA DISTRIBUIDOR
     public function actionCrear_regla_punto($id, $sw = 0) {
         $model = new \app\models\ModeloEditarReglaDescuento();
         $inventario = InventarioProductos::findOne($id);
@@ -1132,6 +1136,7 @@ class OrdenProduccionController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
                                
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -1152,7 +1157,8 @@ class OrdenProduccionController extends Controller
                     ->setCellValue('P1', 'AUTORIZADO')
                     ->setCellValue('Q1', 'ORDEN CERRADA')
                     ->setCellValue('R1', 'RESPONSABLE')
-                    ->setCellValue('S1', 'OBSERVACION');
+                    ->setCellValue('S1', 'OBSERVACION')
+                    ->setCellValue('T1', 'TIPO PROCESO');
             $i = 2;
         
         foreach ($tableexcel as $val) {
@@ -1183,7 +1189,8 @@ class OrdenProduccionController extends Controller
                     ->setCellValue('P' . $i, $val->autorizadoOrden)
                     ->setCellValue('Q' . $i, $val->cerrarOrden)
                     ->setCellValue('R' . $i, $val->responsable)
-                    ->setCellValue('S' . $i, $val->observacion);
+                    ->setCellValue('S' . $i, $val->observacion)
+                    ->setCellValue('T' . $i, $val->tipoProceso->nombre_proceso);
             $i++;
         }
 

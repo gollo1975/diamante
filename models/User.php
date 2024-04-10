@@ -16,6 +16,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
     public $accessToken;
     public $activo;
     public $fechaproceso;
+    public $id_punto;
 
     public static function isUserAdmin($codusuario)
     {

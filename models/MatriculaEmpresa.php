@@ -44,7 +44,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
     {
         return [
             [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion', 'codigo_departamento', 'codigo_municipio'], 'required'],
-            [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion','tipo_regimen','id_naturaleza','aplica_punto_venta','calificacion_proveedor'], 'integer'],
+            [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion','tipo_regimen','id_naturaleza','aplica_punto_venta','calificacion_proveedor','aplica_factura_produccion'], 'integer'],
             [['razon_social', 'razon_social_completa', 'direccion','email','representante_legal'], 'string', 'max' => 50],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'codigo_departamento', 'codigo_municipio','codigo_banco'], 'string', 'max' => 10],
             [['telefono', 'celular'], 'string', 'max' => 15],
@@ -94,6 +94,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'codigo_banco' => 'Codigo banco',
             'aplica_punto_venta' => 'aplica_punto_venta',
             'calificacion_proveedor' => '% Proveedor:',
+            'aplica_factura_produccion' => 'Aplica factura produccion:',
             
             
         ];

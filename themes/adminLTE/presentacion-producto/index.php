@@ -37,7 +37,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $grupo->nombre_grupo;
                 },
                 'filter' => ArrayHelper::map(GrupoProducto::find()->orderBy('nombre_grupo ASC')->all(),'id_grupo','nombre_grupo'),
-                'contentOptions' => ['class' => 'col-lg-3'],
+                'contentOptions' => ['class' => 'col-lg-2'],
+            ],
+            [
+                'attribute' => 'id_marca',
+                'value' => function($model){
+                    $nombre_marca = app\models\Marca::findOne($model->id_marca);
+                    return $nombre_marca->marca;
+                },
+                'filter' => ArrayHelper::map(app\models\Marca::find()->orderBy('marca ASC')->all(),'id_marca','marca'),
+                'contentOptions' => ['class' => 'col-lg-2'],
             ],
             [                
                 'attribute' => 'user_name',

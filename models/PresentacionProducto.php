@@ -40,12 +40,13 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_grupo', 'descripcion'], 'required'],
-            [['id_grupo'], 'integer'],
+            [['id_grupo', 'descripcion','id_marca'], 'required'],
+            [['id_grupo','id_marca'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 40],
             [['user_name'], 'string', 'max' => 15],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
+            [['id_marca'], 'exist', 'skipOnError' => true, 'targetClass' => Marca::className(), 'targetAttribute' => ['id_marca' => 'id_marca']],
         ];
     }
 
@@ -60,6 +61,7 @@ class PresentacionProducto extends \yii\db\ActiveRecord
             'descripcion' => 'Descripcion',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'User name',
+            'id_marca' => 'Marca:',
         ];
     }
 
@@ -69,5 +71,10 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     public function getGrupo()
     {
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
+    }
+    
+    public function getMarca()
+    {
+        return $this->hasOne(Marca::className(), ['id_marca' => 'id_marca']);
     }
 }

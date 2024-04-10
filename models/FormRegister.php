@@ -18,6 +18,7 @@ class FormRegister extends model{
     public $accessToken;
     public $activo;
     public $password_repeat;
+    public $id_punto;
 
     public function rules()
     {
@@ -26,7 +27,7 @@ class FormRegister extends model{
             ['username', 'match', 'pattern' => "/^.{3,50}$/", 'message' => 'Mínimo 3 y máximo 30 caracteres'],
             ['username', 'match', 'pattern' => "/^[0-9a-z]+$/i", 'message' => 'Sólo se aceptan letras y números'],
             ['username', 'usuario_existe'],
-
+            ['id_punto', 'integer'],
             ['nombrecompleto', 'match', 'pattern' => "/^.{3,50}$/", 'message' => 'Mínimo 3 y máximo 50 caracteres'],
             ['nombrecompleto', 'match', 'pattern' => "/^[a-z ]+$/i", 'message' => 'Sólo se aceptan letras'],
 
@@ -48,6 +49,7 @@ class FormRegister extends model{
             'emailusuario' => 'Email:',
             'password' => 'Clave:',
             'password_repeat' => 'Confirmar Clave:',
+            'id_punto' => 'Punto de venta:',
         ];
     }
 

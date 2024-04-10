@@ -63,10 +63,11 @@ $form = ActiveForm::begin([
                                'format' => 'yyyy-m-d',
                                'todayHighlight' => true]])
             ?>
-            <div class="field-tblproveedor-observaciones_proveedor has-success">
+        <div class="field-tblproveedor-observaciones_proveedor has-success">
                 <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-            </div>    
-        </div>
+            </div>
+        </div>    
+       
     </div>    
     <div class="panel-footer text-right">
         <a href="<?= Url::toRoute("factura-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>

@@ -24,7 +24,7 @@ $tipo = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_nomina', 1])
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
-        <h4>MUNICIPIOS</h4>
+        <h4>COORDINADORES</h4>
     </div>
     <div class="panel-body">        														   		
         <div class="row">

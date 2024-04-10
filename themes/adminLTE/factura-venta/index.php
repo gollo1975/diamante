@@ -185,8 +185,9 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-           <a href="<?= Url::toRoute("factura-venta/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva factura</a>   
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-default btn-sm']); ?>                
+           <a href="<?= Url::toRoute(["factura-venta/create"]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Factura produccion</a>  
+          
         </div>
      </div>
 </div>

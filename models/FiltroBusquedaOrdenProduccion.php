@@ -18,10 +18,13 @@ class FiltroBusquedaOrdenProduccion extends Model
     public $almacen;
     public $autorizado;
     public $lote;
+    public $tipo_proceso;
+
+
     public function rules()
     {
         return [  
-           [['numero', 'grupo','almacen','autorizado', 'lote'], 'integer'],
+           [['numero', 'grupo','almacen','autorizado', 'lote','tipo_proceso'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -35,6 +38,7 @@ class FiltroBusquedaOrdenProduccion extends Model
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
             'lote' => 'Número lote:',
+            'tipo_proceso' => 'Tipo proceso:',
             
        
         ];

@@ -6,6 +6,7 @@ use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 use app\models\ConfiguracionIva;
+use app\models\TipoSolicitud;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 /* @var $form yii\widgets\ActiveForm */
@@ -21,6 +22,7 @@ use app\models\ConfiguracionIva;
 	]); ?>
 <?php
 $iva = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DESC')->all(), 'id_iva', 'valor_iva');
+$conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('descripcion ASC')->all(), 'id_solicitud', 'descripcion');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -30,6 +32,15 @@ $iva = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DESC')->al
         <div class="row">
             <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>  					
         </div>
+        <div class="row">
+            <?= $form->field($model, 'id_solicitud')->widget(Select2::classname(), [
+                'data' => $conSolicitud,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+        </div>        
         <div class="row">
             <?= $form->field($model, 'id_iva')->widget(Select2::classname(), [
                 'data' => $iva,

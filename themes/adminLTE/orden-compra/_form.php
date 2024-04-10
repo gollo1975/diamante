@@ -33,7 +33,7 @@ $form = ActiveForm::begin([
 
 <?php
 $tipo = ArrayHelper::map(TipoOrdenCompra::find()->orderBy ('descripcion_orden ASC')->all(), 'id_tipo_orden', 'descripcion_orden');
-$proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')->all(), 'id_proveedor', 'nombre_completo');
+$proveedor = ArrayHelper::map(Proveedor::find()->where(['=','requisito_validado', 1])->orderBy ('nombre_completo ASC')->all(), 'id_proveedor', 'nombre_completo');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">

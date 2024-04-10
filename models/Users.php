@@ -29,8 +29,15 @@ class Users extends \yii\db\ActiveRecord{
             'nombrecompleto' => 'Nombre Completo',
             'emailusuario' => 'Email',
             'activo' => 'Estado',
-            'fechaproceso' => 'Fecha Creación',            
+            'fechaproceso' => 'Fecha Creación',  
+            'id_punto' => 'Punto de venta',
+            [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
         ];
+    }
+    
+     public function getPuntoVenta()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
     
     public function getPerfil()
