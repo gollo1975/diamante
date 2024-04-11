@@ -131,7 +131,102 @@ class FacturaVentaController extends Controller
             return $this->redirect(['site/login']);
         }
     }
-
+    
+    // INDEX DE FACTURA DE PUNTO DE VENTA INVENTARIO
+    public function actionIndex_factura_punto() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',89])->all()){
+                $form = new FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $vendedores = null; $saldo = null; $numero_factura = null;
+                $model = null; $punto_venta = null;
+                $pages = null;
+                $accesoToken = Yii::$app->user->identity->id_punto;
+                $rolUsuario = Yii::$app->user->identity->role;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $saldo = Html::encode($form->saldo);
+                        $numero_factura = Html::encode($form->numero_factura);
+                        if($rolUsuario <> 3){
+                            $table = FacturaVenta::find()
+                                ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['between','fecha_inicio', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','numero_factura', $numero_factura])
+                                ->andFilterWhere(['>', 'saldo_factura', $saldo])     
+                               ->andFilterWhere(['=','id_agente', $vendedores]);
+                        }else{
+                            $table = FacturaVenta::find()
+                                ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['between','fecha_inicio', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','numero_factura', $numero_factura])
+                                ->andFilterWhere(['>', 'saldo_factura', $saldo])     
+                                ->andFilterWhere(['=','id_agente', $vendedores])
+                                ->andWhere(['=','id_punto', $punto_venta]);
+                        }
+                        
+                        $table = $table->orderBy('id_factura DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelFacturaVenta($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                }else{
+                    if($rolUsuario <> 3){
+                        $table = FacturaVenta::find()->orderBy('id_factura DESC');
+                    }else{
+                        $table = FacturaVenta::find()->Where(['=','id_punto', $punto_venta])->orderBy('id_factura DESC');
+                    }   
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelFacturaVenta($tableexcel);
+                    }
+                }
+                return $this->render('index_factura_punto', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'accesoToken' => $accesoToken,
+                            'rolUsuario' => $rolUsuario,
+                           
+                            
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     //PROCESO QUE CREA LA FACTURA DE VENTA
     
     public function actionCrear_factura() {
@@ -311,6 +406,7 @@ class FacturaVentaController extends Controller
                 
         endforeach;
     }
+    
    //PROCESO QUE CONSULTA LAS FACTURA
     public function actionSearch_factura_venta() {
         if (Yii::$app->user->identity){
@@ -371,6 +467,7 @@ class FacturaVentaController extends Controller
             return $this->redirect(['site/login']);
         }
     }
+    
     
     public function actionSearch_maestro_factura($token = 1) {
         if (Yii::$app->user->identity){
@@ -447,6 +544,7 @@ class FacturaVentaController extends Controller
             'token' => $token,
         ]);
     }
+    
     //vista de consulta facturas
     public function actionView_consulta($id, $token)
     {
@@ -461,7 +559,8 @@ class FacturaVentaController extends Controller
             'recibo_caja' => $recibo_caja,
         ]);
     }
-    // VISTA DE FACTURA DE PUNTO
+    
+    // VISTA DE FACTURA DE PUNTO PRODUCTO TERMINADO
     public function actionView_factura_venta($id_factura_punto)
     {
         $form = new \app\models\ModeloEntradaProducto();
@@ -593,6 +692,145 @@ class FacturaVentaController extends Controller
             
         ]);
     }
+    
+    
+    // VISTA FACTURA PARA PUNTO DE VENTA CON EL MODULO DE INVENTARIOS
+    public function actionView_factura_venta_punto($id_factura_punto, $accesoToken) {
+        
+        $form = new \app\models\ModeloEntradaProducto();
+        $codigo_producto = 0;
+        $factura = FacturaVenta::findOne($id_factura_punto);
+        $inventario = \app\models\InventarioPuntoVenta::find()->where(['>','stock_inventario', 0])
+                                                          ->andWhere(['=','venta_publico', 1])->andWhere(['=','id_punto', $accesoToken])
+                                                          ->orderBy('nombre_producto ASC')->all();
+        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
+        var_dump($codigo_producto);
+        if ($form->load(Yii::$app->request->get())) {
+            $codigo_producto = Html::encode($form->codigo_producto);
+              var_dump($codigo_producto);
+            if ($codigo_producto > 0) {
+                $conCodigo = \app\models\InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
+              
+                if($conCodigo){
+                    $conDato = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])
+                                                          ->andWhere(['=','codigo_producto', $codigo_producto])->one();
+                    //declaracion de variables
+                    $porcentaje = 0; $subtotal = 0; $total = 0; $iva = 0; $descuento = 0; $cantidad = 0;
+                    if(!$conDato){
+                        $producto = \app\models\InventarioPuntoVenta::find()->where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
+                        $table = new FacturaVentaDetalle();
+                        $table->id_factura = $id_factura_punto;
+                        $table->id_inventario = $producto->id_inventario;
+                        $table->codigo_producto = $codigo_producto;
+                        $table->producto = $producto->nombre_producto;
+                        if($factura->id_tipo_venta == 3){
+                            $table->cantidad = 1;
+                            $table->valor_unitario = $producto->precio_deptal;    
+                            $porcentaje = number_format($conCodigo->porcentaje_iva/100,2);
+                            $total = round($table->cantidad * $table->valor_unitario);
+                            $iva = round($total * $porcentaje);
+                            $subtotal = round($total - $iva);
+                            if($producto->aplica_descuento_punto == 1){ //aplicar descuento comercial para punto de venta
+                                $fecha_actual = date('Y-m-d');
+                                $regla = \app\models\DescuentoPuntoVenta::find()->where(['=','id_inventario', $producto->id_inventario])->one();
+                                if($regla->tipo_descuento == 1 && $regla->fecha_inicio <= $fecha_actual && $regla->fecha_final >= $fecha_actual){
+                                    $descuento = round(($subtotal * $regla->nuevo_valor)/100);
+                                    $table->total_linea = round($total - $descuento);
+                                    $table->impuesto = round($iva);
+                                    $table->subtotal = round($subtotal);
+                                    $table->porcentaje_descuento = $regla->nuevo_valor;
+                                    $table->valor_descuento = $descuento;
+                                    $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
+                                }else{
+                                    $descuento = 0;
+                                    $table->total_linea = round($total);
+                                    $table->impuesto = round($iva);
+                                    $table->subtotal = round($subtotal);
+                                    $table->porcentaje_descuento = 0;
+                                    $table->valor_descuento = $descuento;
+                                    $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
+                                }
+                            }else{ //SI NO TIENE DESCUENTO COMERCIAL
+                                $descuento = 0;
+                                $table->total_linea = $total;
+                                $table->impuesto = $iva;
+                                $table->subtotal = $subtotal;
+                                $table->porcentaje_descuento = 0;
+                                $table->valor_descuento = $descuento;
+                                $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
+                            }
+                        }    
+                        $table->save();
+                        $id = $id_factura_punto;
+                        $this->ActualizarSaldosTotales($id);
+                        $this->ActualizarConceptosTributarios($id);
+                        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
+                        $this->redirect(["factura-venta/view_factura_venta_punto",'id_factura_punto' => $id_factura_punto, 'detalle_factura' => $detalle_factura,'accesoToken' => $accesoToken]);
+                    }else{
+                        if($factura->id_tipo_venta == 2){
+                            Yii::$app->getSession()->setFlash('warning', 'Este producto ya se encuentra registrado en esta factura, favor subir las unidades faltantes por  la opcion de MAS');
+                            return $this->redirect(['view_factura_venta_punto','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                        }else{
+                            //si existe el producto
+                            $valor_unitario = 0;
+                            $detalle = FacturaVentaDetalle::findOne($conDato->id_detalle);
+                            $producto = \app\models\InventarioPuntoVenta::find()->where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
+                            if($factura->id_tipo_venta == 2){
+                                $valor_unitario = $producto->precio_mayorista;    
+                            }else{
+                                $valor_unitario = $producto->precio_deptal;   
+
+                            }
+                            $pInicio = 0; $pTotal = 0; $pIva = 0; $pSubtotal = 0; $pDescuento = 0;
+                            $pInicio = $detalle->porcentaje_iva;
+                            $pDescuento = $detalle->porcentaje_descuento;
+                            $pTotal = round($valor_unitario);
+                            $pIva = round($pTotal * $pInicio)/100;
+                            $pSubtotal = round($pTotal - $pIva);
+                           //proceso de variables
+                            $cantidad = $conDato->cantidad + 1;
+                            $subtotal = $conDato->subtotal + $pSubtotal;
+                            $iva = $conDato->impuesto + $pIva;
+                            if($pDescuento > 0){
+                                $descuento = round(($pSubtotal * $pDescuento)/100);
+                            }else{
+                               $descuento = 0;  
+                            }
+                            //asignacion
+                            $detalle->cantidad = $cantidad;
+                            $detalle->subtotal = $detalle->subtotal + $pSubtotal;
+                            $detalle->valor_descuento = $detalle->valor_descuento + $descuento;
+                            $detalle->impuesto = $detalle->impuesto + $pIva;
+                            $detalle->total_linea = $detalle->total_linea + $pTotal - $descuento;
+                            $detalle->save();
+                            $id = $id_factura_punto;
+                            $this->ActualizarSaldosTotales($id);
+                            $this->ActualizarConceptosTributarios($id);
+                           return $this->redirect(['view_factura_venta_punto','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                        }   
+                    }
+                }else{
+                    Yii::$app->getSession()->setFlash('info', 'El código del producto NO se encuentra en el sistema.');
+                    return $this->redirect(['view_factura_venta_punto','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                }
+                
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe digitar codigo del producto a buscar.');
+                return $this->redirect(['view_factura_venta_punto','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+            }
+        }
+        return $this->render('view_factura_punto_venta', [
+            'model' => $this->findModel($id_factura_punto),
+            'form' => $form,
+            'inventario' => ArrayHelper::map($inventario, "id_inventario", "inventario"),
+            'detalle_factura' => $detalle_factura,
+            'accesoToken' => $accesoToken,
+            
+            
+        ]);
+    }
+    
+    
     //modificar cantidades a vender
     public function actionAdicionar_cantidades($id_factura_punto, $id_detalle) {
         $model = new \app\models\FormModeloCambiarCantidad();
@@ -634,7 +872,7 @@ class FacturaVentaController extends Controller
     }
     
     //CREAR FACTURAS PARA PUNTOS DE VENTA
-    public function actionCreate() {
+    public function actionCreate($sw, $accesoToken) {
         $model = new FacturaVenta();
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -647,7 +885,7 @@ class FacturaVentaController extends Controller
                 $empresa = \app\models\MatriculaEmpresa::findOne(1);
                 $tipo_factura = \app\models\TipoFacturaVenta::findOne(4);
                 $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])
-                                                                ->andWhere(['=','abreviatura', 'PV'])->one();
+                                                               ->andWhere(['=','abreviatura', 'PV'])->one();
                 $model->id_tipo_factura = 4;
                 $model->id_agente = $cliente->id_agente;
                 $model->nit_cedula = $cliente->nit_cedula;
@@ -667,6 +905,9 @@ class FacturaVentaController extends Controller
                 $model->forma_pago = $cliente->forma_pago;
                 $model->plazo_pago = $cliente->plazo;
                 $model->user_name = Yii::$app->user->identity->username;
+                if($sw == 1){
+                   $model->id_punto = $accesoToken;
+                }
                 if($cliente->autoretenedor == 1){
                     $model->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
                 }else{
@@ -683,16 +924,35 @@ class FacturaVentaController extends Controller
                 }
                 $model->save(false);
                 $table = $this->findModel($model->id_factura);
-                return $this->redirect(['view_factura_venta','id_factura_punto' => $table->id_factura]);
+                if($sw == 0){
+                     return $this->redirect(['view_factura_venta','id_factura_punto' => $table->id_factura]);
+                }else{
+                    return $this->redirect(['view_factura_venta_punto','id_factura_punto' => $table->id_factura, 'accesoToken' => $accesoToken]);
+                }
+               
         }
-     
-            if($matricula->aplica_factura_produccion == 1){
-                return $this->render('create', [
-                    'model' => $model,
-                ]);
+            if($sw == 0){
+                if($matricula->aplica_factura_produccion == 1){
+                    return $this->render('create', [
+                        'model' => $model,
+                        'sw' => $sw,
+                        'accesoToken' => $accesoToken,
+                    ]);
+                }else{
+                     Yii::$app->getSession()->setFlash('info', 'No esta autorizado para utilizar este tipo de factura. Contacte al administrador.');
+                     return $this->redirect(['index']);
+                }  
             }else{
-                 Yii::$app->getSession()->setFlash('info', 'No esta autorizado para utilizar este tipo de factura. Contacte al administrador.');
-                 return $this->redirect(['index']);
+                if($matricula->aplica_punto_venta == 1){
+                    return $this->render('create', [
+                        'model' => $model,
+                        'sw' => $sw,
+                        'accesoToken' => $accesoToken,
+                    ]);
+                }else{
+                     Yii::$app->getSession()->setFlash('info', 'No esta autorizado para utilizar este tipo de factura. Contacte al administrador.');
+                     return $this->redirect(['index_factura_punto']);
+                }     
             }    
                
     }

@@ -15,8 +15,9 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
+$punto = app\models\PuntoVenta::findOne($accesoToken);
 
-$this->title = 'FACTURA DE VENTA';
+$this->title = 'FACTURA DE VENTA ('.$punto->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -30,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("factura-venta/index"),
+    "action" => Url::toRoute("factura-venta/index_factura_punto"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -40,9 +41,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
+
 $vendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-$cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])
-                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+$cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])->andWhere(['=','id_tipo_cliente', 5])
+                                                ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+$conPunto = ArrayHelper::map(app\models\PuntoVenta::find()->all(), 'id_punto', 'nombre_punto');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -82,12 +85,21 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
                     'allowClear' => true
                 ],
             ]); ?>
+            <?php if($accesoToken == 1){?>
+                <?= $formulario->field($form, 'punto_venta')->widget(Select2::classname(), [
+                   'data' => $conPunto,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+               ]); ?>
+            <?php }?>
             <?= $formulario->field($form, 'saldo')->dropDownList(['0' => 'SI'],['prompt' => 'Seleccione una opcion ...']) ?>         
         </div>
         
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("factura-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("factura-venta/index_factura_punto") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -111,7 +123,7 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
@@ -125,8 +137,7 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php
-            if($model){
-                $fecha_dia = date('Y-m-d');
+            $fecha_dia = date('Y-m-d');
                 foreach ($model as $val):
                     $dato = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $val->id_factura])->all();
                     ?>
@@ -134,59 +145,35 @@ $form = ActiveForm::begin([
                         <td><?= $val->numero_factura?></td>
                         <td><?= $val->nit_cedula?></td>
                         <td><?= $val->clienteFactura->nombre_completo?></td>
-                        <td><?= $val->agenteFactura->nombre_completo?></td>
+                        <td><?= $val->puntoVenta->nombre_punto?></td>
                         <td><?= $val->fecha_inicio?></td>
                         <td><?= $val->fecha_vencimiento?></td>
                         <td style="text-align: right"><?= ''.number_format($val->subtotal_factura,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
-                        <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
-                            $total = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento );
-                            $total = round($total / 86400);
-                            ?>  
-                            <td style="text-align: right; background-color:#F5B7B1;"><?= ''.number_format($val->saldo_factura,0)?></td>
-                            <td style="color: #E74C3C"><b><?= $total?></b></td>
-                        <?php }else{
-                            $f_vcto = date_create($val->fecha_vencimiento);
-                            $fecha_final = date_create($fecha_dia);
-                            $contador = date_diff($f_vcto, $fecha_final);
-                            $differenceFormat = '%a';
-                            ?>
-                            <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
-                            <?php  if($val->saldo_factura <> 0 ){?>
-                                <td><?= $contador->format($differenceFormat) * -1?></td>
-                            <?php }else{?>
-                                <td></td>    
-                            <?php }    
-                        }    
-                        if($val->id_tipo_factura == 4){
+                        <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
+                        <?php if($val->id_tipo_factura == 4){
                             if(!$dato){?>    
                                 <td style= 'width: 20px; height: 20px;'>    
-                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta_punto", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
                                 </td>
                                 <td style= 'width: 20px; height: 20px;'>
                                     <a href="<?= Url::toRoute(["factura-venta/update_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar la factura de venta"></span></a>
                                 </td>    
                             <?php }else{?>
                                  <td style= 'width: 20px; height: 20px;'>    
-                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta_punto", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
                                 </td>
                                 <td></td>
                             <?php }
-                        }else{ ?>
-                            <td style= 'width: 20px; height: 20px;'>
-                                <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
-                            </td>
-                            <td></td>
-                        <?php }?>    
+                        }?>
                    </tr>            
-                <?php endforeach;
-            }?>
+                <?php endforeach; ?>
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-default btn-sm']); ?>                
-           <a href="<?= Url::toRoute(["factura-venta/create",'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Factura produccion</a>  
+           <a href="<?= Url::toRoute(["factura-venta/create",'sw' => 1 , 'accesoToken' => $accesoToken]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span>Nueva factura</a>  
           
         </div>
      </div>

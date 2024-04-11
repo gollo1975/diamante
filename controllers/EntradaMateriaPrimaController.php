@@ -322,10 +322,24 @@ class EntradaMateriaPrimaController extends Controller
             $model->update();
             return $this->redirect(['index']);
         }
+         if (Yii::$app->request->get("id")) {
+            $table = EntradaMateriaPrima::findOne($id);
+            $orden_compra = \app\models\OrdenCompra::find()->where(['=','id_proveedor', $table->id_proveedor])
+                                               ->andWhere(['=','importado', 0])
+                                               ->andWhere(['=','abreviatura', 'MP'])->orderBy('descripcion desc')->all();
+            $orden_compra = ArrayHelper::map($orden_compra, "id_orden_compra", "descripcion");
+            $model->id_proveedor = $table->id_proveedor;
+            $model->id_orden_compra = $table->id_orden_compra;
+            $model->fecha_proceso = $table->fecha_proceso;
+            $model->numero_soporte = $table->numero_soporte;
+            $model->observacion = $table->observacion;
+         }
 
         return $this->render('update', [
             'model' => $model,
-            'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
+            'orden_compra' => $orden_compra,
+            
+            
         ]);
     }
     //NUEVA LINEA
@@ -337,10 +351,11 @@ class EntradaMateriaPrimaController extends Controller
         return $this->redirect(['view', 'id' => $id, 'token' => $token]);
       }
    
-      //ACTUALIZAR LINEA
+    //ACTUALIZAR LINEA
     public function actionImportardetallecompra($sw = 0, $id, $id_orden, $token, $proveedor)
     {                                
-        $orden_compra = OrdenCompra::find()->where(['=','id_proveedor' , $proveedor])->andWhere(['=','importado', 0])->one();
+        $orden_compra = OrdenCompra::find()->where(['=','id_proveedor' , $proveedor])->andWhere(['=','id_orden_compra', $id_orden])
+                                                                                     ->andWhere(['=','auditada', 1])->andWhere(['=','importado', 0])->one();
         if($orden_compra){
             $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $orden_compra->id_orden_compra])->all();
             foreach ( $detalle_compra as $detalle_compras):
@@ -355,7 +370,7 @@ class EntradaMateriaPrimaController extends Controller
             $sw = 1;
             $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]);  
         }else{
-             Yii::$app->getSession()->setFlash('warning', 'El proveedor NO tiene ORDENES DE COMPRA programdas para entregar.');
+             Yii::$app->getSession()->setFlash('warning', 'El proveedor NO tiene ORDENES DE COMPRAS programadas para entregar y/o la orden de compra no ha llegado o NO se AUDITADO.');
              $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]); 
         }    
             
@@ -467,6 +482,12 @@ class EntradaMateriaPrimaController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -482,27 +503,44 @@ class EntradaMateriaPrimaController extends Controller
                     ->setCellValue('K1', 'SUBTOTAL')
                     ->setCellValue('L1', 'IVA')
                     ->setCellValue('M1', 'TOTAL')
-                    ->setCellValue('N1', 'OBSERVACION');
+                    ->setCellValue('N1', 'MATERIA PRIMA')
+                    ->setCellValue('O1', 'FECHA VCTO')
+                    ->setCellValue('P1', 'CANTIDAD')
+                    ->setCellValue('Q1', 'VR. UNITARIO')
+                    ->setCellValue('R1', 'SUBTOTAL')
+                    ->setCellValue('S1', 'IVA')
+                    ->setCellValue('T1', 'TOTAL LINEA')
+                    ;
         $i = 2;
         
         foreach ($tableexcel as $val) {
-                                  
-            $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue('A' . $i, $val->id_entrada)
-                    ->setCellValue('B' . $i, $val->proveedor->nombre_completo)
-                    ->setCellValue('C' . $i, $val->ordenCompra->tipoOrden->descripcion_orden)
-                    ->setCellValue('D' . $i, $val->numero_soporte)
-                    ->setCellValue('E' . $i, $val->fecha_proceso)
-                    ->setCellValue('F' . $i, $val->fecha_registro)
-                    ->setCellValue('G' . $i, $val->user_name_crear)
-                    ->setCellValue('H' . $i, $val->user_name_edit)
-                    ->setCellValue('I' . $i, $val->autorizadoCompra)
-                    ->setCellValue('J' . $i, $val->enviarMateria)
-                    ->setCellValue('K' . $i, $val->subtotal)
-                    ->setCellValue('L' . $i, $val->impuesto)
-                    ->setCellValue('M' . $i, $val->total_salida)
-                    ->setCellValue('N' . $i, $val->observacion);
-            $i++;
+            $detalles = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $val->id_entrada])->all();
+            foreach ($detalles as $detalle){                     
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_entrada)
+                        ->setCellValue('B' . $i, $val->proveedor->nombre_completo)
+                        ->setCellValue('C' . $i, $val->ordenCompra->tipoOrden->descripcion_orden)
+                        ->setCellValue('D' . $i, $val->numero_soporte)
+                        ->setCellValue('E' . $i, $val->fecha_proceso)
+                        ->setCellValue('F' . $i, $val->fecha_registro)
+                        ->setCellValue('G' . $i, $val->user_name_crear)
+                        ->setCellValue('H' . $i, $val->user_name_edit)
+                        ->setCellValue('I' . $i, $val->autorizadoCompra)
+                        ->setCellValue('J' . $i, $val->enviarMateria)
+                        ->setCellValue('K' . $i, $val->subtotal)
+                        ->setCellValue('L' . $i, $val->impuesto)
+                        ->setCellValue('M' . $i, $val->total_salida)
+                        ->setCellValue('N' . $i, $detalle->materiaPrima->materia_prima)
+                        ->setCellValue('O' . $i, $detalle->fecha_vencimiento)
+                        ->setCellValue('P' . $i, $detalle->cantidad)
+                        ->setCellValue('Q' . $i, $detalle->valor_unitario)
+                        ->setCellValue('R' . $i, $detalle->subtotal)
+                        ->setCellValue('S' . $i, $detalle->total_iva)
+                        ->setCellValue('T' . $i, $detalle->total_entrada)
+                        ;
+                $i++;
+            }
+            $i = $i;
         }
 
         $objPHPExcel->getActiveSheet()->setTitle('Entradas');

@@ -187,4 +187,10 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
         }
         return $aplicadescuentodistribuidor;
     }
+    
+    //proceso que incrita varios valores
+     public function getInventario()
+    {
+        return "{$this->codigo_producto} - {$this->nombre_producto}";
+    }
 }

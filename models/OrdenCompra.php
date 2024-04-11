@@ -116,4 +116,13 @@ class OrdenCompra extends \yii\db\ActiveRecord
         }
         return $compraauditada;
     }
+    
+    public function getImportadoMateriaPrima() {
+        if($this->importado == 0){
+            $importadomateriaprima = 'NO';
+        }else{
+            $importadomateriaprima = 'SI';
+        }
+        return $importadomateriaprima;
+    }
 }

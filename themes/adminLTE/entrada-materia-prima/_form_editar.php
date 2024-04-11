@@ -40,7 +40,8 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
         <div class="row">
             <?= $form->field($model, 'id_proveedor')->dropDownList($proveedor,['prompt'=>'Seleccione un proveedor...', 'onchange'=>' $.get( "'.Url::toRoute('entrada-materia-prima/ordencompra').'", { id: $(this).val() } ) .done(function( data ) {
             $( "#'.Html::getInputId($model, 'id_orden_compra',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
-            <?= $form->field($model, 'id_orden_compra')->dropDownList(['prompt' => 'Seleccione...']) ?>
+            <?= $form->field($model, 'id_orden_compra')->dropDownList($orden_compra, ['prompt' => 'Seleccione...']) ?>
+          
         </div>    
         <div class="row">
             <?=  $form->field($model, 'fecha_proceso')->widget(DatePicker::className(), ['name' => 'check_issue_date',

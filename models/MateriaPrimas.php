@@ -114,7 +114,7 @@ class MateriaPrimas extends \yii\db\ActiveRecord
     
     public function getMateriasPrimas()
     {
-        return "{$this->codigo_materia_prima} - {$this->materia_prima}";
+        return "{$this->materia_prima} - {$this->codigo_materia_prima}";
     }
     
     public function getAplicaInventario() {

@@ -15,6 +15,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form_factura', [
         'model' => $model,
+        'sw' => $sw,
+        'accesoToken' => $accesoToken,
 
     ]) ?>
 

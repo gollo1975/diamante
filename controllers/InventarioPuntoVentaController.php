@@ -74,7 +74,7 @@ class InventarioPuntoVentaController extends Controller
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['like', 'nombre_producto', $producto])
                                     ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
-                                    ->andFilterWhere(['=', 'punto_venta', $punto_venta]);
+                                    ->andFilterWhere(['=', 'id_punto', $punto_venta]);
                         $table = $table->orderBy('id_inventario DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;

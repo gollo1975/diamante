@@ -23,13 +23,14 @@ class FiltroBusquedaPedidos extends Model
     public $saldo;
     public $numero_factura;
     public $pedido_anulado;
+    public $punto_venta;
 
 
     public function rules()
     {
         return [  
           
-            [['numero_pedido','facturado','vendedor','pedido_cerrado','presupuesto','saldo','numero_factura','pedido_anulado'], 'integer'],
+            [['numero_pedido','facturado','vendedor','pedido_cerrado','presupuesto','saldo','numero_factura','pedido_anulado','punto_venta'], 'integer'],
             [['cliente','documento'], 'string'],
             [['fecha_inicio', 'fecha_corte'],'safe'],
         ];
@@ -50,6 +51,7 @@ class FiltroBusquedaPedidos extends Model
             'saldo' => 'Cartera:',
             'numero_factura' => 'Numero factura:',
             'pedido_anulado' => 'Pedido anulado:',
+            'punto_venta' => 'punto de venta:',
 
         ];
     }

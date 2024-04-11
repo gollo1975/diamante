@@ -62,7 +62,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
           
             [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
                 'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente','estado_factura','dias_mora','valor_intereses_mora',
-                'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario'], 'integer'],
+                'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario','id_punto'], 'integer'],
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada','fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento','porcentaje_mora'], 'number'],
             [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
@@ -75,6 +75,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             [['id_tipo_factura'], 'exist', 'skipOnError' => true, 'targetClass' => TipoFacturaVenta::className(), 'targetAttribute' => ['id_tipo_factura' => 'id_tipo_factura']],
             [['id_agente'], 'exist', 'skipOnError' => true, 'targetClass' => AgentesComerciales::className(), 'targetAttribute' => ['id_agente' => 'id_agente']],
             [['id_tipo_venta'], 'exist', 'skipOnError' => true, 'targetClass' => TipoVenta::className(), 'targetAttribute' => ['id_tipo_venta' => 'id_tipo_venta']],
+            [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
  
             ];
     }
@@ -130,6 +131,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'dias_mora' => 'Dias en mora:',
             'id_tipo_venta' => 'Tipo de venta:',
             'tipo_inventario' => 'Tipo inventario:',
+            'id_punto' => 'Punto de venta:',
             
         ];
     }
@@ -165,6 +167,11 @@ class FacturaVenta extends \yii\db\ActiveRecord
      public function getTipoVenta()
     {
         return $this->hasOne(TipoVenta::className(), ['id_tipo_venta' => 'id_tipo_venta']);
+    }
+    
+    public function getPuntoVenta()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
     
     public function getFormaPago() {

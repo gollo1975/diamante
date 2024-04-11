@@ -120,6 +120,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Total </th>
                 <th scope="col" style='background-color:#B9D5CE;'>User name </th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Autorizado">Aut.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Importado o descargado a inventario">Imp.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
@@ -137,6 +138,11 @@ $form = ActiveForm::begin([
                 <td style="text-align: right"><?= ''.number_format($val->total_orden,0)?></td>
                 <td><?= $val->user_name?></td>
                 <td><?= $val->autorizadoCompra?></td>
+                <?php if($val->importado == 0){?>
+                <td style="background-color:#B9D5CE;"><?= $val->importadoMateriaPrima?></td>
+                <?php }else{?>
+                    <td><?= $val->importadoMateriaPrima?></td>
+                <?php }?>    
                 <td style= 'width: 25px; height: 10px;'>
                     <a href="<?= Url::toRoute(["orden-compra/view", "id" => $val->id_orden_compra, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>

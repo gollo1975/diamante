@@ -16,7 +16,15 @@ use app\models\TipoVenta;
 $departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
 $cliente= ArrayHelper::map(Clientes::find()->where(['=','id_tipo_cliente', 5])->orderBy('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
-$tipo_venta= ArrayHelper::map(TipoVenta::find()->where(['=','abreviatura', 'PV'])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');
+if($sw == 0){
+    $tipo_venta= ArrayHelper::map(TipoVenta::find()->where(['=','abreviatura', 'PV'])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');
+}else{
+    if($accesoToken == 1){
+        $tipo_venta= ArrayHelper::map(TipoVenta::find()->where(['=','id_tipo_venta', 2])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');
+    }else{
+        $tipo_venta= ArrayHelper::map(TipoVenta::find()->where(['=','id_tipo_venta', 3])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');  
+    }    
+}    
 ?>
 
 <!--<h1>Nuevo proveedor</h1>-->
@@ -70,7 +78,11 @@ $form = ActiveForm::begin([
        
     </div>    
     <div class="panel-footer text-right">
-        <a href="<?= Url::toRoute("factura-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+        <?php if($sw == 0){?>
+            <a href="<?= Url::toRoute("factura-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+        <?php }else{?>
+            <a href="<?= Url::toRoute("factura-venta/index_factura_punto") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+        <?php }?>    
         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>        
     </div>
 </div>
