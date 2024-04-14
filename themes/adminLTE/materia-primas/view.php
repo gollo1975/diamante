@@ -90,8 +90,10 @@ $view = 'materia-primas';
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_materia_prima,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'convertir_gramos') ?></th>
+                    <td><?= Html::encode($model->covertirGramos) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion') ?></th>
-                    <td colspan="9"><?= Html::encode($model->descripcion)?></td>
+                    <td colspan="7"><?= Html::encode($model->descripcion)?></td>
                 </tr>
                 
                 

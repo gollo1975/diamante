@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("factura-venta/index_factura_punto"),
+    "action" => Url::toRoute("factura-venta-punto/index"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -99,7 +99,7 @@ $conPunto = ArrayHelper::map(app\models\PuntoVenta::find()->all(), 'id_punto', '
         
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("factura-venta/index_factura_punto") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("factura-venta-punto/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -139,7 +139,7 @@ $form = ActiveForm::begin([
             <?php
             $fecha_dia = date('Y-m-d');
                 foreach ($model as $val):
-                    $dato = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $val->id_factura])->all();
+                    $dato = \app\models\FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $val->id_factura])->all();
                     ?>
                     <tr style ='font-size: 90%;'>                
                         <td><?= $val->numero_factura?></td>
@@ -155,14 +155,14 @@ $form = ActiveForm::begin([
                         <?php if($val->id_tipo_factura == 4){
                             if(!$dato){?>    
                                 <td style= 'width: 20px; height: 20px;'>    
-                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta_punto", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                    <a href="<?= Url::toRoute(["factura-venta-punto/view", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
                                 </td>
                                 <td style= 'width: 20px; height: 20px;'>
-                                    <a href="<?= Url::toRoute(["factura-venta/update_factura_venta", "id_factura_punto" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar la factura de venta"></span></a>
+                                    <a href="<?= Url::toRoute(["factura-venta-punto/update", "id_factura_punto" => $val->id_factura,'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar la factura de venta"></span></a>
                                 </td>    
                             <?php }else{?>
                                  <td style= 'width: 20px; height: 20px;'>    
-                                    <a href="<?= Url::toRoute(["factura-venta/view_factura_venta_punto", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                    <a href="<?= Url::toRoute(["factura-venta-punto/view", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
                                 </td>
                                 <td></td>
                             <?php }
@@ -173,7 +173,7 @@ $form = ActiveForm::begin([
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-default btn-sm']); ?>                
-           <a href="<?= Url::toRoute(["factura-venta/create",'sw' => 1 , 'accesoToken' => $accesoToken]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span>Nueva factura</a>  
+           <a href="<?= Url::toRoute(["factura-venta-punto/create" , 'accesoToken' => $accesoToken]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span>Nueva factura</a>  
           
         </div>
      </div>

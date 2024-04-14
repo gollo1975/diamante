@@ -31,6 +31,8 @@ use app\models\MateriaPrimas;
 use app\models\FormModeloBuscar;
 use app\models\OrdenProduccionMateriaPrima;
 use app\models\ModelCrearPrecios;
+use app\models\OrdenProduccionFaseInicial;
+
 /**
  * OrdenProduccionController implements the CRUD actions for OrdenProduccion model.
  */
@@ -135,6 +137,82 @@ class OrdenProduccionController extends Controller
         }    
     }
     
+    //PROCESO QUE SE ENCARGA DE APROBAR LAS ORDENES DE PRODUCCION
+    public function actionIndex_ordenes_produccion() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',91])->all()){
+                $form = new FiltroBusquedaOrdenProduccion();
+                $numero = null;
+                $lote = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $almacen = null;
+                $autorizado = null;
+                $grupo = null; $tipo_proceso = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero = Html::encode($form->numero);
+                        $lote = Html::encode($form->lote);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $almacen = Html::encode($form->almacen);
+                        $grupo = Html::encode($form->grupo);
+                        $tipo_proceso = Html::encode($form->tipo_proceso);
+                        $autorizado = Html::encode($form->autorizado);
+                        $table = OrdenProduccion::find()
+                                    ->andFilterWhere(['=', 'numero_orden', $numero])
+                                    ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'id_almacen', $almacen])
+                                    ->andFilterWhere(['=', 'numero_lote', $lote])
+                                    ->andFilterWhere(['=', 'id_proceso_produccion', $tipo_proceso])
+                                    ->andFilterWhere(['=', 'id_grupo', $grupo])
+                                    ->andWhere(['=', 'cerrar_orden', 1])
+                                    ->andWhere(['=', 'producto_aprobado', 0]);
+                        $table = $table->orderBy('id_orden_produccion DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = OrdenProduccion::find()->Where(['=', 'cerrar_orden', 1])
+                                                    ->andWhere(['=', 'producto_aprobado', 0])
+                                                    ->orderBy('id_orden_produccion DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    
+                }
+                $to = $count->count();
+                return $this->render('index_aprobacion_ordenes', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+        
     //CONSULTA DE ORDEN DE PRODUCCION
     public function actionSearch_consulta_orden($token = 1) {
         if (Yii::$app->user->identity){
@@ -351,40 +429,40 @@ class OrdenProduccionController extends Controller
     public function actionView($id, $token)
     {
         $detalle_orden = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-        $detalle_materia = OrdenProduccionMateriaPrima::find()->where(['=','id_orden_produccion', $id])->all();
-        if(isset($_POST["actualizamateriaprima"])){
-            if(isset($_POST["listado_materia"])){
-                $intIndice = 0;
-                foreach ($_POST["listado_materia"] as $intCodigo):
-                    $table = OrdenProduccionMateriaPrima::findOne($intCodigo);
-                    $materia = MateriaPrimas::findOne($table->id_materia_prima);
-                    if($_POST["cantidad_materia"]["$intIndice"] > $materia->stock){
-                       Yii::$app->getSession()->setFlash('warning', 'No hay STOCK para estas unidades. Favor revisar el stock de materias primas.');
-                        $table->cantidad = 0;
-                    }else{
-                       $table->cantidad = $_POST["cantidad_materia"]["$intIndice"];    
+        $fase_inicial = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->orderBy('id_fase ASC')->all();
+        if (Yii::$app->request->post()) {
+            if (isset($_POST["eliminartodo"])) {
+                if (isset($_POST["listado_eliminar"])) {
+                    foreach ($_POST["listado_eliminar"] as $intCodigo) {
+                        try {
+                            $eliminar = OrdenProduccionFaseInicial::findOne($intCodigo);
+                            $eliminar->delete();
+                            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                            $this->redirect(["orden-produccion/view", 'id' => $id, 'token' => $token]);
+                        } catch (IntegrityException $e) {
+
+                            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
+                        } catch (\Exception $e) {
+                            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
+
+                        }
                     }
-                    $table->save(false);
-                     $this->ActualizarLineaMateria($id);
-                    $intIndice++;
-                endforeach;
-                $this->TotalMateriaPrima($id);
-                return $this->redirect(['view','id' =>$id, 'token' => $token]);
-            }
-        }    
-        if(isset($_POST["actualizaregistro"])){
-            if(isset($_POST["listado_producto"])){
+                } else {
+                    Yii::$app->getSession()->setFlash('error', 'Debe seleccionar al menos un registro.');
+                }    
+             }
+        }         
+       if(isset($_POST["actualizaregistro"])){
+            if(isset($_POST["listado_fase"])){
                 $intIndice = 0;
-                foreach ($_POST["listado_producto"] as $intCodigo):
-                    $table = OrdenProduccionProductos::findOne($intCodigo);
-                    $table->descripcion = $_POST["descripcion"]["$intIndice"];
-                    $table->cantidad = $_POST["cantidad_producto"]["$intIndice"];
-                    $table->id_medida_producto = $_POST["tipo_medida"]["$intIndice"];
-                    $table->porcentaje_iva = $_POST["porcentaje_iva"]["$intIndice"];
+                foreach ($_POST["listado_fase"] as $intCodigo):
+                    $table = OrdenProduccionFaseInicial::findOne($intCodigo);
+                    $table->porcentaje_aplicacion = $_POST["porcentaje_aplicacion"][$intIndice];
+                    $table->cantidad_gramos = $_POST["cantidad_gramos"][$intIndice];
                     $table->save(false);
                     $intIndice++;
                 endforeach;
-                $this->TotalUnidadesLote($id);
+                $this->ActualizarExistenciaMateriaPrima($id);
                 return $this->redirect(['view','id' =>$id, 'token' => $token]);
             }
         }    
@@ -392,9 +470,67 @@ class OrdenProduccionController extends Controller
             'model' => $this->findModel($id),
             'token' => $token,
             'detalle_orden' => $detalle_orden,
-            'detalle_materia' => $detalle_materia,
+            'fase_inicial' => $fase_inicial,
         ]);
     }
+    
+     //VALIDAR EXISTENCIAS AL ACTUALIZAR EL ARCHIVO DE CONFIGURACION DEL PRODUCTO
+     protected function ActualizarExistenciaMateriaPrima($id) {
+         $fases = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->orderBy('id_fase ASC')->all();
+         foreach ($fases as $fase):
+            $materia = MateriaPrimas::findOne($fase->id_materia_prima);
+            if($materia){           
+                if($fase->cantidad_gramos <= $materia->stock_gramos){
+                    $fase->cumple_existencia = 'OK';
+                    $fase->save();
+                }else{
+                    $fase->cumple_existencia = 'FALTA';
+                    $total =  $fase->cantidad_gramos - $materia->stock_gramos ;
+                    $fase->cantidad_faltante = $total;
+                    $fase->save();
+                }
+             }
+         endforeach;
+     }
+    
+    //IMPORTAR FASE INICIAL
+    public function actionImportar_fase_inicial($id_grupo, $id, $token) {
+        $conFaseinicial = \app\models\ConfiguracionProducto::find(['=','id_grupo', $id_grupo])->all();
+        $model = OrdenProduccion::findOne($id);
+        foreach ($conFaseinicial as $primerafase):
+            $conFase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id', $primerafase->id])->one();
+            if(!$conFase){
+                $table = new OrdenProduccionFaseInicial ();
+                $table->id_orden_produccion = $id;
+                $table->id = $primerafase->id;
+                $table->id_materia_prima = $primerafase->id_materia_prima;
+                $table->id_grupo = $id_grupo;
+                $table->id_fase = $primerafase->id_fase;
+                $table->porcentaje_aplicacion = $primerafase->porcentaje_aplicacion;
+                $totales = ($model->tamano_lote * $primerafase->porcentaje_aplicacion)/100;
+                $table->cantidad_gramos= $totales;
+                $table->codigo_homologacion = $primerafase->codigo_homologacion;
+                $table->user_name = Yii::$app->user->identity->username;
+                $table->save ();
+            }    
+        endforeach;
+        
+        return $this->redirect(['orden-produccion/view','id' => $id, 'token' => $token]);
+    }
+    
+    //PROCESO QUE REGENERA LA FORMULA DE PRODUCCION DEL PRODUCTO
+    public function actionRegenerar_formula($id, $token, $id_grupo){
+        $orden = OrdenProduccion::findOne($id);
+        $formulaFase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_grupo', $id_grupo])->all();
+        $valor = 0;
+        foreach ($formulaFase as $fase):
+            $valor = round(($orden->tamano_lote * $fase->porcentaje_aplicacion)/100);
+            $fase->cantidad_gramos = $valor;
+            $fase->save ();
+        endforeach;
+         return $this->redirect(['orden-produccion/view','id' => $id, 'token' => $token]);
+    }
+    
     //PROCESO QUE SUBE EL TOTAL DE LA MATERIA PRIMA
     
      protected function TotalMateriaPrima($id) {
@@ -543,14 +679,7 @@ class OrdenProduccionController extends Controller
         endforeach;
         $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);  
     }
-    //eliminar detalle de materia prima
-     public function actionEliminarmateria($id,$detalle, $token)
-    {                                
-        $detalle = OrdenProduccionMateriaPrima::findOne($detalle);
-        $detalle->delete();
-        //$this->TotalUnidadesLote($id);
-        $this->redirect(["view",'id' => $id, 'token' => $token]);        
-    }
+    
         
     //eliminar detalles de creacion de producto
     
@@ -567,6 +696,14 @@ class OrdenProduccionController extends Controller
         $dato = \app\models\InventarioPrecioVenta::findOne($detalle);
         $dato->delete();
         $this->redirect(["crearprecioventaproducto",'id' => $id]);        
+    }
+    
+     //eliminar detalle de las fases
+     public function actionEliminarmateria($id, $detalle, $token)
+    {                                
+        $detalle = OrdenProduccionFaseInicial::findOne($detalle);
+        $detalle->delete();
+        $this->redirect(["view",'id' => $id, 'token' => $token]);        
     }
     
     //crear producto nuevo
@@ -699,100 +836,46 @@ class OrdenProduccionController extends Controller
 
         ]);
     }
-    
-    //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
-     public function actionBuscarmateriaprima($id, $token){
-        $operacion = MateriaPrimas::find()->where(['>','stock', 0])->orderBy('materia_prima ASC')->all();
-        $form = new FormModeloBuscar();
-        $q = null;
-        $mensaje = '';
-        if ($form->load(Yii::$app->request->get())) {
-            if ($form->validate()) {
-                $q = Html::encode($form->q);                                
-                    $operacion = MateriaPrimas::find()
-                            ->where(['like','materia_prima',$q])
-                            ->orwhere(['=','codigo_materia_prima',$q])
-                            ->andWhere(['>','stock', 0]);
-                    $operacion = $operacion->orderBy('materia_prima ASC');                    
-                    $count = clone $operacion;
-                    $to = $count->count();
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count()
-                    ]);
-                    $operacion = $operacion
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();         
-            } else {
-                $form->getErrors();
-            }                    
-        }else{
-            $table = MateriaPrimas::find()->where(['>','stock', 0])->orderBy('materia_prima ASC');
-            $tableexcel = $table->all();
-            $count = clone $table;
-            $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count(),
-            ]);
-             $operacion = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-        }
-        //PROCESO DE GUARDAR
-         if (isset($_POST["guardarmateriaprima"])) {
-            if(isset($_POST["nuevo_materia_prima"])){
-                foreach ($_POST["nuevo_materia_prima"] as $intCodigo) {
-                    //consulta para no duplicar
-                    $registro = OrdenProduccionMateriaPrima::find()->where(['=','id_orden_produccion', $id])
-                                                                   ->andWhere(['=','id_materia_prima', $intCodigo])->one();
-                    if(!$registro){
-                        $materia = MateriaPrimas::findOne($intCodigo);
-                        $table = new OrdenProduccionMateriaPrima();
-                        $table->id_orden_produccion = $id;
-                        $table->id_materia_prima = $intCodigo;
-                        $table->valor_unitario = $materia->valor_unidad;
-                        $table->porcentaje_iva = $materia->porcentaje_iva;
-                        $table->save(false);
-                    }    
-                }
-                return $this->redirect(['view','id' => $id, 'token' => $token]);
-            }
-        }
-        return $this->render('importarmateriaprima', [
-            'operacion' => $operacion,            
-            'mensaje' => $mensaje,
-            'pagination' => $pages,
-            'id' => $id,
-            'form' => $form,
-            'token' => $token,
-
-        ]);
-    }
-    
+        
     //modificar cantidades produccion
     public function actionModificarcantidades($id, $token, $detalle) {
         $model = new \app\models\FormModeloCambiarCantidad();
         $table = OrdenProduccionProductos::findOne($detalle);
+        $orden = OrdenProduccion::findOne($id);
        
         if ($model->load(Yii::$app->request->post())) {
             if (isset($_POST["actualizarcantidades"])) { 
                 $table->cantidad = $model->cantidades;
+                $table->cantidad_real = $model->cantidad_real;
                 $table->fecha_vencimiento = $model->fecha;
                 $table->save(false);
-                $this->TotalUnidadesLote($id);
+                $orden->unidades = $model->cantidad_real;
+                $orden->tamano_lote = $model->tamano_lote;
+                $orden->save();
+            //    $this->TotalUnidadesLote($id);
                 $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
             }    
         }
          if (Yii::$app->request->get()) {
+            $model->tamano_lote = $orden->tamano_lote; 
             $model->cantidades = $table->cantidad;
+            $model->cantidad_real = $table->cantidad_real;
             $model->fecha = $table->fecha_vencimiento;
          }
         return $this->renderAjax('cambiarcantidades', [
             'model' => $model,
             'token' => $token,
             'detalle' => $detalle,
+            'id' => $id,
+        ]);
+    }
+    
+    //CONSULTAR INVENTARIO DE MATERIA PRIMA EN LA ORDEN DE PRODUCCION
+    public function actionSearch_inventario($id, $token, $detalle) {
+        //$model = new \app\models\FormModeloSearchMateria();
+        return $this->renderAjax('search_inventario_materia_prima', [
+            'detalle' => $detalle,
+            'token' => $token,
             'id' => $id,
         ]);
     }

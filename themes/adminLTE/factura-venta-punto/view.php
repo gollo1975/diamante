@@ -20,7 +20,7 @@ $this->title = 'Factura de venta ('.$model->tipoVenta->concepto.')';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <p>
-    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_factura_punto'], ['class' => 'btn btn-primary btn-sm']) ?>
+    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { 
         echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_factura, 'token' => 3], ['class' => 'btn btn-default btn-sm']); 
     }else{
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </p>    
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute(["factura-venta/view_factura_venta_punto", 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken]),
+    "action" => Url::toRoute(["factura-venta-punto/view", 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken]),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <td style="width: 25px; height: 25px;">
                                 <!-- Inicio Nuevo Detalle proceso -->
                                 <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
-                                      ['/factura-venta/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle],
+                                      ['/factura-venta-punto/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle,'accesoToken' => $accesoToken],
                                       [
                                           'title' => 'Adicionar cantidades al codigo del producto',
                                           'data-toggle'=>'modal',
@@ -153,7 +153,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </div>
                             </td>
                             <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["factura-venta/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle])?>"
+                                <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                             <span class='glyphicon glyphicon-trash'></span> </a>  
                             </td>  
                         <?php }else{?>

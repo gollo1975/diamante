@@ -120,9 +120,9 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha entrada</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha_vcto</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica inventario">Ap. Inv.</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Inventario inicial">Inv. inicial</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Entrada</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Stock unidades</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Stock en gramos</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Clasificaion </th>
                 <th scope="col" style='background-color:#B9D5CE;'>User name </th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -139,13 +139,13 @@ $form = ActiveForm::begin([
                 <td><?= $val->fecha_entrada?></td>
                 <td><?= $val->fecha_vencimiento?></td>
                 <td><?= $val->aplicaInventario?></td>
-                <td><?= $val->InventarioInicial?></td>
                 <td style="text-align: right"><?= ''.number_format($val->total_cantidad,0)?></td>
                 <?php if($val->stock > 0){?>
                    <td style="text-align: right; background-color:#F5EEF8;"><?= ''.number_format($val->stock,0)?></td>
                 <?php }else{ ?>
                    <td style="text-align: right;"><?= ''.number_format($val->stock,0)?></td>
                 <?php }?>   
+                   <td style="text-align: right"><?= ''.number_format($val->stock_gramos,0)?></td>
                 <td><?= $val->tipoSolicitud->descripcion?></td>
                  <td><?= $val->usuario_creador?></td>
                 <td style= 'width: 25px; height: 10px;'>

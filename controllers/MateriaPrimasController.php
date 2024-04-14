@@ -290,36 +290,45 @@ class MateriaPrimasController extends Controller
                 if($model->total_cantidad == null){
                      Yii::$app->getSession()->setFlash('warning', 'El campo CANTIDAD debe de ser igual a cero o mayor.');
                 }else{
-                    $sumar = 0;
-                    $table = new MateriaPrimas();
-                    $table->codigo_materia_prima = $model->codigo_materia_prima;
-                    $table->materia_prima = $model->materia_prima;
-                    $table->fecha_entrada = $model->fecha_entrada;
-                    $table->fecha_vencimiento = $model->fecha_vencimiento;
-                    $table->id_medida = $model->id_medida;
-                    $table->aplica_inventario = $model->aplica_inventario;
-                    $table->aplica_iva = $model->aplica_iva;
-                    $table->stock= $model->total_cantidad;
-                    $table->porcentaje_iva = $model->porcentaje_iva;
-                    $table->total_cantidad = $model->total_cantidad; 
-                    $table->valor_unidad = $model->valor_unidad;                    
-                    if($table->aplica_iva == 1){
-                        $sumar = round((($table->valor_unidad *   $table->stock)* $table->porcentaje_iva)/100);
-                        $table->valor_iva = $sumar;
-                        $table->total_materia_prima = round(($table->valor_unidad *   $table->stock) + $sumar);
+                    if(MateriaPrimas::find()->where(['=','codigo_materia_prima', $model->codigo_materia_prima])->one()){
+                        Yii::$app->getSession()->setFlash('error', 'Este codigo ya se encuentra codificado con otra materia prima. Validar la informacion nuevamente.');   
                     }else{
-                        $sumar = round(($table->valor_unidad *   $table->stock));
-                        $table->valor_iva = 0;
-                        $table->total_materia_prima = round($sumar);
-                     }
-                    $table->usuario_creador = Yii::$app->user->identity->username;
-                    $table->usuario_editado = Yii::$app->user->identity->username;
-                    $table->descripcion = $model->descripcion;
-                    $table->codigo_ean = $model->codigo_materia_prima;
-                    $table->inventario_inicial = $model->inventario_inicial;
-                    $table->id_solicitud = $model->id_solicitud;
-                    $table->save(false);
-                    return $this->redirect(['index']);
+                        $sumar = 0;
+                        $table = new MateriaPrimas();
+                        $table->codigo_materia_prima = $model->codigo_materia_prima;
+                        $table->materia_prima = $model->materia_prima;
+                        $table->fecha_entrada = $model->fecha_entrada;
+                        $table->fecha_vencimiento = $model->fecha_vencimiento;
+                        $table->id_medida = $model->id_medida;
+                        $table->aplica_inventario = $model->aplica_inventario;
+                        $table->aplica_iva = $model->aplica_iva;
+                        $table->stock= $model->total_cantidad;
+                        $table->porcentaje_iva = $model->porcentaje_iva;
+                        $table->total_cantidad = $model->total_cantidad; 
+                        $table->valor_unidad = $model->valor_unidad;                    
+                        if($table->aplica_iva == 1){
+                            $sumar = round((($table->valor_unidad *   $table->stock)* $table->porcentaje_iva)/100);
+                            $table->valor_iva = $sumar;
+                            $table->total_materia_prima = round(($table->valor_unidad *   $table->stock) + $sumar);
+                        }else{
+                            $sumar = round(($table->valor_unidad *   $table->stock));
+                            $table->valor_iva = 0;
+                            $table->total_materia_prima = round($sumar);
+                         }
+                        $table->usuario_creador = Yii::$app->user->identity->username;
+                        $table->usuario_editado = Yii::$app->user->identity->username;
+                        $table->descripcion = $model->descripcion;
+                        $table->codigo_ean = $model->codigo_materia_prima;
+                        $table->inventario_inicial = $model->inventario_inicial;
+                        $table->id_solicitud = $model->id_solicitud;
+                        $table->convertir_gramos = $model->convertir_gramos;
+                        $table->save(false);
+                        if($model->convertir_gramos == 1){
+                           $materia = MateriaPrimas::find()->orderBy('id_materia_prima DESC')->one();
+                           $this->ConvertiGramosCantidad($materia);
+                        }
+                        return $this->redirect(['index']);
+                    }    
                 }   
             }else{
                 $model->getErrors();
@@ -330,7 +339,16 @@ class MateriaPrimasController extends Controller
             'model' => $model,
         ]);
     }
-
+    
+    //PROCESO QUE CONVIERTE LAS CNTIDADES A GRAMO
+    protected function ConvertiGramosCantidad($materia) {
+        $numero = 0;
+        $numero = $materia->stock * 1000;
+        $materia->stock_gramos = $numero;
+        $materia->save();
+    }
+    
+    
     /**
      * Updates an existing MateriaPrimas model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -377,7 +395,12 @@ class MateriaPrimasController extends Controller
                     $table->codigo_ean = $model->codigo_materia_prima;
                     $table->inventario_inicial = $model->inventario_inicial;
                     $table->id_solicitud = $model->id_solicitud;
+                    $table->convertir_gramos = $model->convertir_gramos;
                     $table->save(false);
+                    if($model->convertir_gramos == 1){
+                           $materia = $this->findModel($id);
+                           $this->ConvertiGramosCantidad($materia);
+                        }
                     return $this->redirect(['index']);
                 }     
                 
@@ -400,6 +423,7 @@ class MateriaPrimasController extends Controller
             $model->descripcion =  $table->descripcion;
             $model->inventario_inicial = $table->inventario_inicial;
             $model->id_solicitud = $table->id_solicitud;
+            $model->convertir_gramos = $table->convertir_gramos;
         }
         return $this->render('update', [
             'model' => $model,

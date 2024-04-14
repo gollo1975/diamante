@@ -92,7 +92,7 @@ $conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('id_solicitud A
             
         </div>   
          <div class="row">
-            
+            <?= $form->field($model, 'convertir_gramos')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
             <?= $form->field($model, 'descripcion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div>    
         <div class="panel-footer text-right">			

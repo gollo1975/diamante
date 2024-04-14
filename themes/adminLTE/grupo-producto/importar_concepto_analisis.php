@@ -7,18 +7,18 @@ use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 
-$this->title = 'Inventario materia prima';
-$this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['view', 'id' => $id ]];
-$this->params['breadcrumbs'][] = $id;
+$this->title = 'CONCEPTOS DE ANALISIS';
+$this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw ]];
+$this->params['breadcrumbs'][] = $id_grupo;
 ?>
     <div class="modal-body">
         <p>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view', 'id' => $id, 'token' => $token], ['class' => 'btn btn-primary btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw], ['class' => 'btn btn-primary btn-sm']) ?>
         </p>
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["orden-produccion/buscarmateriaprima", 'id' => $id, 'token' => $token]),
+            "action" => Url::toRoute(["grupo-producto/buscar_concepto_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $id;
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["orden-produccion/buscarmateriaprima", 'id' => $id, 'token' => $token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["grupo-producto/buscar_concepto_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -66,30 +66,24 @@ $this->params['breadcrumbs'][] = $id;
                      <table class="table table-bordered table-hover">
                         <thead>
                         <tr>
-                            <th scope="col" style='background-color:#B9D5CE;'>Codigo material</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Materia prima</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Aplica iva</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Porcentaje Iva</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Nombre del concepto</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($operacion as $val): ?>
                         <tr style="font-size: 85%;">
-                            <td><?= $val->codigo_materia_prima ?></td>
-                            <td><?= $val->materia_prima ?></td>
-                            <td><?= $val->stock ?></td>
-                            <td><?= $val->aplicaIva ?></td>
-                            <td><?= $val->porcentaje_iva ?>%</td>
-                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_materia_prima[]" value="<?= $val->id_materia_prima ?>"></td> 
+                            <td><?= $val->id_analisis ?></td>
+                            <td><?= $val->concepto ?></td>
+                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_concepto[]" value="<?= $val->id_analisis ?>"></td> 
                         </tr>
                         </tbody>
                         <?php endforeach; ?>
                     </table>
                 </div>
                 <div class="panel-footer text-right">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarmateriaprima']) ?>
+                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarnuevoconcepto']) ?>
                 </div>
             </div>
             <?= LinkPager::widget(['pagination' => $pagination]) ?>

@@ -157,7 +157,9 @@
                                                ['label' => 'Medida producto', 'icon' => 'plus-square-o', 'url' => ['medida-producto-terminado/index']],   
                                                ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],  
                                                ['label' => 'Grupo productos', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
-                                               ['label' => 'Presentacion productos', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
+                                               ['label' => 'Presentacion producto', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
+                                               ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 
+                                               ['label' => 'Formula analisis', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
                                                ['label' => 'Tipo devolucion', 'icon' => 'plus-square-o', 'url' => ['tipo-devolucion-productos/index']], 
                                             ],
                                         ],
@@ -175,6 +177,15 @@
                                                     ['label' => 'Precios y descuentos', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/crear_precio_venta']],
                                                     ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
                                                     ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/validador_imagen']],
+                                                ]],
+                                                [
+                                                'label' => 'Control calidad',
+                                                'icon' => 'check',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Orden de produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
+                                                 //   ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
+                                                    
                                                 ]],
                                                 ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 
                                                 ['label' => 'Devolucion productos', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/index']], 
@@ -232,7 +243,7 @@
                                     ],
                                 ],
                                 //TERMINA 
-                                //INICIO MODULO DE FACTURACION
+                                //INICIO MODULO DE LOGISTICA
                                 [
                                     'label' => 'LOGISTICA',
                                     'icon' => 'automobile',
@@ -479,9 +490,19 @@
                                             'items' => [
                                                 ['label' => 'Cargar pedidos', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/crear_factura']],
                                                 ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index']],
-                                                ['label' => 'Factura punto de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/index_factura_punto']],
                                                 ['label' => 'Cargar facturas', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/listado_factura']],
                                                 ['label' => 'Nota crédito', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/index']],
+                                               
+                                             ],
+                                        ],
+                                        [
+                                            'label' => 'Punto de venta',
+                                            'icon' => 'folder-open',
+                                            'url' => '#',
+                                            'items' => [
+                                                ['label' => 'Factura punto', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/index']],
+                                           //     ['label' => 'Cargar facturas', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/listado_factura']],
+                                             //   ['label' => 'Nota crédito', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/index']],
                                                
                                              ],
                                         ]

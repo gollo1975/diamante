@@ -14,6 +14,7 @@ class ModeloEntradaProducto extends Model
     public $codigo_producto;
     public $cantidad;
     public $producto;
+   
     public function rules()
     {
         return [  

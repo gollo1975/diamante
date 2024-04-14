@@ -41,7 +41,8 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'codigo_producto', 'cantidad', 'cerrar_linea','numero_lote','id_medida_producto','aplica_iva','id_inventario', 'importado','costo_unitario'], 'integer'],
+            [['id_orden_produccion', 'codigo_producto', 'cantidad', 'cerrar_linea','numero_lote','id_medida_producto','aplica_iva','id_inventario',
+                'importado','costo_unitario','cantidad_real'], 'integer'],
             [['descripcion'], 'string', 'max' => 40],
             ['user_name', 'string', 'max' => 15],
             ['porcentaje_iva', 'number'],
@@ -61,7 +62,8 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
             'id_orden_produccion' => 'Id Orden Produccion',
             'codigo_producto' => 'Codigo Producto',
             'descripcion' => 'Descripcion',
-            'cantidad' => 'Cantidad',
+            'cantidad' => 'Proyectada',
+            'cantidad_real' => 'Cantidad real:',
             'user_name' => 'User Name',
             'cerrar_linea' => 'Cerrar Linea',
             'numero_lote' => 'Numero lote',

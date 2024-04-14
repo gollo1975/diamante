@@ -87,9 +87,13 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
             ]); ?> 
         </div>    
          <div class="row">
+             <?= $form->field($model, 'tamano_lote')->textInput(['maxlength' => true]) ?> 
                <?= $form->field($model, 'responsable')->input(['text', 'maxlength' => true]) ?>
-             <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'maxlength' => true, 'size' => '100']) ?>
-        </div> 
+        </div>
+        <div class = "row">
+            <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'maxlength' => true, 'size' => '100']) ?>
+        </div>
+            
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("orden-produccion/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>

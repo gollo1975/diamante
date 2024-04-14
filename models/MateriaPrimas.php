@@ -55,7 +55,8 @@ class MateriaPrimas extends \yii\db\ActiveRecord
     {
         return [
             [['codigo_materia_prima', 'materia_prima', 'id_medida', 'aplica_inventario','valor_unidad'], 'required'],
-            [['id_medida', 'aplica_iva', 'valor_iva', 'total_cantidad','stock', 'total_materia_prima', 'aplica_inventario','inventario_inicial', 'subtotal','stock_salida','id_solicitud'], 'integer'],
+            [['id_medida', 'aplica_iva', 'valor_iva', 'total_cantidad','stock', 'total_materia_prima', 'aplica_inventario','inventario_inicial',
+                'subtotal','id_solicitud','stock_gramos','convertir_gramos'], 'integer'],
             [['valor_unidad', 'porcentaje_iva'], 'number'],
             [['fecha_entrada', 'fecha_vencimiento', 'fecha_registro'], 'safe'],
             [['codigo_materia_prima', 'usuario_creador', 'usuario_editado'], 'string', 'max' => 15],
@@ -93,8 +94,9 @@ class MateriaPrimas extends \yii\db\ActiveRecord
             'stock' => 'Stock:',
             'inventario_inicial' => 'Inventario inicial:',
             'subtotal' => 'Subtotal:',
-            'stock_salida' => 'Stock salida:',
             'id_solicitud' => 'Clasificacion:',
+            'stock_gramos' => 'Stock gramos:',
+            'convertir_gramos' => 'Convertir a gramos:',
         ];
     }
 
@@ -142,5 +144,13 @@ class MateriaPrimas extends \yii\db\ActiveRecord
             $inventarioinicial = 'NO';
         }
         return $inventarioinicial;
+    }
+     public function getCovertirGramos() {
+        if($this->convertir_gramos == 0){
+            $convertirgramos = 'NO';
+        }else{
+            $convertirgramos = 'SI';
+        }
+        return $convertirgramos;
     }
 }
