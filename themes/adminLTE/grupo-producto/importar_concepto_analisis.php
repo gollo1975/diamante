@@ -6,10 +6,12 @@ use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
 
 $this->title = 'CONCEPTOS DE ANALISIS';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw ]];
 $this->params['breadcrumbs'][] = $id_grupo;
+$conEtapas = ArrayHelper::map(app\models\EtapasAuditoria::find()->all(), 'id_etapa', 'concepto');
 ?>
     <div class="modal-body">
         <p>
@@ -38,6 +40,13 @@ $this->params['breadcrumbs'][] = $id_grupo;
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
                     <?= $formulario->field($form, "q")->input("search") ?>
+                    <?= $formulario->field($form, 'etapa')->widget(Select2::classname(), [
+                        'data' => $conEtapas,
+                        'options' => ['prompt' => 'Seleccione un registro ...'],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ],
+                    ]); ?>
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -68,6 +77,7 @@ $this->params['breadcrumbs'][] = $id_grupo;
                         <tr>
                             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Nombre del concepto</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Etapa del proceso</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
                         </thead>
@@ -76,6 +86,7 @@ $this->params['breadcrumbs'][] = $id_grupo;
                         <tr style="font-size: 85%;">
                             <td><?= $val->id_analisis ?></td>
                             <td><?= $val->concepto ?></td>
+                            <td><?= $val->etapaProceso->concepto ?></td>
                             <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_concepto[]" value="<?= $val->id_analisis ?>"></td> 
                         </tr>
                         </tbody>

@@ -137,6 +137,77 @@ class OrdenProduccionController extends Controller
         }    
     }
     
+    //INDEX QUE MUESTRAS TODAS LA AUDITORIAS REALIZADAS
+    public function actionIndex_resultado_auditoria() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',92])->all()){
+                $form = new \app\models\FiltroBusquedaAuditorias();
+                $numero_auditoria = null;
+                $numero_orden = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $etapa = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero_auditoria = Html::encode($form->numero_auditoria);
+                        $numero_orden = Html::encode($form->numero_orden);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $etapa = Html::encode($form->etapa);
+                        $table = \app\models\OrdenProduccionAuditoriaFabricacion::find()
+                                    ->andFilterWhere(['=', 'id_orden_produccion', $numero_orden])
+                                    ->andFilterWhere(['between', 'fecha_creacion', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'numero_auditoria', $numero_auditoria]);
+                        $table = $table->orderBy('id_audtoria DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_auditoria  DESC']);
+                            $this->actionExcelConsultaAuditorias($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = \app\models\OrdenProduccionAuditoriaFabricacion::find()
+                            ->orderBy('id_orden_produccion DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 10,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelConsultaAuditoria($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('index_auditorias', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
     //PROCESO QUE SE ENCARGA DE APROBAR LAS ORDENES DE PRODUCCION
     public function actionIndex_ordenes_produccion() {
         if (Yii::$app->user->identity){
@@ -474,6 +545,33 @@ class OrdenProduccionController extends Controller
         ]);
     }
     
+    //VISTA QUE MUESTRA LOS RESULTADOS DE LA AUDITORIA
+    
+    public function actionView_auditoria_orden_produccion($id_auditoria){
+        $model = \app\models\OrdenProduccionAuditoriaFabricacion::findOne($id_auditoria);
+        $conConcepto = \app\models\OrdenProduccionAuditoriaFabricacionDetalle::find()->where(['=','id_auditoria', $id_auditoria])->all();
+        
+        if (Yii::$app->request->post()) {
+            if(isset($_POST["actualizar_listado_analisis"])){
+                if(isset($_POST["listado_analisis"])){
+                    $intIndice = 0;
+                    foreach ($_POST["listado_analisis"] as $intCodigo):
+                        $table = \app\models\OrdenProduccionAuditoriaFabricacionDetalle::findOne($intCodigo);
+                        $table->resultado = $_POST["resultado"][$intIndice];
+                        $table->save(false);
+                        $intIndice++;
+                    endforeach;
+                    return $this->redirect(['view_auditoria_orden_produccion','id_auditoria' =>$id_auditoria]);
+                }
+            }    
+        }    
+        return $this->render('view_auditoria_orden_produccion', [
+            'conConcepto' => $conConcepto,
+            'id_auditoria' => $id_auditoria,
+            'model' => $model,
+        ]);
+    }
+    
      //VALIDAR EXISTENCIAS AL ACTUALIZAR EL ARCHIVO DE CONFIGURACION DEL PRODUCTO
      protected function ActualizarExistenciaMateriaPrima($id) {
          $fases = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->orderBy('id_fase ASC')->all();
@@ -517,6 +615,39 @@ class OrdenProduccionController extends Controller
         
         return $this->redirect(['orden-produccion/view','id' => $id, 'token' => $token]);
     }
+    
+    //CARGAR AUDITORIA A UNA ORDEN DE PRODUCCION YA LISTA EN EL PROCESO DE GRANEL O FABRICACION
+    public function actionCargar_concepto_auditoria($id, $id_grupo) {
+        if(\app\models\OrdenProduccionAuditoriaFabricacion::find()->where(['=','id_orden_produccion', $id])->one()){ 
+            Yii::$app->getSession()->setFlash('warning', 'Esta orden de produccion cuenta con un proceso de auditoria que no se ha cerrado. Validar la información'); 
+            return $this->redirect(['orden-produccion/index_ordenes_produccion']);
+        }else{      
+            $orden = OrdenProduccion::findOne($id);
+            $etapa = \app\models\EtapasAuditoria::findOne(1);
+            $table = new \app\models\OrdenProduccionAuditoriaFabricacion();
+            $table->id_orden_produccion= $id;
+            $table->numero_orden = $orden->numero_orden;
+            $table->numero_lote = $orden->numero_lote;
+            $table->id_etapa = 1;
+            $table->etapa =$etapa->concepto;
+            $table->fecha_creacion = date('Y-m-d');
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save();
+            $model = \app\models\OrdenProduccionAuditoriaFabricacion::find()->orderBy('id_auditoria DESC')->limit(1)->one();
+            //proceso del detalle de la auditoria
+            $configuracion = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_etapa', 1])->andWhere(['=','id_grupo', $id_grupo])->all();
+            foreach ($configuracion as $resultado):
+                $grabar = new \app\models\OrdenProduccionAuditoriaFabricacionDetalle ();
+                $grabar->id_auditoria = $model->id_auditoria;
+                $grabar->id_analisis = $resultado->id_analisis;
+                $grabar->id_especificacion = $resultado->id_especificacion;
+                $grabar->resultado = $resultado->resultado;
+                $grabar->save();
+            endforeach;
+             return $this->redirect(['orden-produccion/view_auditoria_orden_produccion','id_auditoria' => $model->id_auditoria]);
+        }    
+       
+    } 
     
     //PROCESO QUE REGENERA LA FORMULA DE PRODUCCION DEL PRODUCTO
     public function actionRegenerar_formula($id, $token, $id_grupo){
@@ -706,6 +837,14 @@ class OrdenProduccionController extends Controller
         $this->redirect(["view",'id' => $id, 'token' => $token]);        
     }
     
+    //ELIMINAR DETALLE DE LA AUDITORIA DE ORDENES DE PRODUCCION
+     public function actionEliminar_detalle_auditoria($id_auditoria, $detalle)
+    {                                
+        $dato = \app\models\OrdenProduccionAuditoriaFabricacionDetalle::findOne($detalle);
+        $dato->delete();
+        $this->redirect(["view_auditoria_orden_produccion",'id_auditoria' => $id_auditoria]);        
+    }
+    
     //crear producto nuevo
     public function actionCrearproducto($id, $grupo, $token) {
         
@@ -836,7 +975,33 @@ class OrdenProduccionController extends Controller
 
         ]);
     }
-        
+    
+    //PERMITE TERMINAR DE VALIDAD LA AUDITORIA Y SUBE LA CONTINUIDAD DEL PROCESO
+    
+    public function actionAprobar_orden_produccion($id_auditoria) {
+        $model = new \app\models\FormModeloSubirAuditoria();
+        $auditoria = \app\models\OrdenProduccionAuditoriaFabricacion::findOne($id_auditoria);
+       
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["subir_informacion"])) { 
+                $auditoria->continua = $model->continua;
+                $auditoria->condicion_analisis = $model->condiciones;
+                $auditoria->observacion = $model->observacion;
+                $auditoria->save(false);
+                $this->redirect(["orden-produccion/view_auditoria_orden_produccion", 'id_auditoria' => $id_auditoria]);
+            }    
+        }
+         if (Yii::$app->request->get()) {
+            $model->continua = $auditoria->continua; 
+            $model->condiciones = $auditoria->condicion_analisis;
+            $model->observacion = $auditoria->observacion;
+         }
+        return $this->renderAjax('subir_conceptos_auditoria', [
+            'model' => $model,
+            'id_auditoria' => $id_auditoria,
+        ]);
+    }
+    
     //modificar cantidades produccion
     public function actionModificarcantidades($id, $token, $detalle) {
         $model = new \app\models\FormModeloCambiarCantidad();

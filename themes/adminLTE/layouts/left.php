@@ -184,7 +184,7 @@
                                                 'url' => '#',
                                                 'items' => [
                                                     ['label' => 'Orden de produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
-                                                 //   ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
+                                                    ['label' => 'Resultado auditoria', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
                                                     
                                                 ]],
                                                 ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 

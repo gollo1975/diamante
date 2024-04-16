@@ -15,13 +15,10 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-use app\models\GrupoProducto;
-use app\models\Almacen;
-use app\models\TipoProcesoProduccion;
+use app\models\OrdenProduccion;
+use app\models\EtapasAuditoria;
 
-
-
-$this->title = 'ORDEN DE PRODUCCION (AUDITORIA)';
+$this->title = 'AUDITORIAS DE CALIDAD';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -35,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("orden-produccion/index_ordenes_produccion"),
+    "action" => Url::toRoute("orden-produccion/index_resultado_auditoria"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -46,8 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 
-$grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
-$almacen = ArrayHelper::map(Almacen::find()->orderBy ('almacen ASC')->all(), 'id_almacen', 'almacen');
+
 $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy ('nombre_proceso ASC')->all(), 'id_proceso_produccion', 'nombre_proceso');
 
 ?>
@@ -100,7 +96,7 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("orden-produccion/index_ordenes_produccion") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("orden-produccion/index_resultado_auditoria") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -121,15 +117,20 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 90%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Número</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo/Producto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Almacen</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total </th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th score="col" style='background-color:#B9D5CE;'></th>  
+                         
             </tr>
             </thead>
             <tbody>
@@ -138,29 +139,34 @@ $form = ActiveForm::begin([
                 <td><?= $val->numero_orden?></td>
                 <td><?= $val->grupo->nombre_grupo?></td>
                 <td><?= $val->almacen->almacen?></td>
-                <td><?= $val->tipoProceso->nombre_proceso?></td>
+                 <td><?= $val->tipoProceso->nombre_proceso?></td>
                 <td><?= $val->numero_lote?></td>
                 <td><?= $val->fecha_proceso?></td>
                 <td><?= $val->fecha_entrega?></td>
-                <td><?= $val->tipoOrden?></td>
+                 <td><?= $val->tipoOrden?></td>
+                <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
+                <td style="text-align: right"><?= ''.number_format($val->iva,0)?></td>
+                <td style="text-align: right"><?= ''.number_format($val->total_orden,0)?></td>
                 <td><?= $val->cerrarOrden?></td>
-                <td style= 'width: 25px; height: 10px;'>
-                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
-                                   'class' => '',
-                                   'title' => 'Proceso que permite cargar los conceptos de auditoria.', 
-                                   'data' => [
-                                       'confirm' => 'Esta seguro de crear la auditoria a la orden de produccion Nro:  ('.$val->numero_orden.').',
-                                       'method' => 'post',
-                                   ],
-                     ])?>
+                 <td style= 'width: 25px; height: 10px;'>
+                    <a href="<?= Url::toRoute(["orden-produccion/view", "id" => $val->id_orden_produccion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-list" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                 </td>
-               
+                <?php if($val->autorizado == 0){?>
+                    <td style= 'width: 25px; height: 10px;'>
+                       <a href="<?= Url::toRoute(["orden-produccion/update", "id" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                    </td>
+                <?php }else{?>
+                    <td style= 'width: 25px; height: 10px;'></td>
+                <?php }?>    
             </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 
-       
+        <div class="panel-footer text-right" >            
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+            <a align="right" href="<?= Url::toRoute("orden-produccion/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+        <?php $form->end() ?>
+        </div>
      </div>
-    <?php $form->end() ?>
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>

@@ -269,15 +269,18 @@ class GrupoProductoController extends Controller
 
     //BUSCAR CONCEPTOS DE ANALISIS PARA AGREGAR AL PROCESO
      public function actionBuscar_concepto_analisis($id_grupo, $sw){
-        $operacion = \app\models\ConceptoAnalisis::find()->orderBy('concepto ASC')->all();
+        $operacion = \app\models\ConceptoAnalisis::find()->orderBy('id_etapa ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
+        $etapa = null;
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
-                $q = Html::encode($form->q);                                
+                $q = Html::encode($form->q);  
+                $etapa = Html::encode($form->etapa); 
                     $operacion = \app\models\ConceptoAnalisis::find()
                             ->where(['like','concepto',$q])
-                            ->orwhere(['=','id_analisis',$q]);
+                            ->orwhere(['=','id_analisis',$q])
+                            ->andFilterWhere(['=','id_etapa',$etapa]);
                     $operacion = $operacion->orderBy('concepto ASC');                    
                     $count = clone $operacion;
                     $to = $count->count();
@@ -293,7 +296,7 @@ class GrupoProductoController extends Controller
                 $form->getErrors();
             }                    
         }else{
-            $table = \app\models\ConceptoAnalisis::find()->orderBy('concepto ASC');
+            $table = \app\models\ConceptoAnalisis::find()->orderBy('id_etapa ASC');
             $tableexcel = $table->all();
             $count = clone $table;
             $pages = new Pagination([
@@ -317,7 +320,7 @@ class GrupoProductoController extends Controller
                         $table = new \app\models\ConfiguracionProductoProceso();
                         $table->id_grupo = $id_grupo;
                         $table->id_analisis = $intCodigo;
-                        $table->id_etapa = 1;
+                        $table->id_etapa = $materia->id_etapa;
                         $table->user_name =  Yii::$app->user->identity->username;
                         $table->save(false);
                     }    
