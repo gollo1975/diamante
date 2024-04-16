@@ -16,11 +16,12 @@ class FiltroBusquedaAuditorias extends Model
     public $fecha_corte;
     public $etapa;
     public $numero_orden;
+    public $numero_lote;
     
     public function rules()
     {
         return [  
-           [['numero_auditoria', 'etapa','numero_orden'], 'integer'],
+           [['numero_auditoria', 'etapa','numero_orden','numero_lote'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -33,6 +34,7 @@ class FiltroBusquedaAuditorias extends Model
             'numero_orden' => 'Orden de produccion:',
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
+            'numero_lote' =>'Numero del lote:',
         ];
     }
     

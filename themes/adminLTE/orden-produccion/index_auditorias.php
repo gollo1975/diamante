@@ -15,7 +15,6 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-use app\models\OrdenProduccion;
 use app\models\EtapasAuditoria;
 
 $this->title = 'AUDITORIAS DE CALIDAD';
@@ -44,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ]);
 
 
-$conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy ('nombre_proceso ASC')->all(), 'id_proceso_produccion', 'nombre_proceso');
+$conEtapa = ArrayHelper::map(EtapasAuditoria::find()->all(), 'id_etapa', 'concepto');
 
 ?>
 
@@ -55,14 +54,8 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
 	
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
-            <?= $formulario->field($form, "numero")->input("search") ?>
-             <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
-                'data' => $grupo,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
+            <?= $formulario->field($form, "numero_orden")->input("search") ?>
+            <?= $formulario->field($form, "numero_auditoria")->input("search") ?>
             <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),
                 'options' => ['placeholder' => 'Seleccione una fecha ...'],
@@ -77,22 +70,15 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
-             <?= $formulario->field($form, 'almacen')->widget(Select2::classname(), [
-                'data' => $almacen,
+             <?= $formulario->field($form, 'etapa')->widget(Select2::classname(), [
+                'data' => $conEtapa,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ]); ?> 
-            <?= $formulario->field($form, 'tipo_proceso')->widget(Select2::classname(), [
-                'data' => $conProcesoProduccion,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-            <?= $formulario->field($form, "lote")->input("search") ?>
-            <?= $formulario->field($form, 'autorizado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+            
+            <?= $formulario->field($form, "numero_lote")->input("search") ?>
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -115,56 +101,44 @@ $form = ActiveForm::begin([
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 90%;'>         
-                
-                <th scope="col" style='background-color:#B9D5CE;'>Número</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Almacen</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Tipo proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total </th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'></th>
-                <th score="col" style='background-color:#B9D5CE;'></th>  
-                         
-            </tr>
+                    <th scope="col" style='background-color:#B9D5CE;'>Id</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>No auditoria</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Orden producción</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>F. creacion</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Continua</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Analisis</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th>
+                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                </tr>
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
             <tr style ='font-size: 90%;'>                
-                <td><?= $val->numero_orden?></td>
-                <td><?= $val->grupo->nombre_grupo?></td>
-                <td><?= $val->almacen->almacen?></td>
-                 <td><?= $val->tipoProceso->nombre_proceso?></td>
+                <td><?= $val->id_auditoria?></td>
+                <td><?= $val->numero_auditoria?></td>
                 <td><?= $val->numero_lote?></td>
+                <td><?= $val->numero_orden?></td>
+                <td><?= $val->ordenProduccion->grupo->nombre_grupo?></td>
+                <td><?= $val->fecha_creacion?></td>
                 <td><?= $val->fecha_proceso?></td>
-                <td><?= $val->fecha_entrega?></td>
-                 <td><?= $val->tipoOrden?></td>
-                <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->iva,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->total_orden,0)?></td>
-                <td><?= $val->cerrarOrden?></td>
-                 <td style= 'width: 25px; height: 10px;'>
-                    <a href="<?= Url::toRoute(["orden-produccion/view", "id" => $val->id_orden_produccion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-list" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                <td><?= $val->etapa?></td>
+                <td><?= $val->continuaProceso?></td>
+                <td><?= $val->condicionAnalisis?></td>
+                <td><?= $val->cerrarAuditoria?></td>
+                <td style= 'width: 25px; height: 10px;'>
+                    <a href="<?= Url::toRoute(["orden-produccion/view_auditoria_orden_produccion", "id_auditoria" => $val->id_auditoria]) ?>" ><span class="glyphicon glyphicon-list" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                 </td>
-                <?php if($val->autorizado == 0){?>
-                    <td style= 'width: 25px; height: 10px;'>
-                       <a href="<?= Url::toRoute(["orden-produccion/update", "id" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
-                    </td>
-                <?php }else{?>
-                    <td style= 'width: 25px; height: 10px;'></td>
-                <?php }?>    
+               
             </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-            <a align="right" href="<?= Url::toRoute("orden-produccion/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
         <?php $form->end() ?>
         </div>
      </div>

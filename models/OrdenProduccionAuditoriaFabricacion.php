@@ -37,7 +37,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','numero_lote'], 'integer'],
+            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','numero_lote','cerrar_auditoria'], 'integer'],
             [['fecha_proceso','fecha_creacion'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
@@ -66,6 +66,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
             'numero_orden' => 'Numero orden produccion:',
             'numero_lote' => 'Numero lote:',
             'fecha_creacion' => 'Fecha creacion:',
+            'cerrar_auditoria' => 'Cerrado:',
         ];
     }
 
@@ -117,5 +118,13 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
             }    
         }
         return $condicionanalisis;
+    }
+    public function getCerrarAuditoria() {
+        if($this->cerrar_auditoria == 0){
+            $cerrarauditoria = 'NO';
+        }else{
+            $cerrarauditoria = 'SI';
+        }
+        return $cerrarauditoria;
     }
 }

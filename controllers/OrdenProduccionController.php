@@ -1328,6 +1328,26 @@ class OrdenProduccionController extends Controller
         $inventario->total_inventario = $inventario->subtotal + $iva;
         $inventario->save();
     }
+    
+    //CERRAR AUDITORIA
+    public function actionCerrar_auditoria($id_auditoria, $orden) {
+        //proceso que genera consecutivo
+        $ordenProduccion = OrdenProduccion::findOne($orden);
+        $lista = \app\models\Consecutivos::findOne(11);
+        $auditoria = \app\models\OrdenProduccionAuditoriaFabricacion::findOne($id_auditoria);
+        $auditoria->numero_auditoria = $lista->numero_inicial + 1;
+        $auditoria->cerrar_auditoria = 1;
+        $auditoria->save(false);
+        $lista->numero_inicial = $auditoria->numero_auditoria;
+        $lista->save(false);
+        if($auditoria->continua == 1){
+            $ordenProduccion->seguir_proceso_ensamble = 1;
+            $ordenProduccion->save();
+        }
+        $this->redirect(["orden-produccion/view_auditoria_orden_produccion", 'id_auditoria' => $id_auditoria]);  
+    
+    }
+    
     /**
      * Finds the OrdenProduccion model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

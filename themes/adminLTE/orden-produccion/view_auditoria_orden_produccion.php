@@ -29,24 +29,34 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_resultado_auditoria'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-check"></span> Aprobar conceptos',
-                    ['/orden-produccion/aprobar_orden_produccion','id_auditoria' =>$model->id_auditoria],
-                    [
-                        'title' => 'Permite subir los parametros de aprobacion',
-                        'data-toggle'=>'modal',
-                        'data-target'=>'#modalaprobarordenproduccion',
-                        'class' => 'btn btn-info btn-sm'
-                    ])
-                    ?>
-             <div class="modal remote fade" id="modalaprobarordenproduccion">
-                      <div class="modal-dialog modal-lg" style ="width: 650px;">
-                         <div class="modal-content"></div>
-                     </div>
-             </div>
-    </p>
+   
+        <?php if($model->cerrar_auditoria == 0){
+            echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar auditoria', ['cerrar_auditoria', 'id_auditoria' => $model->id_auditoria,'orden' => $model->id_orden_produccion],['class' => 'btn btn-warning btn-sm',
+                               'data' => ['confirm' => 'Esta seguro de CERRAR el proceso de auditoria a la OP No ('.$model->ordenProduccion->numero_orden.').', 'method' => 'post']]);   
+        
+            echo Html::a('<span class="glyphicon glyphicon-check"></span> Aprobar conceptos',
+                        ['/orden-produccion/aprobar_orden_produccion','id_auditoria' =>$model->id_auditoria],
+                        [
+                            'title' => 'Permite subir los parametros de aprobacion',
+                            'data-toggle'=>'modal',
+                            'data-target'=>'#modalaprobarordenproduccion',
+                            'class' => 'btn btn-info btn-sm'
+                        ])?>
+                        
+            <div class="modal remote fade" id="modalaprobarordenproduccion">
+                     <div class="modal-dialog modal-lg" style ="width: 650px;">
+                        <div class="modal-content"></div>
+                    </div>
+            </div>
+              
+       <?php }else{
+             echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_informe_auditoria', 'id_auditoria' => $model->id_auditoria], ['class' => 'btn btn-default btn-sm']);
+        } ?>
+   </p>    
+    
     <div class="panel panel-success">
         <div class="panel-heading">
-            GRUPO DE PRODUCTOS
+            PRODUCTO AUDITADO
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
@@ -71,10 +81,18 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->continuaProceso) ?></td>
               </tr>
               <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_auditoria') ?></th>
+                    <td><?= Html::encode($model->numero_auditoria) ?></td>  
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'condicion_analisis') ?></th>
-                    <td><?= Html::encode($model->condicionAnalisis) ?></td>                    
+                    <td><?= Html::encode($model->condicionAnalisis) ?></td> 
+                    <th style='background-color:#F0F3EF;'></th>
+                    <td></td>
+                     <th style='background-color:#F0F3EF;'></th>
+                    <td></td>
+              </tr>
+               <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
-                    <td colspan="6"><?= Html::encode($model->observacion) ?></td>
+                    <td colspan="10"><?= Html::encode($model->observacion) ?></td>
                      
               </tr>
                            
@@ -115,24 +133,30 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                                             <td><?= $val->especificacion->concepto?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: left"> <input type="text"  name="resultado[]" value="<?= $val->resultado ?>"  size="15" required="true"> </td>
                                             <input type="hidden" name="listado_analisis[]" value="<?= $val->id_detalle?>"> 
-                                            <td style= 'width: 25px; height: 25px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_auditoria', 'id_auditoria' => $model->id_auditoria, 'detalle' => $val->id_detalle], [
-                                                              'class' => '',
-                                                              'data' => [
-                                                                  'confirm' => 'Esta seguro de eliminar el registro?',
-                                                                  'method' => 'post',
+                                            <?php if($model->cerrar_auditoria == 0){?>
+                                                <td style= 'width: 25px; height: 25px;'>
+                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_auditoria', 'id_auditoria' => $model->id_auditoria, 'detalle' => $val->id_detalle], [
+                                                                  'class' => '',
+                                                                  'data' => [
+                                                                      'confirm' => 'Esta seguro de eliminar el registro?',
+                                                                      'method' => 'post',
 
-                                                              ],
-                                                ])?>
-                                            </td>     
+                                                                  ],
+                                                    ])?>
+                                                </td> 
+                                            <?php  }else{?>
+                                                <td style= 'width: 25px; height: 25px;'></td>
+                                            <?php }?>    
                                         </tr>
                                     <?php endforeach;?>
                                 </tbody>
                             </table>
                         </div>  
-                        <div class="panel-footer text-right">  
-                            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_analisis'])?>
-                        </div>   
+                        <?php if($model->cerrar_auditoria == 0){?>
+                            <div class="panel-footer text-right">  
+                                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_analisis'])?>
+                            </div> 
+                        <?php }?>
                     </div>
                 </div>
             </div>
