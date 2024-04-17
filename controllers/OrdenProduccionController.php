@@ -143,7 +143,7 @@ class OrdenProduccionController extends Controller
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',92])->all()){
                 $form = new \app\models\FiltroBusquedaAuditorias();
                 $numero_auditoria = null;
-                $numero_orden = null;
+                $numero_orden = null; $numero_lote = null;
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $etapa = null;
@@ -154,11 +154,14 @@ class OrdenProduccionController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $etapa = Html::encode($form->etapa);
+                         $numero_lote = Html::encode($form->numero_lote);
                         $table = \app\models\OrdenProduccionAuditoriaFabricacion::find()
-                                    ->andFilterWhere(['=', 'id_orden_produccion', $numero_orden])
+                                    ->andFilterWhere(['=', 'numero_orden', $numero_orden])
                                     ->andFilterWhere(['between', 'fecha_creacion', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['=', 'numero_auditoria', $numero_auditoria]);
-                        $table = $table->orderBy('id_audtoria DESC');
+                                    ->andFilterWhere(['=', 'numero_auditoria', $numero_auditoria])
+                                    ->andFilterWhere(['=', 'numero_lote', $numero_lote])
+                                    ->andFilterWhere(['=', 'id_etapa', $etapa]);
+                        $table = $table->orderBy('id_auditoria DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
                         $to = $count->count();
@@ -179,7 +182,7 @@ class OrdenProduccionController extends Controller
                     }
                 } else {
                     $table = \app\models\OrdenProduccionAuditoriaFabricacion::find()
-                            ->orderBy('id_orden_produccion DESC');
+                            ->orderBy('id_auditoria DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
@@ -244,7 +247,7 @@ class OrdenProduccionController extends Controller
                         $count = clone $table;
                         $to = $count->count();
                         $pages = new Pagination([
-                            'pageSize' => 15,
+                            'pageSize' => 10,
                             'totalCount' => $count->count()
                         ]);
                         $model = $table
@@ -261,7 +264,7 @@ class OrdenProduccionController extends Controller
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
-                        'pageSize' => 15,
+                        'pageSize' => 10,
                         'totalCount' => $count->count(),
                     ]);
                     $model = $table
@@ -550,7 +553,7 @@ class OrdenProduccionController extends Controller
     public function actionView_auditoria_orden_produccion($id_auditoria){
         $model = \app\models\OrdenProduccionAuditoriaFabricacion::findOne($id_auditoria);
         $conConcepto = \app\models\OrdenProduccionAuditoriaFabricacionDetalle::find()->where(['=','id_auditoria', $id_auditoria])->all();
-        
+        //ACTUALIZA LOS REGISTGROS DEL DETALLA DE LA AUDITORIA
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_listado_analisis"])){
                 if(isset($_POST["listado_analisis"])){
@@ -565,6 +568,28 @@ class OrdenProduccionController extends Controller
                 }
             }    
         }    
+        if (Yii::$app->request->post()) {
+            if (isset($_POST["eliminar_todo_auditoria"])) {
+                if (isset($_POST["listado_eliminar"])) {
+                    foreach ($_POST["listado_eliminar"] as $intCodigo) {
+                        try {
+                            $eliminar = \app\models\OrdenProduccionAuditoriaFabricacionDetalle::findOne($intCodigo);
+                            $eliminar->delete();
+                            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                            $this->redirect(["orden-produccion/view_auditoria_orden_produccion", 'id_auditoria' => $id_auditoria]);
+                        } catch (IntegrityException $e) {
+
+                            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
+                        } catch (\Exception $e) {
+                            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
+
+                        }
+                    }
+                } else {
+                    Yii::$app->getSession()->setFlash('error', 'Debe seleccionar al menos un registro.');
+                }    
+             }
+        }         
         return $this->render('view_auditoria_orden_produccion', [
             'conConcepto' => $conConcepto,
             'id_auditoria' => $id_auditoria,
@@ -628,6 +653,7 @@ class OrdenProduccionController extends Controller
             $table->id_orden_produccion= $id;
             $table->numero_orden = $orden->numero_orden;
             $table->numero_lote = $orden->numero_lote;
+            $table->id_grupo = $id_grupo;
             $table->id_etapa = 1;
             $table->etapa =$etapa->concepto;
             $table->fecha_creacion = date('Y-m-d');
@@ -648,6 +674,20 @@ class OrdenProduccionController extends Controller
         }    
        
     } 
+    
+    //CARGAR ITEMS DE AUDITORIA AL DETALLE SE ESTAN ELIMINADOS
+    public function actionCargar_items_auditoria($id_grupo, $id_etapa, $id_auditoria){
+        $configuracion = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_grupo', $id_grupo])->andWhere(['=','id_etapa', $id_etapa])->all();
+        foreach ($configuracion as $resultado):
+            $table = new \app\models\OrdenProduccionAuditoriaFabricacionDetalle();
+            $table->id_auditoria = $id_auditoria;
+            $table->id_analisis = $resultado->id_analisis;
+            $table->id_especificacion = $resultado->id_especificacion;
+            $table->resultado = $resultado->resultado;
+            $table->save ();
+        endforeach;
+        return $this->redirect(['orden-produccion/view_auditoria_orden_produccion','id_auditoria' => $id_auditoria]);
+    }
     
     //PROCESO QUE REGENERA LA FORMULA DE PRODUCCION DEL PRODUCTO
     public function actionRegenerar_formula($id, $token, $id_grupo){

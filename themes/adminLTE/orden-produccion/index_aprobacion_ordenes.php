@@ -21,7 +21,7 @@ use app\models\TipoProcesoProduccion;
 
 
 
-$this->title = 'ORDEN DE PRODUCCION (AUDITORIA)';
+$this->title = 'ORDEN DE PRODUCCION (AUDITORIAS)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -57,7 +57,7 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtro" style="display:none">
+    <div class="panel-body" id="filtro" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "numero")->input("search") ?>
              <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
@@ -128,7 +128,8 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Paso el proceso de auditoria primera etapa">A. etapa 1</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Paso el proceso de auditoria segunda etapa">A. etapa 2</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
@@ -143,16 +144,28 @@ $form = ActiveForm::begin([
                 <td><?= $val->fecha_proceso?></td>
                 <td><?= $val->fecha_entrega?></td>
                 <td><?= $val->tipoOrden?></td>
-                <td><?= $val->cerrarOrden?></td>
+                <td><?= $val->seguirProcesoEnsamble?></td>
+                <td><?= $val->productoAprobado?></td>
                 <td style= 'width: 25px; height: 10px;'>
-                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
-                                   'class' => '',
-                                   'title' => 'Proceso que permite cargar los conceptos de auditoria.', 
-                                   'data' => [
-                                       'confirm' => 'Esta seguro de crear la auditoria a la orden de produccion Nro:  ('.$val->numero_orden.').',
-                                       'method' => 'post',
-                                   ],
-                     ])?>
+                    <?php if($val->seguir_proceso_ensamble == 0){?>
+                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                                       'class' => '',
+                                       'title' => 'Proceso que permite cargar los conceptos de auditoria.', 
+                                       'data' => [
+                                           'confirm' => 'Esta seguro de crear la auditoria a la orden de produccion Nro:  ('.$val->numero_orden.').',
+                                           'method' => 'post',
+                                       ],
+                         ])?>
+                    <?php } else { ?>
+                        <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['cargar_concepto_auditoria_emsable', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                                       'class' => '',
+                                       'title' => 'Proceso que permite cargar los conceptos de auditoria en la segunda etapa', 
+                                       'data' => [
+                                           'confirm' => 'Esta seguro de crear los conceptos de audiroria en la orden de ensamble de acuerdo con a la orden de produccion Nro:  ('.$val->numero_orden.').',
+                                           'method' => 'post',
+                                       ],
+                         ])?>
+                    <?php } ?>
                 </td>
                
             </tr>            

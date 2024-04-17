@@ -183,7 +183,7 @@
                                                 'icon' => 'check',
                                                 'url' => '#',
                                                 'items' => [
-                                                    ['label' => 'Orden de produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
+                                                    ['label' => 'Cargar ordenes', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
                                                     ['label' => 'Resultado auditoria', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
                                                     
                                                 ]],

@@ -67,8 +67,8 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->ordenProduccion->numero_orden) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'etapa') ?></th>
                     <td><?= Html::encode($model->etapa) ?></td>   
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Grupo') ?>:</th>
-                    <td><?= Html::encode($model->ordenProduccion->grupo->nombre_grupo) ?></td>
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
+                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
               </tr>
                <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
@@ -123,6 +123,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                                         <th scope="col" style='background-color:#B9D5CE; '>Espeficicaciones</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>Resultado</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'></th>
+                                        <th scope="col" style='background-color:#B9D5CE; text-align: center;'><input type="checkbox" onclick="marcar(this);"/></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -131,7 +132,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                                         <tr style='font-size:90%;'>
                                             <td><?= $val->analisis->concepto?></td>
                                             <td><?= $val->especificacion->concepto?></td>
-                                            <td style="padding-right: 1;padding-right: 1; text-align: left"> <input type="text"  name="resultado[]" value="<?= $val->resultado ?>"  size="15" required="true"> </td>
+                                            <td style="padding-right: 1;padding-right: 1; text-align: left"> <input type="text"  name="resultado[]" value="<?= $val->resultado ?>"  size="15"> </td>
                                             <input type="hidden" name="listado_analisis[]" value="<?= $val->id_detalle?>"> 
                                             <?php if($model->cerrar_auditoria == 0){?>
                                                 <td style= 'width: 25px; height: 25px;'>
@@ -147,6 +148,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                                             <?php  }else{?>
                                                 <td style= 'width: 25px; height: 25px;'></td>
                                             <?php }?>    
+                                            <td style="text-align: center;"><input type="checkbox" name="listado_eliminar[]" value="<?= $val->id_detalle ?>"></td>    
                                         </tr>
                                     <?php endforeach;?>
                                 </tbody>
@@ -154,7 +156,12 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                         </div>  
                         <?php if($model->cerrar_auditoria == 0){?>
                             <div class="panel-footer text-right">  
-                                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_analisis'])?>
+                                <?php if($conConcepto){?>
+                                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_analisis'])?>
+                                    <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar_todo_auditoria']) ?>
+                                <?php }else { ?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Refrescar', ['orden-produccion/cargar_items_auditoria', 'id_grupo' => $model->id_grupo, 'id_etapa' => $model->id_etapa, 'id_auditoria'=> $model->id_auditoria],[ 'class' => 'btn btn-info btn-sm']) ?>
+                                <?php }?> 
                             </div> 
                         <?php }?>
                     </div>
@@ -165,3 +172,16 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
     </div>    
 <?php ActiveForm::end(); ?>  
 </div>
+<script type="text/javascript">
+	function marcar(source) 
+	{
+		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
+		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
+		{
+			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
+			{
+				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
+			}
+		}
+	}
+</script>

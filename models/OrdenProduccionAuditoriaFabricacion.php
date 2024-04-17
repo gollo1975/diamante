@@ -37,13 +37,14 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','numero_lote','cerrar_auditoria'], 'integer'],
+            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','numero_lote','cerrar_auditoria','id_grupo'], 'integer'],
             [['fecha_proceso','fecha_creacion'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
             [['user_name'], 'string', 'max' => 15],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
+            [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
         ];
     }
 
@@ -67,6 +68,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
             'numero_lote' => 'Numero lote:',
             'fecha_creacion' => 'Fecha creacion:',
             'cerrar_auditoria' => 'Cerrado:',
+            'id_grupo' => 'Nombre del grupo:',
         ];
     }
 
@@ -92,6 +94,14 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     public function getOrdenProduccionAuditoriaFabricacionDetalles()
     {
         return $this->hasMany(OrdenProduccionAuditoriaFabricacionDetalle::className(), ['id_auditoria' => 'id_auditoria']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGrupo()
+    {
+        return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
     }
     
     public function getContinuaProceso() {

@@ -31,7 +31,7 @@ class ConceptoAnalisis extends \yii\db\ActiveRecord
             [['concepto'], 'required'],
             [['id_etapa'], 'integer'],
             [['fecha_registro'], 'safe'],
-            [['concepto'], 'string', 'max' => 30],
+            [['concepto'], 'string', 'max' => 40],
             [['user_name'], 'string', 'max' => 15],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
         ];
