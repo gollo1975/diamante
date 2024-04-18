@@ -19,13 +19,14 @@ class FormModeloCambiarCantidad extends Model
     public $descuento;
     public $cantidad_real;
     public $tamano_lote;
+    public $estado;
 
 
     public function rules()
     {
         return [
 
-           [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual','descuento','cantidad_real','tamano_lote'], 'integer'],
+           [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual','descuento','cantidad_real','tamano_lote','estado'], 'integer'],
            ['fecha', 'safe'], 
         ];
     }
@@ -42,6 +43,7 @@ class FormModeloCambiarCantidad extends Model
             'tipo_precio' => 'Tipo precio venta:',
             'descuento' => 'Descto comercial:',
             'tamano_lote' => 'Tamaño lote:',
+            'estado' => 'Sigue proceso:',
 
         ];
     }

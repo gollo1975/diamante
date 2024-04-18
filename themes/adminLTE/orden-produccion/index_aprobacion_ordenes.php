@@ -156,16 +156,16 @@ $form = ActiveForm::begin([
                                            'method' => 'post',
                                        ],
                          ])?>
-                    <?php } else { ?>
-                        <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['cargar_concepto_auditoria_emsable', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                    <?php }else{ ?>
+                        <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_orden_ensamble', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
                                        'class' => '',
-                                       'title' => 'Proceso que permite cargar los conceptos de auditoria en la segunda etapa', 
+                                       'title' => 'Proceso que permite crear la orden de ensamble a la orden de produccion.', 
                                        'data' => [
-                                           'confirm' => 'Esta seguro de crear los conceptos de audiroria en la orden de ensamble de acuerdo con a la orden de produccion Nro:  ('.$val->numero_orden.').',
+                                           'confirm' => 'Esta seguro de crear la ORDEN DE ENSAMBLE a la orden de produccion  Nro:  ('.$val->numero_orden.').',
                                            'method' => 'post',
                                        ],
                          ])?>
-                    <?php } ?>
+                    <?php }?>
                 </td>
                
             </tr>            

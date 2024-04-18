@@ -51,7 +51,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
         } else {
             if ($model->autorizado == 1 && $model->numero_orden == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generarorden', 'id' => $model->id_orden_produccion, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generarorden', 'id' => $model->id_orden_produccion, 'token'=> $token,'id_grupo' =>$model->id_grupo],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar el numero de la orden de producción!.', 'method' => 'post']]);
             }else{
                 if($model->numero_orden > 0 && $model->numero_lote == 0){
@@ -229,7 +229,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                    <td><?= $val->cerrarLinea ?></td>
                                                    <td><?= $val->documentoExportado ?></td>
                                                 <?php }?>   
-                                                <input type="hidden" name="listado_producto[]" value="<?= $val->id_detalle?>">  
+                                                
                                                 <td style= 'width: 25px; height: 25px;'>
                                                 <?php 
                                                     if($model->autorizado == 0 && $val->importado == 0){?>
@@ -265,7 +265,8 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                         <?php }         
                                                     }?>
                                                     </div>    
-                                                </td>     
+                                                </td>
+                                                 <input type="hidden" name="listado_producto[]" value="<?= $val->id_detalle?>"> 
                                             </tr>
                                          <?php endforeach;?>          
                                     </body>
@@ -293,7 +294,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                </div>
                                         </div>
                                         <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
-                                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizaregistro']) ?>
+                                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>
                                     <?php }   
                                 }?>
                             </div>   
@@ -368,14 +369,16 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                 <?php }?>   
                                                 <input type="hidden" name="listado_fase[]" value="<?= $val->id_detalle?>">  
                                                 <td style= 'width: 25px; height: 25px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminarmateria', 'id' => $model->id_orden_produccion, 'detalle' => $val->id_detalle, 'token' => $token], [
-                                                                'class' => '',
-                                                                'data' => [
-                                                                    'confirm' => 'Esta seguro de eliminar el registro?',
-                                                                    'method' => 'post',
+                                                    <?php if($model->cerrar_orden == 0){?>
+                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminarmateria', 'id' => $model->id_orden_produccion, 'detalle' => $val->id_detalle, 'token' => $token], [
+                                                                    'class' => '',
+                                                                    'data' => [
+                                                                        'confirm' => 'Esta seguro de eliminar el registro?',
+                                                                        'method' => 'post',
 
-                                                                ],
-                                                    ])?>
+                                                                    ],
+                                                        ])?>
+                                                    <?php }?>
                                                 </td>  
                                                 <td><input type="checkbox" name="listado_eliminar[]" value="<?= $val->id_detalle ?>"></td> 
                                             </tr>

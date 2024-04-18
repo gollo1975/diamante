@@ -525,8 +525,9 @@ class OrdenProduccionController extends Controller
                     Yii::$app->getSession()->setFlash('error', 'Debe seleccionar al menos un registro.');
                 }    
              }
-        }         
-       if(isset($_POST["actualizaregistro"])){
+        }    
+        //ACTUALIZA LAS FASES DEL PRODUCTO
+        if(isset($_POST["actualizaregistro"])){
             if(isset($_POST["listado_fase"])){
                 $intIndice = 0;
                 foreach ($_POST["listado_fase"] as $intCodigo):
@@ -539,6 +540,23 @@ class OrdenProduccionController extends Controller
                 $this->ActualizarExistenciaMateriaPrima($id);
                 return $this->redirect(['view','id' =>$id, 'token' => $token]);
             }
+        }
+        //ACTUALIZA LAS PRODUCTOS DEL DETALLE DE LA OP.
+        if(isset($_POST["actualizar_detalle_producto"])){
+            if(isset($_POST["listado_producto"])){
+                $intIndice = 0;
+                foreach ($_POST["listado_producto"] as $intCodigo):
+                    $table = OrdenProduccionProductos::findOne($intCodigo);
+                    $table->cantidad = $_POST["cantidad_producto"][$intIndice];
+                    $table->cantidad_real = $_POST["cantidad_producto"][$intIndice];
+                    $table->id_medida_producto = $_POST["tipo_medida"][$intIndice];
+                    $table->porcentaje_iva = $_POST["porcentaje_iva"][$intIndice];
+                    $table->save(false);
+                    $intIndice++;
+                endforeach;
+                $this->TotalUnidadesLote($id);
+                return $this->redirect(['view','id' =>$id, 'token' => $token]);
+            }
         }    
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -547,7 +565,7 @@ class OrdenProduccionController extends Controller
             'fase_inicial' => $fase_inicial,
         ]);
     }
-    
+       
     //VISTA QUE MUESTRA LOS RESULTADOS DE LA AUDITORIA
     
     public function actionView_auditoria_orden_produccion($id_auditoria){
@@ -824,15 +842,29 @@ class OrdenProduccionController extends Controller
     }
     
     //generar orden produccion
-    public function actionGenerarorden($id, $token) {
-        //proceso de generar consecutivo
-        $lista = \app\models\Consecutivos::findOne(3);
-        $solicitud = OrdenProduccion::findOne($id);
-        $solicitud->numero_orden = $lista->numero_inicial + 1;
-        $solicitud->save(false);
-        $lista->numero_inicial = $solicitud->numero_orden;
-        $lista->save(false);
-        $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);  
+    public function actionGenerarorden($id, $token, $id_grupo) {
+        
+        //proceso que busca si esta ok la fase inicia
+        $fase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_grupo', $id_grupo])->all();
+        $sw = 0;
+        foreach ($fase as $fases):
+           if($fases->cantidad_faltante <> 0){
+               $sw = 1;
+           }
+        endforeach;
+        if($sw == 0){
+            //proceso de generar consecutivo
+            $lista = \app\models\Consecutivos::findOne(3);
+            $solicitud = OrdenProduccion::findOne($id);
+            $solicitud->numero_orden = $lista->numero_inicial + 1;
+            $solicitud->save(false);
+            $lista->numero_inicial = $solicitud->numero_orden;
+            $lista->save(false);
+            $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);  
+        }else{
+            Yii::$app->getSession()->setFlash('warning', 'No se puede generar la ORDEN DE PRODUCCION porque en la fase inicial o final no hay suficiente materia prima para cumplir con el proceso.'); 
+            $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);  
+        }    
     }
     
     //crear codigo productos
@@ -1071,6 +1103,29 @@ class OrdenProduccionController extends Controller
             'model' => $model,
             'token' => $token,
             'detalle' => $detalle,
+            'id' => $id,
+        ]);
+    }
+    
+     //CAMBIA EL ESTADO DE SEGUIR EL PROCESO DE ORDEN DE EMSAMBLE CUANDO NO PASA LA AUDITORIA
+    public function actionModificar_estado_orden($id) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $orden = OrdenProduccion::findOne($id);
+       
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["actualizar_cambio"])) { 
+                $orden->seguir_proceso_ensamble = $model->estado;
+                $orden->fecha_cambio = $model->fecha;
+                $orden->save(false);
+                $this->redirect(["orden-produccion/index"]);
+            }    
+        }
+         if (Yii::$app->request->get()) {
+            $model->estado = $orden->seguir_proceso_ensamble; 
+            $model->fecha = $orden->fecha_cambio;
+        }
+        return $this->renderAjax('cambiar_proceso_auditoria', [
+            'model' => $model,
             'id' => $id,
         ]);
     }
@@ -1386,6 +1441,36 @@ class OrdenProduccionController extends Controller
         }
         $this->redirect(["orden-produccion/view_auditoria_orden_produccion", 'id_auditoria' => $id_auditoria]);  
     
+    }
+    
+    //PROCESO QUE GENERA LA ORDEN DE ENSAMBLE 
+    public function actionGenerar_orden_ensamble($id, $id_grupo) {
+        $orden_produccion = OrdenProduccion::findOne($id);
+        //proceso de insertar
+        $table = new \app\models\OrdenEnsambleProducto();
+        $table->id_orden_produccion = $id;
+        $table->id_grupo = $id_grupo;
+        $table->numero_lote = $orden_produccion->numero_lote;
+        $table->id_etapa = 2;
+        $table->fecha_proceso = date('Y-m-d');
+        $table->user_name = Yii::$app->user->identity->username;
+        $table->save();     
+        $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
+        //proceso del detalle de la orden de ensamble
+        $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
+        foreach ($detalle_orden as $detalle):
+            $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
+            $resultado->id_ensamble = $ensamble->id_ensamble;
+            $resultado->codigo_producto = $detalle->codigo_producto;
+            $resultado->nombre_producto = $detalle->descripcion;
+            $resultado->cantidad_proyectada = $detalle->cantidad;
+            $resultado->cantidad_real = $detalle->cantidad_real;
+            $resultado->save(false);
+        endforeach;
+        $id = $ensamble->id_ensamble;
+        $token = 0;
+        return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token]);
+       
     }
     
     /**
