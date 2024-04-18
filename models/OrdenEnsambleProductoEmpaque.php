@@ -1,0 +1,86 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "orden_ensamble_producto_empaque".
+ *
+ * @property int $id
+ * @property int $id_ensamble
+ * @property int $id_materia_prima
+ * @property int $unidades_solicitadas
+ * @property int $unidades_devolucion
+ * @property int $unidades_averias
+ * @property int $unidades_utilizadas
+ * @property int $unidades_sala_tecnica
+ * @property int $unidades_muestra_retencion
+ * @property int $unidades_reales
+ * @property string $fecha_hora_carga
+ * @property string $user_name
+ *
+ * @property OrdenEnsambleProducto $ensamble
+ * @property MateriaPrimas $materiaPrima
+ */
+class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
+{
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'orden_ensamble_producto_empaque';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['id_ensamble', 'id_materia_prima', 'unidades_solicitadas', 'unidades_devolucion', 'unidades_averias', 'unidades_utilizadas', 'unidades_sala_tecnica', 'unidades_muestra_retencion', 'unidades_reales'], 'integer'],
+            [['fecha_hora_carga'], 'safe'],
+            [['user_name'], 'string', 'max' => 15],
+            [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
+            [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'id_ensamble' => 'Id Ensamble',
+            'id_materia_prima' => 'Id Materia Prima',
+            'unidades_solicitadas' => 'Unidades Solicitadas',
+            'unidades_devolucion' => 'Unidades Devolucion',
+            'unidades_averias' => 'Unidades Averias',
+            'unidades_utilizadas' => 'Unidades Utilizadas',
+            'unidades_sala_tecnica' => 'Unidades Sala Tecnica',
+            'unidades_muestra_retencion' => 'Unidades Muestra Retencion',
+            'unidades_reales' => 'Unidades Reales',
+            'fecha_hora_carga' => 'Fecha Hora Carga',
+            'user_name' => 'User Name',
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEnsamble()
+    {
+        return $this->hasOne(OrdenEnsambleProducto::className(), ['id_ensamble' => 'id_ensamble']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMateriaPrima()
+    {
+        return $this->hasOne(MateriaPrimas::className(), ['id_materia_prima' => 'id_materia_prima']);
+    }
+}

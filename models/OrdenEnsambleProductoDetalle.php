@@ -33,11 +33,12 @@ class OrdenEnsambleProductoDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_ensamble', 'cantidad_proyectada', 'cantidad_real'], 'integer'],
+            [['id_ensamble', 'cantidad_proyectada', 'cantidad_real','id_detalle'], 'integer'],
             [['porcentaje_rendimiento'], 'number'],
             [['codigo_producto'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
             [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
+            [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccionProductos::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']]
         ];
     }
 
@@ -54,6 +55,7 @@ class OrdenEnsambleProductoDetalle extends \yii\db\ActiveRecord
             'cantidad_proyectada' => 'Cantidad Proyectada',
             'cantidad_real' => 'Cantidad Real',
             'porcentaje_rendimiento' => 'Porcentaje Rendimiento',
+            'id_detalle' => 'id_detalle',
         ];
     }
 
@@ -63,5 +65,13 @@ class OrdenEnsambleProductoDetalle extends \yii\db\ActiveRecord
     public function getEnsamble()
     {
         return $this->hasOne(OrdenEnsambleProducto::className(), ['id_ensamble' => 'id_ensamble']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrdenProduccionProducto()
+    {
+        return $this->hasOne(OrdenProduccionProductos::className(), ['id_detalle' => 'id_detalle']);
     }
 }

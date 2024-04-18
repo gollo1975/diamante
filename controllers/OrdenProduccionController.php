@@ -1461,6 +1461,7 @@ class OrdenProduccionController extends Controller
         foreach ($detalle_orden as $detalle):
             $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
             $resultado->id_ensamble = $ensamble->id_ensamble;
+            $resultado->id_detalle = $detalle->id_detalle;
             $resultado->codigo_producto = $detalle->codigo_producto;
             $resultado->nombre_producto = $detalle->descripcion;
             $resultado->cantidad_proyectada = $detalle->cantidad;

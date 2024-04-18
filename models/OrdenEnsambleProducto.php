@@ -41,7 +41,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa', 'peso_neto','autorizado'], 'integer'],
+            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa', 'peso_neto','autorizado','total_unidades'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
@@ -71,6 +71,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'responsable' => 'Responsable:',
             'autorizado' => 'Autorizado:',
+            'total_unidades' => 'Unidades proyectadas:',
         ];
     }
 
