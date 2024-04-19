@@ -1446,31 +1446,38 @@ class OrdenProduccionController extends Controller
     //PROCESO QUE GENERA LA ORDEN DE ENSAMBLE 
     public function actionGenerar_orden_ensamble($id, $id_grupo) {
         $orden_produccion = OrdenProduccion::findOne($id);
-        //proceso de insertar
-        $table = new \app\models\OrdenEnsambleProducto();
-        $table->id_orden_produccion = $id;
-        $table->id_grupo = $id_grupo;
-        $table->numero_lote = $orden_produccion->numero_lote;
-        $table->id_etapa = 2;
-        $table->fecha_proceso = date('Y-m-d');
-        $table->user_name = Yii::$app->user->identity->username;
-        $table->save();     
-        $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
-        //proceso del detalle de la orden de ensamble
-        $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-        foreach ($detalle_orden as $detalle):
-            $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
-            $resultado->id_ensamble = $ensamble->id_ensamble;
-            $resultado->id_detalle = $detalle->id_detalle;
-            $resultado->codigo_producto = $detalle->codigo_producto;
-            $resultado->nombre_producto = $detalle->descripcion;
-            $resultado->cantidad_proyectada = $detalle->cantidad;
-            $resultado->cantidad_real = $detalle->cantidad_real;
-            $resultado->save(false);
-        endforeach;
-        $id = $ensamble->id_ensamble;
-        $token = 0;
-        return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token]);
+        $detalle = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->one();
+        if($detalle){
+            Yii::$app->getSession()->setFlash('warning', 'Esta Orden de produccion ya esta integrada en la ORDEN DE ENSAMBLE. Buscar la orden de ensamble en la modulo de CONTROL DE CALIDAD.'); 
+            $this->redirect(["orden-produccion/index_ordenes_produccion"]);
+        }else{
+           
+            //proceso de insertar
+            $table = new \app\models\OrdenEnsambleProducto();
+            $table->id_orden_produccion = $id;
+            $table->id_grupo = $id_grupo;
+            $table->numero_lote = $orden_produccion->numero_lote;
+            $table->id_etapa = 2;
+            $table->fecha_proceso = date('Y-m-d');
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save();     
+            $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
+            //proceso del detalle de la orden de ensamble
+            $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
+            foreach ($detalle_orden as $detalle):
+                $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
+                $resultado->id_ensamble = $ensamble->id_ensamble;
+                $resultado->id_detalle = $detalle->id_detalle;
+                $resultado->codigo_producto = $detalle->codigo_producto;
+                $resultado->nombre_producto = $detalle->descripcion;
+                $resultado->cantidad_proyectada = $detalle->cantidad;
+                $resultado->cantidad_real = $detalle->cantidad_real;
+               $resultado->save(false);
+            endforeach;
+            $id = $ensamble->id_ensamble;
+            $token = 0;
+            return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token]);
+        }    
        
     }
     

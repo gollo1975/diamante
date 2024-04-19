@@ -111,7 +111,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     //proceso que agrupa varios campos
     public function getOrdenEnsambleConsulta()
     {
-        return " Nmero orden: {$this->ordenProduccion->numero_orden} - Id: {$this->id_orden_produccion}";
+        return " Numero orden: {$this->ordenProduccion->numero_orden} - Id: {$this->id_orden_produccion}";
     }
     
     public function getCerrarOrdenEnsamble() {

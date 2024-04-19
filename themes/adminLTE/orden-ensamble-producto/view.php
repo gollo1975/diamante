@@ -52,8 +52,13 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                         </div>
                 </div>
             <?php }else{
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar orden ensamble', ['cerrar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token],['class' => 'btn btn-default btn-sm',
-                                    'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema.', 'method' => 'post']]);   
+                if($model->cerrar_orden_ensamble == 1 && $model->cerrar_proceso == 0){
+                    echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar orden ensamble', ['cerrar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token],['class' => 'btn btn-default btn-sm',
+                                        'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema.', 'method' => 'post']]);   
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+                }else {
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+                }    
             }  
         }?>    
     </p>
@@ -141,7 +146,7 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                             <td><?= $val->nombre_producto?></td>
                                             <td style="text-align: right;"><?= ''. number_format($val->cantidad_proyectada,0)?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="cantidad_real[]" style = "text-align: right;" value="<?= $val->cantidad_real ?>"  size="15"> </td>
-                                            <td><?= $val->porcentaje_rendimiento?></td>
+                                            <td style="text-align: right;"><?= $val->porcentaje_rendimiento?>%</td>
                                             <?php if($model->autorizado == 0 ){?>
                                                 <td style= 'width: 25px; height: 25px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_ensamble', 'id' => $model->id_ensamble, 'id_detalle' => $val->id, 'token' =>$token], [
@@ -154,12 +159,12 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                                     ])?>
                                                 </td> 
                                             <?php  }else{
-                                                if ($model->cerrar_orden_ensamble == 1){ 
+                                                if ($model->cerrar_orden_ensamble == 1 && $model->cerrar_proceso == 0){ 
                                                     ?>
                                                     <td style= 'width: 25px; height: 25px;'>
                                                         <!-- Inicio Nuevo Detalle proceso -->
                                                             <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                                ['/orden-produccion/modificarcantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token],
+                                                                ['/orden-ensamble-producto/modificar_cantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token,  'codigo' => $val->id_detalle],
                                                                 [
                                                                     'title' => 'Modificar cantidades de producción',
                                                                     'data-toggle'=>'modal',

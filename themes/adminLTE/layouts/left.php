@@ -158,8 +158,16 @@
                                                ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],  
                                                ['label' => 'Grupo productos', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
                                                ['label' => 'Presentacion producto', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
-                                               ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 
-                                               ['label' => 'Formula analisis', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
+                                               [
+                                                'label' => 'Ordenes y calidad',
+                                                'icon' => 'check',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Concepto analisis', 'icon' => 'plus-square-o', 'url' => ['concepto-analisis/index']], 
+                                                    ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 
+                                                    ['label' => 'Formula analisis', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
+                                                ]], 
+                                               
                                                ['label' => 'Tipo devolucion', 'icon' => 'plus-square-o', 'url' => ['tipo-devolucion-productos/index']], 
                                             ],
                                         ],

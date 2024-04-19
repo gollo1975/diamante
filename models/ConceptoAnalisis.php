@@ -22,6 +22,15 @@ class ConceptoAnalisis extends \yii\db\ActiveRecord
         return 'concepto_analisis';
     }
 
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->concepto = strtoupper($this->concepto); 
+ 
+        return true;
+    }
     /**
      * {@inheritdoc}
      */
@@ -43,9 +52,9 @@ class ConceptoAnalisis extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_analisis' => 'Id Analisis',
-            'concepto' => 'Concepto',
-            'fecha_registro' => 'Fecha Registro',
+            'id_analisis' => 'Codigo:',
+            'concepto' => 'Concepto:',
+            'fecha_registro' => 'Fecha registro',
             'user_name' => 'User Name',
             'id_etapa' => 'Etapa:',
         ];

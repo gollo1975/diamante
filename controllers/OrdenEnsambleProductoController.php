@@ -329,6 +329,10 @@ class OrdenEnsambleProductoController extends Controller
         if($sw == 1){
             Yii::$app->getSession()->setFlash('warning', 'No se puede CERRAR la orden de ensamble porque las UNIDADES REALES no son iguales en el proceso. Favor corregir las unidades por la primer vista.'); 
             $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]); 
+        }else{
+            $orden->cerrar_proceso = 1;
+            $orden->save();
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);
         }    
     }
     
@@ -441,6 +445,74 @@ class OrdenEnsambleProductoController extends Controller
         ]);
     }
   
+    //modificar cantidades produccion
+    public function actionModificar_cantidades($id, $token, $detalle,  $codigo) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $table = \app\models\OrdenEnsambleProductoDetalle::findOne($detalle);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["actualizar_unidades"])) { 
+                $cantidad = 0;
+                $variable = number_format((($model->cantidad_real / $table->cantidad_proyectada)*100),2);
+                $cantidad = $model->cantidad_real;
+                $table->cantidad_real = $model->cantidad_real;
+                $table->porcentaje_rendimiento = $variable;
+                $table->save();
+                $orden_ensamble = OrdenEnsambleProducto::findOne($id); 
+                $this->TotalUnidadesLote($orden_ensamble);
+                $this->CambiarCantidadOrdenProduccion($codigo, $cantidad);
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);
+            }    
+        }
+         if (Yii::$app->request->get()) {
+            $model->cantidad_real = $table->cantidad_real;
+        }
+        return $this->renderAjax('subir_cantidades', [
+            'model' => $model,
+            'token' => $token,
+            'detalle' => $detalle,
+            'id' => $id,
+            'codigo' => $codigo,
+        ]);
+    }
+    //actualiza la orden de produccion en su cantidad
+    protected function CambiarCantidadOrdenProduccion($codigo, $cantidad) {
+        $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_detalle', $codigo])->one();
+        $producto->cantidad_real = $cantidad;
+        $producto->save();
+        $orden = \app\models\OrdenProduccion::findOne($producto->id_orden_produccion);
+        $detalles = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $orden->id_orden_produccion])->all();
+        $suma = 0;
+        foreach ($detalles as $detalle):
+            $suma += $detalle->cantidad_real;
+        endforeach;       
+        $orden->unidades = $suma;
+        $orden->save();
+    }
+    //CARGA SEGUNDA AUDITORIA
+    
+    public function actionCargar_concepto_segunda_auditoria($id, $grupo) {
+        var_dump('adasdasdas');
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',94])->all()){
+                
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+    
+     //REPORTES
+    public function actionImprimir_orden_ensamble($id, $token) {
+        $model = OrdenEnsambleProducto::findOne($id);
+        Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.'); 
+         $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);
+        /*return $this->render('../formatos/reporteordenproduccion', [
+            'model' => $model,
+        ]);*/
+    }
+    
     /**
      * Finds the OrdenEnsambleProducto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
