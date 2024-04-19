@@ -185,6 +185,7 @@
                                                 'items' => [
                                                     ['label' => 'Cargar ordenes', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
                                                     ['label' => 'Resultado auditoria', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
+                                                    ['label' => 'Orden de ensamble', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index']],
                                                     
                                                 ]],
                                                 ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 

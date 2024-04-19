@@ -41,9 +41,9 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa', 'peso_neto','autorizado','total_unidades'], 'integer'],
-            [['fecha_proceso', 'fecha_hora_registro'], 'safe'],
-            [['user_name'], 'string', 'max' => 15],
+            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa','autorizado','total_unidades'], 'integer'],
+            [['fecha_proceso', 'fecha_hora_registro','fecha_hora_cierre'], 'safe'],
+            [['user_name','peso_neto'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
             [['responsable'], 'string', 'max' => 50],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
@@ -71,7 +71,8 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'responsable' => 'Responsable:',
             'autorizado' => 'Autorizado:',
-            'total_unidades' => 'Unidades proyectadas:',
+            'total_unidades' => 'Unidades reales:',
+            'fecha_hora_cierre' => 'Fechay hora de cierre:',
         ];
     }
 
@@ -105,5 +106,29 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     public function getOrdenEnsambleProductoDetalles()
     {
         return $this->hasMany(OrdenEnsambleProductoDetalle::className(), ['id_ensamble' => 'id_ensamble']);
+    }
+    
+    //proceso que agrupa varios campos
+    public function getOrdenEnsambleConsulta()
+    {
+        return " Nmero orden: {$this->ordenProduccion->numero_orden} - Id: {$this->id_orden_produccion}";
+    }
+    
+    public function getCerrarOrdenEnsamble() {
+        if($this->cerrar_orden_ensamble == 0){
+            $cerrarordenensamble = 'NO';
+        }else {
+            $cerrarordenensamble = 'SI';
+        }
+        return $cerrarordenensamble;
+    }
+    
+    public function getCerrarProceso() {
+        if($this->cerrar_proceso == 0){
+            $cerrarproceso = 'NO';
+        }else {
+            $cerrarproceso = 'SI';
+        }
+        return $cerrarproceso;
     }
 }

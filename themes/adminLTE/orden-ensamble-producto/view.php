@@ -27,11 +27,34 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
 <div class="orden-ensamble-producto-view">
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_resultado_auditoria'], ['class' => 'btn btn-primary btn-sm']); ?>
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']); ?>
         <?php if($model->autorizado == 0){
             echo Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
         }else{
-           echo Html::a('<span class="glyphicon glyphicon-ok"></span> Desautorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']); 
+            if($model->autorizado == 1 && $model->cerrar_orden_ensamble == 0){
+                echo Html::a('<span class="glyphicon glyphicon-ok"></span> Desautorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']); 
+                
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token],['class' => 'btn btn-warning btn-sm',
+                                    'data' => ['confirm' => 'Esta seguro de GENERAR la orden de ensamble para la OP No ('.$model->ordenProduccion->numero_orden.').', 'method' => 'post']]);   
+                 
+                 echo Html::a('<span class="glyphicon glyphicon-check"></span> Aprobar conceptos',
+                        ['/orden-ensamble-producto/subir_responsable','id' =>$model->id_ensamble, 'token' => $token],
+                        [
+                            'title' => 'Permite subir informacion de los responsables',
+                            'data-toggle'=>'modal',
+                            'data-target'=>'#modalsubirresponsable',
+                            'class' => 'btn btn-info btn-sm'
+                        ])?>
+                        
+                <div class="modal remote fade" id="modalsubirresponsable">
+                         <div class="modal-dialog modal-lg" style ="width: 650px;">
+                            <div class="modal-content"></div>
+                        </div>
+                </div>
+            <?php }else{
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar orden ensamble', ['cerrar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token],['class' => 'btn btn-default btn-sm',
+                                    'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema.', 'method' => 'post']]);   
+            }  
         }?>    
     </p>
      <div class="panel panel-success">
@@ -62,6 +85,15 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
               </tr>
               <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
+                    <td><?= Html::encode($model->user_name) ?></td> 
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'peso_neto') ?></th>
+                     <td><?= Html::encode($model->peso_neto) ?></td> 
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_cierre') ?></th>
+                    <td><?= Html::encode($model->fecha_hora_cierre) ?></td> 
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'responsable') ?></th>
+                    <td><?= Html::encode($model->responsable) ?></td>
+              </tr>
+              <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="8"><?= Html::encode($model->observacion) ?></td>
                      
@@ -110,7 +142,7 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                             <td style="text-align: right;"><?= ''. number_format($val->cantidad_proyectada,0)?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="cantidad_real[]" style = "text-align: right;" value="<?= $val->cantidad_real ?>"  size="15"> </td>
                                             <td><?= $val->porcentaje_rendimiento?></td>
-                                            <?php if($model->autorizado == 0){?>
+                                            <?php if($model->autorizado == 0 ){?>
                                                 <td style= 'width: 25px; height: 25px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_ensamble', 'id' => $model->id_ensamble, 'id_detalle' => $val->id, 'token' =>$token], [
                                                                   'class' => '',
@@ -121,9 +153,29 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                                                   ],
                                                     ])?>
                                                 </td> 
-                                            <?php  }else{?>
-                                                <td style= 'width: 25px; height: 25px;'></td>
-                                            <?php }?>    
+                                            <?php  }else{
+                                                if ($model->cerrar_orden_ensamble == 1){ 
+                                                    ?>
+                                                    <td style= 'width: 25px; height: 25px;'>
+                                                        <!-- Inicio Nuevo Detalle proceso -->
+                                                            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
+                                                                ['/orden-produccion/modificarcantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token],
+                                                                [
+                                                                    'title' => 'Modificar cantidades de producción',
+                                                                    'data-toggle'=>'modal',
+                                                                    'data-target'=>'#modalsubirnuevasunidades'.$val->id,
+                                                                ])    
+                                                           ?>
+                                                        <div class="modal remote fade" id="modalsubirnuevasunidades<?= $val->id ?>">
+                                                            <div class="modal-dialog modal-lg" style ="width: 550px;">
+                                                                <div class="modal-content"></div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                <?php }else{?>
+                                                    <td style= 'width: 25px; height: 25px;'></td>
+                                                <?php }  
+                                            }?>    
                                                 <input type="hidden" name="listado_presentacion[]" value="<?= $val->id?>"> 
                                         </tr>
                                     <?php endforeach;?>
@@ -148,21 +200,29 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                 <thead>
                                     <tr style='font-size:90%;'>
                                         <th scope="col" style='background-color:#B9D5CE; '>Material de empaque</th> 
+                                        <th scope="col" style='background-color:#B9D5CE; '>Estado</th>
+                                        <th scope="col" style='background-color:#B9D5CE; '>Stock</th>
                                         <th scope="col" style='background-color:#B9D5CE; '>U. Solicitadas</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>U. Devolucion</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>U. Averias</th> 
-                                        <th scope="col" style='background-color:#B9D5CE; '>U. Utilizadas</th>
+                                        <th scope="col" style='background-color:#B9D5CE; '>U. Envasadas</th>
                                         <th scope="col" style='background-color:#B9D5CE; '>U. Sala tecnica</th>
                                         <th scope="col" style='background-color:#B9D5CE; '>U. Retencion</th>
                                         <th scope="col" style='background-color:#B9D5CE; '>U. Reales</th>
-                                        <th scope="col" style='background-color:#B9D5CE; '></th> 
+                                       <th scope="col" style='background-color:#B9D5CE; text-align: center;'><input type="checkbox" onclick="marcar(this);"/></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php 
                                     foreach ($conMateriales as $val):?>
                                         <tr style='font-size:90%;'>
-                                            <td><?= $val->materiaPrima->materia_prima?></td>
+                                            <?php if($val->alerta == 'FALTA'){?>
+                                                <td style='background-color:#F1F3E3'><?= $val->materiaPrima->materia_prima?></td>
+                                            <?php } else { ?>
+                                                <td><?= $val->materiaPrima->materia_prima?></td>
+                                            <?php }?>
+                                            <td><?= $val->alerta?></td>
+                                            <td style="text-align: right"><?= ''. number_format($val->stock,0) ?></td>
                                             <td style="text-align: right;"><?= ''.number_format($val->unidades_solicitadas,0)?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="unidades_devolucion[]" style = "text-align: right;" value="<?= $val->unidades_devolucion ?>"  size="5"> </td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="unidades_averias[]" style = "text-align: right;" value="<?= $val->unidades_averias ?>"  size="5"> </td>
@@ -170,31 +230,21 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="unidades_sala_tecnica[]" style = "text-align: right;" value="<?= $val->unidades_sala_tecnica ?>"  size="5"> </td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="unidades_muestra_retencion[]" style = "text-align: right;" value="<?= $val->unidades_muestra_retencion ?>"  size="5"> </td> 
                                             <td style="text-align: right;"><?= ''.number_format($val->unidades_reales,0)?></td>
-                                            <?php if($model->autorizado == 0){?>
-                                                <td style= 'width: 25px; height: 25px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_empaque', 'id' => $model->id_ensamble, 'id_detalle' => $val->id, 'token' =>$token], [
-                                                                  'class' => '',
-                                                                  'data' => [
-                                                                      'confirm' => 'Esta seguro de eliminar el registro?',
-                                                                      'method' => 'post',
-
-                                                                  ],
-                                                    ])?>
-                                                </td> 
-                                            <?php  }else{?>
-                                                <td style= 'width: 25px; height: 25px;'></td>
-                                            <?php }?>    
-                                                <input type="hidden" name="listado_empaque[]" value="<?= $val->id?>"> 
+                                            <input type="hidden" name="listado_empaque[]" value="<?= $val->id?>"> 
+                                            <td style="text-align: center;"><input type="checkbox" name="listado_unidades[]" value="<?= $val->id ?>"></td>
+                                            
+                                                
                                         </tr>
                                     <?php endforeach;?>
                                 </tbody>
                             </table>
                         </div>   
                         <div class="panel-footer text-right">  
-                            <?php if($model->autorizado == 1){
+                            <?php if($model->autorizado == 1 && $model->cerrar_orden_ensamble == 0){
                                 if(count($conMateriales) > 0){?>
-                                    <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Refrescar', ['orden-ensamble-producto/buscar_material_empaque', 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2],[ 'class' => 'btn btn-info btn-sm']) ?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-search"></span> Material de empaque', ['orden-ensamble-producto/buscar_material_empaque', 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2],[ 'class' => 'btn btn-info btn-sm']) ?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_material_empaque'])?>
+                                    <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar_todo_empaque']) ?>
                                 <?php }else{ ?>
                                     <?= Html::a('<span class="glyphicon glyphicon-search"></span> Material de empaque', ['orden-ensamble-producto/buscar_material_empaque', 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2],[ 'class' => 'btn btn-info btn-sm']) ?>
                                 <?php }
@@ -208,4 +258,17 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
     </div>   
     <?php ActiveForm::end(); ?> 
 </div> 
+<script type="text/javascript">
+	function marcar(source) 
+	{
+		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
+		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
+		{
+			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
+			{
+				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
+			}
+		}
+	}
+</script>
 

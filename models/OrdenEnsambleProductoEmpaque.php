@@ -39,9 +39,10 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_ensamble', 'id_materia_prima', 'unidades_solicitadas', 'unidades_devolucion', 'unidades_averias', 'unidades_utilizadas', 'unidades_sala_tecnica', 'unidades_muestra_retencion', 'unidades_reales'], 'integer'],
+            [['id_ensamble', 'id_materia_prima', 'unidades_solicitadas', 'unidades_devolucion', 'unidades_averias', 'unidades_utilizadas', 'unidades_sala_tecnica',
+                'unidades_muestra_retencion', 'unidades_reales','stock'], 'integer'],
             [['fecha_hora_carga'], 'safe'],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','alerta'], 'string', 'max' => 15],
             [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
         ];
@@ -65,6 +66,8 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
             'unidades_reales' => 'Unidades Reales',
             'fecha_hora_carga' => 'Fecha Hora Carga',
             'user_name' => 'User Name',
+            'stock' => 'stock',
+            'alerta' => 'alerta',
         ];
     }
 

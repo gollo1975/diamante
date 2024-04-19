@@ -1,44 +1,153 @@
 <?php
 
-use yii\helpers\Html;
-use yii\grid\GridView;
-
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\OrdenEnsambleProductoSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $form yii\bootstrap\ActiveForm */
+/* @var $model app\models\ContactForm */
 
-$this->title = 'Orden Ensamble Productos';
+use yii\helpers\Html;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
+use yii\widgets\LinkPager;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use kartik\date\DatePicker;
+use kartik\select2\Select2;
+use yii\data\Pagination;
+use kartik\depdrop\DepDrop;
+//Modelos...
+use app\models\GrupoProducto;
+use app\models\OrdenProduccion;
+
+
+
+$this->title = 'ORDENES DE ENSAMBLE';
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
-<div class="orden-ensamble-producto-index">
+<script language="JavaScript">
+    function mostrarfiltro() {
+        divC = document.getElementById("filtro");
+        if (divC.style.display == "none"){divC.style.display = "block";}else{divC.style.display = "none";}
+    }
+</script>
 
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+<!--<h1>Lista Facturas</h1>-->
+<?php $formulario = ActiveForm::begin([
+    "method" => "get",
+    "action" => Url::toRoute("orden-ensamble-producto/index"),
+    "enableClientValidation" => true,
+    'options' => ['class' => 'form-horizontal'],
+    'fieldConfig' => [
+                    'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
+                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                    'options' => []
+                ],
 
-    <p>
-        <?= Html::a('Create Orden Ensamble Producto', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+]);
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+$grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$ordenProduccion = \app\models\OrdenEnsambleProducto::find()->all();
+$ordenProduccion = ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'OrdenEnsambleConsulta');
 
-            'id_ensamble',
-            'id_orden_produccion',
-            'numero_orden_ensamble',
-            'id_grupo',
-            'numero_lote',
-            //'id_etapa',
-            //'fecha_proceso',
-            //'fecha_hora_registro',
-            //'user_name',
-            //'peso_neto',
-            //'observacion',
-            //'responsable',
 
-            ['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+?>
+
+<div class="panel panel-success panel-filters">
+    <div class="panel-heading" onclick="mostrarfiltro()">
+        Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
+    </div>
+	
+    <div class="panel-body" id="filtro" style="display:none">
+        <div class="row" >
+            <?= $formulario->field($form, "numero_ensamble")->input("search") ?>
+             <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
+                'data' => $grupo,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+            <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todayHighlight' => true]])
+            ?>
+            <?= $formulario->field($form, 'fecha_corte')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todayHighlight' => true]])
+            ?>
+             <?= $formulario->field($form, 'orden')->widget(Select2::classname(), [
+                'data' => $ordenProduccion,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+             <?= $formulario->field($form, "numero_lote")->input("search") ?>
+        </div>
+        <div class="panel-footer text-right">
+            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
+            <a align="right" href="<?= Url::toRoute("orden-ensamble-producto/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+        </div>
+    </div>
 </div>
+
+<?php $formulario->end() ?>
+<?php
+$form = ActiveForm::begin([
+                "method" => "post",                            
+            ]);
+    ?>
+<div class="table-responsive">
+<div class="panel panel-success ">
+    <div class="panel-heading">
+          Registros <span class="badge"><?= $pagination->totalCount ?></span>
+    </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr style ='font-size: 90%;'>         
+                
+                <th scope="col" style='background-color:#B9D5CE;'>Orden ensamble</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Orden produccion</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Responsable</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Orden de ensamble cerrado">Cerrado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
+             
+                         
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($model as $val): ?>
+                <tr style ='font-size: 90%;'>                
+                    <td><?= $val->numero_orden_ensamble?></td>
+                    <td><?= $val->grupo->nombre_grupo?></td>
+                    <td><?= $val->ordenProduccion->numero_orden?></td>
+                     <td><?= $val->etapa->concepto?></td>
+                    <td><?= $val->numero_lote?></td>
+                    <td><?= $val->fecha_proceso?></td>
+                    <td><?= $val->responsable?></td>
+                    <td><?= $val->cerrarOrdenEnsamble?></td>
+                     <td style= 'width: 25px; height: 10px;'>
+                        <a href="<?= Url::toRoute(["orden-ensamble-producto/view", "id" => $val->id_ensamble, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                    </td>
+                    
+                </tr>            
+            <?php endforeach; ?>
+            </tbody>    
+        </table> 
+        <div class="panel-footer text-right" >            
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+          <?php $form->end() ?>   
+        </div>
+     </div>
+</div>
+<?= LinkPager::widget(['pagination' => $pagination]) ?>
