@@ -138,20 +138,25 @@ $form = ActiveForm::begin([
                     <td><?= $val->responsable?></td>
                     <td><?= $val->cerrarOrdenEnsamble?></td>
                      <td style= 'width: 25px; height: 10px;'>
-                        <a href="<?= Url::toRoute(["orden-ensamble-producto/view", "id" => $val->id_ensamble, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                        <a href="<?= Url::toRoute(["orden-ensamble-producto/view", "id" => $val->id_ensamble,'token' => $token,'sw' =>0]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                     </td>
-                    <?php if($val->cerrar_orden_ensamble == 1){?>
-                        <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_segunda_auditoria', 'id' => $val->id_ensamble, 'id_grupo' => $val->id_grupo], [
-                                          'class' => '',
-                                          'title' => 'Proceso que permite cargar los conceptos de la segunda auditoria.', 
-                                          'data' => [
-                                              'confirm' => 'Esta seguro de crear la auditoria a la orden de ensamble Nro:  ('.$val->numero_orden_ensamble.').',
-                                              'method' => 'post',
-                                          ],
-                            ]);?>
-                        </td>    
-                    <?php }else { ?>
+                    <?php if($val->cerrar_orden_ensamble == 1){
+                        $auditoria = \app\models\OrdenEnsambleAuditoria::find()->where(['=','id_ensamble', $val->id_ensamble])->one();
+                        if($auditoria){?>
+                            <td style= 'width: 25px; height: 10px;'></td>
+                        <?php }else{?> 
+                            <td style= 'width: 25px; height: 10px;'>
+                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['orden-ensamble-producto/segunda_auditoria', 'id' => $val->id_ensamble, 'id_grupo' => $val->id_grupo], [
+                                              'class' => '',
+                                              'title' => 'Proceso que permite cargar los conceptos de la segunda auditoria.', 
+                                              'data' => [
+                                                  'confirm' => 'Esta seguro de crear la auditoria a la orden de ensamble Nro:  ('.$val->numero_orden_ensamble.').',
+                                                  'method' => 'post',
+                                              ],
+                                ]);?>
+                            </td> 
+                        <?php }    
+                    }else { ?>
                         <td style= 'width: 25px; height: 10px;'></td>
                     <?php } ?>
                     

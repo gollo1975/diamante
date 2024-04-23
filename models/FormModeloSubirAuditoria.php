@@ -15,14 +15,16 @@ class FormModeloSubirAuditoria extends Model
     public $condiciones;
     public $responsable;
     public $peso_neto;
-    
+    public $cosmetica;
+
+
 
 
     public function rules()
     {
         return [
 
-           [['continua','condiciones'], 'integer'],
+           [['continua','condiciones','cosmetica'], 'integer'],
            [['observacion','responsable','peso_neto'], 'string'], 
         ];
     }
@@ -35,6 +37,7 @@ class FormModeloSubirAuditoria extends Model
             'observacion' => 'Observacion:',
             'peso_neto' =>'Peso neto:',
             'responsable' => 'Responsable:',
+            'cosmetica' => 'Forma cosmetica:',
             
             
         ];

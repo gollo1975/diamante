@@ -21,7 +21,7 @@ use app\models\TipoProcesoProduccion;
 
 
 
-$this->title = 'ORDEN DE PRODUCCION (AUDITORIAS)';
+$this->title = 'PROCESO DE AUDITORIAS (OP)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

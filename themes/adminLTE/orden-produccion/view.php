@@ -328,22 +328,42 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                          <?php
                                          foreach ($fase_inicial as $val):?>
                                             <tr style="font-size: 90%;">
-                                                <td style="width: 25px; height: 25px;">
-                                                    <!-- Inicio Nuevo Detalle proceso -->
-                                                      <?= Html::a('<span class="glyphicon glyphicon-eye-open"></span> ',
-                                                          ['/orden-produccion/search_inventario', 'id' => $model->id_orden_produccion, 'detalle' => $val->id_materia_prima, 'token' => $token],
-                                                          [
-                                                              'title' => 'Consultar inventario de materia prima.',
-                                                              'data-toggle'=>'modal',
-                                                              'data-target'=>'#modalconsultarinventariomateria'.$val->id_detalle,
-                                                          ])    
-                                                     ?>
-                                                  <div class="modal remote fade" id="modalconsultarinventariomateria<?= $val->id_detalle ?>">
-                                                      <div class="modal-dialog modal-lg" style ="width: 550px;">
-                                                          <div class="modal-content"></div>
+                                                <?php if($val->porcentaje_aplicacion == null || $val->cantidad_gramos == null){?>
+                                                     <td style="width: 25px; height: 25px;">
+                                                        <!-- editar el registro -->
+                                                          <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
+                                                              ['/orden-produccion/editar_linea_materia', 'id' => $model->id_orden_produccion, 'id_detalle' => $val->id_detalle, 'token' => $token],
+                                                              [
+                                                                  'title' => 'Permite editar la linea del registro.',
+                                                                  'data-toggle'=>'modal',
+                                                                  'data-target'=>'#modaleditarlinearegistro'.$val->id_detalle,
+                                                              ])    
+                                                         ?>
+                                                      <div class="modal remote fade" id="modaleditarlinearegistro<?= $val->id_detalle ?>">
+                                                          <div class="modal-dialog modal-lg" style ="width: 550px;">
+                                                              <div class="modal-content"></div>
+                                                          </div>
                                                       </div>
-                                                  </div>
-                                                </td>
+                                                    </td>
+                                                <?php }else{?>
+                                                    <td style="width: 25px; height: 25px;">
+                                                        <!-- Inicio Nuevo Detalle proceso -->
+                                                          <?= Html::a('<span class="glyphicon glyphicon-eye-open"></span> ',
+                                                              ['/orden-produccion/search_inventario', 'id' => $model->id_orden_produccion, 'detalle' => $val->id_materia_prima, 'token' => $token],
+                                                              [
+                                                                  'title' => 'Consultar inventario de materia prima.',
+                                                                  'data-toggle'=>'modal',
+                                                                  'data-target'=>'#modalconsultarinventariomateria'.$val->id_detalle,
+                                                              ])    
+                                                         ?>
+                                                      <div class="modal remote fade" id="modalconsultarinventariomateria<?= $val->id_detalle ?>">
+                                                          <div class="modal-dialog modal-lg" style ="width: 550px;">
+                                                              <div class="modal-content"></div>
+                                                          </div>
+                                                      </div>
+                                                    </td>
+                                                <?php }?>    
+                                                
                                                 <td><?= $val->materiaPrima->codigo_materia_prima ?></td>
                                                 <td><?= $val->materiaPrima->materia_prima ?></td>
                                                 <td><?= $val->codigo_homologacion ?></td>
@@ -389,6 +409,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                             <?php if($model->cerrar_orden == 0){?>
                                 <div class="panel-footer text-right">  
                                     <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar fase inicial', ['orden-produccion/importar_fase_inicial', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>   
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Agregar material', ['orden-produccion/buscar_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo, 'id_solicitud' => 1],[ 'class' => 'btn btn-warning btn-sm']) ?>   
                                     <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar formula', ['orden-produccion/regenerar_formula', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo],[ 'class' => 'btn btn-info btn-sm']) ?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizaregistro'])?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminartodo']) ?>

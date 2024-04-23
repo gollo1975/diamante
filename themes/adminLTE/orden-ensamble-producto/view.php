@@ -23,22 +23,27 @@ use yii\filters\AccessControl;
 $this->title = 'DETALLE ORDEN DE ENSAMBLE ';
 $this->params['breadcrumbs'][] = ['label' => 'Orden de ensamble', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_ensamble;
+if($sw == 0){
+    
+}else{
+    Yii::$app->getSession()->setFlash('info', 'Esta orden de produccion ya tiene una ORDEN DE EMSABLE. Validar la informacion.'); 
+}
 ?>
 <div class="orden-ensamble-producto-view">
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']); ?>
         <?php if($model->autorizado == 0){
-            echo Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+            echo Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
         }else{
             if($model->autorizado == 1 && $model->cerrar_orden_ensamble == 0){
-                echo Html::a('<span class="glyphicon glyphicon-ok"></span> Desautorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']); 
+                echo Html::a('<span class="glyphicon glyphicon-ok"></span> Desautorizar', ['autorizado', 'id' => $model->id_ensamble, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']); 
                 
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token],['class' => 'btn btn-warning btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token, 'sw' => $sw],['class' => 'btn btn-warning btn-sm',
                                     'data' => ['confirm' => 'Esta seguro de GENERAR la orden de ensamble para la OP No ('.$model->ordenProduccion->numero_orden.').', 'method' => 'post']]);   
                  
                  echo Html::a('<span class="glyphicon glyphicon-check"></span> Aprobar conceptos',
-                        ['/orden-ensamble-producto/subir_responsable','id' =>$model->id_ensamble, 'token' => $token],
+                        ['/orden-ensamble-producto/subir_responsable','id' =>$model->id_ensamble, 'token' => $token, 'sw' => $sw],
                         [
                             'title' => 'Permite subir informacion de los responsables',
                             'data-toggle'=>'modal',
@@ -53,11 +58,11 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                 </div>
             <?php }else{
                 if($model->cerrar_orden_ensamble == 1 && $model->cerrar_proceso == 0){
-                    echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar orden ensamble', ['cerrar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token],['class' => 'btn btn-default btn-sm',
-                                        'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema.', 'method' => 'post']]);   
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+                    echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar orden ensamble', ['cerrar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token ,'sw' => $sw],['class' => 'btn btn-default btn-sm',
+                                        'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema y modificar las unidades reales.', 'method' => 'post']]);   
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
                 }else {
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
                 }    
             }  
         }?>    
@@ -149,7 +154,7 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                             <td style="text-align: right;"><?= $val->porcentaje_rendimiento?>%</td>
                                             <?php if($model->autorizado == 0 ){?>
                                                 <td style= 'width: 25px; height: 25px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_ensamble', 'id' => $model->id_ensamble, 'id_detalle' => $val->id, 'token' =>$token], [
+                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_ensamble', 'id' => $model->id_ensamble, 'id_detalle' => $val->id, 'token' =>$token, 'sw' => $sw], [
                                                                   'class' => '',
                                                                   'data' => [
                                                                       'confirm' => 'Esta seguro de eliminar el registro?',
@@ -164,7 +169,7 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                                                     <td style= 'width: 25px; height: 25px;'>
                                                         <!-- Inicio Nuevo Detalle proceso -->
                                                             <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                                ['/orden-ensamble-producto/modificar_cantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token,  'codigo' => $val->id_detalle],
+                                                                ['/orden-ensamble-producto/modificar_cantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token,  'codigo' => $val->id_detalle, 'sw' => $sw],
                                                                 [
                                                                     'title' => 'Modificar cantidades de producción',
                                                                     'data-toggle'=>'modal',
@@ -189,7 +194,7 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
                         </div>   
                           <?php if($model->autorizado == 0){?>
                             <div class="panel-footer text-right">  
-                                 <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Refrescar', ['orden-ensamble-producto/cargar_nuevamente_items', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'token' => $token],[ 'class' => 'btn btn-info btn-sm']) ?>
+                                 <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Refrescar', ['orden-ensamble-producto/cargar_nuevamente_items', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'token' => $token, 'sw' => $sw],[ 'class' => 'btn btn-info btn-sm']) ?>
                                  <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_presentacion'])?>
                             </div> 
                     <?php }?>

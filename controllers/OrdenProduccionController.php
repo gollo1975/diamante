@@ -975,20 +975,21 @@ class OrdenProduccionController extends Controller
             Yii::$app->getSession()->setFlash('warning', 'El numero de lote para esta orden de produccion ya esta creado.');  
         }
     }
+    
+    
     //BUSCA PRODUCTO DEL INVENTARIO
-    public function actionBuscarproducto($id, $token, $grupo){
-        $operacion = InventarioProductos::find()->where(['=','id_grupo', $grupo])->orderBy('nombre_producto ASC')->all();
+    public function actionBuscar_materia_prima($id, $token, $id_grupo, $id_solicitud){
+        $operacion = MateriaPrimas::find()->where(['=','id_solicitud', $id_solicitud])->andWhere(['>','stock_gramos', 0])->orderBy('materia_prima DESC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
-        $mensaje = '';
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
                 $q = Html::encode($form->q);                                
-                    $operacion = InventarioProductos::find()
-                            ->where(['like','nombre_producto',$q])
-                            ->orwhere(['=','codigo_producto',$q])
-                            ->andWhere(['=','id_grupo', $grupo]);
-                    $operacion = $operacion->orderBy('nombre_producto ASC');                    
+                    $operacion = MateriaPrimas::find()
+                            ->where(['like','materia_prima',$q])
+                            ->orwhere(['=','codigo_materia_prima',$q])
+                            ->andWhere(['=','id_solicitud', $id_solicitud]);
+                    $operacion = $operacion->orderBy('materia_prima DESC');                    
                     $count = clone $operacion;
                     $to = $count->count();
                     $pages = new Pagination([
@@ -1003,7 +1004,7 @@ class OrdenProduccionController extends Controller
                 $form->getErrors();
             }                    
         }else{
-            $table = InventarioProductos::find()->where(['=','id_grupo', $grupo])->orderBy('nombre_producto ASC');
+            $table = MateriaPrimas::find()->where(['=','id_solicitud', $id_solicitud])->andWhere(['>','stock_gramos', 0])->orderBy('materia_prima DESC');
             $tableexcel = $table->all();
             $count = clone $table;
             $pages = new Pagination([
@@ -1016,34 +1017,34 @@ class OrdenProduccionController extends Controller
                             ->all();
         }
         //PROCESO DE GUARDAR
-         if (isset($_POST["guardarproductos"])) {
-            if(isset($_POST["nuevo_productos"])){
+         if (isset($_POST["guardarmateriaprima"])) {
+            if(isset($_POST["nuevo_materia_prima"])){
                 $intIndice = 0;
-                foreach ($_POST["nuevo_productos"] as $intCodigo) {
-                    $item = InventarioProductos::findOne($intCodigo);
-                    $table = new OrdenProduccionProductos();
-                    $table->id_orden_produccion = $id;
-                    $table->codigo_producto = $item->codigo_producto;
-                    $table->descripcion = $item->nombre_producto;   
-                    $table->costo_unitario = $item->costo_unitario; 
-                    $table->user_name = Yii::$app->user->identity->username;
-                    $table->id_medida_producto = $item->grupo->id_medida_producto;
-                    $table->aplica_iva = $item->aplica_iva;
-                    $table->porcentaje_iva = $item->porcentaje_iva;
-                    $table->id_inventario = $intCodigo;
-                    $table->save(false);
+                foreach ($_POST["nuevo_materia_prima"] as $intCodigo) {
+                    $registro = OrdenProduccionFaseInicial::find()->where(['=','id_materia_prima', $intCodigo])->andWhere(['=','id_orden_produccion', $id])->one();
+                    if(!$registro){
+                        $item = MateriaPrimas::findOne($intCodigo);
+                        $table = new OrdenProduccionFaseInicial();
+                        $table->id_orden_produccion = $id;
+                        $table->id_materia_prima = $intCodigo;
+                        $table->id_grupo = $id_grupo;
+                        $table->id_fase = $id_solicitud;
+                        $table->user_name = Yii::$app->user->identity->username;
+                        $table->fecha_registro = date('Y-m-d');
+                        $table->save(false);
+                    }    
                 }
                 return $this->redirect(['view','id' => $id, 'token' => $token]);
             }
         }
         return $this->render('importarproductos', [
             'operacion' => $operacion,            
-            'mensaje' => $mensaje,
             'pagination' => $pages,
             'id' => $id,
             'form' => $form,
             'token' => $token,
-            'grupo' => $grupo,
+            'id_grupo' => $id_grupo,
+            'id_solicitud' => $id_solicitud
 
         ]);
     }
@@ -1071,6 +1072,34 @@ class OrdenProduccionController extends Controller
         return $this->renderAjax('subir_conceptos_auditoria', [
             'model' => $model,
             'id_auditoria' => $id_auditoria,
+        ]);
+    }
+    
+    //EDITAR LINEA DE MATERIA PRIMA MANUAL
+     //modificar cantidades produccion
+    public function actionEditar_linea_materia($id, $token, $id_detalle) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $table = OrdenProduccionFaseInicial::findOne($id_detalle);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["cambiar_fase"])) { 
+                $valor = 0;
+                $orden = OrdenProduccion::findOne($id);
+                $table->id_fase = $model->tipo_precio;
+                $table->porcentaje_aplicacion = $model->porcentaje_aplicacion;
+                $valor = round(($orden->tamano_lote * $model->porcentaje_aplicacion)/100);
+                $table->cantidad_gramos = $valor;
+                $table->save(false);
+                $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
+            }    
+        }
+        if (Yii::$app->request->get()) {
+            $model->tipo_precio = $table->id_fase; 
+             $model->porcentaje_aplicacion = $table->porcentaje_aplicacion;
+         }
+        return $this->renderAjax('cambiar_fase_materia', [
+            'model' => $model,
+            'id_detalle' => $id_detalle,
+            'id' => $id,
         ]);
     }
     
@@ -1447,38 +1476,35 @@ class OrdenProduccionController extends Controller
     public function actionGenerar_orden_ensamble($id, $id_grupo) {
         $orden_produccion = OrdenProduccion::findOne($id);
         $detalle = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->one();
+        $sw = 0;
         if($detalle){
-            Yii::$app->getSession()->setFlash('warning', 'Esta Orden de produccion ya esta integrada en la ORDEN DE ENSAMBLE. Buscar la orden de ensamble en la modulo de CONTROL DE CALIDAD.'); 
-            $this->redirect(["orden-produccion/index_ordenes_produccion"]);
-        }else{
-           
-            //proceso de insertar
-            $table = new \app\models\OrdenEnsambleProducto();
-            $table->id_orden_produccion = $id;
-            $table->id_grupo = $id_grupo;
-            $table->numero_lote = $orden_produccion->numero_lote;
-            $table->id_etapa = 2;
-            $table->fecha_proceso = date('Y-m-d');
-            $table->user_name = Yii::$app->user->identity->username;
-            $table->save();     
-            $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
-            //proceso del detalle de la orden de ensamble
-            $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-            foreach ($detalle_orden as $detalle):
-                $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
-                $resultado->id_ensamble = $ensamble->id_ensamble;
-                $resultado->id_detalle = $detalle->id_detalle;
-                $resultado->codigo_producto = $detalle->codigo_producto;
-                $resultado->nombre_producto = $detalle->descripcion;
-                $resultado->cantidad_proyectada = $detalle->cantidad;
-                $resultado->cantidad_real = $detalle->cantidad_real;
-               $resultado->save(false);
-            endforeach;
-            $id = $ensamble->id_ensamble;
-            $token = 0;
-            return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token]);
-        }    
-       
+            $sw = 1;
+        }
+        //proceso de insertar
+        $table = new \app\models\OrdenEnsambleProducto();
+        $table->id_orden_produccion = $id;
+        $table->id_grupo = $id_grupo;
+        $table->numero_lote = $orden_produccion->numero_lote;
+        $table->id_etapa = 2;
+        $table->fecha_proceso = date('Y-m-d');
+        $table->user_name = Yii::$app->user->identity->username;
+        $table->save();     
+        $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
+        //proceso del detalle de la orden de ensamble
+        $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
+        foreach ($detalle_orden as $detalle):
+            $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
+            $resultado->id_ensamble = $ensamble->id_ensamble;
+            $resultado->id_detalle = $detalle->id_detalle;
+            $resultado->codigo_producto = $detalle->codigo_producto;
+            $resultado->nombre_producto = $detalle->descripcion;
+            $resultado->cantidad_proyectada = $detalle->cantidad;
+            $resultado->cantidad_real = $detalle->cantidad_real;
+           $resultado->save(false);
+        endforeach;
+        $id = $ensamble->id_ensamble;
+        $token = 0;
+        return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token, 'sw' => $sw]);
     }
     
     /**

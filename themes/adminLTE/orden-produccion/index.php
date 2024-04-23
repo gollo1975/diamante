@@ -128,12 +128,12 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total </th>
+                <th scope="col" style='background-color:#B9D5CE;'>Aprobado</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Almacenado</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th score="col" style='background-color:#B9D5CE;'></th>  
+                 <th score="col" style='background-color:#B9D5CE;'></th>  
                          
             </tr>
             </thead>
@@ -147,38 +147,45 @@ $form = ActiveForm::begin([
                     <td><?= $val->numero_lote?></td>
                     <td><?= $val->fecha_proceso?></td>
                     <td><?= $val->fecha_entrega?></td>
-                     <td><?= $val->tipoOrden?></td>
-                    <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
-                    <td style="text-align: right"><?= ''.number_format($val->iva,0)?></td>
-                    <td style="text-align: right"><?= ''.number_format($val->total_orden,0)?></td>
+                    <td><?= $val->tipoOrden?></td>
+                    <?php if($val->producto_aprobado == 0){?>
+                        <td><?= $val->productoAprobado?></td>
+                    <?php }else{?>
+                        <td style="background-color: #D3F2FE"><?= $val->productoAprobado?></td>
+                    <?php } 
+                    if($val->producto_almacenado == 0){?>
+                        <td><?= $val->productoAlmacenado?></td>
+                    <?php }else{?>
+                        <td style="background-color: #F1F3E3"><?= $val->productoAlmacenado?></td>
+                    <?php }?>    
                     <td><?= $val->cerrarOrden?></td>
                      <td style= 'width: 25px; height: 10px;'>
                         <a href="<?= Url::toRoute(["orden-produccion/view", "id" => $val->id_orden_produccion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-list" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                     </td>
-                    <?php if($val->autorizado == 0){?>
-                        <td style= 'width: 25px; height: 10px;'>
-                           <a href="<?= Url::toRoute(["orden-produccion/update", "id" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
-                        </td>
-                    <?php }else{
-                        if($val->seguir_proceso_ensamble == 1){?>
-                            <td style= 'width: 25px; height: 10px;'></td>
-                        <?php }else{?>
-                            <td style= 'width: 20px; height: 20px;'>
-                                <?= Html::a('<span class="glyphicon glyphicon-edit"></span>',
-                                   ['/orden-produccion/modificar_estado_orden', 'id' => $val->id_orden_produccion],
-                                     ['title' => 'Modifica el estado de seguimiento a la orden de produccion',
-                                      'data-toggle'=>'modal',
-                                      'data-target'=>'#modalmodificarestadoorden',
-                                     ])    
-                               ?>
-                               <div class="modal remote fade" id="modalmodificarestadoorden">
-                                    <div class="modal-dialog modal-lg" style ="width: 550px;">    
-                                        <div class="modal-content"></div>
-                                    </div>
-                               </div>
-                            </td>   
-                        <?php }   
-                    }?>    
+                    <td style= 'width: 25px; height: 10px;'>
+                        <?php if($val->autorizado == 0){?>
+                            <a href="<?= Url::toRoute(["orden-produccion/update", "id" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                       <?php }else{?>
+                                <?php if($val->seguir_proceso_ensamble == 1 ){?>
+                                    <td style= 'width: 25px; height: 10px;'></td>
+                                <?php }else{?>
+                                     <td style= 'width: 25px; height: 10px;'>
+                                        <<?= Html::a('<span class="glyphicon glyphicon-edit"></span>',
+                                           ['/orden-produccion/modificar_estado_orden', 'id' => $val->id_orden_produccion],
+                                             ['title' => 'Modifica el estado de seguimiento a la orden de produccion',
+                                              'data-toggle'=>'modal',
+                                              'data-target'=>'#modalmodificarestadoorden',
+                                             ])    
+                                        ?>
+                                        <div class="modal remote fade" id="modalmodificarestadoorden">
+                                            <div class="modal-dialog modal-lg" style ="width: 550px;">    
+                                                <div class="modal-content"></div>
+                                            </div>
+                                       </div>
+                                     </td>    
+                                <?php } ?>
+                       <?php }?>  
+                    </td>      
                 </tr>            
             <?php endforeach; ?>
             </tbody>    

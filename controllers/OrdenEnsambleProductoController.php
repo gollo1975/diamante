@@ -25,6 +25,9 @@ use app\models\OrdenEnsambleProducto;
 use app\models\OrdenEnsambleProductoSearch;
 use app\models\UsuarioDetalle;
 use app\models\FiltroBusquedaOrdenEnsamble;
+use app\models\OrdenEnsambleAuditoria;
+use app\models\OrdenEnsambleAuditoriaDetalle;
+
 
 
 
@@ -133,7 +136,7 @@ class OrdenEnsambleProductoController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id, $token)
+    public function actionView($id, $token, $sw)
     {
         $conPresentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
         $orden_ensamble = OrdenEnsambleProducto::findOne($id);
@@ -150,7 +153,7 @@ class OrdenEnsambleProductoController extends Controller
                         $intIndice++;
                     endforeach;
                     $this->TotalUnidadesLote($orden_ensamble);
-                    return $this->redirect(['view','id' =>$id, 'token' => $token]);
+                    return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
                 }
             }
         }  
@@ -169,7 +172,7 @@ class OrdenEnsambleProductoController extends Controller
                         $intIndice++;
                     endforeach;
                    // $this->TotalUnidadesLote($orden_ensamble);
-                   return $this->redirect(['view','id' =>$id, 'token' => $token]);
+                   return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
                 }
             }
             
@@ -183,7 +186,7 @@ class OrdenEnsambleProductoController extends Controller
                             $eliminar = \app\models\OrdenEnsambleProductoEmpaque::findOne($intCodigo);
                             $eliminar->delete();
                             Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
-                            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token]);
+                            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
                         } catch (IntegrityException $e) {
 
                             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
@@ -202,8 +205,57 @@ class OrdenEnsambleProductoController extends Controller
             'token' =>$token,
             'conPresentacion' => $conPresentacion,
             'conMateriales' => $conMateriales,
+            'sw' => $sw,
         ]);
     }
+    
+    //VISTA QUE MUESTRA EL PROCESO DE LA SEGUNDA AUDITORIA
+    public function actionView_auditoria($id_auditoria) {
+        $model = \app\models\OrdenEnsambleAuditoria::findOne($id_auditoria);
+        $conDetalles = \app\models\OrdenEnsambleAuditoriaDetalle::find()->where(['=','id_auditoria', $id_auditoria])->all();
+        //ACTUALIZA LOS REGISTGROS DEL DETALLA DE LA AUDITORIA
+        if (Yii::$app->request->post()) {
+            if(isset($_POST["actualizar_listado_analisis"])){
+                if(isset($_POST["listado_analisis"])){
+                    $intIndice = 0;
+                    foreach ($_POST["listado_analisis"] as $intCodigo):
+                        $table = \app\models\OrdenEnsambleAuditoriaDetalle::findOne($intCodigo);
+                        $table->resultado = $_POST["resultado"][$intIndice];
+                        $table->save(false);
+                        $intIndice++;
+                    endforeach;
+                    return $this->redirect(['view_auditoria','id_auditoria' =>$id_auditoria]);
+                }
+            }    
+        }   
+        if (Yii::$app->request->post()) {
+            if (isset($_POST["eliminar_todo_auditoria"])) {
+                if (isset($_POST["listado_eliminar"])) {
+                    foreach ($_POST["listado_eliminar"] as $intCodigo) {
+                        try {
+                            $eliminar = \app\models\OrdenEnsambleAuditoriaDetalle::findOne($intCodigo);
+                            $eliminar->delete();
+                            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                            $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]);
+                        } catch (IntegrityException $e) {
+
+                            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
+                        } catch (\Exception $e) {
+                            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el detalle, tiene registros asociados en otros procesos');
+
+                        }
+                    }
+                } else {
+                    Yii::$app->getSession()->setFlash('error', 'Debe seleccionar al menos un registro.');
+                }    
+             }
+        }         
+        return $this->render('view_auditoria', [
+            'model' => $model,
+            'conDetalles' => $conDetalles,
+        ]);
+    }   
+    
     //PROCESO QUE ACTUALIZA LAS UNIDAS PROYECTAS
     protected function TotalUnidadesLote($orden_ensamble) {
         $detalles = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $orden_ensamble->id_ensamble])->all();
@@ -225,7 +277,7 @@ class OrdenEnsambleProductoController extends Controller
     }
     
     //PROCESO QUE CARGA LAS PRESENTACIONES DEL PRODUCTO QUE ESTAN EN UNA ORDE DE PRODUCCION
-    public function actionCargar_nuevamente_items($id, $token, $id_orden_produccion) {
+    public function actionCargar_nuevamente_items($id, $token, $id_orden_produccion,$sw) {
         
         $detalle_orden = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden_produccion])->all();
         foreach ($detalle_orden as $detalle):
@@ -241,7 +293,7 @@ class OrdenEnsambleProductoController extends Controller
                 $resultado->save(false);
             }    
         endforeach;
-        return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token]);
+        return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token, 'sw' => $sw]);
     }
     
 
@@ -253,29 +305,29 @@ class OrdenEnsambleProductoController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
    //ELIMINAR DETALLE DE LA ORDEN DE ENSAMBLE
-     public function actionEliminar_detalle_ensamble($id, $id_detalle, $token)
+     public function actionEliminar_detalle_ensamble($id, $id_detalle, $token, $sw)
     {                                
         $dato = \app\models\OrdenEnsambleProductoDetalle::findOne($id_detalle);
         $dato->delete();
-        return $this->redirect(['view','id' => $id, 'token' => $token]);     
+        return $this->redirect(['view','id' => $id, 'token' => $token ,'sw' => $sw]);     
     }
 
     //AUTORIZAR Y DESAUTORIZAR UNA ORDEN DE ENSAMBLE
-      public function actionAutorizado($id, $token) {
+      public function actionAutorizado($id, $token, $sw) {
         $model = $this->findModel($id);
         if ($model->autorizado == 0){  
             $model->autorizado = 1;            
             $model->update();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);  
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
         }else{
             $model->autorizado = 0;            
             $model->update();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);      
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
         }    
     }
     
     //GENERA LA ORDEN Y CIERRA EN PROCESO
-    public function actionGenerar_orden_ensamble($id, $token) {
+    public function actionGenerar_orden_ensamble($id, $token, $sw) {
         $orden = OrdenEnsambleProducto::findOne($id);
         $detalle_empaque = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         $sw = 0; $suma1; $suma2 = 0; 
@@ -301,7 +353,7 @@ class OrdenEnsambleProductoController extends Controller
         endforeach;
         if($sw == 1){
             Yii::$app->getSession()->setFlash('warning', 'No se puede generar la orden de ensamble porque los materiales de empaque estan incompletos. Validar con el administrador.'); 
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]); 
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
              
         }else{
             //generar consecutivo
@@ -311,12 +363,12 @@ class OrdenEnsambleProductoController extends Controller
             $orden->save();
             $consecutivo->numero_inicial = $orden->numero_orden_ensamble;
             $consecutivo->save();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]); 
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
         }
     }
     
     //PROCESO QUE CIERRA EN SU TOTALIDAD LA ORDEN DE ENSAMBLE
-    public function actionCerrar_orden_ensamble($id, $token) {
+    public function actionCerrar_orden_ensamble($id, $token, $sw) {
         $orden = OrdenEnsambleProducto::findOne($id);
         $detalle_empaque = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         $sw = 0;
@@ -328,11 +380,11 @@ class OrdenEnsambleProductoController extends Controller
         endforeach;
         if($sw == 1){
             Yii::$app->getSession()->setFlash('warning', 'No se puede CERRAR la orden de ensamble porque las UNIDADES REALES no son iguales en el proceso. Favor corregir las unidades por la primer vista.'); 
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]); 
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
         }else{
             $orden->cerrar_proceso = 1;
             $orden->save();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
         }    
     }
     
@@ -420,7 +472,7 @@ class OrdenEnsambleProductoController extends Controller
     //SUBIR RESPONASBLE AL PROCESO
     //PERMITE TERMINAR DE VALIDAD LA AUDITORIA Y SUBE LA CONTINUIDAD DEL PROCESO
     
-    public function actionSubir_responsable($id, $token) {
+    public function actionSubir_responsable($id, $token, $sw) {
         $model = new \app\models\FormModeloSubirAuditoria();
         $ensamble = \app\models\OrdenEnsambleProducto::findOne($id);
        
@@ -431,7 +483,7 @@ class OrdenEnsambleProductoController extends Controller
                 $ensamble->observacion = $model->observacion;
                 $ensamble->fecha_hora_cierre = date('Y-m-d H:i:s' );
                 $ensamble->save(false);
-                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token]);
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
             }    
         }
          if (Yii::$app->request->get()) {
@@ -442,11 +494,12 @@ class OrdenEnsambleProductoController extends Controller
         return $this->renderAjax('subir_responsable', [
             'model' => $model,
             'id' => $id,
+            'sw' => $sw,
         ]);
     }
   
     //modificar cantidades produccion
-    public function actionModificar_cantidades($id, $token, $detalle,  $codigo) {
+    public function actionModificar_cantidades($id, $token, $detalle,  $codigo, $sw) {
         $model = new \app\models\FormModeloCambiarCantidad();
         $table = \app\models\OrdenEnsambleProductoDetalle::findOne($detalle);
         if ($model->load(Yii::$app->request->post())) {
@@ -460,7 +513,7 @@ class OrdenEnsambleProductoController extends Controller
                 $orden_ensamble = OrdenEnsambleProducto::findOne($id); 
                 $this->TotalUnidadesLote($orden_ensamble);
                 $this->CambiarCantidadOrdenProduccion($codigo, $cantidad);
-                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' =>$sw]);
             }    
         }
          if (Yii::$app->request->get()) {
@@ -472,8 +525,10 @@ class OrdenEnsambleProductoController extends Controller
             'detalle' => $detalle,
             'id' => $id,
             'codigo' => $codigo,
+            'sw' =>$sw,
         ]);
     }
+    
     //actualiza la orden de produccion en su cantidad
     protected function CambiarCantidadOrdenProduccion($codigo, $cantidad) {
         $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_detalle', $codigo])->one();
@@ -490,11 +545,39 @@ class OrdenEnsambleProductoController extends Controller
     }
     //CARGA SEGUNDA AUDITORIA
     
-    public function actionCargar_concepto_segunda_auditoria($id, $grupo) {
-        var_dump('adasdasdas');
+    public function actionSegunda_auditoria($id, $id_grupo) {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',94])->all()){
-                
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',95])->all()){
+                $conSearch = OrdenEnsambleAuditoria::find()->where(['=','id_ensamble', $id])->one();
+                if($conSearch){
+                    Yii::$app->getSession()->setFlash('warning', 'Esta orden de ensamble se encuentra en un proceso de auditoria. Favor valide la información.');
+                    $this->redirect(["orden-ensamble-producto/index"]);
+                }else{        
+                    //proceso que crea al encabezado de la auditoria
+                    $orden_ensamble = OrdenEnsambleProducto::find()->where(['=','id_ensamble', $id])->one();
+                    $table = new \app\models\OrdenEnsambleAuditoria();
+                    $table->numero_orden = $orden_ensamble->numero_orden_ensamble;
+                    $table->numero_lote = $orden_ensamble->numero_lote;
+                    $table->id_ensamble = $id;
+                    $table->id_etapa = 2;
+                    $table->etapa = $orden_ensamble->etapa->concepto;
+                    $table->id_grupo = $id_grupo;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->fecha_creacion = date('Y-m-d');
+                    $table->save();
+                    //PROCESO PARA INSERTAR LOS DATOS DE LA AUDITORIA
+                    $auditoria = \app\models\OrdenEnsambleAuditoria::find()->orderBy('id_auditoria DESC')->limit(1)->one(); //para conseguir el ID
+                    $concepto = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_etapa', $orden_ensamble->id_etapa])->andWhere(['=','id_grupo', $id_grupo])->all();
+                    foreach ($concepto as $detalle):
+                        $registro = new \app\models\OrdenEnsambleAuditoriaDetalle();
+                        $registro->id_auditoria = $auditoria->id_auditoria;
+                        $registro->id_analisis = $detalle->id_analisis;
+                        $registro->id_especificacion = $detalle->id_especificacion;
+                        $registro->resultado = $detalle->resultado;
+                        $registro->save(false);
+                    endforeach;
+                    $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $auditoria->id_auditoria]);
+                }    
             }else{
                 return $this->redirect(['site/sinpermiso']);
             }
@@ -503,7 +586,67 @@ class OrdenEnsambleProductoController extends Controller
         }    
     }
     
-     //REPORTES
+    //PERMITE TERMINAR DE VALIDAD LA AUDITORIA Y SUBE LA CONTINUIDAD DEL PROCESO
+    public function actionAprobar_auditoria($id_auditoria) {
+        $model = new \app\models\FormModeloSubirAuditoria();
+        $auditoria = \app\models\OrdenEnsambleAuditoria::findOne($id_auditoria);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["subir_informacion"])) { 
+                $auditoria->id_forma = $model->cosmetica;
+                $auditoria->condiciones_analisis = $model->condiciones;
+                $auditoria->observacion = $model->observacion;
+                $auditoria->fecha_analisis = date('Y-m-d');
+                $auditoria->save(false);
+                $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]);
+            }    
+        }
+         if (Yii::$app->request->get()) {
+            $model->cosmetica = $auditoria->id_forma; 
+            $model->condiciones = $auditoria->condiciones_analisis;
+            $model->observacion = $auditoria->observacion;
+         }
+        return $this->renderAjax('subir_conceptos_auditoria', [
+            'model' => $model,
+            'id_auditoria' => $id_auditoria,
+        ]);
+    }
+    
+    //CARGAR ITEMS DE AUDITORIA AL DETALLE 
+    public function actionCargar_items_auditoria($id_grupo, $id_etapa, $id_auditoria){
+        $configuracion = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_grupo', $id_grupo])->andWhere(['=','id_etapa', $id_etapa])->all();
+        foreach ($configuracion as $resultado):
+            $table = new \app\models\OrdenEnsambleAuditoriaDetalle();
+            $table->id_auditoria = $id_auditoria;
+            $table->id_analisis = $resultado->id_analisis;
+            $table->id_especificacion = $resultado->id_especificacion;
+            $table->resultado = $resultado->resultado;
+            $table->save(false);
+        endforeach;
+        return $this->redirect(['orden-ensamble-producto/view_auditoria','id_auditoria' => $id_auditoria]);
+    }
+    
+    //CERRAR AUDITORIA
+    public function actionCerrar_auditoria($id_auditoria, $orden) {
+        //proceso que genera consecutivo
+        $ordenProduccion = \app\models\OrdenProduccion::findOne($orden);
+        $lista = \app\models\Consecutivos::findOne(13);
+        $auditoria = \app\models\OrdenEnsambleAuditoria::findOne($id_auditoria);
+        if($auditoria->id_forma == null){
+             Yii::$app->getSession()->setFlash('warning', 'Debe de APROBAR, la FORMA COSMETICA, CONDICIONES DE ANALISIS  y una breve OBSERVACION.'); 
+             $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]); 
+        }else{
+            $auditoria->numero_auditoria = $lista->numero_inicial + 1;
+            $auditoria->cerrar_auditoria = 1;
+            $auditoria->save(false);
+            $lista->numero_inicial = $auditoria->numero_auditoria;
+            $lista->save(false);
+            $ordenProduccion->producto_aprobado = 1;
+            $ordenProduccion->save();
+            $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]); 
+        }    
+    }
+    
+    //REPORTES
     public function actionImprimir_orden_ensamble($id, $token) {
         $model = OrdenEnsambleProducto::findOne($id);
         Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.'); 

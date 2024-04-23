@@ -8,8 +8,8 @@ use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 
-$this->title = 'Inventario productos';
-$this->params['breadcrumbs'][] = ['label' => 'Inventario productos', 'url' => ['view', 'id' => $id, 'token' => $token ]];
+$this->title = 'MATERIAS PRIMAS';
+$this->params['breadcrumbs'][] = ['label' => 'Materias primas', 'url' => ['view', 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud]];
 $this->params['breadcrumbs'][] = $id;
 ?>
     <div class="modal-body">
@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $id;
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["orden-produccion/buscarproducto", 'id' => $id, 'token' => $token, 'grupo' => $grupo]),
+            "action" => Url::toRoute(["orden-produccion/buscar_materia_prima", 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $id;
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscarproducto", 'id' => $id, 'token' => $token, 'grupo' => $grupo]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscar_materia_prima", 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -67,30 +67,34 @@ $this->params['breadcrumbs'][] = $id;
                      <table class="table table-bordered table-hover">
                         <thead>
                         <tr>
-                            <th scope="col" style='background-color:#B9D5CE;'>Codigo producto</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Materia prima</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                             <th scope="col" style='background-color:#B9D5CE;'>Stock gramos</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Aplica iva</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Porcentaje Iva</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Clasificacion</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($operacion as $val): ?>
                         <tr style="font-size: 85%;">
-                            <td><?= $val->codigo_producto ?></td>
-                            <td><?= $val->nombre_producto ?></td>
-                            <td><?= $val->stock_unidades ?></td>
+                            <td><?= $val->codigo_materia_prima ?></td>
+                            <td><?= $val->materia_prima ?></td>
+                            <td><?= $val->stock ?></td>
+                            <td><?= $val->stock_gramos ?></td>
                             <td><?= $val->aplicaIva ?></td>
                             <td><?= $val->porcentaje_iva ?>%</td>
-                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_productos[]" value="<?= $val->id_inventario ?>"></td> 
+                             <td><?= $val->tipoSolicitud->descripcion?></td>
+                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_materia_prima[]" value="<?= $val->id_materia_prima ?>"></td> 
                         </tr>
                         </tbody>
                         <?php endforeach; ?>
                     </table>
                 </div>
                 <div class="panel-footer text-right">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarproductos']) ?>
+                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarmateriaprima']) ?>
                 </div>
 
             </div>
