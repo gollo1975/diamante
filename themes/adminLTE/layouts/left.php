@@ -192,7 +192,8 @@
                                                 'url' => '#',
                                                 'items' => [
                                                     ['label' => 'Cargar OP', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
-                                                    ['label' => 'Primera auditoria', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
+                                                    ['label' => 'Auditoria granel', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
+                                                    ['label' => 'Auditoria OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_auditoria_ensamble']],
                                                     ['label' => 'Cargar OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index']],
                                                     
                                                 ]],

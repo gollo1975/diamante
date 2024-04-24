@@ -22,38 +22,38 @@ class PDF extends FPDF {
         //Encabezado
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(53, 9);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("EMPRESA:"), 0, 0, 'l', 1);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(40, 5, utf8_decode($config->razon_social_completa), 0, 0, 'L', 1);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(30, 5, utf8_decode("EMPRESA:"), 0, 0, 'l', 0);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(40, 5, utf8_decode($config->razon_social_completa), 0, 0, 'L', 0);
         $this->SetXY(30, 5);
         //FIN
         $this->SetXY(53, 13);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("NIT:"), 0, 0, 'l', 1);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(30, 5, utf8_decode("NIT:"), 0, 0, '0', 0);
          $this->SetFont('Arial', '', 7);
-        $this->Cell(40, 5, utf8_decode($config->nit_empresa." - ".$config->dv), 0, 0, 'L', 1);
+        $this->Cell(40, 5, utf8_decode($config->nit_empresa." - ".$config->dv), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
         $this->SetXY(53, 17);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("DIRECCION:"), 0, 0, 'l', 1);
-         $this->SetFont('Arial', '', 7);
-        $this->Cell(40, 5, utf8_decode($config->direccion), 0, 0, 'L', 1);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(30, 5, utf8_decode("DIRECCION:"), 0, 0, '0', 0);
+         $this->SetFont('Arial', '', 8);
+        $this->Cell(40, 5, utf8_decode($config->direccion), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
         $this->SetXY(53, 21);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("TELEFONO:"), 0, 0, 'l', 1);
-         $this->SetFont('Arial', '', 7);
-        $this->Cell(40, 5, utf8_decode($config->telefono), 0, 0, 'L', 1);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(30, 5, utf8_decode("TELEFONO:"), 0, 0, '0', 0);
+         $this->SetFont('Arial', '', 8);
+        $this->Cell(40, 5, utf8_decode($config->telefono), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
         $this->SetXY(53, 25);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("MUNICIPIO:"), 0, 0, 'l', 1);
-         $this->SetFont('Arial', '', 7);
-        $this->Cell(40, 5, utf8_decode($config->codigoMunicipio->municipio." - ".$config->codigoDepartamento->departamento), 0, 0, 'L', 1);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(30, 5, utf8_decode("MUNICIPIO:"), 0, 0, '0', 0);
+         $this->SetFont('Arial', '', 8);
+        $this->Cell(40, 5, utf8_decode($config->codigoMunicipio->municipio." - ".$config->codigoDepartamento->departamento), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
 
         //FIN
@@ -78,9 +78,9 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 7);
         $this->Cell(50, 5, utf8_decode($orden->grupo->nombre_grupo), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(25, 5, utf8_decode("LOTE:"), 0, 0, 'L', 1);
+        $this->Cell(25, 5, utf8_decode("T. LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(10, 5, utf8_decode($orden->numero_lote), 0, 0, 'L', 1);
+        $this->Cell(10, 5, ''. number_format($orden->tamano_lote,0), 0, 0, 'R', 1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(22, 5, utf8_decode("UNIDADES:"), 0, 0, 'R', 1);
         $this->SetFont('Arial', '', 7);
@@ -106,9 +106,9 @@ class PDF extends FPDF {
         //FIN
         $this->SetXY(10, 56);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(20, 5, utf8_decode("F. PROCESO:"), 0, 0, 'L', 1);
+        $this->Cell(20, 5, utf8_decode("USER:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(24, 5, utf8_decode($orden->fecha_proceso), 0, 0, 'L',1);
+        $this->Cell(24, 5, utf8_decode($orden->user_name), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(26, 5, utf8_decode("F. REGISTRO:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
@@ -118,13 +118,22 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 7);
         $this->Cell(15, 5, utf8_decode($orden->fecha_entrega), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(17, 5, utf8_decode("USER:"), 0, 0, 'R', 1);
+        $this->Cell(17, 5, utf8_decode("F. PROCESO:"), 0, 0, 'R', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(15, 5, utf8_decode($orden->autorizadoOrden), 0, 0, 'L', 1);
+        $this->Cell(15, 5, utf8_decode($orden->fecha_proceso), 0, 0, 'L', 1);
        
         //FIN
          $this->EncabezadoDetalles();
-     
+                 
+         
+        //linea del llogo
+        $this->Line(10,8,202,8);//linea superior horizontal
+        $this->Line(10,30,10,8);//primera linea en y
+        $this->Line(45,30,45,8);//segunda linea en y
+        $this->Line(130,30,130,8);//tercera linea en y
+        $this->Line(202,30,202,8);//cuarta linea en y
+        $this->Line(10,30,202,30);//linea inferior horizontal
+       
         //Lineas del encabezado
         $this->Line(10,70,10,102);
         $this->Line(33,70,33,102);
@@ -134,13 +143,18 @@ class PDF extends FPDF {
         $this->Line(177,70,177,102);
         $this->Line(202,70,202,102);
         $this->Line(10,102,202,102);//linea horizontal inferior  
-        //Líneas creditos
-        $this->Line(10,118,10,180);
-        $this->Line(33,118,33,180);
-        $this->Line(133,118,133,180);
-        $this->Line(168,118,168,180);
-        $this->Line(202,118,202,180);
-        $this->Line(10,180,202,180);//linea horizontal inferior
+        //Líneas MATERIA PRIMAS FACE 1
+        $this->Line(10,110,10,170);
+        $this->Line(74,120,74,170);
+        $this->Line(138,120,138,170);
+        $this->Line(202,110,202,170);
+        $this->Line(10,170,202,170);//linea horizontal inferior
+        //Líneas MATERIA PRIMA FACE 2
+        $this->Line(10,110,10,230);
+        $this->Line(74,110,74,230);
+        $this->Line(138,110,138,230);
+        $this->Line(202,110,202,230);
+        $this->Line(10,230,202,230);//linea horizontal inferior
         
       
     }
@@ -170,7 +184,10 @@ class PDF extends FPDF {
                       
 
     function Body($pdf,$model) {        
-        $materiales = OrdenProduccionMateriaPrima::find()->where(['=','id_orden_produccion',$model->id_orden_produccion])->orderBy('id_materia_prima asc')->all();
+        $materiales = app\models\OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion',$model->id_orden_produccion])
+                                                                   ->andWhere(['=','id_fase', 1])->orderBy('id_detalle asc')->all();
+        $fase2 = app\models\OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion',$model->id_orden_produccion])
+                                                                   ->andWhere(['=','id_fase', 2])->orderBy('id_detalle asc')->all();
         $producto = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $model->id_orden_produccion])->orderBy('descripcion asc')->all();		
         $pdf->SetX(10);
         $pdf->SetFont('Arial', '', 7);
@@ -192,38 +209,83 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 7);
         //productos
         $pdf->SetXY(10, 63);
-        $pdf->Cell(192, 5, 'LISTADO DE PRODUCTOS', 1, 0, 'C',1);
+        $pdf->Cell(192, 5, 'PRESENTACION DEL PRODUCTO', 1, 0, 'C',1);
         //materiales
+        $fase = app\models\TipoFases::findOne(1);
         $pdf->SetXY(10, 109);
         $this->SetFont('', 'B', 7);
-        $pdf->Cell(192, 5, utf8_decode('LISTADO DE MATERIA PRIMA'), 1, 0, 'C',1);
+        $pdf->Cell(192, 5, utf8_decode('MATERIAS PRIMAS (M.P.)'), 1, 0, 'C',1);
         $pdf->SetXY(10, 114);
-        $pdf->Cell(23, 4, 'CODIGO', 1, 0, 'C',1);
-        $pdf->Cell(100, 4, 'MATERIA PRIMA', 1, 0, 'C',1);
-        $pdf->Cell(35, 4, utf8_decode('CANTIDAD'), 1, 0, 'C',1);
-        $pdf->Cell(34, 4, utf8_decode('MEDIDA'), 1, 0, 'C',1);
+        $this->Cell(64, 4, utf8_decode($fase->nombre_fase), 0, 0, 'C', 0);
+        $this->Cell(64, 4, utf8_decode($fase->nombre_fase), 0, 0, 'C', 0);
+        $this->Cell(64, 4, utf8_decode($fase->nombre_fase), 0, 0, 'C', 0);
         $pdf->SetXY(10, 119);
-        $pdf->SetFont('Arial', '', 7);
+       //
+        $pdf->Cell(64, 4, 'INSUMOS / MP', 1, 0, 'C',1);
+        $pdf->Cell(64, 4, '% DE APLICACION', 1, 0, 'C',1);
+        $pdf->Cell(64, 4, utf8_decode('CANTIDAD A PESAR EN GRAMOS'), 1, 0, 'C',1);
+        $pdf->SetXY(10, 124);
+        $pdf->SetFont('Arial', '', 8);
         foreach ($materiales as $detalle) {                                    
-            $pdf->Cell(23, 4, $detalle->materiaPrima->codigo_materia_prima, 0, 0, 'L');            
-            $pdf->Cell(100, 4, utf8_decode($detalle->materiaPrima->materia_prima), 0, 0, 'L');
-            $pdf->Cell(35, 4, ' '.number_format($detalle->cantidad, 0), 0, 0, 'R');
-            $pdf->Cell(34, 4, utf8_decode($detalle->materiaPrima->medida->descripcion), 0, 0, 'C');
+            $pdf->Cell(64, 4, $detalle->codigo_homologacion, 0, 0, 'C');            
+            $pdf->Cell(64, 4, utf8_decode($detalle->porcentaje_aplicacion), 0, 0, 'R');
+            $pdf->Cell(64, 4, ' '.number_format($detalle->cantidad_gramos, 0), 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }
+        // SEGUNDO PROCESO
+        $fase = app\models\TipoFases::findOne(2);
+        $pdf->SetXY(10, 172);
+        $this->SetFont('', 'B', 7);
+        $pdf->Cell(192, 5, utf8_decode('MATERIAS PRIMAS (M.P.)'), 1, 0, 'C',1);
+        $pdf->SetXY(10, 177);
+        $this->Cell(64, 4, utf8_decode($fase->nombre_fase), 0, 0, 'C', 0);
+        $this->Cell(64, 4, utf8_decode($fase->nombre_fase), 0, 0, 'C', 0);
+        $this->Cell(64, 4, utf8_decode($fase->nombre_fase), 0, 0, 'C', 0);
+        $pdf->SetXY(10, 182);
+       //
+        $pdf->Cell(64, 4, 'INSUMOS / MP', 1, 0, 'C',1);
+        $pdf->Cell(64, 4, '% DE APLICACION', 1, 0, 'C',1);
+        $pdf->Cell(64, 4, utf8_decode('CANTIDAD A PESAR EN GRAMOS'), 1, 0, 'C',1);
+        $pdf->SetXY(10, 187);
+        $pdf->SetFont('Arial', '', 8);
+        foreach ($fase2 as $detalle) {                                    
+            $pdf->Cell(64, 4, $detalle->codigo_homologacion, 0, 0, 'C');            
+            $pdf->Cell(64, 4, utf8_decode($detalle->porcentaje_aplicacion), 0, 0, 'R');
+            $pdf->Cell(64, 4, ' '.number_format($detalle->cantidad_gramos, 0), 0, 0, 'R');
+            $pdf->Ln();
+            $pdf->SetAutoPageBreak(true, 20);                              
+        }
+        
+        $pdf->SetXY(10, 237);
+        $this->SetFont('Arial', 'B', 8);
+        $pdf->MultiCell(146, 4, utf8_decode('OBSERVACION: '.$model->observacion),0,'J');
 	//firma trabajador
-        $pdf->SetXY(10, 240);
+        $pdf->SetXY(10, 252);
         $this->SetFont('', 'B', 9);
-        $pdf->Cell(35, 5, 'FIRMA EMPLEADO: ___________________________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(10, 245);
-        $pdf->Cell(35, 5, 'C.C.:', 0, 0, 'L',0);
-        //firma empresa
-        $pdf->SetXY(10, 265);//firma trabajador
+        $pdf->Cell(35, 5, '________________________________', 0, 0, 'L',0);
+         $pdf->SetXY(10, 257);
+        $pdf->Cell(35, 5, 'LIDER DE PRODUCCION', 0, 0, 'L',0);
+        $pdf->SetXY(10, 262);
+        $pdf->Cell(35, 5, utf8_decode('Emitió y Revisó'), 0, 0, 'L',0);
+        // SEGUNDA FIRMA
+        $pdf->SetXY(120, 252);
         $this->SetFont('', 'B', 9);
-        $pdf->Cell(35, 5, 'FIRMA AUTORIZADO: ____________________________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(10, 270);
-        $pdf->Cell(35, 5, 'NIT/CC.:', 0, 0, 'L',0);
+        $pdf->Cell(120, 5, '________________________________', 0, 0, 'L',0);
+        $pdf->SetXY(120, 257);
+        $pdf->Cell(120, 5, 'DIRECCION TECNICA', 0, 0, 'L',0);
+        $pdf->SetXY(120, 262);
+        $pdf->Cell(120, 5, utf8_decode('Aprobado por'), 0, 0, 'L',0);
+        //liena
+        //linea
+        $pdf->SetXY(106, 12);
+        $pdf->Cell(120, 5, 'GESTION DE PRODUCCION', 0, 0, 'C',0);
+        $this->SetXY(129, 16);
+        $pdf->Cell(125, 5, '_________________________________________', 0, 0, 'L',0);
+        //SEGUNDO NOMBRE
+        $pdf->SetXY(106, 22);
+        $pdf->Cell(120, 5, 'ORDEN DE PRODUCCION', 0, 0, 'C',0);
+
     }
 
     function Footer() {
@@ -242,6 +304,6 @@ $pdf->AddPage();
 $pdf->Body($pdf,$model);
 $pdf->AliasNbPages();
 $pdf->SetFont('Times', '', 10);
-$pdf->Output("Orden_produccion$model->id_orden_produccion.pdf", 'D');
+$pdf->Output("Orden_produccion$model->numero_orden.pdf", 'D');
 
 exit;

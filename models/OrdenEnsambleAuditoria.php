@@ -137,4 +137,13 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
         }
         return $condicionanalisis;
     }
+    
+    public function getCerrarAuditoria() {
+        if($this->cerrar_auditoria == 0){
+            $cerrarauditoria = 'NO';
+        }else{
+            $cerrarauditoria = 'SI';
+        }
+        return $cerrarauditoria;
+    }
 }

@@ -211,6 +211,7 @@ class OrdenProduccionController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    
     //PROCESO QUE SE ENCARGA DE APROBAR LAS ORDENES DE PRODUCCION
     public function actionIndex_ordenes_produccion() {
         if (Yii::$app->user->identity){

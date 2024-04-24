@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
 <div class="grupo-producto-view">
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_auditoria_ensamble'], ['class' => 'btn btn-primary btn-sm']) ?>
    
         <?php if($model->cerrar_auditoria == 0){
             echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar auditoria', ['cerrar_auditoria', 'id_auditoria' => $model->id_auditoria,'orden' => $model->ensamble->ordenProduccion->id_orden_produccion],['class' => 'btn btn-warning btn-sm',

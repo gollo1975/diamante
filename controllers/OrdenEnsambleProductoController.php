@@ -129,7 +129,81 @@ class OrdenEnsambleProductoController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
-
+    
+    //INDEX QUE MUESTRAS TODAS LA AUDITORIAS REALIZADAS A LAS OE
+    public function actionIndex_auditoria_ensamble() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',96])->all()){
+                $form = new \app\models\FiltroBusquedaAuditorias();
+                $numero_auditoria = null;
+                $numero_orden = null; $numero_lote = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $grupo = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero_auditoria = Html::encode($form->numero_auditoria);
+                        $numero_orden = Html::encode($form->numero_orden);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $grupo = Html::encode($form->grupo);
+                         $numero_lote = Html::encode($form->numero_lote);
+                        $table = \app\models\OrdenEnsambleAuditoria::find()
+                                    ->andFilterWhere(['=', 'numero_orden', $numero_orden])
+                                    ->andFilterWhere(['between', 'fecha_creacion', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'numero_auditoria', $numero_auditoria])
+                                    ->andFilterWhere(['=', 'numero_lote', $numero_lote])
+                                    ->andFilterWhere(['=', 'id_grupo', $grupo]);
+                        $table = $table->orderBy('id_auditoria DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_auditoria  DESC']);
+                            $this->actionExcelConsultaAuditorias($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = \app\models\OrdenEnsambleAuditoria::find()
+                            ->orderBy('id_auditoria DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 10,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelConsultaAuditoria($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('index_auditoria_orden', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+    
     /**
      * Displays a single OrdenEnsambleProducto model.
      * @param integer $id
