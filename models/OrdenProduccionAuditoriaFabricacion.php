@@ -38,7 +38,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     {
         return [
             [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','numero_lote','cerrar_auditoria','id_grupo'], 'integer'],
-            [['fecha_proceso','fecha_creacion'], 'safe'],
+            [['fecha_proceso','fecha_cierre'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
             [['user_name'], 'string', 'max' => 15],
@@ -66,7 +66,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
             'numero_auditoria' => 'Numero auditoria:',
             'numero_orden' => 'Numero orden produccion:',
             'numero_lote' => 'Numero lote:',
-            'fecha_creacion' => 'Fecha creacion:',
+            'fecha_cierre' => 'Fecha cierre:',
             'cerrar_auditoria' => 'Cerrado:',
             'id_grupo' => 'Nombre del grupo:',
         ];

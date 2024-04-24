@@ -447,10 +447,9 @@ class OrdenEnsambleProductoController extends Controller
         $detalle_empaque = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         $sw = 0;
         foreach ($detalle_empaque as $detalle):
-            echo $detalle->unidades_reales;
-            if($orden->total_unidades <> $detalle->unidades_reales){
-               echo $sw = 1;
-            }
+                if($orden->total_unidades <> $detalle->unidades_reales){
+                   $sw = 1;
+                }
         endforeach;
         if($sw == 1){
             Yii::$app->getSession()->setFlash('warning', 'No se puede CERRAR la orden de ensamble porque las UNIDADES REALES no son iguales en el proceso. Favor corregir las unidades por la primer vista.'); 
@@ -721,13 +720,11 @@ class OrdenEnsambleProductoController extends Controller
     }
     
     //REPORTES
-    public function actionImprimir_orden_ensamble($id, $token) {
-        $model = OrdenEnsambleProducto::findOne($id);
-        Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.'); 
-         $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token]);
-        /*return $this->render('../formatos/reporteordenproduccion', [
+    public function actionImprimir_auditoria_orden($id_auditoria) {
+        $model = OrdenEnsambleAuditoria::findOne($id_auditoria);
+        return $this->render('../formatos/reporte_auditoria_terminado', [
             'model' => $model,
-        ]);*/
+        ]);
     }
     
     /**

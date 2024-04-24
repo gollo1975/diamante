@@ -675,7 +675,6 @@ class OrdenProduccionController extends Controller
             $table->id_grupo = $id_grupo;
             $table->id_etapa = 1;
             $table->etapa =$etapa->concepto;
-            $table->fecha_creacion = date('Y-m-d');
             $table->user_name = Yii::$app->user->identity->username;
             $table->save();
             $model = \app\models\OrdenProduccionAuditoriaFabricacion::find()->orderBy('id_auditoria DESC')->limit(1)->one();
@@ -1462,6 +1461,7 @@ class OrdenProduccionController extends Controller
         $auditoria = \app\models\OrdenProduccionAuditoriaFabricacion::findOne($id_auditoria);
         $auditoria->numero_auditoria = $lista->numero_inicial + 1;
         $auditoria->cerrar_auditoria = 1;
+        $auditoria->fecha_cierre = date('Y-m-d');
         $auditoria->save(false);
         $lista->numero_inicial = $auditoria->numero_auditoria;
         $lista->save(false);
@@ -1527,6 +1527,13 @@ class OrdenProduccionController extends Controller
     public function actionImprimirordenproduccion($id) {
         $model = OrdenProduccion::findOne($id);
         return $this->render('../formatos/reporteordenproduccion', [
+            'model' => $model,
+        ]);
+    }
+    
+    public function actionImprimir_informe_auditoria($id_auditoria) {
+        $model = \app\models\OrdenProduccionAuditoriaFabricacion::findOne($id_auditoria);
+        return $this->render('../formatos/reporte_auditoria_granel', [
             'model' => $model,
         ]);
     }

@@ -122,7 +122,11 @@ $form = ActiveForm::begin([
                 <td><?= $val->numero_auditoria?></td>
                 <td><?= $val->numero_lote?></td>
                 <td><?= $val->numero_orden?></td>
-                <td><?= $val->forma->concepto?></td>
+                <?php if($val->id_forma == null){?>
+                     <td><?= 'NO FOUND'?></td>
+                <?php }else{?>
+                    <td><?= $val->forma->concepto?></td>
+                <?php }?>
                 <td><?= $val->grupo->nombre_grupo?></td>
                 <td><?= $val->fecha_creacion?></td>
                 <td><?= $val->fecha_analisis?></td>

@@ -20,7 +20,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 
-$this->title = 'DETALLE AUDITORIA    ';
+$this->title = 'DETALLE AUDITORIA (OE)   ';
 $this->params['breadcrumbs'][] = ['label' => 'Auditoria orden produccion', 'url' => ['index_resultado_auditoria']];
 $this->params['breadcrumbs'][] = $model->id_auditoria;
 //$conFases = ArrayHelper::map(app\models\TipoFases::find()->all(), 'id_fase', 'nombre_fase');
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
             </div>
               
        <?php }else{
-             echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_informe_auditoria', 'id_auditoria' => $model->id_auditoria], ['class' => 'btn btn-default btn-sm']);
+             echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_auditoria_orden', 'id_auditoria' => $model->id_auditoria], ['class' => 'btn btn-default btn-sm']);
         } ?>
    </p>    
     

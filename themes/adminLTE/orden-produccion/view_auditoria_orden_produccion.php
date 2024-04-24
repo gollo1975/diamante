@@ -71,8 +71,8 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
               </tr>
                <tr style ='font-size:90%;'>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
-                    <td><?= Html::encode($model->fecha_creacion) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
+                    <td><?= Html::encode($model->fecha_proceso) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_lote') ?></th>
                     <td><?= Html::encode($model->numero_lote) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_produccion') ?></th>
@@ -85,8 +85,8 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->numero_auditoria) ?></td>  
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'condicion_analisis') ?></th>
                     <td><?= Html::encode($model->condicionAnalisis) ?></td> 
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_cierre') ?></th>
+                    <td><?= Html::encode($model->fecha_cierre) ?></td>  
                      <th style='background-color:#F0F3EF;'></th>
                     <td></td>
               </tr>
