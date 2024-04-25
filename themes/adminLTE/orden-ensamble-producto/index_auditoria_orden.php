@@ -107,8 +107,8 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Orden producción</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. cosmetica</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>F. creacion</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>F. cierre</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>F. analisis</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Analisis</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th>
@@ -128,7 +128,7 @@ $form = ActiveForm::begin([
                     <td><?= $val->forma->concepto?></td>
                 <?php }?>
                 <td><?= $val->grupo->nombre_grupo?></td>
-                <td><?= $val->fecha_creacion?></td>
+                <td><?= $val->fecha_proceso?></td>
                 <td><?= $val->fecha_analisis?></td>
                 <td><?= $val->etapa?></td>
                 <td><?= $val->condicionAnalisis?></td>

@@ -60,9 +60,9 @@ if($sw == 0){
                 if($model->cerrar_orden_ensamble == 1 && $model->cerrar_proceso == 0){
                     echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar orden ensamble', ['cerrar_orden_ensamble', 'id' => $model->id_ensamble,'token' => $token ,'sw' => $sw],['class' => 'btn btn-default btn-sm',
                                         'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema y modificar las unidades reales.', 'method' => 'post']]);   
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
                 }else {
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
                 }    
             }  
         }?>    

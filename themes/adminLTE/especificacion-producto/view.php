@@ -7,8 +7,8 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Municipio */
 
 $this->title = 'Detalle';
-$this->params['breadcrumbs'][] = ['label' => 'Concepto analisis', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $model->id_analisis;
+$this->params['breadcrumbs'][] = ['label' => 'Especificacion producto', 'url' => ['index']];
+$this->params['breadcrumbs'][] = $model->id_especificacion;
 ?>
 <div class="concepto-analisis-view">
 
@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $model->id_analisis;
 
     <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar', ['update', 'id' => $model->id_analisis], ['class' => 'btn btn-success btn-sm']) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar', ['update', 'id' => $model->id_especificacion], ['class' => 'btn btn-success btn-sm']) ?>
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -25,8 +25,8 @@ $this->params['breadcrumbs'][] = $model->id_analisis;
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
                <tr style ='font-size:90%;'>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_analisis') ?>:</th>
-                    <td><?= Html::encode($model->id_analisis) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_especificacion') ?>:</th>
+                    <td><?= Html::encode($model->id_especificacion) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'concepto') ?>:</th>
                     <td><?= Html::encode($model->concepto) ?></td>
               </tr>

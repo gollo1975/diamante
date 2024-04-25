@@ -37,7 +37,7 @@ class ConceptoAnalisis extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['concepto'], 'required'],
+            [['concepto','id_etapa'], 'required'],
             [['id_etapa'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['concepto'], 'string', 'max' => 40],

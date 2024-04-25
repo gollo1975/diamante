@@ -3,20 +3,21 @@
 namespace app\controllers;
 
 use Yii;
+
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\models\UsuarioDetalle;
 use yii\data\Pagination;
 use yii\helpers\Html;
+//models
+use app\models\EspecificacionProducto;
+use app\models\EspecificacionProductoSearch;
 
-//model
-use app\models\ConceptoAnalisis;
-use app\models\UsuarioDetalle;
-use app\models\FiltroBusquedaAnalisis;
 /**
- * ConceptoAnalisisController implements the CRUD actions for ConceptoAnalisis model.
+ * EspecificacionProductoController implements the CRUD actions for EspecificacionProducto model.
  */
-class ConceptoAnalisisController extends Controller
+class EspecificacionProductoController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -34,48 +35,44 @@ class ConceptoAnalisisController extends Controller
     }
 
     /**
-     * Lists all ConceptoAnalisis models.
+     * Lists all EspecificacionProducto models.
      * @return mixed
      */
    public function actionIndex() {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso', 94])->all()){
-                $form = new FiltroBusquedaAnalisis();
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso', 97])->all()){
+                $form = new \app\models\FiltroBusquedaAnalisis();
                 $codigo = null;
                 $concepto = null; $etapa = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $concepto = Html::encode($form->concepto);
                         $codigo = Html::encode($form->codigo);
-                        $etapa = Html::encode($form->etapa);
-                        $table = ConceptoAnalisis::find()
-                                ->andFilterWhere(['=', 'id_analisis', $codigo])
-                                ->andFilterWhere(['like', 'concepto', $concepto])
-                                ->andFilterWhere(['=', 'id_etapa', $etapa]);
-                        $table = $table->orderBy('id_analisis DESC');
+                        $table = EspecificacionProducto::find()
+                                ->andFilterWhere(['=', 'id_especificacion', $codigo])
+                                ->andFilterWhere(['like', 'concepto', $concepto]);
+                        $table = $table->orderBy('id_especificacion DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
                         $to = $count->count();
                         $pages = new Pagination([
-                            'pageSize' => 15,
+                            'pageSize' => 10,
                             'totalCount' => $count->count()
                         ]);
                         $model = $table
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                     ->all();
-                        if(isset($_POST['excel'])){                    
-                            $this->actionExcelconsultaAnalisis($tableexcel);
-                        }
+                        
                     } else {
                         $form->getErrors();
                     }
                 } else {
-                    $table = ConceptoAnalisis::find()
-                            ->orderBy('id_analisis DESC');
+                    $table = EspecificacionProducto::find()
+                            ->orderBy('id_especificacion DESC');
                     $count = clone $table;
                     $pages = new Pagination([
-                        'pageSize' => 15,
+                        'pageSize' => 10,
                         'totalCount' => $count->count(),
                     ]);
                     $tableexcel = $table->all();
@@ -83,9 +80,7 @@ class ConceptoAnalisisController extends Controller
                             ->offset($pages->offset)
                             ->limit($pages->limit)
                             ->all();
-                    if(isset($_POST['excel'])){                    
-                            $this->actionExcelconsultaAnalisis($tableexcel);
-                    }
+                    
                 }
                 $to = $count->count();
                 return $this->render('index', [
@@ -101,9 +96,8 @@ class ConceptoAnalisisController extends Controller
             return $this->redirect(['site/login']);
         }
     }
-
     /**
-     * Displays a single ConceptoAnalisis model.
+     * Displays a single EspecificacionProducto model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -116,13 +110,13 @@ class ConceptoAnalisisController extends Controller
     }
 
     /**
-     * Creates a new ConceptoAnalisis model.
+     * Creates a new EspecificacionProducto model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new ConceptoAnalisis();
+        $model = new EspecificacionProducto();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $model->user_name = Yii::$app->user->identity->username;
@@ -136,7 +130,7 @@ class ConceptoAnalisisController extends Controller
     }
 
     /**
-     * Updates an existing ConceptoAnalisis model.
+     * Updates an existing EspecificacionProducto model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -156,15 +150,15 @@ class ConceptoAnalisisController extends Controller
     }
 
         /**
-     * Finds the ConceptoAnalisis model based on its primary key value.
+     * Finds the EspecificacionProducto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return ConceptoAnalisis the loaded model
+     * @return EspecificacionProducto the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = ConceptoAnalisis::findOne($id)) !== null) {
+        if (($model = EspecificacionProducto::findOne($id)) !== null) {
             return $model;
         }
 

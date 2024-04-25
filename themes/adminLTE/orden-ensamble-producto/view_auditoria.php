@@ -71,8 +71,8 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
               </tr>
                <tr style ='font-size:90%;'>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
-                    <td><?= Html::encode($model->fecha_creacion) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
+                    <td><?= Html::encode($model->fecha_proceso) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_lote') ?></th>
                     <td><?= Html::encode($model->numero_lote) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_ensamble') ?></th>

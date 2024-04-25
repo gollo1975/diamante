@@ -46,7 +46,7 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
     {
         return [
             [['numero_auditoria', 'numero_orden', 'numero_lote', 'id_ensamble', 'id_etapa', 'id_grupo', 'id_forma', 'condiciones_analisis', 'cerrar_auditoria'], 'integer'],
-            [['fecha_creacion', 'fecha_proceso','fecha_analisis'], 'safe'],
+            [['fecha_proceso','fecha_analisis'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
             [['user_name'], 'string', 'max' => 15],
@@ -75,7 +75,6 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
             'condiciones_analisis' => 'Condiciones de analisis:',
             'observacion' => 'Observacion:',
             'user_name' => 'User name:',
-            'fecha_creacion' => 'Fecha creacion:',
             'fecha_proceso' => 'Fecha proceso:',
             'cerrar_auditoria' => 'Cerrar auditoria:',
             'fecha_analisis' => 'Fecha analisis:',

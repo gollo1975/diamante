@@ -727,6 +727,13 @@ class OrdenEnsambleProductoController extends Controller
         ]);
     }
     
+    public function actionImprimir_orden_ensamble($id) {
+        $model = OrdenEnsambleProducto::findOne($id);
+        return $this->render('../formatos/reporte_orden_ensamble', [
+            'model' => $model,
+        ]);
+    }
+    
     /**
      * Finds the OrdenEnsambleProducto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

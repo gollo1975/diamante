@@ -21,6 +21,15 @@ class EspecificacionProducto extends \yii\db\ActiveRecord
     {
         return 'especificacion_producto';
     }
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->concepto = strtoupper($this->concepto); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -41,10 +50,10 @@ class EspecificacionProducto extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_especificacion' => 'Id Especificacion',
-            'concepto' => 'Concepto',
-            'fecha_registro' => 'Fecha Registro',
-            'user_name' => 'User Name',
+            'id_especificacion' => 'Codigo:',
+            'concepto' => 'Concepto:',
+            'fecha_registro' => 'Fecha registro:',
+            'user_name' => 'User name:',
         ];
     }
 }
