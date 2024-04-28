@@ -42,13 +42,14 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
     {
         return [
             [['id_orden_produccion', 'codigo_producto', 'cantidad', 'cerrar_linea','numero_lote','id_medida_producto','aplica_iva','id_inventario',
-                'importado','costo_unitario','cantidad_real'], 'integer'],
+                'importado','costo_unitario','cantidad_real','id_presentacion'], 'integer'],
             [['descripcion'], 'string', 'max' => 40],
             ['user_name', 'string', 'max' => 15],
             ['porcentaje_iva', 'number'],
             ['fecha_vencimiento', 'safe'],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_medida_producto'], 'exist', 'skipOnError' => true, 'targetClass' => MedidaProductoTerminado::className(), 'targetAttribute' => ['id_medida_producto' => 'id_medida_producto']],
+            [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => PresentacionProducto::className(), 'targetAttribute' => ['id_presentacion' => 'id_presentacion']],
         ];
     }
 
@@ -74,6 +75,7 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
             'importado' => 'importado',
             'fecha_vencimiento' => 'fecha_vencimiento',
             'costo_unitario' => 'costo_unitario',
+            'id_presentacion' => 'id_presentacion' ,
         ];
     }
 
@@ -83,6 +85,14 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
     public function getOrdenProduccion()
     {
         return $this->hasOne(OrdenProduccion::className(), ['id_orden_produccion' => 'id_orden_produccion']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPresentacionProducto()
+    {
+        return $this->hasOne(PresentacionProducto::className(), ['id_presentacion' => 'id_presentacion']);
     }
     
     public function getMedidaProducto()

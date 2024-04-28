@@ -405,40 +405,51 @@ class OrdenEnsambleProductoController extends Controller
         $orden = OrdenEnsambleProducto::findOne($id);
         $detalle_empaque = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         $sw = 0; $suma1; $suma2 = 0; 
-        foreach ($detalle_empaque as $empaque):
-            if($empaque->alerta == 'FALTA'){
-               $sw = 1;
-               $suma1 = $empaque->unidades_devolucion + $empaque->unidades_averias;
-               $empaque->unidades_utilizadas -= $suma1;
-               $empaque->unidades_reales = $empaque->unidades_utilizadas;
-               $empaque->save(false);
-               $suma2 = $empaque->unidades_sala_tecnica + $empaque->unidades_muestra_retencion;
-               $empaque->unidades_reales -= $suma2;
-               $empaque->save(false);
-            }else{
-              $suma1 = $empaque->unidades_devolucion + $empaque->unidades_averias;
-               $empaque->unidades_utilizadas -= $suma1;
-               $empaque->unidades_reales = $empaque->unidades_utilizadas;
-               $empaque->save(false);
-               $suma2 = $empaque->unidades_sala_tecnica + $empaque->unidades_muestra_retencion;
-               $empaque->unidades_reales -= $suma2;
-               $empaque->save(false);
-            }
-        endforeach;
-        if($sw == 1){
-            Yii::$app->getSession()->setFlash('warning', 'No se puede generar la orden de ensamble porque los materiales de empaque estan incompletos. Validar con el administrador.'); 
+        if($orden->responsable == null && $orden->peso_neto == null && $orden->observacion == NULL){
+            Yii::$app->getSession()->setFlash('info', 'Debe de subir la siguiente informacion: RESPOSAMBLE del proceso, el PESOS NETO y las OBSERVACIONES de la orden de ensamble.'); 
             $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
-             
         }else{
-            //generar consecutivo
-            $consecutivo = \app\models\Consecutivos::findOne(12);
-            $orden->numero_orden_ensamble = $consecutivo->numero_inicial + 1;
-            $orden->cerrar_orden_ensamble = 1;
-            $orden->save();
-            $consecutivo->numero_inicial = $orden->numero_orden_ensamble;
-            $consecutivo->save();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
+            if(count($detalle_empaque) >  0){
+                foreach ($detalle_empaque as $empaque):
+                    if($empaque->alerta == 'FALTA'){
+                       $sw = 1;
+                       $suma1 = $empaque->unidades_devolucion + $empaque->unidades_averias;
+                       $empaque->unidades_utilizadas -= $suma1;
+                       $empaque->unidades_reales = $empaque->unidades_utilizadas;
+                       $empaque->save(false);
+                       $suma2 = $empaque->unidades_sala_tecnica + $empaque->unidades_muestra_retencion;
+                       $empaque->unidades_reales -= $suma2;
+                       $empaque->save(false);
+                    }else{
+                       $suma1 = $empaque->unidades_devolucion + $empaque->unidades_averias;
+                       $empaque->unidades_utilizadas -= $suma1;
+                       $empaque->unidades_reales = $empaque->unidades_utilizadas;
+                       $empaque->save(false);
+                       $suma2 = $empaque->unidades_sala_tecnica + $empaque->unidades_muestra_retencion;
+                       $empaque->unidades_reales -= $suma2;
+                       $empaque->save(false);
+                    }
+                endforeach;
+                if($sw == 1){
+                    Yii::$app->getSession()->setFlash('warning', 'No se puede generar la orden de ensamble porque los materiales de empaque estan incompletos. Validar con el administrador.'); 
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
+
+                 }else{
+                    //generar consecutivo
+                    $consecutivo = \app\models\Consecutivos::findOne(12);
+                    $orden->numero_orden_ensamble = $consecutivo->numero_inicial + 1;
+                    $orden->cerrar_orden_ensamble = 1;
+                    $orden->save();
+                    $consecutivo->numero_inicial = $orden->numero_orden_ensamble;
+                    $consecutivo->save();
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
+                 }    
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'No existe material de empaque seleccionado en esta ORDEN DE ENSAMBLE. Favor validar la informacion.'); 
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
+            }  
         }
+        
     }
     
     //PROCESO QUE CIERRA EN SU TOTALIDAD LA ORDEN DE ENSAMBLE
@@ -455,14 +466,25 @@ class OrdenEnsambleProductoController extends Controller
             Yii::$app->getSession()->setFlash('warning', 'No se puede CERRAR la orden de ensamble porque las UNIDADES REALES no son iguales en el proceso. Favor corregir las unidades por la primer vista.'); 
             $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
         }else{
-            $orden->cerrar_proceso = 1;
-            $orden->save();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+            $detalle_producto = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
+            foreach ($detalle_producto as $producto):
+                if($producto->porcentaje_rendimiento == null){
+                    $sw = 1;
+                }
+            endforeach;
+            if($sw == 1){
+                Yii::$app->getSession()->setFlash('error', 'No se puede CERRAR la orden de ensamble porque el PORCENTAJE DE RENDIMIENTO debe de ser mayor a 0. Favor actualizar las unidades desde el LAPIZ.'); 
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
+            }else{
+                $orden->cerrar_proceso = 1;
+                $orden->save();
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+            }
         }    
     }
     
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
-    public function actionBuscar_material_empaque($id, $token, $id_solicitud){
+    public function actionBuscar_material_empaque($id, $token, $id_solicitud, $sw){
         $operacion = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
@@ -529,7 +551,7 @@ class OrdenEnsambleProductoController extends Controller
                          $table->save(false);
                     }    
                 }
-                return $this->redirect(['view','id' => $id, 'token' => $token]);
+                return $this->redirect(['view','id' => $id, 'token' => $token,'sw' =>$sw,]);
             }
         }
         return $this->render('importar_material_empaque', [
@@ -539,6 +561,7 @@ class OrdenEnsambleProductoController extends Controller
             'form' => $form,
             'token' => $token,
             'id_solicitud' => $id_solicitud,
+            'sw' =>$sw,
         ]);
     }
     
@@ -636,7 +659,6 @@ class OrdenEnsambleProductoController extends Controller
                     $table->etapa = $orden_ensamble->etapa->concepto;
                     $table->id_grupo = $id_grupo;
                     $table->user_name = Yii::$app->user->identity->username;
-                    $table->fecha_creacion = date('Y-m-d');
                     $table->save();
                     //PROCESO PARA INSERTAR LOS DATOS DE LA AUDITORIA
                     $auditoria = \app\models\OrdenEnsambleAuditoria::find()->orderBy('id_auditoria DESC')->limit(1)->one(); //para conseguir el ID
@@ -699,25 +721,120 @@ class OrdenEnsambleProductoController extends Controller
     }
     
     //CERRAR AUDITORIA
-    public function actionCerrar_auditoria($id_auditoria, $orden) {
+    public function actionCerrar_auditoria($id_auditoria, $orden_produccion, $orden_ensamble) {
         //proceso que genera consecutivo
-        $ordenProduccion = \app\models\OrdenProduccion::findOne($orden);
+        $orden_ensamble = OrdenEnsambleProducto::findOne($orden_ensamble);
+        $ordenProduccion = \app\models\OrdenProduccion::findOne($orden_produccion);
         $lista = \app\models\Consecutivos::findOne(13);
         $auditoria = \app\models\OrdenEnsambleAuditoria::findOne($id_auditoria);
-        if($auditoria->id_forma == null){
+        $sw = 0;
+        if($auditoria->id_forma == null && $auditoria->condiciones_analisis == 0){
              Yii::$app->getSession()->setFlash('warning', 'Debe de APROBAR, la FORMA COSMETICA, CONDICIONES DE ANALISIS  y una breve OBSERVACION.'); 
              $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]); 
         }else{
-            $auditoria->numero_auditoria = $lista->numero_inicial + 1;
-            $auditoria->cerrar_auditoria = 1;
-            $auditoria->save(false);
-            $lista->numero_inicial = $auditoria->numero_auditoria;
-            $lista->save(false);
-            $ordenProduccion->producto_aprobado = 1;
-            $ordenProduccion->save();
-            $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]); 
+            $detalle = OrdenEnsambleAuditoriaDetalle::find()->where(['=','id_auditoria', $id_auditoria])->all();
+            foreach ($detalle as $detalles):
+                if($detalles->resultado == ''){
+                    $sw = 1;
+                }
+            endforeach;
+            if($sw == 1){
+                Yii::$app->getSession()->setFlash('info', 'En CAMPO RESULTADO no puede ser VACIO. Valide la informacion.'); 
+                $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]); 
+            }else{
+                $auditoria->numero_auditoria = $lista->numero_inicial + 1;
+                $auditoria->cerrar_auditoria = 1;
+                $auditoria->save(false);
+                $lista->numero_inicial = $auditoria->numero_auditoria;
+                $lista->save(false);
+                $ordenProduccion->producto_aprobado = 1;
+                $ordenProduccion->save();
+                $orden_ensamble->proceso_auditado = 1;
+                $orden_ensamble->save();
+                $this->redirect(["orden-ensamble-producto/view_auditoria", 'id_auditoria' => $id_auditoria]); 
+            }    
         }    
     }
+   
+    //PERMITE EXPORTAR TODOS LOS PRODUCTOS APROBADOS
+    public function actionExportar_producto_inventario($id, $id_orden_produccion, $token, $grupo, $sw) {
+        $ordenP = \app\models\OrdenProduccion::findOne($id_orden_produccion);
+        $orden_ensamble = OrdenEnsambleProducto::findOne($id);
+        $detalle = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', 'null'])->all();
+        if($orden_ensamble->proceso_auditado == 0){
+            Yii::$app->getSession()->setFlash('error', 'No se puede exportar el inventario al modulo de producto terminado porque esta orden de ensable no se ha auditado. Favor valide la informacion.'); 
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token,'sw' => $sw]);
+        }else {
+            if($ordenP->tipo_orden == 0){ //reprogramacion de productos
+                if(count($detalle) > 0){
+                    foreach ($detalle as $detalles):
+                        $inventario = \app\models\InventarioProductos::find()->where(['=','id_inventario', $detalles->ordenProduccionProducto->id_inventario])->one();
+                        if($inventario){
+                            $inventario->unidades_entradas += $detalles->cantidad_real;
+                            $inventario->stock_unidades +=  $detalles->cantidad_real;
+                            $inventario->fecha_proceso = $ordenP->fecha_proceso;
+                            $inventario->fecha_vencimiento = $inventario->fecha_vencimiento;
+                            $inventario->id_detalle = $detalles->ordenProduccionProducto->id_detalle;
+                            $inventario->save();
+                            $detalles->importado = 1;
+                            $detalles->save();
+                            $ordenP->exportar_inventario = 1;
+                            $ordenP->save();
+                            $orden_ensamble->inventario_exportado = 1;
+                            $orden_ensamble->save(false);
+                            
+                        }
+                    endforeach;
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token,'sw' => $sw]);
+                }else{
+                    Yii::$app->getSession()->setFlash('warning', 'Los productos que se crearon en esta orden de produccion ya fueron importados al modulo de inventario.'); 
+                     $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token,'sw' => $sw]);
+                }    
+            }else{ //INGRESA PRODUCTO NUEVO AL SISTEMA
+                if(count($detalle) > 0){
+                    $proveedor = \app\models\Proveedor::find()->where(['=','predeterminado', 1])->one();
+                    foreach ($detalle as $detalles):
+                        $auxiliar = 0;
+                        $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_detalle', $detalles->id_detalle])->one();
+                        if($producto){
+                            $table = new \app\models\InventarioProductos();
+                            $table->codigo_producto = $detalles->codigo_producto;
+                            $table->nombre_producto = $detalles->nombre_producto;
+                            $table->descripcion_producto = $detalles->nombre_producto;
+                            $table->unidades_entradas = $detalles->cantidad_real;
+                            $table->stock_unidades = $detalles->cantidad_real;
+                            $table->id_grupo = $grupo;
+                            $table->id_detalle = $detalles->id_detalle;
+                            $table->aplica_iva = $producto->aplica_iva;
+                            $table->porcentaje_iva = $producto->porcentaje_iva;
+                            $table->fecha_vencimiento = $producto->fecha_vencimiento;
+                            $table->fecha_proceso = $ordenP->fecha_proceso;
+                            $table->user_name = Yii::$app->user->identity->username;
+                            $table->codigo_ean = $detalles->codigo_producto;
+                            $table->id_proveedor = $proveedor->id_proveedor;
+                            $table->id_presentacion = $producto->id_presentacion;
+                            $table->activar_producto_venta = 1;
+                            $table->save(false);
+                            $detalles->importado = 1;
+                            $detalles->save();
+                            $ordenP->exportar_inventario = 1;
+                            $ordenP->save();
+                            $producto->importado = 1;
+                            $producto->save();
+                            $orden_ensamble->inventario_exportado = 1;
+                            $orden_ensamble->save(false);
+                        }    
+                   endforeach;
+                    Yii::$app->getSession()->setFlash('success', 'Los productos realcionados en esta ORDEN DE ENSAMBLE se exportaron con EXITO al modulo de inventario de producto terminado.');  
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+                }else{
+                    Yii::$app->getSession()->setFlash('warning', 'Este producto no cumple con los requisistos para importar. Validar el porcentaje de cumplimiento en la vista de presentacion del producto. Este debe ser mayor a 0.');  
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+                }    
+            }
+        }    
+    }
+    
     
     //REPORTES
     public function actionImprimir_auditoria_orden($id_auditoria) {

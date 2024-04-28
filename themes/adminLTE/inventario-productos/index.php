@@ -105,15 +105,12 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. Vcto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Iva </th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total </th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica para el presupuesto comercial">A.p.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica para el presupuesto comercial">A. presupuesto</span></th>
+                  <th scope="col" style='background-color:#B9D5CE;'><span title="Venta a publico">V. publico</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th score="col" style='background-color:#B9D5CE;'></th>  
                          
@@ -124,24 +121,22 @@ $form = ActiveForm::begin([
             <tr style ='font-size: 90%;'>           
                 <td><?= $val->codigo_producto?></td>
                 <td><?= $val->nombre_producto?></td>
-                <td><?= $val->grupo->nombre_grupo?></td>
-                <?php if($val->id_detalle == NULL){?>
+                <?php if($val->id_grupo == NULL){?>
                     <td><?= 'NO FOUND'?></td>
-                <?php }else{?>     
-                    <td><?= $val->detalle->numero_lote?></td>
-                <?php }?>
+                <?php }else{?> 
+                    <td><?= $val->grupo->nombre_grupo?></td>
+                <?php }?>   
                 <td><?= $val->fecha_proceso?></td>
                 <td><?= $val->fecha_vencimiento?></td>
                 <td style="text-align: right;"><?= ''.number_format($val->unidades_entradas,0)?></td>
                 <td style="text-align: right; background-color:#CBDDE3; color: black"><?= ''.number_format($val->stock_unidades,0)?></td>
-                <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->valor_iva,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->total_inventario,0)?></td>
+               
                 <?php if($val->aplica_presupuesto == 0){?>
                      <td><?= $val->aplicaPresupuesto?></td>
                 <?php }else{?>
                      <td style='background-color:#F0F3EF;'><?= $val->aplicaPresupuesto?></td>
                 <?php }?>     
+                <td><?= $val->venta_Publico?></td>
                 <td style= 'width: 25px; height: 10px;'>
                    <a href="<?= Url::toRoute(["inventario-productos/view", "id" => $val->id_inventario, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                 </td>  

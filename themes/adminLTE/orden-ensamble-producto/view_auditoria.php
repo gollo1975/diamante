@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_auditoria_ensamble'], ['class' => 'btn btn-primary btn-sm']) ?>
    
         <?php if($model->cerrar_auditoria == 0){
-            echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar auditoria', ['cerrar_auditoria', 'id_auditoria' => $model->id_auditoria,'orden' => $model->ensamble->ordenProduccion->id_orden_produccion],['class' => 'btn btn-warning btn-sm',
+            echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar auditoria', ['cerrar_auditoria', 'id_auditoria' => $model->id_auditoria,'orden_produccion' => $model->ensamble->ordenProduccion->id_orden_produccion, 'orden_ensamble' => $model->id_ensamble],['class' => 'btn btn-warning btn-sm',
                                'data' => ['confirm' => 'Esta seguro de CERRAR el proceso de auditoria a la Orden de emsable No ('.$model->ensamble->numero_orden_ensamble.'.) Tener presente que con el cierre de este proceso se aprueba el producto.', 'method' => 'post']]);   
         
             echo Html::a('<span class="glyphicon glyphicon-check"></span> Aprobar conceptos',

@@ -17,7 +17,7 @@ class GrupoProductoSearch extends GrupoProducto
     public function rules()
     {
         return [
-            [['id_grupo','id_medida_producto','id_clasificacion'], 'integer'],
+            [['id_grupo','id_clasificacion'], 'integer'],
             [['nombre_grupo', 'fecha_registro', 'user_name'], 'safe'],
         ];
     }
@@ -61,7 +61,7 @@ class GrupoProductoSearch extends GrupoProducto
         $query->andFilterWhere([
             'id_grupo' => $this->id_grupo,
             'fecha_registro' => $this->fecha_registro,
-            'id_medida_producto' => $this->id_medida_producto,
+            
             'id_clasificacion' => $this->id_clasificacion,
         ]);
 

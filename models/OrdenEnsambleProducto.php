@@ -41,7 +41,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa','autorizado','total_unidades'], 'integer'],
+            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa','autorizado','total_unidades','inventario_exportado','proceso_auditado'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro','fecha_hora_cierre'], 'safe'],
             [['user_name','peso_neto'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
@@ -73,6 +73,8 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             'autorizado' => 'Autorizado:',
             'total_unidades' => 'Unidades reales:',
             'fecha_hora_cierre' => 'Fechay hora de cierre:',
+            'inventario_exportado' => 'inventario_exportado',
+            'proceso_auditado'=> 'proceso_auditado',
         ];
     }
 
@@ -123,6 +125,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
         return $cerrarordenensamble;
     }
     
+    
     public function getCerrarProceso() {
         if($this->cerrar_proceso == 0){
             $cerrarproceso = 'NO';
@@ -130,5 +133,23 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             $cerrarproceso = 'SI';
         }
         return $cerrarproceso;
+    }
+    
+    public function getInventarioExportado() {
+        if($this->inventario_exportado == 0){
+            $inventarioexportado = 'NO';
+        }else {
+            $inventarioexportado = 'SI';
+        }
+        return $inventarioexportado;
+    }
+    
+    public function getProcesoAuditado() {
+        if($this->proceso_auditado == 0){
+            $procesoauditado = 'NO';
+        }else{
+            $procesoauditado = 'SI';
+        }
+        return $procesoauditado;
     }
 }

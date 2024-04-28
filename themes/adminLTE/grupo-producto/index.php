@@ -30,15 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'col-lg-2'],
             ],
             [
-                'attribute' => 'id_medida_producto',
-                'value' => function($model){
-                    $medida = \app\models\MedidaProductoTerminado::findOne($model->id_medida_producto);
-                    return $medida->descripcion;
-                },
-                'filter' => ArrayHelper::map(\app\models\MedidaProductoTerminado::find()->orderBy('descripcion ASC')->all(),'id_medida_producto','descripcion'),
-                'contentOptions' => ['class' => 'col-lg-1'],
-            ],
-                        [
                 'attribute' => 'id_clasificacion',
                 'value' => function($model){
                     $clasificar = \app\models\ClasificacionInventario::findOne($model->id_clasificacion);

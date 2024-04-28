@@ -84,7 +84,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(22, 5, utf8_decode("UNIDADES:"), 0, 0, 'R', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(15, 5, '$ '. number_format($orden->unidades, 0), 0, 0, 'R', 1);
+        $this->Cell(15, 5, ' '. number_format($orden->unidades, 0), 0, 0, 'R', 1);
         //FIN
         $this->SetXY(10, 52);
         $this->SetFont('Arial', 'B', 7);

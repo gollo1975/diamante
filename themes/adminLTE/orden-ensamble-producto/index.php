@@ -119,7 +119,9 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Responsable</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Exportado</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Orden de ensamble cerrado">Cerrado</span></th>
+                 <th scope="col" style='background-color:#B9D5CE;'><span title="Orden de ensamble auditada">Auditada</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
              
@@ -136,7 +138,13 @@ $form = ActiveForm::begin([
                     <td><?= $val->numero_lote?></td>
                     <td><?= $val->fecha_proceso?></td>
                     <td><?= $val->responsable?></td>
+                    <?php if($val->inventario_exportado == 0){?>
+                        <td  style="background-color: #BBD3E0"><?= $val->inventarioExportado?></td>
+                    <?php }else{?>
+                        <td style="background-color: #EFFBDC"><?= $val->inventarioExportado?></td>
+                    <?php }?>    
                     <td><?= $val->cerrarOrdenEnsamble?></td>
+                     <td><?= $val->procesoAuditado?></td>
                      <td style= 'width: 25px; height: 10px;'>
                         <a href="<?= Url::toRoute(["orden-ensamble-producto/view", "id" => $val->id_ensamble,'token' => $token,'sw' =>0]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                     </td>

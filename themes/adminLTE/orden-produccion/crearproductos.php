@@ -23,7 +23,7 @@ use yii\bootstrap\ActiveForm;
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left">
-                    Lineas <span class="badge"><?= count($presentacion)?></span>
+                   LISTADO DE PRESENTACIONES
                 </div>
                 <div class="panel-body">
                     <table class="table table-bordered table-hover">
@@ -35,18 +35,19 @@ use yii\bootstrap\ActiveForm;
                             </tr>
                         </thead>
                         <tbody>
-                        <?php
-                        foreach ($presentacion as $val):
-                            ?>
-                            <tr style="font-size: 100%;">
-                                <td style="text-align: left"><?= $val->id_presentacion ?></td>  
-                                <td style="text-align: left"><?= $val->descripcion ?></td>
-                                <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="listado[]" value="<?= $val->id_presentacion ?>"></td> 
-                            </tr>
-                            </tbody>
                             <?php
-                        endforeach; ?>    
-                   
+                            foreach ($presentacion as $val):
+                                $inventario = \app\models\InventarioProductos::find()->where(['=','id_presentacion', $val->id_presentacion])->one();
+                                if(!$inventario){
+                                    ?>
+                                    <tr style="font-size: 100%;">
+                                        <td style="text-align: left"><?= $val->id_presentacion ?></td>  
+                                        <td style="text-align: left"><?= $val->descripcion ?></td>
+                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="listado[]" value="<?= $val->id_presentacion ?>"></td> 
+                                    </tr>
+                                <?php }    
+                            endforeach; ?>    
+                        </tbody>
                     </table>
                     <div class="panel-footer text-right">			
                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'listadopresentacion']) ?>                    

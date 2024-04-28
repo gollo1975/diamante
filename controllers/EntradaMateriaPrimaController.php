@@ -413,9 +413,15 @@ class EntradaMateriaPrimaController extends Controller
                    $materia->valor_unidad = $detalles->valor_unitario;
                    $materia->total_cantidad += $detalles->cantidad; 
                    $materia->stock += $detalles->cantidad;
+                   if($materia->convertir_gramos == 1){
+                       $materia->stock_gramos = round($materia->stock * 1000);
+                   }
                 } else {
                    $materia->total_cantidad += $detalles->cantidad;   
                    $materia->stock += $detalles->cantidad;
+                   if($materia->convertir_gramos == 1){
+                       $materia->stock_gramos = round($materia->stock * 1000);
+                   }
                 } 
                 $materia->save(false);
                 $this->ActualizarCostoMateriaPrima($codigo);

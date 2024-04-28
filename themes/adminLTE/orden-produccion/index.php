@@ -170,7 +170,7 @@ $form = ActiveForm::begin([
                                     <td style= 'width: 25px; height: 10px;'></td>
                                 <?php }else{?>
                                      <td style= 'width: 25px; height: 10px;'>
-                                        <<?= Html::a('<span class="glyphicon glyphicon-edit"></span>',
+                                        <?= Html::a('<span class="glyphicon glyphicon-edit"></span>',
                                            ['/orden-produccion/modificar_estado_orden', 'id' => $val->id_orden_produccion],
                                              ['title' => 'Modifica el estado de seguimiento a la orden de produccion',
                                               'data-toggle'=>'modal',

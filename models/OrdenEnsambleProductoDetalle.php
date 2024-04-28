@@ -33,7 +33,7 @@ class OrdenEnsambleProductoDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_ensamble', 'cantidad_proyectada', 'cantidad_real','id_detalle'], 'integer'],
+            [['id_ensamble', 'cantidad_proyectada', 'cantidad_real','id_detalle','importado'], 'integer'],
             [['porcentaje_rendimiento'], 'number'],
             [['codigo_producto'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -56,6 +56,7 @@ class OrdenEnsambleProductoDetalle extends \yii\db\ActiveRecord
             'cantidad_real' => 'Cantidad Real',
             'porcentaje_rendimiento' => 'Porcentaje Rendimiento',
             'id_detalle' => 'id_detalle',
+            'importado' => 'Importado:',
         ];
     }
 
@@ -74,4 +75,15 @@ class OrdenEnsambleProductoDetalle extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrdenProduccionProductos::className(), ['id_detalle' => 'id_detalle']);
     }
+    
+    public function getImportadoRegistro() {
+        if($this->importado == 0){
+            $importadoregistro = 'NO';
+        }else{
+            $importadoregistro = 'SI';
+        }
+        return $importadoregistro;
+    }
+    
+    
 }

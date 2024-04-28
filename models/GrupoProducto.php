@@ -37,12 +37,11 @@ class GrupoProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['nombre_grupo','id_medida_producto','id_clasificacion'], 'required'],
+            [['nombre_grupo','id_clasificacion'], 'required'],
             [['fecha_registro'], 'safe'],
-            [['id_medida_producto','id_clasificacion','ver_registro'], 'integer'],
+            [['id_clasificacion','ver_registro'], 'integer'],
             [['nombre_grupo'], 'string', 'max' => 40],
             [['user_name'], 'string', 'max' => 15],
-            [['id_medida_producto'], 'exist', 'skipOnError' => true, 'targetClass' => MedidaProductoTerminado::className(), 'targetAttribute' => ['id_medida_producto' => 'id_medida_producto']],
             [['id_clasificacion'], 'exist', 'skipOnError' => true, 'targetClass' => ClasificacionInventario::className(), 'targetAttribute' => ['id_clasificacion' => 'id_clasificacion']],
         ];
     }
@@ -57,16 +56,11 @@ class GrupoProducto extends \yii\db\ActiveRecord
             'nombre_grupo' => 'Nombre del grupo',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'Usuario',
-            'id_medida_producto' => 'Medida producto',
             'id_clasificacion' => 'Clasificación inventario',
             'ver_registro' => 'Venta publico',
         ];
     }
-    public function getPresentacionProducto()
-    {
-        return $this->hasMany(PresentacionProducto::className(), ['id_medida_producto' => 'id_medida_producto']);
-    }
-    
+       
     public function getClasificacionInventario()
     {
         return $this->hasOne(ClasificacionInventario::className(), ['id_clasificacion' => 'id_clasificacion']);

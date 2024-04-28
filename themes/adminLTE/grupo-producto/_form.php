@@ -20,7 +20,7 @@ use kartik\select2\Select2;
 	]); ?>
 <?php
 $clasificar = ArrayHelper::map(app\models\ClasificacionInventario::find()->orderBy('descripcion ASC')->all(), 'id_clasificacion', 'descripcion');
-$medida = ArrayHelper::map(app\models\MedidaProductoTerminado::find()->orderBy('descripcion ASC')->all(), 'id_medida_producto', 'descripcion');
+
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -32,15 +32,6 @@ $medida = ArrayHelper::map(app\models\MedidaProductoTerminado::find()->orderBy('
         </div>
         
         <div class="row">
-           <?= $form->field($model, 'id_medida_producto')->widget(Select2::classname(), [
-                'data' => $medida,
-                'options' => ['prompt' => 'Seleccione un registro ...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?>
-        </div>  
-         <div class="row">
            <?= $form->field($model, 'id_clasificacion')->widget(Select2::classname(), [
                 'data' => $clasificar,
                 'options' => ['prompt' => 'Seleccione un registro ...'],

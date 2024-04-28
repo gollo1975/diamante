@@ -62,7 +62,13 @@ if($sw == 0){
                                         'data' => ['confirm' => 'Esta seguro de CERRAR la orden de ensamble No ('.$model->numero_orden_ensamble.'). Favor validar las cantidades reales en el sistema y modificar las unidades reales.', 'method' => 'post']]);   
                     echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
                 }else {
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
+                    if($model->inventario_exportado == 0){
+                        echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
+                        echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar a inventarios', ['/orden-ensamble-producto/exportar_producto_inventario', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'sw' =>$sw,'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
+                                   'data' => ['confirm' => 'Esta seguro de exportar los productos que se encuentra en la OE al modulo de inventarios de productos!.', 'method' => 'post']]);
+                    }else{
+                         echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
+                    }    
                 }    
             }  
         }?>    
@@ -139,7 +145,8 @@ if($sw == 0){
                                         <th scope="col" style='background-color:#B9D5CE; '>Presentacion del producto</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>Cantidad proyectada</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>Cantidad real</th> 
-                                        <th scope="col" style='background-color:#B9D5CE; '>Porcentaje</th> 
+                                        <th scope="col" style='background-color:#B9D5CE; '>Importado</th> 
+                                        <th scope="col" style='background-color:#B9D5CE; '>Porcentaje rendimiento</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '></th> 
                                     </tr>
                                 </thead>
@@ -151,6 +158,7 @@ if($sw == 0){
                                             <td><?= $val->nombre_producto?></td>
                                             <td style="text-align: right;"><?= ''. number_format($val->cantidad_proyectada,0)?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="cantidad_real[]" style = "text-align: right;" value="<?= $val->cantidad_real ?>"  size="15"> </td>
+                                              <td><?= $val->importadoRegistro?></td>
                                             <td style="text-align: right;"><?= $val->porcentaje_rendimiento?>%</td>
                                             <?php if($model->autorizado == 0 ){?>
                                                 <td style= 'width: 25px; height: 25px;'>
@@ -256,7 +264,7 @@ if($sw == 0){
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_material_empaque'])?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar_todo_empaque']) ?>
                                 <?php }else{ ?>
-                                    <?= Html::a('<span class="glyphicon glyphicon-search"></span> Material de empaque', ['orden-ensamble-producto/buscar_material_empaque', 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2],[ 'class' => 'btn btn-info btn-sm']) ?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-search"></span> Material de empaque', ['orden-ensamble-producto/buscar_material_empaque', 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2,'sw' => $sw],[ 'class' => 'btn btn-info btn-sm']) ?>
                                 <?php }
                             } ?>
                         </div>     
