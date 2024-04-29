@@ -214,7 +214,7 @@ class OrdenEnsambleProductoController extends Controller
     {
         $conPresentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
         $orden_ensamble = OrdenEnsambleProducto::findOne($id);
-        $conMateriales = \app\models\OrdenEnsambleProductoEmpaque::find(['=','id_ensamble', $id])->all();
+        $conMateriales = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         //actualizar listado de presentacion producto
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_listado_presentacion"])){
@@ -339,15 +339,6 @@ class OrdenEnsambleProductoController extends Controller
         endforeach;
         $orden_ensamble->total_unidades = $contador;
         $orden_ensamble->save();
-    }
-    
-    //PROCESO QUE SUMA Y RESTA UNIDADES DE ENVASE
-    protected function SumarRestarEmpaque($id) {
-        $detalle  = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
-        $suma = 0; $suma1 = 0;
-        foreach ($detalle as $detalles):
-           
-        endforeach;
     }
     
     //PROCESO QUE CARGA LAS PRESENTACIONES DEL PRODUCTO QUE ESTAN EN UNA ORDE DE PRODUCCION
@@ -835,6 +826,63 @@ class OrdenEnsambleProductoController extends Controller
         }    
     }
     
+    ///SIMULADOR DE MATERIA DE EMPAQUE PARA LA ORDEN DE ENSAMBLE
+    public function actionSimulador_material_empaque($id, $token, $sw) {
+        $empaque = \app\models\MateriaPrimas::find()->where(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
+        $orden = OrdenEnsambleProducto::findOne($id);
+        return $this->render('simulador_material_empaque', [
+            'id' => $id,
+            'token' => $token,
+            'empaque' => $empaque,
+            'orden' => $orden,
+            'sw' => $sw,
+        ]);
+    }
+    
+     //PROCESO QUE DESCARGA EL MATERIAL DE EMPAQUE DE LA ORDEN DE ENSAMBLE
+    public function actionExportar_material_empaque($id, $token, $id_orden_produccion, $sw) {
+        $orden = OrdenEnsambleProducto::findOne($id);
+        $detalle = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->andWhere(['=','importado', 0])->all();
+        if(count($detalle) > 0){
+            $con = 0;
+            foreach ($detalle as $detalles):
+                $materia = \app\models\MateriaPrimas::findOne($detalles->id_materia_prima);
+                if ($materia){
+                    if($materia->aplica_inventario == 1){
+                        $materia->stock -= $detalles->unidades_reales;
+                        $materia->save(false);
+                        $detalles->importado = 1;
+                        $detalles->save();
+                        $this->ActualizarCostoMaterialEmpaque($materia);
+                        $con += 1;
+                    }
+                }
+                $orden->exportar_material_empaque = 1;
+                $orden->save(false);
+            endforeach;
+            Yii::$app->getSession()->setFlash('success', 'Se exportaron  ('.$con.') registros al modulo de materias primas con EXITO.');
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+        }else{
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw ]);
+            Yii::$app->getSession()->setFlash('info', 'No hay registros para exportar.'); 
+        }    
+        
+    }
+    //ACTUALIZA EL COSTO DEL INVENTARIO DE MATERIAL DE EMPAQUE
+    
+    protected function ActualizarCostoMaterialEmpaque($materia) {
+        $iva = 0; $subtotal = 0;
+        $subtotal = round($materia->stock * $materia->valor_unidad);
+        if($materia->aplica_iva == 1){
+            $iva = round(($subtotal * $materia->porcentaje_iva)/100);
+        }else{
+           $iva = 0;                
+        }    
+        $materia->valor_iva = $iva;
+        $materia->subtotal = $subtotal;
+        $materia->total_materia_prima = $subtotal + $iva;
+        $materia->save(false);
+    }
     
     //REPORTES
     public function actionImprimir_auditoria_orden($id_auditoria) {

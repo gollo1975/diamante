@@ -40,7 +40,7 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     {
         return [
             [['id_ensamble', 'id_materia_prima', 'unidades_solicitadas', 'unidades_devolucion', 'unidades_averias', 'unidades_utilizadas', 'unidades_sala_tecnica',
-                'unidades_muestra_retencion', 'unidades_reales','stock'], 'integer'],
+                'unidades_muestra_retencion', 'unidades_reales','stock','importado'], 'integer'],
             [['fecha_hora_carga'], 'safe'],
             [['user_name','alerta'], 'string', 'max' => 15],
             [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
@@ -68,6 +68,7 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'stock' => 'stock',
             'alerta' => 'alerta',
+            'importado' => 'Importado',
         ];
     }
 
@@ -85,5 +86,14 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     public function getMateriaPrima()
     {
         return $this->hasOne(MateriaPrimas::className(), ['id_materia_prima' => 'id_materia_prima']);
+    }
+    
+    public function getImportadoRegistro() {
+        if($this->importado == 0){
+            $importadoregistro ='NO';
+        }else{
+            $importadoregistro = 'SI';
+        }
+        return $importadoregistro;
     }
 }

@@ -1379,8 +1379,6 @@ class OrdenProduccionController extends Controller
                             $detalles->importado = 1;
                             $detalles->save();
                             $this->ActualizarCostoMateriaPrima($materia, $valor);
-                        }else{
-                            
                         }    
                     }
                 }
@@ -1570,7 +1568,7 @@ class OrdenProduccionController extends Controller
     
     ///SIMULADOR DE MATERIA PRIMA PARA LA ORDEN DE PRODUCCION
     public function actionSimulador_materia_prima($id, $token, $grupo) {
-        $conFaseinicial = \app\models\ConfiguracionProducto::find(['=','id_grupo', $grupo])->orderBy('id_fase ASC')->all();
+        $conFaseinicial = \app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $grupo])->orderBy('id_fase ASC')->all();
         $orden = OrdenProduccion::findOne($id);
         return $this->render('simulador_inventario', [
             'id' => $id,

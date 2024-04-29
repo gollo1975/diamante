@@ -83,7 +83,7 @@ $this->params['breadcrumbs'][] = $id;
                             <td style="text-align: right"><?= ''. number_format($val->stock,0) ?></td>
                             <td><?= $val->aplicaIva ?></td>
                             <td><?= $val->porcentaje_iva ?>%</td>
-                            <td><?= $val->tipoSolicitud->descripcion ?>%</td>
+                            <td><?= $val->tipoSolicitud->descripcion ?></td>
                             <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_material_empaque[]" value="<?= $val->id_materia_prima ?>"></td> 
                         </tr>
                         </tbody>

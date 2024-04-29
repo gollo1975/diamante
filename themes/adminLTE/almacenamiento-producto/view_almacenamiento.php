@@ -118,7 +118,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                          ])    
                                                    ?>
                                                    <div class="modal remote fade" id="modalsubirdocumento">
-                                                        <div class="modal-dialog modal-lg" style ="width: 550px;">    
+                                                        <div class="modal-dialog modal-lg" style ="width: 560px;">    
                                                             <div class="modal-content"></div>
                                                         </div>
                                                    </div>

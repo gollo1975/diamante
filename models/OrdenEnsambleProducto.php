@@ -41,7 +41,8 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa','autorizado','total_unidades','inventario_exportado','proceso_auditado'], 'integer'],
+            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa','autorizado','total_unidades','inventario_exportado',
+                'proceso_auditado','exportar_material_empaque'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro','fecha_hora_cierre'], 'safe'],
             [['user_name','peso_neto'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
@@ -75,6 +76,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             'fecha_hora_cierre' => 'Fechay hora de cierre:',
             'inventario_exportado' => 'inventario_exportado',
             'proceso_auditado'=> 'proceso_auditado',
+            'exportar_material_empaque' => 'exportar_material_empaque',
         ];
     }
 
@@ -151,5 +153,14 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             $procesoauditado = 'SI';
         }
         return $procesoauditado;
+    }
+   
+     public function getExpotarEmpaque() {
+        if($this->exportar_material_empaque == 0){
+            $exportarempaque = 'NO';
+        }else{
+            $exportarempaque = 'SI';
+        }
+        return $exportarempaque;
     }
 }

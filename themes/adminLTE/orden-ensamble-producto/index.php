@@ -119,7 +119,8 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Responsable</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Exportado</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Exporta productos al inventario">Exp. producto</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Exporta material de empaque">Exp. empaque</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Orden de ensamble cerrado">Cerrado</span></th>
                  <th scope="col" style='background-color:#B9D5CE;'><span title="Orden de ensamble auditada">Auditada</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -143,6 +144,11 @@ $form = ActiveForm::begin([
                     <?php }else{?>
                         <td style="background-color: #EFFBDC"><?= $val->inventarioExportado?></td>
                     <?php }?>    
+                    <?php if($val->exportar_material_empaque == 0){?>
+                        <td  style="background-color: #9FE6F3"><?= $val->expotarEmpaque?></td>
+                    <?php }else{?>
+                        <td style="background-color: #F9ECCD"><?= $val->expotarEmpaque?></td>
+                    <?php }?>  
                     <td><?= $val->cerrarOrdenEnsamble?></td>
                      <td><?= $val->procesoAuditado?></td>
                      <td style= 'width: 25px; height: 10px;'>
