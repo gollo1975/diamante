@@ -251,6 +251,7 @@ class GrupoProductoController extends Controller
                         $table->id_materia_prima = $intCodigo;
                         $table->codigo_materia =  $materia->codigo_materia_prima;
                         $table->nombre_materia_prima = $materia->materia_prima;
+                        $table->id_fase = 1;
                         $table->user_name =  Yii::$app->user->identity->username;
                         $table->save(false);
                     }    
@@ -401,13 +402,20 @@ class GrupoProductoController extends Controller
     }
     
     //eliminar detalle de materia prima
-     public function actionEliminarmateria($id_grupo,$detalle)
+     public function actionEliminarmateria($id_grupo,$detalle, $sw)
     {                                
-        $detalle = \app\models\ConfiguracionProducto::findOne($detalle);
-        $detalle->delete();
-        $this->redirect(["view_configuracion",'id_grupo' => $id_grupo]);        
+        $detalles = \app\models\ConfiguracionProducto::findOne($detalle);
+        $detalles->delete();
+        $this->redirect(["view_configuracion",'id_grupo' => $id_grupo, 'sw' => $sw]);        
     }
-
+    //PERMITE ELIMINAR LOS ITEMS DE ANALISIS
+     public function actionEliminar_analisis($id_grupo, $id_proceso, $sw)
+    {                                
+        $detalles = \app\models\ConfiguracionProductoProceso::findOne($id_proceso);
+        $detalles->delete();
+        $this->redirect(["view_analisis",'id_grupo' => $id_grupo, 'sw' => $sw]);        
+    }
+    
     /**
      * Finds the GrupoProducto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

@@ -98,7 +98,7 @@ $conEspecificacion = ArrayHelper::map(app\models\EspecificacionProducto::find()-
                                             <td><?= $val->user_name?></td>
                                             <input type="hidden" name="listado_analisis_cargados[]" value="<?= $val->id_proceso?>"> 
                                             <td style= 'width: 25px; height: 25px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminaranalisis', 'id_grupo' => $model->id_grupo, 'detalle' => $val->id_proceso], [
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_analisis', 'id_grupo' => $model->id_grupo, 'id_proceso' => $val->id_proceso,'sw'=> $sw], [
                                                               'class' => '',
                                                               'data' => [
                                                                   'confirm' => 'Esta seguro de eliminar el registro?',

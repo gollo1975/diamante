@@ -35,7 +35,7 @@ class ConfiguracionProductoProceso extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_analisis', 'resultado'], 'required'],
+            [['id_analisis'], 'required'],
             [['id_analisis', 'id_grupo', 'id_especificacion','id_etapa'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['resultado'], 'string', 'max' => 20],
