@@ -21,7 +21,7 @@ use app\models\TipoProcesoProduccion;
 
 
 
-$this->title = 'PROCESO DE AUDITORIAS (OP)';
+$this->title = 'LISTADO DE ORDENES DE PRODUCCION (Auditoria / Orden de ensamble.)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -131,6 +131,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Paso el proceso de auditoria primera etapa">A. etapa 1</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Paso el proceso de auditoria segunda etapa">A. etapa 2</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
             <tbody>
@@ -146,26 +147,40 @@ $form = ActiveForm::begin([
                 <td><?= $val->tipoOrden?></td>
                 <td><?= $val->seguirProcesoEnsamble?></td>
                 <td><?= $val->productoAprobado?></td>
-                <td style= 'width: 25px; height: 10px;'>
                     <?php if($val->seguir_proceso_ensamble == 0){?>
-                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
-                                       'class' => '',
-                                       'title' => 'Proceso que permite cargar los conceptos de auditoria.', 
-                                       'data' => [
-                                           'confirm' => 'Esta seguro de crear la auditoria a la orden de produccion Nro:  ('.$val->numero_orden.').',
-                                           'method' => 'post',
-                                       ],
-                         ])?>
+                        <td style= 'width: 25px; height: 10px;'>
+                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                                           'class' => '',
+                                           'title' => 'Proceso que permite cargar los conceptos de auditoria. (Auditoria OP)', 
+                                           'data' => [
+                                               'confirm' => 'Esta seguro de crear la auditoria a la orden de produccion Nro:  ('.$val->numero_orden.').',
+                                               'method' => 'post',
+                                           ],
+                             ])?>
+                        </td> 
+                        <th scope="col" style='background-color:#B9D5CE;'></th>
                     <?php }else{ ?>
-                        <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_orden_ensamble', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
-                                       'class' => '',
-                                       'title' => 'Proceso que permite crear la orden de ensamble a la orden de produccion.', 
-                                       'data' => [
-                                           'confirm' => 'Esta seguro de crear la ORDEN DE ENSAMBLE a la orden de produccion  Nro:  ('.$val->numero_orden.').',
-                                           'method' => 'post',
-                                       ],
-                         ])?>
-                    <?php }?>
+                         <td style= 'width: 25px; height: 10px;'>
+                            <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_orden_ensamble', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                                           'class' => '',
+                                           'title' => 'Proceso que permite crear la orden de ensamble a la orden de produccion.', 
+                                           'data' => [
+                                               'confirm' => 'Esta seguro de crear la ORDEN DE ENSAMBLE a la orden de produccion  Nro:  ('.$val->numero_orden.').',
+                                               'method' => 'post',
+                                           ],
+                             ])?>
+                         </td>
+                         <td style= 'width: 25px; height: 10px;'>
+                            <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_orden_produccion', 'id' => $val->id_orden_produccion], [
+                                               'class' => '',
+                                               'title' => 'Proceso que permite CERRAR la orden de produccion.', 
+                                               'data' => [
+                                                   'confirm' => 'Esta seguro de CERRAR la ORDEN DE PRODUCCION Nro:  ('.$val->numero_orden.'). Despues de cerrada NO se puede generar Ordenes de ensamble.',
+                                                   'method' => 'post',
+                                               ],
+                             ])?>
+                         </td>     
+                        <?php }?>
                 </td>
                
             </tr>            

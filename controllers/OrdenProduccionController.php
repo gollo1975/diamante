@@ -240,7 +240,8 @@ class OrdenProduccionController extends Controller
                                     ->andFilterWhere(['=', 'numero_lote', $lote])
                                     ->andFilterWhere(['=', 'id_proceso_produccion', $tipo_proceso])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo])
-                                    ->andWhere(['=', 'cerrar_orden', 0])
+                                    ->andWhere(['=', 'cerrar_orden', 1])
+                                    ->andWhere(['=', 'orden_cerrada_ensamble', 0])
                                     ->andWhere(['=', 'producto_aprobado', 0]);
                         $table = $table->orderBy('id_orden_produccion DESC');
                         $tableexcel = $table->all();
@@ -258,8 +259,9 @@ class OrdenProduccionController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = OrdenProduccion::find()->Where(['=', 'cerrar_orden', 0])
+                    $table = OrdenProduccion::find()->Where(['=', 'cerrar_orden', 1])
                                                     ->andWhere(['=', 'producto_aprobado', 0])
+                                                    ->andWhere(['=', 'orden_cerrada_ensamble', 0])
                                                     ->orderBy('id_orden_produccion DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
@@ -829,7 +831,7 @@ class OrdenProduccionController extends Controller
                  $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
             }else{
                 if($sw == 2){
-                    Yii::$app->getSession()->setFlash('warning', 'Debe de ingresar las unidades proyectadas el y Seleccionar el IVA'); 
+                    Yii::$app->getSession()->setFlash('warning', 'Debe de ingresar las unidades proyectadas.'); 
                     $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
                 }else{
                     if(count($detalle) > 0){
@@ -954,12 +956,14 @@ class OrdenProduccionController extends Controller
                 $intIndice = 0;
                 if (isset($_POST["listado"])) {
                     foreach ($_POST["listado"] as $intCodigo):
+                       $conIva = \app\models\ConfiguracionIva::findOne(1);
                        $detalle = \app\models\PresentacionProducto::find()->where(['=','id_presentacion', $intCodigo])->one();
                        $table = new OrdenProduccionProductos();
                        $table->id_orden_produccion = $id;
                        $table->id_presentacion = $detalle->id_presentacion;
                        $table->descripcion = $detalle->descripcion;
                        $table->id_medida_producto = $detalle->id_medida_producto;
+                       $table->porcentaje_iva = $conIva->valor_iva;
                        $table->user_name = Yii::$app->user->identity->username;
                        $table->save(false);
                        $intIndice++;
@@ -1465,34 +1469,41 @@ class OrdenProduccionController extends Controller
         $orden_produccion = OrdenProduccion::findOne($id);
         $detalle = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->one();
         $sw = 0;
-        if($detalle){
-            $sw = 1;
-        }
-        //proceso de insertar
-        $table = new \app\models\OrdenEnsambleProducto();
-        $table->id_orden_produccion = $id;
-        $table->id_grupo = $id_grupo;
-        $table->numero_lote = $orden_produccion->numero_lote;
-        $table->id_etapa = 2;
-        $table->fecha_proceso = date('Y-m-d');
-        $table->user_name = Yii::$app->user->identity->username;
-        $table->save();     
-        $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
-        //proceso del detalle de la orden de ensamble
         $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-        foreach ($detalle_orden as $detalle):
-            $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
-            $resultado->id_ensamble = $ensamble->id_ensamble;
-            $resultado->id_detalle = $detalle->id_detalle;
-            $resultado->codigo_producto = $detalle->codigo_producto;
-            $resultado->nombre_producto = $detalle->descripcion;
-            $resultado->cantidad_proyectada = $detalle->cantidad;
-            $resultado->cantidad_real = $detalle->cantidad_real;
-           $resultado->save(false);
-        endforeach;
-        $id = $ensamble->id_ensamble;
-        $token = 0;
-        return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token, 'sw' => $sw]);
+        $detalle_orden_ensamble = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->all();
+        if(count($detalle_orden_ensamble ) < count($detalle_orden) ){
+            if($detalle){
+                $sw = 1;
+            }
+            //proceso de insertar
+            $table = new \app\models\OrdenEnsambleProducto();
+            $table->id_orden_produccion = $id;
+            $table->id_grupo = $id_grupo;
+            $table->numero_lote = $orden_produccion->numero_lote;
+            $table->id_etapa = 2;
+            $table->fecha_proceso = date('Y-m-d');
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save();     
+            $ensamble = \app\models\OrdenEnsambleProducto::find()->orderBy('id_ensamble DESC')->limit(1)->one();
+            //proceso del detalle de la orden de ensamble
+            $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','orden_ensamble_creado', 0])->all();
+            foreach ($detalle_orden as $detalle):
+                $resultado = new \app\models\OrdenEnsambleProductoDetalle ();
+                $resultado->id_ensamble = $ensamble->id_ensamble;
+                $resultado->id_detalle = $detalle->id_detalle;
+                $resultado->codigo_producto = $detalle->codigo_producto;
+                $resultado->nombre_producto = $detalle->descripcion;
+                $resultado->cantidad_proyectada = $detalle->cantidad;
+                $resultado->cantidad_real = $detalle->cantidad_real;
+               $resultado->save(false);
+            endforeach;
+            $id = $ensamble->id_ensamble;
+            $token = 0;
+            return $this->redirect(['/orden-ensamble-producto/view','id' => $id, 'token' => $token, 'sw' => $sw]);
+        }else{
+            Yii::$app->getSession()->setFlash('warning', 'Esta orden de produccion NO tiene mas registros de producto para crearles ORDENES DE ENSAMBLE.'); 
+            $this->redirect(["orden-produccion/index_ordenes_produccion"]); 
+        }    
     }
     
     //BUSCA PRODUCTO DEL INVENTARIO PARA REPROGRAMARLO
@@ -1577,8 +1588,13 @@ class OrdenProduccionController extends Controller
             'conFaseinicial' => $conFaseinicial,
             'orden' => $orden,
         ]);
-            
-        
+    }
+    //permite cerrar las ordens de produccion sin hacerle ordenes de ensamble
+    public function actionCerrar_orden_produccion($id) {
+        $orden = OrdenProduccion::findOne($id);
+        $orden->orden_cerrada_ensamble = 1;
+        $orden->save();
+        return $this->redirect(['index_ordenes_produccion']);
     }
     /**
      * Finds the OrdenProduccion model based on its primary key value.

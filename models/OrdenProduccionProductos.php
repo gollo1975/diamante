@@ -42,7 +42,7 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
     {
         return [
             [['id_orden_produccion', 'codigo_producto', 'cantidad', 'cerrar_linea','numero_lote','id_medida_producto','aplica_iva','id_inventario',
-                'importado','costo_unitario','cantidad_real','id_presentacion'], 'integer'],
+                'importado','costo_unitario','cantidad_real','id_presentacion','orden_ensamble_creado'], 'integer'],
             [['descripcion'], 'string', 'max' => 40],
             ['user_name', 'string', 'max' => 15],
             ['porcentaje_iva', 'number'],
@@ -76,6 +76,7 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
             'fecha_vencimiento' => 'fecha_vencimiento',
             'costo_unitario' => 'costo_unitario',
             'id_presentacion' => 'id_presentacion' ,
+            'orden_ensamble_creado' => 'orden_ensamble_creado',
         ];
     }
 

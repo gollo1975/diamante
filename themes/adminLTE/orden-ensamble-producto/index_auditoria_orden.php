@@ -104,7 +104,7 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                     <th scope="col" style='background-color:#B9D5CE;'>No auditoria</th>
                     <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Orden producción</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Orden ensamble</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. cosmetica</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>

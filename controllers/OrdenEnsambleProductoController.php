@@ -150,7 +150,7 @@ class OrdenEnsambleProductoController extends Controller
                          $numero_lote = Html::encode($form->numero_lote);
                         $table = \app\models\OrdenEnsambleAuditoria::find()
                                     ->andFilterWhere(['=', 'numero_orden', $numero_orden])
-                                    ->andFilterWhere(['between', 'fecha_creacion', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['between', 'fecha_analisis', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'numero_auditoria', $numero_auditoria])
                                     ->andFilterWhere(['=', 'numero_lote', $numero_lote])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);
@@ -168,7 +168,7 @@ class OrdenEnsambleProductoController extends Controller
                                 ->all();
                         if (isset($_POST['excel'])) {
                             $check = isset($_REQUEST['id_auditoria  DESC']);
-                            $this->actionExcelConsultaAuditorias($tableexcel);
+                            $this->actionExcelConsultaAuditoria($tableexcel);
                         }
                     } else {
                         $form->getErrors();
@@ -344,7 +344,7 @@ class OrdenEnsambleProductoController extends Controller
     //PROCESO QUE CARGA LAS PRESENTACIONES DEL PRODUCTO QUE ESTAN EN UNA ORDE DE PRODUCCION
     public function actionCargar_nuevamente_items($id, $token, $id_orden_produccion,$sw) {
         
-        $detalle_orden = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden_produccion])->all();
+        $detalle_orden = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden_produccion])->andWhere(['=','orden_ensamble_creado', 0])->all();
         foreach ($detalle_orden as $detalle):
             $table = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['=','id_detalle', $detalle->id_detalle])->one();
             if(!$table){
@@ -380,14 +380,19 @@ class OrdenEnsambleProductoController extends Controller
     //AUTORIZAR Y DESAUTORIZAR UNA ORDEN DE ENSAMBLE
       public function actionAutorizado($id, $token, $sw) {
         $model = $this->findModel($id);
-        if ($model->autorizado == 0){  
-            $model->autorizado = 1;            
-            $model->update();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
+        if($model->total_unidades == 0){
+           Yii::$app->getSession()->setFlash('info', 'Debe actualizar las unidades reales desde el boton ACTUALIZAR.'); 
+            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
         }else{
-            $model->autorizado = 0;            
-            $model->update();
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
+            if ($model->autorizado == 0){  
+                $model->autorizado = 1;            
+                $model->update();
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
+            }else{
+                $model->autorizado = 0;            
+                $model->update();
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
+            }    
         }    
     }
     
@@ -467,6 +472,14 @@ class OrdenEnsambleProductoController extends Controller
                 Yii::$app->getSession()->setFlash('error', 'No se puede CERRAR la orden de ensamble porque el PORCENTAJE DE RENDIMIENTO debe de ser mayor a 0. Favor actualizar las unidades desde el LAPIZ.'); 
                 $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
             }else{
+                $detalle_ensamble = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
+                foreach ($detalle_ensamble as $ensamble):
+                    $presentacion = \app\models\OrdenProduccionProductos::findOne ($ensamble->id_detalle);
+                    if($presentacion){
+                        $presentacion->orden_ensamble_creado = 1;
+                        $presentacion->save();
+                    }
+                endforeach;
                 $orden->cerrar_proceso = 1;
                 $orden->save();
                 $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
@@ -913,5 +926,103 @@ class OrdenEnsambleProductoController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+    //EXCELES
+    
+     public function actionExcelConsultaAuditoria($tableexcel) {                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+                               
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NUMERO AUDITORIA')
+                    ->setCellValue('C1', 'NUMERO ORDEN ENSAMBLE')
+                    ->setCellValue('D1', 'GRUPO')
+                    ->setCellValue('E1', 'NUMERO LOTE')
+                    ->setCellValue('F1', 'FORMA COSMETICA')
+                    ->setCellValue('G1', 'NUMERO ENSAMBLE')
+                    ->setCellValue('H1', 'COND. ANALISIS')
+                    ->setCellValue('I1', 'OBSERVACION')
+                    ->setCellValue('J1', 'FECHA ANALISIS')
+                    ->setCellValue('K1', 'FECHA PROCESO')
+                    ->setCellValue('L1', 'USUARIO')
+                    ->setCellValue('M1', 'ANALISIS')
+                    ->setCellValue('N1', 'ESPECIFICACIONES')
+                    ->setCellValue('O1', 'RESULTADO');
+                    
+            $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $detalle = OrdenEnsambleAuditoriaDetalle::find()->where(['=','id_auditoria', $val->id_auditoria])->all();
+            foreach ($detalle as $detalles){
+                                  
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_auditoria)
+                        ->setCellValue('B' . $i, $val->numero_auditoria)
+                        ->setCellValue('C' . $i, $val->numero_orden)
+                        ->setCellValue('D' . $i, $val->grupo->nombre_grupo)
+                        ->setCellValue('E' . $i, $val->numero_lote)
+                        ->setCellValue('F' . $i, $val->forma->concepto)
+                        ->setCellValue('G' . $i, $val->ensamble->numero_orden_ensamble)
+                        ->setCellValue('H' . $i, $val->condicionAnalisis)
+                        ->setCellValue('I' . $i, $val->observacion)
+                        ->setCellValue('J' . $i, $val->fecha_analisis)
+                        ->setCellValue('K' . $i, $val->fecha_proceso)
+                        ->setCellValue('L' . $i, $val->user_name)
+                        ->setCellValue('M' . $i, $detalles->analisis->concepto)
+                        ->setCellValue('N' . $i, $detalles->especificacion->concepto)
+                        ->setCellValue('O' . $i, $detalles->resultado);
+                $i++;
+            }
+            $i = $i;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado_auditorias');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Listado_Auditorias.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }

@@ -28,6 +28,7 @@ class ConfiguracionIva extends \yii\db\ActiveRecord
         return [
             [['valor_iva'], 'required'],
             [['valor_iva'], 'number'],
+            ['predeterminado', 'integer'],
         ];
     }
 
@@ -39,6 +40,7 @@ class ConfiguracionIva extends \yii\db\ActiveRecord
         return [
             'id_iva' => 'Id Iva',
             'valor_iva' => 'Valor Iva',
+            'predeterminado' => 'Predeterminado:',
         ];
     }
     public function getIva()

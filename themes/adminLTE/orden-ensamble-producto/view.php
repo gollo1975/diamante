@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $model->id_ensamble;
 if($sw == 0){
     
 }else{
-    Yii::$app->getSession()->setFlash('info', 'Esta orden de produccion ya tiene una ORDEN DE EMSABLE. Validar la informacion.'); 
+   // Yii::$app->getSession()->setFlash('info', 'Esta orden de produccion ya tiene una ORDENES DE ENSAMBLE creadas. Validar la informacion.'); 
 }
 ?>
 <div class="orden-ensamble-producto-view">
