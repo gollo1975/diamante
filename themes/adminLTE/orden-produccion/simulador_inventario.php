@@ -23,6 +23,11 @@ use yii\filters\AccessControl;
 $this->title = 'SIMULADOR DE MATERIAS PRIMAS';
 $this->params['breadcrumbs'][] = ['label' => 'Simulador de materia prima', 'url' => ['view','id' =>$id, 'token' =>$token]];
 $this->params['breadcrumbs'][] = $id;
+if(count($conFaseinicial) > 0){
+    
+}else{
+     Yii::$app->getSession()->setFlash('warning', 'No se ha configurado la MATERIA PRIMA para este producto. Favor validar la informacion.');
+}
 ?>
 <div class="orden-produccion-simulador">
     <p>

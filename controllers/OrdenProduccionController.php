@@ -553,7 +553,6 @@ class OrdenProduccionController extends Controller
                         $table->cantidad = $_POST["cantidad_producto"][$intIndice];
                         $table->cantidad_real = $_POST["cantidad_producto"][$intIndice];
                         $table->id_medida_producto = $_POST["tipo_medida"][$intIndice];
-                        $table->porcentaje_iva = $_POST["porcentaje_iva"][$intIndice];
                         $table->save(false);
                         $intIndice++;
                     endforeach;
@@ -640,27 +639,31 @@ class OrdenProduccionController extends Controller
     
     //IMPORTAR FASE INICIAL
     public function actionImportar_fase_inicial($id_grupo, $id, $token) {
-        $conFaseinicial = \app\models\ConfiguracionProducto::find(['=','id_grupo', $id_grupo])->all();
+        $conFaseinicial = \app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $id_grupo])->all();
         $model = OrdenProduccion::findOne($id);
-        foreach ($conFaseinicial as $primerafase):
-            $conFase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id', $primerafase->id])->one();
-            if(!$conFase){
-                $table = new OrdenProduccionFaseInicial ();
-                $table->id_orden_produccion = $id;
-                $table->id = $primerafase->id;
-                $table->id_materia_prima = $primerafase->id_materia_prima;
-                $table->id_grupo = $id_grupo;
-                $table->id_fase = $primerafase->id_fase;
-                $table->porcentaje_aplicacion = $primerafase->porcentaje_aplicacion;
-                $totales = ($model->tamano_lote * $primerafase->porcentaje_aplicacion)/100;
-                $table->cantidad_gramos= $totales;
-                $table->codigo_homologacion = $primerafase->codigo_homologacion;
-                $table->user_name = Yii::$app->user->identity->username;
-                $table->save ();
-            }    
-        endforeach;
-        
-        return $this->redirect(['orden-produccion/view','id' => $id, 'token' => $token]);
+        if(count($conFaseinicial) > 0){
+            foreach ($conFaseinicial as $primerafase):
+                $conFase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id', $primerafase->id])->one();
+                if(!$conFase){
+                    $table = new OrdenProduccionFaseInicial ();
+                    $table->id_orden_produccion = $id;
+                    $table->id = $primerafase->id;
+                    $table->id_materia_prima = $primerafase->id_materia_prima;
+                    $table->id_grupo = $id_grupo;
+                    $table->id_fase = $primerafase->id_fase;
+                    $table->porcentaje_aplicacion = $primerafase->porcentaje_aplicacion;
+                    $totales = ($model->tamano_lote * $primerafase->porcentaje_aplicacion)/100;
+                    $table->cantidad_gramos= $totales;
+                    $table->codigo_homologacion = $primerafase->codigo_homologacion;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save ();
+                }    
+            endforeach;
+            return $this->redirect(['orden-produccion/view','id' => $id, 'token' => $token]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Este GRUPO NO tiene configurado la materia prima, la face inicial y la fase final. Validar la informacion.'); 
+            return $this->redirect(['orden-produccion/view','id' => $id, 'token' => $token]);
+        }    
     }
     
     //CARGAR AUDITORIA A UNA ORDEN DE PRODUCCION YA LISTA EN EL PROCESO DE GRANEL O FABRICACION

@@ -173,8 +173,6 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>F. Vcto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>User name</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Aplica Iva</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cerrado</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Registro exportado a inventarios">Exp.</span></th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
@@ -195,12 +193,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                     <td style="text-align: right"><?= $val->numero_lote ?></td>  
                                                     <td><?= $val->fecha_vencimiento ?></td>
                                                     <td><?= $val->user_name ?></td>
-                                                    <td><?= $val->aplicaIva ?></td>
-                                                    <?php if($val->aplica_iva == 0){?>
-                                                        <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('porcentaje_iva[]', $val->porcentaje_iva, $iva, ['class' => 'col-sm-11', 'prompt' => 'Iva', 'required' => true]) ?></td>
-                                                    <?php }else{?>
-                                                        <td><?= '0'?>%</td>    
-                                                    <?php }?>    
+                                                    
                                                     <td><?= $val->cerrarLinea ?></td>
                                                      <td><?= $val->documentoExportado ?></td>
                                                 <?php }else{?>
@@ -211,8 +204,6 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                    <td style="text-align: right"><?= $val->numero_lote ?></td>  
                                                    <td><?= $val->fecha_vencimiento ?></td>
                                                    <td><?= $val->user_name ?></td>
-                                                   <td><?= $val->aplicaIva ?></td>
-                                                   <td><?= $val->porcentaje_iva?>%</td>
                                                    <td><?= $val->cerrarLinea ?></td>
                                                    <td><?= $val->documentoExportado ?></td>
                                                 <?php }?>   
@@ -283,7 +274,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                         <?php if(count($detalle_orden) > 0){?>
                                             <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
                                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
-                                           <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>ç
+                                           <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>
                                         <?php }else{?>
                                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>

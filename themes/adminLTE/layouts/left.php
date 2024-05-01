@@ -249,6 +249,8 @@
                                                     ['label' => 'Entradas', 'icon' => 'plus-square-o', 'url' => ['/entrada-producto-terminado/index']],
                                                 ]],
                                                 ['label' => 'Orden produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index']],
+                                                ['label' => 'Solicitud materiales', 'icon' => 'plus-square-o', 'url' => ['/solicitud-materiales/index']],
+                                                ['label' => 'Entrega materiales', 'icon' => 'plus-square-o', 'url' => ['/entrega-materiales/index']],
                                             ],
                                         ],
                                     ],
