@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                 ])    
                     ?>
                     <div class="modal remote fade" id="modalcrearobservacion">
-                           <div class="modal-dialog modal-lg" style ="width: 430px;">    
+                           <div class="modal-dialog modal-lg" style ="width: 500px;">    
                                <div class="modal-content"></div>
                            </div>
                     </div>

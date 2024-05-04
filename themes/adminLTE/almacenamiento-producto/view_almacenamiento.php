@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $id_orden;
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['cargar_orden_produccion'], ['class' => 'btn btn-primary btn-sm']);?>
         <?php }
         if($model->producto_almacenado == 0){?>
-            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Cerrar orden produccion', ['cerrar_orden_produccion', 'id_orden' => $model->id_orden_produccion],['class' => 'btn btn-success btn-sm',
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Cerrar orden produccion', ['cerrar_orden_produccion', 'id_orden' => $model->id_orden_produccion, 'token' =>$token],['class' => 'btn btn-success btn-sm',
                                'data' => ['confirm' => 'Esta seguro de CERRAR la Orden de produccion No ('.$model->numero_orden.'). Tener presente que todas las unidades deben de estar almacendas.', 'method' => 'post']]);?>
         <?php }?>
     </p>  

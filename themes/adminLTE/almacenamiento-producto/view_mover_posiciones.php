@@ -72,7 +72,9 @@ $this->params['breadcrumbs'][] = $model->id;
                                 <thead>
                                     <tr style="font-size: 90%;">
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>   
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Piso anterior</th>   
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Nuevo piso</th>   
                                         <th scope="col"  style='background-color:#B9D5CE;'>Posicion anterior</th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'>Nueva posicion</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Rack anterior</th>  
@@ -88,6 +90,12 @@ $this->params['breadcrumbs'][] = $model->id;
                                         <tr style="font-size: 90%;">
                                             <td><?= $val->codigo ?></td>
                                             <td><?= $val->producto ?></td>
+                                            <td><?= $val->piso->descripcion ?></td>
+                                             <?php if($val->id_piso_nuevo == null){?>
+                                                <td><?= 'NO FOUND' ?></td>
+                                            <?php }else{?>
+                                                <td><?= $val->pisoNuevo->descripcion ?></td>
+                                            <?php }?>
                                             <td><?= $val->posicion->posicion ?></td>
                                             <?php if($val->id_posicion_nueva == null){?>
                                                 <td><?= 'NO FOUND' ?></td>

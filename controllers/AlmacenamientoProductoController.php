@@ -137,7 +137,6 @@ class AlmacenamientoProductoController extends Controller
                 $fecha_corte = null;
                 $producto = null;
                 $model = null;
-                $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -174,6 +173,21 @@ class AlmacenamientoProductoController extends Controller
                         }
                     } else {
                         $form->getErrors();
+                    }
+                }else{
+                    $table = AlmacenamientoProductoDetalles::find()->orderBy('id_posicion DESC');   
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 10,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                        $this->actionExcelAlmacenamiento($tableexcel); 
                     }
                 } 
                 return $this->render('mover_posicion', [
@@ -807,7 +821,7 @@ class AlmacenamientoProductoController extends Controller
     }
     
     //CAMBIAR O MOVER DE RACK Y POSICION
-    public function actionCambiar_almacenamiento_rack($id_rack) {
+    public function actionCambiar_almacenamiento_rack($id_rack, $id_almacenamiento) {
         $model = new \app\models\ModeloMoverPosicionRack();
         $conRacks = AlmacenamientoProductoDetalles::find()->where(['=','id_rack', $id_rack])->all(); 
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
@@ -818,6 +832,7 @@ class AlmacenamientoProductoController extends Controller
             if(isset($_POST["cambiar_posicion"])){
                 if(isset($_POST["seleccione_item"])){
                     if($model->nuevo_rack <> ''){
+                        $almacenamiento = AlmacenamientoProductoDetalles::findOne($id_almacenamiento);
                         foreach ($_POST["seleccione_item"] as $intCodigo):
                             $valor = 0;
                             $descontar = 0;
@@ -828,7 +843,13 @@ class AlmacenamientoProductoController extends Controller
                                 $valor = $table->cantidad + $Racks->capacidad_actual;
                                 if($valor <= $Racks->capacidad_instalada){
                                     $cambio = new \app\models\PosicionAlmacenamiento();
-                                    $cambio->id_piso = $table->id_piso;
+                                    if($model->nuevo_piso == $table->id_piso){
+                                       $cambio->id_piso = $table->id_piso;  
+                                    }else{
+                                       $cambio->id_piso = $model->nuevo_piso; 
+                                       $cambio->id_piso_nuevo = $model->nuevo_piso;
+                                       $almacenamiento->id_piso = $model->nuevo_piso;
+                                    }
                                     $cambio->id_rack = $table->id_rack;
                                     $cambio->id_rack_nuevo = $model->nuevo_rack;
                                     $cambio->id_posicion = $table->id_posicion;
@@ -853,11 +874,19 @@ class AlmacenamientoProductoController extends Controller
                                         $table->id_posicion = $model->nueva_posicion;
                                     }
                                     $table->save();
+                                    $almacenamiento->save();
+                                    
                                 }
                             }else{
                                 $valor = $table->cantidad + $Racks->capacidad_actual;
                                 $cambio = new \app\models\PosicionAlmacenamiento();
-                                $cambio->id_piso = $table->id_piso;    
+                                if($model->nuevo_piso == $table->id_piso){
+                                   $cambio->id_piso = $table->id_piso;  
+                                }else{
+                                   $cambio->id_piso = $model->nuevo_piso; 
+                                    $cambio->id_piso_nuevo = $model->nuevo_piso;
+                                   $almacenamiento->id_piso = $model->nuevo_piso;
+                                }
                                 $cambio->id_rack = $table->id_rack;
                                 $cambio->id_rack_nuevo = $model->nuevo_rack;
                                 $cambio->id_posicion = $table->id_posicion;
@@ -882,6 +911,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->id_posicion = $model->nueva_posicion;
                                 }
                                 $table->save();
+                                $almacenamiento->save();
                             }
                         endforeach;
                         return $this->redirect(['mover_posiciones']); 
@@ -1374,11 +1404,24 @@ class AlmacenamientoProductoController extends Controller
     }
 
     //PROCES QUE CIERRA LA ORDEN PRODUCCION
-    public function actionCerrar_orden_produccion($id_orden) {
+    public function actionCerrar_orden_produccion($id_orden, $token) {
         $orden = OrdenProduccion::findOne($id_orden);
-        $orden->producto_almacenado = 1;
-        $orden->save(false);
+        $almacenamiento = AlmacenamientoProducto::find()->where(['=', 'id_orden_produccion', $id_orden])->all();
+        $semaforo = 0;
+        foreach ($almacenamiento as $detalle):
+            if($detalle->unidades_almacenadas == 0){
+                $semaforo = 1;
+            }
+        endforeach;
+        if($semaforo == 0){
+            $orden->producto_almacenado = 1;
+            $orden->save(false);
         return $this->redirect(["cargar_orden_produccion"]);
+        }else{
+            Yii::$app->getSession()->setFlash('warning', 'Para CERRAR la orden de produccion se debe de almacenar todos los lotes o presentaciones del producto.');
+            return $this->redirect(["view_almacenamiento",'token' => $token, 'id_orden' =>$id_orden]); 
+        }
+        
     }
     
     //PROCES QUE CIERRA LA ORDEN PRODUCCION

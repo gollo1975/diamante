@@ -129,7 +129,6 @@ $form = ActiveForm::begin([
         </thead>
         <tbody>
         <?php 
-        if($model){
             foreach ($model as $val):?>
                 <tr style ='font-size: 90%;'>
                     <td><?= $val->codigo_producto?></td>
@@ -154,14 +153,14 @@ $form = ActiveForm::begin([
                     <td><?= $val->fecha_almacenamiento?></td>
                     <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
                     <td style= 'width: 25px; height: 20px;'>
-                         <a href="<?= Url::toRoute(["almacenamiento-producto/cambiar_almacenamiento_rack", 'id_rack' => $val->id_rack]) ?>" ><span class="glyphicon glyphicon-th-large"></span></a>
+                         <a href="<?= Url::toRoute(["almacenamiento-producto/cambiar_almacenamiento_rack", 'id_rack' => $val->id_rack,'id_almacenamiento' => $val->id]) ?>" ><span class="glyphicon glyphicon-th-large"></span></a>
                     </td>
                     <td style= 'width: 25px; height: 20px;'>
                          <a href="<?= Url::toRoute(["almacenamiento-producto/view_posiciones", "id_posicion" => $val->id]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 </tr>            
             <?php endforeach; 
-        }   ?>
+        ?>
         </tbody>    
     </table> 
         <div class="panel-footer text-right" >
@@ -172,6 +171,5 @@ $form = ActiveForm::begin([
         </div>
     </div>    
 </div>
-<?php if($model){?>
-    <?= LinkPager::widget(['pagination' => $pagination]) ?>
-<?php }?>
+   <?= LinkPager::widget(['pagination' => $pagination]) ?>
+

@@ -48,6 +48,7 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
             [['codigo', 'user_name'], 'string', 'max' => 15],
             [['producto'], 'string', 'max' => 40],
             [['id_piso'], 'exist', 'skipOnError' => true, 'targetClass' => Pisos::className(), 'targetAttribute' => ['id_piso' => 'id_piso']],
+            [['id_piso_nuevo'], 'exist', 'skipOnError' => true, 'targetClass' => Pisos::className(), 'targetAttribute' => ['id_piso_nuevo' => 'id_piso']],
             [['id_rack'], 'exist', 'skipOnError' => true, 'targetClass' => TipoRack::className(), 'targetAttribute' => ['id_rack' => 'id_rack']],
             [['id_rack_nuevo'], 'exist', 'skipOnError' => true, 'targetClass' => TipoRack::className(), 'targetAttribute' => ['id_rack_nuevo' => 'id_rack']],
             [['id_posicion'], 'exist', 'skipOnError' => true, 'targetClass' => Posiciones::className(), 'targetAttribute' => ['id_posicion' => 'id_posicion']],
@@ -83,6 +84,11 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
     public function getPiso()
     {
         return $this->hasOne(Pisos::className(), ['id_piso' => 'id_piso']);
+    }
+    
+     public function getPisoNuevo()
+    {
+        return $this->hasOne(Pisos::className(), ['id_piso' => 'id_piso_nuevo']);
     }
 
     /**
