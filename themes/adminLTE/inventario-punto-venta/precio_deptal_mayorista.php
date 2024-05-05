@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
 
-$this->title = 'PRECIO DE VENTA';
+$this->title = 'REGLA DE PRECIOS Y DESCUENTOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -94,7 +94,7 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        Registros <span class="badge"> <?= 1?></span>
+        Registros <span class="badge"> <?= count($model)?></span>
       
     </div>
         <table class="table table-bordered table-hover">
@@ -116,7 +116,6 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
             </thead>
             <tbody>
                 <?php 
-                if($sw <> 0){
                     foreach ($model as $val):
                         ?>
                         <tr style='font-size:90%;'>             
@@ -149,16 +148,15 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
                                <a href="<?= Url::toRoute(["inventario-punto-venta/view_descuentos_comerciales", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
                             </td>
                         </tr>  
-                    <?php endforeach;
-                }?>
-            </tbody> 
+                    <?php endforeach;?>
+                </tbody> 
         </table>   
     </div>
 </div>
 <?php $formulario->end() ?>
-<?php if($sw <> 0){?>
+
     <?= LinkPager::widget(['pagination' => $pagination]) ?>
-<?php }?>
+
 <script type="text/javascript">
 	function marcar(source) 
 	{

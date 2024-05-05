@@ -519,20 +519,92 @@ class FacturaVentaPuntoController extends Controller
         ]);  
     }
 
-    /**
-     * Deletes an existing FacturaVentaPunto model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+    //PROCESO QUE AUTORIZADO O DESAUTORIZA
+    public function actionAutorizado($id_factura_punto, $accesoToken) {
+        $detalle = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
+        $factura = FacturaVentaPunto::findOne($id_factura_punto);
+        if(count($detalle) > 0 && $factura->valor_bruto > 0){
+            if($factura->autorizado == 0){
+                $factura->autorizado = 1;
+            }else{
+                $factura->autorizado = 0;
+            }
+            $factura->save();
+            $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
+        }else{
+            Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la factura porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
+            $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
+        }
     }
-
+    
+    //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA DE PUNTO DE VENTA
+     public function actionGenerar_factura_punto($id_factura_punto, $accesoToken) {
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(16);
+        $factura = FacturaVentaPunto::findOne($id_factura_punto);
+        $factura->numero_factura = $consecutivo->numero_inicial + 1;
+        $factura->save(false);
+        $consecutivo->numero_inicial = $factura->numero_factura;
+        $consecutivo->save(false);
+        $this->redirect(["view", 'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);  
+    }
+    
+    public function actionCrear_talla_color($id_factura_punto, $accesoToken, $id_detalle) {
+       
+        $form = new \app\models\ModeloTallasColores();
+        $id_talla = null;
+        $id_color = null;
+        $conColores = null;
+        $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
+        $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['>','stock_punto', 0])->orderBy('id_talla ASC')->all();
+        if ($form->load(Yii::$app->request->get())) {
+            $id_talla = Html::encode($form->id_talla);
+            $id_color = Html::encode($form->id_color);
+            if($id_talla > 0){
+                if($id_color <> 0){
+                    $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_talla', $id_talla ])
+                                                                       ->orderBy('id_color ASC')->all();
+                }
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar la talla de la lista.');
+                return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+            }
+        }
+        if (isset($_POST["enviarcolores"])) {
+            if(isset($_POST["nuevo_color"])){
+                $intIndice = 0;
+                foreach ($_POST["nuevo_color"] as $intCodigo) {
+                    if($_POST["cantidad_venta"][$intIndice] > 0){
+                        $table = new \app\models\FacturaPuntoDetalleColoresTalla();
+                        $table->id_detalle =  $id_detalle;
+                        $table->id_factura = $id_factura_punto;
+                        $table->id_inventario = $detalle->id_inventario;
+                        $table->id_color = $intCodigo;
+                        $table->id_talla = $id_talla;
+                        $table->cantidad_venta = $_POST["cantidad_venta"][$intIndice];
+                        $table->save(false);
+                        $intIndice++; 
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'Debe digitar la cantidad de unidades a vender.'); 
+                    }
+                }
+                 return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+            }else{
+               Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar un registro para procesar la informacion.'); 
+            }
+        }
+        return $this->render('factura_detalle_tallas_colores', [
+            'id_factura_punto' => $id_factura_punto,
+            'accesoToken' => $accesoToken,
+            'form' => $form, 
+            'conColores' => $conColores,
+            'conTallas' => ArrayHelper::map($conTallas, 'id_talla', 'nombreTalla'),
+            'id_detalle' => $id_detalle,
+        ]);
+    }
+    
+  
+    
     /**
      * Finds the FacturaVentaPunto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

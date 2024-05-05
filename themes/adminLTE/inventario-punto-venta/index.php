@@ -15,7 +15,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-$this->title = 'INVENTARIO';
+$this->title = 'INVENTARIO (GENERAL)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -113,47 +113,48 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
-            <tr style ='font-size: 90%;'>  
-                
-                <td style="width: 20px; height: 20px">
-                    <!-- Inicio Nuevo Detalle proceso -->
-                    <?= Html::a('<span class="glyphicon glyphicon-list"></span>',
-                            ['/inventario-punto-venta/trasladar_punto_venta','id' => $val->id_inventario],
-                            [
-                                'title' => 'Desear enviar este producto para otro PUNTO DE VENTA?',
-                                'data-toggle'=>'modal',
-                                'data-target'=>'#modaltrasladareferenciapuntoventa'.$val->id_inventario,
-                                'class' => ''
-                            ])    
-                       ?>
-                    <div class="modal remote fade" id="modaltrasladareferenciapuntoventa<?= $val->id_inventario ?>">
-                        <div class="modal-dialog modal-lg" style ="width: 500px;">
-                             <div class="modal-content"></div>
-                        </div>
-                    </div> 
-                </td>
-                               
-                <td><?= $val->codigo_producto?></td>
-                <td><?= $val->nombre_producto?></td>
-                <td><?= $val->punto->nombre_punto?></td>
-                <td><?= $val->proveedor->nombre_completo?></td>
-                <td><?= $val->marca->marca?></td>
-                <td><?= $val->categoria->categoria?></td>
-                <td><?= $val->fecha_proceso?></td>
-                <td style="text-align: right;"><?= ''.number_format($val->stock_unidades,0)?></td>
-                <td style="text-align: right; background-color:#CBDDE3; color: black"><?= ''.number_format($val->stock_inventario,0)?></td>
-             
-                <td style= 'width: 25px; height: 10px;'>
-                   <a href="<?= Url::toRoute(["inventario-punto-venta/view", "id" => $val->id_inventario, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
-                </td>  
-                <?php if($val->stock_unidades == $val->stock_inventario){?>
+                <tr style ='font-size: 90%;'>  
+                    <?php if($val->id_punto == 1){?>
+                        <td style="width: 20px; height: 20px">
+                            <!-- Inicio Nuevo Detalle proceso -->
+                            <?= Html::a('<span class="glyphicon glyphicon-list"></span>',
+                                    ['/inventario-punto-venta/trasladar_punto_venta','id' => $val->id_inventario],
+                                    [
+                                        'title' => 'Desear enviar este producto para otro PUNTO DE VENTA?',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modaltrasladareferenciapuntoventa'.$val->id_inventario,
+                                        'class' => ''
+                                    ])    
+                               ?>
+                            <div class="modal remote fade" id="modaltrasladareferenciapuntoventa<?= $val->id_inventario ?>">
+                                <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                     <div class="modal-content"></div>
+                                </div>
+                            </div> 
+                        </td>
+                    <?php }else{?>
+                        <td style="width: 20px; height: 20px"></td>
+                    <?php }?>   
+                    <td><?= $val->codigo_producto?></td>
+                    <td><?= $val->nombre_producto?></td>
+                    <td><?= $val->punto->nombre_punto?></td>
+                    <td><?= $val->proveedor->nombre_completo?></td>
+                    <td><?= $val->marca->marca?></td>
+                    <td><?= $val->categoria->categoria?></td>
+                    <td><?= $val->fecha_proceso?></td>
+                    <td style="text-align: right;"><?= ''.number_format($val->stock_unidades,0)?></td>
+                    <td style="text-align: right; background-color:#CBDDE3; color: black"><?= ''.number_format($val->stock_inventario,0)?></td>
                     <td style= 'width: 25px; height: 10px;'>
-                           <a href="<?= Url::toRoute(["inventario-punto-venta/update", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
-                    </td>
-                <?php }else{?>
-                    <td style= 'width: 25px; height: 10px;'></td>
-                <?php }?>    
-            </tr>            
+                         <a href="<?= Url::toRoute(["inventario-punto-venta/view", "id" => $val->id_inventario, 'token' => $token,'codigo' => $val->codigo_enlace_bodega]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                    </td> 
+                    <?php if($val->stock_unidades == $val->stock_inventario){?>
+                        <td style= 'width: 25px; height: 10px;'>
+                               <a href="<?= Url::toRoute(["inventario-punto-venta/update", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                        </td>
+                    <?php }else{?>
+                        <td style= 'width: 25px; height: 10px;'></td>
+                    <?php }?>    
+                </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 

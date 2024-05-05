@@ -95,4 +95,14 @@ class DetalleColorTalla extends \yii\db\ActiveRecord
         }
         return $cerradodetalle;
     }
+    
+    //proceso que agrupa el nombre de la talla.
+    public function getNombreTalla(){
+         return " Talla: {$this->talla->nombre_talla}";
+    }
+    
+    //proceso que agrupa el nombre del color.
+    public function getNombreColor(){
+         return " Color: {$this->color->colores}";
+    }
 }

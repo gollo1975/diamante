@@ -63,7 +63,8 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
         return [
             [[ 'codigo_producto','nombre_producto','id_proveedor','id_marca', 'id_categoria'], 'required'],
             [['id_inventario', 'codigo_producto', 'costo_unitario', 'stock_unidades', 'stock_inventario', 'id_proveedor', 'id_punto', 'iva_incluido', 'inventario_inicial', 'aplica_inventario', 'subtotal',
-                'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 'codigo_barra', 'venta_publico', 'aplica_descuento_punto', 'aplica_descuento_distribuidor','id_marca','id_categoria'], 'integer'],
+                'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 'codigo_barra', 'venta_publico', 'aplica_descuento_punto', 'aplica_descuento_distribuidor',
+                'id_marca','id_categoria','codigo_enlace_bodega','inventario_aprobado'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_creacion', 'fecha_proceso'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -109,6 +110,8 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
             'aplica_descuento_distribuidor' => 'Aplica Descuento Distribuidor',
             'id_marca' => 'Marca:',
             'id_categoria' => 'Categoria:',
+            'codigo_enlace_bodega' => 'codigo_enlace_bodega',
+            'inventario_aprobado' => 'inventario_aprobado',
         ];
     }
 

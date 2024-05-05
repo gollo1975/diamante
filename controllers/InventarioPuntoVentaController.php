@@ -132,7 +132,7 @@ class InventarioPuntoVentaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id, $token)
+    public function actionView($id, $token, $codigo)
     {
         
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
@@ -145,21 +145,34 @@ class InventarioPuntoVentaController extends Controller
                     if($detalle){
                         if($_POST["cantidad"]["$intIndice"] > 0){
                             $table = \app\models\DetalleColorTalla::findOne($intCodigo);
-                            $table->cantidad = $_POST["cantidad"]["$intIndice"];
-                            $table->stock_punto = $_POST["cantidad"]["$intIndice"];
-                            $table->save(false);
-                            $intIndice++;
-                        }else{
-                            $intIndice++;
-                        }   
+                            if($codigo <> 0){
+                                $unidad_entrada = $_POST["cantidad"][$intIndice]; //asigno variable
+                                 var_dump($unidad_entrada);
+                                $inventario = InventarioPuntoVenta::findOne($codigo);
+                                if($unidad_entrada <= $inventario->stock_inventario){ //si hay stoxk
+                                    $detalle->cantidad = $unidad_entrada;
+                                    $detalle->stock_punto = $unidad_entrada;
+                                    $detalle->save(false);
+                                    $intIndice++;
+                                }else{
+                                    $intIndice++;
+                                }
+                            }else{    
+                                $detalle->cantidad = $_POST["cantidad"][$intIndice];
+                                $detalle->stock_punto = $_POST["cantidad"][$intIndice];
+                                $detalle->save(false);
+                                $intIndice++;
+                            } 
+                        }else{    
+                           $intIndice++; 
+                        }    
                     }else{
-                        $intIndice++;   
-                    }
-                
+                        $intIndice++;
+                    }   
                 endforeach;
-               $this->ActualizarLineas($id);
-               $this->ActualizarTotalesProducto($id);
-                return $this->redirect(['view','id' =>$id, 'token' => $token]);
+                    $this->ActualizarLineas($id);
+                    $this->ActualizarTotalesProducto($id);
+                return $this->redirect(['view','id' =>$id, 'token' => $token, 'codigo' => $codigo]);
             }
             
         }
@@ -168,9 +181,11 @@ class InventarioPuntoVentaController extends Controller
             'token' => $token,
             'talla_color' => $talla_color,
             'talla_color_cerrado' => $talla_color_cerrado,
+            'codigo' => $codigo, 
             
         ]);
     }
+    
 
      // VISTA  DESCUENTOS COMERCIALES
     public function actionView_descuentos_comerciales($id){
@@ -432,6 +447,7 @@ class InventarioPuntoVentaController extends Controller
                     $table->fecha_proceso = date('Y-m-d');
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->venta_publico = $inventario->venta_publico;
+                    $table->codigo_enlace_bodega = $inventario->id_inventario;
                     $table->save(false);
                     $this->redirect(["inventario-punto-venta/index"]);
                 }
@@ -462,7 +478,7 @@ class InventarioPuntoVentaController extends Controller
         if ($model->load(Yii::$app->request->post())){
             $conDato = \app\models\InventarioPuntoVenta::find()->where(['=','codigo_producto', $model->codigo_producto])->one();
             if($conDato){
-                 Yii::$app->getSession()->setFlash('info', 'El codigo ('. $model->codigo_producto. ') ya esta codificado en el sistema. Valide la informacin.');
+                 Yii::$app->getSession()->setFlash('info', 'El codigo ('. $model->codigo_producto. ') ya esta codificado en el sistema. Valide la informacion.');
             }else{
                 $model->save() ;
                 $model->user_name = Yii::$app->user->identity->username;
@@ -526,17 +542,17 @@ class InventarioPuntoVentaController extends Controller
     }
     
       //ELIMINAR DETALLES  
-    public function actionEliminar($id,$id_detalle, $token)
+    public function actionEliminar($id,$id_detalle, $token,$codigo)
     {                                
         $detalles = \app\models\DetalleColorTalla::findOne($id_detalle);
         $detalles->delete();
         $this->ActualizarLineas($id);
         $this->ActualizarTotalesProducto($id);
-        $this->redirect(["view",'id' => $id, 'token' => $token]);        
+        $this->redirect(["view",'id' => $id, 'token' => $token, 'codigo' => $codigo]);        
     } 
     
     //PROCESO QUE GENERA LA COMBINACION DE TALLAS Y COLORES
-    public function actionGenerar_combinacion_talla_color($id, $token) {
+    public function actionGenerar_combinacion_talla_color($id, $token, $codigo) {
         $form = new \app\models\FiltroBusquedaTallas();
         $codigo_talla = null;
         $conColores = null;
@@ -544,18 +560,21 @@ class InventarioPuntoVentaController extends Controller
             $codigo_talla = Html::encode($form->codigo_talla);
             if($codigo_talla > 0){
                 $model = \app\models\Tallas::find()->where(['=','id_talla', $codigo_talla])->one();
-                $conColores = \app\models\Colores::find()->orderBy('colores ASC')->all();
+                if($codigo == 0){
+                    $conColores = \app\models\Colores::find()->orderBy('colores ASC')->all();
+                }else{
+                    $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $codigo])->andWhere(['=','id_talla', $codigo_talla ])->orderBy('id_color ASC')->all();
+                }
+                
             }else{
                 Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar la talla de la lista.');
-                return $this->redirect(['generar_combinacion_talla_color','id' =>$id, 'token' =>$token]);
+                return $this->redirect(['generar_combinacion_talla_color','id' =>$id, 'token' =>$token, 'codigo' => $codigo]);
             }
             
         }
         if (isset($_POST["enviarcolores"])) {
-            
             if(isset($_POST["nuevo_color"])){
                 foreach ($_POST["nuevo_color"] as $intCodigo) {
-                    var_dump($codigo_talla);
                     $table = new \app\models\DetalleColorTalla();
                     $table->id_inventario = $id;
                     $table->id_color = $intCodigo;
@@ -563,7 +582,7 @@ class InventarioPuntoVentaController extends Controller
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->save();
                 }
-                return $this->redirect(['generar_combinacion_talla_color','id' => $id, 'token' => $token, 'conColores' => $conColores,  'model' =>$model]);
+                return $this->redirect(['generar_combinacion_talla_color','id' => $id, 'token' => $token, 'conColores' => $conColores,  'model' =>$model, 'codigo'=> $codigo]);
             }
             
         }
@@ -572,21 +591,22 @@ class InventarioPuntoVentaController extends Controller
             'token' => $token,
             'form' => $form, 
             'conColores' => $conColores,
+            'codigo' => $codigo,
         ]);
     }
    
     //CERRAR COMBINACIONES
-    public function actionCerrar_combinaciones($id, $token){
+    public function actionCerrar_combinaciones($id, $token, $codigo){
         $detalle = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->andWhere(['=','cerrado', 0])->all();
         if($detalle){
             foreach ($detalle as $detalles):
                 $detalles->cerrado = 1;
                 $detalles->save ();
             endforeach;
-            $this->redirect(["view",'id' => $id, 'token' => $token]);
+            $this->redirect(["view",'id' => $id, 'token' => $token, 'codigo' => $codigo]);
         }else{
             Yii::$app->getSession()->setFlash('warning', 'Este proceso ya esta cerrado para las tallas y colores.');
-            $this->redirect(["view",'id' => $id, 'token' => $token]);
+            $this->redirect(["view",'id' => $id, 'token' => $token, 'codigo' => $codigo]);
         }    
         
     }
@@ -601,8 +621,6 @@ class InventarioPuntoVentaController extends Controller
                 $marca = null;
                 $proveedor = null; $categoria = null; $punto_venta = null;
                 $sw  = 0;
-                $model = null;
-                $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -632,9 +650,21 @@ class InventarioPuntoVentaController extends Controller
                                 ->limit($pages->limit)
                                 ->all();
                             $sw = 1;
-                     } else {
+                    } else {
                         $form->getErrors();
                     }
+                }else{
+                    $table = InventarioPuntoVenta::find()->Where(['>','stock_inventario', 0])->orderBy('id_inventario DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
                 }
                 return $this->render('precio_deptal_mayorista', [
                             'model' => $model,
@@ -671,6 +701,37 @@ class InventarioPuntoVentaController extends Controller
         ]);
     }
     
+    //DESCARGAR INVENTARIO DE BODEGA
+    public function actionDescargar_inventario_bodega($token, $id, $codigo){
+        $bodega = InventarioPuntoVenta::findOne($codigo);
+        $punto = InventarioPuntoVenta::findOne($id);
+        $talla_color_bodega = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $codigo])->all();
+        $talla_color_punto = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
+        foreach ($talla_color_bodega as $talla_bodega):
+            foreach ($talla_color_punto as $talla_punto):
+                 $saldo = 0;
+                 if($talla_bodega->id_color == $talla_punto->id_color && $talla_bodega->id_talla == $talla_punto->id_talla){
+                     $saldo = $talla_bodega->stock_punto; 
+                     $saldo -= $talla_punto->stock_punto;
+                     if($saldo >= 0){
+                         $talla_bodega->stock_punto = $saldo;
+                         $talla_bodega->save();
+                     }else{
+                        Yii::$app->getSession()->setFlash('error', 'La Talla (' . $talla_bodega->talla->nombre_talla . ' ), No cumple con las exitencias actuales en bodega.'); 
+                         $this->redirect(["view",'id' => $id, 'token' => $token, 'codigo' => $codigo]);
+                     }
+                         
+                 }
+            endforeach;
+        endforeach;
+        
+       //primera descarga de bodega
+        $bodega->stock_inventario -= $punto->stock_inventario;
+        $bodega->inventario_aprobado = 1;
+        $bodega->save();
+        $this->redirect(["view",'id' => $id, 'token' => $token, 'codigo' => $codigo]);
+        
+    }
     /**
      * Finds the InventarioPuntoVenta model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

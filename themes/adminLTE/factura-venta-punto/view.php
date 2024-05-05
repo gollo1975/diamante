@@ -22,11 +22,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { 
-        echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_factura, 'token' => 3], ['class' => 'btn btn-default btn-sm']); 
+        echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); 
     }else{
         if ($model->autorizado == 1 && $model->numero_factura == 0){
-            echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' => 3], ['class' => 'btn btn-default btn-sm']);
-            echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id' => $model->id_factura],['class' => 'btn btn-default btn-sm',
+            echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
+            echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
         }else{
            echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);                        
@@ -105,7 +105,8 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size:90%;'>                
+                <tr style ='font-size:90%;'>  
+                    <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del producto</th>                        
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
@@ -118,12 +119,22 @@ $this->params['breadcrumbs'][] = $this->title;
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Total linea</th> 
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
+                    
                 </tr>
             </thead>
             <tbody>
                 <?php                    
                 foreach ($detalle_factura as $detalle):?>
                 <tr style ='font-size:90%;'>
+                    <?php if($model->autorizado == 0 && $model->valor_bruto > 0){?>
+                        <td style="width: 20px; height: 20px">
+                            <!-- Inicio Nuevo Detalle proceso -->
+                             <a href="<?= Url::toRoute(["factura-venta-punto/crear_talla_color", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                            <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
+                        </td>
+                    <?php }else{?>
+                        <td style="width: 20px; height: 20px"></td>
+                    <?php }?>   
                     <td><?= $detalle->codigo_producto?></td>
                     <td><?= $detalle->producto?></td>
                     <td style="text-align: right";><?= ''.number_format($detalle->cantidad,0)?></td>
@@ -172,47 +183,47 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endforeach;?>
             </tbody>
             <tr style="font-size: 90%; background-color:#B9D5CE">
-                <td colspan="10"></td>
+                <td colspan="11"></td>
                 <td style="text-align: right;"><b></b></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="8"></td>
+                <td colspan="9"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>SUBTOTAL:</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="8"></td>
+                <td colspan="9"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>DSCTO:</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->descuento,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="8"></td>
+                <td colspan="9"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>IMPUESTO :</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="8"></td>
+                <td colspan="9"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>RETENCION (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
                 <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="8"></td>
+                <td colspan="9"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>RETE IVA (<?= $model->porcentaje_rete_iva?> %) :</b></td>
                 <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="8"></td>
+                <td colspan="9"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>TOTAL PAGAR:</b></td>
                 <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
                 <td></td>

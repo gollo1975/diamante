@@ -10,23 +10,16 @@ use kartik\select2\Select2;
 use app\models\Tallas;
 use app\models\DetalleColorTalla;
 
-$this->title = 'Nueva combinacion';
-$this->params['breadcrumbs'][] = ['label' => 'Inventario punto de venta', 'url' => ['view','id'=> $id, 'token' => $token]];
+$this->title = 'TALLAS Y COLORES';
+$this->params['breadcrumbs'][] = ['label' => 'Factura de venta', 'url' => ['view','id_factura_punto'=> $id_factura_punto, 'accesoToken' => $accesoToken]];
 $this->params['breadcrumbs'][] = $this->title;
-if($codigo == 0){
-    $conTalla = ArrayHelper::map(Tallas::find()->orderBy(' id_talla ASC')->all(), 'id_talla', 'nombre_talla');
-}else{
-   $conTalla = DetalleColorTalla::find()->where(['=','id_inventario', $codigo])->orderBy(' id_talla ASC')->all();
-   $conTalla = ArrayHelper::map($conTalla, 'id_talla', 'nombreTalla'); 
-}
-
 ?>
 <p>
-    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view','id' => $id, 'token' =>$token, 'codigo' =>$codigo], ['class' => 'btn btn-primary btn-sm']) ?>
+    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view','id_factura_punto' => $id_factura_punto, 'accesoToken' =>$accesoToken], ['class' => 'btn btn-primary btn-sm']) ?>
 </p>   
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute(["inventario-punto-venta/generar_combinacion_talla_color", 'id' => $id,'token' => $token,'codigo' => $codigo]),
+    "action" => Url::toRoute(["factura-venta-punto/crear_talla_color", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken,'id_detalle' => $id_detalle]),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -39,13 +32,13 @@ if($codigo == 0){
 
 <div class="panel panel-success panel-filters">
     <div class="panel-heading">
-        Busqueda por codigo de barras
+        Busqueda por tallas
     </div>
 
     <div class="panel-body" id="entrada_producto">
         <div class="row" >
-            <?= $formulario->field($form, 'codigo_talla')->widget(Select2::classname(),[
-                'data' => $conTalla,
+            <?= $formulario->field($form, 'id_talla')->widget(Select2::classname(),[
+                'data' => $conTallas,
                 'options' => ['prompt' => 'Seleccione la talla...'],
                 'pluginOptions' => [
                     'allowClear' => true,
@@ -64,58 +57,52 @@ if($codigo == 0){
                 "method" => "post",                            
             ]);
     ?>
-<?php if($conColores){?>
+
     <div class="panel panel-success">
         <div class="panel-heading">
-            Colores
+            Listado de colores
         </div>
         <div class="panel-body">
              <table class="table table-bordered table-hover">
                 <thead>
                     <tr style='font-size:90%;'>
-                        <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>                      
+                        <th scope="col" style='background-color:#B9D5CE;'>Codigo del color</th>                      
                         <th scope="col" style='background-color:#B9D5CE;'>Nombre del color</th> 
+                        <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
+                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad a vender</th> 
                         <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
 
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    if($codigo == 0){
-                        foreach ($conColores  as $val):?>
-                            <tr>
-                                <td><?= $val->id_color?></td>
-                                <td><?= $val->colores?></td> 
-                                <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_color[]" value="<?= $val->id_color ?>"></td> 
-                            </tr>
-                        <?php endforeach;
-                    }else{
+                    if($conColores){
                         $auxiliar = 0;
                         foreach ($conColores  as $val):
                             if($auxiliar <> $val->id_color){
-                               $auxiliar = $val->id_color; ?>
+                                $auxiliar = $val->id_color;  ?>
                                 <tr>
                                     <td><?= $val->id_color?></td>
                                     <td><?= $val->color->colores?></td> 
+                                    <td><?= $val->stock_punto?></td>
+                                    <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_venta[]" style="text-align: right" size="9" > </td> 
                                     <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_color[]" value="<?= $val->id_color ?>"></td> 
                                 </tr>
-                            <?php }?>    
+                             
+                            <?php }   
 
-                        <?php endforeach;
-                    }?>
-                                
+                        endforeach;
+                    }    ?>
                 </tbody>
             </table>    
         </div>
-    </div>
-    <div class="panel-footer text-right">
-       <a href="<?= Url::toRoute(['inventario-punto-venta/view', 'id' => $id, 'token' =>$token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
-       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Generar", ["class" => "btn btn-success btn-sm", 'name' => 'enviarcolores']) ?>        
+        <div class="panel-footer text-right">
+       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-success btn-sm", 'name' => 'enviarcolores']) ?>        
     </div>
     <?php $form->end() ?>
-<?php }else{?>
-<?php $form->end() ?>
-<?php } ?>         
+    </div>
+    
+       
 <script type="text/javascript">
 	function marcar(source) 
 	{
