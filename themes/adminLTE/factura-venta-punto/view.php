@@ -7,7 +7,7 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
-use yii\widgets\LinkPager;
+use yii\widgets\LinkPager;                       
 use yii\bootstrap\Modal;
 use app\models\InventarioProductos;
 use yii\helpers\ArrayHelper;
@@ -29,7 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
             echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
         }else{
-           echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);                        
+            if($model->exportar_inventario == 0){
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);                        
+                echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de procesar la descarga de referencias al modulo de inventario.', 'method' => 'post']]);
+            }else{
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']); 
+            }    
         }
     }?>
 </p>    
@@ -51,6 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="panel-body">
         <table class="table table-bordered table-striped table-hover">
+            
             <tr style="font-size: 90%;">
                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_factura") ?></th>
                 <td><?= Html::encode($model->id_factura) ?></td>
@@ -60,6 +67,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?= Html::encode($model->cliente) ?></td>
                  <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'direccion') ?></th>
                  <td><?= Html::encode($model->direccion) ?></td>
+            </tr>
+            <tr style="font-size: 90%;">
+                <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "numero_factura") ?></th>
+                <td><?= Html::encode($model->numero_factura) ?></td>
+                <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_inicio') ?></th>
+                <td><?= Html::encode($model->fecha_inicio) ?></td>
+                <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
+                <td><?= Html::encode($model->fecha_vencimiento) ?></td>
+                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
+                 <td><?= Html::encode($model->user_name) ?></td>
             </tr>
         </table>
     </div>
@@ -124,18 +141,23 @@ $this->params['breadcrumbs'][] = $this->title;
             </thead>
             <tbody>
                 <?php                    
-                foreach ($detalle_factura as $detalle):?>
+                foreach ($detalle_factura as $detalle):
+                    $tallaColor = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle->id_detalle])->one();
+                    ?>
                 <tr style ='font-size:90%;'>
                     <?php if($model->autorizado == 0 && $model->valor_bruto > 0){?>
                         <td style="width: 20px; height: 20px">
-                            <!-- Inicio Nuevo Detalle proceso -->
                              <a href="<?= Url::toRoute(["factura-venta-punto/crear_talla_color", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                             <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
                         </td>
                     <?php }else{?>
                         <td style="width: 20px; height: 20px"></td>
-                    <?php }?>   
-                    <td><?= $detalle->codigo_producto?></td>
+                    <?php }
+                    if($tallaColor){?>   
+                        <td style="background-color: #d8f3dc"><?= $detalle->codigo_producto?></td>
+                    <?php }else{?>
+                        <td><?= $detalle->codigo_producto?></td>
+                    <?php } ?>    
                     <td><?= $detalle->producto?></td>
                     <td style="text-align: right";><?= ''.number_format($detalle->cantidad,0)?></td>
                     <td style="text-align: right";><?= ''.number_format($detalle->valor_unitario,0)?></td>
@@ -148,7 +170,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php if($model->autorizado == 0){
                         if($model->id_tipo_venta == 2){?>
                             <td style="width: 25px; height: 25px;">
-                                <!-- Inicio Nuevo Detalle proceso -->
                                 <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
                                       ['/factura-venta-punto/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle,'accesoToken' => $accesoToken],
                                       [
@@ -169,7 +190,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </td>  
                         <?php }else{?>
                             <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["factura-venta/eliminar_linea_factura_punto", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle])?>"
+                                <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_punto", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                 <span class='glyphicon glyphicon-trash'></span> </a>  
                             </td>  
                             <td style= 'width: 25px; height: 25px;'></td>

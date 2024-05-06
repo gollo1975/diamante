@@ -29,7 +29,7 @@ use app\models\UsuarioDetalle;
 use app\models\Clientes;
 use app\models\AgentesComerciales;
 use app\models\FiltroBusquedaPedidos;
-use app\models\Pedidos;
+use app\models\Pedidos; 
 use app\models\FacturaVentaDetalle;
 use app\models\TipoFacturaVenta;
 use app\models\NotaCredito;
@@ -69,9 +69,9 @@ class FacturaVentaPuntoController extends Controller
                 $cliente = null; $fecha_corte = null;
                 $vendedores = null; $saldo = null; $numero_factura = null;
                 $model = null; $punto_venta = null;
-                $pages = null;
                 $accesoToken = Yii::$app->user->identity->id_punto;
-               $rolUsuario = Yii::$app->user->identity->role;
+                $rolUsuario = Yii::$app->user->identity->role;
+                $local = Yii::$app->user->identity->id_punto;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -80,10 +80,9 @@ class FacturaVentaPuntoController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $saldo = Html::encode($form->saldo);
-                         $punto_venta = Html::encode($form->punto_venta);
+                        $punto_venta = Html::encode($form->punto_venta);
                         $numero_factura = Html::encode($form->numero_factura);
-                        if($rolUsuario ==  2 || $rolUsuario  == 1 ){
-                            var_dump($punto_venta);
+                        if($local == 1 ){
                             $table = FacturaVentaPunto::find()
                                 ->andFilterWhere(['=', 'nit_cedula', $documento])
                                 ->andFilterWhere(['=', 'id_cliente', $cliente])
@@ -116,16 +115,16 @@ class FacturaVentaPuntoController extends Controller
                                 ->limit($pages->limit)
                                     ->all();
                         if(isset($_POST['excel'])){                    
-                            $this->actionExcelFacturaVenta($tableexcel);
+                            $this->actionExcelFacturaVentaPunto($tableexcel);
                         }
                     } else {
                         $form->getErrors();
                     }
                 }else{
-                    if($rolUsuario <> 3){
+                    if($local === 1){
                         $table = FacturaVentaPunto::find()->orderBy('id_factura DESC');
                     }else{
-                        $table = FacturaVentaPunto::find()->Where(['=','id_punto', $punto_venta])->orderBy('id_factura DESC');
+                        $table = FacturaVentaPunto::find()->Where(['=','id_punto', $local])->orderBy('id_factura DESC');
                     }   
                     $count = clone $table;
                     $pages = new Pagination([
@@ -138,7 +137,7 @@ class FacturaVentaPuntoController extends Controller
                             ->limit($pages->limit)
                             ->all();
                     if(isset($_POST['excel'])){                    
-                            $this->actionExcelFacturaVenta($tableexcel);
+                            $this->actionExcelFacturaVentaPunto($tableexcel);
                     }
                 }
                 return $this->render('index', [
@@ -391,6 +390,17 @@ class FacturaVentaPuntoController extends Controller
         $this->ActualizarConceptosTributarios($id);
         $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);        
     } 
+    
+      //ELIMINAR LINEA DE FACTURA DE MAYORISTA
+    public function actionEliminar_linea_factura_punto($id_factura_punto, $id_detalle, $accesoToken)
+    {                                
+        $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
+        $detalle->delete();
+        $id =  $id_factura_punto;
+        $this->ActualizarSaldosTotales($id);
+        $this->ActualizarConceptosTributarios($id);
+        $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);        
+    } 
 
     /**
      * Creates a new FacturaVentaPunto model.
@@ -538,7 +548,7 @@ class FacturaVentaPuntoController extends Controller
     }
     
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA DE PUNTO DE VENTA
-     public function actionGenerar_factura_punto($id_factura_punto, $accesoToken) {
+    public function actionGenerar_factura_punto($id_factura_punto, $accesoToken) {
         //proceso de generar consecutivo
         $consecutivo = \app\models\Consecutivos::findOne(16);
         $factura = FacturaVentaPunto::findOne($id_factura_punto);
@@ -549,6 +559,7 @@ class FacturaVentaPuntoController extends Controller
         $this->redirect(["view", 'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);  
     }
     
+    //PERMITE CREAR LA TALLA Y COLOR A LA REFERENCIA
     public function actionCrear_talla_color($id_factura_punto, $accesoToken, $id_detalle) {
        
         $form = new \app\models\ModeloTallasColores();
@@ -556,6 +567,7 @@ class FacturaVentaPuntoController extends Controller
         $id_color = null;
         $conColores = null;
         $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
+        $detallaTalla = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','id_factura', $id_factura_punto])->all();
         $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['>','stock_punto', 0])->orderBy('id_talla ASC')->all();
         if ($form->load(Yii::$app->request->get())) {
             $id_talla = Html::encode($form->id_talla);
@@ -600,11 +612,46 @@ class FacturaVentaPuntoController extends Controller
             'conColores' => $conColores,
             'conTallas' => ArrayHelper::map($conTallas, 'id_talla', 'nombreTalla'),
             'id_detalle' => $id_detalle,
+            'detallaTalla' => $detallaTalla,
         ]);
     }
     
+    //PERMITE ELIMINAR LA TALLA Y COLOR CREADO AL PRODUCTO
+    public function actionEliminar_talla_color($id_factura_punto, $id_detalle, $accesoToken, $id_codigo)
+    {                                
+        $detalle = \app\models\FacturaPuntoDetalleColoresTalla::findOne($id_codigo);
+        $detalle->delete();
+        return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'id_detalle' => $id_detalle]);
+    } 
   
+    //EXPORTAR REFERENCIAS AL MODULO DE INVETARIO
+    public function actionExportar_inventario_punto($id_factura_punto, $accesoToken) {
+        $facturaPunto = FacturaVentaPunto::findOne($id_factura_punto);
+        $talla_color_factura = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_factura', $id_factura_punto])->all();
+        foreach ($talla_color_factura as $factura):
+            $inventario = \app\models\InventarioPuntoVenta::findOne($factura->id_inventario);
+            $talla_color_bodega = \app\models\DetalleColorTalla::find()->where (['=','id_inventario', $factura->id_inventario])
+                                                                       ->andWhere(['=','id_talla', $factura->id_talla])
+                                                                       ->andWhere(['=','id_color', $factura->id_color])->all();
+            foreach ($talla_color_bodega as $bodega):
+                $bodega->stock_punto -= $factura->cantidad_venta; 
+                $bodega->save ();
+                $inventario->stock_inventario -= $factura->cantidad_venta;
+                $inventario->save ();
+            endforeach;        
+        endforeach; 
+        $facturaPunto->exportar_inventario = 1;
+        $facturaPunto->save ();
+        return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken]);
+    }
     
+     //IMPRESIONES
+    public function actionImprimir_factura_venta($id_factura_punto) {
+        $model = FacturaVentaPunto::findOne($id_factura_punto);
+        return $this->render('../formatos/reporte_factura_venta_punto', [
+            'model' => $model,
+        ]);
+    }
     /**
      * Finds the FacturaVentaPunto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -620,4 +667,133 @@ class FacturaVentaPuntoController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+      //PROCESO QUE EXPORTA FACTURAS
+    public function actionExcelFacturaVentaPunto($tableexcel) {                
+            $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('X')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Y')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Z')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AC')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'No FACTURA')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'VENDEDOR')
+                        ->setCellValue('F1', 'TIPO FACTURA')
+                        ->setCellValue('G1', 'PUNTO DE VENTA')
+                        ->setCellValue('H1', 'FECHA INICIO')
+                        ->setCellValue('I1', 'FECHA VENCIMIENTO')
+                        ->setCellValue('J1', 'F. ENVIADA DIAN')    
+                        ->setCellValue('K1', 'FORMA PAGO')
+                        ->setCellValue('L1', 'PLAZO')
+                        ->setCellValue('M1', 'VR. BRUTO')
+                        ->setCellValue('N1', 'DESCUENTO')
+                        ->setCellValue('O1', 'SUBTOTAL')
+                        ->setCellValue('P1', 'IVA')
+                        ->setCellValue('Q1', 'RETENCION')
+                        ->setCellValue('R1', 'RETE IVA')
+                        ->setCellValue('S1', 'TOTAL PAGAR')
+                        ->setCellValue('T1', 'SALDO FACTURA')
+                        ->setCellValue('U1', '% IVA')
+                        ->setCellValue('V1', '% RETENCION')
+                        ->setCellValue('W1', '% RETE IVA')
+                        ->setCellValue('X1', '% DESCUENTO')
+                        ->setCellValue('Y1', 'USER CREADOR')
+                        ->setCellValue('Z1', 'USER EDITADO')
+                        ->setCellValue('AA1', 'F. EDITADO')
+                        ->setCellValue('AB1', 'AUTORIZADO')
+                        ->setCellValue('AC1', 'OBSERVACION');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_factura)
+                        ->setCellValue('B' . $i, $val->numero_factura)
+                        ->setCellValue('C' . $i, $val->nit_cedula)
+                        ->setCellValue('D' . $i, $val->cliente)
+                        ->setCellValue('E' . $i, $val->agente->nombre_completo)
+                        ->setCellValue('F' . $i, $val->tipoFactura->descripcion)
+                        ->setCellValue('G' . $i, $val->puntoVenta->nombre_punto)
+                        ->setCellValue('H' . $i, $val->fecha_inicio)
+                        ->setCellValue('I' . $i, $val->fecha_vencimiento)
+                        ->setCellValue('J' . $i, $val->fecha_enviada)
+                        ->setCellValue('K' . $i, $val->formaPago)
+                        ->setCellValue('L' . $i, $val->plazo_pago)
+                        ->setCellValue('M' . $i, $val->valor_bruto)
+                        ->setCellValue('N' . $i, $val->descuento)
+                        ->setCellValue('O' . $i, $val->subtotal_factura)
+                        ->setCellValue('P' . $i, $val->impuesto)
+                        ->setCellValue('Q' . $i, $val->valor_retencion)
+                        ->setCellValue('R' . $i, $val->valor_reteiva)
+                        ->setCellValue('S' . $i, $val->total_factura)
+                        ->setCellValue('T' . $i, $val->saldo_factura)
+                        ->setCellValue('U' . $i, $val->porcentaje_iva)
+                        ->setCellValue('V' . $i, $val->porcentaje_rete_fuente)
+                        ->setCellValue('W' . $i, $val->porcentaje_rete_iva)
+                        ->setCellValue('X' . $i, $val->porcentaje_descuento)
+                        ->setCellValue('Y' . $i, $val->user_name)
+                        ->setCellValue('Z' . $i, $val->user_name_editado)
+                        ->setCellValue('AA' . $i, $val->fecha_editada)
+                        ->setCellValue('AB' . $i, $val->autorizadofactura)
+                        ->setCellValue('AC' . $i, $val->observacion);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Factura_venta.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        }   
 }

@@ -57,51 +57,99 @@ $this->params['breadcrumbs'][] = $this->title;
                 "method" => "post",                            
             ]);
     ?>
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#procesoinformacion" aria-controls="procesoinformacion" role="tab" data-toggle="tab">Agregar tallas y colores <span class="badge"></span></a></li>
+        <li role="presentation"><a href="#tallas_colores" aria-controls="tallas_colores" role="tab" data-toggle="tab">Tallas y colores <span class="badge"><?= count($detallaTalla)?></span></a></li>
+    </ul>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="procesoinformacion">
+            <div class="table-responsive">
+                <div class="panel panel-success">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr style='font-size:90%;'>
+                                <th scope="col" style='background-color:#B9D5CE;'>Codigo del color</th>                      
+                                <th scope="col" style='background-color:#B9D5CE;'>Nombre del color</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'>Cantidad a vender</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
 
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            Listado de colores
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if($conColores){
+                                $auxiliar = 0;
+                                foreach ($conColores  as $val):
+                                    if($auxiliar <> $val->id_color){
+                                        $auxiliar = $val->id_color;  ?>
+                                        <tr>
+                                            <td><?= $val->id_color?></td>
+                                            <td><?= $val->color->colores?></td> 
+                                            <td><?= $val->stock_punto?></td>
+                                            <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_venta[]" style="text-align: right" size="9" > </td> 
+                                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_color[]" value="<?= $val->id_color ?>"></td> 
+                                        </tr>
+
+                                    <?php }   
+
+                                endforeach;
+                            }    ?>
+                        </tbody>
+                    </table>    
+                </div>
+                <div class="panel-footer text-right">
+                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-success btn-sm", 'name' => 'enviarcolores']) ?>        
+                 </div>
+            </div>    
         </div>
-        <div class="panel-body">
-             <table class="table table-bordered table-hover">
-                <thead>
-                    <tr style='font-size:90%;'>
-                        <th scope="col" style='background-color:#B9D5CE;'>Codigo del color</th>                      
-                        <th scope="col" style='background-color:#B9D5CE;'>Nombre del color</th> 
-                        <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
-                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad a vender</th> 
-                        <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if($conColores){
-                        $auxiliar = 0;
-                        foreach ($conColores  as $val):
-                            if($auxiliar <> $val->id_color){
-                                $auxiliar = $val->id_color;  ?>
+        <!-- TERMINA TABAS-->
+        <div role="tabpanel" class="tab-pane" id="tallas_colores">
+            <div class="table-responsive">
+                <div class="panel panel-success">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr style='font-size:90%;'>
+                                <th scope="col" style='background-color:#B9D5CE;'>Nombre de talla</th>                      
+                                <th scope="col" style='background-color:#B9D5CE;'>Nombre de color</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'>Referencia</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'>Fecha hora registro</th>
+                                <th scope="col" style='background-color:#B9D5CE;'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($detallaTalla  as $val):?>
                                 <tr>
-                                    <td><?= $val->id_color?></td>
+                                    <td><?= $val->talla->nombre_talla?></td>
                                     <td><?= $val->color->colores?></td> 
-                                    <td><?= $val->stock_punto?></td>
-                                    <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_venta[]" style="text-align: right" size="9" > </td> 
-                                    <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_color[]" value="<?= $val->id_color ?>"></td> 
+                                    <td><?= $val->inventarioPunto->nombre_producto?></td>
+                                    <td style="text-align: right"><?= ''. number_format( $val->cantidad_venta,0)?></td>
+                                    <td><?= $val->fecha_registro?></td>
+                                    <td style= 'width: 25px; height: 25px;'>
+                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_talla_color', 'id_factura_punto' => $id_factura_punto, 'id_detalle' => $id_detalle, 'accesoToken' => $accesoToken, 'id_codigo' => $val->codigo], [
+                                                   'class' => '',
+                                                   'data' => [
+                                                       'confirm' => 'Esta seguro de eliminar el registro?',
+                                                       'method' => 'post',
+                                                   ],
+                                               ])
+                                        ?>
+                                    </td>    
                                 </tr>
-                             
-                            <?php }   
-
-                        endforeach;
-                    }    ?>
-                </tbody>
-            </table>    
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>    
+                </div>
+            </div>    
         </div>
-        <div class="panel-footer text-right">
-       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-success btn-sm", 'name' => 'enviarcolores']) ?>        
-    </div>
-    <?php $form->end() ?>
-    </div>
-    
+        <!-- TERMINA TABAS-->
+    </div>        
+</div>
+  <?php $form->end() ?>   
        
 <script type="text/javascript">
 	function marcar(source) 

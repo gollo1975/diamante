@@ -78,7 +78,7 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
         return [
             [['id_factura', 'id_cliente', 'id_tipo_factura', 'id_agente', 'id_tipo_venta', 'numero_factura', 'dv', 'valor_bruto', 'descuento', 'subtotal_factura', 'impuesto', 
                 'total_factura', 'valor_retencion', 'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado', 'estado_factura', 'dias_mora',
-                'valor_intereses_mora', 'iva_intereses_mora', 'subtotal_interes_masiva', 'id_punto'], 'integer'],
+                'valor_intereses_mora', 'iva_intereses_mora', 'subtotal_interes_masiva', 'id_punto','exportar_inventario'], 'integer'],
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada', 'fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento', 'porcentaje_mora'], 'number'],
             [['nit_cedula', 'user_name', 'user_name_editado'], 'string', 'max' => 15],
@@ -146,6 +146,7 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
             'subtotal_interes_masiva' => 'Subtotal Interes Masiva',
             'porcentaje_mora' => 'Porcentaje Mora',
             'id_punto' => 'Punto de venta:',
+            'exportar_inventario' => 'exportar_inventario'
         ];
     }
 
@@ -195,5 +196,22 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
     public function getFacturaVentaPuntoDetalles()
     {
         return $this->hasMany(FacturaVentaPuntoDetalle::className(), ['id_factura' => 'id_factura']);
+    }
+     public function getFormaPago() {
+        if($this->forma_pago == 1){
+            $formapago = 'CONTADO';
+        }else{
+            $formapago = 'CREDITO';
+        }
+        return $formapago;
+    }
+    
+     public function getAutorizadofactura() {
+        if($this->autorizado == 0){
+            $autorizadofactura = 'NO';
+        }else{
+            $autorizadofactura = 'SI';
+        }
+        return $autorizadofactura;
     }
 }

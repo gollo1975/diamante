@@ -130,7 +130,6 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
-                    <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                 </tr>
@@ -164,7 +163,7 @@ $form = ActiveForm::begin([
                                  <td style= 'width: 20px; height: 20px;'>    
                                     <a href="<?= Url::toRoute(["factura-venta-punto/view", "id_factura_punto" => $val->id_factura, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
                                 </td>
-                                <td></td>
+                                <td style= 'width: 20px; height: 20px;'></td>
                             <?php }
                         }?>
                    </tr>            
