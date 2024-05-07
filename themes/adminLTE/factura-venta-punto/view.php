@@ -125,7 +125,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <tr style ='font-size:90%;'>  
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
-                    <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del producto</th>                        
+                    <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del producto</th>   
+                    <th scope="col" align="center" style='background-color:#B9D5CE;'>Imagen</th>  
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Valor unitario</th>                        
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>
@@ -140,8 +141,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 </tr>
             </thead>
             <tbody>
-                <?php                    
+                <?php         
+                $cadena = '';
+                $item = \app\models\Documentodir::findOne(18);
                 foreach ($detalle_factura as $detalle):
+                    $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $detalle->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
                     $tallaColor = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle->id_detalle])->one();
                     ?>
                 <tr style ='font-size:90%;'>
@@ -159,6 +163,16 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td><?= $detalle->codigo_producto?></td>
                     <?php } ?>    
                     <td><?= $detalle->producto?></td>
+                    <?php if($valor){
+                        $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
+                        if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
+                           <td  style=" text-align: center; background-color: white" title="<?php echo $detalle->producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '80;', 'height' => '60;'])?></td>
+                        <?php }else {?>
+                            <td><?= 'NOT FOUND'?></td>
+                        <?php } 
+                    }else{?>
+                          <td></td>
+                    <?php }?>      
                     <td style="text-align: right";><?= ''.number_format($detalle->cantidad,0)?></td>
                     <td style="text-align: right";><?= ''.number_format($detalle->valor_unitario,0)?></td>
                     <td style="text-align: right";><?= ''.number_format($detalle->subtotal,0)?></td>
@@ -204,47 +218,47 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endforeach;?>
             </tbody>
             <tr style="font-size: 90%; background-color:#B9D5CE">
-                <td colspan="11"></td>
+                <td colspan="12"></td>
                 <td style="text-align: right;"><b></b></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="9"></td>
+                <td colspan="10"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>SUBTOTAL:</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="9"></td>
+                <td colspan="10"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>DSCTO:</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->descuento,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="9"></td>
+                <td colspan="10"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>IMPUESTO :</b></td>
                 <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="9"></td>
+                <td colspan="10"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>RETENCION (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
                 <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="9"></td>
+                <td colspan="10"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>RETE IVA (<?= $model->porcentaje_rete_iva?> %) :</b></td>
                 <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="font-size: 90%;">
-                <td colspan="9"></td>
+                <td colspan="10"></td>
                 <td style="text-align: right; background-color:#F0F3EF"><b>TOTAL PAGAR:</b></td>
                 <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
                 <td></td>

@@ -125,6 +125,99 @@ class InventarioPuntoVentaController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    
+    //CONSULTAR INVENTARIOS
+     public function actionSearch_inventario($token = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',101])->all()){
+                $form = new \app\models\FiltroBusquedaInventarioPunto();
+                $codigo = null;
+                $proveedor = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $punto_venta = null;
+                $producto = null;
+                $tokenAcceso = Yii::$app->user->identity->id_punto;
+                $conPunto = \app\models\PuntoVenta::find()->orderBy('id_punto ASC')->all();
+                $local = \app\models\PuntoVenta::findOne($tokenAcceso);
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $codigo = Html::encode($form->codigo);
+                        $proveedor = Html::encode($form->proveedor);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $producto = Html::encode($form->producto);
+                        $punto_venta = Html::encode($form->punto_venta);
+                        if($tokenAcceso == 1){
+                            $table = InventarioPuntoVenta::find()
+                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                    ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                    ->andFilterWhere(['=', 'id_proveedor', $proveedor])
+                                    ->andFilterWhere(['=', 'id_punto', $punto_venta]);
+                        }else{
+                            $table = InventarioPuntoVenta::find()
+                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                    ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                    ->andWhere(['=', 'id_punto', $tokenAcceso]);
+                        }
+                        $table = $table->orderBy('id_inventario DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_inventario  DESC']);
+                            $this->actionExcelInventarioPuntoVenta($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    if($tokenAcceso == 1){
+                        $table = InventarioPuntoVenta::find()->orderBy('id_inventario DESC');
+                    }else{
+                        $table = InventarioPuntoVenta::find()->andWhere(['=','id_punto', $tokenAcceso])->orderBy('id_inventario DESC');
+                    }
+                    
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        $this->actionExcelInventarioPuntoVenta($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_inventario', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'tokenAcceso' => $tokenAcceso,
+                            'token' => $token,
+                            'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombre_punto'),
+                            'local' => $local,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
 
     /**
      * Displays a single InventarioPuntoVenta model.
@@ -184,6 +277,18 @@ class InventarioPuntoVentaController extends Controller
             'codigo' => $codigo, 
             
         ]);
+    }
+    
+    //VISTA DE BUSQUEDA DE INVENTIO
+    public function actionView_search($token, $id, $tokenAcceso) {
+        $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
+        return $this->render('view_search', [
+            'model' => $this->findModel($id),
+            'token' => $token,
+            'talla_color' => $talla_color,
+            'tokenAcceso' => $tokenAcceso,
+        ]);
+        
     }
     
 

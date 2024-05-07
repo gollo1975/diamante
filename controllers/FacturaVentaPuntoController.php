@@ -169,13 +169,15 @@ class FacturaVentaPuntoController extends Controller
         
         $form = new \app\models\ModeloEntradaProducto();
         $codigo_producto = null;
+        $producto = null;
         $factura = FacturaVentaPunto::findOne($id_factura_punto);
         $inventario = \app\models\InventarioPuntoVenta::find()->where(['>','stock_inventario', 0])
                                                           ->andWhere(['=','venta_publico', 1])->andWhere(['=','id_punto', $accesoToken])
                                                           ->orderBy('nombre_producto ASC')->all();
         $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
         if ($form->load(Yii::$app->request->get())) {
-            $codigo_producto = Html::encode($form->codigo_producto);
+            var_dump($codigo_producto = Html::encode($form->codigo_producto));
+             $producto = Html::encode($form->producto);
             if ($codigo_producto > 0) {
                 $conCodigo = \app\models\InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
                 if($conCodigo){
@@ -391,15 +393,42 @@ class FacturaVentaPuntoController extends Controller
         $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);        
     } 
     
-      //ELIMINAR LINEA DE FACTURA DE MAYORISTA
-    public function actionEliminar_linea_factura_punto($id_factura_punto, $id_detalle, $accesoToken)
+       
+    //ELIMINAR LINEA DE FACTURA DE PUNTO DE VENTA
+    public function actionEliminar_linea_factura_punto($id_factura_punto, $id_detalle,$accesoToken)
     {                                
         $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
-        $detalle->delete();
-        $id =  $id_factura_punto;
-        $this->ActualizarSaldosTotales($id);
-        $this->ActualizarConceptosTributarios($id);
-        $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);        
+        $talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->one();
+        if($talla_color){
+            Yii::$app->getSession()->setFlash('error', 'Debe eliminar las tallas y colores de esta referencia y luego volver a ingresar las nuevas cantidades.');
+            $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);   
+        }else{
+            if($detalle->cantidad == 1){
+                $detalle->delete();     
+            }else{
+                $cantidad = 0; $vrl_unitario = 0; $total = 0; $subtotal = 0; $descuento = 0; $porcentaje_dscto = 0; $porcentaje_iva = 0; $iva = 0;
+               $producto = \app\models\InventarioPuntoVenta::findOne($detalle->id_inventario);
+               $cantidad = $detalle->cantidad - 1;
+               $vrl_unitario = $producto->precio_deptal;
+               $porcentaje_dscto = $detalle->porcentaje_descuento;
+               $porcentaje_iva = number_format($detalle->porcentaje_iva / 100,2);
+               $total = round($cantidad * $vrl_unitario);
+               $iva = round($total * $porcentaje_iva);
+               $subtotal = round($total - $iva);
+               $descuento = round($subtotal * $porcentaje_dscto /100);
+               //asignacion
+               $detalle->cantidad = $cantidad;
+               $detalle->subtotal = $subtotal;
+               $detalle->impuesto = $iva;
+               $detalle->valor_descuento = $descuento;
+               $detalle->total_linea = round($total - $descuento);
+               $detalle->save();
+            }
+            $id =  $id_factura_punto;
+            $this->ActualizarSaldosTotales($id);
+            $this->ActualizarConceptosTributarios($id);
+            $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);   
+        }    
     } 
 
     /**
@@ -533,18 +562,30 @@ class FacturaVentaPuntoController extends Controller
     public function actionAutorizado($id_factura_punto, $accesoToken) {
         $detalle = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
         $factura = FacturaVentaPunto::findOne($id_factura_punto);
-        if(count($detalle) > 0 && $factura->valor_bruto > 0){
-            if($factura->autorizado == 0){
-                $factura->autorizado = 1;
-            }else{
-                $factura->autorizado = 0;
+        $sw = 0;
+        foreach ($detalle as $detalle_factura):
+            if(!$talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
+                $sw = 1;
             }
-            $factura->save();
-            $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
+        endforeach;
+        if($sw == 0){
+            if(count($detalle) > 0 && $factura->valor_bruto > 0){
+                if($factura->autorizado == 0){
+                    $factura->autorizado = 1;
+                }else{
+                    $factura->autorizado = 0;
+                }
+                $factura->save();
+                $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la factura porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
+                $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
+            }
         }else{
-            Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la factura porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
-            $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
-        }
+            Yii::$app->getSession()->setFlash('error', 'No se puede AUTORIZAR la factura porque NO ha ingresado las TALLAS Y COLORS de la referencia ('.$detalle_factura->producto.').'); 
+            $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]); 
+        }    
+            
     }
     
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA DE PUNTO DE VENTA

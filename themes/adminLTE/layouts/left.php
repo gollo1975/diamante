@@ -421,7 +421,7 @@
                                             'icon' => 'question',
                                             'url' => '#',
                                             'items' => [
-                                            //   ['label' => 'Agentes comerciales', 'icon' => 'plus-square-o', 'url' => ['/agentes-comerciales/search_consulta_agentes']],
+                                               ['label' => 'Inventario', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/search_inventario']],
                                               // ['label' => 'Programacion de citas', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/search_programacion_citas']],
                                                [
                                                 'label' => 'Indicadores',

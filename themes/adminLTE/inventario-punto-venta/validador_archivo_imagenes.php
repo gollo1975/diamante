@@ -96,7 +96,7 @@ $validador_imagen = 'inventario-punto-venta';
                                     </thead>
                                     <tbody>
                                         <?php 
-                                          $cadena = '';
+                                        $cadena = '';
                                         $item = \app\models\Documentodir::findOne(18);
                                         foreach ($model as $val): 
                                             $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
