@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                       Yii::$app->getSession()->setFlash('warning', 'No esta autorizado para crear pedidos. Comunicate con el administrador.'); 
                  }?>
                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
-                   <script src=dist/js/functions.js></script>
+                   <script src="dist/js/functions.js"></script>
                    </tbody>        
         </table>
     </div>

@@ -85,7 +85,7 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
         return [
             'id_inventario' => 'Id',
             'codigo_producto' => 'Codigo producto:',
-            'nombre_producto' => 'Nombre del producto:',
+            'nombre_producto' => 'Referencia:',
             'descripcion_producto' => 'Descripcion:',
             'costo_unitario' => 'Costo unitario:',
             'stock_unidades' => 'Stock entrada:',
@@ -104,7 +104,7 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
             'fecha_creacion' => 'Fecha Creacion',
             'fecha_proceso' => 'Fecha Proceso',
             'user_name' => 'User Name',
-            'codigo_barra' => 'Codigo barra',
+            'codigo_barra' => 'Codigo barra:',
             'venta_publico' => 'Venta publico',
             'aplica_descuento_punto' => 'Aplica Descuento Punto',
             'aplica_descuento_distribuidor' => 'Aplica Descuento Distribuidor',

@@ -422,6 +422,7 @@
                                             'url' => '#',
                                             'items' => [
                                                ['label' => 'Inventario', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/search_inventario']],
+                                               ['label' => 'Rerefencias', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/search_referencias']],
                                               // ['label' => 'Programacion de citas', 'icon' => 'plus-square-o', 'url' => ['/programacion-citas/search_programacion_citas']],
                                                [
                                                 'label' => 'Indicadores',

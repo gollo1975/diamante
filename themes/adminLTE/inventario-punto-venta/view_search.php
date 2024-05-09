@@ -28,10 +28,10 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
 
     <!--<?= Html::encode($this->title) ?>-->
     <p>
-        <?php if($token == 0){
-            echo  Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);
+        <?php if($token == 1){
+            echo  Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_inventario'], ['class' => 'btn btn-primary btn-sm']);
         }else{ 
-            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_inventario'], ['class' => 'btn btn-primary btn-sm']);
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_referencias'], ['class' => 'btn btn-primary btn-sm']);
         }?>
     </p>
     <div class="panel panel-success">
@@ -50,8 +50,8 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                     <td><?= Html::encode($model->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'iva_incluido') ?></th>
                     <td><?= Html::encode($model->ivaIncluido) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
-                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'precio_deptal') ?></th>
+                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->precio_deptal,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_punto') ?></th>
@@ -125,7 +125,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                         <th scope="col" style='background-color:#B9D5CE;'>User_name</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha registro</th> 
                                          <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Existencias</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad </th> 
                                         <th scope="col" style='background-color:#B9D5CE;'></th>
                                     </tr>
@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                             <td><?= $val->user_name?></td>
                                             <td><?= $val->fecha_registro?></td>
                                             <td><?= $val->cerradoDetalle?></td>
-                                            <td style="text-align: right"><?= $val->stock_punto?></td>
+                                            <td style="text-align: right; background-color: #F5EEF8"><?= $val->stock_punto?></td>
                                             <td style="padding-right: 1; padding-right: 0; text-align: right"><input type="text" name="cantidad[]" style="text-align: right" value="<?= $val->cantidad ?>" size="5" > </td> 
                                             <input type="hidden" name="entrada_cantidad[]" value="<?= $val->id_detalle ?>">
                                             <td style= 'width: 25px; height: 25px;'>

@@ -218,7 +218,46 @@ class InventarioPuntoVentaController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    
+    //PERMITE BUSCAR POR REFERENCIAS
+    
+    public function actionSearch_referencias($token = 2) {
+         if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',102])->all()){
+                $form = new \app\models\ModeloEntradaProducto();
+                $codigo_producto = 0;
+                $model = null;
+                $tokenAcceso = Yii::$app->user->identity->id_punto;
+                if ($form->load(Yii::$app->request->get())) {
+                    $codigo_producto = Html::encode($form->codigo_producto);
+                    if ($codigo_producto > 0) {
+                        $table = \app\models\InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->all();
+                        if(count($table) > 0){
+                            $model = $table;
+                        }else{
+                             Yii::$app->getSession()->setFlash('info', 'El código del producto que digito NO se encuentra en el sistema.');
+                             return $this->redirect(['search_referencias']);
+                        }
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'Debe digitar codigo del producto a buscar.');
+                        return $this->redirect(['search_referencias']);
+                    }    
+                } 
+            }else{
+                return $this->redirect(['site/sinpermiso']); 
+            }   
+         }else{
+             return $this->redirect(['site/login']);
+         }    
 
+        return $this->render('search_referencias', [
+           'form'=> $form,
+           'model' => $model,  
+           'tokenAcceso' => $tokenAcceso,
+            'token' => $token,
+        ]);
+        
+    }
     /**
      * Displays a single InventarioPuntoVenta model.
      * @param integer $id
