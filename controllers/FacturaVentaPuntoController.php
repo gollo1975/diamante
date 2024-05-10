@@ -724,38 +724,39 @@ class FacturaVentaPuntoController extends Controller
             $id_talla = Html::encode($form->id_talla);
             $id_color = Html::encode($form->id_color);
             if($id_talla > 0){
-                if($id_color <> 0){
-                    $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_talla', $id_talla ])
-                                                                       ->orderBy('id_color ASC')->all();
-                }
+                $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_talla', $id_talla ])
+                                                     ->orderBy('id_color ASC')->all();
             }else{
                 Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar la talla de la lista.');
                 return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
             }
         }
-        if (isset($_POST["enviarcolores"])) {
-            if(isset($_POST["nuevo_color"])){
-                $intIndice = 0;
-                foreach ($_POST["nuevo_color"] as $intCodigo) {
-                    if($_POST["cantidad_venta"][$intIndice] > 0){
-                        $colores = \app\models\DetalleColorTalla::findOne($intCodigo);
-                        $table = new \app\models\FacturaPuntoDetalleColoresTalla();
-                        $table->id_detalle =  $id_detalle;
-                        $table->id_factura = $id_factura_punto;
-                        $table->id_inventario = $detalle->id_inventario;
-                        $table->id_color = $colores->id_color;
-                        $table->id_talla = $id_talla;
-                        $table->cantidad_venta = $_POST["cantidad_venta"][$intIndice];
-                        $table->save(false);
-                        $intIndice++; 
+        if (Yii::$app->request->post()) {
+            if (isset($_POST["enviarcolores"])) {
+                if(isset($_POST["nuevo_color_entrada"])){
+                    $indice = 0;
+                    foreach ($_POST["nuevo_color_entrada"] as $intCodigo) {
+                        $cantidad = 0;
+                        $cantidad = $_POST["cantidad_venta"][$indice]; 
+                        if($cantidad > 0){
+                            $colores = \app\models\DetalleColorTalla::findOne($intCodigo);
+                            $table = new \app\models\FacturaPuntoDetalleColoresTalla();
+                            $table->id_detalle =  $id_detalle;
+                            $table->id_factura = $id_factura_punto;
+                            $table->id_inventario = $detalle->id_inventario;
+                            $table->id_color = $colores->id_color;
+                            $table->id_talla = $id_talla;
+                            $table->cantidad_venta = $_POST["cantidad_venta"][$indice];
+                            $table->save(false);
+                        }    
+                       $indice++; 
                     }
-                    $intIndice++; 
+                     return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+                }else{
+                   Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar un registro para procesar la informacion.'); 
                 }
-                 return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
-            }else{
-               Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar un registro para procesar la informacion.'); 
             }
-        }
+        }    
         return $this->render('factura_detalle_tallas_colores', [
             'id_factura_punto' => $id_factura_punto,
             'accesoToken' => $accesoToken,
