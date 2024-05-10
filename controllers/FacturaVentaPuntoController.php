@@ -749,7 +749,7 @@ class FacturaVentaPuntoController extends Controller
                             $table->cantidad_venta = $_POST["cantidad_venta"][$indice];
                             $table->save(false);
                         }    
-                       $indice++; 
+                        $indice++; 
                     }
                      return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
                 }else{
