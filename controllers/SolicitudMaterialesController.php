@@ -173,7 +173,7 @@ class SolicitudMaterialesController extends Controller
                 $model = new SolicitudMateriales();
                 $tipoSolicitud = TipoSolicitud::find()->where(['=','aplica_materia_prima', 1])->orderBy ('descripcion ASC')->all();
                 $grupo = GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all();
-                $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->all();
+                $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->where(['=','exportar_material_empaque', 0])->orderBy('id_orden_produccion DESC')->all();
                 if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
                     return ActiveForm::validate($model);

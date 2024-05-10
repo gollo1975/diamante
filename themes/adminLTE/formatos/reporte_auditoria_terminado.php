@@ -26,7 +26,7 @@ class PDF extends FPDF {
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
         $this->Cell(162, 7, utf8_decode("AUDITORIA PRODUCTO TERMINADO"), 0, 0, 'l', 0);
-        $this->Cell(30, 7, utf8_decode('N°. '.str_pad($auditoria->id_auditoria, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        $this->Cell(30, 7, utf8_decode('N°. '.str_pad($auditoria->numero_auditoria, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 7);

@@ -51,7 +51,7 @@ class FiltroBusquedaPedidos extends Model
             'saldo' => 'Cartera:',
             'numero_factura' => 'Numero factura:',
             'pedido_anulado' => 'Pedido anulado:',
-            'punto_venta' => 'punto de venta:',
+            'punto_venta' => 'Punto de venta:',
 
         ];
     }

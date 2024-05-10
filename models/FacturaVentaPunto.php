@@ -214,4 +214,24 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
         }
         return $autorizadofactura;
     }
+    public function getEstadofactura() {
+        if($this->estado_factura == 0){
+            $estadofactura = 'ACTIVA';
+        }else{
+            if($this->estado_factura == 1){    
+                $estadofactura = 'ABONADA';
+            }else{
+                if($this->estado_factura == 2){ 
+                  $estadofactura = 'CANCELADA';
+                }else{
+                    if($this->estado_factura == 3){ 
+                       $estadofactura = 'ANULADA';  
+                    }else{
+                        $estadofactura = 'NOTA CREDITO';  
+                    }   
+                }  
+            }    
+        }
+        return $estadofactura;
+    }
 }

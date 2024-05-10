@@ -157,7 +157,97 @@ class FacturaVentaPuntoController extends Controller
             return $this->redirect(['site/login']);
         }
     }
-
+     
+    //CONSULTA DE TODAS LAS FACTUAS
+    public function actionSearch_maestro_factura($token = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',103])->all()){
+                $form = new \app\models\FiltroBusquedaPedidos();
+                $documento= null;
+                $cliente = null;
+                $punto_venta = null;
+                $desde = null;
+                $hasta = null;
+                $numero = null;
+                $local = Yii::$app->user->identity->id_punto;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $desde = Html::encode($form->fecha_inicio);
+                        $hasta = Html::encode($form->fecha_corte);
+                        $punto_venta = Html::encode($form->punto_venta);
+                        $numero = Html::encode($form->numero_factura);
+                        if($local === 1){
+                            $table = FacturaVentaPunto::find()
+                                    ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                    ->andFilterWhere(['like', 'cliente', $cliente])
+                                    ->andFilterWhere(['=', 'id_punto', $punto_venta])
+                                    ->andFilterWhere(['=', 'numero_factura', $numero])  
+                                    ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
+                                    ->andWhere(['>', 'numero_factura', 0]);
+                        }else{
+                            $table = FacturaVentaPunto::find()
+                                    ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                    ->andFilterWhere(['like', 'cliente', $cliente])
+                                    ->andFilterWhere(['=', 'numero_factura', $numero])  
+                                    ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
+                                    ->andWhere(['=', 'id_punto', $local])
+                                    ->andWhere(['>', 'numero_factura', 0]); 
+                        }    
+                        $table = $table->orderBy('id_factura DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelFacturaVentaPunto($tableexcel);
+                        }
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                }else{
+                    if($local === 1){
+                        $table = FacturaVentaPunto::find()->orderBy('id_factura DESC');
+                    }else{
+                        $table = FacturaVentaPunto::find()->Where(['=','id_punto', $local])->orderBy('id_factura DESC');
+                    }   
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelFacturaVentaPunto($tableexcel);
+                    }
+                }   
+                return $this->render('search_maestro_factura', [
+                                'model' => $model,
+                                'form' => $form,
+                                'pagination' => $pages,
+                                'token' => $token,
+                                'local' => $local,
+                    ]); 
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
     /**
      * Displays a single FacturaVentaPunto model.
      * @param integer $id
@@ -302,6 +392,20 @@ class FacturaVentaPuntoController extends Controller
         ]);
     }
     
+    //vista de consulta facturas
+    public function actionView_consulta($id_factura_punto, $token)
+    {
+        $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
+        $talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_factura', $id_factura_punto])->all();
+       // $recibo_caja = ReciboCajaDetalles::find()->where(['=','id_factura', $id])->orderBy('id_recibo DESC')->all();
+        return $this->render('view_consulta_maestro', [
+            'model' => $this->findModel($id_factura_punto),
+            'detalle_factura' => $detalle_factura,
+            'token' => $token,
+            'talla_color' => $talla_color,
+           // 'recibo_caja' => $recibo_caja,
+        ]);
+    }
     ///PROCESO QUE SUMA LOS TOTALES
     protected function ActualizarSaldosTotales($id) {
         $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id])->all();
@@ -386,11 +490,17 @@ class FacturaVentaPuntoController extends Controller
     public function actionEliminar_linea_factura_mayorista($id_factura_punto, $id_detalle, $accesoToken)
     {                                
         $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
-        $detalle->delete();
-        $id =  $id_factura_punto;
-        $this->ActualizarSaldosTotales($id);
-        $this->ActualizarConceptosTributarios($id);
-        $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);        
+        $talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->one();
+        if($talla_color){
+            Yii::$app->getSession()->setFlash('error', 'No se puede eliminar esta linea de compra porque debe de ELIMINAR primero las tallas y colores de la referencia.');
+            $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);   
+        }else{
+            $detalle->delete();
+            $id =  $id_factura_punto;
+            $this->ActualizarSaldosTotales($id);
+            $this->ActualizarConceptosTributarios($id);
+            $this->redirect(["view",'id_factura_punto' => $id_factura_punto, 'accesoToken' => $accesoToken]);    
+        }    
     } 
     
        
@@ -608,7 +718,7 @@ class FacturaVentaPuntoController extends Controller
         $id_color = null;
         $conColores = null;
         $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
-        $detallaTalla = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','id_factura', $id_factura_punto])->all();
+        $detalleTalla = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','id_factura', $id_factura_punto])->all();
         $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['>','stock_punto', 0])->orderBy('id_talla ASC')->all();
         if ($form->load(Yii::$app->request->get())) {
             $id_talla = Html::encode($form->id_talla);
@@ -628,18 +738,18 @@ class FacturaVentaPuntoController extends Controller
                 $intIndice = 0;
                 foreach ($_POST["nuevo_color"] as $intCodigo) {
                     if($_POST["cantidad_venta"][$intIndice] > 0){
+                        $colores = \app\models\DetalleColorTalla::findOne($intCodigo);
                         $table = new \app\models\FacturaPuntoDetalleColoresTalla();
                         $table->id_detalle =  $id_detalle;
                         $table->id_factura = $id_factura_punto;
                         $table->id_inventario = $detalle->id_inventario;
-                        $table->id_color = $intCodigo;
+                        $table->id_color = $colores->id_color;
                         $table->id_talla = $id_talla;
                         $table->cantidad_venta = $_POST["cantidad_venta"][$intIndice];
                         $table->save(false);
                         $intIndice++; 
-                    }else{
-                        Yii::$app->getSession()->setFlash('warning', 'Debe digitar la cantidad de unidades a vender.'); 
                     }
+                    $intIndice++; 
                 }
                  return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
             }else{
@@ -653,7 +763,7 @@ class FacturaVentaPuntoController extends Controller
             'conColores' => $conColores,
             'conTallas' => ArrayHelper::map($conTallas, 'id_talla', 'nombreTalla'),
             'id_detalle' => $id_detalle,
-            'detallaTalla' => $detallaTalla,
+            'detalleTalla' => $detalleTalla,
         ]);
     }
     

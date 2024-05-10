@@ -494,9 +494,22 @@
                                             'url' => '#',
                                             'items' => [
                                                 ['label' => 'Clientes', 'icon' => 'plus-square-o', 'url' => ['/clientes/search_consulta_clientes']],
-                                                ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
-                                            ],  
-                                        ],
+                                               
+                                            [                                            
+                                                'label' => 'Factura produccion',
+                                                'icon' => 'cart-plus',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
+                                            ]],
+                                            [
+                                                'label' => 'Facturas pto venta',
+                                                'icon' => 'cart-plus',
+                                                'url' => '#',
+                                                'items' => [
+                                                    ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_factura']],
+                                            ]],
+                                        ]],
                                         [
                                             'label' => 'Movimientos',
                                             'icon' => 'book',

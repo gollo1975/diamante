@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div>
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#procesoinformacion" aria-controls="procesoinformacion" role="tab" data-toggle="tab">Agregar tallas y colores <span class="badge"></span></a></li>
-        <li role="presentation"><a href="#tallas_colores" aria-controls="tallas_colores" role="tab" data-toggle="tab">Tallas y colores <span class="badge"><?= count($detallaTalla)?></span></a></li>
+        <li role="presentation"><a href="#tallas_colores" aria-controls="tallas_colores" role="tab" data-toggle="tab">Tallas y colores <span class="badge"><?= count($detalleTalla)?></span></a></li>
     </ul>
     </ul>
     <div class="tab-content">
@@ -74,7 +74,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <th scope="col" style='background-color:#B9D5CE;'>Nombre del color</th> 
                                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
                                 <th scope="col" style='background-color:#B9D5CE;'>Cantidad a vender</th> 
-                                <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
 
                             </tr>
                         </thead>
@@ -90,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             <td><?= $val->color->colores?></td> 
                                             <td><?= $val->stock_punto?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_venta[]" style="text-align: right" size="9" > </td> 
-                                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_color[]" value="<?= $val->id_color ?>"></td> 
+                                             <input type="hidden" name="nuevo_color[]" value="<?= $val->id_detalle?>">
                                         </tr>
 
                                     <?php }   
@@ -122,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </thead>
                         <tbody>
                             <?php
-                            foreach ($detallaTalla  as $val):?>
+                            foreach ($detalleTalla  as $val):?>
                                 <tr>
                                     <td><?= $val->talla->nombre_talla?></td>
                                     <td><?= $val->color->colores?></td> 
