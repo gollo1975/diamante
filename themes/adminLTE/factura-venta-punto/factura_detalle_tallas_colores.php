@@ -53,10 +53,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 <?php $formulario->end() ?>
-<?php $form = ActiveForm::begin([
-                "method" => "post",                            
-            ]);
-    ?>
+ <?php $form = ActiveForm::begin([
+    'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+    'fieldConfig' => [
+        'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+        'labelOptions' => ['class' => 'col-sm-3 control-label'],
+        'options' => []
+    ],
+    ]);?>
 <div>
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#procesoinformacion" aria-controls="procesoinformacion" role="tab" data-toggle="tab">Agregar tallas y colores <span class="badge"></span></a></li>
@@ -70,6 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr style='font-size:90%;'>
+                                <th scope="col" style='background-color:#B9D5CE;'>Id</th> 
                                 <th scope="col" style='background-color:#B9D5CE;'>Codigo del color</th>                      
                                 <th scope="col" style='background-color:#B9D5CE;'>Nombre del color</th> 
                                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
@@ -85,11 +90,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                     if($auxiliar <> $val->id_color){
                                         $auxiliar = $val->id_color;  ?>
                                         <tr>
+                                            <td><?= $val->id_detalle?></td>
                                             <td><?= $val->id_color?></td>
                                             <td><?= $val->color->colores?></td> 
                                             <td><?= $val->stock_punto?></td>
-                                            <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_venta[]" style="text-align: right" size="9" > </td> 
-                                             <input type="hidden" name="nuevo_color[]" value="<?= $val->id_detalle?>">
+                                            <td style="padding-right: 1; padding-right: 1; text-align: right"> <input type="text" name="cantidad_venta[]" style="text-align: right" size="9" > </td> 
+                                             <input type="hidden" name="nuevo_color_entrada[]" value = "<?= $val->id_detalle?>">
+                                            
                                         </tr>
 
                                     <?php }   
