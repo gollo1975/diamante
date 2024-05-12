@@ -37,9 +37,10 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['descripcion_orden'], 'required'],
+            [['descripcion_orden','tipo_modulo'], 'required'],
             [['descripcion_orden'], 'string', 'max' => 30],
              [['abreviatura'], 'string', 'max' => 3],
+            ['tipo_modulo', 'integer'],
         ];
     }
 
@@ -52,6 +53,16 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
             'id_tipo_orden' => 'Código',
             'descripcion_orden' => 'Descripción',
             'abreviatura' => 'Abreviatura',
+            'tipo_modulo' => 'Tipo de modulo:',
         ];
+    }
+    
+    public function getTipoModulo() {
+        if($this->tipo_modulo == 1){
+            $tipomodulo = 'PRODUCCION';
+        }else{
+            $tipomodulo = 'INVENTARIOS';
+        }
+        return $tipomodulo;
     }
 }

@@ -74,7 +74,7 @@ class EntradaProductoTerminadoController extends Controller
                         $tipo_entrada = Html::encode($form->tipo_entrada);
                         $table = EntradaProductoTerminado::find()
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['=', 'id_orden_compra', $orden])
+                                    ->andFilterWhere(['=', 'id_tipo_orden', $orden])
                                     ->andFilterWhere(['=', 'tipo_entrada', $tipo_entrada])
                                     ->andFilterWhere(['=', 'id_proveedor', $proveedor]);
                         $table = $table->orderBy('id_entrada DESC');
@@ -127,7 +127,7 @@ class EntradaProductoTerminadoController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
-
+   
     /**
      * Displays a single EntradaProductoTerminado model.
      * @param integer $id
@@ -148,6 +148,8 @@ class EntradaProductoTerminadoController extends Controller
                 foreach ($_POST["detalle_entrada"] as $intCodigo):
                     $table = EntradaProductoTerminadoDetalle::findOne($intCodigo);
                     $table->id_inventario= $_POST["id_inventario"]["$intIndice"];
+                     $inven = InventarioPuntoVenta::findOne($table->id_inventario);
+                    $table->codigo_producto = $inven->codigo_producto;
                     $table->cantidad = $_POST["cantidad"]["$intIndice"];
                     $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
                     $table->porcentaje_iva = $_POST["porcentaje_iva"]["$intIndice"];
@@ -201,6 +203,13 @@ class EntradaProductoTerminadoController extends Controller
             return ActiveForm::validate($model);
         }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if($sw == 0){
+                $ordenCompra = OrdenCompra::findOne($model->id_orden_compra);
+                $model->id_tipo_orden = $ordenCompra->id_tipo_orden;
+            }else{
+                 $model->id_tipo_orden = null;
+                 $model->id_orden_compra = null;
+            }    
             $model->user_name_crear= Yii::$app->user->identity->username;
             $model->update();
             $token = 0;
@@ -218,10 +227,11 @@ class EntradaProductoTerminadoController extends Controller
             'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
         ]);
     }
+    
     //importar lineas de la orden de compra
     public function actionImportardetallecompra($id, $id_orden, $token, $proveedor)
     {                                
-        $orden_compra = OrdenCompra::find()->where(['=','id_proveedor' , $proveedor])->andWhere(['=','importado', 0])->one();
+        $orden_compra = OrdenCompra::find()->where(['=','id_proveedor' , $proveedor])->andWhere(['=','importado', 0])->andWhere(['=','abreviatura', 'IPT'])->one();
         if($orden_compra){
             $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $orden_compra->id_orden_compra])->all();
             foreach ( $detalle_compra as $detalle_compras):
@@ -253,12 +263,17 @@ class EntradaProductoTerminadoController extends Controller
     public function actionUpdate($id, $sw)
     {
         $model = $this->findModel($id);
-        $ordenes = \app\models\OrdenCompra::find()->where(['=','abreviatura', 'IPT'])->orderBy('id_orden_compra desc')->all(); 
+        $ordenes = \app\models\OrdenCompra::find()->where(['=','abreviatura', 'IPT'])->andWhere(['=','importado', 0])->orderBy('id_orden_compra desc')->all(); 
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if($sw == 0){
+               $ordenCompra = OrdenCompra::findOne($model->id_orden_compra);
+                $model->id_tipo_orden = $ordenCompra->id_tipo_orden; 
+            }
+            
             $model->user_name_edit= Yii::$app->user->identity->username;
             if($sw == 1){
                 $model->id_orden_compra = null;
@@ -487,8 +502,8 @@ class EntradaProductoTerminadoController extends Controller
                     $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
                     $table->cantidad = $_POST["cantidad"]["$intIndice"];
                     $table->fecha_vencimiento = $_POST["fecha_vcto"]["$intIndice"];
+                    $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
                     if($_POST["actualizar_precio"]["$intIndice"] == 1){
-                       $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
                        $auxiliar =  $table->cantidad * $table->valor_unitario;
                        $iva = round(($auxiliar * $table->porcentaje_iva)/100);
                     }else{

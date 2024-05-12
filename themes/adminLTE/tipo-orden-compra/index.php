@@ -33,6 +33,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'abreviatura',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
+            [
+                'attribute' => 'tipo_modulo',
+                'value' => function($model) {
+                    $estado = app\models\TipoOrdenCompra::findOne($model->id_tipo_orden);
+                    return $estado->tipoModulo;
+                },
+                'filter' => ArrayHelper::map(app\models\TipoOrdenCompra::find()->all(), 'tipo_modulo', 'tipoModulo'),
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
              [
                 'class' => 'yii\grid\ActionColumn', 
                  'contentOptions' => ['class' => 'col-lg-1'],

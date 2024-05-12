@@ -31,6 +31,9 @@ use kartik\select2\Select2;
         <div class="row">
             <?= $form->field($model, 'abreviatura')->textInput(['maxlength' => true]) ?>  					
         </div>
+        <div class="row">
+             <?= $form->field($model, 'tipo_modulo')->dropdownList(['1' => 'PRODUCCION', '2' => 'INVENTARIOS'], ['prompt' => 'Seleccione...']) ?>
+        </div>
 
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("tipo-orden-compra/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>

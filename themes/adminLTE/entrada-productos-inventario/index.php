@@ -20,7 +20,7 @@ use app\models\OrdenCompra;
 
 
 
-$this->title = 'ENTRADA PRODUCTO TERMINADO';
+$this->title = 'ENTRADA DE INVENTARIO';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("entrada-producto-terminado/index"),
+    "action" => Url::toRoute("entrada-productos-inventario/index"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')->all(), 'id_proveedor', 'nombre_completo');
-$orden_compra = ArrayHelper::map(app\models\TipoOrdenCompra::find()->where(['=','tipo_modulo', '2'])->orderBy ('descripcion_orden ASC')->all(), 'id_tipo_orden', 'descripcion_orden');
+$orden_compra = ArrayHelper::map(OrdenCompra::find()->where(['=','abreviatura', 'IP'])->andWhere(['=','importado', 0])->orderBy ('descripcion ASC')->all(), 'id_orden_compra', 'descripcion');
 
 ?>
 
@@ -90,7 +90,7 @@ $orden_compra = ArrayHelper::map(app\models\TipoOrdenCompra::find()->where(['=',
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("entrada-producto-terminado/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("entrada-productos-inventario/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -147,25 +147,25 @@ $form = ActiveForm::begin([
                 <td><?= $val->autorizadoCompra?></td>
                 <?php if($val->tipo_entrada == 1){?>
                     <td style= 'width: 20px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["entrada-producto-terminado/view", "id" => $val->id_entrada, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["entrada-productos-inventario/view", "id" => $val->id_entrada, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }else{?>    
                     <td style= 'width: 20px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["entrada-producto-terminado/codigo_barra_ingreso", "id" => $val->id_entrada]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["entrada-productos-inventario/codigo_barra_ingreso", "id" => $val->id_entrada]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }    
                 if(!$detalle && $val->tipo_entrada == 1){?>
                     <td style= 'width: 20px; height: 20px;'>
-                       <a href="<?= Url::toRoute(["entrada-producto-terminado/update", "id" => $val->id_entrada, 'sw' => 0]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                       <a href="<?= Url::toRoute(["entrada-productos-inventario/update", "id" => $val->id_entrada, 'sw' => 0]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                     </td>
                 <?php }else{
                         if(!$detalle && $val->tipo_entrada == 2){?>
                             <td style= 'width: 20px; height: 20px;'>
-                                <a href="<?= Url::toRoute(["entrada-producto-terminado/update", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                                <a href="<?= Url::toRoute(["entrada-productos-inventario/update", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                             </td>
                         <?php }else{?>    
                             <td style= 'width: 20px; height: 20px;'>
-                                <a href="<?= Url::toRoute(["entrada-producto-terminado/imprimir_entrada_producto", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-print"></span></a>                   
+                                <a href="<?= Url::toRoute(["entrada-productos-inventario/imprimir_entrada_producto", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-print"></span></a>                   
                             </td>
                         <?php }    
                 }?>  
@@ -175,10 +175,11 @@ $form = ActiveForm::begin([
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-            <a align="right" href="<?= Url::toRoute(["entrada-producto-terminado/create", 'sw' => 1]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo sin OC</a>
-            <a align="right" href="<?= Url::toRoute(["entrada-producto-terminado/create", 'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo con OC</a>
+            <a align="right" href="<?= Url::toRoute(["entrada-productos-inventario/create", 'sw' => 1]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo sin OC</a>
+            <a align="right" href="<?= Url::toRoute(["entrada-productos-inventario/create", 'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo con OC</a>
         <?php $form->end() ?>
         </div>
      </div>
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>
+
