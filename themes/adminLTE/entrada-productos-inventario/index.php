@@ -127,7 +127,7 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): 
-                $detalle = app\models\EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $val->id_entrada])->one();
+                $detalle = app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $val->id_entrada])->one();
                 ?>
             <tr style ='font-size: 90%;'>                
                 <td><?= $val->id_entrada?></td>
@@ -151,7 +151,7 @@ $form = ActiveForm::begin([
                     </td>
                 <?php }else{?>    
                     <td style= 'width: 20px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["entrada-productos-inventario/codigo_barra_ingreso", "id" => $val->id_entrada]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["entrada-productos-inventario/codigo_barra_ingreso", "id" => $val->id_entrada, 'bodega' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }    
                 if(!$detalle && $val->tipo_entrada == 1){?>
@@ -165,7 +165,6 @@ $form = ActiveForm::begin([
                             </td>
                         <?php }else{?>    
                             <td style= 'width: 20px; height: 20px;'>
-                                <a href="<?= Url::toRoute(["entrada-productos-inventario/imprimir_entrada_producto", "id" => $val->id_entrada, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-print"></span></a>                   
                             </td>
                         <?php }    
                 }?>  

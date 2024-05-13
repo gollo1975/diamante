@@ -530,6 +530,7 @@ class EntradaProductoTerminadoController extends Controller
         ]);
         
     }
+   
     //IMPRESIONES
     public function actionImprimir_entrada_producto($id) {
         $model = EntradaProductoTerminado::findOne($id);

@@ -25,10 +25,9 @@ use app\models\InventarioProductos;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'INVENTARIO DE PRODUCTOS DETALLE';
+$this->title = 'ENTRADA DE INVENTARIOS';
 $this->params['breadcrumbs'][] = ['label' => 'Entrada inventario', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_entrada;
-$view = 'entrada-producto-terminado';
 $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva ASC')->all(), 'valor_iva', 'valor_iva');
 ?>
 
@@ -46,11 +45,11 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
         } else {
             if ($model->autorizado == 1 && $model->enviar_materia_prima  == 0) {?> 
                 <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm'])?>
-                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar al inventario', ['enviarinventario', 'id' => $model->id_entrada, 'token'=> $token, 'id_compra' => $model->id_orden_compra],['class' => 'btn btn-info btn-sm',
+                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar al inventario', ['enviar_inventario_modulo', 'id' => $model->id_entrada, 'token'=> $token, 'id_compra' => $model->id_orden_compra,'genera_talla' => $empresa->aplica_talla_color],['class' => 'btn btn-info btn-sm',
                            'data' => ['confirm' => 'Esta seguro de actualizar el modulo de inventarios de productos?. Tener presente que debe de subir las tallas y colores del producto.', 'method' => 'post']]);?>
-            <?php }else{ ?>
-               <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 6, 'codigo' => $model->id_entrada,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm'])?>  
-            <?php }    
+            <?php }else{ 
+             echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_entrada_producto', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+            }    
         }?>        
     </p>  
     <div class="panel panel-success">
@@ -170,15 +169,17 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                     <td style="text-align: right"><?= ''.number_format($val->total_iva,0) ?></td>
                                                     <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                                     <td style="text-align: right"><?= ''.number_format($val->total_entrada,0) ?></td>
-                                                <?php }else{?>
-                                                    <?php if($model->enviar_materia_prima == 0){?>
-                                                        <td style="width: 20px; height: 20px">
-                                                             <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$model->id_entrada ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle, 'token' => $token])?>"
-                                                                            <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
-                                                        </td>
-                                                    <?php }else{?>
-                                                        <td style="width: 20px; height: 20px"></td>
-                                                    <?php }?>
+                                                <?php }else{
+                                                    if($empresa->aplica_talla_color == 1){
+                                                        if($model->enviar_materia_prima == 0){?>
+                                                            <td style="width: 20px; height: 20px">
+                                                                 <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$model->id_entrada ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle, 'token' => $token])?>"
+                                                                                <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
+                                                            </td>
+                                                        <?php }else{?>
+                                                            <td style="width: 20px; height: 20px"></td>
+                                                        <?php }
+                                                    }?>
                                                     <td><?= $val->codigo_producto ?></td>
                                                     <td><?= $val->inventario->nombre_producto ?></td>  
                                                     <td style="text-align: left"><?= $val->actualizarPrecio ?></td> 

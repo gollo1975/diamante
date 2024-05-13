@@ -136,6 +136,7 @@ class EntradaProductosInventarioController extends Controller
         $models = new \app\models\ModeloEntradaProducto();
         $inventario = InventarioPuntoVenta::find()->orderBy('nombre_producto ASC')->where(['=','id_punto', 1])->all();
         $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["detalle_entrada"])){
                 $intIndice = 0;
@@ -172,6 +173,7 @@ class EntradaProductosInventarioController extends Controller
             'detalle_entrada' => $detalle_entrada,
             'inventario' => ArrayHelper::map($inventario, "id_inventario", "inventario"),
             'models' => $models,
+            'empresa' => $empresa,
         ]);
     }
 
@@ -252,16 +254,35 @@ class EntradaProductosInventarioController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+  public function actionUpdate($id, $sw)
     {
         $model = $this->findModel($id);
-
+        $ordenes = \app\models\OrdenCompra::find()->where(['=','abreviatura', 'IP'])->andWhere(['=','importado', 0])->orderBy('id_orden_compra desc')->all(); 
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entrada]);
+            if($sw == 0){
+                $ordenCompra = OrdenCompra::findOne($model->id_orden_compra);
+                $model->id_tipo_orden = $ordenCompra->id_tipo_orden;
+            }else{
+                 $model->id_tipo_orden = null;
+                 $model->id_orden_compra = null;
+            }    
+            
+            $model->user_name_edit= Yii::$app->user->identity->username;
+            if($sw == 1){
+                $model->id_orden_compra = null;
+            }
+            $model->update(false);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
+            'sw' => $sw,
         ]);
     }
 
@@ -300,12 +321,12 @@ class EntradaProductosInventarioController extends Controller
     } 
     
     //ELIMINAR DETALLES  manuales
-    public function actionEliminar_manual($id, $detalle_manual)
+    public function actionEliminar_manual($id, $detalle_manual, $bodega)
     {                                
         $detalle = \app\models\EntradaProductoInventarioDetalle::findOne($detalle_manual);
         $detalle->delete();
         $this->ActualizarLineas($id);
-        $this->redirect(["codigo_barra_ingreso",'id' => $id]);        
+        $this->redirect(["codigo_barra_ingreso",'id' => $id, 'bodega' => $bodega]);        
     } 
 
     //AUTORIZAR ENTRADA
@@ -342,17 +363,17 @@ class EntradaProductosInventarioController extends Controller
     }
     
      //AUTORIZAR ENTRADA SIN OC
-     public function actionAutorizado_sinoc($id) {
+     public function actionAutorizado_sinoc($id, $bodega) {
         $model = $this->findModel($id);
         if ($model->autorizado == 0) {                        
                 $model->autorizado = 1;            
                $model->update();
-               $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso", 'id' => $id]);  
+               $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);  
 
         } else{
                 $model->autorizado = 0;
                 $model->update();
-                $this->redirect(["entrada-producto-terminado/codigo_barra_ingreso", 'id' => $id]);  
+                 $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);  
         }    
     }
     
@@ -360,6 +381,8 @@ class EntradaProductosInventarioController extends Controller
     public function actionCrear_talla_color_entrada($id, $id_inventario , $id_detalle, $token) {
         $listadoTallaColor = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id_inventario])->all();
         $model = \app\models\EntradaProductoInventarioDetalle::findOne($id_detalle);
+        $entrada_talla = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $id_detalle])->all();
+        $item_cerrado = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','cerrado', 0])->all();
         return $this->render('crear_talla_color_entrada', [
             'token' => $token,
             'id_detalle' => $id_detalle,
@@ -368,9 +391,213 @@ class EntradaProductosInventarioController extends Controller
             'token' => $token,
             'id' => $id,
             'model' => $model,
+            'entrada_talla' => $entrada_talla,
+            'item_cerrado' => $item_cerrado,
         ]);
     }
     
+     //PERMITE ENTAR LAS NUEVAS EXISTENCIAS POR TALLA Y COLOR
+    public function actionEntrada_nueva_existencia($id, $id_inventario, $id_detalle, $token, $id_detalle_existencia) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $table = \app\models\DetalleColorTalla::findOne($id_detalle_existencia);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["nueva_entrada"])) {
+                $fila = new \app\models\EntradaTallaColor();
+                $fila->id_detalle = $id_detalle;
+                $fila->id_inventario =  $id_inventario;
+                $fila->id_entrada = $id;
+                $fila->id_color = $table->id_color;
+                $fila->id_talla = $table->id_talla;
+                $fila->cantidad = $model->nueva_cantidad;
+                $fila->user_name = Yii::$app->user->identity->username;
+                $fila->save();
+                $this->redirect(["entrada-productos-inventario/crear_talla_color_entrada", 'id' => $id, 'id_inventario' => $id_inventario, 'id_detalle' => $id_detalle, 'token' => $token]);
+            }
+        }
+        return $this->renderAjax('nueva_entrada_inventario', [
+            'model' => $model,
+            'id' => $id,
+            'id_inventario' => $id_inventario,
+            'id_detalle' => $id_detalle,
+            'token' => $token,
+            
+        ]);
+    }
+    
+    //ELIMINAR DETALLES  DE NUEVA ENTRADA O EXISTENCIAS
+    public function actionEliminar_nueva_entrada($id, $id_inventario, $id_detalle, $token, $codigo)
+    {                                
+        $entrada = \app\models\EntradaTallaColor::findOne($codigo);
+        $entrada->delete();
+        $this->redirect(["entrada-productos-inventario/crear_talla_color_entrada", 'id' => $id, 'id_inventario' => $id_inventario, 'id_detalle' => $id_detalle, 'token' => $token]);        
+    } 
+    
+    //PROCESO QUE CIERRA LA ENTRADA DE UNIDADES
+    public function actionCerrar_entrada_referencia($id, $token, $id_detalle, $id_inventario) {
+        $nueva_entrada = \app\models\EntradaTallaColor::find()->where(['=','id_detalle',$id_detalle])->all();
+        $detalle_referencia = \app\models\EntradaProductoInventarioDetalle::findOne($id_detalle);
+        $contador = 0;
+        foreach ($nueva_entrada as $contar):
+            $contador += $contar->cantidad;
+        endforeach;
+        if($contador == $detalle_referencia->cantidad){
+            foreach ($nueva_entrada as $nueva):
+                $existencias = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id_inventario])
+                                                                    ->andWhere(['=','id_talla', $nueva->id_talla])
+                                                                    ->andWhere(['=','id_color', $nueva->id_color])->one();
+                if($existencias){
+                    $existencias->cantidad += $nueva->cantidad;
+                    $existencias->stock_punto += $nueva->cantidad;
+                    $existencias->save();
+                    $nueva->cerrado = 1;
+                    $nueva->save();
+                }
+            endforeach;
+            $this->redirect(["entrada-productos-inventario/crear_talla_color_entrada", 'id' => $id, 'id_inventario' => $id_inventario, 'id_detalle' => $id_detalle, 'token' => $token]);
+        }else{
+             Yii::$app->getSession()->setFlash('error', 'Las cantidades ingresas en la orden entrada deben de ser igual a las cantidades ingresadas en TALLA Y COLOR. Validar la informacion.');
+             $this->redirect(["entrada-productos-inventario/crear_talla_color_entrada", 'id' => $id, 'id_inventario' => $id_inventario, 'id_detalle' => $id_detalle, 'token' => $token]);
+        }
+        
+    }
+    
+    //ENVIAR INVENTARIO AL MODULO
+    public function actionEnviar_inventario_modulo($id, $token, $id_compra, $genera_talla) {
+        $orden_compra = OrdenCompra::findOne($id_compra);
+        $entrada_inventario = EntradaProductosInventario::findOne($id);
+        $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
+        $sw = 0;
+        if($genera_talla == 0){
+            foreach ($detalle_entrada as $detalle):
+                $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
+                $inventario_entrada->stock_unidades += $detalle->cantidad; 
+                $inventario_entrada->stock_inventario += $detalle->cantidad;
+                $inventario_entrada->save();
+            endforeach;
+            $entrada_inventarioº->enviar_materia_prima = 1;
+            $entrada_inventario->save();
+            $orden_compra->importado = 1;
+            $orden_compra->save();
+            $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);
+        }else{
+            foreach ($detalle_entrada as $detalle):
+                $entrada = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $detalle->id_detalle])->one(); 
+                if($entrada){
+                    $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
+                    $inventario_entrada->stock_unidades += $detalle->cantidad; 
+                    $inventario_entrada->stock_inventario += $detalle->cantidad;
+                    $inventario_entrada->save(); 
+                }else{
+                    $sw = 1;
+                }
+            endforeach;
+        }    
+        if($sw == 1){
+             Yii::$app->getSession()->setFlash('error', 'Debe de subir las TALLAS Y COLORES a esta referencia.');
+             $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);
+        }else{
+            $entrada_inventario->enviar_materia_prima = 1;
+            $entrada_inventario->save();
+            $orden_compra->importado = 1;
+            $orden_compra->save();
+            $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);
+        }
+            
+    }
+    
+    //PROCESO QUE INGRESA CON CODIGO DE BARRAS
+    public function actionCodigo_barra_ingreso($id, $bodega) {
+        $form = new \app\models\ModeloEntradaProducto();
+        $model = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        $entrada_producto = EntradaProductosInventario::findOne($id);
+        $codigo_producto = 0;
+        if ($form->load(Yii::$app->request->get())) {
+            $codigo_producto = Html::encode($form->codigo_producto);
+            if ($codigo_producto > 0) {
+                $table = InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $bodega])->one();
+                if($table){
+                    $conDato = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','codigo_producto', $codigo_producto])
+                                                                      ->andWhere(['=','id_entrada', $id])->one();
+                    if(!$conDato){
+                        $entrada = new \app\models\EntradaProductoInventarioDetalle();
+                        $entrada->id_entrada = $id;
+                        $entrada->id_inventario = $table->id_inventario;
+                        $entrada->codigo_producto = $codigo_producto;
+                        $entrada->fecha_vencimiento = date('Y-m-d');
+                        $entrada->porcentaje_iva = $table->porcentaje_iva;
+                        $entrada->valor_unitario = $table->costo_unitario;
+                        $entrada->save(false);
+                        $model = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all(); 
+                        $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso",'id' => $id, 'bodega' => $bodega]);
+                        if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id_entrada  DESC']);
+                                $this->actionExcelConsultaEntrada($tableexcel);
+                        }
+                    }else{
+                        Yii::$app->getSession()->setFlash('success', 'El código digitado ya se en cuentra agregado a esta entrada.');
+                     return $this->redirect(['codigo_barra_ingreso','id' =>$id, 'bodega' => $bodega]);
+                    }    
+                }else{
+                     Yii::$app->getSession()->setFlash('info', 'El código del producto no se encuentra en el sistema.');
+                     return $this->redirect(['codigo_barra_ingreso','id' =>$id, 'bodega' => $bodega]);
+                }
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe digitar codigo del producto a buscar.');
+                return $this->redirect(['codigo_barra_ingreso','id' =>$id, 'bodega' => $bodega]);
+            }    
+        }
+        if(isset($_POST["actualizarlineas"])){
+            if(isset($_POST["detalle_entrada"])){
+                $intIndice = 0;
+                $auxiliar = 0;
+                $iva = 0 ;
+                foreach ($_POST["detalle_entrada"] as $intCodigo):
+                    $table = \app\models\EntradaProductoInventarioDetalle::findOne($intCodigo);
+                    $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
+                    $table->cantidad = $_POST["cantidad"]["$intIndice"];
+                    $table->fecha_vencimiento = $_POST["fecha_vcto"]["$intIndice"];
+                    $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
+                    if($_POST["actualizar_precio"]["$intIndice"] == 1){
+                       $auxiliar =  $table->cantidad * $table->valor_unitario;
+                       $iva = round(($auxiliar * $table->porcentaje_iva)/100);
+                    }else{
+                       $auxiliar =  $table->cantidad * $table->valor_unitario;
+                       $iva = round(($auxiliar * $table->porcentaje_iva)/100);
+                    }
+                    $table->total_iva = $iva;
+                    $table->subtotal = $auxiliar;
+                    $table->total_entrada = $iva + $auxiliar;
+                    $table->save(false);
+                    $auxiliar = 0;
+                    $iva = 0;   
+                    $intIndice++;
+                endforeach;
+                $this->ActualizarLineas($id);
+                return $this->redirect(['codigo_barra_ingreso','id' =>$id, 'bodega' => $bodega]);
+            }
+            
+        }
+        return $this->render('_form_codigo_barras', [
+                    'model' => $model,
+                    'form' => $form,
+                    'id' => $id,
+                    'bodega' => $bodega,
+                    'empresa' => $empresa,
+                    'entrada_producto' => $entrada_producto,
+         ]);
+        
+    }
+   
+    
+    
+     //IMPRESIONES
+    public function actionImprimir_entrada_producto($id, $token) {
+        $model = EntradaProductosInventario::findOne($id);
+        return $this->render('../formatos/reporte_entrada_inventario', [
+            'model' => $model,
+        ]);
+    }
     /**
      * Finds the EntradaProductosInventario model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
