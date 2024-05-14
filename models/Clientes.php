@@ -72,7 +72,7 @@ class Clientes extends \yii\db\ActiveRecord
         return [
             [['id_tipo_documento', 'nit_cedula', 'celular', 'email_cliente', 'codigo_departamento', 'codigo_municipio', 'id_naturaleza', 'id_posicion','id_agente','id_tipo_cliente'], 'required'],
             [['id_tipo_documento', 'dv', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'id_posicion',
-                'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente'], 'integer'],
+                'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente','predeterminado'], 'integer'],
             [['fecha_creacion', 'fecha_editado'], 'safe'],
             [['observacion'], 'string'],
             ['email_cliente', 'email'],
@@ -131,6 +131,7 @@ class Clientes extends \yii\db\ActiveRecord
             'presupuesto_comercial' => 'Presupuesto:',
             'gasto_presupuesto_comercial' => 'Gasto presupuesto:',
             'id_tipo_cliente' => 'Tipo cliente:',
+            'predeterminado' => 'predeterminado',
         ];
     }
 
@@ -233,5 +234,10 @@ class Clientes extends \yii\db\ActiveRecord
             $ventamora = 'SI';
         }
         return $ventamora;
+    }
+    
+    public function getClienteCompleto() {
+        return "Cedula/Nit: {$this->nit_cedula} Nombres: {$this->nombre_completo}";
+       
     }
 }

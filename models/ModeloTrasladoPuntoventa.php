@@ -11,13 +11,16 @@ use yii\base\Model;
 class ModeloTrasladoPuntoventa extends Model
 {
     public $punto_venta;  
-    
-    
+    public $unidades;
+
+
+
+
     public function rules()
     {
         return [
            [['punto_venta'],'required',  'message' => 'Campo requerido'],
-           [['punto_venta'], 'integer'],
+           [['punto_venta','unidades'], 'integer'],
            
         ];
     }
@@ -26,6 +29,7 @@ class ModeloTrasladoPuntoventa extends Model
     {
         return [
             'punto_venta' => 'Punto de venta:', 
+            'unidades' => 'Existencias:',
             
         ];
     }

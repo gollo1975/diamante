@@ -15,7 +15,8 @@ use app\models\TipoVenta;
 //vectores
 $departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
-$cliente= ArrayHelper::map(Clientes::find()->where(['=','id_tipo_cliente', 5])->orderBy('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
+$cliente = Clientes::find()->where(['=','id_tipo_cliente', 5])->orderBy('nombre_completo ASC')->all();
+$cliente= ArrayHelper::map($cliente, 'id_cliente', 'clienteCompleto');
 if($accesoToken == 1){
         $tipo_venta= ArrayHelper::map(TipoVenta::find()->where(['=','id_tipo_venta', 2])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');
 }else{
@@ -53,7 +54,7 @@ $form = ActiveForm::begin([
             ]);?> 
             <?= $form->field($model, 'id_tipo_venta')->widget(Select2::classname(), [
                    'data' => $tipo_venta,
-                   'options' => ['prompt' => 'Seleccione...', 'required' => true],
+                   'options' => ['prompt' => 'Seleccione...','required' => true],
                    'pluginOptions' => [
                        'allowClear' => true
                    ],
@@ -62,7 +63,7 @@ $form = ActiveForm::begin([
         <div class="row">
             <?=  $form->field($model, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                            'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                           'options' => ['placeholder' => 'Seleccione una fecha ...', 'required' => true],
                            'pluginOptions' => [
                                'format' => 'yyyy-m-d',
                                'todayHighlight' => true]])
@@ -74,9 +75,8 @@ $form = ActiveForm::begin([
        
     </div>    
     <div class="panel-footer text-right">
-       
         <a href="<?= Url::toRoute("factura-venta-punto/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
-        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>        
+         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>        
     </div>
 </div>
 <?php $form->end() ?>

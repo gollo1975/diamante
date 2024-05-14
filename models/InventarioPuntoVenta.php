@@ -88,7 +88,7 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
             'nombre_producto' => 'Referencia:',
             'descripcion_producto' => 'Descripcion:',
             'costo_unitario' => 'Costo unitario:',
-            'stock_unidades' => 'Stock entrada:',
+            'stock_unidades' => 'Unidades entradas:',
             'stock_inventario' => 'Stock inventario:',
             'id_proveedor' => 'Proveedor:',
             'id_punto' => 'Punto de venta:',

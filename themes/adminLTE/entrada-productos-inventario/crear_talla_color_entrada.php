@@ -30,7 +30,12 @@ $this->params['breadcrumbs'][] = $id;
 ?>
 <div class="entrada-productos-inventario-color">
     <p>
-       <?php echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view', 'id' => $id, 'token' => $token], ['class' => 'btn btn-primary btn-sm']);
+       <?php
+       if($token == 0){ 
+             echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view', 'id' => $id, 'token' => $token], ['class' => 'btn btn-primary btn-sm']);
+       }else{
+          echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['codigo_barra_ingreso', 'id' => $id, 'bodega' => 1], ['class' => 'btn btn-primary btn-sm']); 
+       }      
         if(count($item_cerrado) > 0){
             echo Html::a('<span class="glyphicon glyphicon-send"></span> Cerrar entrada', ['cerrar_entrada_referencia', 'id' => $id, 'token'=> $token, 'id_detalle' => $id_detalle, 'id_inventario' => $id_inventario],['class' => 'btn btn-info btn-sm',
                            'data' => ['confirm' => 'Esta seguro CERRAR el proceso de entradas a esta REFERENCIA.?', 'method' => 'post']]);

@@ -110,6 +110,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
     <div>
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#talla_color" aria-controls="talla_color" role="tab" data-toggle="tab">Tallas y colores <span class="badge"><?= count($talla_color) ?></span></a></li>
+            <li role="presentation"><a href="#listado_entradas" aria-controls="listado_entradas" role="tab" data-toggle="tab">Entradas de inventario <span class="badge"><?= count($entrada_detalle) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="talla_color">
@@ -164,6 +165,43 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                 </div>
             </div>
             <!-- TERMINA TABAS-->
+             <div role="tabpanel" class="tab-pane" id="listado_entradas">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style='font-size:90%;'>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Nro entrada</th>                      
+                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha hora entrada</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Orden de compra</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th> 
+                                         <th scope="col" style='background-color:#B9D5CE;'>User name</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($entrada_detalle as $val):?>
+                                        <tr style='font-size:90%;'>
+                                            <td><?= $val->entrada->id_entrada?></td>
+                                            <td><?= $val->entrada->fecha_registro?></td>
+                                            <?php if($val->entrada->id_orden_compra == null){?>
+                                                 <td><?= 'NO HAY ORDEN DE COMPRA'?></td>
+                                            <?php  }else{?>
+                                                 <td><?= $val->entrada->ordenCompra->id_orden_compra?></td>
+                                            <?php }?>     
+                                            <td style = "text-align: right"><?= ''.number_format($val->cantidad,0)?></td>
+                                            <td><?= $val->entrada->user_name_crear?></td>
+                                        </tr>
+                                    <?php endforeach;?>
+                                  
+                                </tbody>      
+                            </table>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+            <!--TERMINA TABS-->
         </div>
     </div>    
   <?php $form->end() ?> 

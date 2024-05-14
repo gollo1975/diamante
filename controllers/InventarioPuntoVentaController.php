@@ -269,6 +269,7 @@ class InventarioPuntoVentaController extends Controller
         
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $talla_color_cerrado= \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->andWhere(['=','cerrado', 1])->all();
+        $confi = \app\models\MatriculaEmpresa::findOne(1);
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["entrada_cantidad"])){
                 $intIndice = 0;
@@ -314,6 +315,7 @@ class InventarioPuntoVentaController extends Controller
             'talla_color' => $talla_color,
             'talla_color_cerrado' => $talla_color_cerrado,
             'codigo' => $codigo, 
+            'confi' => $confi,
             
         ]);
     }
@@ -321,11 +323,13 @@ class InventarioPuntoVentaController extends Controller
     //VISTA DE BUSQUEDA DE INVENTIO
     public function actionView_search($token, $id, $tokenAcceso) {
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
+        $entrada_detalle = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_inventario', $id])->all();
         return $this->render('view_search', [
             'model' => $this->findModel($id),
             'token' => $token,
             'talla_color' => $talla_color,
             'tokenAcceso' => $tokenAcceso,
+            'entrada_detalle' => $entrada_detalle,
         ]);
         
     }
@@ -571,17 +575,16 @@ class InventarioPuntoVentaController extends Controller
     public function actionTrasladar_punto_venta($id) {
         $model = new \app\models\ModeloTrasladoPuntoventa();
         $inventario = InventarioPuntoVenta::findOne($id);
+        $confi = \app\models\MatriculaEmpresa::findOne(1);
         if ($model->load(Yii::$app->request->post())) {
             if($model->validate()){
                 if (isset($_POST["enviar_producto"])) {
-                  
                     $table = new InventarioPuntoVenta();
                     $table->codigo_producto = $inventario->codigo_producto;
                     $table->codigo_barra = $inventario->codigo_producto;
                     $table->nombre_producto = $inventario->nombre_producto;
                     $table->costo_unitario = $inventario->costo_unitario;
                     $table->id_proveedor = $inventario->id_proveedor;
-                    $table->id_punto = $model->punto_venta;
                     $table->id_marca = $inventario->id_marca;
                     $table->id_categoria = $inventario->id_categoria;
                     $table->iva_incluido = $inventario->iva_incluido;
@@ -592,7 +595,37 @@ class InventarioPuntoVentaController extends Controller
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->venta_publico = $inventario->venta_publico;
                     $table->codigo_enlace_bodega = $inventario->id_inventario;
-                    $table->save(false);
+                    if($confi->aplica_talla_color == 0){
+                        if($model->unidades > 0){
+                            if($inventario->stock_inventario >= $model->unidades){
+                                $table->stock_inventario = $model->unidades; 
+                                $table->stock_unidades = $model->unidades;
+                                $table->id_punto = $model->punto_venta;
+                                $table->save(false);
+                                //actualiza
+                                $inventario->stock_inventario -= $model->unidades;
+                                $inventario->save();
+                                
+                            }else{
+                                return $this->renderAjax('_form_traslado_puntoventa', [
+                                'model' => $model,
+                                'id' => $id,
+                                'confi' => $confi,
+
+                                ]);  
+                            }    
+                        }else{
+                              return $this->renderAjax('_form_traslado_puntoventa', [
+                                'model' => $model,
+                                'id' => $id,
+                                'confi' => $confi,
+
+                            ]);
+                        }
+                    }else{
+                        $table->id_punto = $model->punto_venta;
+                        $table->save(false);
+                    }
                     $this->redirect(["inventario-punto-venta/index"]);
                 }
             }else{
@@ -602,6 +635,7 @@ class InventarioPuntoVentaController extends Controller
         return $this->renderAjax('_form_traslado_puntoventa', [
             'model' => $model,
             'id' => $id,
+            'confi' => $confi,
             
         ]);
     }
@@ -614,6 +648,7 @@ class InventarioPuntoVentaController extends Controller
     public function actionCreate()
     {
         $model = new InventarioPuntoVenta();
+        $confi = \app\models\MatriculaEmpresa::findOne(1);
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
@@ -628,16 +663,20 @@ class InventarioPuntoVentaController extends Controller
                 $model->user_name = Yii::$app->user->identity->username;
                 $model->codigo_barra = $model->codigo_producto;
                 $model->id_punto = 1;
+                if($confi->aplica_talla_color == 0){
+                    $model->stock_unidades = $model->stock_unidades;
+                    $model->stock_inventario = $model->stock_unidades;
+                }
                 $model->save();
                 $id = $model->id_inventario;
-             
-                 return $this->redirect(['index']);
-                }    
+                return $this->redirect(['index']);
+           }    
         }
 
         return $this->render('create', [
             'model' => $model,
             'sw' =>0,
+            'confi' => $confi,
         ]);
     }
     
@@ -670,18 +709,25 @@ class InventarioPuntoVentaController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $confi = \app\models\MatriculaEmpresa::findOne(1);
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if($confi->aplica_talla_color == 0){
+                    $model->stock_unidades = $model->stock_unidades;
+                    $model->stock_inventario = $model->stock_unidades;
+                    $model->save();
+                }
             return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
             'sw' => 1,
+            'confi' =>$confi,
         ]);
     }
     
@@ -860,6 +906,8 @@ class InventarioPuntoVentaController extends Controller
                      if($saldo >= 0){
                          $talla_bodega->stock_punto = $saldo;
                          $talla_bodega->save();
+                         $punto->inventario_aprobado = 1;
+                         $punto->save();
                      }else{
                         Yii::$app->getSession()->setFlash('error', 'La Talla (' . $talla_bodega->talla->nombre_talla . ' ), No cumple con las exitencias actuales en bodega.'); 
                          $this->redirect(["view",'id' => $id, 'token' => $token, 'codigo' => $codigo]);

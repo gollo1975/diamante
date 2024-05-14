@@ -505,7 +505,48 @@ class EntradaProductosInventarioController extends Controller
             
     }
     
-    //PROCESO QUE INGRESA CON CODIGO DE BARRAS
+    //ENVIAR INVENTARIO AL MODULO SIN ORDEN DE COMPRA
+   public function actionEnviar_inventario_modulo_sinorden($id, $genera_talla, $bodega) {
+        $entrada_inventario = EntradaProductosInventario::findOne($id);
+        $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
+        if($genera_talla == 0){
+            foreach ($detalle_entrada as $detalle):
+                $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
+                $inventario_entrada->stock_unidades += $detalle->cantidad; 
+                $inventario_entrada->stock_inventario += $detalle->cantidad;
+                $inventario_entrada->save();
+            endforeach;
+            $entrada_inventario->enviar_materia_prima = 1;
+            $entrada_inventario->save();
+            $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
+        }else{
+            foreach ($detalle_entrada as $detalle):
+                $entrada = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $detalle->id_detalle])->one(); 
+                if($entrada){
+                    $sw = 0;
+                    $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
+                    $inventario_entrada->stock_unidades += $detalle->cantidad; 
+                    $inventario_entrada->stock_inventario += $detalle->cantidad;
+                    $inventario_entrada->save(); 
+                    
+                }else{
+                    $sw = 1;
+                }
+            endforeach;
+            if($sw == 1){
+                Yii::$app->getSession()->setFlash('error', 'Debe de subir las TALLAS Y COLORES a cada referencia.');
+                $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
+            }else{
+                $entrada_inventario->enviar_materia_prima = 1;
+                $entrada_inventario->save();
+                $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
+            }
+        }    
+        
+            
+    }
+    
+   //PROCESO QUE INGRESA CON CODIGO DE BARRAS
     public function actionCodigo_barra_ingreso($id, $bodega) {
         $form = new \app\models\ModeloEntradaProducto();
         $model = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();

@@ -36,10 +36,18 @@ $form = ActiveForm::begin([
                   TRASLADO A PUNTO DE VENTA
                 </div>
                 <div class="panel-body">
-                    <div class="row">
-                        <?= $form->field($model, 'punto_venta')->dropdownList($conPunto, ['prompt' => 'Seleccione...']) ?>
-                    </div>
-                   
+                    <?php if($confi->aplica_talla_color == 0){?>
+                        <div class="row">
+                            <?= $form->field($model, 'punto_venta')->dropdownList($conPunto, ['prompt' => 'Seleccione...']) ?>
+                        </div>
+                        <div class="row">
+                             <?= $form->field($model,'unidades')->textInput(['maxlength' => true, 'required' => true]) ?>
+                        </div> 
+                    <?php }else{?>
+                        <div class="row">
+                            <?= $form->field($model, 'punto_venta')->dropdownList($conPunto, ['prompt' => 'Seleccione...'],['required' => true]) ?>
+                        </div>
+                    <?php }?>
                 </div>  
                     <div class="panel-footer text-right">
                        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'enviar_producto']) ?>                    

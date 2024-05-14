@@ -33,12 +33,14 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
         }else{ 
             echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_inventario'], ['class' => 'btn btn-primary btn-sm']);
         }
-        echo Html::a('<span class="glyphicon glyphicon-eye-close"></span> Cerrar combinacion', ['cerrar_combinaciones', 'id' => $model->id_inventario, 'token'=> $token, 'codigo' =>$codigo],['class' => 'btn btn-info btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de cerrar la combinacion de tallas y colores. Tener presente que se actualiza el inventario de BODEGA.', 'method' => 'post']]);
-        if($codigo <> 0 && $model->inventario_aprobado = 0){
-             echo Html::a('<span class="glyphicon glyphicon-import"></span> Descargar inventario de bodega', ['descargar_inventario_bodega', 'id' => $model->id_inventario, 'token'=> $token, 'codigo' =>$codigo],['class' => 'btn btn-success btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de enviar el proceso a BODEGA para descargar en inventario que se traslado al punto de venta.', 'method' => 'post']]);
-        }?> 
+        if($confi->aplica_talla_color == 1){
+            echo Html::a('<span class="glyphicon glyphicon-eye-close"></span> Cerrar combinacion', ['cerrar_combinaciones', 'id' => $model->id_inventario, 'token'=> $token, 'codigo' =>$codigo],['class' => 'btn btn-info btn-sm',
+                               'data' => ['confirm' => 'Esta seguro de cerrar la combinacion de tallas y colores. Tener presente que se actualiza el inventario de BODEGA.', 'method' => 'post']]);
+            if($codigo <> 0 && $model->inventario_aprobado == 0){
+                 echo Html::a('<span class="glyphicon glyphicon-import"></span> Descargar inventario de bodega', ['descargar_inventario_bodega', 'id' => $model->id_inventario, 'token'=> $token, 'codigo' =>$codigo],['class' => 'btn btn-success btn-sm',
+                               'data' => ['confirm' => 'Esta seguro de enviar el proceso a BODEGA para descargar en inventario que se traslado al punto de venta.', 'method' => 'post']]);
+            }
+        }?>
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -166,12 +168,14 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                             </table>
                             <div class="panel-footer text-right">
                                 <?php
-                                 if(count($talla_color) <> count($talla_color_cerrado)){?>
-                                    <?= Html::a('<span class="glyphicon glyphicon-search"></span> Crear combinacion', ['inventario-punto-venta/generar_combinacion_talla_color', 'id' => $model->id_inventario, 'token' => $token, 'codigo' => $codigo],[ 'class' => 'btn btn-primary btn-sm']);?>
-                                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
-                                <?php }else{?>
-                                     <?= Html::a('<span class="glyphicon glyphicon-search"></span> Crear combinacion', ['inventario-punto-venta/generar_combinacion_talla_color', 'id' => $model->id_inventario, 'token' => $token, 'codigo' => $codigo],[ 'class' => 'btn btn-primary btn-sm']) ?>
-                                <?php }?>
+                                if($confi->aplica_talla_color == 1){
+                                    if(count($talla_color) <> count($talla_color_cerrado)){?>
+                                       <?= Html::a('<span class="glyphicon glyphicon-search"></span> Crear combinacion', ['inventario-punto-venta/generar_combinacion_talla_color', 'id' => $model->id_inventario, 'token' => $token, 'codigo' => $codigo],[ 'class' => 'btn btn-primary btn-sm']);?>
+                                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
+                                   <?php }else{?>
+                                        <?= Html::a('<span class="glyphicon glyphicon-search"></span> Crear combinacion', ['inventario-punto-venta/generar_combinacion_talla_color', 'id' => $model->id_inventario, 'token' => $token, 'codigo' => $codigo],[ 'class' => 'btn btn-primary btn-sm']) ?>
+                                   <?php }
+                                }?>
                             </div>
                         </div>
                        

@@ -107,10 +107,16 @@ $categoria = ArrayHelper::map(Categoria::find()->orderBy('categoria ASC')->all()
                ]); ?> 
             
         </div>
-        <div class="row">
-            
-            <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-        </div> 
+        <?php if($confi->aplica_talla_color == 0){?>
+            <div class="row">
+                <?= $form->field($model, 'stock_unidades')->textInput(['maxlength' => true, 'required' => true]) ?>
+                <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+            </div> 
+        <?php }else{?>
+            <div class="row">
+                <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+            </div> 
+        <?php }?>
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("inventario-punto-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>

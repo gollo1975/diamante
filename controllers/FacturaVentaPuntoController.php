@@ -266,7 +266,7 @@ class FacturaVentaPuntoController extends Controller
                                                           ->orderBy('nombre_producto ASC')->all();
         $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
         if ($form->load(Yii::$app->request->get())) {
-            var_dump($codigo_producto = Html::encode($form->codigo_producto));
+             $codigo_producto = Html::encode($form->codigo_producto);
              $producto = Html::encode($form->producto);
             if ($codigo_producto > 0) {
                 $conCodigo = \app\models\InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();

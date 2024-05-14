@@ -27,8 +27,8 @@ $entrada = \app\models\EntradaProductosInventario::findOne($id);
         } else {
             if ($entrada->autorizado == 1 && $entrada->enviar_materia_prima  == 0) {?> 
                 <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado_sinoc', 'id' => $id, 'bodega' => $bodega], ['class' => 'btn btn-default btn-sm'])?>
-                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar inventario', ['actualizar_inventario', 'id' => $id, 'bodega' => $bodega],['class' => 'btn btn-info btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de actualizar el moduo de  inventarios .', 'method' => 'post']]);?>
+                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar inventario', ['enviar_inventario_modulo_sinorden', 'id' => $id, 'bodega' => $bodega, 'genera_talla' => $empresa->aplica_talla_color],['class' => 'btn btn-info btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de actualizar el modulo de  inventarios .', 'method' => 'post']]);?>
             <?php }
     }?>        
 </p>  
@@ -104,7 +104,7 @@ $entrada = \app\models\EntradaProductosInventario::findOne($id);
                         <?php if($empresa->aplica_talla_color == 1){
                             if($entrada_producto->enviar_materia_prima == 0){?>
                                 <td style="width: 20px; height: 20px">
-                                     <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$val->id_entrada ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle])?>"
+                                     <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$id ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle, 'token' => 1])?>"
                                                     <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
                                 </td>
                             <?php }else{?>
