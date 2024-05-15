@@ -15,7 +15,8 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-$this->title = 'REMISIONES ()';
+$Punto = \app\models\PuntoVenta::findOne($accesoToken);
+$this->title = 'REMISIONES ('.$Punto->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -49,38 +50,65 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 	
     <div class="panel-body" id="filtro" style="display:none">
+        <?php if($accesoToken == 1){?>
+            <div class="row" >
+                <?= $formulario->field($form, "numero")->input("search") ?>
+                <?= $formulario->field($form, 'punto_venta')->widget(Select2::classname(), [
+                    'data' => $conPunto,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?> 
+                <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                    'value' => date('d-M-Y', strtotime('+2 days')),
+                    'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                    'pluginOptions' => [
+                        'format' => 'yyyy-m-d',
+                        'todayHighlight' => true]])
+                ?>
+                <?= $formulario->field($form, 'fecha_corte')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                    'value' => date('d-M-Y', strtotime('+2 days')),
+                    'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                    'pluginOptions' => [
+                        'format' => 'yyyy-m-d',
+                        'todayHighlight' => true]])
+                ?>
+                 <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
+                    'data' => $conCliente,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?> 
+
+            </div>
+        <?php }else{?>
         <div class="row" >
-            <?= $formulario->field($form, "numero")->input("search") ?>
-             <?= $formulario->field($form, 'punto_venta')->widget(Select2::classname(), [
-                'data' => $conPunto,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-            <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                'value' => date('d-M-Y', strtotime('+2 days')),
-                'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                'pluginOptions' => [
-                    'format' => 'yyyy-m-d',
-                    'todayHighlight' => true]])
-            ?>
-            <?= $formulario->field($form, 'fecha_corte')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                'value' => date('d-M-Y', strtotime('+2 days')),
-                'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                'pluginOptions' => [
-                    'format' => 'yyyy-m-d',
-                    'todayHighlight' => true]])
-            ?>
-            
-             <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
-                'data' => $conCliente,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-        </div>
+                <?= $formulario->field($form, "numero")->input("search") ?>
+            <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
+                    'data' => $conCliente,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?> 
+                <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                    'value' => date('d-M-Y', strtotime('+2 days')),
+                    'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                    'pluginOptions' => [
+                        'format' => 'yyyy-m-d',
+                        'todayHighlight' => true]])
+                ?>
+                <?= $formulario->field($form, 'fecha_corte')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                    'value' => date('d-M-Y', strtotime('+2 days')),
+                    'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                    'pluginOptions' => [
+                        'format' => 'yyyy-m-d',
+                        'todayHighlight' => true]])
+                ?>
+            </div>
+        <?php }?>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
             <a align="right" href="<?= Url::toRoute("remisiones/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
@@ -104,9 +132,11 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 90%;'>         
                 <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Numero remision</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Nit/Cedula</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total remision</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th score="col" style='background-color:#B9D5CE;'></th>  
                          
@@ -114,20 +144,22 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): 
-                $detalle = app\models\RemisionDetalles::find(['=','id_remision', $val->id_remision])->all();
+                $detalle = app\models\RemisionDetalles::find()->where(['=','id_remision', $val->id_remision])->one();
                 ?>
                 <tr style ='font-size: 90%;'>  
                     <td><?= $val->id_remision?></td>
                     <td><?= $val->numero_remision?></td>
+                    <td><?= $val->puntoVenta->nombre_punto?></td>
                     <td><?= $val->cliente->nit_cedula?></td>
                     <td><?= $val->cliente->nombre_completo?></td>
                     <td><?= $val->fecha_inicio?></td>
+                    <td style="text-align: right"><?= ''. number_format($val->total_remision,0)?></td>
                     <td style= 'width: 25px; height: 10px;'>
                          <a href="<?= Url::toRoute(["remisiones/view", "id" => $val->id_remision, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                     </td> 
-                    <?php if($detalle){?>
+                    <?php if(!$detalle){?>
                         <td style= 'width: 25px; height: 10px;'>
-                               <a href="<?= Url::toRoute(["remision/update", "id" => $val->id_remision]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                               <a href="<?= Url::toRoute(["remisiones/update", "id" => $val->id_remision, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                         </td>
                     <?php }else{?>
                         <td style= 'width: 25px; height: 10px;'></td>

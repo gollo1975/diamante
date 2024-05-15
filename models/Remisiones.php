@@ -44,11 +44,13 @@ class Remisiones extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_cliente', 'numero_remision', 'valor_bruto', 'descuento', 'subtotal', 'total_remision', 'autorizado', 'estado_remision', 'id_punto', 'exportar_inventario'], 'integer'],
+            [['id_cliente', 'numero_remision', 'valor_bruto', 'descuento', 'subtotal', 'total_remision', 'autorizado', 'estado_remision', 'id_punto',
+                'exportar_inventario','expedir_factura'], 'integer'],
             [['fecha_inicio', 'fecha_hora_registro', 'fecha_editada'], 'safe'],
             [['user_name', 'user_name_editado'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 200],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
+            [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
         ];
     }
 
@@ -75,6 +77,7 @@ class Remisiones extends \yii\db\ActiveRecord
             'estado_remision' => 'Estado:',
             'id_punto' => 'Punto de venta',
             'exportar_inventario' => 'Exportar inventario:',
+            'expedir_factura' => 'expedir_factura',
         ];
     }
 
@@ -92,5 +95,13 @@ class Remisiones extends \yii\db\ActiveRecord
     public function getCliente()
     {
         return $this->hasOne(Clientes::className(), ['id_cliente' => 'id_cliente']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPuntoVenta()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
 }

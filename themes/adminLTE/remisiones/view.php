@@ -21,6 +21,23 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+    <?php if ($model->autorizado == 0 && $model->numero_remision == 0) { 
+        echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_remision, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); 
+    }else{
+        if ($model->autorizado == 1 && $model->numero_remision == 0){
+            echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_remision, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
+            echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar remision', ['generar_remision', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de generar la remision de salida al cliente: ('.$model->cliente->nombre_completo.').', 'method' => 'post']]);
+        }else{
+            if($model->exportar_inventario == 0){
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']);                        
+                echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de procesar la descarga de referencias al modulo de inventario.', 'method' => 'post']]);
+            }else{
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']); 
+            }    
+        }
+    }?>
 </p>    
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
@@ -183,7 +200,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </td>  
                         <?php }else{?>
                             <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["remisiones/eliminar_linea_factura_punto", 'id' => $model->id_remision, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                <a href="<?= Url::toRoute(["remisiones/eliminar_linea_remision_punto", 'id' => $model->id_remision, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                 <span class='glyphicon glyphicon-trash'></span> </a>  
                             </td>  
                             <td style= 'width: 25px; height: 25px;'></td>

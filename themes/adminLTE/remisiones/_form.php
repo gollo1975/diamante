@@ -2,52 +2,59 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\helpers\ArrayHelper;
+use yii\widgets\LinkPager;
+use kartik\select2\Select2;
+use kartik\date\DatePicker;
+//models
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Remisiones */
-/* @var $form yii\widgets\ActiveForm */
+use app\models\Clientes;
+
+//vectores
+$cliente = Clientes::find()->where(['=','id_tipo_cliente', 5])->orderBy('nombre_completo ASC')->all();
+$cliente= ArrayHelper::map($cliente, 'id_cliente', 'clienteCompleto');
 ?>
 
-<div class="remisiones-form">
-
-    <?php $form = ActiveForm::begin(); ?>
-
-    <?= $form->field($model, 'id_cliente')->textInput() ?>
-
-    <?= $form->field($model, 'numero_remision')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_inicio')->textInput() ?>
-
-    <?= $form->field($model, 'fecha_hora_registro')->textInput() ?>
-
-    <?= $form->field($model, 'valor_bruto')->textInput() ?>
-
-    <?= $form->field($model, 'descuento')->textInput() ?>
-
-    <?= $form->field($model, 'subtotal')->textInput() ?>
-
-    <?= $form->field($model, 'total_remision')->textInput() ?>
-
-    <?= $form->field($model, 'autorizado')->textInput() ?>
-
-    <?= $form->field($model, 'user_name')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'observacion')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'fecha_editada')->textInput() ?>
-
-    <?= $form->field($model, 'user_name_editado')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'estado_remision')->textInput() ?>
-
-    <?= $form->field($model, 'id_punto')->textInput() ?>
-
-    <?= $form->field($model, 'exportar_inventario')->textInput() ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+<!--<h1>Nuevo proveedor</h1>-->
+<?php
+$form = ActiveForm::begin([
+            "method" => "post",
+            'id' => 'formulario',
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+                'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-3 control-label'],
+                'options' => []
+            ],
+        ]);
+?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        REMISIONES
     </div>
-
-    <?php ActiveForm::end(); ?>
-
+    <div class="panel-body">
+        <div class="row">
+            <?= $form->field($model, 'id_cliente')->widget(Select2::classname(), [
+                   'data' => $cliente,
+                   'options' => ['prompt' => 'Seleccione...','required' => true],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+            ]);?> 
+        </div>
+       <div class="row">
+                <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+          
+        </div>    
+       
+    </div>    
+    <div class="panel-footer text-right">
+        <a href="<?= Url::toRoute("remisiones/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>        
+    </div>
 </div>
+<?php $form->end() ?>
+ 

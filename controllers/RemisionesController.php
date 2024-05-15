@@ -71,11 +71,19 @@ class RemisionesController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $cliente = Html::encode($form->cliente);
                         $punto_venta = Html::encode($form->punto_venta);
-                        $table = Remisiones::find()
-                                    ->andFilterWhere(['=', 'numero_remision', $numero])
-                                    ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['=', 'id_cliente', $cliente])
-                                    ->andFilterWhere(['=', 'id_punto', $punto_venta]);
+                        if($accesoToken == 1){ 
+                            $table = Remisiones::find()
+                                        ->andFilterWhere(['=', 'numero_remision', $numero])
+                                        ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                        ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                        ->andFilterWhere(['=', 'id_punto', $punto_venta]);
+                        }else{
+                            $table = Remisiones::find()
+                                        ->andFilterWhere(['=', 'numero_remision', $numero])
+                                        ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                        ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                        ->andWhere(['=', 'id_punto', $accesoToken]);
+                        }    
                         $table = $table->orderBy('id_remision DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -96,7 +104,11 @@ class RemisionesController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = Remisiones::find() ->orderBy('id_remision DESC');
+                    if($accesoToken == 1){
+                        $table = Remisiones::find()->orderBy('id_remision DESC');
+                    }else{
+                        $table = Remisiones::find()->where(['=','id_punto', $accesoToken])->orderBy('id_remision DESC');
+                    }
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
@@ -270,7 +282,169 @@ class RemisionesController extends Controller
         $factura->descuento = $descuento;
         $factura->save(false);
     }
-
+    
+     //modificar cantidades a vender
+    public function actionAdicionar_cantidades($id, $id_detalle, $accesoToken) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $table = \app\models\RemisionDetalles::findOne($id_detalle);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["adicionar_cantidades"])) {
+                $iva = 0; $subtotal = 0; $total = 0; $valor_unitario = 0; $dscto = 0;
+                $producto = \app\models\InventarioPuntoVenta::findOne($table->id_inventario);
+                $valor_unitario = $producto->precio_mayorista;
+                $total = ($valor_unitario * $model->cantidades);
+                $subtotal = ($total);
+                $table->cantidad = $model->cantidades;
+                $table->valor_unitario = $valor_unitario;
+                $table->subtotal = $subtotal;
+                if($model->descuento > 0){
+                   $dscto = round(($subtotal * $model->descuento)/100);
+                   $table->total_linea = $total - $dscto;
+                   $table->porcentaje_descuento = $model->descuento;
+                   $table->valor_descuento = $dscto;
+                }else{
+                    $table->total_linea = $total;
+                    $table->porcentaje_descuento = 0;
+                    $table->valor_descuento = 0;
+                }        
+                $table->save();
+                $this->ActualizarSaldosTotales($id);
+               return $this->redirect(['view','id' =>$id, 'accesoToken' => $accesoToken]);
+            }    
+        }
+        return $this->renderAjax('_form_adicionar_cantidad', [
+            'model' => $model,
+        ]);
+    }
+    
+     //PROCESO QUE AUTORIZADO O DESAUTORIZA
+    public function actionAutorizado($id, $accesoToken) {
+        $detalle = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->all();
+        $factura = Remisiones::findOne($id);
+        $sw = 0;
+        foreach ($detalle as $detalle_factura):
+            if(!$talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
+                $sw = 1;
+            }
+        endforeach;
+        if($sw == 0){
+            if(count($detalle) > 0 && $factura->valor_bruto > 0){
+                if($factura->autorizado == 0){
+                    $factura->autorizado = 1;
+                }else{
+                    $factura->autorizado = 0;
+                }
+                $factura->save();
+                $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la remision porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
+                $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
+            }
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No se puede AUTORIZAR la remision de salida porque NO ha ingresado las TALLAS Y COLORS de la referencia ('.$detalle_factura->producto.').'); 
+            $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]); 
+        }    
+            
+    }
+    
+     //PERMITE CREAR LA TALLA Y COLOR A LA REFERENCIA
+    public function actionCrear_talla_color($id, $accesoToken, $id_detalle) {
+       
+        $form = new \app\models\ModeloTallasColores();
+        $id_talla = null;
+        $id_color = null;
+        $conColores = null;
+        $detalle = \app\models\RemisionDetalles::findOne($id_detalle);
+        $detalleTalla = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','id_remision', $id])->all();
+        $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['>','stock_punto', 0])->orderBy('id_talla ASC')->all();
+        if ($form->load(Yii::$app->request->get())) {
+            $id_talla = Html::encode($form->id_talla);
+            $id_color = Html::encode($form->id_color);
+            if($id_talla > 0){
+                $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_talla', $id_talla ])
+                                                     ->orderBy('id_color ASC')->all();
+            }else{
+                Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar la talla de la lista.');
+                return $this->redirect(['crear_talla_color','id' =>$id, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+            }
+        }
+        if (Yii::$app->request->post()) {
+            if (isset($_POST["enviarcolores"])) {
+                if(isset($_POST["nuevo_color_entrada"])){
+                    $indice = 0;
+                    foreach ($_POST["nuevo_color_entrada"] as $intCodigo) {
+                        $cantidad = 0;
+                        $cantidad = $_POST["cantidad_venta"][$indice]; 
+                        if($cantidad > 0){
+                            $colores = \app\models\DetalleColorTalla::findOne($intCodigo);
+                            $table = new \app\models\RemisionDetalleColoresTalla();
+                            $table->id_detalle =  $id_detalle;
+                            $table->id_remision = $id;
+                            $table->id_inventario = $detalle->id_inventario;
+                            $table->id_color = $colores->id_color;
+                            $table->id_talla = $id_talla;
+                            $table->cantidad_venta = $_POST["cantidad_venta"][$indice];
+                            $table->save(false);
+                        }    
+                        $indice++; 
+                    }
+                     return $this->redirect(['crear_talla_color','id' =>$id, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+                }else{
+                   Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar un registro para procesar la informacion.'); 
+                }
+            }
+        }    
+        return $this->render('remision_detalle_tallas_colores', [
+            'id' => $id,
+            'accesoToken' => $accesoToken,
+            'form' => $form, 
+            'conColores' => $conColores,
+            'conTallas' => ArrayHelper::map($conTallas, 'id_talla', 'nombreTalla'),
+            'id_detalle' => $id_detalle,
+            'detalleTalla' => $detalleTalla,
+        ]);
+    }
+    //PERMITE ELIMINAR LA TALLA Y COLOR CREADO AL PRODUCTO
+    public function actionEliminar_talla_color($id, $id_detalle, $accesoToken, $id_codigo)
+    {                                
+        $detalle = \app\models\RemisionDetalleColoresTalla::findOne($id_codigo);
+        $detalle->delete();
+        return $this->redirect(['crear_talla_color','id' =>$id, 'accesoToken' =>$accesoToken, 'id_detalle' => $id_detalle]);
+    } 
+    
+     //CREAR EL CONSECUTIVO DE LA REMISION EN MAYORISTA
+    public function actionGenerar_remision($id, $accesoToken) {
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(17);
+        $factura = Remisiones::findOne($id);
+        $factura->numero_remision = $consecutivo->numero_inicial + 1;
+        $factura->save(false);
+        $consecutivo->numero_inicial = $factura->numero_remision;
+        $consecutivo->save(false);
+        $this->redirect(["view", 'id' => $id, 'accesoToken' => $accesoToken]);  
+    }
+    
+    //EXPORTAR REFERENCIAS AL MODULO DE INVETARIO
+    public function actionExportar_inventario_punto($id, $accesoToken) {
+        $facturaPunto = Remisiones::findOne($id);
+        $talla_color_factura = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_remision', $id])->all();
+        foreach ($talla_color_factura as $factura):
+            $inventario = \app\models\InventarioPuntoVenta::findOne($factura->id_inventario);
+            $talla_color_bodega = \app\models\DetalleColorTalla::find()->where (['=','id_inventario', $factura->id_inventario])
+                                                                       ->andWhere(['=','id_talla', $factura->id_talla])
+                                                                       ->andWhere(['=','id_color', $factura->id_color])->all();
+            foreach ($talla_color_bodega as $bodega):
+                $bodega->stock_punto -= $factura->cantidad_venta; 
+                $bodega->save ();
+                $inventario->stock_inventario -= $factura->cantidad_venta;
+                $inventario->save ();
+            endforeach;        
+        endforeach; 
+        $facturaPunto->exportar_inventario = 1;
+        $facturaPunto->save ();
+        return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
+    }
+    
     /**
      * Creates a new Remisiones model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -285,6 +459,7 @@ class RemisionesController extends Controller
             $table->fecha_inicio = date('Y-m-d');
             $table->user_name = Yii::$app->user->identity->username;
             $table->id_punto = $accesoToken;
+            $table->observacion = 'Remision para posterior facturacion.';
             $table->save();
             $remision = Remisiones::find()->orderBy('id_remision DESC')->one();
             return $this->redirect(['view','id' => $remision->id_remision, 'accesoToken' => $accesoToken]);
@@ -304,31 +479,65 @@ class RemisionesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $accesoToken)
     {
         $model = $this->findModel($id);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_remision]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->id_cliente = $model->id_cliente;
+            $model->observacion = $model->observacion;
+            $model->save();
+            return $this->redirect(['view', 'id' => $model->id_remision, 'accesoToken' => $accesoToken]);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'accesoToken' => $accesoToken,
         ]);
     }
+    
+     //ELIMINAR LINEA DE FACTURA DE PUNTO DE VENTA
+    public function actionEliminar_linea_remision_punto($id, $id_detalle,$accesoToken)
+    {                                
+        $detalle = \app\models\RemisionDetalles::findOne($id_detalle);
+        $talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->one();
+        if($talla_color){
+            Yii::$app->getSession()->setFlash('error', 'Debe eliminar las tallas y colores de esta referencia y luego volver a ingresar las nuevas cantidades.');
+            $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
+        }else{
+            if($detalle->cantidad == 1){
+                $detalle->delete();     
+            }else{
+                $cantidad = 0; $vrl_unitario = 0; $total = 0; $subtotal = 0; $descuento = 0; $porcentaje_dscto = 0; $porcentaje_iva = 0; $iva = 0;
+               $producto = \app\models\InventarioPuntoVenta::findOne($detalle->id_inventario);
+               $cantidad = $detalle->cantidad - 1;
+               $vrl_unitario = $producto->precio_deptal;
+               $porcentaje_dscto = $detalle->porcentaje_descuento;
+               $total = round($cantidad * $vrl_unitario);
+               $subtotal = round($total);
+               $descuento = round($subtotal * $porcentaje_dscto /100);
+               //asignacion
+               $detalle->cantidad = $cantidad;
+               $detalle->subtotal = $subtotal;
+               $detalle->valor_descuento = $descuento;
+               $detalle->total_linea = round($total - $descuento);
+               $detalle->save();
+            }
+            $this->ActualizarSaldosTotales($id);
+            $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
+        }    
+    } 
 
-    /**
-     * Deletes an existing Remisiones model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+     //IMPRESIONES
+    public function actionImprimir_remision_venta($id) {
+        $model = Remisiones::findOne($id);
+        return $this->render('../formatos/reporte_remision_venta', [
+            'model' => $model,
+        ]);
     }
 
     /**
