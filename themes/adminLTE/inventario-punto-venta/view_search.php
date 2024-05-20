@@ -7,6 +7,7 @@ use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\db\ActiveQuery;
 use yii\bootstrap\ActiveForm;
+use yii\bootstrap\Carousel;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\base\Model;
@@ -111,6 +112,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#talla_color" aria-controls="talla_color" role="tab" data-toggle="tab">Tallas y colores <span class="badge"><?= count($talla_color) ?></span></a></li>
             <li role="presentation"><a href="#listado_entradas" aria-controls="listado_entradas" role="tab" data-toggle="tab">Entradas de inventario <span class="badge"><?= count($entrada_detalle) ?></span></a></li>
+            <li role="presentation"><a href="#imagenes" aria-controls="imagenes" role="tab" data-toggle="tab">Imagenes <span class="badge"><?= count($imagenes) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="talla_color">
@@ -202,6 +204,29 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                 </div>
             </div>
             <!--TERMINA TABS-->
+            <div role="tabpanel" class="tab-pane" id="imagenes">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                            <div class="jumbotron">  
+                                <div id="carouselExampleIndicators" class="carousel slide mb-4" data-ride="carousel">
+                                    
+                                    <div class="carousel-inner">
+                                        <?php foreach ($imagenes as $key => $dato): 
+                                            $cadena = 'Documentos/' . $dato->numero . '/' . $dato->codigo . '/' . $dato->nombre;
+                                            if($dato->extension == 'png' || $dato->extension == 'jpeg' || $dato->extension == 'jpg'){?>
+                                                <?= Html::img($cadena,['height' => '25%', 'width' => '25%' ]);
+                                            }
+                                        endforeach; ?>
+                                             
+                                     </div>
+                            </div>        
+                        </div>
+                            </div>        
+                    </div>   
+                </div>
+            </div>
         </div>
     </div>    
   <?php $form->end() ?> 

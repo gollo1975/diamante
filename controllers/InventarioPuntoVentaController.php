@@ -324,12 +324,15 @@ class InventarioPuntoVentaController extends Controller
     public function actionView_search($token, $id, $tokenAcceso) {
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $entrada_detalle = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_inventario', $id])->all();
+        $item = \app\models\Documentodir::findOne(18);
+        $imagenes = \app\models\DirectorioArchivos::find()->where(['=', 'codigo', $id])->andWhere(['=', 'numero', $item->codigodocumento])->all();
         return $this->render('view_search', [
             'model' => $this->findModel($id),
             'token' => $token,
             'talla_color' => $talla_color,
             'tokenAcceso' => $tokenAcceso,
             'entrada_detalle' => $entrada_detalle,
+            'imagenes' => $imagenes,
         ]);
         
     }

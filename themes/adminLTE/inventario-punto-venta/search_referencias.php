@@ -16,6 +16,7 @@ use kartik\date\DatePicker;
 use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
+use yii\bootstrap;
 
 $this->title = 'BUSQUEDA DE REFERENCIAS';
 $this->params['breadcrumbs'][] = $this->title;
@@ -71,17 +72,16 @@ $this->params['breadcrumbs'][] = $this->title;
                          <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre de marca</th>  
                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Precio venta</th>  
                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Existencias</th>      
-                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Imagen</th>
+                        
                         <th scope="col" style='background-color:#B9D5CE;'></th>
 
                     </tr>
                 </thead>
                 <tbody>
                     <?php if($model){
-                        $cadena = '';
-                        $item = \app\models\Documentodir::findOne(18);
+                      
                         foreach ($model as $val):
-                            $valor = app\models\DirectorioArchivos::find()->where(['=', 'codigo', $val->id_inventario])->andWhere(['=', 'numero', $item->codigodocumento])->one();
+                            
                             ?>
                             <tr style ='font-size: 90%;'>                
                                 <td><?= $val->codigo_producto ?></td>
@@ -90,19 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td><?= $val->marca->marca ?></td>
                                 <td style="text-align: right"><?= '$'.number_format($val->precio_deptal,0) ?></td>
                                 <td style="text-align: right"><?= ''.number_format($val->stock_inventario,0) ?></td>
-                                <?php
-                                if ($valor) {
-                                    $cadena = 'Documentos/' . $valor->numero . '/' . $valor->codigo . '/' . $valor->nombre;
-                                    if ($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg') {
-                                        ?>
-                                        <td  style="width: 10%; height: 20%; text-align: center; background-color: white" title="<?php echo $val->nombre_producto ?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '100%;', 'height' => '60%;']) ?></td>
-                                    <?php } else { ?>
-                                        <td><?= 'NOT FOUND' ?></td>
-                                    <?php }
-                                } else {
-                                    ?>
-                                    <td></td>
-                                 <?php } ?>
+                                
                                 <td style= 'width: 25px; height: 10px;'>
                                      <a href="<?= Url::toRoute(["inventario-punto-venta/view_search", "id" => $val->id_inventario, 'tokenAcceso' => $tokenAcceso, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                                 </td>     
@@ -112,7 +100,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     }?>
                 </tbody>
             </table>
-    </div>
+      </div>
 </div> 
+
  <?php $formulario->end() ?>       
 
