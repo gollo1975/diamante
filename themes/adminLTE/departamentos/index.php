@@ -11,6 +11,7 @@ use app\models\Departamentos;
 $this->title = 'DEPARTAMENTOS';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+
 <div class="departamentos-index">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->

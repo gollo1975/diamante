@@ -204,29 +204,54 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                 </div>
             </div>
             <!--TERMINA TABS-->
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  
             <div role="tabpanel" class="tab-pane" id="imagenes">
                 <div class="table-responsive">
                     <div class="panel panel-success">
                         <div class="panel-body">
-                            <div class="table-responsive">
-                            <div class="jumbotron">  
-                                <div id="carouselExampleIndicators" class="carousel slide mb-4" data-ride="carousel">
-                                    
-                                    <div class="carousel-inner">
-                                        <?php foreach ($imagenes as $key => $dato): 
-                                            $cadena = 'Documentos/' . $dato->numero . '/' . $dato->codigo . '/' . $dato->nombre;
-                                            if($dato->extension == 'png' || $dato->extension == 'jpeg' || $dato->extension == 'jpg'){?>
-                                                <?= Html::img($cadena,['height' => '25%', 'width' => '25%' ]);
-                                            }
-                                        endforeach; ?>
-                                             
-                                     </div>
-                            </div>        
-                        </div>
-                            </div>        
+                            <div class="jumbotron">
+                                <div class="container">
+                                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                        <div id="carousel-example-captions" class="carousel slide" data-ride="carousel"> 
+                                            <ol class="carousel-indicators">
+                                                <?php for ($i=0; $i<count($imagenes); $i++):
+                                                    $active = "active";?>
+					            <li data-target="#carousel-example-captions" data-slide-to="<?php echo $i;?>" class="<?php echo $active;?>"></li>
+					            <?php
+						    $active = "";
+                                                endfor;?>
+                                            </ol>
+                                            <div class="carousel-inner" role="listbox"> 
+                                                <?php
+                                                $active="active";
+                                                foreach ($imagenes as $dato){
+                                                   $cadena = 'Documentos/' . $dato->numero . '/' . $dato->codigo . '/' . $dato->nombre;
+                                                   if($dato->extension == 'png' || $dato->extension == 'jpeg' || $dato->extension == 'jpg'){  ?>
+                                                    <div class="item <?php echo $active;?>"> 
+                                                        <img style="text-align:center;" src="<?= $cadena;?>" data-holder-rendered = "true"> 
+                                                            <div class="carousel-caption"> 
+                                                               <p><?= $dato->descripcion;?></p>
+                                                            </div> 
+                                                    </div>
+                                                    <?php
+                                                    $active="";
+                                                   } 
+                                                } ?>
+                                            </div> 
+                                            <a class="left carousel-control" href="#carousel-example-captions" role="button" data-slide="prev"> <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span> <span class="sr-only">Previous</span> </a> 
+                                            <a class="right carousel-control" href="#carousel-example-captions" role="button" data-slide="next"> <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> <span class="sr-only">Next</span> </a> 
+                                        </div>
+                                    </div>
+                                </div>    
+                            </div>
+                        </div>        
                     </div>   
                 </div>
             </div>
+            <!--TERMINA TABS-->
+           
+
         </div>
     </div>    
   <?php $form->end() ?> 

@@ -254,8 +254,15 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                 <?php 
                                 if($model->autorizado == 0){
                                     if($model->tipo_orden == 0){?>
-                                        <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
-                                        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto'])?>
+                                        <?php
+                                        if(count($detalle_orden) > 0){?>
+                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
+                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
+                                            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto'])?>
+                                        <?php }else{?>
+                                             <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
+                                            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto'])?>
+                                        <?php }?>
                                     <?php }else{ ?>   
                                         <!-- Inicio Nuevo Detalle proceso -->
                                         <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear producto',
