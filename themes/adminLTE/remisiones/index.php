@@ -20,6 +20,7 @@ $this->title = 'REMISIONES ('.$Punto->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <script language="JavaScript">
     function mostrarfiltro() {
         divC = document.getElementById("filtro");
@@ -130,7 +131,6 @@ $form = ActiveForm::begin([
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 90%;'>         
-                <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Numero remision</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Nit/Cedula</th>
@@ -147,7 +147,6 @@ $form = ActiveForm::begin([
                 $detalle = app\models\RemisionDetalles::find()->where(['=','id_remision', $val->id_remision])->one();
                 ?>
                 <tr style ='font-size: 90%;'>  
-                    <td><?= $val->id_remision?></td>
                     <td><?= $val->numero_remision?></td>
                     <td><?= $val->puntoVenta->nombre_punto?></td>
                     <td><?= $val->cliente->nit_cedula?></td>

@@ -220,7 +220,7 @@ class EntradaProductosInventarioController extends Controller
             if($sw == 0){
                 return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
             }else{
-                return $this->redirect(['codigo_barra_ingreso', 'id' => $model->id_entrada]);
+                return $this->redirect(['codigo_barra_ingreso', 'id' => $model->id_entrada, 'bodega' => 1]);
             }
             
         }

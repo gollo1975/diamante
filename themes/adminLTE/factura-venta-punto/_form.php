@@ -23,7 +23,7 @@ if($accesoToken == 1){
     $tipo_venta= ArrayHelper::map(TipoVenta::find()->where(['=','id_tipo_venta', 3])->orderBy('concepto ASC')->all(), 'id_tipo_venta', 'concepto');  
 }    
 ?>
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <!--<h1>Nuevo proveedor</h1>-->
 <?php
 $form = ActiveForm::begin([

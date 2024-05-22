@@ -14,6 +14,7 @@ $this->title = 'TALLAS Y COLORES';
 $this->params['breadcrumbs'][] = ['label' => 'Remisiones', 'url' => ['view','id'=> $id, 'accesoToken' => $accesoToken]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view','id' => $id, 'accesoToken' =>$accesoToken], ['class' => 'btn btn-primary btn-sm']) ?>
 </p>   

@@ -24,6 +24,7 @@ $this->title = 'Vista (' .$model->nombre_producto. ')';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario bodega', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_inventario;
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <div class="inventario-punto-venta-view">
 
     <!--<?= Html::encode($this->title) ?>-->

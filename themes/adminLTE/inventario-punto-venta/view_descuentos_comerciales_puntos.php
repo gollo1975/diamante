@@ -24,6 +24,7 @@ $this->title = 'DESCUENTOS COMERCIALES ';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario producto', 'url' => ['crear_precio_venta']];
 $this->params['breadcrumbs'][] = $id;
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <div class="orden-produccion-view_precio_venta">
 
     <!--<?= Html::encode($this->title) ?>-->

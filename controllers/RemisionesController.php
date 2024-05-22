@@ -500,8 +500,40 @@ class RemisionesController extends Controller
         ]);
     }
     
-     //ELIMINAR LINEA DE FACTURA DE PUNTO DE VENTA
+     //ELIMINAR LINEA DEL DETALLE DE LA REMISION PUNTO DE VENTA
     public function actionEliminar_linea_remision_punto($id, $id_detalle,$accesoToken)
+    {                                
+        $detalle = \app\models\RemisionDetalles::findOne($id_detalle);
+        $talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->one();
+        if($talla_color){
+            Yii::$app->getSession()->setFlash('error', 'Debe eliminar las tallas y colores de esta referencia y luego volver a ingresar las nuevas cantidades.');
+            $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
+        }else{
+            if($detalle->cantidad == 1){
+                $detalle->delete();     
+            }else{
+                $cantidad = 0; $vrl_unitario = 0; $total = 0; $subtotal = 0; $descuento = 0; $porcentaje_dscto = 0; $porcentaje_iva = 0; $iva = 0;
+               $producto = \app\models\InventarioPuntoVenta::findOne($detalle->id_inventario);
+               $cantidad = $detalle->cantidad - 1;
+               $vrl_unitario = $producto->precio_deptal;
+               $porcentaje_dscto = $detalle->porcentaje_descuento;
+               $total = round($cantidad * $vrl_unitario);
+               $subtotal = round($total);
+               $descuento = round($subtotal * $porcentaje_dscto /100);
+               //asignacion
+               $detalle->cantidad = $cantidad;
+               $detalle->subtotal = $subtotal;
+               $detalle->valor_descuento = $descuento;
+               $detalle->total_linea = round($total - $descuento);
+               $detalle->save();
+            }
+            $this->ActualizarSaldosTotales($id);
+            $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
+        }    
+    } 
+    
+      //ELIMINAR LINEA DEL DETALLE DE LA REMISION BODEGA
+    public function actionEliminar_linea_remision_bodega($id, $id_detalle,$accesoToken)
     {                                
         $detalle = \app\models\RemisionDetalles::findOne($id_detalle);
         $talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->one();

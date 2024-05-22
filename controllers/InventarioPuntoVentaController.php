@@ -325,7 +325,14 @@ class InventarioPuntoVentaController extends Controller
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $entrada_detalle = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_inventario', $id])->all();
         $item = \app\models\Documentodir::findOne(18);
-        $imagenes = \app\models\DirectorioArchivos::find()->where(['=', 'codigo', $id])->andWhere(['=', 'numero', $item->codigodocumento])->all();
+        $inventario = InventarioPuntoVenta::findOne($id);
+        $id_inventario = $inventario->codigo_enlace_bodega; //asigna el codigo de enlace
+        if($id_inventario){
+             $imagenes = \app\models\DirectorioArchivos::find()->where(['=', 'codigo', $id_inventario])->andWhere(['=', 'numero', $item->codigodocumento])->all();
+        }else{
+           $imagenes = \app\models\DirectorioArchivos::find()->where(['=', 'codigo', $id])->andWhere(['=', 'numero', $item->codigodocumento])->all();
+        }        
+       
         return $this->render('view_search', [
             'model' => $this->findModel($id),
             'token' => $token,
@@ -522,12 +529,14 @@ class InventarioPuntoVentaController extends Controller
                             $table = InventarioPuntoVenta::find()
                                 ->Where(['like','nombre_producto', $nombre])
                                 ->andwhere(['=','venta_publico', 1])
-                                ->andwhere(['>','stock_inventario', 1]);
+                                ->andwhere(['>','stock_inventario', 1])
+                                ->andwhere(['=','id_punto', 1]);
                         }else{
                             $table = InventarioPuntoVenta::find()
                                 ->where(['=','codigo_producto', $q])
                                 ->andwhere(['=','venta_publico', 1])
-                                ->andwhere(['>','stock_inventario', 1]);
+                                ->andwhere(['>','stock_inventario', 1])
+                                ->andwhere(['=','id_punto', 1]);
                         } 
                         $table = $table->orderBy('id_inventario DESC');  
                         $tableexcel = $table->all();
@@ -546,7 +555,7 @@ class InventarioPuntoVentaController extends Controller
                     }
                 } else {
                     $table = InventarioPuntoVenta::find()->where(['>','stock_inventario', 0])->andWhere(['=','venta_publico', 1]) 
-                            ->orderBy('id_inventario DESC');
+                                                         ->andWhere(['=','id_punto', 1])->orderBy('id_inventario DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([

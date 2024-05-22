@@ -20,6 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 ?>
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <script language="JavaScript">
     function mostrarfiltro() {
         divC = document.getElementById("filtrorack");
@@ -35,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
                     'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
-                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                    'labelOptions' => ['class' => 'col-sm-4 control-label'],
                     'options' => []
                 ],
 

@@ -19,6 +19,7 @@ use kartik\depdrop\DepDrop;
 $this->title = 'Factura de venta ('.$model->tipoVenta->concepto.')';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { 

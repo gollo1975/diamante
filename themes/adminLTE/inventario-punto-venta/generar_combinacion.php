@@ -13,6 +13,7 @@ use app\models\DetalleColorTalla;
 $this->title = 'Nueva combinacion';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario punto de venta', 'url' => ['view','id'=> $id, 'token' => $token]];
 $this->params['breadcrumbs'][] = $this->title;
+
 if($codigo == 0){
     $conTalla = ArrayHelper::map(Tallas::find()->orderBy(' id_talla ASC')->all(), 'id_talla', 'nombre_talla');
 }else{
@@ -36,7 +37,7 @@ if($codigo == 0){
                 ],
 
 ]);?>
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <div class="panel panel-success panel-filters">
     <div class="panel-heading">
         Busqueda por codigo de barras
@@ -109,7 +110,7 @@ if($codigo == 0){
         </div>
     </div>
     <div class="panel-footer text-right">
-       <a href="<?= Url::toRoute(['inventario-punto-venta/view', 'id' => $id, 'token' =>$token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+       <a href="<?= Url::toRoute(['inventario-punto-venta/view', 'id' => $id, 'token' =>$token,'codigo' => $codigo]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Generar", ["class" => "btn btn-success btn-sm", 'name' => 'enviarcolores']) ?>        
     </div>
     <?php $form->end() ?>

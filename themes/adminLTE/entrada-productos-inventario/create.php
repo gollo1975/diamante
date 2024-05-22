@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\EntradaProductosInventario */
 
-$this->title = 'Nueva';
+$this->title = 'NUEVA ENTRADA';
 $this->params['breadcrumbs'][] = ['label' => 'Entrada Productos Inventarios', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

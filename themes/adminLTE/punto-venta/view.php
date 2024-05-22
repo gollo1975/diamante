@@ -6,10 +6,11 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 
-$this->title = 'Detalle de puntos';
+$this->title = 'PUNTOS DE VENTAS (DETALLE)';
 $this->params['breadcrumbs'][] = ['label' => 'Puntos de venta', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_punto;
 ?>
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <div class="punto-venta-view">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
@@ -20,7 +21,7 @@ $this->params['breadcrumbs'][] = $model->id_punto;
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
-            MUNICIPIOS
+            PUNTO DE VENTA
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">

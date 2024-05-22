@@ -19,6 +19,7 @@ use kartik\depdrop\DepDrop;
 $this->title = 'REMISIONES ('.$punto_venta->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_remision == 0) { 
@@ -30,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                            'data' => ['confirm' => 'Esta seguro de generar la remision de salida al cliente: ('.$model->cliente->nombre_completo.').', 'method' => 'post']]);
         }else{
             if($model->exportar_inventario == 0){
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']);                        
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']);                        
                 echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
                            'data' => ['confirm' => 'Esta seguro de procesar la descarga de referencias al modulo de inventario.', 'method' => 'post']]);
             }else{
@@ -195,7 +196,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </div>
                             </td>
                             <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["remisiones/eliminar_linea_factura_mayorista", 'id' => $model->id_remision, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                <a href="<?= Url::toRoute(["remisiones/eliminar_linea_remision_bodega", 'id' => $model->id_remision, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                             <span class='glyphicon glyphicon-trash'></span> </a>  
                             </td>  
                         <?php }else{?>

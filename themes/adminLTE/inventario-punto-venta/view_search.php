@@ -229,7 +229,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                                    $cadena = 'Documentos/' . $dato->numero . '/' . $dato->codigo . '/' . $dato->nombre;
                                                    if($dato->extension == 'png' || $dato->extension == 'jpeg' || $dato->extension == 'jpg'){  ?>
                                                     <div class="item <?php echo $active;?>"> 
-                                                        <img style="text-align:center;" src="<?= $cadena;?>" data-holder-rendered = "true"> 
+                                                        <img style="width: 100%; height: 100%" src="<?= $cadena;?>" data-holder-rendered = "true"> 
                                                             <div class="carousel-caption"> 
                                                                <p><?= $dato->descripcion;?></p>
                                                             </div> 

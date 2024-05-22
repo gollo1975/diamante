@@ -21,6 +21,7 @@ use yii\bootstrap;
 $this->title = 'BUSQUEDA DE REFERENCIAS';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <?php $formulario = ActiveForm::begin([
     "method" => "get",
     "action" => Url::toRoute(["inventario-punto-venta/search_referencias"]),
@@ -33,9 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);?>
+
 <div class="panel panel-success panel-filters">
    <div class="panel-heading">
-       Busqueda general del producto
+       Busqueda por codigo de barra...
    </div>
 
    <div class="panel-body" id="entrada_producto">

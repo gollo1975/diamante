@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $validador_imagen = 'inventario-punto-venta';
 
 ?>
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <div class="panel panel-success">
     <div class="panel-body">
         <script language="JavaScript">
@@ -72,6 +73,7 @@ $validador_imagen = 'inventario-punto-venta';
                 'options' => []
             ],
         ]); ?>
+        
         <div>
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#inventario" aria-controls="inventario" role="tab" data-toggle="tab">Productos <span class="badge"><?= $pagination->totalCount ?></span></a></li>
@@ -81,6 +83,7 @@ $validador_imagen = 'inventario-punto-venta';
                     <div class="table-responsive">
                         <div class="panel panel-success">
                            <div class="panel-body">
+                               
                                  <table class="table table-bordered table-striped table-hover">
                                      <link rel="stylesheet" href="dist/css/site.css">
                                     <thead>
