@@ -18,7 +18,7 @@ if($sw == 0){
     $this->title = 'GRUPOS / PRODUCTOS (CONFIGURACION DE FORMULA)';
     $this->params['breadcrumbs'][] = $this->title;
 }else{
-   $this->title = 'GRUPOS / PRODUCTOS (CONFIGURACION DE ANALISIS)';
+   $this->title = 'GRUPOS / PRODUCTOS (CONFIGURACION DE AUDITORIA)';
     $this->params['breadcrumbs'][] = $this->title; 
 }    
 

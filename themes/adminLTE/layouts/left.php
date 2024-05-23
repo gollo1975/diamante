@@ -166,7 +166,7 @@
                                                     ['label' => 'Especificaciones', 'icon' => 'plus-square-o', 'url' => ['especificacion-producto/index']],
                                                     ['label' => 'Concepto analisis', 'icon' => 'plus-square-o', 'url' => ['concepto-analisis/index']],
                                                     ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 
-                                                    ['label' => 'Formula analisis', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
+                                                    ['label' => 'Formula auditoria', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
                                                 ]], 
                                                
                                                ['label' => 'Tipo devolucion', 'icon' => 'plus-square-o', 'url' => ['tipo-devolucion-productos/index']], 
