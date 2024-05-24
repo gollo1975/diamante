@@ -102,7 +102,8 @@ $validador_imagen = 'inventario-punto-venta';
                                         $cadena = '';
                                         $item = \app\models\Documentodir::findOne(18);
                                         foreach ($model as $val): 
-                                            $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                                            $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])
+                                                                                          ->andWhere(['=','predeterminado', 1])->andWhere(['=','numero', $item->codigodocumento])->one();
                                             ?>
                                             <tr style ='font-size: 90%;'>                
                                                 <td><?= $val->codigo_producto?></td>
@@ -118,7 +119,7 @@ $validador_imagen = 'inventario-punto-venta';
                                                         <td><?= 'NOT FOUND'?></td>
                                                     <?php } 
                                                 }else{?>
-                                                      <td></td>
+                                                      <td><?= 'No found'?></td>
                                                 <?php }?>      
                                                       <td style="width: 5%; height: 10%">
                                                     <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index_imagen_punto','numero' => 18, 'codigo' => $val->id_inventario, 'validador_imagen' => $validador_imagen, 'token' => $token,], ['class' => 'btn btn-default btn-sm']) ?>

@@ -46,7 +46,7 @@ class DirectorioArchivos extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['iddocumentodir', 'numero', 'iddirectorio'], 'integer'],
+            [['iddocumentodir', 'numero', 'iddirectorio','predeterminado'], 'integer'],
             [['fecha_creacion'], 'safe'],
             [['tamaño'], 'number'],
             [['descripcion', 'comentarios'], 'string'],
@@ -76,6 +76,7 @@ class DirectorioArchivos extends \yii\db\ActiveRecord
             'tamaño' => 'Tamaño',
             'descripcion' => 'Descripcion',
             'comentarios' => 'Comentarios',
+            'predeterminado' => 'Predeterminado',
         ];
     }
 
@@ -93,5 +94,14 @@ class DirectorioArchivos extends \yii\db\ActiveRecord
     public function getDirectorio()
     {
         return $this->hasOne(Directorio::className(), ['iddirectorio' => 'iddirectorio']);
+    }
+    
+    public function getImagenActiva() {
+       if($this->predeterminado == 0){
+           $imagenActiva = 'NO';
+       } else{
+           $imagenActiva = 'SI';
+       }
+       return $imagenActiva;
     }
 }

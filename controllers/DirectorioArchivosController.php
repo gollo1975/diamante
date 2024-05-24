@@ -339,7 +339,8 @@ class DirectorioArchivosController extends \yii\web\Controller
                 $table = DirectorioArchivos::findOne($idarchivodir);
                 
                 if ($table) {
-                    $table->descripcion = Html::encode($_POST["descripcion"]);                                                                                
+                    $table->descripcion = Html::encode($_POST["descripcion"]);    
+                    $table->predeterminado = Html::encode($_POST["predeterminado"]);
                     $table->update();                       
                     $this->redirect(["directorio-archivos/index_imagen_punto",'numero' => $numero,'codigo' => $codigo,'validador_imagen' => $validador_imagen, 'token' => $token]); 
                                         

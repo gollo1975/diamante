@@ -144,7 +144,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 $cadena = '';
                 $item = \app\models\Documentodir::findOne(18);
                 foreach ($detalle_remision as $detalle):
-                    $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $detalle->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                    $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $detalle->id_inventario])
+                                                                  ->andwhere(['=','predeterminado', 1])->andWhere(['=','numero', $item->codigodocumento])->one();
                     $tallaColor = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle->id_detalle])->one();
                     ?>
                 <tr style ='font-size:90%;'>
