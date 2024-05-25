@@ -64,7 +64,7 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
             [[ 'codigo_producto','nombre_producto','id_proveedor','id_marca', 'id_categoria'], 'required'],
             [['id_inventario', 'codigo_producto', 'costo_unitario', 'stock_unidades', 'stock_inventario', 'id_proveedor', 'id_punto', 'iva_incluido', 'inventario_inicial', 'aplica_inventario', 'subtotal',
                 'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 'codigo_barra', 'venta_publico', 'aplica_descuento_punto', 'aplica_descuento_distribuidor',
-                'id_marca','id_categoria','codigo_enlace_bodega','inventario_aprobado'], 'integer'],
+                'id_marca','id_categoria','codigo_enlace_bodega','inventario_aprobado','aplica_talla_color'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_creacion', 'fecha_proceso'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -112,6 +112,7 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
             'id_categoria' => 'Categoria:',
             'codigo_enlace_bodega' => 'codigo_enlace_bodega',
             'inventario_aprobado' => 'inventario_aprobado',
+            'aplica_talla_color' => 'Aplica talla y color:',
         ];
     }
 
@@ -195,5 +196,14 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
      public function getInventario()
     {
         return "{$this->codigo_producto} - {$this->nombre_producto}";
+    }
+    
+    public function getAplicaTallaColor() {
+        if($this->aplica_talla_color == 0){
+            $aplicatallacolor = 'NO';
+        }else{
+            $aplicatallacolor  = 'SI';
+        }
+        return $aplicatallacolor;
     }
 }

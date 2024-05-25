@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="row" >
                 <?php if($model->autorizado == 0){?>
                     <?= $formulario->field($form, 'codigo_producto',['inputOptions' =>['autofocus' => 'autofocus', 'class' => 'form-control']])?>
-                    <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                    <?= $formulario->field($form, 'nombre_producto')->widget(Select2::classname(), [
                        'data' => $inventario,
                        'options' => ['prompt' => 'Seleccione...'],
                        'pluginOptions' => [
@@ -142,81 +142,94 @@ $this->params['breadcrumbs'][] = $this->title;
                 </tr>
             </thead>
             <tbody>
-                <?php         
+                <?php     
+              
                 $cadena = '';
                 $item = \app\models\Documentodir::findOne(18);
                 foreach ($detalle_factura as $detalle):
-                    $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $detalle->id_inventario])
+                    $inventario = app\models\InventarioPuntoVenta::findOne($detalle->id_inventario);
+                    $id_inventario = $inventario->codigo_enlace_bodega; //asigna el codigo de enlace
+                    if($id_inventario){
+                         $valor = \app\models\DirectorioArchivos::find()->where(['=', 'codigo', $id_inventario])->andWhere(['=', 'numero', $item->codigodocumento])->one();
+                    }else{
+                       $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $detalle->id_inventario])
                                                                   ->andWhere(['=','predeterminado', 1])->andWhere(['=','numero', $item->codigodocumento])->one();
+                    }    
+                    
                     $tallaColor = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle->id_detalle])->one();
+                    $invent = app\models\InventarioPuntoVenta::findOne($detalle->id_inventario);
                     ?>
-                <tr style ='font-size:90%;'>
-                    <?php if($model->autorizado == 0 && $model->valor_bruto > 0){?>
-                        <td style="width: 20px; height: 20px">
-                             <a href="<?= Url::toRoute(["factura-venta-punto/crear_talla_color", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
-                                            <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
-                        </td>
-                    <?php }else{?>
-                        <td style="width: 20px; height: 20px"></td>
-                    <?php }
-                    if($tallaColor){?>   
-                        <td style="background-color: #d8f3dc"><?= $detalle->codigo_producto?></td>
-                    <?php }else{?>
-                        <td><?= $detalle->codigo_producto?></td>
-                    <?php } ?>    
-                    <td><?= $detalle->producto?></td>
-                    <?php if($valor){
-                        $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
-                        if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                           <td  style=" text-align: center; background-color: white" title="<?php echo $detalle->producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '80;', 'height' => '60;'])?></td>
-                        <?php }else {?>
-                            <td><?= 'NOT FOUND'?></td>
-                        <?php } 
-                    }else{?>
-                          <td></td>
-                    <?php }?>      
-                    <td style="text-align: right";><?= ''.number_format($detalle->cantidad,0)?></td>
-                    <td style="text-align: right";><?= ''.number_format($detalle->valor_unitario,0)?></td>
-                    <td style="text-align: right";><?= ''.number_format($detalle->subtotal,0)?></td>
-                    <td style="text-align: right"><?= $detalle->porcentaje_descuento?>%</td>
-                    <td style="text-align: right";><?= ''.number_format($detalle->valor_descuento,0)?></td>
-                    <td style="text-align: right";><?= ''.number_format($detalle->porcentaje_iva,0)?>%</td>
-                    <td style="text-align: right";><?= ''.number_format($detalle->impuesto,0)?></td>
-                    <td style="text-align: right";><?= ''.number_format($detalle->total_linea,0)?></td>
-                    <?php if($model->autorizado == 0){
-                        if($model->id_tipo_venta == 2){?>
-                            <td style="width: 25px; height: 25px;">
-                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
-                                      ['/factura-venta-punto/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle,'accesoToken' => $accesoToken],
-                                      [
-                                          'title' => 'Adicionar cantidades al codigo del producto',
-                                          'data-toggle'=>'modal',
-                                          'data-target'=>'#modaladicionarcantidades'.$detalle->id_detalle,
-                                      ])    
-                                ?>
-                                <div class="modal remote fade" id="modaladicionarcantidades<?= $detalle->id_detalle ?>">
-                                  <div class="modal-dialog modal-lg" style ="width: 500px;">
-                                      <div class="modal-content"></div>
-                                  </div>
-                                </div>
-                            </td>
-                            <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
-                                            <span class='glyphicon glyphicon-trash'></span> </a>  
-                            </td>  
+                    <tr style ='font-size:90%;'>
+                        <?php if($model->autorizado == 0 && $model->valor_bruto > 0){
+                            if($invent->aplica_talla_color == 1){ ?>
+                                <td style="width: 20px; height: 20px">
+                                     <a href="<?= Url::toRoute(["factura-venta-punto/crear_talla_color", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                                    <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
+                                </td>
+                            <?php }else{?>
+                                <td style="width: 20px; height: 20px"></td>
+                            <?php }
+                        } else { ?>
+                            <td style="width: 20px; height: 20px"></td>
+                        <?php }    
+                        if($tallaColor){?>   
+                            <td style="background-color: #d8f3dc"><?= $detalle->codigo_producto?></td>
                         <?php }else{?>
-                            <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_punto", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
-                                <span class='glyphicon glyphicon-trash'></span> </a>  
-                            </td>  
-                            <td style= 'width: 25px; height: 25px;'></td>
-                        <?php }
-                    }else{?>
-                           <td style= 'width: 25px; height: 25px;'>
-                            <td style= 'width: 25px; height: 25px;'>
-                    <?php } ?>   
-                      
-                </tr>
+                            <td><?= $detalle->codigo_producto?></td>
+                        <?php } ?>    
+                        <td><?= $detalle->producto?></td>
+                        <?php if($valor){
+                            $cadena = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
+                            if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
+                               <td  style=" text-align: center; background-color: white" title="<?php echo $detalle->producto?>"> <?= yii\bootstrap\Html::img($cadena, ['width' => '80;', 'height' => '60;'])?></td>
+                            <?php }else {?>
+                                <td><?= 'NOT FOUND'?></td>
+                            <?php } 
+                        }else{?>
+                              <td></td>
+                        <?php }?>      
+                        <td style="text-align: right";><?= ''.number_format($detalle->cantidad,0)?></td>
+                        <td style="text-align: right";><?= ''.number_format($detalle->valor_unitario,0)?></td>
+                        <td style="text-align: right";><?= ''.number_format($detalle->subtotal,0)?></td>
+                        <td style="text-align: right"><?= $detalle->porcentaje_descuento?>%</td>
+                        <td style="text-align: right";><?= ''.number_format($detalle->valor_descuento,0)?></td>
+                        <td style="text-align: right";><?= ''.number_format($detalle->porcentaje_iva,0)?>%</td>
+                        <td style="text-align: right";><?= ''.number_format($detalle->impuesto,0)?></td>
+                        <td style="text-align: right";><?= ''.number_format($detalle->total_linea,0)?></td>
+                        <?php if($model->autorizado == 0){
+                            if($model->id_tipo_venta == 2){?>
+                                <td style="width: 25px; height: 25px;">
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
+                                          ['/factura-venta-punto/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle,'accesoToken' => $accesoToken],
+                                          [
+                                              'title' => 'Adicionar cantidades al codigo del producto',
+                                              'data-toggle'=>'modal',
+                                              'data-target'=>'#modaladicionarcantidades'.$detalle->id_detalle,
+                                          ])    
+                                    ?>
+                                    <div class="modal remote fade" id="modaladicionarcantidades<?= $detalle->id_detalle ?>">
+                                      <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                          <div class="modal-content"></div>
+                                      </div>
+                                    </div>
+                                </td>
+                                <td style= 'width: 25px; height: 25px;'>
+                                    <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                                <span class='glyphicon glyphicon-trash'></span> </a>  
+                                </td>  
+                            <?php }else{?>
+                                <td style= 'width: 25px; height: 25px;'>
+                                    <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_punto", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                    <span class='glyphicon glyphicon-trash'></span> </a>  
+                                </td>  
+                                <td style= 'width: 25px; height: 25px;'></td>
+                            <?php }
+                        }else{?>
+                               <td style= 'width: 25px; height: 25px;'>
+                                <td style= 'width: 25px; height: 25px;'>
+                        <?php } ?>   
+
+                    </tr>
                 <?php endforeach;?>
             </tbody>
             <tr style="font-size: 90%; background-color:#B9D5CE">

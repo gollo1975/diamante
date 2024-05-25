@@ -269,7 +269,6 @@ class InventarioPuntoVentaController extends Controller
         
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $talla_color_cerrado= \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->andWhere(['=','cerrado', 1])->all();
-        $confi = \app\models\MatriculaEmpresa::findOne(1);
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["entrada_cantidad"])){
                 $intIndice = 0;
@@ -280,7 +279,6 @@ class InventarioPuntoVentaController extends Controller
                             $table = \app\models\DetalleColorTalla::findOne($intCodigo);
                             if($codigo <> 0){
                                 $unidad_entrada = $_POST["cantidad"][$intIndice]; //asigno variable
-                                 var_dump($unidad_entrada);
                                 $inventario = InventarioPuntoVenta::findOne($codigo);
                                 if($unidad_entrada <= $inventario->stock_inventario){ //si hay stoxk
                                     $detalle->cantidad = $unidad_entrada;
@@ -315,7 +313,6 @@ class InventarioPuntoVentaController extends Controller
             'talla_color' => $talla_color,
             'talla_color_cerrado' => $talla_color_cerrado,
             'codigo' => $codigo, 
-            'confi' => $confi,
             
         ]);
     }
@@ -606,6 +603,7 @@ class InventarioPuntoVentaController extends Controller
                     $table->fecha_proceso = date('Y-m-d');
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->venta_publico = $inventario->venta_publico;
+                    $table->aplica_talla_color = $inventario->aplica_talla_color;
                     $table->codigo_enlace_bodega = $inventario->id_inventario;
                     if($confi->aplica_talla_color == 0){
                         if($model->unidades > 0){
@@ -660,7 +658,6 @@ class InventarioPuntoVentaController extends Controller
     public function actionCreate()
     {
         $model = new InventarioPuntoVenta();
-        $confi = \app\models\MatriculaEmpresa::findOne(1);
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
@@ -671,24 +668,104 @@ class InventarioPuntoVentaController extends Controller
             if($conDato){
                  Yii::$app->getSession()->setFlash('info', 'El codigo ('. $model->codigo_producto. ') ya esta codificado en el sistema. Valide la informacion.');
             }else{
-                $model->save() ;
-                $model->user_name = Yii::$app->user->identity->username;
-                $model->codigo_barra = $model->codigo_producto;
-                $model->id_punto = 1;
-                if($confi->aplica_talla_color == 0){
-                    $model->stock_unidades = $model->stock_unidades;
-                    $model->stock_inventario = $model->stock_unidades;
-                }
-                $model->save();
-                $id = $model->id_inventario;
-                return $this->redirect(['index']);
-           }    
-        }
+                if($model->aplica_talla_color == 0 ){
+                    if ($model->stock_unidades > 0){
+                        $model->save() ;
+                        $model->user_name = Yii::$app->user->identity->username;
+                        $model->codigo_barra = $model->codigo_producto;
+                        $model->id_punto = 1;
+                        $model->stock_unidades = $model->stock_unidades;
+                        $model->stock_inventario = $model->stock_unidades;
+                        $model->save();
+                        $id = $model->id_inventario;
+                        return $this->redirect(['index']);
+                    }else{
+                        Yii::$app->getSession()->setFlash('error', 'Debe de ingresar las unidades al inventario.');
+                    } 
+               }else{
+                    $model->save();
+                    $model->user_name = Yii::$app->user->identity->username;
+                    $model->codigo_barra = $model->codigo_producto;
+                    $model->id_punto = 1;
+                    $model->stock_unidades = 0;
+                    $model->stock_inventario = 0;
+                    $model->save();
+                    $id = $model->id_inventario;
+                    return $this->redirect(['index']);
+               }    
+            }
+        }   
 
         return $this->render('create', [
             'model' => $model,
             'sw' =>0,
-            'confi' => $confi,
+        ]);
+    }
+    
+    /**
+     * Updates an existing InventarioPuntoVenta model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if($model->aplica_talla_color == 0 ){
+                if ($model->stock_unidades > 0){
+                    if($model->codigo_enlace_bodega > 0){
+                        $table = InventarioPuntoVenta::findOne($model->codigo_enlace_bodega);
+                        if($model->stock_unidades <= $table->stock_inventario){
+                            $model->save() ;
+                            $model->user_name = Yii::$app->user->identity->username;
+                            $model->codigo_barra = $model->codigo_producto;
+                            $model->stock_unidades = $model->stock_unidades;
+                            $model->stock_inventario = $model->stock_unidades;
+                            $model->save();
+                            $table->stock_inventario -= $model->stock_unidades;
+                            $table->save();
+                            $id = $model->id_inventario;
+                             return $this->redirect(['index']); 
+                           
+                        }else{ 
+                             Yii::$app->getSession()->setFlash('error', 'Las cantidades a ingresar son mayores que el inventario actual que hay en bodega.');
+                        }
+                    }else{
+                        $model->save() ;
+                        $model->user_name = Yii::$app->user->identity->username;
+                        $model->stock_unidades = $model->stock_unidades;
+                        $model->stock_inventario = $model->stock_unidades;
+                        $model->save();
+                        $id = $model->id_inventario;
+                        return $this->redirect(['index']);
+                    }
+                    
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'Debe de ingresar las unidades al inventario.');
+                } 
+            }else{
+                    $model->save();
+                    $model->user_name = Yii::$app->user->identity->username;
+                    $model->codigo_barra = $model->codigo_producto;
+                    $model->id_punto = 1;
+                    $model->stock_unidades = 0;
+                    $model->stock_inventario = 0;
+                    $model->save();
+                    $id = $model->id_inventario;
+                    return $this->redirect(['index']);
+            }    
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+            'sw' => 1,
         ]);
     }
     
@@ -711,37 +788,7 @@ class InventarioPuntoVentaController extends Controller
        $inventario->save();
     }
 
-    /**
-     * Updates an existing InventarioPuntoVenta model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-        $confi = \app\models\MatriculaEmpresa::findOne(1);
-        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
-        }
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if($confi->aplica_talla_color == 0){
-                    $model->stock_unidades = $model->stock_unidades;
-                    $model->stock_inventario = $model->stock_unidades;
-                    $model->save();
-                }
-            return $this->redirect(['index']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-            'sw' => 1,
-            'confi' =>$confi,
-        ]);
-    }
+    
     
       //ELIMINAR DETALLES  
     public function actionEliminar($id,$id_detalle, $token,$codigo)

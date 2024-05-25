@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtro" style="display:none">
+    <div class="panel-body" id="filtro" style="display:block">
         <?php if($tokenAcceso == 1){?>
             <div class="row" >
                 <?= $formulario->field($form, "codigo")->input("search") ?>

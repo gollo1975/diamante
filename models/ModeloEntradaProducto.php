@@ -13,13 +13,13 @@ class ModeloEntradaProducto extends Model
    
     public $codigo_producto;
     public $cantidad;
-    public $producto;
+    public $nombre_producto;
    
     public function rules()
     {
         return [  
            [['cantidad'], 'integer'],
-           [['codigo_producto','producto'], 'string'],
+           [['codigo_producto','nombre_producto'], 'string'],
         ];
     }
 
@@ -28,7 +28,7 @@ class ModeloEntradaProducto extends Model
         return [   
             'cantidad' => 'Cantidad unidades:',
             'codigo_producto' => 'Codigo del producto:',
-            'producto' => 'Nombre del producto:',
+            'nombre_producto' => 'Nombre del producto:',
           
        
         ];

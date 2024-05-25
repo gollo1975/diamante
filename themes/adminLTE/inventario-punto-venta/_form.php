@@ -78,6 +78,15 @@ $categoria = ArrayHelper::map(Categoria::find()->orderBy('categoria ASC')->all()
         </div>  
         <div class="row">
             <?php if($sw == 1){?>
+                <?= $form->field($model, 'aplica_talla_color')->dropDownList(['0' => 'NO', '1' => 'SI'],['onchange' => 'validartalla()', 'id' => 'aplica_talla_color'])?>
+                <div id="stock_unidades" style="display:block"><?= $form->field($model, 'stock_unidades')->textInput(['maxlength' => true]) ?></div>
+            <?php }else{?> 
+                <?= $form->field($model, 'aplica_talla_color')->dropDownList(['0' => 'NO', '1' => 'SI'],['onchange' => 'validartallacolor()', 'id' => 'aplica_talla_color'])?>
+                <div id="stock_unidades" style="display:block"><?= $form->field($model, 'stock_unidades')->textInput(['maxlength' => true]) ?></div>
+            <?php }?>
+        </div>
+        <div class="row">
+            <?php if($sw == 1){?>
                  <?= $form->field($model, 'iva_incluido')->dropDownList(['0' => 'NO', '1' => 'SI'],['onchange' => 'validar()', 'id' => 'iva_incluido'])?>
                  <div id="porcentaje_iva" style="display:block"> <?= $form->field($model, 'porcentaje_iva')->dropDownList($porcentaje, ['prompt' => 'Seleccione...']) ?></div>
             <?php }else{?>
@@ -108,16 +117,10 @@ $categoria = ArrayHelper::map(Categoria::find()->orderBy('categoria ASC')->all()
                ]); ?> 
             
         </div>
-        <?php if($confi->aplica_talla_color == 0){?>
-            <div class="row">
-                <?= $form->field($model, 'stock_unidades')->textInput(['maxlength' => true, 'required' => true]) ?>
-                <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-            </div> 
-        <?php }else{?>
+        
             <div class="row">
                 <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
             </div> 
-        <?php }?>
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("inventario-punto-venta/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>
@@ -127,7 +130,7 @@ $categoria = ArrayHelper::map(Categoria::find()->orderBy('categoria ASC')->all()
 <?php $form->end() ?>     
 
 <script type="text/javascript">
-    function mostrarcampo(){
+    function mostrarcampo(){ //aplica el porcentaje
         let aplica_iva = document.getElementById('iva_incluido').value;
         if(aplica_iva === '0'){
           porcentaje_iva.style.display = "none";
@@ -137,15 +140,34 @@ $categoria = ArrayHelper::map(Categoria::find()->orderBy('categoria ASC')->all()
            
         }
     }
-    
-</script>    
-<script type="text/javascript">
-       function validar(){
+    function validar(){ //valida el iva
         let aplica = document.getElementById('iva_incluido').value;
         if(aplica === '1'){
           porcentaje_iva.style.display = "block";
         } else {
              porcentaje_iva.style.display = "none";
+            
+           
+        }
+    }
+    
+    function validartalla(){
+        let aplicatalla = document.getElementById('aplica_talla_color').value;
+        if(aplicatalla === '0'){
+          stock_unidades.style.display = "block";
+        } else {
+             stock_unidades.style.display = "none";
+            
+           
+        }
+    }
+    
+    function validartallacolor(){
+        let aplicatalla = document.getElementById('aplica_talla_color').value;
+        if(aplicatalla === '1'){
+          stock_unidades.style.display = "none";
+        } else {
+             stock_unidades.style.display = "block";
             
            
         }

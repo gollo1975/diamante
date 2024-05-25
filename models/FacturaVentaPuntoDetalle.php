@@ -41,7 +41,7 @@ class FacturaVentaPuntoDetalle extends \yii\db\ActiveRecord
     {
         return [
             [['id_detalle'], 'required'],
-            [['id_detalle', 'id_factura', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea'], 'integer'],
+            [['id_detalle', 'id_factura', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea','genera_talla'], 'integer'],
             [['porcentaje_descuento', 'porcentaje_iva'], 'number'],
             [['producto'], 'string', 'max' => 40],
             [['id_detalle'], 'unique'],
@@ -69,6 +69,7 @@ class FacturaVentaPuntoDetalle extends \yii\db\ActiveRecord
             'porcentaje_iva' => 'Porcentaje Iva',
             'impuesto' => 'Impuesto',
             'total_linea' => 'Total Linea',
+            'genera_talla' => 'genera_talla',
         ];
     }
 

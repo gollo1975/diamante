@@ -9,6 +9,7 @@ use kartik\date\DatePicker;
 use kartik\select2\Select2;
 ?>
 <?php
+
 $form = ActiveForm::begin([
             "method" => "post",
             'id' => 'formulario',

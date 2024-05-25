@@ -259,7 +259,8 @@ class FacturaVentaPuntoController extends Controller
         
         $form = new \app\models\ModeloEntradaProducto();
         $codigo_producto = null;
-        $producto = null;
+        $nombre_producto = null;
+        
         $factura = FacturaVentaPunto::findOne($id_factura_punto);
         $inventario = \app\models\InventarioPuntoVenta::find()->where(['>','stock_inventario', 0])
                                                           ->andWhere(['=','venta_publico', 1])->andWhere(['=','id_punto', $accesoToken])
@@ -267,7 +268,12 @@ class FacturaVentaPuntoController extends Controller
         $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
         if ($form->load(Yii::$app->request->get())) {
              $codigo_producto = Html::encode($form->codigo_producto);
-             $producto = Html::encode($form->producto);
+             $nombre_producto = Html::encode($form->nombre_producto);
+             if($nombre_producto > 0 ){
+                $busquedaCodido = \app\models\InventarioPuntoVenta::findOne($nombre_producto); 
+                $codigo_producto = $busquedaCodido->codigo_producto;
+             }
+             
             if ($codigo_producto > 0) {
                 $conCodigo = \app\models\InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
                 if($conCodigo){
@@ -284,7 +290,10 @@ class FacturaVentaPuntoController extends Controller
                         $table->id_inventario = $producto->id_inventario;
                         $table->codigo_producto = $codigo_producto;
                         $table->producto = $producto->nombre_producto;
-                        if($factura->id_tipo_venta == 3){
+                        if($producto->aplica_talla_color == 1){
+                            $table->genera_talla = 1;
+                        }
+                        if($factura->id_tipo_venta == 3){ //para puntos de venta al deptal
                             $table->cantidad = 1;
                             $table->valor_unitario = $producto->precio_deptal;    
                             $porcentaje = number_format($conCodigo->porcentaje_iva/100,2);
@@ -328,7 +337,7 @@ class FacturaVentaPuntoController extends Controller
                         $detalle_factura = \app\models\FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
                         $this->redirect(["factura-venta-punto/view",'id_factura_punto' => $id_factura_punto, 'detalle_factura' => $detalle_factura,'accesoToken' => $accesoToken]);
                     }else{
-                        if($factura->id_tipo_venta == 2){
+                        if($factura->id_tipo_venta == 2){ //PROCESO AL POR MAYOR
                             Yii::$app->getSession()->setFlash('warning', 'Este producto ya se encuentra registrado en esta factura, favor subir las unidades faltantes por  la opcion de MAS');
                             return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
                         }else{
@@ -337,11 +346,10 @@ class FacturaVentaPuntoController extends Controller
                             $valor_unitario = 0;
                             $detalle = \app\models\FacturaVentaPuntoDetalle::findOne($conDato->id_detalle);
                             $producto = \app\models\InventarioPuntoVenta::find()->where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
-                            if($factura->id_tipo_venta == 2){
+                            if($factura->id_tipo_venta == 2){ //PRECIO MAYORISTA
                                 $valor_unitario = $producto->precio_mayorista;    
                             }else{
                                 $valor_unitario = $producto->precio_deptal;   
-
                             }
                             $pInicio = 0; $pTotal = 0; $pIva = 0; $pSubtotal = 0; $pDescuento = 0;
                             $pInicio = $detalle->porcentaje_iva;
@@ -364,6 +372,10 @@ class FacturaVentaPuntoController extends Controller
                             $detalle->valor_descuento = $detalle->valor_descuento + $descuento;
                             $detalle->impuesto = $detalle->impuesto + $pIva;
                             $detalle->total_linea = $detalle->total_linea + $pTotal - $descuento;
+                            if($producto->aplica_talla_color == 1){
+                                $detalle->genera_talla = 1;
+                            }
+                            
                             $detalle->save();
                             $id = $id_factura_punto;
                             $this->ActualizarSaldosTotales($id);
@@ -455,34 +467,40 @@ class FacturaVentaPuntoController extends Controller
                 $iva = 0; $subtotal = 0; $total = 0; $valor_unitario = 0; $dscto = 0;
                 $producto = \app\models\InventarioPuntoVenta::findOne($table->id_inventario);
                 $porcentaje = number_format($producto->porcentaje_iva / 100, 2);
-                $valor_unitario = $producto->precio_mayorista;
-                $total = ($valor_unitario * $model->cantidades);
-                $iva = round($total * $porcentaje);
-                $subtotal = ($total - $iva);
-                $table->cantidad = $model->cantidades;
-                $table->valor_unitario = $valor_unitario;
-                $table->subtotal = $subtotal;
-                $table->impuesto = $iva;
-                if($model->descuento > 0){
-                   $dscto = round(($subtotal * $model->descuento)/100);
-                   $table->total_linea = $total - $dscto;
-                   $table->porcentaje_descuento = $model->descuento;
-                   $table->valor_descuento = $dscto;
+                if($producto->precio_mayorista > 0){
+                    $valor_unitario = $producto->precio_mayorista; 
+                    $total = ($valor_unitario * $model->cantidades);
+                    $iva = round($total * $porcentaje);
+                    $subtotal = ($total - $iva);
+                    $table->cantidad = $model->cantidades;
+                    $table->valor_unitario = $valor_unitario;
+                    $table->subtotal = $subtotal;
+                    $table->impuesto = $iva;
+                    if($model->descuento > 0){
+                       $dscto = round(($subtotal * $model->descuento)/100);
+                       $table->total_linea = $total - $dscto;
+                       $table->porcentaje_descuento = $model->descuento;
+                       $table->valor_descuento = $dscto;
+                    }else{
+                        $table->total_linea = $total;
+                        $table->porcentaje_descuento = 0;
+                        $table->valor_descuento = 0;
+                        $table->porcentaje_iva = $producto->porcentaje_iva;
+                    }        
+                    $table->save();
+                    $id = $id_factura_punto;
+                    $this->ActualizarSaldosTotales($id);
+                    $this->ActualizarConceptosTributarios($id);
+                    return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
                 }else{
-                    $table->total_linea = $total;
-                    $table->porcentaje_descuento = 0;
-                    $table->valor_descuento = 0;
-                    $table->porcentaje_iva = $producto->porcentaje_iva;
-                }        
-                $table->save();
-                $id = $id_factura_punto;
-                $this->ActualizarSaldosTotales($id);
-                $this->ActualizarConceptosTributarios($id);
-               return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                    return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                    
+                }   
             }    
         }
         return $this->renderAjax('_form_adicionar_cantidad', [
             'model' => $model,
+           
         ]);
     }
     
@@ -674,9 +692,12 @@ class FacturaVentaPuntoController extends Controller
         $factura = FacturaVentaPunto::findOne($id_factura_punto);
         $sw = 0;
         foreach ($detalle as $detalle_factura):
-            if(!$talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
-                $sw = 1;
-            }
+            $item = \app\models\InventarioPuntoVenta::findOne($detalle_factura->id_inventario);
+            if($item->aplica_talla_color == 1){
+                if(!$talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
+                    $sw = 1;
+                }
+            }    
         endforeach;
         if($sw == 0){
             if(count($detalle) > 0 && $factura->valor_bruto > 0){
@@ -688,7 +709,7 @@ class FacturaVentaPuntoController extends Controller
                 $factura->save();
                 $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
             }else{
-                Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la factura porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
+                Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la factura porque no tiene productos relacionados, No hay precio de venta o NO se le ha asignado cantidades.'); 
                 $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]);  
             }
         }else{
@@ -718,54 +739,59 @@ class FacturaVentaPuntoController extends Controller
         $id_color = null;
         $conColores = null;
         $detalle = FacturaVentaPuntoDetalle::findOne($id_detalle);
-        $detalleTalla = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','id_factura', $id_factura_punto])->all();
-        $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['>','stock_punto', 0])->orderBy('id_talla ASC')->all();
-        if ($form->load(Yii::$app->request->get())) {
-            $id_talla = Html::encode($form->id_talla);
-            $id_color = Html::encode($form->id_color);
-            if($id_talla > 0){
-                $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_talla', $id_talla ])
-                                                     ->orderBy('id_color ASC')->all();
-            }else{
-                Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar la talla de la lista.');
-                return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
-            }
-        }
-        if (Yii::$app->request->post()) {
-            if (isset($_POST["enviarcolores"])) {
-                if(isset($_POST["nuevo_color_entrada"])){
-                    $indice = 0;
-                    foreach ($_POST["nuevo_color_entrada"] as $intCodigo) {
-                        $cantidad = 0;
-                        $cantidad = $_POST["cantidad_venta"][$indice]; 
-                        if($cantidad > 0){
-                            $colores = \app\models\DetalleColorTalla::findOne($intCodigo);
-                            $table = new \app\models\FacturaPuntoDetalleColoresTalla();
-                            $table->id_detalle =  $id_detalle;
-                            $table->id_factura = $id_factura_punto;
-                            $table->id_inventario = $detalle->id_inventario;
-                            $table->id_color = $colores->id_color;
-                            $table->id_talla = $id_talla;
-                            $table->cantidad_venta = $_POST["cantidad_venta"][$indice];
-                            $table->save(false);
-                        }    
-                        $indice++; 
-                    }
-                     return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+        if($detalle->cantidad > 0){
+            $detalleTalla = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $id_detalle])->andWhere(['=','id_factura', $id_factura_punto])->all();
+            $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['>','stock_punto', 0])->orderBy('id_talla ASC')->all();
+            if ($form->load(Yii::$app->request->get())) {
+                $id_talla = Html::encode($form->id_talla);
+                $id_color = Html::encode($form->id_color);
+                if($id_talla > 0){
+                    $conColores = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_talla', $id_talla ])
+                                                         ->orderBy('id_color ASC')->all();
                 }else{
-                   Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar un registro para procesar la informacion.'); 
+                    Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar la talla de la lista.');
+                    return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
                 }
             }
+            if (Yii::$app->request->post()) {
+                if (isset($_POST["enviarcolores"])) {
+                    if(isset($_POST["nuevo_color_entrada"])){
+                        $indice = 0;
+                        foreach ($_POST["nuevo_color_entrada"] as $intCodigo) {
+                            $cantidad = 0;
+                            $cantidad = $_POST["cantidad_venta"][$indice]; 
+                            if($cantidad > 0){
+                                $colores = \app\models\DetalleColorTalla::findOne($intCodigo);
+                                $table = new \app\models\FacturaPuntoDetalleColoresTalla();
+                                $table->id_detalle =  $id_detalle;
+                                $table->id_factura = $id_factura_punto;
+                                $table->id_inventario = $detalle->id_inventario;
+                                $table->id_color = $colores->id_color;
+                                $table->id_talla = $id_talla;
+                                $table->cantidad_venta = $_POST["cantidad_venta"][$indice];
+                                $table->save(false);
+                            }    
+                            $indice++; 
+                        }
+                         return $this->redirect(['crear_talla_color','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken, 'conTallas' => $conTallas, 'id_detalle' => $id_detalle]);
+                    }else{
+                       Yii::$app->getSession()->setFlash('warning', 'Debe seleccionar un registro para procesar la informacion.'); 
+                    }
+                }
+            }    
+            return $this->render('factura_detalle_tallas_colores', [
+                'id_factura_punto' => $id_factura_punto,
+                'accesoToken' => $accesoToken,
+                'form' => $form, 
+                'conColores' => $conColores,
+                'conTallas' => ArrayHelper::map($conTallas, 'id_talla', 'nombreTalla'),
+                'id_detalle' => $id_detalle,
+                'detalleTalla' => $detalleTalla,
+            ]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Debe ingresar primero las unidades que a vender antes de generar las tallas y colores.'); 
+            $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]); 
         }    
-        return $this->render('factura_detalle_tallas_colores', [
-            'id_factura_punto' => $id_factura_punto,
-            'accesoToken' => $accesoToken,
-            'form' => $form, 
-            'conColores' => $conColores,
-            'conTallas' => ArrayHelper::map($conTallas, 'id_talla', 'nombreTalla'),
-            'id_detalle' => $id_detalle,
-            'detalleTalla' => $detalleTalla,
-        ]);
     }
     
     //PERMITE ELIMINAR LA TALLA Y COLOR CREADO AL PRODUCTO
@@ -780,18 +806,28 @@ class FacturaVentaPuntoController extends Controller
     public function actionExportar_inventario_punto($id_factura_punto, $accesoToken) {
         $facturaPunto = FacturaVentaPunto::findOne($id_factura_punto);
         $talla_color_factura = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_factura', $id_factura_punto])->all();
-        foreach ($talla_color_factura as $factura):
-            $inventario = \app\models\InventarioPuntoVenta::findOne($factura->id_inventario);
-            $talla_color_bodega = \app\models\DetalleColorTalla::find()->where (['=','id_inventario', $factura->id_inventario])
-                                                                       ->andWhere(['=','id_talla', $factura->id_talla])
-                                                                       ->andWhere(['=','id_color', $factura->id_color])->all();
-            foreach ($talla_color_bodega as $bodega):
-                $bodega->stock_punto -= $factura->cantidad_venta; 
-                $bodega->save ();
-                $inventario->stock_inventario -= $factura->cantidad_venta;
-                $inventario->save ();
-            endforeach;        
-        endforeach; 
+        $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->andWhere(['=','genera_talla', 0])->all();
+        if(count($talla_color_factura) > 0){
+            foreach ($talla_color_factura as $factura):
+                $inventario = \app\models\InventarioPuntoVenta::findOne($factura->id_inventario);
+                $talla_color_bodega = \app\models\DetalleColorTalla::find()->where (['=','id_inventario', $factura->id_inventario])
+                                                                           ->andWhere(['=','id_talla', $factura->id_talla])
+                                                                           ->andWhere(['=','id_color', $factura->id_color])->all();
+                foreach ($talla_color_bodega as $bodega):
+                    $bodega->stock_punto -= $factura->cantidad_venta; 
+                    $bodega->save ();
+                    $inventario->stock_inventario -= $factura->cantidad_venta;
+                    $inventario->save ();
+                endforeach;        
+            endforeach; 
+        }
+        if(count($detalle_factura) > 0){
+            foreach ($detalle_factura as $detalle):
+                $inventario = \app\models\InventarioPuntoVenta::findOne($detalle->id_inventario);
+                $inventario->stock_inventario -= $detalle->cantidad;
+                $inventario->save (); 
+            endforeach;             
+        }
         $facturaPunto->exportar_inventario = 1;
         $facturaPunto->save ();
         return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken]);
