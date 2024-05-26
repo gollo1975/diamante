@@ -46,7 +46,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
         } else {
             if ($model->autorizado == 1 && $model->enviar_materia_prima  == 0) {?> 
                 <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm'])?>
-                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar al inventario', ['enviar_inventario_modulo', 'id' => $model->id_entrada, 'token'=> $token, 'id_compra' => $model->id_orden_compra,'genera_talla' => $empresa->aplica_talla_color],['class' => 'btn btn-info btn-sm',
+                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar al inventario', ['enviar_inventario_modulo', 'id' => $model->id_entrada, 'token'=> $token, 'id_compra' => $model->id_orden_compra],['class' => 'btn btn-info btn-sm',
                            'data' => ['confirm' => 'Esta seguro de actualizar el modulo de inventarios de productos?. Tener presente que debe de subir las tallas y colores del producto.', 'method' => 'post']]);?>
             <?php }else{ 
              echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_entrada_producto', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
@@ -146,16 +146,32 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                          <?php
                                          foreach ($detalle_entrada as $val):?>
                                             <tr style="font-size: 90%;">
-                                                
-                                                <?php  if($model->autorizado == 0){?>
-                                                    <td style="width: 20px; height: 20px"></td>
-                                                   <?php if($val->id_inventario == NULL){?>
+                                                <?php  
+                                                if($model->autorizado == 0){?>
+                                                   
+                                                    <?php 
+                                                    if($val->id_inventario == NULL){?>
+                                                         <td style= 'width: 25px; height: 25px;'></td>
                                                          <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('id_inventario[]', $val->id_inventario, $inventario, ['class' => 'col-sm-13', 'prompt' => 'Seleccion...', 'required' => true]) ?></td>
                                                          <td><?= 'No Found'?></td>
                                                     <?php }else{?>    
-                                                        <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('id_inventario[]', $val->id_inventario, $inventario, ['class' => 'col-sm-13', 'prompt' => 'Seleccion...', 'required' => true]) ?></td>
-                                                        <td><?= $val->inventario->nombre_producto ?></td>
-                                                    <?php }?>    
+                                                        <?php $inve_entrada = \app\models\InventarioPuntoVenta::findOne($val->id_inventario);
+                                                        if($inve_entrada->aplica_talla_color == 1){
+                                                            if($model->enviar_materia_prima == 0){?>
+                                                                <td style="width: 20px; height: 20px">
+                                                                     <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$model->id_entrada ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle, 'token' => $token])?>"
+                                                                                    <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
+                                                                </td>
+                                                                <td><?= $val->codigo_producto ?></td>
+                                                                <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('id_inventario[]', $val->id_inventario, $inventario, ['class' => 'col-sm-13', 'prompt' => 'Seleccion...', 'required' => true]) ?></td>
+                                                                   
+                                                            <?php }
+                                                        } else { ?>
+                                                            <td style= 'width: 25px; height: 25px;'></td>
+                                                            <td><?= $val->codigo_producto ?></td>
+                                                            <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('id_inventario[]', $val->id_inventario, $inventario, ['class' => 'col-sm-13', 'prompt' => 'Seleccion...', 'required' => true]) ?></td>  
+                                                        <?php }
+                                                    }    ?>        
                                                     <td align="center"><select name="actualizar_precio[]" style="width: 60px;">
                                                             <?php if ($val->actualizar_precio == 0){echo $actualizar = "NO";}else{echo $actualizar ="SI";}?>
                                                             <option value="<?= $val->actualizar_precio ?>"><?= $actualizar ?></option>
@@ -170,17 +186,8 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                     <td style="text-align: right"><?= ''.number_format($val->total_iva,0) ?></td>
                                                     <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                                     <td style="text-align: right"><?= ''.number_format($val->total_entrada,0) ?></td>
-                                                <?php }else{
-                                                    if($empresa->aplica_talla_color == 1){
-                                                        if($model->enviar_materia_prima == 0){?>
-                                                            <td style="width: 20px; height: 20px">
-                                                                 <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$model->id_entrada ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle, 'token' => $token])?>"
-                                                                                <span class='glyphicon glyphicon-shopping-cart'></span> </a>  
-                                                            </td>
-                                                        <?php }else{?>
-                                                            <td style="width: 20px; height: 20px"></td>
-                                                        <?php }
-                                                    }?>
+                                                <?php } else{ ?>
+                                                    <td style= 'width: 25px; height: 25px;'></td>
                                                     <td><?= $val->codigo_producto ?></td>
                                                     <td><?= $val->inventario->nombre_producto ?></td>  
                                                     <td style="text-align: left"><?= $val->actualizarPrecio ?></td> 
@@ -194,18 +201,23 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                 <?php }?>   
                                                 
                                             <input type="hidden" name="detalle_entrada[]" value="<?= $val->id_detalle ?>">
-                                                <?php if($model->autorizado == 0){?>
-                                                    <td style= 'width: 25px; height: 25px;'>
-                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar', 'id' => $model->id_entrada, 'detalle' => $val->id_detalle, 'token' => $token], [
-                                                                   'class' => '',
-                                                                   'data' => [
-                                                                       'confirm' => 'Esta seguro de eliminar el registro?',
-                                                                       'method' => 'post',
-                                                                   ],
-                                                               ])
-                                                        ?>
-                                                    </td>    
-                                                <?php }else{ ?>
+                                                <?php if($model->autorizado == 0){
+                                                    $consulta = app\models\EntradaTallaColor::find()->where(['=','id_detalle', $val->id_detalle])->one();
+                                                    if($consulta){ ?>
+                                                            <td style= 'width: 25px; height: 25px;'></td>
+                                                    <?php }else{?>     
+                                                        <td style= 'width: 25px; height: 25px;'>
+                                                            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar', 'id' => $model->id_entrada, 'detalle' => $val->id_detalle, 'token' => $token], [
+                                                                       'class' => '',
+                                                                       'data' => [
+                                                                           'confirm' => 'Esta seguro de eliminar el registro?',
+                                                                           'method' => 'post',
+                                                                       ],
+                                                                   ])
+                                                            ?>
+                                                        </td> 
+                                                    <?php }    
+                                                }else{ ?>
                                                     <td style= 'width: 25px; height: 25px;'></td>
                                                 <?php }?>    
                                             </tr>
@@ -215,12 +227,10 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                 <div class="panel-footer text-right">  
                                     <?php 
                                     if($model->autorizado == 0 && count($detalle_entrada) == 0){?>
-                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea', ['entrada-productos-inventario/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
                                             <?= Html::a('<span class="glyphicon glyphicon-export"></span> Cargar orden', ['entrada-productos-inventario/importardetallecompra','id' => $model->id_entrada, 'id_orden' => $model->id_orden_compra, 'token' => $token, 'proveedor' => $model->id_proveedor],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
                                    <?php }else{
                                        if($model->autorizado == 0 && count($detalle_entrada) > 0){?>
-                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea', ['entrada-productos-inventario/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
                                        <?php }?>                                      
                                     

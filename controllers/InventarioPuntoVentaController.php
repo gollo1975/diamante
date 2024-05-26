@@ -6,7 +6,6 @@ use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\db\ActiveQuery;
 use yii\base\Model;
 use yii\web\Response;
 use yii\web\Session;
@@ -19,11 +18,16 @@ use yii\web\UploadedFile;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 use Codeception\Lib\HelperModule;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\db\Command;
+use yii\db\ActiveQuery;
 //models
 //models
 
 use app\models\InventarioPuntoVenta;
 use app\models\UsuarioDetalle;
+use app\models\FacturaVentaPunto;
 
 
 /**
@@ -258,6 +262,7 @@ class InventarioPuntoVentaController extends Controller
         ]);
         
     }
+           
     /**
      * Displays a single InventarioPuntoVenta model.
      * @param integer $id
@@ -269,6 +274,7 @@ class InventarioPuntoVentaController extends Controller
         
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $talla_color_cerrado= \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->andWhere(['=','cerrado', 1])->all();
+        $traslado = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario', $id])->all();
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["entrada_cantidad"])){
                 $intIndice = 0;
@@ -313,7 +319,7 @@ class InventarioPuntoVentaController extends Controller
             'talla_color' => $talla_color,
             'talla_color_cerrado' => $talla_color_cerrado,
             'codigo' => $codigo, 
-            
+            'traslado' => $traslado,            
         ]);
     }
     
@@ -584,7 +590,6 @@ class InventarioPuntoVentaController extends Controller
     public function actionTrasladar_punto_venta($id) {
         $model = new \app\models\ModeloTrasladoPuntoventa();
         $inventario = InventarioPuntoVenta::findOne($id);
-        $confi = \app\models\MatriculaEmpresa::findOne(1);
         if ($model->load(Yii::$app->request->post())) {
             if($model->validate()){
                 if (isset($_POST["enviar_producto"])) {
@@ -605,39 +610,37 @@ class InventarioPuntoVentaController extends Controller
                     $table->venta_publico = $inventario->venta_publico;
                     $table->aplica_talla_color = $inventario->aplica_talla_color;
                     $table->codigo_enlace_bodega = $inventario->id_inventario;
-                    if($confi->aplica_talla_color == 0){
-                        if($model->unidades > 0){
-                            if($inventario->stock_inventario >= $model->unidades){
+                    $table->id_punto = $model->punto_venta;
+                    if($model->unidades > 0){
+                        if($inventario->stock_inventario >= $model->unidades){
+                            if($table->aplica_talla_color == 0){
                                 $table->stock_inventario = $model->unidades; 
                                 $table->stock_unidades = $model->unidades;
-                                $table->id_punto = $model->punto_venta;
+                                $table->inventario_aprobado = 1;
                                 $table->save(false);
-                                //actualiza
                                 $inventario->stock_inventario -= $model->unidades;
                                 $inventario->save();
-                                
+                                return $this->redirect(['index']);
                             }else{
-                                return $this->renderAjax('_form_traslado_puntoventa', [
-                                'model' => $model,
-                                'id' => $id,
-                                'confi' => $confi,
-
-                                ]);  
+                                $table->save(false);
+                                 return $this->redirect(['index']);
                             }    
                         }else{
-                              return $this->renderAjax('_form_traslado_puntoventa', [
-                                'model' => $model,
-                                'id' => $id,
-                                'confi' => $confi,
+                            return $this->renderAjax('_form_traslado_puntoventa', [
+                            'model' => $model,
+                            'id' => $id,
 
-                            ]);
-                        }
+                            ]);  
+                        }    
                     }else{
-                        $table->id_punto = $model->punto_venta;
-                        $table->save(false);
+                        return $this->renderAjax('_form_traslado_puntoventa', [
+                          'model' => $model,
+                          'id' => $id,
+
+                      ]);
                     }
-                    $this->redirect(["inventario-punto-venta/index"]);
-                }
+                }  
+                
             }else{
                 $model->getErrors();
             }    
@@ -645,9 +648,49 @@ class InventarioPuntoVentaController extends Controller
         return $this->renderAjax('_form_traslado_puntoventa', [
             'model' => $model,
             'id' => $id,
-            'confi' => $confi,
             
         ]);
+    }
+   
+    //IMPORTAR REFERENCIAS DE BODEGA
+    public function actionImportar_inventario_bodega($id, $id_punto) {
+        $model = new \app\models\ModeloImportarReferenciaBodega();
+        $inventario = InventarioPuntoVenta::findOne($id);
+       
+        if ($model->load(Yii::$app->request->post())) {
+           if (isset($_POST["importar_producto"])) {
+                $punto = \app\models\PuntoVenta::findOne($id);
+                $nueva_referencia = InventarioPuntoVenta::findOne($inventario->codigo_enlace_bodega);
+                if($model->unidades <= $nueva_referencia->stock_inventario){
+                    $table = new \app\models\TrasladoReferenciaPunto();
+                    $table->id_inventario = $inventario->codigo_enlace_bodega;
+                    $table->id_punto_saliente = 1;
+                    $table->id_punto_entrante = $id_punto;
+                    $table->unidades = $model->unidades;
+                    $table->fecha_proceso = date('Y-m-d');
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save();
+                    if ($nueva_referencia->aplica_talla_color == 0) {
+                       $inventario->stock_inventario += $model->unidades;
+                       $inventario->stock_unidades += $model->unidades;
+                       $inventario->save();
+                       $nueva_referencia->stock_inventario -= $model->unidades;
+                       $nueva_referencia->save();
+                       return $this->redirect(['index']);
+                    } 
+                }else{
+                    Yii::$app->session->setFlash('error', 'La EXISTENCIA que hay en la bodega es MENOR que la cantidad a importar. Valide la informacion.');
+                    return $this->redirect(['index']);
+                }    
+            }
+        }   
+        return $this->renderAjax('_form_importar_producto_bodega', [
+            'model' => $model,
+            'id' => $id,
+            'id_punto'=> $id_punto,
+
+            
+        ]); 
     }
     
     /**

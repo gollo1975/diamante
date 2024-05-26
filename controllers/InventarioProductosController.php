@@ -225,8 +225,9 @@ class InventarioProductosController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
-    //REGLA COMERCIAL DE PRODUCTO
     
+  
+    //REGLA COMERCIAL DE PRODUCTO
     public function actionRegla_comercial() {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',53])->all()){

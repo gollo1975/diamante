@@ -136,7 +136,6 @@ class EntradaProductosInventarioController extends Controller
         $models = new \app\models\ModeloEntradaProducto();
         $inventario = InventarioPuntoVenta::find()->orderBy('nombre_producto ASC')->where(['=','id_punto', 1])->all();
         $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
-        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["detalle_entrada"])){
                 $intIndice = 0;
@@ -157,6 +156,11 @@ class EntradaProductosInventarioController extends Controller
                     $table->total_iva = $iva;
                     $table->subtotal = $auxiliar;
                     $table->total_entrada = $iva + $auxiliar;
+                    if($inven->aplica_talla_color == 1){
+                        $table->genera_talla = 1;
+                    }else{
+                        $table->genera_talla = 0;
+                    }
                     $table->save(false);
                     $auxiliar = 0;
                     $iva = 0;   
@@ -173,7 +177,7 @@ class EntradaProductosInventarioController extends Controller
             'detalle_entrada' => $detalle_entrada,
             'inventario' => ArrayHelper::map($inventario, "id_inventario", "inventario"),
             'models' => $models,
-            'empresa' => $empresa,
+           
         ]);
     }
 
@@ -332,48 +336,62 @@ class EntradaProductosInventarioController extends Controller
     //AUTORIZAR ENTRADA
      public function actionAutorizado($id, $token) {
         $model = $this->findModel($id);
-        $detalle = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
         $sw = 0;
-        if(count($detalle) > 0){
-            foreach ($detalle as $validar):
-                if($validar->id_inventario == null){
-                    $sw = 1;
-                }
-            endforeach;
-            if($sw == 0){
-                if ($model->autorizado == 0) {                        
-                    $model->autorizado = 1;            
-                   $model->update();
-                   $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' =>$token]);  
-
-                } else{
-                        $model->autorizado = 0;
-                        $model->update();
-                        $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' =>$token]);  
-                } 
-            }else{
-                 Yii::$app->getSession()->setFlash('error', 'No puede AUTORIZAR la entrada porque NO ha seleccionado el productos para descargar la entrada.');
-                $this->redirect(["view",'id' => $id, 'token' => $token]);   
+        $entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
+        $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->andWhere(['=','genera_talla', 1])->all();
+        foreach ($detalle_entrada as $detalle_entrada):
+            $buscar = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $detalle_entrada->id_detalle])->one();
+            if($buscar == null){
+                $sw = 1;
             }
-            
+        endforeach;
+        if($sw == 0){
+            if(count($entrada) > 0 ){
+              if($model->autorizado == 0){
+                  $model->autorizado = 1;
+              }else{
+                  $model->autorizado = 0;
+              }
+              $model->save();
+             $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]); 
+            }else{
+              Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la entrada porque no tiene productos ingresados en el detalle.'); 
+              $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);  
+            }
         }else{
-             Yii::$app->getSession()->setFlash('warning', 'Debe de importar primero la orden de compra.');
-             $this->redirect(["view",'id' => $id, 'token' => $token]);   
+            Yii::$app->getSession()->setFlash('error', 'No se puede AUTORIZAR la entrada porque NO ha ingresado las TALLAS Y COLORES de la referencia ('.$detalle_entrada->codigo_producto.').'); 
+            $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);
         }    
     }
     
      //AUTORIZAR ENTRADA SIN OC
      public function actionAutorizado_sinoc($id, $bodega) {
         $model = $this->findModel($id);
-        if ($model->autorizado == 0) {                        
-                $model->autorizado = 1;            
-               $model->update();
-               $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);  
-
-        } else{
-                $model->autorizado = 0;
-                $model->update();
-                 $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);  
+        $sw = 0;
+        $entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
+        $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->andWhere(['=','genera_talla', 1])->all();
+        foreach ($detalle_entrada as $detalle_entrada):
+            $buscar = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $detalle_entrada->id_detalle])->one();
+            if($buscar == null){
+                $sw = 1;
+            }
+        endforeach;
+        if($sw == 0){
+            if(count($entrada) > 0 ){
+              if($model->autorizado == 0){
+                  $model->autorizado = 1;
+              }else{
+                  $model->autorizado = 0;
+              }
+              $model->save();
+             $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);   
+            }else{
+              Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la entrada porque no tiene productos ingresados en el detalle.'); 
+              $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);  
+            }
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No se puede AUTORIZAR la entrada porque NO ha ingresado las TALLAS Y COLORES de la referencia ('.$detalle_entrada->codigo_producto.').'); 
+            $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
         }    
     }
     
@@ -462,25 +480,20 @@ class EntradaProductosInventarioController extends Controller
     }
     
     //ENVIAR INVENTARIO AL MODULO
-    public function actionEnviar_inventario_modulo($id, $token, $id_compra, $genera_talla) {
+    public function actionEnviar_inventario_modulo($id, $token, $id_compra) {
         $orden_compra = OrdenCompra::findOne($id_compra);
         $entrada_inventario = EntradaProductosInventario::findOne($id);
         $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
         $sw = 0;
-        if($genera_talla == 0){
+        if(count($detalle_entrada) > 0){
             foreach ($detalle_entrada as $detalle):
                 $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
                 $inventario_entrada->stock_unidades += $detalle->cantidad; 
                 $inventario_entrada->stock_inventario += $detalle->cantidad;
                 $inventario_entrada->save();
             endforeach;
-            $entrada_inventarioº->enviar_materia_prima = 1;
-            $entrada_inventario->save();
-            $orden_compra->importado = 1;
-            $orden_compra->save();
-            $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);
-        }else{
-            foreach ($detalle_entrada as $detalle):
+        }
+        foreach ($detalle_entrada as $detalle):
                 $entrada = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $detalle->id_detalle])->one(); 
                 if($entrada){
                     $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
@@ -490,8 +503,8 @@ class EntradaProductosInventarioController extends Controller
                 }else{
                     $sw = 1;
                 }
-            endforeach;
-        }    
+        endforeach;
+           
         if($sw == 1){
              Yii::$app->getSession()->setFlash('error', 'Debe de subir las TALLAS Y COLORES a esta referencia.');
              $this->redirect(["entrada-productos-inventario/view", 'id' => $id, 'token' => $token]);
@@ -506,51 +519,24 @@ class EntradaProductosInventarioController extends Controller
     }
     
     //ENVIAR INVENTARIO AL MODULO SIN ORDEN DE COMPRA
-   public function actionEnviar_inventario_modulo_sinorden($id, $genera_talla, $bodega) {
+   public function actionEnviar_inventario_modulo_sinorden($id, $bodega) {
         $entrada_inventario = EntradaProductosInventario::findOne($id);
         $detalle_entrada = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
-        if($genera_talla == 0){
-            foreach ($detalle_entrada as $detalle):
+        foreach ($detalle_entrada as $detalle):
                 $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
                 $inventario_entrada->stock_unidades += $detalle->cantidad; 
                 $inventario_entrada->stock_inventario += $detalle->cantidad;
                 $inventario_entrada->save();
-            endforeach;
-            $entrada_inventario->enviar_materia_prima = 1;
-            $entrada_inventario->save();
-            $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
-        }else{
-            foreach ($detalle_entrada as $detalle):
-                $entrada = \app\models\EntradaTallaColor::find()->where(['=','id_detalle', $detalle->id_detalle])->one(); 
-                if($entrada){
-                    $sw = 0;
-                    $inventario_entrada = InventarioPuntoVenta::findOne($detalle->id_inventario);
-                    $inventario_entrada->stock_unidades += $detalle->cantidad; 
-                    $inventario_entrada->stock_inventario += $detalle->cantidad;
-                    $inventario_entrada->save(); 
-                    
-                }else{
-                    $sw = 1;
-                }
-            endforeach;
-            if($sw == 1){
-                Yii::$app->getSession()->setFlash('error', 'Debe de subir las TALLAS Y COLORES a cada referencia.');
-                $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
-            }else{
-                $entrada_inventario->enviar_materia_prima = 1;
-                $entrada_inventario->save();
-                $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
-            }
-        }    
-        
-            
+        endforeach;
+        $entrada_inventario->enviar_materia_prima = 1;
+        $entrada_inventario->save();
+        $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso", 'id' => $id, 'bodega' => $bodega]);
     }
     
    //PROCESO QUE INGRESA CON CODIGO DE BARRAS
     public function actionCodigo_barra_ingreso($id, $bodega) {
         $form = new \app\models\ModeloEntradaProducto();
         $model = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all();
-        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         $entrada_producto = EntradaProductosInventario::findOne($id);
         $codigo_producto = 0;
         if ($form->load(Yii::$app->request->get())) {
@@ -568,6 +554,9 @@ class EntradaProductosInventarioController extends Controller
                         $entrada->fecha_vencimiento = date('Y-m-d');
                         $entrada->porcentaje_iva = $table->porcentaje_iva;
                         $entrada->valor_unitario = $table->costo_unitario;
+                        if($table->aplica_talla_color == 1){
+                            $entrada->genera_talla = 1;
+                        }
                         $entrada->save(false);
                         $model = \app\models\EntradaProductoInventarioDetalle::find()->where(['=','id_entrada', $id])->all(); 
                         $this->redirect(["entrada-productos-inventario/codigo_barra_ingreso",'id' => $id, 'bodega' => $bodega]);
@@ -624,7 +613,6 @@ class EntradaProductosInventarioController extends Controller
                     'form' => $form,
                     'id' => $id,
                     'bodega' => $bodega,
-                    'empresa' => $empresa,
                     'entrada_producto' => $entrada_producto,
          ]);
         

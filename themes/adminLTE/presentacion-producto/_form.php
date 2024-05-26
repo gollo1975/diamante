@@ -23,6 +23,7 @@ use kartik\select2\Select2;
 <?php
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
 $conMarca = ArrayHelper::map(Marca::find()->orderBy('marca ASC')->all(), 'id_marca', 'marca');
+$medidaProducto = ArrayHelper::map(app\models\MedidaProductoTerminado::find()->orderBy('descripcion ASC')->all(), 'id_medida_producto', 'descripcion');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -44,6 +45,15 @@ $conMarca = ArrayHelper::map(Marca::find()->orderBy('marca ASC')->all(), 'id_mar
         <div class="row">
            <?= $form->field($model, 'id_marca')->widget(Select2::classname(), [
                 'data' => $conMarca,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+        </div>  
+        <div class="row">
+           <?= $form->field($model, 'id_medida_producto')->widget(Select2::classname(), [
+                'data' => $medidaProducto,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true

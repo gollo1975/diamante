@@ -440,7 +440,7 @@
                                                 'icon' => 'connectdevelop',
                                                 'url' => '#',
                                                 'items' => [
-                                                  //  ['label' => 'Maestro pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_maestro_pedidos']],
+                                                   // ['label' => 'Ventas clientes', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/search_maestro_referencia']],
                                                     //['label' => 'Graficas', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_vendedor']],
                                                     
                                                 ]],
@@ -508,6 +508,7 @@
                                                 'url' => '#',
                                                 'items' => [
                                                     ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_factura']],
+                                                    ['label' => 'Ventas clientes', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_referencia']],
                                             ]],
                                         ]],
                                         [

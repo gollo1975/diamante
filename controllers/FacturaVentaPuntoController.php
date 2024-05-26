@@ -248,6 +248,67 @@ class FacturaVentaPuntoController extends Controller
             return $this->redirect(['site/login']);
         }
     }
+    
+     // MAESTRO CONSULTA DE PRODUCTO, FACTURAS Y CLIENTES IA
+    public function actionSearch_maestro_referencia() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',106])->all()){
+                $form = new \app\models\ModelBusquedaAvanzada();
+                $hasta = null;
+                $desde = null;
+                $busqueda = null; 
+                $model = null;
+                $pages = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $busqueda = Html::encode($form->busqueda);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        if($busqueda <> null && $desde <> null && $hasta <> null){
+                            if($busqueda == 1){
+                                $query =new Query();
+                                $table = FacturaVentaPunto::find()->select([new Expression('SUM(subtotal_factura) as subtotal_factura, SUM(total_factura) AS total_factura, numero_factura, id_agente, id_punto'), 'id_cliente'])
+                                            ->where(['between','fecha_inicio', $desde, $hasta])
+                                            ->groupBy('id_cliente')
+                                            ->orderBy('subtotal_factura DESC')
+                                            ->limit (1)
+                                            ->all();       
+                                $model = $table;
+                            }else{
+                                $query =new Query();
+                                $table = FacturaVentaPunto::find()->select([new Expression('SUM(subtotal_factura) AS subtotal_factura,  SUM(total_factura) AS total_factura, id_agente, id_cliente, id_punto'), 'id_agente'])
+                                            ->where(['between','fecha_inicio', $desde, $hasta])
+                                            ->groupBy('id_agente')
+                                            ->orderBy('subtotal_factura ASC')
+                                            ->limit (1)
+                                            ->all();       
+                                $model = $table;
+                            }    
+                        }else{
+                            Yii::$app->getSession()->setFlash('info', 'Debe de seleccionar el tipo de busqueda y las fechas. Favor validar la informacion.'); 
+                            return $this->redirect(['search_maestro_referencia']);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('search_maestro_referencia', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'desde' => $desde,
+                            'hasta' => $hasta,
+                            'busqueda' => $busqueda,
+                           
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     /**
      * Displays a single FacturaVentaPunto model.
      * @param integer $id
@@ -329,13 +390,16 @@ class FacturaVentaPuntoController extends Controller
                                 $table->valor_descuento = $descuento;
                                 $table->porcentaje_iva = $conCodigo->porcentaje_iva; 
                             }
-                        }    
+                        } 
+                       
                         $table->save(false);
+
                         $id = $id_factura_punto;
                         $this->ActualizarSaldosTotales($id);
                         $this->ActualizarConceptosTributarios($id);
                         $detalle_factura = \app\models\FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
                         $this->redirect(["factura-venta-punto/view",'id_factura_punto' => $id_factura_punto, 'detalle_factura' => $detalle_factura,'accesoToken' => $accesoToken]);
+                          
                     }else{
                         if($factura->id_tipo_venta == 2){ //PROCESO AL POR MAYOR
                             Yii::$app->getSession()->setFlash('warning', 'Este producto ya se encuentra registrado en esta factura, favor subir las unidades faltantes por  la opcion de MAS');
@@ -375,12 +439,16 @@ class FacturaVentaPuntoController extends Controller
                             if($producto->aplica_talla_color == 1){
                                 $detalle->genera_talla = 1;
                             }
-                            
-                            $detalle->save();
-                            $id = $id_factura_punto;
-                            $this->ActualizarSaldosTotales($id);
-                            $this->ActualizarConceptosTributarios($id);
-                           return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                            $sumar = $this->ContarUnidadesInventario($codigo_producto, $accesoToken, $id_factura_punto);
+                            if($sumar != 0){
+                                $detalle->save();
+                                $id = $id_factura_punto;
+                                $this->ActualizarSaldosTotales($id);
+                                $this->ActualizarConceptosTributarios($id);
+                               return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                            }else{
+                                 Yii::$app->getSession()->setFlash('error', 'No hay mas inventario de esta referencia para vender. Comunicate con el administrador');
+                            }   
                         }   
                     }
                 }else{
@@ -404,6 +472,14 @@ class FacturaVentaPuntoController extends Controller
         ]);
     }
     
+    //PROCESO QUE CUENTA EL INVENTARIO
+    protected function ContarUnidadesInventario($codigo_producto, $accesoToken, $id_factura_punto) {
+        $inventario = \app\models\InventarioPuntoVenta::find()->where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
+        $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->andWhere(['=','id_inventario', $inventario->id_inventario])->one();
+        $sumar = $inventario->stock_inventario - $detalle_factura->cantidad;
+        return ($sumar);
+       
+    }
     //vista de consulta facturas
     public function actionView_consulta($id_factura_punto, $token)
     {
@@ -465,37 +541,42 @@ class FacturaVentaPuntoController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if (isset($_POST["adicionar_cantidades"])) {
                 $iva = 0; $subtotal = 0; $total = 0; $valor_unitario = 0; $dscto = 0;
-                $producto = \app\models\InventarioPuntoVenta::findOne($table->id_inventario);
-                $porcentaje = number_format($producto->porcentaje_iva / 100, 2);
+                $producto = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $table->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
                 if($producto->precio_mayorista > 0){
-                    $valor_unitario = $producto->precio_mayorista; 
-                    $total = ($valor_unitario * $model->cantidades);
-                    $iva = round($total * $porcentaje);
-                    $subtotal = ($total - $iva);
-                    $table->cantidad = $model->cantidades;
-                    $table->valor_unitario = $valor_unitario;
-                    $table->subtotal = $subtotal;
-                    $table->impuesto = $iva;
-                    if($model->descuento > 0){
-                       $dscto = round(($subtotal * $model->descuento)/100);
-                       $table->total_linea = $total - $dscto;
-                       $table->porcentaje_descuento = $model->descuento;
-                       $table->valor_descuento = $dscto;
+                    if($model->cantidades <= $producto->stock_inventario){
+                        $porcentaje = number_format($producto->porcentaje_iva / 100, 2);
+                        $valor_unitario = $producto->precio_mayorista; 
+                        $total = ($valor_unitario * $model->cantidades);
+                        $iva = round($total * $porcentaje);
+                        $subtotal = ($total - $iva);
+                        $table->cantidad = $model->cantidades;
+                        $table->valor_unitario = $valor_unitario;
+                        $table->subtotal = $subtotal;
+                        $table->impuesto = $iva;
+                        if($model->descuento > 0){
+                           $dscto = round(($subtotal * $model->descuento)/100);
+                           $table->total_linea = $total - $dscto;
+                           $table->porcentaje_descuento = $model->descuento;
+                           $table->valor_descuento = $dscto;
+                        }else{
+                            $table->total_linea = $total;
+                            $table->porcentaje_descuento = 0;
+                            $table->valor_descuento = 0;
+                            $table->porcentaje_iva = $producto->porcentaje_iva;
+                        }        
+                        $table->save();
+                        $id = $id_factura_punto;
+                        $this->ActualizarSaldosTotales($id);
+                        $this->ActualizarConceptosTributarios($id);
+                        return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);  
                     }else{
-                        $table->total_linea = $total;
-                        $table->porcentaje_descuento = 0;
-                        $table->valor_descuento = 0;
-                        $table->porcentaje_iva = $producto->porcentaje_iva;
-                    }        
-                    $table->save();
-                    $id = $id_factura_punto;
-                    $this->ActualizarSaldosTotales($id);
-                    $this->ActualizarConceptosTributarios($id);
-                    return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                        Yii::$app->session->setFlash('error', 'No hay existencias suficientes de la referencia ('.$producto->nombre_producto.') para la venta.');  
+                        return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
+                    }  
                 }else{
                     return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' => $accesoToken]);
                     
-                }   
+                }
             }    
         }
         return $this->renderAjax('_form_adicionar_cantidad', [
@@ -831,6 +912,29 @@ class FacturaVentaPuntoController extends Controller
         $facturaPunto->exportar_inventario = 1;
         $facturaPunto->save ();
         return $this->redirect(['view','id_factura_punto' =>$id_factura_punto, 'accesoToken' =>$accesoToken]);
+    }
+    
+     //LISTAR FACTURAS POR CLIENTE
+    public function actionListado_facturas($desde, $hasta, $id_cliente, $busqueda, $id_agente) {
+        if($busqueda == 1){
+            $model = Clientes::findOne($id_cliente);
+            $facturas = FacturaVentaPunto::find()->where(['=','id_cliente', $id_cliente])
+                                            ->andWhere(['between','fecha_inicio', $desde, $hasta])
+                                            ->orderBy('cliente ASC')->all(); 
+        }else{
+            $model = AgentesComerciales::findOne($id_agente);
+            $facturas = FacturaVentaPunto::find()->where(['=','id_agente', $id_agente])
+                                            ->andWhere(['between','fecha_inicio', $desde, $hasta])
+                                            ->orderBy('cliente ASC')->all(); 
+        }    
+        return $this->render('view_listado_facturas', [
+            'model' =>$model,
+            'facturas' => $facturas,
+            'desde' => $desde,
+            'hasta' =>$hasta,
+            'busqueda' => $busqueda,
+           
+        ]);   
     }
     
      //IMPRESIONES

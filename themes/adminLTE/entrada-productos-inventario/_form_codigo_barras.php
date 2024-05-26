@@ -28,7 +28,7 @@ $entrada = \app\models\EntradaProductosInventario::findOne($id);
         } else {
             if ($entrada->autorizado == 1 && $entrada->enviar_materia_prima  == 0) {?> 
                 <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado_sinoc', 'id' => $id, 'bodega' => $bodega], ['class' => 'btn btn-default btn-sm'])?>
-                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar inventario', ['enviar_inventario_modulo_sinorden', 'id' => $id, 'bodega' => $bodega, 'genera_talla' => $empresa->aplica_talla_color],['class' => 'btn btn-info btn-sm',
+                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar inventario', ['enviar_inventario_modulo_sinorden', 'id' => $id, 'bodega' => $bodega],['class' => 'btn btn-info btn-sm',
                            'data' => ['confirm' => 'Esta seguro de actualizar el modulo de  inventarios .', 'method' => 'post']]);?>
             <?php }
     }?>        
@@ -100,9 +100,11 @@ $entrada = \app\models\EntradaProductosInventario::findOne($id);
             </thead>
             <tbody>
                 <?php 
-                foreach ($model as $val):?>
+                foreach ($model as $val):
+                    $inve_entrada = \app\models\InventarioPuntoVenta::findOne($val->id_inventario);
+                    ?>
                     <tr style ='font-size:90%;'>
-                        <?php if($empresa->aplica_talla_color == 1){
+                        <?php if($inve_entrada->aplica_talla_color == 1 && $val->entrada->autorizado == 0){
                             if($entrada_producto->enviar_materia_prima == 0){?>
                                 <td style="width: 20px; height: 20px">
                                      <a href="<?= Url::toRoute(["entrada-productos-inventario/crear_talla_color_entrada", 'id' =>$id ,'id_inventario' => $val->id_inventario , 'id_detalle' => $val->id_detalle, 'token' => 1])?>"
@@ -111,7 +113,9 @@ $entrada = \app\models\EntradaProductosInventario::findOne($id);
                             <?php }else{?>
                                 <td style="width: 20px; height: 20px"></td>
                             <?php }
-                        }?>
+                        }else{?>
+                                <td style="width: 20px; height: 20px"></td>
+                        <?php }?>        
                         
                         <td> <?= $val->inventario->codigo_producto?></td>
                         <td> <?= $val->inventario->nombre_producto?></td>

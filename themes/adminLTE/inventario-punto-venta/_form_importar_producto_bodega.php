@@ -8,7 +8,6 @@ use kartik\date\DatePicker;
 use kartik\select2\Select2;
 
 
-$conPunto = ArrayHelper::map(app\models\PuntoVenta::find()->where(['<>','predeterminado', 1])->all(), 'id_punto', 'nombre_punto');
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -33,19 +32,15 @@ $form = ActiveForm::begin([
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                  TRASLADO A PUNTO DE VENTA
+                 IMPORTAR REFERENCIAS DE BODEGA
                 </div>
                 <div class="panel-body">
-                    
-                        <div class="row">
-                             <?= $form->field($model,'unidades')->textInput(['maxlength' => true, 'required' => true]) ?>
-                        </div> 
-                        <div class="row">
-                            <?= $form->field($model, 'punto_venta')->dropdownList($conPunto, ['prompt' => 'Seleccione...'],['required' => true]) ?>
-                        </div>
+                    <div class="row">
+                        <?= $form->field($model,'unidades')->textInput(['maxlength' => true, 'required' => true]) ?>
+                    </div> 
                 </div>  
                     <div class="panel-footer text-right">
-                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'enviar_producto']) ?>                    
+                       <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'importar_producto']) ?>                    
                    </div>
                 
             </div>

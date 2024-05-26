@@ -134,7 +134,22 @@ $form = ActiveForm::begin([
                             </div> 
                         </td>
                     <?php }else{?>
-                        <td style="width: 20px; height: 20px"></td>
+                        <td style="width: 20px; height: 20px">
+                            <?= Html::a('<span class="glyphicon glyphicon-import"></span>',
+                                    ['/inventario-punto-venta/importar_inventario_bodega','id' => $val->id_inventario, 'id_punto' => $val->id_punto],
+                                    [
+                                        'title' => 'Importar referencias de bodega cuando no hay existencias.?',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalimportarproductobodega'.$val->id_inventario,
+                                        'class' => ''
+                                    ])    
+                               ?>
+                            <div class="modal remote fade" id="modalimportarproductobodega<?= $val->id_inventario ?>">
+                                <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                     <div class="modal-content"></div>
+                                </div>
+                            </div> 
+                        </td>
                     <?php }?>   
                     <td><?= $val->codigo_producto?></td>
                     <td><?= $val->nombre_producto?></td>
@@ -148,7 +163,7 @@ $form = ActiveForm::begin([
                     <td style= 'width: 25px; height: 10px;'>
                          <a href="<?= Url::toRoute(["inventario-punto-venta/view", "id" => $val->id_inventario, 'token' => $token,'codigo' => $val->codigo_enlace_bodega]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                     </td> 
-                    <?php if($val->stock_unidades == $val->stock_inventario){?>
+                    <?php if($val->stock_unidades == $val->stock_inventario && $val->aplica_talla_color == 0){?>
                         <td style= 'width: 25px; height: 10px;'>
                                <a href="<?= Url::toRoute(["inventario-punto-venta/update", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                         </td>

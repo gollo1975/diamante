@@ -118,6 +118,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
     <div>
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#talla_color" aria-controls="talla_color" role="tab" data-toggle="tab">Tallas y colores <span class="badge"><?= count($talla_color) ?></span></a></li>
+             <li role="presentation"><a href="#trasladopunto" aria-controls="trasladopunto" role="tab" data-toggle="tab">Traslado de bodega a punto <span class="badge"><?= count($traslado) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="talla_color">
@@ -184,6 +185,42 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                 </div>
             </div>
             <!-- TERMINA TABAS-->
+            <div role="tabpanel" class="tab-pane" id="trasladopunto">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style='font-size:90%;'>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Id</th>                      
+                                        <th scope="col" style='background-color:#B9D5CE;'>Bodega principal</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Punto de  venta destino</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th> 
+                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha y hora</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>User name</th> 
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($traslado as $val):?>
+                                        <tr style='font-size:90%;'>
+                                            <td><?= $val->id_traslado?></td>
+                                            <td><?= $val->puntoSaliente->nombre_punto?></td>
+                                            <td><?= $val->puntoEntrante->nombre_punto?></td>
+                                             <td style="text-align: right"><?= $val->unidades?></td>
+                                            <td><?= $val->fecha_proceso?></td>
+                                            <td><?= $val->fecha_hora_registro?></td>
+                                             <td><?= $val->user_name?></td>
+                                        </tr>
+                                    <?php endforeach;?>
+                                  
+                                </tbody>      
+                            </table>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+            <!-- TERMINA TABS->
         </div>
     </div>    
   <?php $form->end() ?> 
