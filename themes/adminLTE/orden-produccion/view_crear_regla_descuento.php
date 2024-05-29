@@ -20,7 +20,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Empleado */
 
-$this->title = 'REGLA Y DESCUENTO ';
+$this->title = 'DESCUENTOS COMERCIALES ';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario producto', 'url' => ['crear_precio_venta']];
 $this->params['breadcrumbs'][] = $id;
 ?>

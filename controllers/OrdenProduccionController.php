@@ -394,7 +394,6 @@ class OrdenProduccionController extends Controller
                 $producto = null;
                 $grupo = null;
                 $sw  = 0;
-                $model = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -404,17 +403,43 @@ class OrdenProduccionController extends Controller
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo])
                                         ->andFilterWhere(['like', 'nombre_producto', $producto])
-                                        ->andWhere(['>','stock_unidades', 0])->all(); 
-                            $model = $table;
-                            $sw = 1;
-                     } else {
+                                        ->andWhere(['>','stock_unidades', 0]); 
+                        $table = $table->orderBy('id_inventario DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
                         $form->getErrors();
                     }
+                }else{
+                    $table = InventarioProductos::find()
+                            ->Where(['>','stock_unidades', 0])
+                            ->orderBy('id_inventario DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    
                 }
                 return $this->render('crearpreciosventa', [
                             'model' => $model,
                             'form' => $form,
                             'sw' => $sw,
+                            'pagination' => $pages,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);

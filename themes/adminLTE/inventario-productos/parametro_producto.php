@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div>
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#inventario" aria-controls="inventario" role="tab" data-toggle="tab">Inventarios <span class="badge"><?= $pagination->totalCount ?></span></a></li>
-                <li role="presentation"><a href="#listadoparametro" aria-controls="listadoparametro" role="tab" data-toggle="tab">Parametros <span class="badge"><?= count($parametros) ?></span></a></li>
+                <li role="presentation"><a href="#listadoparametro" aria-controls="listadoparametro" role="tab" data-toggle="tab">Presupuesto <span class="badge"><?= count($parametros) ?></span></a></li>
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="inventario">

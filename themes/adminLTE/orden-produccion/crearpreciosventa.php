@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
 
-$this->title = 'REGLAS Y PRECIOS';
+$this->title = 'PRECIOS Y DESCUENTOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -69,7 +69,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        Registros <span class="badge"> <?= 1?></span>
+        Registros <span class="badge"> <?= count($model)?></span>
       
     </div>
         <table class="table table-bordered table-hover">
@@ -90,7 +90,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
             </thead>
             <tbody>
                 <?php 
-                if($sw <> 0){
+                
                     foreach ($model as $val):
                         $concodigo = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $val->id_inventario])->one();
                         ?>
@@ -125,8 +125,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                                <a href="<?= Url::toRoute(["orden-produccion/view_regla_descuento", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
                             </td>
                         </tr>  
-                    <?php endforeach;
-                }?>
+                    <?php endforeach; ?>
             </tbody> 
         </table>   
     </div>
