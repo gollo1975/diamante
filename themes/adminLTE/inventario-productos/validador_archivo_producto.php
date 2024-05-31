@@ -15,6 +15,7 @@ use kartik\depdrop\DepDrop;
 //Modelos...
 $this->title = 'CARGAR IMAGEN';
 $this->params['breadcrumbs'][] = $this->title;
+$view_archivo = 'view_archivo';
 
 ?>
 <div class="panel panel-success">
@@ -27,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </script>
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["inventario-productos/validador_imagen"]),
+            "action" => Url::toRoute(["inventario-productos/view_archivo"]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -49,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["inventario-productos/validador_imagen"]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["inventario-productos/view_archivo"]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -79,31 +80,37 @@ $this->params['breadcrumbs'][] = $this->title;
                                              <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Imagen</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
+                                            <th scope="col" style='background-color:#B9D5CE;'></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php 
                                         $variable = '';
-                                        $item = \app\models\Documentodir::findOne(8);
+                                        $item = \app\models\Documentodir::findOne(21);
                                         foreach ($model as $val): 
-                                            $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
+                                            $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])
+                                                                                          ->andWhere(['=','predeterminado', 1])->one();
                                             ?>
                                             <tr style ='font-size: 90%;'>                
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
                                                 <td><?= $val->grupo->nombre_grupo?></td>
-                                                <?php if($valor){
+                                                <?php 
+                                                if($valor){
                                                   $variable = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;
                                                   if($valor->extension == 'png' || $valor->extension == 'jpeg' || $valor->extension == 'jpg'){?>
-                                                <td style="width: 100px; background-color: white" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($variable, ['width' => '70px;', 'height' => '75px;'])?></td>
+                                                    <td style="width: 100px; background-color: white" title="<?php echo $val->nombre_producto?>"> <?= yii\bootstrap\Html::img($variable, ['width' => '70px;', 'height' => '75px;'])?></td>
                                                   <?php }else {?>
                                                       <td><?= 'NOT FOUND'?></td>
                                                   <?php } 
                                                 }else{?>
-                                                      <td></td>
-                                                <?php }?>      
+                                                      <td><?= 'NOT FOUND'?></td>
+                                                <?php }?>  
+                                                <td style="width: 5%; height: 10%">
+                                                    <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index_archivo','numero' => 21, 'codigo' => $val->id_inventario, 'view_archivo' => $view_archivo, 'token' => $token,], ['class' => 'btn btn-default btn-sm']) ?>
+                                                </td>     
                                                 <td style= 'width: 25px; height: 10px;'>
-                                                    <a href="<?= Url::toRoute(["inventario-productos/view_archivo", "id" => $val->id_inventario, 'token' => $token, ]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Este proceso permite cargar la imagen del producto"></span></a>
+                                                    <a href="<?= Url::toRoute(["inventario-productos/view_imagen", "id" => $val->id_inventario, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Este proceso permite cargar la imagen del producto"></span></a>
                                                 </td>  
                                             </tr>            
                                         <?php endforeach; ?>

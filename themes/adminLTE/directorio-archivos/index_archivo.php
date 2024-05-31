@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th scope="col">Ruta</th>
                 <th scope="col">Tamaño</th>
                 <th scope="col">Extension</th>
+                 <th scope="col">Inicial</th>
                 <th scope="col" colspan="3">Acción</th>                               
                 
             </tr>
@@ -50,7 +51,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?= $val->descripcion ?></td>   
                 <td><?= $val->tipo ?></td>
                 <td><?= $val->tamaño ?></td>
-                 <td><?= $val->extension ?></td>
+                <td><?= $val->extension ?></td>
+                <td><?= $val->imagenActiva?></td> 
                 <td style= 'width: 15px; height: 20px;'>
                     <a href="<?= Url::toRoute(["directorio-archivos/descargar", "id" => $val->idarchivodir, 'numero' => $numero, 'codigo' => $codigo, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-download"></span></a>                                        
                 </td>
@@ -63,22 +65,28 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                                <h4 class="modal-title">Editar Archivo <?= $val->idarchivodir ?></h4>
+                                                <h4 class="modal-title">Modificar registro No : <?= $val->idarchivodir ?></h4>
                                             </div>
                                             <?= Html::beginForm(Url::toRoute(["directorio-archivos/editar_archivo", 'token' => $token]), "POST") ?>
                                             <div class="modal-body">
                                                 <div class="panel panel-success">
                                                     <div class="panel-heading">
-                                                        <h4>Información Archivo</h4>
+                                                        <h4>Gestor documental</h4>
                                                     </div>
                                                     
                                                     <div class="panel-body">
                                                         <div class="row">
-                                                            <label id="descripcion" for="descripcion" class="col-sm-3 control-label">Descripción</label>
-                                                            <div class="col-sm-5 form-group">
+                                                            <label id="descripcion" for="descripcion" class="col-sm-2 control-label">Descripción: </label>
+                                                            <div class="col-sm-8 form-group">
                                                                 <?= Html::textInput('descripcion', $val->descripcion, ['id' => 'descripcion', 'aria-required' => true, 'aria-invalid' => 'false', 'maxlength' => 120, 'class' => 'form-control', 'style' => 'width:100%', 'required' => true]) ?>                        
                                                             </div>   
-                                                        </div>                                                        
+                                                        </div> 
+                                                        <div class="row">
+                                                            <label id="predeterminado" for="predeterminado" class="col-sm-2 control-label">Predeterminado:</label>
+                                                            <div class="col-sm-8 form-group">
+                                                                  <?= Html::dropdownList('predeterminado', $val->predeterminado, ['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+                                                            </div>
+                                                        </div>    
                                                         <input type="hidden" name="idarchivodir" value="<?= $val->idarchivodir ?>">
                                                         <input type="hidden" name="numero" value="<?= $numero ?>">
                                                         <input type="hidden" name="codigo" value="<?= $codigo ?>">
@@ -110,10 +118,10 @@ $this->params['breadcrumbs'][] = $this->title;
         </table>
         <div class="panel-footer text-right" >
             <?php if($token == 0){?>
-                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', [$view_archivo.'/view_archivo', 'id' => $codigo, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>
+                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['inventario-productos/view_archivo', 'id' => $codigo, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>
                 <?= Html::a('<span class="glyphicon glyphicon-upload"></span> Subir Archivo', ['directorio-archivos/subir_archivo','numero' => $numero, 'codigo' => $codigo,'view_archivo' =>$view_archivo, 'token' => $token], ['class' => 'btn btn-success btn-sm']); ?>            
             <?php }else{?>
-               <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', [$view_archivo.'/view_archivo', 'id' => $codigo, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>
+               <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', [$view_archivo, 'id' => $codigo, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>
             <?php }?>
         </div>
     </div>

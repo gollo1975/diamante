@@ -391,13 +391,18 @@ class InventarioProductosController extends Controller
             'entradas' => $entradas,
         ]);
     }
-    //VISTA PARA SUBIR ARCHIOS DE IMAGEN
-      public function actionView_archivo($id, $token)
+    
+    //VISTA PARA VER LAS IMAGENES
+    public function actionView_imagen($id, $token)
     {
+        $item = \app\models\Documentodir::findOne(21);
+        $inventario = InventarioProductos::findOne($id);
         $model =  $this->findModel($id);
+        $imagenes = \app\models\DirectorioArchivos::find()->where(['=', 'codigo', $id])->andWhere(['=', 'numero', $item->codigodocumento])->all();
         return $this->render('view_archivo', [
             'model' => $model,
             'token' => $token,
+            'imagenes' => $imagenes,
             ]);
     }
     
@@ -637,7 +642,7 @@ class InventarioProductosController extends Controller
     }
     
     //PROCESO QUE VALIDA LA SUBIDA DE ARCHIVOS
-     public function actionValidador_imagen($token = 0) {
+     public function actionView_archivo($token = 0) {
        if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',37])->all()){
                 $form = new \app\models\FormModeloBuscar();

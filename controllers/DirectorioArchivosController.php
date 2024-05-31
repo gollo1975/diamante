@@ -187,7 +187,7 @@ class DirectorioArchivosController extends \yii\web\Controller
                         $table->iddocumentodir = $documentodir->iddocumentodir;
                         $table->iddirectorio = 1;
                         $table->save(false);
-                       $this->redirect([$view_archivo."/view_archivo",'id' => $codigo, 'token' => $token]);
+                       $this->redirect(['inventario-productos/view_archivo']);
                     } else {
                         Yii::$app->getSession()->setFlash('warning', 'Ya existe el nombre y la extesion del archivo que desea subir');    
                     }  
@@ -312,7 +312,8 @@ class DirectorioArchivosController extends \yii\web\Controller
                 $table = DirectorioArchivos::findOne($idarchivodir);
                 
                 if ($table) {
-                    $table->descripcion = Html::encode($_POST["descripcion"]);                                                                                
+                    $table->descripcion = Html::encode($_POST["descripcion"]); 
+                     $table->predeterminado = Html::encode($_POST["predeterminado"]);
                     $table->update();                       
                     $this->redirect(["directorio-archivos/index_archivo",'numero' => $numero,'codigo' => $codigo,'view_archivo' => $view_archivo, 'token' => $token]); 
                                         

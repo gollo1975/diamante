@@ -206,7 +206,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
             <!--TERMINA TABS-->
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   
-            <div role="tabpanel" class="tab-pane" id="imagenes">
+           <div role="tabpanel" class="tab-pane" id="imagenes">
                 <div class="table-responsive">
                     <div class="panel panel-success">
                         <div class="panel-body">

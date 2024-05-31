@@ -142,7 +142,7 @@
                                     ],
                                 ],
                                 //TERMINA 
-                              // MODULO DE PRODUCCION
+                              //  INICIO MODULO DE PRODUCCION
                                 [
                                     'label' => 'PRODUCCION',
                                     'icon' => 'flask',
@@ -185,7 +185,7 @@
                                                 'items' => [
                                                     ['label' => 'Precios y descuentos', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/crear_precio_venta']],
                                                     ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
-                                                    ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/validador_imagen']],
+                                                    ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/view_archivo']],
                                                 ]],
                                                 [
                                                 'label' => 'Control calidad',
@@ -194,8 +194,8 @@
                                                 'items' => [
                                                     ['label' => 'Cargar OP', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
                                                     ['label' => 'Auditoria granel', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
-                                                    ['label' => 'Auditoria OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_auditoria_ensamble']],
                                                     ['label' => 'Cargar OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index']],
+                                                    ['label' => 'Auditoria OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_auditoria_ensamble']],
                                                     
                                                 ]],
                                                 ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 

@@ -21,7 +21,7 @@ use app\models\TipoProcesoProduccion;
 
 
 
-$this->title = 'LISTADO DE ORDENES DE PRODUCCION (Auditoria / Orden de ensamble.)';
+$this->title = 'ORDENES DE PRODUCCION (Auditoria y/o Orden de ensamble.)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

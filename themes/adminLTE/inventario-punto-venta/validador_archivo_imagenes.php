@@ -121,9 +121,8 @@ $validador_imagen = 'inventario-punto-venta';
                                                 }else{?>
                                                       <td><?= 'No found'?></td>
                                                 <?php }?>      
-                                                      <td style="width: 5%; height: 10%">
+                                                <td style="width: 5%; height: 10%">
                                                     <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index_imagen_punto','numero' => 18, 'codigo' => $val->id_inventario, 'validador_imagen' => $validador_imagen, 'token' => $token,], ['class' => 'btn btn-default btn-sm']) ?>
-                                                    
                                                 </td>  
                                             </tr>            
                                         <?php endforeach; ?>
