@@ -113,11 +113,11 @@ $form = ActiveForm::begin([
                     <?php 
                     if($val->aplica_talla_color == 1){?>
                         <td style= 'width: 25px; height: 10px;'>
-                             <a href="<?= Url::toRoute(["inventario-punto-venta/view_traslado", "id" => $val->id_inventario,'id_punto' => $val->id_punto]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite trasladar productos entre puntos de ventas."></span></a>
+                             <a href="<?= Url::toRoute(["inventario-punto-venta/view_traslado", "id" => $val->id_inventario,'id_punto' => $val->id_punto,'sw' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite trasladar productos entre puntos de ventas."></span></a>
                         </td> 
                     <?php }else{?>
                         <td style= 'width: 25px; height: 10px;'>
-                          <a href="<?= Url::toRoute(["inventario-punto-venta/traslado_entre_sucursal", "id" => $val->id_inventario,'id_punto' => $val->id_punto]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite trasladar productos entre puntos de ventas."></span></a>
+                          <a href="<?= Url::toRoute(["inventario-punto-venta/view_traslado", "id" => $val->id_inventario,'id_punto' => $val->id_punto, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite trasladar productos entre puntos de ventas."></span></a>
                         </td>    
                     <?php }?>    
                 </tr>            

@@ -432,48 +432,93 @@ class InventarioPuntoVentaController extends Controller
     }
     
     //VISTA DE TRASLADO DE PRODUCO ENTRE SUCURSALES
-    public function actionView_traslado($id, $id_punto) {
+    public function actionView_traslado($id, $id_punto, $sw) {
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $conPunto = \app\models\PuntoVenta::find()->andWhere(['<>','id_punto', 1])->orderBy('nombre_punto DESC')->all();
         $asignacion = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario', $id])->all();
         $inventario = \app\models\InventarioPuntoVenta::findOne($id);
-        if(isset($_POST["enviar_traslado"])){
-            if(isset($_POST["nuevo_traslado_punto"])){
-                $intIndice = 0;
-                $unidad_entrada = 0;
-                foreach ($_POST["nuevo_traslado_punto"] as $intCodigo):
-                    $unidad_entrada = $_POST["cantidad_trasladar"][$intIndice]; //asigno variable
-                    if($unidad_entrada > 0){
-                        $Busqueda = \app\models\DetalleColorTalla::find()->where(['=','id_detalle', $intCodigo])->one();
-                        if($unidad_entrada <= $inventario->stock_inventario){
-                            $table = new \app\models\TrasladoReferenciaPunto();
-                            $table->id_inventario = $id;
-                            $table->id_punto_saliente = $id_punto;
-                            $table->id_talla = $Busqueda->id_talla;
-                            $table->id_color = $Busqueda->id_color;
-                            $table->id_punto_entrante =  $_POST["nuevo_punto"][$intIndice];
-                            $table->unidades = $unidad_entrada;
-                            $table->fecha_proceso = date('Y-m-d');
-                            $table->user_name = Yii::$app->user->identity->username;
-                            $table->save();
-                            $intIndice++; 
+        if($sw == 0){
+            if(isset($_POST["enviar_traslado"])){
+                if(isset($_POST["nuevo_traslado_punto"])){
+                    $intIndice = 0;
+                    $unidad_entrada = 0;
+                    foreach ($_POST["nuevo_traslado_punto"] as $intCodigo):
+                        $unidad_entrada = $_POST["cantidad_trasladar"][$intIndice]; //asigno variable
+                        if($unidad_entrada > 0){
+                            $Busqueda = \app\models\DetalleColorTalla::find()->where(['=','id_detalle', $intCodigo])->one();
+                            if($unidad_entrada <= $inventario->stock_inventario){
+                                $table = new \app\models\TrasladoReferenciaPunto();
+                                $table->id_inventario = $id;
+                                $table->id_punto_saliente = $id_punto;
+                                $table->id_talla = $Busqueda->id_talla;
+                                $table->id_color = $Busqueda->id_color;
+                                $table->id_punto_entrante =  $_POST["nuevo_punto"][$intIndice];
+                                $table->unidades = $unidad_entrada;
+                                $table->fecha_proceso = date('Y-m-d');
+                                $table->user_name = Yii::$app->user->identity->username;
+                                $table->save();
+                                $intIndice++; 
+                            }else{
+                                $intIndice++;
+                            }    
                         }else{
-                            $intIndice++;
-                        }    
-                    }else{
-                       $intIndice++; 
-                    } 
-                endforeach;
-                return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto]);
-            }
-        }    
-        return $this->render('view_traslado_producto', [
+                           $intIndice++; 
+                        } 
+                    endforeach;
+                    return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto]);
+                }
+            } 
+            return $this->render('view_traslado_producto', [
                             'model' => $this->findModel($id),
                             'talla_color' => $talla_color,
                             'id_punto' => $id_punto,
                             'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombrePunto'),
                             'asignacion'=> $asignacion,
+                            'sw' => $sw,
                 ]);
+        }else{
+            $form = new \app\models\FiltroBusquedaInventarioPunto();
+            $unidades = null;
+            $punto_venta = null;
+            if ($form->load(Yii::$app->request->get())) {
+                if ($form->validate()) {
+                    $unidades = Html::encode($form->unidades);
+                    $punto_venta = Html::encode($form->punto_venta);
+                    if($unidades <> null && $punto_venta <> null){
+                       $conInven = InventarioPuntoVenta::findOne($id);
+                       if($punto_venta <= $conInven->stock_inventario){
+                           $table = new \app\models\TrasladoReferenciaPunto();
+                           $table->id_inventario = $id;
+                           $table->id_punto_saliente = $id_punto;
+                           $table->id_punto_entrante = $punto_venta;
+                           $table->unidades = $unidades;
+                           $table->fecha_proceso = date('Y-m-d');
+                           $table->user_name = Yii::$app->user->identity->username;
+                           $table->save();
+                           return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto,'sw'=> $sw]);
+                       }else{
+                           Yii::$app->session->setFlash('warning', 'Las existencias de estas referencia son MENORES que la cantidad a trasladar. Favor valide la informacion.');
+                           return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto,'sw'=> $sw]);
+                       }
+                    }else{
+                        Yii::$app->session->setFlash('error', 'Campos vacios. Favor seleccionar el PUNTO DE VENTA y las CANTIDADES a trasladar.');
+                        return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto,'sw'=> $sw]);
+                    }
+                }else{
+                  $form->getErrors();
+                }   
+            }    
+            return $this->render('view_traslado_producto', [
+                            'model' => $this->findModel($id),
+                            'talla_color' => $talla_color,
+                            'form' => $form,
+                            'id_punto' => $id_punto,
+                            'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombrePunto'),
+                            'asignacion'=> $asignacion,
+                            'sw' => $sw,
+                ]); 
+        }    
+        
                            
     }
     
@@ -621,7 +666,6 @@ class InventarioPuntoVentaController extends Controller
     }
     
     //EDITAR DESCUENTO COMERCIAL PUNTO DE VENTA
-    //EDITAR DESCUENTO COMERCIAL MAYORISTA
     public function actionEditar_descuento_puntoventa($id, $sw = 1) {
         $model = new \app\models\ModeloEditarReglaDescuento();
         $table = InventarioPuntoVenta::findOne($id);
@@ -977,11 +1021,18 @@ class InventarioPuntoVentaController extends Controller
     }
 
     //ELIMINAR DETALLES DE TRASLADOS
-    public function actionEliminar_traslado($id, $id_traslado, $id_punto)
+    public function actionEliminar_traslado($id, $id_traslado, $id_punto, $sw)
     {                                
-        $detalles = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
-        $detalles->delete();
-        $this->redirect(["inventario-punto-venta/view_traslado",'id' => $id, 'id_punto' => $id_punto]);        
+        
+        if($sw == 0){
+            $detalles = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
+            $detalles->delete();
+            $this->redirect(["inventario-punto-venta/view_traslado",'id' => $id, 'id_punto' => $id_punto,'sw' => $sw]);  
+        }else{
+           if ($form->load(Yii::$app->request->get())) {
+               echo 'dadada';
+           }
+        }    
     } 
     
     //ELIMINAR DETALLES  
