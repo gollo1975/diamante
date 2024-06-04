@@ -262,7 +262,77 @@ class InventarioPuntoVentaController extends Controller
         ]);
         
     }
-           
+    
+    //TRASLADO ENTRE PUNTOS DE VENA
+      public function actionTraslado_producto() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',107])->all()){
+                $form = new \app\models\FiltroBusquedaInventarioPunto();
+                $codigo = null;
+                $inventario_inicial = null;
+                $punto_venta = null;
+                $marca = null;
+                $producto = null;
+                $conPunto = \app\models\PuntoVenta::find()->andWhere(['>','id_punto', 1])->orderBy('predeterminado DESC')->all();
+                $conMarca = \app\models\Marca::find()->orderBy('marca DESC')->all();
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $codigo = Html::encode($form->codigo);
+                        $inventario_inicial = Html::encode($form->inventario_inicial);
+                        $producto = Html::encode($form->producto);
+                        $punto_venta = Html::encode($form->punto_venta);
+                        $marca = Html::encode($form->marca);
+                        $table = InventarioPuntoVenta::find()
+                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                    ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                    ->andFilterWhere(['=', 'id_punto', $punto_venta])
+                                    ->andFilterWhere(['=', 'id_marca', $marca])
+                                    ->andWhere(['>', 'stock_inventario', 0])
+                                    ->andWhere(['>','id_punto', 1]);
+                        $table = $table->orderBy('id_inventario DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = InventarioPuntoVenta::find()->Where(['>', 'stock_inventario', 0])
+                                                         ->andWhere(['>','id_punto', 1])->orderBy('id_inventario DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }
+                $to = $count->count();
+                return $this->render('traslado_punto_venta', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombre_punto'),
+                            'conMarca' => ArrayHelper::map($conMarca, 'id_marca', 'marca'),
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }     
     /**
      * Displays a single InventarioPuntoVenta model.
      * @param integer $id
@@ -360,6 +430,81 @@ class InventarioPuntoVentaController extends Controller
                             'id' => $id,
         ]);
     }
+    
+    //VISTA DE TRASLADO DE PRODUCO ENTRE SUCURSALES
+    public function actionView_traslado($id, $id_punto) {
+        $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
+        $conPunto = \app\models\PuntoVenta::find()->andWhere(['<>','id_punto', 1])->orderBy('nombre_punto DESC')->all();
+        $asignacion = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario', $id])->all();
+        $inventario = \app\models\InventarioPuntoVenta::findOne($id);
+        if(isset($_POST["enviar_traslado"])){
+            if(isset($_POST["nuevo_traslado_punto"])){
+                $intIndice = 0;
+                $unidad_entrada = 0;
+                foreach ($_POST["nuevo_traslado_punto"] as $intCodigo):
+                    $unidad_entrada = $_POST["cantidad_trasladar"][$intIndice]; //asigno variable
+                    if($unidad_entrada > 0){
+                        $Busqueda = \app\models\DetalleColorTalla::find()->where(['=','id_detalle', $intCodigo])->one();
+                        if($unidad_entrada <= $inventario->stock_inventario){
+                            $table = new \app\models\TrasladoReferenciaPunto();
+                            $table->id_inventario = $id;
+                            $table->id_punto_saliente = $id_punto;
+                            $table->id_talla = $Busqueda->id_talla;
+                            $table->id_color = $Busqueda->id_color;
+                            $table->id_punto_entrante =  $_POST["nuevo_punto"][$intIndice];
+                            $table->unidades = $unidad_entrada;
+                            $table->fecha_proceso = date('Y-m-d');
+                            $table->user_name = Yii::$app->user->identity->username;
+                            $table->save();
+                            $intIndice++; 
+                        }else{
+                            $intIndice++;
+                        }    
+                    }else{
+                       $intIndice++; 
+                    } 
+                endforeach;
+                return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto]);
+            }
+        }    
+        return $this->render('view_traslado_producto', [
+                            'model' => $this->findModel($id),
+                            'talla_color' => $talla_color,
+                            'id_punto' => $id_punto,
+                            'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombrePunto'),
+                            'asignacion'=> $asignacion,
+                ]);
+                           
+    }
+    
+    //APLICAR TRASLADO DE REFERENCIAS.
+    public function actionAplicar_traslado($id, $id_punto, $id_traslado){
+        $inventario = InventarioPuntoVenta::findOne($id);
+        $traslado = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
+        if($inventario->aplica_talla_color == 1){
+            $conReferenciaPunto = \app\models\InventarioPuntoVenta::find()->where(['=','id_punto', $traslado->id_punto_entrante])->andWhere(['=','id_inventario', $id])->all();
+            if(count($conReferenciaPunto)> 0 ){
+                echo 'se ecncuenra';
+            }else{
+                Yii::$app->session->setFlash('error', 'No se puedes aplicar este traslado a este punto de venta porque la referencia no esta creada. Contactar al administrador.');
+                return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto]);
+            }
+            
+            $ConReferencia = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])
+                                                                   ->andWhere(['=','id_talla', $traslado->id_talla])
+                                                                   ->andWhere(['=','id_color', $traslado->id_color])->one();
+             if($ConReferencia){
+                 echo 'entra';
+             }else{
+                 echo 'no existe';
+             }
+            //  return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto]);
+        }else{
+            
+        }
+       // return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto]);
+    }
+    
     
     //PROCESO QUE SUMA TODAAS LAS CANTIDAD
     protected function ActualizarLineas($id) {
@@ -669,18 +814,18 @@ class InventarioPuntoVentaController extends Controller
                     $table->unidades = $model->unidades;
                     $table->fecha_proceso = date('Y-m-d');
                     $table->user_name = Yii::$app->user->identity->username;
-                    $table->save();
+                    $table->save(false);
                     if ($nueva_referencia->aplica_talla_color == 0) {
                        $inventario->stock_inventario += $model->unidades;
                        $inventario->stock_unidades += $model->unidades;
                        $inventario->save();
                        $nueva_referencia->stock_inventario -= $model->unidades;
-                       $nueva_referencia->save();
-                       return $this->redirect(['index']);
+                       $nueva_referencia->save(false);
                     } 
+                    return $this->redirect(['inventario-punto-venta/index']);
                 }else{
                     Yii::$app->session->setFlash('error', 'La EXISTENCIA que hay en la bodega es MENOR que la cantidad a importar. Valide la informacion.');
-                    return $this->redirect(['index']);
+                    return $this->redirect(['inventario-punto-venta/index']);
                 }    
             }
         }   
@@ -831,9 +976,15 @@ class InventarioPuntoVentaController extends Controller
        $inventario->save();
     }
 
+    //ELIMINAR DETALLES DE TRASLADOS
+    public function actionEliminar_traslado($id, $id_traslado, $id_punto)
+    {                                
+        $detalles = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
+        $detalles->delete();
+        $this->redirect(["inventario-punto-venta/view_traslado",'id' => $id, 'id_punto' => $id_punto]);        
+    } 
     
-    
-      //ELIMINAR DETALLES  
+    //ELIMINAR DETALLES  
     public function actionEliminar($id,$id_detalle, $token,$codigo)
     {                                
         $detalles = \app\models\DetalleColorTalla::findOne($id_detalle);

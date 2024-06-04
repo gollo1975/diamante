@@ -79,6 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <th scope="col" style='background-color:#B9D5CE;'>Codigo del color</th>                      
                                 <th scope="col" style='background-color:#B9D5CE;'>Nombre del color</th> 
                                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th> 
+                                <th scope="col" style='background-color:#B9D5CE;'>Nuevo punto de venta</th> 
                                 <th scope="col" style='background-color:#B9D5CE;'>Cantidad a vender</th> 
 
                             </tr>

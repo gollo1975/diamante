@@ -101,6 +101,12 @@ class PuntoVenta extends \yii\db\ActiveRecord
         return $this->hasOne(Municipios::className(), ['codigo_municipio' => 'codigo_municipio']);
     }
     
+    //proceso que incrita varios valores
+     public function getNombrePunto()
+    {
+        return "{$this->nombre_punto}";
+    }
+    
     public function getPredeterminadoPunto() {
         if($this->predeterminado == 0){
             $predeterminadopunto = 'NO';

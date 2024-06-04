@@ -18,10 +18,13 @@ class FiltroBusquedaInventarioPunto extends Model
     public $inventario_inicial;
     public $punto_venta;
     public $proveedor;
+    public $marca;
+
+
     public function rules()
     {
         return [  
-           [['codigo', 'punto_venta','inventario_inicial','proveedor'], 'integer'],
+           [['codigo', 'punto_venta','inventario_inicial','proveedor','marca'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
            ['producto', 'string'],
         ];
@@ -37,6 +40,7 @@ class FiltroBusquedaInventarioPunto extends Model
             'fecha_corte' => 'Fecha corte:',
             'inventario_inicial' => 'Inventario inicial:',
             'proveedor' =>'Nombre de proveedor:',
+            'marca' => 'Nombre de marca:',
            
         ];
     }

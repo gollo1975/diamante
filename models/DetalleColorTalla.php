@@ -36,12 +36,13 @@ class DetalleColorTalla extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'id_color', 'id_talla', 'cantidad', 'stock_punto','cerrado'], 'integer'],
+            [['id_inventario', 'id_color', 'id_talla', 'cantidad', 'stock_punto','cerrado','id_punto'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
             [['id_color'], 'exist', 'skipOnError' => true, 'targetClass' => Colores::className(), 'targetAttribute' => ['id_color' => 'id_color']],
             [['id_talla'], 'exist', 'skipOnError' => true, 'targetClass' => Tallas::className(), 'targetAttribute' => ['id_talla' => 'id_talla']],
+            [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
         ];
     }
 
@@ -60,6 +61,7 @@ class DetalleColorTalla extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',
             'cerrado' => 'Cerrado:',
+            'id_punto' => 'id_punto',
         ];
     }
 
@@ -70,7 +72,15 @@ class DetalleColorTalla extends \yii\db\ActiveRecord
     {
         return $this->hasOne(InventarioPuntoVenta::className(), ['id_inventario' => 'id_inventario']);
     }
-
+     
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPunto()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */

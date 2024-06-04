@@ -36,12 +36,14 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'id_punto_saliente', 'id_punto_entrante', 'unidades'], 'integer'],
+            [['id_inventario', 'id_punto_saliente', 'id_punto_entrante', 'unidades','id_talla','id_color','aplicado'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
             [['id_punto_saliente'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto_saliente' => 'id_punto']],
             [['id_punto_entrante'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto_entrante' => 'id_punto']],
+            [['id_talla'], 'exist', 'skipOnError' => true, 'targetClass' => Tallas::className(), 'targetAttribute' => ['id_talla' => 'id_talla']],
+            [['id_color'], 'exist', 'skipOnError' => true, 'targetClass' => Colores::className(), 'targetAttribute' => ['id_color' => 'id_color']],
         ];
     }
 
@@ -59,6 +61,9 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
             'fecha_proceso' => 'Fecha Proceso',
             'fecha_hora_registro' => 'Fecha Hora Regisro',
             'user_name' => 'User Name',
+            'id_talla' => 'Tallas:',
+            'id_color' => 'Colores:',
+            'aplicado' => 'Aplicado:',
         ];
     }
 
@@ -68,6 +73,21 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     public function getInventario()
     {
         return $this->hasOne(InventarioPuntoVenta::className(), ['id_inventario' => 'id_inventario']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getColores()
+    {
+        return $this->hasOne(Colores::className(), ['id_color' => 'id_color']);
+    }
+      /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTallas()
+    {
+        return $this->hasOne(Tallas::className(), ['id_talla' => 'id_talla']);
     }
 
     /**
@@ -84,5 +104,14 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     public function getPuntoEntrante()
     {
         return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto_entrante']);
+    }
+    
+    public function getRegistroAplicado() {
+        if($this->aplicado == 0){
+            $registroaplicado = 'NO';
+        }else{
+            $registroaplicado = 'SI';
+        }
+        return $registroaplicado;
     }
 }
