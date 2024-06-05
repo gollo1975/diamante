@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="row" >
                 <?php if($model->autorizado == 0){?>
                     <?= $formulario->field($form, 'codigo_producto',['inputOptions' =>['autofocus' => 'autofocus', 'class' => 'form-control']])?>
-                    <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                    <?= $formulario->field($form, 'nombre_producto')->widget(Select2::classname(), [
                        'data' => $inventario,
                        'options' => ['prompt' => 'Seleccione...'],
                        'pluginOptions' => [
@@ -144,12 +144,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 $cadena = '';
                 $item = \app\models\Documentodir::findOne(18);
                 foreach ($detalle_remision as $detalle):
+                    $conInventario = app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
                     $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $detalle->id_inventario])
                                                                   ->andwhere(['=','predeterminado', 1])->andWhere(['=','numero', $item->codigodocumento])->one();
-                    $tallaColor = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_detalle', $detalle->id_detalle])->one();
+                    $tallaColor = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $detalle->id_detalle])->one();
                     ?>
                 <tr style ='font-size:90%;'>
-                    <?php if($model->autorizado == 0 && $model->valor_bruto > 0){?>
+                    <?php if($model->autorizado == 0 && $model->valor_bruto > 0 && $conInventario->aplica_talla_color == 1){?>
                         <td style="width: 20px; height: 20px">
                              <a href="<?= Url::toRoute(["remisiones/crear_talla_color", 'id' => $model->id_remision, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                             <span class='glyphicon glyphicon-shopping-cart'></span> </a>  

@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Traslados de producto', 'url' => [
 $this->params['breadcrumbs'][] = $model->id_inventario;
 
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <div class="inventario-punto-venta-view_traslado">
 
     <!--<?= Html::encode($this->title) ?>-->
@@ -204,7 +205,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                    <?= $formulario->field($form, 'unidades')->textInput(['maxlength' => true]) ?>
                                 </div>  
                                 <div class="panel-footer text-right">
-                                    <?= Html::submitButton("<span class='glyphicon glyphicon-send'></span> Enviar", ["class" => "btn btn-primary btn-sm",]) ?>
+                                    <?= Html::submitButton("<span class='glyphicon glyphicon-send'></span> Enviar", ["class" => "btn btn-primary btn-sm", 'name' => 'enviar_productos']) ?>
                                 </div>
                            </div>
                     </div>
@@ -234,27 +235,21 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                             <td><?= $val->puntoEntrante->nombre_punto?></td>
                                             <td style="text-align: right"><?= ''. number_format( $val->unidades,0)?></td>
                                             <td><?= $val->fecha_hora_registro?></td>
-                                             <td><?= $val->registroAplicado?></td>
-                                            <td style= 'width: 25px; height: 25px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw' => $sw], [
-                                                           'class' => '',
-                                                           'data' => [
-                                                               'confirm' => 'Esta seguro de eliminar el registro?',
-                                                               'method' => 'post',
-                                                           ],
-                                                       ])
-                                                ?>
-                                            </td> 
-                                            <td style= 'width: 25px; height: 10px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['inventario-punto-venta/aplicar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado,'sw' => $sw], [
-                                                              'class' => '',
-                                                              'title' => 'Proceso que permite cargar estas existencias a la referencia seleccionada.', 
-                                                              'data' => [
-                                                                  'confirm' => 'Esta seguro de aplicar el traslado de la referencia:  ('.$model->nombre_producto.') al punto de venta de ('.$val->puntoEntrante->nombre_punto.').',
-                                                                  'method' => 'post',
-                                                              ],
-                                                ]);?>
-                                            </td> 
+                                            <td><?= $val->registroAplicado?></td>
+                                            <?php 
+                                            if($val->aplicado == 0){?>
+                                                <td style= 'width: 25px; height: 10px;'>
+                                                        <a href="<?= Url::toRoute(["inventario-punto-venta/eliminar_traslado", 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado,'sw' => $sw])?>"
+                                                        <span class='glyphicon glyphicon-trash'></span> </a>
+                                                 </td>  
+                                                <td style= 'width: 25px; height: 10px;'>
+                                                    <a href="<?= Url::toRoute(["inventario-punto-venta/aplicar_traslado", 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado,'sw' => $sw, 'nuevo_punto' =>$val->id_punto_entrante])?>"
+                                                        <span class='glyphicon glyphicon-plus'></span> </a>
+                                                </td> 
+                                            <?php }else{?>
+                                                <td style= 'width: 25px; height: 10px;'></td>
+                                                <td style= 'width: 25px; height: 10px;'></td>
+                                            <?php } ?>    
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>

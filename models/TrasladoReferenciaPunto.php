@@ -36,10 +36,10 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'id_punto_saliente', 'id_punto_entrante', 'unidades','id_talla','id_color','aplicado'], 'integer'],
+            [['id_inventario_saliente', 'id_punto_saliente', 'id_punto_entrante', 'unidades','id_talla','id_color','aplicado','id_inventario_entrante'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
-            [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
+            [['id_inventario_saliente'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario_saliente' => 'id_inventario']],
             [['id_punto_saliente'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto_saliente' => 'id_punto']],
             [['id_punto_entrante'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto_entrante' => 'id_punto']],
             [['id_talla'], 'exist', 'skipOnError' => true, 'targetClass' => Tallas::className(), 'targetAttribute' => ['id_talla' => 'id_talla']],
@@ -54,7 +54,8 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     {
         return [
             'id_traslado' => 'Id Traslado',
-            'id_inventario' => 'Id Inventario',
+            'id_inventario_saliente' => 'Saliente',
+            'id_inventario_entrante' => 'Entrante',
             'id_punto_saliente' => 'Id Punto Saliente',
             'id_punto_entrante' => 'Id Punto Entrante',
             'unidades' => 'Unidades',
@@ -72,7 +73,7 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
      */
     public function getInventario()
     {
-        return $this->hasOne(InventarioPuntoVenta::className(), ['id_inventario' => 'id_inventario']);
+        return $this->hasOne(InventarioPuntoVenta::className(), ['id_inventario' => 'id_inventario_saliente']);
     }
     
      /**

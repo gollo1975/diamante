@@ -104,4 +104,31 @@ class Remisiones extends \yii\db\ActiveRecord
     {
         return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
+    
+    public function getAutorizadoRemision(){
+        if($this->autorizado == 0){
+            $autorizadoremision = 'NO';
+        }else{
+            $autorizadoremision = 'SI';
+        }
+        return $autorizadoremision;
+    }
+    
+    public function getExportarInventario(){
+        if($this->exportar_inventario == 0){
+            $exportarinventario = 'NO';
+        }else{
+            $exportarinventario = 'SI';
+        }
+        return $exportarinventario;
+    }
+    
+    public function getExpedirFactura(){
+        if($this->expedir_factura == 0){
+            $expedirfactura = 'NO';
+        }else{
+            $expedirfactura = 'SI';
+        }
+        return $expedirfactura;
+    }
 }

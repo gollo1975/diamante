@@ -168,8 +168,22 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Nueva remision', ['create','accesoToken' => $accesoToken], [
+           
+            <div class="btn-group btn-sm" role="group">    
+                   <button type="button" class="btn btn-success  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       Exportar a excel
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li> <?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Excel", ['name' => 'excel']); ?> </li>
+                        <?php 
+                        if($fecha_inicio <> '' && $fecha_corte <> '' || $cliente <> null || $punto_venta <> null  ){?>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-export"></span> Detalle', ['excel_detalle_remision', 'fecha_inicio' => $fecha_inicio, 'fecha_corte' => $fecha_corte, 'cliente' =>$cliente, 'punto_venta' => $punto_venta]) ?></li>
+                        <?php }?> 
+                    </ul>
+            </div> 
+           
+            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Nueva remision', ['create','accesoToken' => $accesoToken], [
                                            'class' => '',
                                            'title' => 'Proceso que permite crear una nueva remision de venta.', 
                                            'class' => 'btn btn-default btn-sm',
@@ -180,8 +194,8 @@ $form = ActiveForm::begin([
                                            ], 
                                            
                              ])?>
-        <?php $form->end() ?>
         </div>
+      <?php $form->end() ?>
      </div>
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>

@@ -74,7 +74,7 @@ class RemisionesController extends Controller
                         if($accesoToken == 1){ 
                             $table = Remisiones::find()
                                         ->andFilterWhere(['=', 'numero_remision', $numero])
-                                        ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                        ->andFilterWhere(['between', 'fecha_inicio', $fecha_inicio, $fecha_corte])
                                         ->andFilterWhere(['=', 'id_cliente', $cliente])
                                         ->andFilterWhere(['=', 'id_punto', $punto_venta]);
                         }else{
@@ -131,6 +131,10 @@ class RemisionesController extends Controller
                             'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombre_punto'),
                             'conCliente' => ArrayHelper::map($conCliente, 'id_cliente', 'clienteCompleto'),
                             'accesoToken' => $accesoToken,
+                            'cliente' => $cliente,
+                            'punto_venta' => $punto_venta,
+                            'fecha_inicio' => $fecha_inicio,
+                            'fecha_corte' => $fecha_corte,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -150,7 +154,7 @@ class RemisionesController extends Controller
     {
         $form = new \app\models\ModeloEntradaProducto();
         $codigo_producto = null;
-        $producto = null;
+        $nombre_producto = null;
         $factura = Remisiones::findOne($id);
         $punto_venta = \app\models\PuntoVenta::findOne($accesoToken);
         $inventario = \app\models\InventarioPuntoVenta::find()->where(['>','stock_inventario', 0])
@@ -158,8 +162,12 @@ class RemisionesController extends Controller
                                                           ->orderBy('nombre_producto ASC')->all();
         $detalle_remision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->all();
          if ($form->load(Yii::$app->request->get())) {
-              $codigo_producto = Html::encode($form->codigo_producto);
-             $producto = Html::encode($form->producto);
+            $codigo_producto = Html::encode($form->codigo_producto);
+            $nombre_producto = Html::encode($form->nombre_producto);
+            if($nombre_producto <> null){
+                $conInve = InventarioPuntoVenta::findOne($nombre_producto);
+                $codigo_producto = $conInve->codigo_producto;
+            }
             if ($codigo_producto > 0) {
                 $conCodigo = \app\models\InventarioPuntoVenta::find()->Where(['=','codigo_producto', $codigo_producto])->andWhere(['=','id_punto', $accesoToken])->one();
                 if($conCodigo){
@@ -323,7 +331,7 @@ class RemisionesController extends Controller
         $factura = Remisiones::findOne($id);
         $sw = 0;
         foreach ($detalle as $detalle_factura):
-            if(!$talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
+            if($talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
                 $sw = 1;
             }
         endforeach;
@@ -428,21 +436,33 @@ class RemisionesController extends Controller
     public function actionExportar_inventario_punto($id, $accesoToken) {
         $facturaPunto = Remisiones::findOne($id);
         $talla_color_factura = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_remision', $id])->all();
-        foreach ($talla_color_factura as $factura):
-            $inventario = \app\models\InventarioPuntoVenta::findOne($factura->id_inventario);
-            $talla_color_bodega = \app\models\DetalleColorTalla::find()->where (['=','id_inventario', $factura->id_inventario])
-                                                                       ->andWhere(['=','id_talla', $factura->id_talla])
-                                                                       ->andWhere(['=','id_color', $factura->id_color])->all();
-            foreach ($talla_color_bodega as $bodega):
-                $bodega->stock_punto -= $factura->cantidad_venta; 
-                $bodega->save ();
-                $inventario->stock_inventario -= $factura->cantidad_venta;
-                $inventario->save ();
-            endforeach;        
-        endforeach; 
-        $facturaPunto->exportar_inventario = 1;
-        $facturaPunto->save ();
-        return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
+        if(count($talla_color_factura)> 0){    
+            foreach ($talla_color_factura as $factura):
+                $inventario = \app\models\InventarioPuntoVenta::findOne($factura->id_inventario);
+                $talla_color_bodega = \app\models\DetalleColorTalla::find()->where (['=','id_inventario', $factura->id_inventario])
+                                                                           ->andWhere(['=','id_talla', $factura->id_talla])
+                                                                           ->andWhere(['=','id_color', $factura->id_color])->all();
+                foreach ($talla_color_bodega as $bodega):
+                    $bodega->stock_punto -= $factura->cantidad_venta; 
+                    $bodega->save ();
+                    $inventario->stock_inventario -= $factura->cantidad_venta;
+                    $inventario->save ();
+                endforeach;        
+            endforeach; 
+            $facturaPunto->exportar_inventario = 1;
+            $facturaPunto->save ();
+            return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
+        }else{
+            $detalle_remision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->all();
+            foreach ($detalle_remision as $detalle):
+                $inventario = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
+                $inventario->stock_inventario -= $detalle->cantidad;
+                $inventario->save();
+            endforeach;
+            $facturaPunto->exportar_inventario = 1;
+            $facturaPunto->save ();
+            return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
+        }    
     }
     
     /**
@@ -541,7 +561,8 @@ class RemisionesController extends Controller
             Yii::$app->getSession()->setFlash('error', 'Debe eliminar las tallas y colores de esta referencia y luego volver a ingresar las nuevas cantidades.');
             $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
         }else{
-            if($detalle->cantidad == 1){
+            var_dump($detalle->cantidad);
+            if($detalle->cantidad == 1 || $detalle->cantidad == 0){
                 $detalle->delete();     
             }else{
                 $cantidad = 0; $vrl_unitario = 0; $total = 0; $subtotal = 0; $descuento = 0; $porcentaje_dscto = 0; $porcentaje_iva = 0; $iva = 0;
@@ -559,8 +580,8 @@ class RemisionesController extends Controller
                $detalle->total_linea = round($total - $descuento);
                $detalle->save();
             }
-            $this->ActualizarSaldosTotales($id);
-            $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
+           $this->ActualizarSaldosTotales($id);
+           $this->redirect(["view",'id' => $id, 'accesoToken' => $accesoToken]);   
         }    
     } 
 
@@ -587,4 +608,236 @@ class RemisionesController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    //PROCESOS DE EXCEL
+    public function actionExcelRemisiones($tableexcel)
+    {
+         $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'NRO REMISION')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'FECHA REMISION')
+                        ->setCellValue('F1', 'FECHA HORA REGISTRO')
+                        ->setCellValue('G1', 'VALOR BRUTO')
+                        ->setCellValue('H1', 'DSCUENTO')
+                        ->setCellValue('I1', 'SUBTOTAL')
+                        ->setCellValue('J1', 'TOTAL REMISION')
+                        ->setCellValue('K1', 'VENDEDOR')    
+                        ->setCellValue('L1', 'USER NAME')
+                        ->setCellValue('M1', 'AUTORIZADO')
+                        ->setCellValue('N1', 'PUNTO DE VENTA')
+                        ->setCellValue('O1', 'EXPORTADO')
+                        ->setCellValue('P1', 'FACTURADO');
+            $i = 2;
+
+            foreach ($tableexcel as $val) {
+
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_remision)
+                        ->setCellValue('B' . $i, $val->numero_remision)
+                        ->setCellValue('C' . $i, $val->cliente->nit_cedula)
+                        ->setCellValue('D' . $i, $val->cliente->nombre_completo)
+                        ->setCellValue('E' . $i, $val->fecha_inicio)
+                        ->setCellValue('F' . $i, $val->fecha_hora_registro)
+                        ->setCellValue('G' . $i, $val->valor_bruto)
+                        ->setCellValue('H' . $i, $val->descuento)
+                        ->setCellValue('I' . $i, $val->subtotal)
+                        ->setCellValue('J' . $i, $val->total_remision)
+                        ->setCellValue('K' . $i, $val->cliente->agenteComercial->nombre_completo)
+                        ->setCellValue('L' . $i, $val->user_name)
+                        ->setCellValue('M' . $i, $val->autorizadoRemision)
+                        ->setCellValue('N' . $i, $val->puntoVenta->nombre_punto)
+                        ->setCellValue('O' . $i, $val->exportarInventario)
+                        ->setCellValue('P' . $i, $val->expedirFactura);
+                $i++;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Remisiones.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        
+    }
+    
+    //DETALLE DE LA REMISION
+    public function actionExcel_detalle_remision($fecha_inicio, $fecha_corte, $cliente, $punto_venta)
+    {
+        if($fecha_inicio <> null && $fecha_corte <> null && $cliente <> null){
+              $remision = Remisiones::find()->where(['between','fecha_inicio', $fecha_inicio, $fecha_corte])->andWhere(['=','id_cliente', $cliente])->all();
+        }else{
+            if($fecha_inicio <> null && $fecha_corte <> null && $punto_venta <> null){
+                $remision = Remisiones::find()->where(['between','fecha_inicio', $fecha_inicio, $fecha_corte])->andWhere(['=','id_punto', $punto_venta])->all();
+            }else{
+               if($fecha_inicio <> null && $fecha_corte <> null){
+                   $remision = Remisiones::find()->where(['between','fecha_inicio', $fecha_inicio, $fecha_corte])->all();
+               }else{
+                   if($cliente <> null){
+                      $remision = Remisiones::find()->where(['=','id_cliente', $cliente])->all();
+                   }else{
+                       $remision = Remisiones::find()->where(['=','id_punto', $punto_venta])->all();
+                   }
+               }
+            }
+        }
+        $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('X')->setAutoSize(true);
+            
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'ID')
+                        ->setCellValue('B1', 'NRO REMISION')
+                        ->setCellValue('C1', 'DOCUMENTO')
+                        ->setCellValue('D1', 'CLIENTE')
+                        ->setCellValue('E1', 'FECHA REMISION')
+                        ->setCellValue('F1', 'FECHA HORA REGISTRO')
+                        ->setCellValue('G1', 'VALOR BRUTO')
+                        ->setCellValue('H1', 'DSCUENTO')
+                        ->setCellValue('I1', 'SUBTOTAL')
+                        ->setCellValue('J1', 'TOTAL REMISION')
+                        ->setCellValue('K1', 'VENDEDOR')    
+                        ->setCellValue('L1', 'USER NAME')
+                        ->setCellValue('M1', 'AUTORIZADO')
+                        ->setCellValue('N1', 'PUNTO DE VENTA')
+                        ->setCellValue('O1', 'EXPORTADO')
+                        ->setCellValue('P1', 'FACTURADO')
+                        ->setCellValue('Q1', 'CODIGO')
+                        ->setCellValue('R1', 'PRODUCTO')
+                        ->setCellValue('S1', 'CANTIDAD')
+                        ->setCellValue('T1', 'VALOR UNIT.')
+                        ->setCellValue('U1', 'SUBTOTAL')
+                        ->setCellValue('V1', '% DESCUENTO')
+                        ->setCellValue('W1', 'VR.DESCUENTO')
+                        ->setCellValue('X1', 'TOTAL LINEA');
+            $i = 2;
+
+            foreach ($remision as $val) {
+                $detalles = \app\models\RemisionDetalles::find()->where(['=','id_remision', $val->id_remision])->all();
+                foreach ($detalles as $detalle){
+
+                    $objPHPExcel->setActiveSheetIndex(0)
+                            ->setCellValue('A' . $i, $val->id_remision)
+                            ->setCellValue('B' . $i, $val->numero_remision)
+                            ->setCellValue('C' . $i, $val->cliente->nit_cedula)
+                            ->setCellValue('D' . $i, $val->cliente->nombre_completo)
+                            ->setCellValue('E' . $i, $val->fecha_inicio)
+                            ->setCellValue('F' . $i, $val->fecha_hora_registro)
+                            ->setCellValue('G' . $i, $val->valor_bruto)
+                            ->setCellValue('H' . $i, $val->descuento)
+                            ->setCellValue('I' . $i, $val->subtotal)
+                            ->setCellValue('J' . $i, $val->total_remision)
+                            ->setCellValue('K' . $i, $val->cliente->agenteComercial->nombre_completo)
+                            ->setCellValue('L' . $i, $val->user_name)
+                            ->setCellValue('M' . $i, $val->autorizadoRemision)
+                            ->setCellValue('N' . $i, $val->puntoVenta->nombre_punto)
+                            ->setCellValue('O' . $i, $val->exportarInventario)
+                            ->setCellValue('P' . $i, $val->expedirFactura)
+                            ->setCellValue('Q' . $i, $detalle->codigo_producto)
+                            ->setCellValue('R' . $i, $detalle->producto)
+                            ->setCellValue('S' . $i, $detalle->cantidad)
+                            ->setCellValue('T' . $i, $detalle->valor_unitario)
+                            ->setCellValue('U' . $i, $detalle->subtotal)
+                            ->setCellValue('V' . $i, $detalle->porcentaje_descuento)
+                            ->setCellValue('W' . $i, $detalle->valor_descuento)
+                            ->setCellValue('X' . $i, $detalle->total_linea);
+                    $i++;
+                }
+                $i = $i;
+            }
+
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Detalle_remision.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        
+    }
+    
+    
 }
