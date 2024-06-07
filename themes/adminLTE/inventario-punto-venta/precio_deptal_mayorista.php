@@ -145,7 +145,7 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
                                 </div> 
                             </td>
                             <td style="width: 25px; height: 25px;">
-                               <a href="<?= Url::toRoute(["inventario-punto-venta/view_descuentos_comerciales", "id" => $val->id_inventario]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
+                               <a href="<?= Url::toRoute(["inventario-punto-venta/view_descuentos_comerciales", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
                             </td>
                         </tr>  
                     <?php endforeach;?>

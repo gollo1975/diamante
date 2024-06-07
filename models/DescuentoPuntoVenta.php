@@ -35,7 +35,7 @@ class DescuentoPuntoVenta extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario', 'tipo_descuento', 'nuevo_valor', 'estado_regla'], 'integer'],
+            [['id_inventario', 'tipo_descuento', 'nuevo_valor', 'estado_regla','id_punto'], 'integer'],
             [['fecha_inicio', 'fecha_final', 'tipo_descuento'], 'required'],
             [['fecha_inicio', 'fecha_final', 'fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
@@ -58,6 +58,7 @@ class DescuentoPuntoVenta extends \yii\db\ActiveRecord
             'estado_regla' => 'Estado Regla',
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',
+            'id_punto' => 'Punto de venta:',
         ];
     }
 
@@ -67,6 +68,14 @@ class DescuentoPuntoVenta extends \yii\db\ActiveRecord
     public function getInventario()
     {
         return $this->hasOne(InventarioPuntoVenta::className(), ['id_inventario' => 'id_inventario']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPuntoVenta()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
     
      public function getTipoDescuento() {

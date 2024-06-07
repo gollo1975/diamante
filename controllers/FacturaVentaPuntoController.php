@@ -1002,9 +1002,11 @@ class FacturaVentaPuntoController extends Controller
                     foreach ($_POST["listado_remision"] as $intCodigo) {
                         $conRemision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $intCodigo])->all();
                         if(count($conRemision) > 0){
-                            if($factura->id_remision <> $intCodigo){
+                            if($factura->id_remision == null){
+                                
                                 foreach ($conRemision as $detalle):
                                     $table = new FacturaVentaPuntoDetalle ();
+                                    $inventario = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
                                     $table->id_factura = $id_factura_punto;
                                     $table->id_inventario = $detalle->id_inventario;
                                     $table->codigo_producto = $detalle->codigo_producto;
@@ -1015,6 +1017,12 @@ class FacturaVentaPuntoController extends Controller
                                     $table->porcentaje_descuento = $detalle->porcentaje_descuento;
                                     $table->valor_descuento = $detalle->valor_descuento;
                                     $table->porcentaje_iva = $factura->porcentaje_iva;
+                                    if($inventario->aplica_talla_color == 0){
+                                       $table->genera_talla = 0; 
+                                    }else{
+                                       $table->genera_talla = 1;  
+                                    }
+                                        
                                     $table->save(false);
                                     $factura->id_remision = $intCodigo;
                                     //$factura->save ();

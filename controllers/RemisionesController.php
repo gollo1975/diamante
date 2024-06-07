@@ -298,13 +298,15 @@ class RemisionesController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if (isset($_POST["adicionar_cantidades"])) {
                 $iva = 0; $subtotal = 0; $total = 0; $valor_unitario = 0; $dscto = 0;
-                $producto = \app\models\InventarioPuntoVenta::findOne($table->id_inventario);
+                $producto = \app\models\InventarioPuntoVenta::find(['=','id_inventario', $table->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
+                
                 $valor_unitario = $producto->precio_mayorista;
                 $total = ($valor_unitario * $model->cantidades);
                 $subtotal = ($total);
                 $table->cantidad = $model->cantidades;
                 $table->valor_unitario = $valor_unitario;
                 $table->subtotal = $subtotal;
+                
                 if($model->descuento > 0){
                    $dscto = round(($subtotal * $model->descuento)/100);
                    $table->total_linea = $total - $dscto;

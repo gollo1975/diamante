@@ -419,15 +419,16 @@ class InventarioPuntoVentaController extends Controller
     
 
      // VISTA  DESCUENTOS COMERCIALES
-    public function actionView_descuentos_comerciales($id){
+    public function actionView_descuentos_comerciales($id, $id_punto){
         $model = InventarioPuntoVenta::findOne($id);
         $regla_punto = \app\models\DescuentoPuntoVenta::find()->where(['=','id_inventario', $id])->all();
         $regla_distribuidor = \app\models\DescuentoDistribuidor::find()->where(['=','id_inventario', $id])->all();
         return $this->render('view_descuentos_comerciales_puntos', [
                             'model' => $model,
-                           'regla_punto' => $regla_punto,
+                            'regla_punto' => $regla_punto,
                             'regla_distribuidor' => $regla_distribuidor,
                             'id' => $id,
+                            'id_punto' => $id_punto, 
         ]);
     }
     
@@ -639,7 +640,7 @@ class InventarioPuntoVentaController extends Controller
     }
     
     //CREAR DESCUENTO PARA PUNTO DE VENTA
-    public function actionCrear_descuento_puntoventa($id, $sw = 0) {
+    public function actionCrear_descuento_puntoventa($id, $sw = 0, $id_punto) {
         $model = new \app\models\ModeloEditarReglaDescuento();
         $inventario = InventarioPuntoVenta::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
@@ -651,11 +652,12 @@ class InventarioPuntoVentaController extends Controller
                     $table->fecha_final = $model->fecha_final;
                     $table->nuevo_valor = $model->nuevo_valor;
                     $table->tipo_descuento = $model->tipo_descuento;
+                    $table->id_punto = $id_punto;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->save(false);
                     $inventario->aplica_descuento_punto = 1;
                     $inventario->save();
-                    $this->redirect(["inventario-punto-venta/view_descuentos_comerciales", 'id' => $id]);
+                    $this->redirect(["inventario-punto-venta/view_descuentos_comerciales", 'id' => $id, 'id_punto' => $id_punto]);
                 }
             }else{
                 $model->getErrors();
