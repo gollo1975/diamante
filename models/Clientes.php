@@ -70,15 +70,15 @@ class Clientes extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_tipo_documento', 'nit_cedula', 'celular', 'email_cliente', 'codigo_departamento', 'codigo_municipio', 'id_naturaleza', 'id_posicion','id_agente','id_tipo_cliente'], 'required'],
+            [['id_tipo_documento', 'nit_cedula', 'celular', 'email_cliente', 'codigo_departamento','direccion', 'codigo_municipio', 'id_naturaleza', 'id_posicion','id_agente','id_tipo_cliente'], 'required'],
             [['id_tipo_documento', 'dv', 'tipo_regimen', 'forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'id_posicion',
                 'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente','predeterminado'], 'integer'],
             [['fecha_creacion', 'fecha_editado'], 'safe'],
             [['observacion'], 'string'],
             ['email_cliente', 'email'],
             [['nit_cedula', 'telefono', 'celular', 'user_name', 'user_name_editar'], 'string', 'max' => 15],
-            [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 12],
-            [['direccion', 'email_cliente','nombre_completo','razon_social'], 'string', 'max' => 50],
+            [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 15],
+            [['direccion', 'email_cliente','nombre_completo','razon_social'], 'string', 'max' => 60],
             [['codigo_departamento', 'codigo_municipio'], 'string', 'max' => 10],
             [['id_tipo_documento'], 'exist', 'skipOnError' => true, 'targetClass' => TipoDocumento::className(), 'targetAttribute' => ['id_tipo_documento' => 'id_tipo_documento']],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],

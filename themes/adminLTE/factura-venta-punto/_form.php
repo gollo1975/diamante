@@ -33,8 +33,8 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
-                'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
-                'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-3 control-label'],
                 'options' => []
             ],
         ]);
@@ -52,26 +52,8 @@ $form = ActiveForm::begin([
                        'allowClear' => true
                    ],
             ]);?> 
-            <?= $form->field($model, 'id_tipo_venta')->widget(Select2::classname(), [
-                   'data' => $tipo_venta,
-                   'options' => ['prompt' => 'Seleccione...','required' => true],
-                   'pluginOptions' => [
-                       'allowClear' => true
-                   ],
-            ]); ?> 
         </div>
-        <div class="row">
-            <?=  $form->field($model, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...', 'required' => true],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
-        <div class="field-tblproveedor-observaciones_proveedor has-success">
-                <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-            </div>
-        </div>    
+        
        
     </div>    
     <div class="panel-footer text-right">

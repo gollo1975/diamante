@@ -16,15 +16,29 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
-$this->title = 'Factura de venta ('.$model->tipoVenta->concepto.')';
+$this->title = 'Factura de venta ('. $model->tipoVenta->concepto .')';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { 
-        echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); 
-    }else{
+        echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); ?>
+        <!-- Inicio Nuevo Detalle proceso -->
+        <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar remision',
+              ['/factura-venta-punto/importar_remision', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],
+                ['title' => 'Importar remisiones generadas',
+                 'data-toggle'=>'modal',
+                 'data-target'=>'#modalimportarremision',
+                 'class' => 'btn btn-info btn-sm'
+                ])    
+        ?>
+        <div class="modal remote fade" id="modalimportarremision">
+               <div class="modal-dialog modal-lg" style ="width: 850px;">    
+                   <div class="modal-content"></div>
+               </div>
+        </div>
+    <?php }else{
         if ($model->autorizado == 1 && $model->numero_factura == 0){
             echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
             echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',

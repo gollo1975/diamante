@@ -671,9 +671,12 @@ class FacturaVentaPuntoController extends Controller
                 $model->desde = $resolucion->desde;
                 $model->hasta = $resolucion->hasta;
                 $model->consecutivo = $resolucion->consecutivo;
-                $model->fecha_inicio = $model->fecha_inicio;
-                $model->fecha_vencimiento = $model->fecha_inicio;
-                $model->fecha_vencimiento = date('Y-m-d');
+                $model->fecha_inicio = date('Y-m-d');
+                if($cliente->forma_pago == 1){
+                    $model->fecha_vencimiento = date('Y-m-d');
+                }else{
+                    $model->fecha_vencimiento = date("Y-m-d",strtotime($model->fecha_inicio."+".$cliente->plazo."days"));                    
+                }
                 $model->fecha_generada = date('Y-m-d');
                 $model->porcentaje_iva = $iva->valor_iva;
                 $model->forma_pago = $cliente->forma_pago;
@@ -693,6 +696,11 @@ class FacturaVentaPuntoController extends Controller
                     }
                 }else{
                     $model->porcentaje_rete_fuente = 0; 
+                }
+                if($accesoToken == 1){
+                    $model->id_tipo_venta = 2;
+                }else{
+                    $model->id_tipo_venta = 3;
                 }
                 $model->save(false);
                 $table = $this->findModel($model->id_factura);
@@ -937,7 +945,92 @@ class FacturaVentaPuntoController extends Controller
         ]);   
     }
     
-     //IMPRESIONES
+    //IMPORTACION DE REMISION A FACTURA ELECTRONICA
+    public function actionCrear_nuevo_cliente($accesoToken) {
+        $model = new \app\models\Clientes();
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->validate()){
+                if (isset($_POST["crear_clientes"])) {
+                    $table = new Clientes();
+                    $dv = Html::encode($_POST["dv"]);
+                    $table->id_tipo_documento = $model->tipoDocumento;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->dv = $dv;
+                    if ($model->id_tipo_documento == 1 || $model->id_tipo_documento == 2 ) {
+                    $table->nombre_completo = strtoupper($model->primer_nombre . " " . $model->segundo_nombre . " " . $model->primer_apellido . " " . $model->segundo_apellido);
+                    $table->razon_social = null;
+                 } else {
+                     $table->nombre_completo = strtoupper($model->razon_social); 
+                     $table->primer_nombre = null;
+                     $table->segundo_nombre = null;
+                     $table->primer_apellido = null;
+                     $table->segundo_apellido = null;
+                 }
+                 $table->codigo_departamento = $model->codigo_departamento;
+                 $table->codigo_municipio = $model->codigo_municipio;
+                 $table->tipo_regimen = $model->tipo_regimen;
+                 $table->id_naturaleza = $model->id_naturaleza;
+                 $table->tipo_sociedad = $model->tipo_sociedad;
+                 $table->direccion = $model->direccion;
+                 $table->celular = $model->celular;
+                 $table->id_posicion = $model->id_posicion;
+                 $table->id_tipo_cliente = $model->id_tipo_cliente;
+                 $table->id_agente = $model->id_agente;
+                 $table->forma_pago = 0;
+                 $table->plazo = 0;
+                 $table->save(false);
+                // return $this->redirect(['view', 'accesoToken' =>$accesoToken]);
+                }
+            }else{
+                $model->getErrors();
+            }    
+        }    
+        return $this->renderAjax('crear_cliente', [
+            'model' => $model,       
+            'accesoToken' => $accesoToken,
+        ]);      
+    }
+    
+    //IMPORTAR REMISIONES GENERADAS
+    public function actionImportar_remision($id_factura_punto, $accesoToken)
+    {
+        $model = \app\models\Remisiones::find()->where(['=','expedir_factura', 0])->orderBy('id_remision DESC')->all();
+        $factura = FacturaVentaPunto::findOne($id_factura_punto);
+        if (Yii::$app->request->post()) {
+            if (isset($_POST["importar_registros"])) {
+                 if (isset($_POST["listado_remision"])) {
+                    foreach ($_POST["listado_remision"] as $intCodigo) {
+                        $conRemision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $intCodigo])->all();
+                        if(count($conRemision) > 0){
+                            if($factura->id_remision <> $intCodigo){
+                                foreach ($conRemision as $detalle):
+                                    $table = new FacturaVentaPuntoDetalle ();
+                                    $table->id_factura = $id_factura_punto;
+                                    $table->id_inventario = $detalle->id_inventario;
+                                    $table->codigo_producto = $detalle->codigo_producto;
+                                    $table->producto = $detalle->producto;
+                                    $table->cantidad = $detalle->cantidad;
+                                    $table->valor_unitario = $detalle->valor_unitario;
+                                    $table->subtotal = $detalle->subtotal;
+                                    $table->porcentaje_descuento = $detalle->porcentaje_descuento;
+                                    $table->valor_descuento = $detalle->valor_descuento;
+                                    $table->porcentaje_iva = $factura->porcentaje_iva;
+                                    $table->save(false);
+                                    $factura->id_remision = $intCodigo;
+                                    //$factura->save ();
+                                endforeach;
+                            }    
+                        }
+                    }
+                 }
+            }
+        }    
+        return $this->renderAjax('importar_remision',[
+            'model' => $model,
+        ]);
+    }
+    
+    //IMPRESIONES
     public function actionImprimir_factura_venta($id_factura_punto) {
         $model = FacturaVentaPunto::findOne($id_factura_punto);
         return $this->render('../formatos/reporte_factura_venta_punto', [

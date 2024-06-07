@@ -52,7 +52,7 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtrocliente" style="display:none">
+    <div class="panel-body" id="filtrocliente" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "nitcedula")->input("search") ?>
             <?= $formulario->field($form, "nombre_completo")->input("search") ?>

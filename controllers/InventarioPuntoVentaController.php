@@ -344,7 +344,7 @@ class InventarioPuntoVentaController extends Controller
         
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $talla_color_cerrado= \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->andWhere(['=','cerrado', 1])->all();
-        $traslado = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario', $id])->all();
+        $traslado = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario_saliente', $id])->all();
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["entrada_cantidad"])){
                 $intIndice = 0;

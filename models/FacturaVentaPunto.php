@@ -78,7 +78,7 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
         return [
             [['id_factura', 'id_cliente', 'id_tipo_factura', 'id_agente', 'id_tipo_venta', 'numero_factura', 'dv', 'valor_bruto', 'descuento', 'subtotal_factura', 'impuesto', 
                 'total_factura', 'valor_retencion', 'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado', 'estado_factura', 'dias_mora',
-                'valor_intereses_mora', 'iva_intereses_mora', 'subtotal_interes_masiva', 'id_punto','exportar_inventario'], 'integer'],
+                'valor_intereses_mora', 'iva_intereses_mora', 'subtotal_interes_masiva', 'id_punto','exportar_inventario','id_remision'], 'integer'],
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada', 'fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento', 'porcentaje_mora'], 'number'],
             [['nit_cedula', 'user_name', 'user_name_editado'], 'string', 'max' => 15],
@@ -92,6 +92,7 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
             [['id_agente'], 'exist', 'skipOnError' => true, 'targetClass' => AgentesComerciales::className(), 'targetAttribute' => ['id_agente' => 'id_agente']],
             [['id_tipo_venta'], 'exist', 'skipOnError' => true, 'targetClass' => TipoVenta::className(), 'targetAttribute' => ['id_tipo_venta' => 'id_tipo_venta']],
             [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
+            [['id_remision'], 'exist', 'skipOnError' => true, 'targetClass' => Remisiones::className(), 'targetAttribute' => ['id_remision' => 'id_remision']],
         ];
     }
 
@@ -146,7 +147,8 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
             'subtotal_interes_masiva' => 'Subtotal Interes Masiva',
             'porcentaje_mora' => 'Porcentaje Mora',
             'id_punto' => 'Punto de venta:',
-            'exportar_inventario' => 'exportar_inventario'
+            'exportar_inventario' => 'exportar_inventario',
+            'id_remision' => 'id_remision',
         ];
     }
 
@@ -172,6 +174,14 @@ class FacturaVentaPunto extends \yii\db\ActiveRecord
     public function getAgente()
     {
         return $this->hasOne(AgentesComerciales::className(), ['id_agente' => 'id_agente']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRemision()
+    {
+        return $this->hasOne(Remisiones::className(), ['id_remision' => 'id_remision']);
     }
 
     /**
