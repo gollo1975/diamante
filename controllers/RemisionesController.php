@@ -295,11 +295,22 @@ class RemisionesController extends Controller
     public function actionAdicionar_cantidades($id, $id_detalle, $accesoToken) {
         $model = new \app\models\FormModeloCambiarCantidad();
         $table = \app\models\RemisionDetalles::findOne($id_detalle);
+        $descuento = \app\models\DescuentoDistribuidor::find()->where(['=','id_inventario', $table->id_inventario])->andWhere(['=','estado_regla', 0])->one();
+        $sw = 0;
+        if($descuento){
+            $fecha_proceso = date('Y-m-d');
+            $fecha_inicio = $descuento->fecha_inicio;
+            $fecha_final = $descuento->fecha_final;
+            if($fecha_proceso >= $fecha_inicio && $fecha_proceso <= $fecha_final){
+                $sw = 1;
+            } 
+        }
+        
+        
         if ($model->load(Yii::$app->request->post())) {
             if (isset($_POST["adicionar_cantidades"])) {
                 $iva = 0; $subtotal = 0; $total = 0; $valor_unitario = 0; $dscto = 0;
-                $producto = \app\models\InventarioPuntoVenta::find(['=','id_inventario', $table->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
-                
+                $producto = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $table->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
                 $valor_unitario = $producto->precio_mayorista;
                 $total = ($valor_unitario * $model->cantidades);
                 $subtotal = ($total);
@@ -317,14 +328,24 @@ class RemisionesController extends Controller
                     $table->porcentaje_descuento = 0;
                     $table->valor_descuento = 0;
                 }        
-                $table->save();
+                $table->save(false);
                 $this->ActualizarSaldosTotales($id);
                return $this->redirect(['view','id' =>$id, 'accesoToken' => $accesoToken]);
             }    
         }
-        return $this->renderAjax('_form_adicionar_cantidad', [
+        if($sw == 1){
+            if (Yii::$app->request->get()) {
+                $model->descuento = $descuento->nuevo_valor; 
+            }
+             return $this->renderAjax('_form_adicionar_cantidad', [
             'model' => $model,
         ]);
+        }else{
+             return $this->renderAjax('_form_adicionar_cantidad', [
+            'model' => $model,
+        ]);
+        }
+      
     }
     
      //PROCESO QUE AUTORIZADO O DESAUTORIZA

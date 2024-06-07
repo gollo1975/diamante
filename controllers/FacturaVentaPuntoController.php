@@ -994,7 +994,7 @@ class FacturaVentaPuntoController extends Controller
     //IMPORTAR REMISIONES GENERADAS
     public function actionImportar_remision($id_factura_punto, $accesoToken)
     {
-        $model = \app\models\Remisiones::find()->where(['=','expedir_factura', 0])->orderBy('id_remision DESC')->all();
+        $model = \app\models\Remisiones::find()->where(['=','expedir_factura', 0])->orderBy('id_remision DESC')->andWhere(['=','id_punto', $accesoToken])->all();
         $factura = FacturaVentaPunto::findOne($id_factura_punto);
         if (Yii::$app->request->post()) {
             if (isset($_POST["importar_registros"])) {
@@ -1003,7 +1003,7 @@ class FacturaVentaPuntoController extends Controller
                         $conRemision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $intCodigo])->all();
                         if(count($conRemision) > 0){
                             if($factura->id_remision == null){
-                                
+                                $total = 0; $iva = 0; $porcentaje = 0;
                                 foreach ($conRemision as $detalle):
                                     $table = new FacturaVentaPuntoDetalle ();
                                     $inventario = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
@@ -1013,10 +1013,16 @@ class FacturaVentaPuntoController extends Controller
                                     $table->producto = $detalle->producto;
                                     $table->cantidad = $detalle->cantidad;
                                     $table->valor_unitario = $detalle->valor_unitario;
-                                    $table->subtotal = $detalle->subtotal;
                                     $table->porcentaje_descuento = $detalle->porcentaje_descuento;
                                     $table->valor_descuento = $detalle->valor_descuento;
                                     $table->porcentaje_iva = $factura->porcentaje_iva;
+                                    //variables
+                                    $porcentaje = $factura->porcentaje_iva/100;
+                                    $iva = round($detalle->subtotal * $porcentaje);
+                                    $total = round($detalle->subtotal - ($iva + $detalle->valor_descuento));
+                                    $table->subtotal = round($detalle->subtotal - $iva);
+                                    $table->impuesto = $iva;
+                                    $table->total_linea = $total;
                                     if($inventario->aplica_talla_color == 0){
                                        $table->genera_talla = 0; 
                                     }else{
@@ -1025,7 +1031,10 @@ class FacturaVentaPuntoController extends Controller
                                         
                                     $table->save(false);
                                     $factura->id_remision = $intCodigo;
-                                    //$factura->save ();
+                                    $factura->save ();
+                                    $id =  $id_factura_punto;
+                                    $this->ActualizarSaldosTotales($id);
+                                    $this->ActualizarConceptosTributarios($id);
                                 endforeach;
                             }    
                         }

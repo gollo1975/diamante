@@ -117,7 +117,7 @@ $this->params['breadcrumbs'][] = $id;
                                             <td><?= $val->fecha_registro?></td>
                                             <td style= 'width: 25px; height: 25px;'>
                                                 <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                    ['/inventario-punto-venta/editar_descuento_mayorista','id' => $model->id_inventario],
+                                                    ['/inventario-punto-venta/editar_descuento_mayorista', 'id_detalle' => $val->id_regla,'id' => $model->id_inventario, 'id_punto' => $id_punto],
                                                     [
                                                         'title' => 'Editar el descuento de mayorista..',
                                                         'data-toggle'=>'modal',
@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $id;
                             <div class="panel-footer text-right">
                                 <!-- Inicio Nuevo Detalle proceso -->
                                 <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Descuento mayorista',
-                                        ['/inventario-punto-venta/crear_descuento_mayorista','id' => $model->id_inventario],
+                                        ['/inventario-punto-venta/crear_descuento_mayorista','id' => $model->id_inventario, 'id_punto' => $id_punto],
                                         [
                                             'title' => 'Crear el nuevo dscuenro comercial para mayorista',
                                             'data-toggle'=>'modal',

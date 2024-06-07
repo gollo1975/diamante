@@ -210,7 +210,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td style="text-align: right";><?= ''.number_format($detalle->porcentaje_iva,0)?>%</td>
                         <td style="text-align: right";><?= ''.number_format($detalle->impuesto,0)?></td>
                         <td style="text-align: right";><?= ''.number_format($detalle->total_linea,0)?></td>
-                        <?php if($model->autorizado == 0){
+                        <?php 
+                        if($model->autorizado == 0){
                             if($model->id_tipo_venta == 2){?>
                                 <td style="width: 25px; height: 25px;">
                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
@@ -231,7 +232,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                                 <span class='glyphicon glyphicon-trash'></span> </a>  
                                 </td>  
-                            <?php }else{?>
+                            <?php }else{         ?>
                                 <td style= 'width: 25px; height: 25px;'>
                                     <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_punto", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                     <span class='glyphicon glyphicon-trash'></span> </a>  
