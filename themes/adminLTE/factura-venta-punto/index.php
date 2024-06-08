@@ -43,8 +43,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 
-$vendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-$cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])->andWhere(['=','id_tipo_cliente', 5])
+$convendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$Concliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])->andWhere(['=','id_tipo_cliente', 5])
                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
 $conPunto = ArrayHelper::map(app\models\PuntoVenta::find()->all(), 'id_punto', 'nombre_punto');
 ?>
@@ -73,14 +73,14 @@ $conPunto = ArrayHelper::map(app\models\PuntoVenta::find()->all(), 'id_punto', '
                     'todayHighlight' => true]])
             ?>
              <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
-                'data' => $cliente,
+                'data' => $Concliente,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ]); ?>
              <?= $formulario->field($form, 'vendedor')->widget(Select2::classname(), [
-                'data' => $vendedor,
+                'data' => $convendedor,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -172,7 +172,19 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-default btn-sm']); ?>                
+           <div class="btn-group btn-sm" role="group">    
+                   <button type="button" class="btn btn-success  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       Exportar a excel
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li> <?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Excel", ['name' => 'excel']); ?> </li>
+                        <?php 
+                        if($fecha_inicio <> null && $fecha_corte <> null ||  $punto_venta <> null || $documento <> null || $cliente <> null || $vendedor <> null || $documento <> null || $numero_factura <> null){?>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-export"></span> Detalle', ['excel_detalle_factura', 'fecha_inicio' => $fecha_inicio, 'fecha_corte' => $fecha_corte, 'cliente' =>$cliente, 'punto_venta' => $punto_venta,'numero_factura' => $numero_factura,'documento' => $documento, 'vendedor'=> $vendedor]) ?></li>
+                        <?php }?> 
+                    </ul>
+            </div> 
            <a href="<?= Url::toRoute(["factura-venta-punto/create" , 'accesoToken' => $accesoToken]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span>Nueva factura</a>  
           
         </div>

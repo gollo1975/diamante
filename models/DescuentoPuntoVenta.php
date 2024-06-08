@@ -36,7 +36,6 @@ class DescuentoPuntoVenta extends \yii\db\ActiveRecord
     {
         return [
             [['id_inventario', 'tipo_descuento', 'nuevo_valor', 'estado_regla','id_punto'], 'integer'],
-            [['fecha_inicio', 'fecha_final', 'tipo_descuento'], 'required'],
             [['fecha_inicio', 'fecha_final', 'fecha_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],

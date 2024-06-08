@@ -131,10 +131,12 @@ class InventarioPuntoVenta extends \yii\db\ActiveRecord
     {
         return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
+    
     public function getMarca()
     {
         return $this->hasOne(Marca::className(), ['id_marca' => 'id_marca']);
     }
+    
     public function getCategoria()
     {
         return $this->hasOne(Categoria::className(), ['id_categoria' => 'id_categoria']);

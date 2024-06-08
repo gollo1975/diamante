@@ -46,8 +46,10 @@ $this->params['breadcrumbs'][] = $this->title;
         }else{
             if($model->exportar_inventario == 0){
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);                        
-                echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de procesar la descarga de referencias al modulo de inventario.', 'method' => 'post']]);
+                if($model->id_remision == null){
+                    echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de procesar el envio de estas referencias vendidas al modulo de inventario.', 'method' => 'post']]);
+                }    
             }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']); 
             }    
@@ -103,7 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="panel-body" id="entrada_producto">
             <div class="row" >
-                <?php if($model->autorizado == 0){?>
+                <?php if($model->autorizado == 0 && $model->id_remision == null){?>
                     <?= $formulario->field($form, 'codigo_producto',['inputOptions' =>['autofocus' => 'autofocus', 'class' => 'form-control']])?>
                     <?= $formulario->field($form, 'nombre_producto')->widget(Select2::classname(), [
                        'data' => $inventario,
@@ -212,27 +214,33 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td style="text-align: right";><?= ''.number_format($detalle->total_linea,0)?></td>
                         <?php 
                         if($model->autorizado == 0){
-                            if($model->id_tipo_venta == 2){?>
-                                <td style="width: 25px; height: 25px;">
-                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
-                                          ['/factura-venta-punto/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle,'accesoToken' => $accesoToken],
-                                          [
-                                              'title' => 'Adicionar cantidades al codigo del producto',
-                                              'data-toggle'=>'modal',
-                                              'data-target'=>'#modaladicionarcantidades'.$detalle->id_detalle,
-                                          ])    
-                                    ?>
-                                    <div class="modal remote fade" id="modaladicionarcantidades<?= $detalle->id_detalle ?>">
-                                      <div class="modal-dialog modal-lg" style ="width: 500px;">
-                                          <div class="modal-content"></div>
-                                      </div>
-                                    </div>
-                                </td>
-                                <td style= 'width: 25px; height: 25px;'>
-                                    <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
-                                                <span class='glyphicon glyphicon-trash'></span> </a>  
-                                </td>  
-                            <?php }else{         ?>
+                            if($model->id_tipo_venta == 2 ){
+                                if($model->id_remision == null){?>
+                                    <td style="width: 25px; height: 25px;">
+                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ',
+                                              ['/factura-venta-punto/adicionar_cantidades', 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle,'accesoToken' => $accesoToken],
+                                              [
+                                                  'title' => 'Adicionar cantidades al codigo del producto',
+                                                  'data-toggle'=>'modal',
+                                                  'data-target'=>'#modaladicionarcantidades'.$detalle->id_detalle,
+                                              ])    
+                                        ?>
+                                        <div class="modal remote fade" id="modaladicionarcantidades<?= $detalle->id_detalle ?>">
+                                          <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                              <div class="modal-content"></div>
+                                          </div>
+                                        </div>
+                                    </td>
+                                    <td style= 'width: 25px; height: 25px;'>
+                                        <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_mayorista", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
+                                                    <span class='glyphicon glyphicon-trash'></span> </a>  
+                                    </td>  
+                                <?php }else{?>
+                                    <td style="width: 25px; height: 25px;"></td>
+                                     <td style="width: 25px; height: 25px;"></td>
+
+                                <?php }    
+                            }else{         ?>
                                 <td style= 'width: 25px; height: 25px;'>
                                     <a href="<?= Url::toRoute(["factura-venta-punto/eliminar_linea_factura_punto", 'id_factura_punto' => $model->id_factura, 'id_detalle' => $detalle->id_detalle, 'accesoToken'=>$accesoToken])?>"
                                     <span class='glyphicon glyphicon-trash'></span> </a>  
