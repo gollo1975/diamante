@@ -41,12 +41,14 @@ class FacturaVentaPuntoDetalle extends \yii\db\ActiveRecord
     {
         return [
             [['id_detalle'], 'required'],
-            [['id_detalle', 'id_factura', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea','genera_talla'], 'integer'],
+            [['id_detalle', 'id_factura', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea','genera_talla','id_punto'], 'integer'],
             [['porcentaje_descuento', 'porcentaje_iva'], 'number'],
             [['producto'], 'string', 'max' => 40],
             [['id_detalle'], 'unique'],
+            ['fecha_inicio', 'safe'],
             [['id_factura'], 'exist', 'skipOnError' => true, 'targetClass' => FacturaVentaPunto::className(), 'targetAttribute' => ['id_factura' => 'id_factura']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
+            [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
         ];
     }
 
@@ -70,6 +72,8 @@ class FacturaVentaPuntoDetalle extends \yii\db\ActiveRecord
             'impuesto' => 'Impuesto',
             'total_linea' => 'Total Linea',
             'genera_talla' => 'genera_talla',
+            'id_punto' => 'id_punto',
+            'fecha_inicio' => 'fecha_inicio',
         ];
     }
 
@@ -79,6 +83,14 @@ class FacturaVentaPuntoDetalle extends \yii\db\ActiveRecord
     public function getFactura()
     {
         return $this->hasOne(FacturaVentaPunto::className(), ['id_factura' => 'id_factura']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPuntoVenta()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
 
     /**

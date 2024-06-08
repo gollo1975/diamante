@@ -256,7 +256,7 @@ class FacturaVentaPuntoController extends Controller
         }
     }
     
-     // MAESTRO CONSULTA DE PRODUCTO, FACTURAS Y CLIENTES IA
+    // MAESTRO CONSULTA DE PRODUCTO, FACTURAS Y CLIENTES IA
     public function actionSearch_maestro_referencia() {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',106])->all()){
@@ -316,6 +316,67 @@ class FacturaVentaPuntoController extends Controller
         }
     }
     
+    // PERMITE BUSCAR EL PRODUCTO MAS VENDIDO
+    public function actionSearch_producto_vendido() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',108])->all()){
+                $form = new \app\models\FiltroBusquedaInventarioPunto();
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $punto_venta = null;
+                $producto = null;
+                $pages = null;
+                $model = null;
+                $conPunto = \app\models\PuntoVenta::find()->orderBy('nombre_punto ASC')->all();
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $producto = Html::encode($form->producto);
+                        $punto_venta = Html::encode($form->punto_venta);
+                       
+                        if($form->punto_venta <> null){
+                            $table = FacturaVentaPuntoDetalle::find()
+                                        ->andFilterWhere(['between', 'fecha_inicio', $fecha_inicio, $fecha_corte])
+                                        ->andFilterWhere(['=', 'id_inventario', $producto])
+                                        ->andFilterWhere(['=', 'id_punto', $punto_venta]);
+                            $table = $table->orderBy('id_inventario DESC');
+                            $tableexcel = $table->all();
+                            $count = clone $table;
+                            $to = $count->count();
+                            $pages = new Pagination([
+                                'pageSize' => 15,
+                                'totalCount' => $count->count()
+                            ]);
+                            $model = $table
+                                    ->offset($pages->offset)
+                                    ->limit($pages->limit)
+                                    ->all();
+                            if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id_inventario  DESC']);
+                                $this->actionExcelProductoVendido($tableexcel);
+                            }
+                        }else{
+                            Yii::$app->getSession()->setFlash('warning', 'Debe se seleccion un PUNTO DE VENTA para ejecutar la consulta.');
+                        }       
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('search_producto_vendido', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombre_punto'),
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+    
     /**
      * Displays a single FacturaVentaPunto model.
      * @param integer $id
@@ -358,6 +419,8 @@ class FacturaVentaPuntoController extends Controller
                         $table->id_inventario = $producto->id_inventario;
                         $table->codigo_producto = $codigo_producto;
                         $table->producto = $producto->nombre_producto;
+                        $table->fecha_inicio = $factura->fecha_inicio;
+                        $table->id_punto = $accesoToken;
                         if($producto->aplica_talla_color == 1){
                             $table->genera_talla = 1;
                         }
@@ -440,6 +503,8 @@ class FacturaVentaPuntoController extends Controller
                                $descuento = 0;  
                             }
                             //asignacion
+                            $table->id_punto = $accesoToken;
+                            $table->fecha_inicio = $factura->fecha_inicio;
                             $detalle->cantidad = $cantidad;
                             $detalle->subtotal = $detalle->subtotal + $pSubtotal;
                             $detalle->valor_descuento = $detalle->valor_descuento + $descuento;
@@ -494,13 +559,13 @@ class FacturaVentaPuntoController extends Controller
     {
         $detalle_factura = FacturaVentaPuntoDetalle::find()->where(['=','id_factura', $id_factura_punto])->all();
         $talla_color = \app\models\FacturaPuntoDetalleColoresTalla::find()->where(['=','id_factura', $id_factura_punto])->all();
-       // $recibo_caja = ReciboCajaDetalles::find()->where(['=','id_factura', $id])->orderBy('id_recibo DESC')->all();
+       
         return $this->render('view_consulta_maestro', [
             'model' => $this->findModel($id_factura_punto),
             'detalle_factura' => $detalle_factura,
             'token' => $token,
             'talla_color' => $talla_color,
-           // 'recibo_caja' => $recibo_caja,
+           
         ]);
     }
     ///PROCESO QUE SUMA LOS TOTALES
@@ -1414,5 +1479,99 @@ class FacturaVentaPuntoController extends Controller
         $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
         $objWriter->save('php://output');
         exit;
-    }     
+    }   
+    
+ //EXCEL PRODUCTO VENDIDO
+ public function actionExcelProductoVendido($tableexcel)
+ {
+    $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'CODIGO')
+                    ->setCellValue('B1', 'PRODUCTO')
+                    ->setCellValue('C1', 'PUNTO DE VENTA')
+                    ->setCellValue('D1', 'PROVEEDOR')
+                    ->setCellValue('E1', 'MARCA')
+                    ->setCellValue('F1', 'CATEGORIA')
+                    ->setCellValue('G1', 'FECHA VENTA')
+                    ->setCellValue('H1', 'PRECIO COSTO')
+                    ->setCellValue('I1', 'PRECIO VENTA')
+                    ->setCellValue('J1', 'U. OPERATIVA')    
+                    ->setCellValue('K1', '% UTILIDAD')
+                    ->setCellValue('L1', 'U. VENDIDAS')
+                    ->setCellValue('M1', 'NRO FACTURA')
+                    ->setCellValue('N1', 'CLIENTE')
+                    ->setCellValue('O1', 'VENDEDOR')
+                    ->setCellValue('P1', 'USUARIO');
+                   
+        $i = 2;
+         $utilidad = 0;
+         $porcentaje = 0;
+        foreach ($tableexcel as $val) {
+             $utilidad = $val->total_linea - $val->inventario->costo_unitario;
+             $porcentaje = ''.number_format((($val->total_linea - $val->inventario->costo_unitario) / $val->inventario->costo_unitario) * 100);
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->codigo_producto)
+                    ->setCellValue('B' . $i, $val->producto)
+                    ->setCellValue('C' . $i, $val->puntoVenta->nombre_punto)
+                    ->setCellValue('D' . $i, $val->inventario->proveedor->nombre_completo)
+                    ->setCellValue('E' . $i, $val->inventario->marca->marca)
+                    ->setCellValue('F' . $i, $val->inventario->categoria->categoria)
+                    ->setCellValue('G' . $i, $val->fecha_inicio)
+                    ->setCellValue('H' . $i, $val->inventario->costo_unitario)
+                    ->setCellValue('I' . $i, $val->total_linea)
+                    ->setCellValue('J' . $i, $utilidad)
+                    ->setCellValue('K' . $i, $porcentaje)
+                    ->setCellValue('L' . $i, $val->cantidad)
+                    ->setCellValue('M' . $i, $val->factura->numero_factura)
+                    ->setCellValue('N' . $i, $val->factura->cliente)
+                    ->setCellValue('O' . $i, $val->factura->agente->nombre_completo)
+                    ->setCellValue('P' . $i, $val->factura->user_name);
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Listado_productos_vendidos.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+ }
 }

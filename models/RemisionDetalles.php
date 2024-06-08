@@ -40,11 +40,13 @@ class RemisionDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_remision', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea'], 'integer'],
+            [['id_remision', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea','id_punto'], 'integer'],
             [['porcentaje_descuento', 'porcentaje_iva'], 'number'],
             [['producto'], 'string', 'max' => 40],
+            ['fecha_inicio', 'safe'],
             [['id_remision'], 'exist', 'skipOnError' => true, 'targetClass' => Remisiones::className(), 'targetAttribute' => ['id_remision' => 'id_remision']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
+            [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
         ];
     }
 
@@ -67,6 +69,8 @@ class RemisionDetalles extends \yii\db\ActiveRecord
             'porcentaje_iva' => 'Porcentaje Iva',
             'impuesto' => 'Impuesto',
             'total_linea' => 'Total Linea',
+            'fecha_inicio' => 'fecha_inicio',
+            'id_punto' => 'id_punto',
         ];
     }
 
@@ -76,6 +80,14 @@ class RemisionDetalles extends \yii\db\ActiveRecord
     public function getRemision()
     {
         return $this->hasOne(Remisiones::className(), ['id_remision' => 'id_remision']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPuntoVenta()
+    {
+        return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
 
     /**

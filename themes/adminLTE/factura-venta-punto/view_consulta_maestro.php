@@ -39,8 +39,13 @@ $view = 'factura-venta';
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_maestro_factura'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?=  Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);?>            
+        <?php 
+        if($token == 1){
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_maestro_factura'], ['class' => 'btn btn-primary btn-sm']);
+        }else{
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_producto_vendido'], ['class' => 'btn btn-primary btn-sm']);            
+        }   
+         echo  Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);?>            
        
     </p>  
     <div class="panel panel-success">
