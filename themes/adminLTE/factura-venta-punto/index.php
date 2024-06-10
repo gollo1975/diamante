@@ -122,15 +122,15 @@ $form = ActiveForm::begin([
             <thead>
                 <tr style ='font-size: 90%;'>         
                     <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Local</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Estado</th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                 </tr>
@@ -143,7 +143,6 @@ $form = ActiveForm::begin([
                     ?>
                     <tr style ='font-size: 90%;'>                
                         <td><?= $val->numero_factura?></td>
-                        <td><?= $val->nit_cedula?></td>
                         <td><?= $val->clienteFactura->nombre_completo?></td>
                         <td><?= $val->puntoVenta->nombre_punto?></td>
                         <td><?= $val->fecha_inicio?></td>
@@ -152,6 +151,7 @@ $form = ActiveForm::begin([
                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
                         <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
+                        <td><?= $val->estadoFactura?></td>
                         <?php if($val->id_tipo_factura == 4){
                             if(!$dato){?>    
                                 <td style= 'width: 20px; height: 20px;'>    

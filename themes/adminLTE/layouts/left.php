@@ -539,7 +539,7 @@
                                             'items' => [
                                                 ['label' => 'Factura punto', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/index']],
                                                 ['label' => 'Remision', 'icon' => 'plus-square-o', 'url' => ['/remisiones/index']],
-                                             //   ['label' => 'Nota crédito', 'icon' => 'plus-square-o', 'url' => ['/nota-credito/index']],
+                                                ['label' => 'Cierre de caja', 'icon' => 'plus-square-o', 'url' => ['/cierre-caja/index']],
                                                
                                              ],
                                         ]

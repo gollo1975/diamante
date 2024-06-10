@@ -1191,6 +1191,7 @@ class FacturaVentaPuntoController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('AC')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AD')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -1221,7 +1222,8 @@ class FacturaVentaPuntoController extends Controller
                     ->setCellValue('Z1', 'USER EDITADO')
                     ->setCellValue('AA1', 'F. EDITADO')
                     ->setCellValue('AB1', 'AUTORIZADO')
-                    ->setCellValue('AC1', 'OBSERVACION');
+                    ->setCellValue('AC1', 'OBSERVACION')
+                    ->setCellValue('AD1', 'ESTADO');
         $i = 2;
 
         foreach ($tableexcel as $val) {
@@ -1255,7 +1257,8 @@ class FacturaVentaPuntoController extends Controller
                     ->setCellValue('Z' . $i, $val->user_name_editado)
                     ->setCellValue('AA' . $i, $val->fecha_editada)
                     ->setCellValue('AB' . $i, $val->autorizadofactura)
-                    ->setCellValue('AC' . $i, $val->observacion);
+                    ->setCellValue('AC' . $i, $val->observacion)
+                    ->setCellValue('AD' . $i, $val->estadoFactura);
             $i++;
         }
 

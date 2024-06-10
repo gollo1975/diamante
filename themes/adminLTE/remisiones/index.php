@@ -137,6 +137,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total remision</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Estado</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th score="col" style='background-color:#B9D5CE;'></th>  
                          
@@ -153,6 +154,7 @@ $form = ActiveForm::begin([
                     <td><?= $val->cliente->nombre_completo?></td>
                     <td><?= $val->fecha_inicio?></td>
                     <td style="text-align: right"><?= ''. number_format($val->total_remision,0)?></td>
+                    <td><?= $val->estadoRemision?></td>
                     <td style= 'width: 25px; height: 10px;'>
                          <a href="<?= Url::toRoute(["remisiones/view", "id" => $val->id_remision, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                     </td> 

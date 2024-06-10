@@ -18,6 +18,7 @@ use kartik\depdrop\DepDrop;
 
 $this->title = 'Factura de venta ('. $model->tipoVenta->concepto .')';
 $this->params['breadcrumbs'][] = $this->title;
+$buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_factura', $model->id_factura])->one();
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <p>
@@ -43,6 +44,21 @@ $this->params['breadcrumbs'][] = $this->title;
             echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
             echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
+            if(!$buscarRecibo){
+                echo  Html::a('<span class="glyphicon glyphicon-plus"></span> Recibo de pago',
+                  ['/recibo-caja-punto-venta/crear_recibo_caja_factura', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],
+                    ['title' => 'Generar recibos de caja',
+                     'data-toggle'=>'modal',
+                     'data-target'=>'#modalcrearrecibofactura'.$model->id_factura,
+                     'class' => 'btn btn-info btn-sm'
+                    ])    
+                ?>
+                <div class="modal remote fade" id="modalcrearrecibofactura<?=$model->id_factura?>">
+                       <div class="modal-dialog modal-lg" style ="width: 600px;">    
+                           <div class="modal-content"></div>
+                       </div>
+                </div>  
+            <?php }
         }else{
             if($model->exportar_inventario == 0){
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);                        
@@ -51,7 +67,10 @@ $this->params['breadcrumbs'][] = $this->title;
                            'data' => ['confirm' => 'Esta seguro de procesar el envio de estas referencias vendidas al modulo de inventario.', 'method' => 'post']]);
                 }    
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']); 
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir factura', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']); 
+                if($buscarRecibo){
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir recibo', ['imprimir_recibo_caja', 'id_recibo' => $buscarRecibo->id_recibo], ['class' => 'btn btn-default btn-sm']); 
+                }    
             }    
         }
     }?>

@@ -131,4 +131,16 @@ class Remisiones extends \yii\db\ActiveRecord
         }
         return $expedirfactura;
     }
+    public function getEstadoRemision(){
+        if($this->estado_remision == 0){
+            $estadoremision = 'ACTIVA';
+        }else{
+            if($this->estado_remision == 1){
+                 $estadoremision = 'CANCELADA';
+            }else{
+                $estadoremision = 'ANULADA';
+            }
+        }
+        return $estadoremision;
+    }
 }
