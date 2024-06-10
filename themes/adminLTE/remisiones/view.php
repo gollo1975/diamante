@@ -18,6 +18,7 @@ use kartik\depdrop\DepDrop;
 
 $this->title = 'REMISIONES ('.$punto_venta->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
+$buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision', $model->id_remision])->one();
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <p>
@@ -29,13 +30,32 @@ $this->params['breadcrumbs'][] = $this->title;
             echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_remision, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
             echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar remision', ['generar_remision', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la remision de salida al cliente: ('.$model->cliente->nombre_completo.').', 'method' => 'post']]);
+            if(!$buscarRecibo){
+                echo  Html::a('<span class="glyphicon glyphicon-plus"></span> Recibo de pago',
+                  ['/recibo-caja-punto-venta/crear_recibo_caja_remision', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],
+                    ['title' => 'Generar recibos de caja',
+                     'data-toggle'=>'modal',
+                     'data-target'=>'#modalcrearreciboremision'.$model->id_remision,
+                     'class' => 'btn btn-info btn-sm'
+                    ])    
+                ?>
+                <div class="modal remote fade" id="modalcrearreciboremision<?=$model->id_remision?>">
+                       <div class="modal-dialog modal-lg" style ="width: 600px;">    
+                           <div class="modal-content"></div>
+                       </div>
+                </div>  
+            <?php }
+            
         }else{
             if($model->exportar_inventario == 0){
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']);                        
                 echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
                            'data' => ['confirm' => 'Esta seguro de procesar la descarga de referencias al modulo de inventario.', 'method' => 'post']]);
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']); 
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir remision', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']); 
+                if($buscarRecibo){
+                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir recibo', ['imprimir_recibo_caja', 'id_recibo' => $buscarRecibo->id_recibo], ['class' => 'btn btn-default btn-sm']); 
+                } 
             }    
         }
     }?>
@@ -216,6 +236,39 @@ $this->params['breadcrumbs'][] = $this->title;
                 </tr>
                 <?php endforeach;?>
             </tbody>
+            <tr style="font-size: 90%; background-color:#B9D5CE">
+                                        <td colspan="10"></td>
+                                        <td style="text-align: right;"><b></b></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr style="font-size: 90%;">
+                                        <td colspan="8"></td>
+                                        <td style="text-align: right;  background-color:#F0F3EF;"><b>VALOR BRUTO:</b></td>
+                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                         <td></td>
+                                          <td></td>
+                                    </tr>
+                                    <tr style="font-size: 90%;">
+                                        <td colspan="8"></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>DESCTO :</b></td>
+                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr style="font-size: 90%;">
+                                        <td colspan="8"></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>SUBTOTAL:</b></td>
+                                        <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal,0); ?></b></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr style="font-size: 90%;">
+                                        <td colspan="8"></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>TOTAL PAGAR:</b></td>
+                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_remision,0); ?></b></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
         </table>
     </div>
 </div>
