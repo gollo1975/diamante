@@ -39,7 +39,7 @@ class CierreCaja extends \yii\db\ActiveRecord
     {
         return [
             [['id_punto', 'total_remision', 'total_factura', 'total_efectivo_factura', 'total_efectivo_remision', 'total_transacion_factura',
-                'total_transacion_remision','autorizado','proceso_cerrado'], 'integer'],
+                'total_transacion_remision','autorizado','proceso_cerrado','numero_cierre','total_cierre_caja'], 'integer'],
             [['fecha_inicio', 'fecha_corte', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
@@ -52,20 +52,22 @@ class CierreCaja extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_cierre' => 'Id Cierre',
-            'id_punto' => 'Id Punto',
-            'fecha_inicio' => 'Fecha Inicio',
-            'fecha_corte' => 'Fecha Corte',
-            'total_remision' => 'Total Remision',
-            'total_factura' => 'Total Factura',
-            'total_efectivo_factura' => 'Total Efectivo Factura',
-            'total_efectivo_remision' => 'Total Efectivo Remision',
-            'total_transacion_factura' => 'Total Transacion Factura',
-            'total_transacion_remision' => 'Total Transacion Remision',
-            'user_name' => 'User Name',
+            'id_cierre' => 'Id',
+            'id_punto' => 'Punto de venta:',
+            'fecha_inicio' => 'Fecha inicio:',
+            'fecha_corte' => 'Fecha corte:',
+            'total_remision' => 'Total remision:',
+            'total_factura' => 'Total factura:',
+            'total_efectivo_factura' => 'Total efectivo factura',
+            'total_efectivo_remision' => 'Total efectivo remision',
+            'total_transacion_factura' => 'Total transacion factura',
+            'total_transacion_remision' => 'Total transacion remision',
+            'user_name' => 'User name',
             'autorizado' => 'Autorizado:',
-            'fecha_hora_registro' => 'Fecha Hora Registro',
+            'fecha_hora_registro' => 'Fecha hora registro',
             'proceso_cerrado' => 'Proceso cerrado:',
+            'numero_cierre' => 'Numero de cierre:',
+            'total_cierre_caja' => 'Total caja:',
         ];
     }
 
@@ -86,12 +88,12 @@ class CierreCaja extends \yii\db\ActiveRecord
         return $procesocerrado;
     }
     
-    public function getAutorizado() {
+    public function getAutorizadoCierre() {
         if($this->autorizado == 0){
-             $autorizado = 'NO';
+             $autorizadocierre = 'NO';
         }else{
-            $autorizado = 'SI';
+            $autorizadocierre = 'SI';
         }
-        return $autorizado;
+        return $autorizadocierre;
     }
 }

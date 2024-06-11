@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
 
-$this->title = 'CERRAR CAJA ('.$conPunto->nombre_punto.')';
+$this->title = 'CIERRE DE CAJA ('.$conPunto->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
 
 
@@ -92,6 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th scope="col" style='background-color:#B9D5CE;'>F. corte</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total remision</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total factura</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total caja</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cerrado</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>  
             </tr>
@@ -107,16 +108,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?= $val->fecha_corte ?></td>
                 <td style="text-align: right"><?= ''.number_format($val->total_remision,0) ?></td>
                <td style="text-align: right"><?= ''.number_format($val->total_factura,0) ?></td>
+               <td style="text-align: right"><?= ''.number_format($val->total_cierre_caja,0) ?></td>
                 <?php if($val->proceso_cerrado == 0){?>
                     <td style='background-color:#F7EDEA;'><?= $val->procesoCerrado ?></td>
                 <?php }else{?>
                     <td style='background-color:#F6C8BE;'><?= $val->procesoCerrado ?></td>
                 <?php }?>
                 <td style= 'width: 25px; height: 20px;'>
-                    <a href="<?= Url::toRoute(["clientes/view", "id" => $val->id_cliente, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                    <a href="<?= Url::toRoute(["cierre-caja/view", "id" => $val->id_cierre, 'accesoToken' => $accesoToken]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>
                 <td style= 'width: 25px; height: 20px;'>
-                    <a href="<?= Url::toRoute(["clientes/update", "id" => $val->id_cliente])?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                    
                 </td>
             </tr>
             </tbody>
