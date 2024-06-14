@@ -19,18 +19,10 @@ $this->params['breadcrumbs'][] = ['label' => 'Cierre Cajas', 'url' => ['index']]
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="cierre-caja-view">
+    
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <p>
-        <?php echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);
-        if ($model->autorizado == 0 && $model->numero_cierre == 0){
-            echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_cierre, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); 
-        }else{
-            if($model->autorizado == 1 && $model->numero_cierre == 0){
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $id, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-book"></span> Cerrar caja', ['cerrar_caja_punto', 'id' => $id, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de cerrar la caja del punto de venta ('.$model->punto->nombre_punto.').', 'method' => 'post']]);
-             }
-        }?>    
+        <?php echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_cierre_caja'], ['class' => 'btn btn-primary btn-sm']);?>
     </p>    
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -107,7 +99,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                          <th scope="col" style='background-color:#B9D5CE;'>Forma pago</th> 
                                          <th scope="col" style='background-color:#B9D5CE;'>No transacion</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Valor pago</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -121,7 +112,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                             <td><?= $val->recibo->formaPago->concepto?></td>
                                             <td><?= $val->recibo->numero_transacion?></td>
                                             <td style="text-align: right"><?= ''. number_format($val->valor_pago,0)?></td>
-                                            <td><input type="checkbox" name="listado_eliminar[]" value="<?= $val->id_detalle ?>"></td> 
                                         </tr>
                                     <?php
                                     endforeach;?>
@@ -129,16 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </table>
                         </div>
                         <div class="panel-footer text-right">
-                            <?php
-                            if($model->autorizado == 0){ 
-                                if(count($conrecibofactura) == null){
-                                    echo  Html::a('<span class="glyphicon glyphicon-import"></span> Importar recibo factura', ['cargar_recibo_factura', 'id' => $model->id_cierre, 'accesoToken' => $accesoToken, 'fecha_inicio' => $model->fecha_inicio], ['class' => 'btn btn-success btn-sm']);
-                                }else{
-                                   echo Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminartodo']);
-                                }
-                            }else{
-                               echo Html::a('<span class="glyphicon glyphicon-export"></span> Excel remisiones', ['excel_recibo_facturas', 'id' => $id], ['class' => 'btn btn-success btn-sm']); 
-                            } ?> 
+                             <?= Html::a('<span class="glyphicon glyphicon-export"></span> Excel remisiones', ['excel_recibo_facturas', 'id' => $id], ['class' => 'btn btn-success btn-sm']) ?>
                         </div>
                     </div>
                 </div>
@@ -158,7 +139,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                          <th scope="col" style='background-color:#B9D5CE;'>Forma pago</th> 
                                          <th scope="col" style='background-color:#B9D5CE;'>No transacion</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Valor pago</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcaremision(this);"/></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -172,7 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             <td><?= $val->recibo->formaPago->concepto?></td>
                                             <td><?= $val->recibo->numero_transacion?></td>
                                             <td style="text-align: right"><?= ''. number_format($val->valor_pago,0)?></td>
-                                            <td><input type="checkbox" name="listado_eliminar_remision[]" value="<?= $val->id_detalle ?>"></td> 
+                                            
                                         </tr>
                                     <?php
                                     endforeach;?>
@@ -180,17 +160,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             </table>
                         </div>
                          <div class="panel-footer text-right">
-                            <?php
-                            if($model->autorizado == 0){ 
-                                if(count($conreciboremision) == null){
-                                    echo  Html::a('<span class="glyphicon glyphicon-import"></span> Importar recibo remision', ['cargar_recibo_remision', 'id' => $model->id_cierre, 'accesoToken' => $accesoToken, 'fecha_inicio' => $model->fecha_inicio], ['class' => 'btn btn-info btn-sm']);
-                                }else{
-                                   echo Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar_todo_remision']);
-                                }
-                            }else{
-                                echo Html::a('<span class="glyphicon glyphicon-export"></span> Excel remisiones', ['excel_recibo_remision', 'id' => $id], ['class' => 'btn btn-success btn-sm']);
-                            }  ?> 
-                         </div>
+                             <?= Html::a('<span class="glyphicon glyphicon-export"></span> Excel remisiones', ['excel_recibo_remision', 'id' => $id], ['class' => 'btn btn-success btn-sm']) ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,28 +170,4 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>    
     <?php $form->end() ?>     
 </div>
-<script type="text/javascript">
-	function marcar(source) 
-	{
-		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
-		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
-		{
-			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
-			{
-				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
-			}
-		}
-	}
-        //proceso de remision
-        function marcaremision(source) 
-	{
-		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
-		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
-		{
-			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
-			{
-				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
-			}
-		}
-	}
-</script>
+

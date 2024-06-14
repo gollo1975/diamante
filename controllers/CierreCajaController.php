@@ -125,6 +125,77 @@ class CierreCajaController extends Controller
             return $this->redirect(['site/login']);
         }
     }
+    
+    //CONSULTA DE CIERRES DE CAJA
+      public function actionSearch_cierre_caja() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',111])->all()){
+                $form = new \app\models\FiltroBusquedaCierreCaja();
+                $numero_cierre = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $punto_venta = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero_cierre = Html::encode($form->numero_cierre);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                         $punto_venta = Html::encode($form->punto_venta);
+                        $table = CierreCaja::find()
+                                ->andFilterWhere(['between', 'fecha_inicio', $fecha_inicio , $fecha_corte])
+                                ->andFilterWhere(['=', 'numero_cierre', $numero_cierre])
+                                 ->andFilterWhere(['=', 'id_punto', $punto_venta]);
+                        $table = $table->orderBy('id_cierre DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaCierreCaja($tableexcel);
+                        }
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                    
+                } else {
+                    $table = CierreCaja::find()->orderBy('id_cierre DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                     if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaCierreCaja($tableexcel);
+                    }
+                    
+                }
+                $to = $count->count();
+                return $this->render('search_cierre_caja', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                    
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
 
     /**
      * Displays a single CierreCaja model.
@@ -188,6 +259,18 @@ class CierreCajaController extends Controller
             'conrecibofactura' => $conrecibofactura,
             'conreciboremision' => $conreciboremision,
         ]);
+    }
+    
+    //VISTA PARA VER LA CIERRES DE CAJA
+    public function actionView_search($id) {
+       $conrecibofactura = \app\models\CierreCajaFactura::find()->where(['=','id_cierre', $id])->all();
+       $conreciboremision = \app\models\CierreCajaRemision::find()->where(['=','id_cierre', $id])->all(); 
+       return $this->render('view_search', [
+            'model' => $this->findModel($id),
+            'id' => $id,
+            'conrecibofactura' => $conrecibofactura,
+            'conreciboremision' => $conreciboremision,
+        ]); 
     }
 
     /**
@@ -347,4 +430,240 @@ class CierreCajaController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    //PROCESO QUE EXPORTA EL CIERRE DE CAJA
+     public function actionExcelconsultaCierreCaja($tableexcel) { // EXPORTAR RECIBOS DE CAJA DE FACTURAS                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NRO CIERRE')
+                    ->setCellValue('C1', 'PUNTO DE VENTA')
+                    ->setCellValue('D1', 'DESDE')
+                    ->setCellValue('E1', 'HASTA')
+                    ->setCellValue('F1', 'TOTAL TRANSACION FACTURA')
+                    ->setCellValue('G1', 'TOTAL EFECTIVO FACTURA')
+                    ->setCellValue('H1', 'TOTAL FACTURA')
+                    ->setCellValue('I1', 'TOTAL TRANSACION EFECTIVO')
+                    ->setCellValue('J1', 'TOTAL EFECTIVO EFECTIVO')
+                    ->setCellValue('K1', 'TOTAL REMISION')
+                    ->setCellValue('L1', 'TOTAL CAJA')
+                    ->setCellValue('M1', 'USER NAME')
+                    ->setCellValue('N1', 'FECHA HORA CARGA');
+                    
+        $i = 2;
+
+        foreach ($tableexcel     as $val) {
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_cierre)
+                    ->setCellValue('B' . $i, $val->numero_cierre)
+                    ->setCellValue('C' . $i, $val->punto->nombre_punto)
+                    ->setCellValue('D' . $i, $val->fecha_corte)
+                    ->setCellValue('E' . $i, $val->fecha_corte )
+                    ->setCellValue('F' . $i, $val->total_transacion_factura)
+                    ->setCellValue('G' . $i, $val->total_efectivo_factura)
+                    ->setCellValue('H' . $i, $val->total_factura)
+                    ->setCellValue('I' . $i, $val->total_transacion_remision)
+                    ->setCellValue('J' . $i, $val->total_efectivo_remision)
+                    ->setCellValue('K' . $i, $val->total_remision)
+                    ->setCellValue('L' . $i, $val->total_cierre_caja)
+                    ->setCellValue('M' . $i, $val->user_name)
+                    ->setCellValue('N' . $i, $val->fecha_hora_registro);
+                   
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Detalle');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Cierre_Caja_facturas.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
+    
+    //PROCESO QUE EXPORTA EL DETALLE DEL RECIBO DE FACTURAS
+     public function actionExcel_recibo_facturas($id) { // EXPORTAR RECIBOS DE CAJA DE FACTURAS                
+       $detalle = \app\models\CierreCajaFactura::find()->where(['=', 'id_cierre', $id])->all();  
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'NRO CIERRE')
+                    ->setCellValue('B1', 'PUNTO DE VENTA')
+                    ->setCellValue('C1', 'DESDE')
+                    ->setCellValue('D1', 'HASTA')
+                    ->setCellValue('E1', 'TOTAL FACTURA')
+                    ->setCellValue('F1', 'USER NAME')
+                    ->setCellValue('G1', 'FACTURA')
+                    ->setCellValue('H1', 'NRO RECIBO')
+                    ->setCellValue('I1', 'VALOR RECIBO')
+                    ->setCellValue('J1', 'FECHA HORA CARGA');
+                    
+        $i = 2;
+
+        foreach ($detalle as $val) {
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->cierreCaja->numero_cierre)
+                    ->setCellValue('B' . $i, $val->cierreCaja->punto->nombre_punto)
+                    ->setCellValue('C' . $i, $val->cierreCaja->fecha_inicio)
+                    ->setCellValue('D' . $i, $val->cierreCaja->fecha_corte)
+                    ->setCellValue('E' . $i, $val->cierreCaja->total_factura )
+                    ->setCellValue('F' . $i, $val->cierreCaja->user_name)
+                    ->setCellValue('G' . $i, $val->factura->numero_factura)
+                    ->setCellValue('H' . $i, $val->recibo->numero_recibo)
+                    ->setCellValue('I' . $i, $val->valor_pago)
+                    ->setCellValue('J' . $i, $val->fecha_hora_carga);
+                   
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Detalle');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Cierre_Caja_facturas.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
+    
+    //PROCESO QUE EXPORTA EL DETALLE DEL RECIBO DE REMISIONES
+     public function actionExcel_recibo_remision($id) { // EXPORTAR RECIBOS DE CAJA DE FACTURAS                
+       $detalle = \app\models\CierreCajaRemision::find()->where(['=', 'id_cierre', $id])->all();  
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'NRO CIERRE')
+                    ->setCellValue('B1', 'PUNTO DE VENTA')
+                    ->setCellValue('C1', 'DESDE')
+                    ->setCellValue('D1', 'HASTA')
+                    ->setCellValue('E1', 'TOTAL REMISION')
+                    ->setCellValue('F1', 'USER NAME')
+                    ->setCellValue('G1', 'REMISION')
+                    ->setCellValue('H1', 'NRO RECIBO')
+                    ->setCellValue('I1', 'VALOR RECIBO')
+                    ->setCellValue('J1', 'FECHA HORA CARGA');
+                    
+        $i = 2;
+
+        foreach ($detalle as $val) {
+
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->cierreCaja->numero_cierre)
+                    ->setCellValue('B' . $i, $val->cierreCaja->punto->nombre_punto)
+                    ->setCellValue('C' . $i, $val->cierreCaja->fecha_inicio)
+                    ->setCellValue('D' . $i, $val->cierreCaja->fecha_corte)
+                    ->setCellValue('E' . $i, $val->cierreCaja->total_remision )
+                    ->setCellValue('F' . $i, $val->cierreCaja->user_name)
+                    ->setCellValue('G' . $i, $val->remision->numero_remision)
+                    ->setCellValue('H' . $i, $val->recibo->numero_recibo)
+                    ->setCellValue('I' . $i, $val->valor_pago)
+                    ->setCellValue('J' . $i, $val->fecha_hora_carga);
+                   
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Detalle');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Cierre_Caja_remisiones.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
 }

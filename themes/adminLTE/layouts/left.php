@@ -518,6 +518,7 @@
                                                 'items' => [
                                                     ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_factura']],
                                                     ['label' => 'Ventas clientes', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_referencia']],
+                                                    ['label' => 'Cierre caja', 'icon' => 'plus-square-o', 'url' => ['/cierre-caja/search_cierre_caja']],
                                             ]],
                                         ]],
                                         [
