@@ -2,7 +2,7 @@
 
 use inquid\pdf\FPDF;
 use app\models\ReciboCajaPuntoVenta;
-use app\models\FacturaVentaPunto;
+use app\models\Remisiones;
 use app\models\MatriculaEmpresa;
 use app\models\Municipios;
 use app\models\Departamentos;
@@ -62,7 +62,7 @@ class PDF extends FPDF {
         $this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
         //Recibo caja
         $this->SetFillColor(200, 200, 200);
-        $this->SetXY(10, 38);
+        $this->SetXY(8, 38);
         $this->SetFont('Arial', 'B', 13);
         $this->Cell(63, 7, utf8_decode("RECIBO DE CAJA"), 0, 0, 'l', 0);
         $this->Cell(15, 7, utf8_decode('N°. ' . str_pad($recibo->numero_recibo, 6, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
@@ -72,19 +72,19 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(25, 5, utf8_decode("Nit/Cedula:"), 0, 0, 'L','0');
         $this->SetFont('Arial', '', 8);        
-        $this->Cell(60, 5, utf8_decode($recibo->factura->clienteFactura->nit_cedula . '-' . $recibo->factura->clienteFactura->dv), 0, 0, 'L','0');                
+        $this->Cell(60, 5, utf8_decode($recibo->remision->cliente->nit_cedula . '-' . $recibo->remision->cliente->dv), 0, 0, 'L','0');                
         
         $this->SetXY(8, 57); //FILA 1
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(25, 5, utf8_decode("Cliente:"), 0, 0, 'L','0');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(60, 5, utf8_decode($recibo->factura->clienteFactura->nombre_completo), 0, 0, 'L','0');
+        $this->Cell(60, 5, utf8_decode($recibo->remision->cliente->nombre_completo), 0, 0, 'L','0');
         //fin
         $this->SetXY(8, 62); //FILA 3
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(25, 5, utf8_decode("Dirección:"), 0, 0, 'L','0');
         $this->SetFont('Arial', '', 8);        
-        $this->Cell(60, 5, utf8_decode($recibo->factura->clienteFactura->direccion), 0, 0, 'L','0');          
+        $this->Cell(60, 5, utf8_decode($recibo->remision->cliente->direccion), 0, 0, 'L','0');          
         //fin
         
         $this->SetXY(8, 67); //FILA 3
@@ -102,9 +102,9 @@ class PDF extends FPDF {
         //fin
         $this->SetXY(8, 77); //FILA 3
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(25, 5, utf8_decode("Nro factura:"), 0, 0, 'L','0');
+        $this->Cell(25, 5, utf8_decode("Nro remision:"), 0, 0, 'L','0');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(60, 5, utf8_decode($recibo->factura->numero_factura), 0, 0, 'L','0');
+        $this->Cell(60, 5, utf8_decode($recibo->remision->numero_remision), 0, 0, 'L','0');
         //fin
         $this->SetXY(8, 82); //FILA 4
         $this->SetFont('Arial', 'B', 8);

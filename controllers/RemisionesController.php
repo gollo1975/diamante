@@ -26,6 +26,7 @@ use app\models\UsuarioDetalle;
 use app\models\Clientes;
 use app\models\InventarioPuntoVenta;
 use app\models\RemisionDetalles;
+use app\models\ReciboCajaPuntoVenta;
 
 
 
@@ -689,6 +690,14 @@ class RemisionesController extends Controller
     public function actionImprimir_remision_venta($id) {
         $model = Remisiones::findOne($id);
         return $this->render('../formatos/reporte_remision_venta', [
+            'model' => $model,
+        ]);
+    }
+    
+    //PROCESO QUE IMPRIME EL RECIBO EN FORMARTO TICKET
+    public function actionImprimir_remision_ticket($id_recibo) {
+        $model = ReciboCajaPuntoVenta::findOne($id_recibo);
+        return $this->render('../formatos/recibo_caja_remision_ticket', [
             'model' => $model,
         ]);
     }

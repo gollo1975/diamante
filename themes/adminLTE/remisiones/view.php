@@ -21,7 +21,6 @@ $this->params['breadcrumbs'][] = $this->title;
 $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision', $model->id_remision])->one();
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-<p>
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_remision == 0) { 
         echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_remision, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); 
@@ -47,19 +46,49 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision
             <?php }
             
         }else{
-            if($model->exportar_inventario == 0){
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']);                        
+            if($model->exportar_inventario == 0){?>
+                <div class="btn-group btn-sm" role="group">
+                    <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       Imprimir remision
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_remision_venta', 'id' => $model->id_remision]) ?></li>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_remision_ticket', 'id' => $model->id_remision]) ?></li>
+                    </ul>
+                </div>   
+                <?php
                 echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
                            'data' => ['confirm' => 'Esta seguro de procesar la descarga de referencias al modulo de inventario.', 'method' => 'post']]);
-            }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir remision', ['imprimir_remision_venta', 'id' => $model->id_remision], ['class' => 'btn btn-default btn-sm']); 
-                if($buscarRecibo){
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir recibo', ['imprimir_recibo_caja', 'id_recibo' => $buscarRecibo->id_recibo], ['class' => 'btn btn-default btn-sm']); 
+            }else{?>
+                <div class="btn-group btn-sm" role="group">
+                    <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       Imprimir remisión
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_remision_venta', 'id' => $model->id_remision]) ?></li>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_remision_venta_ticket', 'id' => $model->id_remision]) ?></li>
+                    </ul>
+                </div> 
+                <?php
+                if($buscarRecibo){?>
+                   <div class="btn-group btn-sm" role="group">
+                        <button type="button" class="btn btn-warning  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           Imprimir recibo
+                           <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                                <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_recibo_caja_remision', 'id_recibo' => $buscarRecibo->id_recibo, 'id' => $model->id_remision, 'accesoToken' => $accesoToken]) ?></li>
+                                <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_remision_ticket', 'id_recibo' => $buscarRecibo->id_recibo]) ?></li>
+                        </ul>
+                     </div>  
+                <?php
                 } 
             }    
         }
     }?>
-</p>    
+ 
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
     "action" => Url::toRoute(["remisiones/view", 'id' => $model->id_remision, 'accesoToken' => $accesoToken]),
@@ -96,8 +125,8 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision
                 <td><?= Html::encode($model->fecha_inicio) ?></td>
                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_registro') ?></th>
                 <td><?= Html::encode($model->fecha_hora_registro) ?></td>
-                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
-                 <td><?= Html::encode($model->user_name) ?></td>
+                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'estado_remision') ?></th>
+                 <td style='background-color:#cbf3f0'><?= Html::encode($model->estadoRemision) ?></td>
             </tr>
         </table>
     </div>
