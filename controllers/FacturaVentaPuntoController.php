@@ -1053,7 +1053,7 @@ class FacturaVentaPuntoController extends Controller
                  $table->forma_pago = 0;
                  $table->plazo = 0;
                  $table->save(false);
-                // return $this->redirect(['view', 'accesoToken' =>$accesoToken]);
+                 return $this->redirect(['view', 'accesoToken' =>$accesoToken]);
                 }
             }else{
                 $model->getErrors();
@@ -1129,6 +1129,24 @@ class FacturaVentaPuntoController extends Controller
     public function actionImprimir_factura_venta($id_factura_punto) {
         $model = FacturaVentaPunto::findOne($id_factura_punto);
         return $this->render('../formatos/reporte_factura_venta_punto', [
+            'model' => $model,
+        ]);
+    }
+    
+    //IMPRIMIR RECIBO DE CAJA
+    public function actionImprimir_recibo_caja($id_factura_punto, $id_recibo, $accesoToken) {
+       // $model = \app\models\ReciboCajaPuntoVenta::findOne($id_recibo);
+       /* return $this->render('../formatos/recibo_caja_punto_venta', [
+            'model' => $model,
+        ]);*/
+        Yii::$app->getSession()->setFlash('success', 'Este proceso esta en construccion.');
+        return $this->redirect(['view', 'accesoToken' =>$accesoToken, 'id_factura_punto' => $id_factura_punto]);
+    }
+    
+    //IMPRIMIR TICKET
+    public function actionImprimir_recibo_ticket($id_recibo) {
+        $model = \app\models\ReciboCajaPuntoVenta::findOne($id_recibo);
+        return $this->render('../formatos/recibo_caja_punto_venta', [
             'model' => $model,
         ]);
     }

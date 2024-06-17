@@ -28,6 +28,7 @@ use yii\db\ActiveQuery;
 use app\models\InventarioPuntoVenta;
 use app\models\UsuarioDetalle;
 use app\models\FacturaVentaPunto;
+use app\models\FacturaVentaPuntoDetalle;
 
 
 /**
@@ -333,6 +334,54 @@ class InventarioPuntoVentaController extends Controller
             return $this->redirect(['site/login']);
         }    
     }     
+   
+    //PRODUCTO MAS VENDID
+      public function actionProducto_masvendido() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',107])->all()){
+                $form = new \app\models\FiltroBusquedaInventarioPunto();
+                $cantidad_mostrar = null;
+                $listado = null;
+                $conPunto = \app\models\PuntoVenta::find()->orderBy('predeterminado DESC')->all();
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $cantidad_mostrar = Html::encode($form->cantidad_mostrar);
+                        if($cantidad_mostrar <> null){
+                            $query = (new Query())
+                                       ->select('inventario_punto_venta.id_inventario, inventario_punto_venta.codigo_producto, inventario_punto_venta.nombre_producto,
+                                                SUM(factura_venta_punto_detalle.cantidad) AS cantidad, factura_venta_punto_detalle.fecha_inicio, punto_venta.nombre_punto AS punto,
+                                                proveedor.nombre_completo AS proveedor')
+                                       ->from('factura_venta_punto_detalle, punto_venta, proveedor')
+                                       ->innerJoin('inventario_punto_venta')
+                                       ->where('factura_venta_punto_detalle.id_inventario = inventario_punto_venta.id_inventario')
+                                       ->andWhere('inventario_punto_venta.id_proveedor = proveedor.id_proveedor')
+                                       ->andWhere('factura_venta_punto_detalle.id_punto = punto_venta.id_punto')
+                                       ->groupBy('inventario_punto_venta.id_inventario')
+                                       ->orderBy('SUM(factura_venta_punto_detalle.cantidad) DESC')
+                                       ->limit($cantidad_mostrar); 
+                                       $command = $query->createCommand();
+                                       $rows = $command->queryAll();   
+                                       $listado = $rows;
+                        }else{
+                            Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar la cantidad de registro a mostrar.');
+                           
+                        }               
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('producto_masvendido', [
+                            'listado' => $listado,
+                            'form' => $form,
+                            'conPunto' => ArrayHelper::map($conPunto, 'id_punto', 'nombre_punto'),
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }  
     /**
      * Displays a single InventarioPuntoVenta model.
      * @param integer $id

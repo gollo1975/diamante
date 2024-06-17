@@ -430,7 +430,8 @@
                                                 'items' => [
                                                     ['label' => 'Factura de venta', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_producto_vendido']],
                                                     ['label' => 'Remision', 'icon' => 'plus-square-o', 'url' => ['/remisiones/search_producto_vendido']],
-                                                   // ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/validador_imagen']],
+                                                    ['label' => 'Producto + vendido', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/producto_masvendido']],
+                                                     // ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/validador_imagen']],
                                                     
                                                 ]],
                                                [

@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_factura', $model->id_factura])->one();
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-<p>
+
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
     <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { 
         echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']); ?>
@@ -42,7 +42,7 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_factura'
     <?php }else{
         if ($model->autorizado == 1 && $model->numero_factura == 0){
             echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken], ['class' => 'btn btn-default btn-sm']);
-            echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
+            echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
             if(!$buscarRecibo){
                 echo  Html::a('<span class="glyphicon glyphicon-plus"></span> Recibo de pago',
@@ -60,21 +60,51 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_factura'
                 </div>  
             <?php }
         }else{
-            if($model->exportar_inventario == 0){
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);                        
+            if($model->exportar_inventario == 0){?>
+                <div class="btn-group btn-sm" role="group">
+                    <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       Imprimir
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura]) ?></li>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_factura_ticket', 'id_factura_punto' => $model->id_factura]) ?></li>
+                    </ul>
+                </div>   
+                <?php
                 if($model->id_remision == null){
                     echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar inventario', ['exportar_inventario_punto', 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken],['class' => 'btn btn-success btn-sm',
                            'data' => ['confirm' => 'Esta seguro de procesar el envio de estas referencias vendidas al modulo de inventario.', 'method' => 'post']]);
                 }    
-            }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir factura', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura], ['class' => 'btn btn-default btn-sm']); 
-                if($buscarRecibo){
-                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir recibo', ['imprimir_recibo_caja', 'id_recibo' => $buscarRecibo->id_recibo], ['class' => 'btn btn-default btn-sm']); 
+            }else{?>
+                <div class="btn-group btn-sm" role="group">
+                    <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       Imprimir factura
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_factura_venta', 'id_factura_punto' => $model->id_factura]) ?></li>
+                        <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_factura_ticket', 'id_factura_punto' => $model->id_factura]) ?></li>
+                    </ul>
+                </div>   
+                <?php
+                if($buscarRecibo){?>
+                    <div class="btn-group btn-sm" role="group">
+                        <button type="button" class="btn btn-warning  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           Imprimir recibo
+                           <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                                <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_recibo_caja', 'id_recibo' => $buscarRecibo->id_recibo, 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken]) ?></li>
+                                <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_recibo_ticket', 'id_recibo' => $buscarRecibo->id_recibo]) ?></li>
+                        </ul>
+                    </div>   
+                <?php
                 }    
             }    
         }
     }?>
-</p>    
+   
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
     "action" => Url::toRoute(["factura-venta-punto/view", 'id_factura_punto' => $model->id_factura, 'accesoToken' => $accesoToken]),
@@ -111,8 +141,8 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_factura'
                 <td><?= Html::encode($model->fecha_inicio) ?></td>
                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
                 <td><?= Html::encode($model->fecha_vencimiento) ?></td>
-                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
-                 <td><?= Html::encode($model->user_name) ?></td>
+                 <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'estado_factura') ?></th>
+                 <td style='background-color:#cbf3f0'><?= Html::encode($model->estadoFactura) ?></td>
             </tr>
         </table>
     </div>
