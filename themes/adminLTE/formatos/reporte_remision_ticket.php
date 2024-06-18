@@ -6,123 +6,123 @@ use app\models\RemisionDetalles;
 use app\models\MatriculaEmpresa;
 use app\models\Municipios;
 use app\models\Departamentos;
+
 class PDF extends FPDF {
-     function Header() {
+
+    function Header() {
         $id_remision = $GLOBALS['id_remision'];
-        $factura = Remisiones::findOne($id_remision);
+        $conRemision = Remisiones::findOne($id_remision);
         $config = MatriculaEmpresa::findOne(1);
         $municipio = Municipios::findOne($config->codigo_municipio);
         $departamento = Departamentos::findOne($config->codigo_departamento);
         //Logo
         $this->SetXY(43, 10);
-        $this->Image('dist/images/logos/logoempresa.png', 10, 10, 30, 30);
+        $this->Image('dist/images/logos/logoempresa.png', 10, 10, 20, 20);
         //Encabezado
         $this->SetFillColor(220, 220, 220);
-        $this->SetXY(53, 9);
+        $this->SetXY(35, 9);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("Empresa:"), 0, 0, 'l', 1);
+        $this->Cell(15, 5, utf8_decode("Empresa:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->razon_social_completa), 0, 0, 'L', 1);
-        $this->SetXY(30, 5);
-        //FIN
-        $this->SetXY(53, 13);
+               //FIN
+        $this->SetXY(35, 13);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("Nit:"), 0, 0, 'l', 1);
+        $this->Cell(15, 5, utf8_decode("Nit:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->nit_empresa." - ".$config->dv), 0, 0, 'L', 1);
-        $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 17);
+        $this->SetXY(35, 17);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("Dirección"), 0, 0, 'l', 1);
+        $this->Cell(15, 5, utf8_decode("Dirección"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->direccion), 0, 0, 'L', 1);
-        $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 21);
+        $this->SetXY(35, 21);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("Telefono:"), 0, 0, 'l', 1);
+        $this->Cell(15, 5, utf8_decode("Telefono:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->telefono), 0, 0, 'L', 1);
-        $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 25);
+        $this->SetXY(35, 25);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
+        $this->Cell(15, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->codigoMunicipio->municipio." - ".$config->codigoDepartamento->departamento), 0, 0, 'L', 1);
-        $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 29);
+        $this->SetXY(35, 29);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(30, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 1);
+        $this->Cell(15, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->tipoRegimen), 0, 0, 'L', 1);
-        $this->SetXY(40, 5);
-        //DATOS DE LA FACTURA
-          $this->SetXY(138, 7);
-        $this->SetFont('Arial', 'B', 12);
-        $this->Cell(162, 7, utf8_decode("REMISION DE SALIDA"), 0, 0, 'l', 0);
-        $this->SetXY(152, 14);
-        $this->SetFont('Arial', 'B', 10);
-        $this->Cell(20, 7, utf8_decode('No: '.str_pad($factura->numero_remision, 6, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
-       
-        //linea
-        $this->SetXY(10, 32);
+       //liena
+         $this->SetXY(10, 32);
         $this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
          $this->SetXY(10, 32.5);
         $this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
-        //comienza datos del cliente
-         //FIN
+        //Recibo caja
         $this->SetFillColor(200, 200, 200);
-        $this->SetXY(10, 40);
+        $this->SetXY(8, 38);
+        $this->SetFont('Arial', 'B', 13);
+        $this->Cell(63, 7, utf8_decode("REMISION DE SALIDA"), 0, 0, 'l', 0);
+        $this->Cell(15, 7, utf8_decode('N°. ' . str_pad($conRemision->numero_remision, 6, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+      //  $this->SetFillColor(200, 200, 200);
+        //fin
+        $this->SetXY(8, 52); //FILA 1
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("Nit:"), 0, 0, 'L', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->cliente->nit_cedula.'-'.$factura->cliente->dv), 0, 0, 'L',1);
-        $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Cliente:"), 0, 0, 'c', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->cliente->nombre_completo), 0, 0, 'c', 1);
-        //FIN
-        $this->SetXY(10, 44);
-        $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("Dirección:"), 0, 0, 'L', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->cliente->direccion), 0, 0, 'L',1);
-        $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Celular:"), 0, 0, 'c', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->cliente->celular), 0, 0, 'c', 1);
-        //FIN
-         //Lineas del encabezado
-        $this->Line(10,55,10,188); //la primera con la tercera es para la la raya iguales, la segunda es el lago o corto y la tercera es la tamaño de largo
-        $this->Line(26,55,26,188);
-        $this->Line(81,55,81,188);
-        $this->Line(93,55,93,188);
-        $this->Line(113,55,113,188);
-        $this->Line(131,55,131,188);
-        $this->Line(151,55,151,188);
-        $this->Line(177,55,177,188);
-        $this->Line(202,55,202,188);
-        //Cuadro de la nota
-        $this->Line(10,188,157,188);//linea horizontal superior
-        $this->Line(10,170,10,178);//linea vertical
-        $this->Line(10,196,157,196);//linea horizontal inferior
-        //Linea de las observacines
-        $this->Line(10,188,10,212);//linea vertical
-        //lineas para los cuadros de nit/cc,fecha,firma   
-        $this->Line(10,90,10,90);//linea vertical x1,y1,x2,y2   
-        $this->Line(0,90,0,90);//linea vertical x1,y1,x2,y2
-        $this->Line(0,90,0,90);//linea vertical x1,y1,x2,y2
-        $this->Line(0,90,0,90);//linea vertical x1,y1,x2,y2
-        $this->Line(202,90,202,90);//linea vertical x1,y1,x2,y2       
+        $this->Cell(25, 5, utf8_decode("Nit/Cedula:"), 0, 0, 'L','0');
+        $this->SetFont('Arial', '', 8);        
+        $this->Cell(60, 5, utf8_decode($conRemision->cliente->nit_cedula . '-' . $conRemision->cliente->dv), 0, 0, 'L','0');                
         
-        $this->EncabezadoDetalles();
-     }
-     function EncabezadoDetalles() {
+        $this->SetXY(8, 56); //FILA 1
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(25, 5, utf8_decode("Cliente:"), 0, 0, 'L','0');
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(60, 5, utf8_decode($conRemision->cliente->nombre_completo), 0, 0, 'L','0');
+        //fin
+        $this->SetXY(8, 60); //FILA 3
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(25, 5, utf8_decode("Dirección:"), 0, 0, 'L','0');
+        $this->SetFont('Arial', '', 8);        
+        $this->Cell(60, 5, utf8_decode($conRemision->cliente->direccion), 0, 0, 'L','0');          
+        //fin
+        
+        $this->SetXY(8, 64); //FILA 3
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(25, 5, utf8_decode("Fecha remision:"), 0, 0, 'L','0');
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(60, 5, utf8_decode($conRemision->fecha_inicio), 0, 0, 'L','0');
+        //fin
+        $this->SetXY(8, 68); //FILA 2
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(25, 5, utf8_decode("Punto de venta:"), 0, 0, 'L','0');
+        $this->SetFont('Arial', '', 8);        
+        $this->Cell(60, 5, utf8_decode($conRemision->puntoVenta->nombre_punto), 0, 0, 'L','0'); 
+        //fin
+        $this->SetXY(8, 72); //FILA 2
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(25, 5, utf8_decode("Total pagar:"), 0, 0, 'L','0');
+        $this->SetFont('Arial', '', 8);        
+        $this->Cell(60, 5, utf8_decode('$ '.number_format($conRemision->total_remision,0)), 0, 0, 'L','0'); 
+       
+        //fin
+        $this->Line(7,50,95,50);//linea superior horizontal
+        $this->Line(7,170,7,50);//primera linea en y
+        $this->Line(95,170,95,50);//primera linea en y
+        $this->Line(7,170,95,170);//linea inferior horizontal
+         //Lineas del encabezado
+        $this->Line(10,120,10,83); //la primera con la tercera es para la la raya iguales, la segunda es el lago o corto y la tercera es la tamaño de largo
+        $this->Line(42,120,42,83);
+        $this->Line(54,120,54,83);
+        $this->Line(69,120,69,83);
+        $this->Line(93,120,93,83);
+        $this->Line(10,120,93,120);//linea inferior horizontal
+           $this->EncabezadoDetalles();             
+        //Detalle factura
+    }   
+        function EncabezadoDetalles() {
         $this->Ln(7);
-        $header = array('CODIGO', 'NOMBRE PRODUCTO', 'CANT.', 'VR UNIT.','SUBTOTAL', '% DCTO','VR. DESCTO',  'TOTAL');
+        $header = array('REFERENCIA', 'CANT.','VR. UNIT.','TOTAL');
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
         $this->SetDrawColor(0, 0, 0);
@@ -130,7 +130,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 7);
 
         //creamos la cabecera de la tabla.
-        $w = array(16, 55, 12,  20, 18, 20, 26,  25);
+        $w = array(32, 12, 15, 24);
         for ($i = 0; $i < count($header); $i++)
             if ($i == 0 || $i == 1)
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -142,83 +142,52 @@ class PDF extends FPDF {
         $this->SetTextColor(0);
         $this->SetFont('');
         $this->Ln(5);
+    
+       
     }
-    function Body($pdf,$model) {
-        $config = MatriculaEmpresa::findOne(1);
+    function Body($pdf, $model) {
         $detalles = RemisionDetalles::find()->where(['=','id_remision',$model->id_remision])->all();
         $pdf->SetX(10);
         $pdf->SetFont('Arial', '', 8);
         $cant = 0;
         foreach ($detalles as $detalle) { 
             $pdf->SetFont('Arial', '', 7);
-            $pdf->Cell(16, 4, $detalle->codigo_producto, 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 7);
-            $pdf->Cell(55, 4, utf8_decode($detalle->producto) , 0, 0, 'L');
+            $pdf->Cell(32, 4, utf8_decode(mb_substr($detalle->producto, 0,20)) , 0, 0, 'L');
             $pdf->Cell(12, 4, $detalle->cantidad, 0, 0, 'R');
-            $pdf->Cell(20, 4, number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
-            $pdf->Cell(18, 4, number_format($detalle->subtotal, 0, '.', ','), 0, 0, 'R');
-            $pdf->Cell(20, 4, $detalle->porcentaje_descuento, 0, 0, 'R');
-            $pdf->Cell(26, 4, number_format($detalle->valor_descuento, 0, '.', ','), 0, 0, 'R');
-            $pdf->Cell(25, 4, number_format($detalle->total_linea, 0, '.', ','), 0, 0, 'R');            
+            $pdf->Cell(15, 4, number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
+            $pdf->Cell(24, 4, number_format($detalle->total_linea, 0, '.', ','), 0, 0, 'R');            
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);
-            $cant += $detalle->cantidad;
         }
-        $this->SetFillColor(200, 200, 200);
-        $pdf->SetXY(10, 188);
-        $this->SetFont('Arial', 'B', 8);
-        $pdf->MultiCell(146, 4, utf8_decode(valorEnLetras($model->total_remision)),0,'J');
-        $pdf->SetXY(157, 188);
-        $pdf->MultiCell(20, 8, 'VR BRUTO:',1,'L');
-        $pdf->SetXY(177, 188);
-        $pdf->MultiCell(25, 8, '$ '.number_format($model->valor_bruto, 0, '.', ','),1,'R');
-       //FIN
-        $pdf->SetXY(10, 196);
-        $this->SetFont('Arial', 'B', 8);
-        $pdf->MultiCell(146, 4, utf8_decode('Observacion: '.$model->observacion),0,'J');
-        $pdf->SetXY(157, 196);
-        $pdf->MultiCell(20, 8, 'DESCUENTO:',1,'L');
-        $pdf->SetXY(177, 196);
-        $pdf->MultiCell(25, 8, '$ '.number_format($model->descuento, 0, '.', ','),1,'R');
-        //FIN
-        $pdf->SetXY(157, 204);
-        $pdf->MultiCell(20, 8, 'SUBTOTAL:',1,'L');
-        $pdf->SetXY(177, 204);
-        $pdf->MultiCell(25, 8, '$ '.number_format($model->subtotal, 0, '.', ','),1,'R');
-        ///fin
-        //fin
-        $pdf->SetXY(10, 212);
-        $pdf->MultiCell(109, 8, '',1,'R',1);
-        $pdf->SetXY(119, 212);
-        $pdf->MultiCell(38, 8, 'UNIDADES: '.$cant,1,'L',1);
-        $pdf->SetXY(157, 212);           
-        $pdf->MultiCell(20, 8, 'TOTAL:',1,'L',1);
-        $pdf->SetXY(177, 212);
-        $pdf->MultiCell(25, 8,'$ '. number_format($model->total_remision, 0, '.', ','),1,'R',1);
-        
-       
-       
-        $pdf->SetXY(10, 255);//firma trabajador
-        $this->SetFont('', 'B', 9);
-        $pdf->Cell(35, 5, 'FIRMA CLIENTE: ____________________________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(10, 260);
-        $pdf->Cell(35, 5, 'NIT/CC.:', 0, 0, 'L',0);
+        $this->SetFont('Arial', '', 12);
+        $this->Text(25, 147, utf8_decode('Muchas gracias por su compra!'),0,0, 'C');
+        $this->Text(27, 152, utf8_decode('Fue un placer poderle servir!'),0, 0, 'C');
+    }
+    function Footer() {
+
+        $this->SetFont('Arial', '', 8);
+        $this->Text(8, 167, utf8_decode('Nuestra compañía, en favor del medio ambiente.'));
+        $this->Text(250, 205, utf8_decode('Página ') . $this->PageNo() . ' de {nb}');
     }
 }
+
 global $id_remision;
 $id_remision = $model->id_remision;
-$pdf = new PDF();
+$pdf = new PDF('P', 'mm', array(100,185));
+//$pdf = new PDF();
 $pdf->AliasNbPages();
 $pdf->AddPage();
-$pdf->Body($pdf,$model);
+$pdf->Body($pdf, $model);
 $pdf->AliasNbPages();
 $pdf->SetFont('Times', '', 10);
-$pdf->Output("RemisionVenta_$model->numero_remision.pdf", 'D');
+$pdf->Output("Remision_No:$model->numero_remision.pdf", 'D');
+
 exit;
-function zero_fill ($valor, $long = 0)
-{
+
+function zero_fill($valor, $long = 0) {
     return str_pad($valor, $long, '0', STR_PAD_LEFT);
 }
+
 function valorEnLetras($x) {
     if ($x < 0) {
         $signo = "menos ";
@@ -445,7 +414,7 @@ function unidades($u) {
     } elseif ($u == 74) {
         $ru = "Setenta y cuatro ";
     } elseif ($u == 75) {
-        $ru = "Setenta y cinco ";
+        $ru = "Setentaycinco ";
     } elseif ($u == 76) {
         $ru = "Setenta y seis ";
     } elseif ($u == 77) {
@@ -522,5 +491,3 @@ function decenas($d) {
     }
     return $rd; //Retornar el resultado 
 }
-
-

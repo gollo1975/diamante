@@ -701,6 +701,15 @@ class RemisionesController extends Controller
             'model' => $model,
         ]);
     }
+    
+      
+    //PROCESO QUE IMPRIME LA REMISION EN TICKET
+    public function actionImprimir_remision_venta_ticket($id) {
+        $model = Remisiones::findOne($id);
+        return $this->render('../formatos/reporte_remision_ticket', [
+            'model' => $model,
+        ]);
+    }
 
     /**
      * Finds the Remisiones model based on its primary key value.
