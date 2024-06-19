@@ -22,37 +22,37 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(35, 9);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(15, 5, utf8_decode("Empresa:"), 0, 0, 'l', 1);
+        $this->Cell(20, 5, utf8_decode("Empresa:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->razon_social_completa), 0, 0, 'L', 1);
                //FIN
         $this->SetXY(35, 13);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(15, 5, utf8_decode("Nit:"), 0, 0, 'l', 1);
+        $this->Cell(20, 5, utf8_decode("Nit:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->nit_empresa." - ".$config->dv), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(35, 17);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(15, 5, utf8_decode("Dirección"), 0, 0, 'l', 1);
+        $this->Cell(20, 5, utf8_decode("Dirección"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->direccion), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(35, 21);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(15, 5, utf8_decode("Telefono:"), 0, 0, 'l', 1);
+        $this->Cell(20, 5, utf8_decode("Telefono:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->telefono), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(35, 25);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(15, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
+        $this->Cell(20, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->codigoMunicipio->municipio." - ".$config->codigoDepartamento->departamento), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(35, 29);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(15, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 1);
+        $this->Cell(20, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
         $this->Cell(40, 5, utf8_decode($config->tipoRegimen), 0, 0, 'L', 1);
        //liena

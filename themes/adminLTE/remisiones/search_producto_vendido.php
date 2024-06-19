@@ -138,10 +138,12 @@ $form = ActiveForm::begin([
                 <?php
                 $utilidad = 0;
                 $porcentaje = 0;
+                  $cantidad = 0;
                 if($model){
                     foreach ($model as $val):
-                        $utilidad = $val->total_linea - $val->inventario->costo_unitario;
-                        $porcentaje = ''.number_format((($val->total_linea - $val->inventario->costo_unitario) / $val->inventario->costo_unitario) * 100);
+                        $cantidad = $val->inventario->costo_unitario * $val->cantidad;
+                        $utilidad = $val->total_linea - $cantidad;
+                        $porcentaje = ((($val->total_linea - $cantidad) / $cantidad) * 100);
                         ?>
                         <tr style ='font-size: 90%;'>  
                             <td><?= $val->codigo_producto?></td>

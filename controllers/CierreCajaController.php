@@ -282,7 +282,7 @@ class CierreCajaController extends Controller
     {
         $fecha_dia_actual = date('Y-m-d');
         $facturas = FacturaVentaPunto::find()->where(['=','fecha_inicio', $fecha_dia_actual])->andWhere(['=','id_punto', $accesoToken])->all(); // cargo las facturas
-        $remisiones = Remisiones::find()->where(['=','fecha_inicio', $fecha_dia_actual])->andWhere(['=','id_punto', $accesoToken])->all(); // cargo las remisiones  
+        $remisiones = Remisiones::find()->where(['=','fecha_inicio', $fecha_dia_actual])->andWhere(['=','id_punto', $accesoToken])->andWhere(['=','expedir_factura', 0])->all(); // cargo las remisiones  
         $total_remision = 0;
         $total_factura = 0;
        

@@ -330,10 +330,10 @@ class FacturaVentaPuntoController extends Controller
                 $conPunto = \app\models\PuntoVenta::find()->orderBy('nombre_punto ASC')->all();
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
+                        $punto_venta = Html::encode($form->punto_venta);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $producto = Html::encode($form->producto);
-                        $punto_venta = Html::encode($form->punto_venta);
                        
                         if($form->punto_venta <> null){
                             $table = FacturaVentaPuntoDetalle::find()
@@ -503,8 +503,8 @@ class FacturaVentaPuntoController extends Controller
                                $descuento = 0;  
                             }
                             //asignacion
-                            $table->id_punto = $accesoToken;
-                            $table->fecha_inicio = $factura->fecha_inicio;
+                         //   $table->id_punto = $accesoToken;
+                          //  $table->fecha_inicio = $factura->fecha_inicio;
                             $detalle->cantidad = $cantidad;
                             $detalle->subtotal = $detalle->subtotal + $pSubtotal;
                             $detalle->valor_descuento = $detalle->valor_descuento + $descuento;
@@ -952,7 +952,7 @@ class FacturaVentaPuntoController extends Controller
                 'detalleTalla' => $detalleTalla,
             ]);
         }else{
-            Yii::$app->getSession()->setFlash('error', 'Debe ingresar primero las unidades que a vender antes de generar las tallas y colores.'); 
+            Yii::$app->getSession()->setFlash('error', 'Debe ingresar primero las unidades que va vender antes de generar las tallas y colores.'); 
             $this->redirect(["view", 'id_factura_punto' => $id_factura_punto,'accesoToken' => $accesoToken]); 
         }    
     }
@@ -1085,12 +1085,14 @@ class FacturaVentaPuntoController extends Controller
                                     $table->id_factura = $id_factura_punto;
                                     $table->id_inventario = $detalle->id_inventario;
                                     $table->codigo_producto = $detalle->codigo_producto;
+                                    $table->id_punto = $accesoToken;
                                     $table->producto = $detalle->producto;
                                     $table->cantidad = $detalle->cantidad;
                                     $table->valor_unitario = $detalle->valor_unitario;
                                     $table->porcentaje_descuento = $detalle->porcentaje_descuento;
                                     $table->valor_descuento = $detalle->valor_descuento;
                                     $table->porcentaje_iva = $factura->porcentaje_iva;
+                                    $table->fecha_inicio = $factura->fecha_inicio; 
                                     //variables
                                     $porcentaje = $factura->porcentaje_iva/100;
                                     $iva = round($detalle->subtotal * $porcentaje);
@@ -1554,9 +1556,11 @@ class FacturaVentaPuntoController extends Controller
         $i = 2;
          $utilidad = 0;
          $porcentaje = 0;
+         $cantidad = 0;
         foreach ($tableexcel as $val) {
-             $utilidad = $val->total_linea - $val->inventario->costo_unitario;
-             $porcentaje = ''.number_format((($val->total_linea - $val->inventario->costo_unitario) / $val->inventario->costo_unitario) * 100);
+            $cantidad = $val->inventario->costo_unitario * $val->cantidad;
+            $utilidad = $val->total_linea - $cantidad;
+            $porcentaje = ''.number_format((($val->total_linea - $cantidad) / $cantidad) * 100);
             $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A' . $i, $val->codigo_producto)
                     ->setCellValue('B' . $i, $val->producto)

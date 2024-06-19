@@ -16,7 +16,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
-$this->title = 'Factura de venta ('. $model->tipoVenta->concepto .')';
+$this->title = 'Factura de venta ('. $model->puntoVenta->nombre_punto .')';
 $this->params['breadcrumbs'][] = $this->title;
 $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_factura', $model->id_factura])->one();
 ?>

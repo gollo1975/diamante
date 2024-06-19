@@ -54,7 +54,7 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision
                     </button>
                     <ul class="dropdown-menu">
                             <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Tamaño carta', ['imprimir_remision_venta', 'id' => $model->id_remision]) ?></li>
-                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_remision_ticket', 'id' => $model->id_remision]) ?></li>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Ticket', ['imprimir_remision_venta_ticket', 'id' => $model->id_remision]) ?></li>
                     </ul>
                 </div>   
                 <?php

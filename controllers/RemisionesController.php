@@ -247,6 +247,9 @@ class RemisionesController extends Controller
                         $table->id_inventario = $producto->id_inventario;
                         $table->codigo_producto = $codigo_producto;
                         $table->fecha_inicio = $factura->fecha_inicio;
+                        if($producto->aplica_talla_color == 1){
+                            $table->genera_talla = 1;
+                        }
                         $table->id_punto = $accesoToken;
                         $table->producto = $producto->nombre_producto;
                         if($factura->id_punto  <> 1 ){ ///PROCESO AL DEPTAL
@@ -428,15 +431,19 @@ class RemisionesController extends Controller
     
      //PROCESO QUE AUTORIZADO O DESAUTORIZA
     public function actionAutorizado($id, $accesoToken) {
-        $detalle = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->all();
+        $detalle = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->andWhere(['=','genera_talla', 1])->all();
         $factura = Remisiones::findOne($id);
         $sw = 0;
         foreach ($detalle as $detalle_factura):
-            if($talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one()){
+           
+            $talla_color = \app\models\RemisionDetalleColoresTalla::find()->where(['=','id_detalle', $detalle_factura->id_detalle])->one();
+            if(!$talla_color){
                 $sw = 1;
+                
             }
         endforeach;
         if($sw == 0){
+            var_dump(count($detalle));
             if(count($detalle) > 0 && $factura->valor_bruto > 0){
                 if($factura->autorizado == 0){
                     $factura->autorizado = 1;
@@ -446,8 +453,18 @@ class RemisionesController extends Controller
                 $factura->save();
                 $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
             }else{
-                Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la remision porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
-                $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
+                if(count($detalle)<= 0){
+                    if($factura->autorizado == 0){
+                    $factura->autorizado = 1;
+                    }else{
+                        $factura->autorizado = 0;
+                    }
+                    $factura->save();
+                    $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
+                }else{
+                    Yii::$app->getSession()->setFlash('warning', 'No se puede AUTORIZAR la remision porque no tiene productos relacionados para la generar la venta o NO le ha asignado cantidades.'); 
+                    $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
+                }    
             }
         }else{
             Yii::$app->getSession()->setFlash('error', 'No se puede AUTORIZAR la remision de salida porque NO ha ingresado las TALLAS Y COLORS de la referencia ('.$detalle_factura->producto.').'); 
@@ -552,18 +569,19 @@ class RemisionesController extends Controller
             endforeach; 
             $facturaPunto->exportar_inventario = 1;
             $facturaPunto->save ();
-            return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
-        }else{
-            $detalle_remision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->all();
+        }
+        $detalle_remision = \app\models\RemisionDetalles::find()->where(['=','id_remision', $id])->andWhere(['=','genera_talla', 0])->all();
+        if(count($detalle_remision)> 0){
             foreach ($detalle_remision as $detalle):
-                $inventario = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
+                    $inventario = \app\models\InventarioPuntoVenta::find()->where(['=','id_inventario', $detalle->id_inventario])->andWhere(['=','id_punto', $accesoToken])->one();
                 $inventario->stock_inventario -= $detalle->cantidad;
                 $inventario->save();
             endforeach;
             $facturaPunto->exportar_inventario = 1;
             $facturaPunto->save ();
-            return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
-        }    
+          
+        }  
+         return $this->redirect(['view','id' =>$id, 'accesoToken' =>$accesoToken]);
     }
     
     /**
@@ -1009,9 +1027,11 @@ class RemisionesController extends Controller
         $i = 2;
          $utilidad = 0;
          $porcentaje = 0;
+         $cantidad = 0;
         foreach ($tableexcel as $val) {
-             $utilidad = $val->total_linea - $val->inventario->costo_unitario;
-             $porcentaje = ''.number_format((($val->total_linea - $val->inventario->costo_unitario) / $val->inventario->costo_unitario) * 100);
+            $cantidad = $val->inventario->costo_unitario * $val->cantidad;
+            $utilidad = $val->total_linea - $cantidad;
+            $porcentaje = ''.number_format((($val->total_linea - $cantidad) / $cantidad) * 100);
             $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A' . $i, $val->codigo_producto)
                     ->setCellValue('B' . $i, $val->producto)

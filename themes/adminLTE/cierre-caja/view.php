@@ -100,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr style='font-size:90%;'>
-                                        <th scope="col" style='background-color:#B9D5CE;'>Id</th>                      
+                                        <th scope="col" style='background-color:#B9D5CE;'>Numero recibo</th>                      
                                         <th scope="col" style='background-color:#B9D5CE;'>Factura</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Cliente</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Banco</th> 
@@ -114,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <?php
                                     foreach ($conrecibofactura as $val):?>
                                         <tr style='font-size:90%;'> 
-                                            <td><?= $val->id_detalle?></td>
+                                            <td><?= $val->recibo->numero_recibo?></td>
                                             <td><?= $val->factura->numero_factura?></td>
                                             <td><?= $val->factura->clienteFactura->nombre_completo?></td>
                                             <td><?= $val->recibo->codigoBanco->entidad_bancaria?></td>
@@ -137,7 +137,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                    echo Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminartodo']);
                                 }
                             }else{
-                               echo Html::a('<span class="glyphicon glyphicon-export"></span> Excel remisiones', ['excel_recibo_facturas', 'id' => $id], ['class' => 'btn btn-success btn-sm']); 
+                               echo Html::a('<span class="glyphicon glyphicon-export"></span> Excel recibo facturas', ['excel_recibo_facturas', 'id' => $id], ['class' => 'btn btn-success btn-sm']); 
                             } ?> 
                         </div>
                     </div>
@@ -151,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr style='font-size:90%;'>
-                                        <th scope="col" style='background-color:#B9D5CE;'>Id</th>                      
+                                        <th scope="col" style='background-color:#B9D5CE;'>Numero recibo</th>                     
                                         <th scope="col" style='background-color:#B9D5CE;'>Remision</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Cliente</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Banco</th> 
@@ -165,7 +165,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <?php
                                     foreach ($conreciboremision as $val):?>
                                         <tr style='font-size:90%;'> 
-                                            <td><?= $val->id_detalle?></td>
+                                            <td><?= $val->recibo->numero_recibo?></td>
                                             <td><?= $val->remision->numero_remision?></td>
                                             <td><?= $val->remision->cliente->nombre_completo?></td>
                                             <td><?= $val->recibo->codigoBanco->entidad_bancaria?></td>
@@ -188,7 +188,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                    echo Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar_todo_remision']);
                                 }
                             }else{
-                                echo Html::a('<span class="glyphicon glyphicon-export"></span> Excel remisiones', ['excel_recibo_remision', 'id' => $id], ['class' => 'btn btn-success btn-sm']);
+                                echo Html::a('<span class="glyphicon glyphicon-export"></span> Excel recibo remisiones', ['excel_recibo_remision', 'id' => $id], ['class' => 'btn btn-success btn-sm']);
                             }  ?> 
                          </div>
                     </div>
