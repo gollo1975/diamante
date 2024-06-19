@@ -15,7 +15,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-$this->title = 'TRASLADO (Punto de venta)';
+$this->title = 'TRASLADO DE REFERENCIAS (Puntos de venta)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

@@ -65,6 +65,7 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
             'id_talla' => 'Tallas:',
             'id_color' => 'Colores:',
             'aplicado' => 'Aplicado:',
+           
         ];
     }
 
