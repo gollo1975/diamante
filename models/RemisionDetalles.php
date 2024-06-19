@@ -40,7 +40,8 @@ class RemisionDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_remision', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto', 'total_linea','id_punto'], 'integer'],
+            [['id_remision', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'valor_descuento', 'impuesto',
+                'total_linea','id_punto','genera_talla'], 'integer'],
             [['porcentaje_descuento', 'porcentaje_iva'], 'number'],
             [['producto'], 'string', 'max' => 40],
             ['fecha_inicio', 'safe'],
@@ -71,6 +72,7 @@ class RemisionDetalles extends \yii\db\ActiveRecord
             'total_linea' => 'Total Linea',
             'fecha_inicio' => 'fecha_inicio',
             'id_punto' => 'id_punto',
+            'genera_talla' => 'Genera_talla',
         ];
     }
 
