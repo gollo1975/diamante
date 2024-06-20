@@ -135,20 +135,7 @@ $form = ActiveForm::begin([
                         </td>
                     <?php }else{?>
                         <td style="width: 20px; height: 20px">
-                            <?= Html::a('<span class="glyphicon glyphicon-import"></span>',
-                                    ['/inventario-punto-venta/importar_inventario_bodega','id' => $val->id_inventario, 'id_punto' => $val->id_punto],
-                                    [
-                                        'title' => 'Importar referencias de bodega cuando no hay existencias.?',
-                                        'data-toggle'=>'modal',
-                                        'data-target'=>'#modalimportarproductobodega'.$val->id_inventario,
-                                        'class' => ''
-                                    ])    
-                               ?>
-                            <div class="modal remote fade" id="modalimportarproductobodega<?= $val->id_inventario ?>">
-                                <div class="modal-dialog modal-lg" style ="width: 500px;">
-                                     <div class="modal-content"></div>
-                                </div>
-                            </div> 
+                            <a href="<?= Url::toRoute(["inventario-punto-venta/importar_inventario_bodega", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>" ><span class="glyphicon glyphicon-import"></span></a>                   
                         </td>
                     <?php }?>   
                     <td><?= $val->codigo_producto?></td>

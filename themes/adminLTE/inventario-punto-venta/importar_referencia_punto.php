@@ -12,6 +12,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Traslasdo de referencias', 'url' =
 $this->params['breadcrumbs'][] = $id_punto;
 $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_punto', 1])->orderBy ('nombre_punto ASC')->all(), 'id_punto', 'nombre_punto');
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <div class="modal-body">
         <p>
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view_traslado', 'id' => $id, 'id_punto' => $id_punto, 'sw' => $sw], ['class' => 'btn btn-primary btn-sm']) ?>
@@ -93,7 +94,7 @@ $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_
                                         <td><?= $val->inventario->nombre_producto ?></td>
                                         <td><?= $val->stock_punto ?></td>
                                         <td><?= $val->punto->nombre_punto ?></td>
-                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"><?= $val->id_detalle ?></td> 
+                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"></td> 
                                     </tr>
                                 <?php endforeach;
                             }   ?>

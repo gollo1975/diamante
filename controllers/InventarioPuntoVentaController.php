@@ -633,6 +633,7 @@ class InventarioPuntoVentaController extends Controller
                     foreach ($buscarRegistro as $buscar):
                         if($registro->codigo_producto == $buscar->codigo_producto && $registro->id_color = $buscar->id_color
                                 && $registro->id_talla ==  $buscar->id_talla){
+                           
                             $table = new \app\models\TrasladoReferenciaPunto();
                             $table->id_inventario_saliente = $buscar->id_inventario;
                             $table->id_inventario_entrante = $id;
@@ -645,9 +646,8 @@ class InventarioPuntoVentaController extends Controller
                             $table->save(false);
                         }
                     endforeach;
-                    
                 }
-             // return $this->redirect(['view','id' => $id, 'token' => $token]);
+                return $this->redirect(['view_traslado','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
             }
         }
         return $this->render('importar_referencia_punto', [
@@ -661,35 +661,23 @@ class InventarioPuntoVentaController extends Controller
     }
     
      //modificar cantidades produccion
-    public function actionModificar_cantidades($id, $id_punto, $id_detalle, $sw) {
+    public function actionModificar_cantidades($id, $id_punto, $id_traslado, $sw) {
         $model = new \app\models\FormModeloCambiarCantidad();
-        $table = OrdenProduccionProductos::findOne($detalle);
-        $orden = OrdenProduccion::findOne($id);
+        $conRegistro = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
        
         if ($model->load(Yii::$app->request->post())) {
-            if (isset($_POST["actualizarcantidades"])) { 
-                $table->cantidad = $model->cantidades;
-                $table->cantidad_real = $model->cantidad_real;
-                $table->fecha_vencimiento = $model->fecha;
-                $table->save(false);
-                $orden->unidades = $model->cantidad_real;
-                $orden->tamano_lote = $model->tamano_lote;
-                $orden->save();
-            //    $this->TotalUnidadesLote($id);
-                $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
+            if (isset($_POST["asignar_unidades"])) { 
+                $conRegistro->unidades = $model->nueva_cantidad;
+                $conRegistro->save();
+                $this->redirect(["inventario-punto-venta/view_traslado", 'id' => $id, 'id_punto' =>$id_punto, 'sw' => $sw]);
             }    
         }
          if (Yii::$app->request->get()) {
-            $model->tamano_lote = $orden->tamano_lote; 
-            $model->cantidades = $table->cantidad;
-            $model->cantidad_real = $table->cantidad_real;
-            $model->fecha = $table->fecha_vencimiento;
+            $model->nueva_cantidad = $conRegistro->unidades; 
+           
          }
-        return $this->renderAjax('cambiarcantidades', [
+        return $this->renderAjax('asignar_unidades_traslado', [
             'model' => $model,
-            'token' => $token,
-            'detalle' => $detalle,
-            'id' => $id,
         ]);
     }
     
@@ -1010,46 +998,50 @@ class InventarioPuntoVentaController extends Controller
         ]);
     }
    
-    //IMPORTAR REFERENCIAS DE BODEGA
+    // IMPORTAR UNIDADES DE BODEGA
     public function actionImportar_inventario_bodega($id, $id_punto) {
-        $model = new \app\models\ModeloImportarReferenciaBodega();
-        $inventario = InventarioPuntoVenta::findOne($id);
-       
-        if ($model->load(Yii::$app->request->post())) {
-           if (isset($_POST["importar_producto"])) {
-                $punto = \app\models\PuntoVenta::findOne($id);
-                $nueva_referencia = InventarioPuntoVenta::findOne($inventario->codigo_enlace_bodega);
-                if($model->unidades <= $nueva_referencia->stock_inventario){
-                    $table = new \app\models\TrasladoReferenciaPunto();
-                    $table->id_inventario = $inventario->codigo_enlace_bodega;
-                    $table->id_punto_saliente = 1;
-                    $table->id_punto_entrante = $id_punto;
-                    $table->unidades = $model->unidades;
-                    $table->fecha_proceso = date('Y-m-d');
-                    $table->user_name = Yii::$app->user->identity->username;
-                    $table->save(false);
-                    if ($nueva_referencia->aplica_talla_color == 0) {
-                       $inventario->stock_inventario += $model->unidades;
-                       $inventario->stock_unidades += $model->unidades;
-                       $inventario->save();
-                       $nueva_referencia->stock_inventario -= $model->unidades;
-                       $nueva_referencia->save(false);
-                    } 
-                    return $this->redirect(['inventario-punto-venta/index']);
-                }else{
-                    Yii::$app->session->setFlash('error', 'La EXISTENCIA que hay en la bodega es MENOR que la cantidad a importar. Valide la informacion.');
-                    return $this->redirect(['inventario-punto-venta/index']);
-                }    
-            }
-        }   
-        return $this->renderAjax('_form_importar_producto_bodega', [
+        $model = InventarioPuntoVenta::findOne($id);
+        $talla_color = \app\models\DetalleColorTalla::find()->where(['=','codigo_producto', $model->codigo_producto])
+                                                            ->andWhere(['=','id_inventario', $model->codigo_enlace_bodega])->all();
+        if (Yii::$app->request->post()) {
+            if(isset($_POST["traslado_unidades_bodega"])){
+                if(isset($_POST["nuevo_traslado_bodega"])){
+                    $intIndice = 0;
+                    $cantidad = 0;
+                    foreach ($_POST["nuevo_traslado_bodega"] as $intCodigo):
+                        $cantidad = $_POST["cantidades"][$intIndice];
+                        if($cantidad > 0){
+                            $talla = \app\models\DetalleColorTalla::findOne($intCodigo);
+                            if($cantidad <= $talla->stock_punto){
+                                $table = OrdenProduccionProductos::findOne($intCodigo);
+                                $table->cantidad = $_POST["cantidad_producto"][$intIndice];
+                                $table->cantidad_real = $_POST["cantidad_producto"][$intIndice];
+                                $table->id_medida_producto = $_POST["tipo_medida"][$intIndice];
+                                $table->save(false);
+                                $intIndice++;
+                            }else{
+                                Yii::$app->getSession()->setFlash('error', 'La cantidad a trasladar no puede ser mayor que el STOCK de la talla.');
+                            }
+                           
+                         var_dump ($intCodigo);
+                        }else{
+                             $intIndice++;  
+                        } 
+                    endforeach;
+                  //  return $this->redirect(['importar_inventario_bodega','id' =>$id, 'id_punto' => $id_punto]);
+                }
+            }  
+        }    
+        return $this->render('importar_unidades_bodega', [
             'model' => $model,
             'id' => $id,
             'id_punto'=> $id_punto,
+            'talla_color' => $talla_color,
 
             
         ]); 
     }
+  
     
     /**
      * Creates a new InventarioPuntoVenta model.

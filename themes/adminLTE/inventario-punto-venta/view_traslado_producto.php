@@ -100,7 +100,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                         <td><?= $val->fecha_hora_registro?></td>
                                         <td><?= $val->registroAplicado?></td>
                                         <td style= 'width: 25px; height: 25px;'>
-                                            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado], [
+                                            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw' => $sw], [
                                                        'class' => '',
                                                        'data' => [
                                                            'confirm' => 'Esta seguro de eliminar el registro?',
@@ -122,7 +122,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                         <td style="width: 25px; height: 25px;">
                                                 <!-- Inicio Nuevo Detalle proceso -->
                                                   <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                      ['/inventario-punto-venta/modificar_cantidades', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'sw' => $sw, 'id_detalle' => $val->id_traslado],
+                                                      ['/inventario-punto-venta/modificar_cantidades', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'sw' => $sw, 'id_traslado' => $val->id_traslado],
                                                       [
                                                           'title' => 'Ingresar existencia a trasladar',
                                                           'data-toggle'=>'modal',
