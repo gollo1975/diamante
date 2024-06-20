@@ -115,29 +115,61 @@ $form = ActiveForm::begin([
             <tbody>
             <?php foreach ($model as $val): ?>
                 <tr style ='font-size: 90%;'>  
-                    <?php if($val->id_punto == 1){?>
-                        <td style="width: 20px; height: 20px">
-                            <!-- Inicio Nuevo Detalle proceso -->
-                            <?= Html::a('<span class="glyphicon glyphicon-list"></span>',
-                                    ['/inventario-punto-venta/trasladar_punto_venta','id' => $val->id_inventario],
-                                    [
-                                        'title' => 'Desear enviar este producto para otro PUNTO DE VENTA?',
-                                        'data-toggle'=>'modal',
-                                        'data-target'=>'#modaltrasladareferenciapuntoventa'.$val->id_inventario,
-                                        'class' => ''
-                                    ])    
-                               ?>
-                            <div class="modal remote fade" id="modaltrasladareferenciapuntoventa<?= $val->id_inventario ?>">
-                                <div class="modal-dialog modal-lg" style ="width: 500px;">
-                                     <div class="modal-content"></div>
-                                </div>
-                            </div> 
-                        </td>
-                    <?php }else{?>
-                        <td style="width: 20px; height: 20px">
-                            <a href="<?= Url::toRoute(["inventario-punto-venta/importar_inventario_bodega", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>" ><span class="glyphicon glyphicon-import"></span></a>                   
-                        </td>
-                    <?php }?>   
+                    <?php if($val->id_punto == 1){
+                            if($val->aplica_talla_color == 0){
+                                if($val->stock_inventario > 0){?>
+                                    <td style="width: 20px; height: 20px">
+                                        <!-- Inicio Nuevo Detalle proceso -->
+                                        <?= Html::a('<span class="glyphicon glyphicon-list"></span>',
+                                                ['/inventario-punto-venta/trasladar_punto_venta','id' => $val->id_inventario],
+                                                [
+                                                    'title' => 'Permite enviar productos por primera vez a un PUNTO DE VENTA?',
+                                                    'data-toggle'=>'modal',
+                                                    'data-target'=>'#modaltrasladareferenciapuntoventa'.$val->id_inventario,
+                                                    'class' => ''
+                                                ])    
+                                           ?>
+                                        <div class="modal remote fade" id="modaltrasladareferenciapuntoventa<?= $val->id_inventario ?>">
+                                            <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                                 <div class="modal-content"></div>
+                                            </div>
+                                        </div> 
+                                    </td>
+                                <?php }else{ ?>  
+                                    <td style="width: 20px; height: 20px"></td>
+                                <?php }
+                            }else{
+                                if($val->stock_inventario > 0){?>
+                                    <td style="width: 20px; height: 20px">
+                                         <a href="<?= Url::toRoute(["inventario-punto-venta/enviar_referencia_punto", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>"><span class="glyphicon glyphicon-home" title ="Permite enviar desde BODEGA la referencia por primera vez al puntol.."></span></a>                   
+                                    </td>
+                                <?php }
+                            }   
+                    }else{
+                        if($val->aplica_talla_color == 1){ ?>
+                            <td style="width: 20px; height: 20px">
+                                <a href="<?= Url::toRoute(["inventario-punto-venta/importar_inventario_bodega", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>"><span class="glyphicon glyphicon-import" title ="Permite importar unidades desde la bodega princial.."></span></a>                   
+                            </td>
+                        <?php }else{ ?>
+                            <td style="width: 20px; height: 20px">
+                                <!-- Inicio Nuevo Detalle proceso -->
+                                <?= Html::a('<span class="glyphicon glyphicon-export"></span>',
+                                        ['/inventario-punto-venta/trasladar_referencia_bodega_punto','id' => $val->id_inventario],
+                                        [
+                                            'title' => 'Permite trasladar productos de la bodega al punto de venda?',
+                                            'data-toggle'=>'modal',
+                                            'data-target'=>'#modaltrasladarreferenciabodegapunto'.$val->id_inventario,
+                                            'class' => ''
+                                        ])    
+                                   ?>
+                                <div class="modal remote fade" id="modaltrasladarreferenciabodegapunto<?= $val->id_inventario ?>">
+                                    <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                         <div class="modal-content"></div>
+                                    </div>
+                                </div> 
+                            </td>
+                       <?php }    
+                    }?>   
                     <td><?= $val->codigo_producto?></td>
                     <td><?= $val->nombre_producto?></td>
                     <td><?= $val->punto->nombre_punto?></td>

@@ -62,12 +62,14 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_punto') ?></th>
-                    <td><?= Html::encode($model->punto->nombre_punto) ?></td>
+                   
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
+                     
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
                     <td><?= Html::encode($model->fecha_creacion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_punto') ?></th>
+                    <td><?= Html::encode($model->punto->nombre_punto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_marca') ?></th>
@@ -90,12 +92,14 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                     <td><?= Html::encode($model->inventarioInicial) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
                     <td><?= Html::encode($model->aplicaInventario) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proveedor') ?></th>
+                    <td><?= Html::encode($model->proveedor->nombre_completo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_iva') ?></th>
                     <td><?= Html::encode($model->porcentaje_iva) ?></td>
+                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'venta_publico') ?></th>
                     <td><?= Html::encode($model->ventaPublico) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proveedor') ?></th>
-                    <td><?= Html::encode($model->proveedor->nombre_completo) ?></td>
+                   
                     
                 </tr>
                 <tr style="font-size: 90%;" >

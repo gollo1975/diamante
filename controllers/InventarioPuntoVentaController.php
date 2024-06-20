@@ -932,34 +932,37 @@ class InventarioPuntoVentaController extends Controller
         }    
     }
     
-    //TRASLADAR REFERENCIAS A PUNTOS DE VENTA
+    //ENVIAR REFERENCIAS A PUNTOS DE VENTA DESDE BODEGA POR PRIMERA VEZ(NO APLICA TALLA NI COLO)
     public function actionTrasladar_punto_venta($id) {
         $model = new \app\models\ModeloTrasladoPuntoventa();
         $inventario = InventarioPuntoVenta::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
             if($model->validate()){
                 if (isset($_POST["enviar_producto"])) {
-                    $table = new InventarioPuntoVenta();
-                    $table->codigo_producto = $inventario->codigo_producto;
-                    $table->codigo_barra = $inventario->codigo_producto;
-                    $table->nombre_producto = $inventario->nombre_producto;
-                    $table->costo_unitario = $inventario->costo_unitario;
-                    $table->id_proveedor = $inventario->id_proveedor;
-                    $table->id_marca = $inventario->id_marca;
-                    $table->id_categoria = $inventario->id_categoria;
-                    $table->iva_incluido = $inventario->iva_incluido;
-                    $table->inventario_inicial = $inventario->inventario_inicial;
-                    $table->aplica_inventario = $inventario->aplica_inventario;
-                    $table->porcentaje_iva = $inventario->porcentaje_iva;
-                    $table->fecha_proceso = date('Y-m-d');
-                    $table->user_name = Yii::$app->user->identity->username;
-                    $table->venta_publico = $inventario->venta_publico;
-                    $table->aplica_talla_color = $inventario->aplica_talla_color;
-                    $table->codigo_enlace_bodega = $inventario->id_inventario;
-                    $table->id_punto = $model->punto_venta;
-                    if($model->unidades > 0){
-                        if($inventario->stock_inventario >= $model->unidades){
-                            if($table->aplica_talla_color == 0){
+                    if(InventarioPuntoVenta::find()->where(['=','codigo_enlace_bodega', $id])->andWhere(['=','id_punto', $model->punto_venta])->one()){
+                        Yii::$app->getSession()->setFlash('error', 'Este producto ya se encuentra registrado en este punto de venta.');
+                       return $this->redirect(['index']);
+                    }else{
+                        $table = new InventarioPuntoVenta();
+                        $table->codigo_producto = $inventario->codigo_producto;
+                        $table->codigo_barra = $inventario->codigo_producto;
+                        $table->nombre_producto = $inventario->nombre_producto;
+                        $table->costo_unitario = $inventario->costo_unitario;
+                        $table->id_proveedor = $inventario->id_proveedor;
+                        $table->id_marca = $inventario->id_marca;
+                        $table->id_categoria = $inventario->id_categoria;
+                        $table->iva_incluido = $inventario->iva_incluido;
+                        $table->inventario_inicial = $inventario->inventario_inicial;
+                        $table->aplica_inventario = $inventario->aplica_inventario;
+                        $table->porcentaje_iva = $inventario->porcentaje_iva;
+                        $table->fecha_proceso = date('Y-m-d');
+                        $table->user_name = Yii::$app->user->identity->username;
+                        $table->venta_publico = $inventario->venta_publico;
+                        $table->aplica_talla_color = $inventario->aplica_talla_color;
+                        $table->codigo_enlace_bodega = $inventario->id_inventario;
+                        $table->id_punto = $model->punto_venta;
+                        if($model->unidades > 0){
+                            if($inventario->stock_inventario >= $model->unidades){
                                 $table->stock_inventario = $model->unidades; 
                                 $table->stock_unidades = $model->unidades;
                                 $table->inventario_aprobado = 1;
@@ -967,24 +970,22 @@ class InventarioPuntoVentaController extends Controller
                                 $inventario->stock_inventario -= $model->unidades;
                                 $inventario->save();
                                 return $this->redirect(['index']);
+                               
                             }else{
-                                $table->save(false);
-                                 return $this->redirect(['index']);
+                                return $this->renderAjax('_form_traslado_puntoventa', [
+                                'model' => $model,
+                                'id' => $id,
+
+                                ]);  
                             }    
                         }else{
                             return $this->renderAjax('_form_traslado_puntoventa', [
-                            'model' => $model,
-                            'id' => $id,
+                              'model' => $model,
+                              'id' => $id,
 
-                            ]);  
-                        }    
-                    }else{
-                        return $this->renderAjax('_form_traslado_puntoventa', [
-                          'model' => $model,
-                          'id' => $id,
-
-                      ]);
-                    }
+                          ]);
+                        }
+                    }    
                 }  
                 
             }else{
@@ -998,6 +999,40 @@ class InventarioPuntoVentaController extends Controller
         ]);
     }
    
+    //TRASLADAR REFERENCIAS A PUNTOS DE VENTA DESDE BODEGA (NO APLICA TALLA NI COLO)
+    public function actionTrasladar_referencia_bodega_punto($id) {
+        $model = new \app\models\ModeloTrasladoPuntoventa();
+        $inventario = InventarioPuntoVenta::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["enviar_traslado_bodega"])) {
+                $consulta = InventarioPuntoVenta::findOne($inventario->codigo_enlace_bodega); 
+                if($model->unidades <= $consulta->stock_inventario){
+                    $table = new \app\models\TrasladoReferenciaPunto();
+                    $table->id_inventario_saliente = $talla->id_inventario;
+                    $table->id_inventario_entrante = $id;
+                    $table->id_punto_saliente = $talla->id_punto;
+                    $table->id_punto_entrante = $id_punto;
+                    $table->id_talla = $talla->id_talla;
+                    $table->id_color = $talla->id_color;
+                    $table->unidades = $cantidad;
+                    $table->fecha_proceso = date('Y-m-d');
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->aplicado = 1;
+                    $table->save(); 
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'La cantidad a trasladar no puede ser mayor que el STOCK en BODEGA.');
+                    return $this->redirect(['index']);
+                }
+               
+            }
+            
+        }    
+        return $this->renderAjax('traslado_bodega_puntoventa', [
+            'model' => $model,
+            'id' => $id,
+            
+        ]);
+    }
     // IMPORTAR UNIDADES DE BODEGA
     public function actionImportar_inventario_bodega($id, $id_punto) {
         $model = InventarioPuntoVenta::findOne($id);
