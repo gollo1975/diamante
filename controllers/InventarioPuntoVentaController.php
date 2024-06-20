@@ -1013,22 +1013,53 @@ class InventarioPuntoVentaController extends Controller
                         if($cantidad > 0){
                             $talla = \app\models\DetalleColorTalla::findOne($intCodigo);
                             if($cantidad <= $talla->stock_punto){
-                                $table = OrdenProduccionProductos::findOne($intCodigo);
-                                $table->cantidad = $_POST["cantidad_producto"][$intIndice];
-                                $table->cantidad_real = $_POST["cantidad_producto"][$intIndice];
-                                $table->id_medida_producto = $_POST["tipo_medida"][$intIndice];
-                                $table->save(false);
-                                $intIndice++;
+                                $actualiar_unidades = \app\models\DetalleColorTalla::find()->where(['=','id_color', $talla->id_color])
+                                                                                           ->andWhere(['=','id_talla', $talla->id_talla])
+                                                                                           ->andWhere(['=','codigo_producto', $talla->codigo_producto])
+                                                                                           ->andWhere(['=','id_punto', $id_punto])->one();
+                                if($actualiar_unidades){
+                                    $talla->stock_punto -= $cantidad;
+                                    $talla->save();
+                                    //actualiza cantidad entrante
+                                    $actualiar_unidades->cantidad += $cantidad;
+                                    $actualiar_unidades->stock_punto += $cantidad;
+                                    $actualiar_unidades->save();
+                                    //descarga del inventar de bodega
+                                    $salida_inventario = InventarioPuntoVenta::findOne($talla->id_inventario);
+                                    $salida_inventario->stock_inventario -= $cantidad;
+                                    $salida_inventario->save();
+                                    //actualizar inventario entrante
+                                    $actualizar_inventario_entrante = InventarioPuntoVenta::findOne($id);
+                                    $actualizar_inventario_entrante->stock_inventario += $cantidad;
+                                    $actualizar_inventario_entrante->stock_unidades += $cantidad;
+                                    $actualizar_inventario_entrante->save();
+                                    //ingresa el registro en traslado
+                                    $table = new \app\models\TrasladoReferenciaPunto();
+                                    $table->id_inventario_saliente = $talla->id_inventario;
+                                    $table->id_inventario_entrante = $id;
+                                    $table->id_punto_saliente = $talla->id_punto;
+                                    $table->id_punto_entrante = $id_punto;
+                                    $table->id_talla = $talla->id_talla;
+                                    $table->id_color = $talla->id_color;
+                                    $table->unidades = $cantidad;
+                                    $table->fecha_proceso = date('Y-m-d');
+                                    $table->user_name = Yii::$app->user->identity->username;
+                                    $table->aplicado = 1;
+                                    $table->save();
+                                    $intIndice++;
+                                }else{
+                                  $intIndice++;  
+                                }
                             }else{
                                 Yii::$app->getSession()->setFlash('error', 'La cantidad a trasladar no puede ser mayor que el STOCK de la talla.');
                             }
                            
-                         var_dump ($intCodigo);
+                        
                         }else{
                              $intIndice++;  
                         } 
                     endforeach;
-                  //  return $this->redirect(['importar_inventario_bodega','id' =>$id, 'id_punto' => $id_punto]);
+                    return $this->redirect(['importar_inventario_bodega','id' =>$id, 'id_punto' => $id_punto]);
                 }
             }  
         }    
