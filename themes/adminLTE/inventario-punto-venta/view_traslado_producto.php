@@ -85,6 +85,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                      <th scope="col" style='background-color:#B9D5CE;'>Aplicado</th>
                                     <th scope="col" style='background-color:#B9D5CE;'></th>
                                     <th scope="col" style='background-color:#B9D5CE;'></th>
+                                    <th scope="col" style='background-color:#B9D5CE;'></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,7 +98,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                         <td><?= $val->colores->colores?></td> 
                                         <td style="text-align: right"><?= ''. number_format( $val->unidades,0)?></td>
                                         <td><?= $val->fecha_hora_registro?></td>
-                                         <td><?= $val->registroAplicado?></td>
+                                        <td><?= $val->registroAplicado?></td>
                                         <td style= 'width: 25px; height: 25px;'>
                                             <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado], [
                                                        'class' => '',
@@ -118,6 +119,22 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                                           ],
                                             ]);?>
                                         </td> 
+                                        <td style="width: 25px; height: 25px;">
+                                                <!-- Inicio Nuevo Detalle proceso -->
+                                                  <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
+                                                      ['/inventario-punto-venta/modificar_cantidades', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'sw' => $sw, 'id_detalle' => $val->id_traslado],
+                                                      [
+                                                          'title' => 'Ingresar existencia a trasladar',
+                                                          'data-toggle'=>'modal',
+                                                          'data-target'=>'#modalmodificarcantidades'.$val->id_traslado,
+                                                      ])    
+                                                 ?>
+                                              <div class="modal remote fade" id="modalmodificarcantidades<?= $val->id_traslado ?>">
+                                                  <div class="modal-dialog modal-lg" style ="width: 550px;">
+                                                      <div class="modal-content"></div>
+                                                  </div>
+                                              </div>
+                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

@@ -15,6 +15,7 @@ class FormModeloBuscar extends Model
     public $observacion;
     public $fecha_entrega;
     public $etapa;
+    public $punto;
 
 
 
@@ -24,7 +25,7 @@ class FormModeloBuscar extends Model
 
             [['q','nombre'], 'match', 'pattern' => '/^[a-z0-9\s]+$/i', 'message' => 'Sólo se aceptan números y letras'],  
             [['observacion'], 'string'],
-            [['etapa'], 'integer'],
+            [['etapa','punto'], 'integer'],
             [['fecha_entrega'], 'safe'],
         ];
     }
@@ -37,6 +38,7 @@ class FormModeloBuscar extends Model
             'observacion' => 'Observacion:',
             'fecha_entrega' => 'F. entrega:',
             'etapa' => 'Etapa proceso:',
+            'punto' => 'Punto de venta:',
 
         ];
     }

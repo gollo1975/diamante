@@ -1,25 +1,25 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use app\models\Ordenproduccion;
-use app\models\TiposMaquinas;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
 
-$this->title = 'BUSCAR PUNTO DE VENTA';
-$this->params['breadcrumbs'][] = ['label' => 'Traslasdo de referencias', 'url' => ['view_traslado', 'id' => $id, 'id_punto' => $punton, 'sw' => $sw]];
-$this->params['breadcrumbs'][] = $grupo;
+$this->title = 'TRASLADO DE REFERENCIAS';
+$this->params['breadcrumbs'][] = ['label' => 'Traslasdo de referencias', 'url' => ['view_traslado', 'id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]];
+$this->params['breadcrumbs'][] = $id_punto;
+$conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_punto', 1])->orderBy ('nombre_punto ASC')->all(), 'id_punto', 'nombre_punto');
 ?>
     <div class="modal-body">
         <p>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view_traslado', 'id' => $id, 'id_punto' => $punton, 'sw' => $sw], ['class' => 'btn btn-primary btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view_traslado', 'id' => $id, 'id_punto' => $id_punto, 'sw' => $sw], ['class' => 'btn btn-primary btn-sm']) ?>
         </p>
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["inventario-punto-venta/buscar_punto_venta", 'id' => $id, 'id_punto' => $punton, 'sw' => $sw]),
+            "action" => Url::toRoute(["inventario-punto-venta/buscar_punto_venta", 'id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -38,11 +38,18 @@ $this->params['breadcrumbs'][] = $grupo;
 
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
-                    <?= $formulario->field($form, "q")->input("search") ?>
-                </div>
+                    <?= $formulario->field($form, 'q')->input("search") ?>
+                    <?= $formulario->field($form, 'punto')->widget(Select2::classname(), [
+                        'data' => $conPunto,
+                        'options' => ['prompt' => 'Seleccione...'],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ],
+                     ]); ?> 
+                </div>   
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscar_producto_inventario", 'id' => $id, 'token' => $token, 'grupo' => $grupo]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                     <a align="right" href="<?= Url::toRoute(["inventario-punto-venta/buscar_punto_venta", 'id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -61,36 +68,47 @@ $this->params['breadcrumbs'][] = $grupo;
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading">
-                    Productos <span class="badge"><?= $pagination->totalCount ?></span>
+                    <?php 
+                    if($operacion){?>
+                        Productos <span class="badge"><?= $pagination->totalCount ?></span>
+                    <?php }?>
                 </div>
                 <div class="panel-body">
                      <table class="table table-bordered table-hover">
                         <thead>
                         <tr>
                             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Presentacion producto</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Referencia/th>
                             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($operacion as $val): ?>
-                        <tr style="font-size: 85%;">
-                            <td><?= $val->codigo_producto ?></td>
-                            <td><?= $val->nombre_producto ?></td>
-                            <td><?= $val->stock_unidades ?></td>
-                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_producto[]" value="<?= $val->id_inventario ?>"></td> 
-                        </tr>
-                        </tbody>
-                        <?php endforeach; ?>
+                            <?php
+                            if($operacion){
+                                foreach ($operacion as $val): ?>
+                                    <tr style="font-size: 85%;">
+                                        <td><?= $val->codigo_producto ?></td>
+                                        <td><?= $val->inventario->nombre_producto ?></td>
+                                        <td><?= $val->stock_punto ?></td>
+                                        <td><?= $val->punto->nombre_punto ?></td>
+                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"><?= $val->id_detalle ?></td> 
+                                    </tr>
+                                <?php endforeach;
+                            }   ?>
+                        <tbody>
                     </table>
                 </div>
                 <div class="panel-footer text-right">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarproducto']) ?>
+                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'traslado_punto_venta']) ?>
                 </div>
 
             </div>
-            <?= LinkPager::widget(['pagination' => $pagination]) ?>
+            <?php
+            if($operacion){?>
+                <?= LinkPager::widget(['pagination' => $pagination]) ?>
+            <?php }?>
         </div>
         
     </div>
