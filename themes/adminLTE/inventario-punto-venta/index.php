@@ -136,15 +136,18 @@ $form = ActiveForm::begin([
                                         </div> 
                                     </td>
                                 <?php }else{ ?>  
-                                    <td style="width: 20px; height: 20px"></td>
+                                    <td style="width: 20px; height: 20px; background-color: #fae1dd"></td>
                                 <?php }
                             }else{
                                 if($val->stock_inventario > 0){?>
                                     <td style="width: 20px; height: 20px">
                                          <a href="<?= Url::toRoute(["inventario-punto-venta/enviar_referencia_punto", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>"><span class="glyphicon glyphicon-home" title ="Permite enviar desde BODEGA la referencia por primera vez al puntol.."></span></a>                   
                                     </td>
+                                <?php 
+                                }else{ ?>
+                                     <td style="width: 20px; height: 20px; background-color: #d0f4de"></td>
                                 <?php }
-                            }   
+                            }    
                     }else{
                         if($val->aplica_talla_color == 1){ ?>
                             <td style="width: 20px; height: 20px">

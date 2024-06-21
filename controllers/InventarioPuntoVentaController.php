@@ -393,7 +393,11 @@ class InventarioPuntoVentaController extends Controller
         
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $talla_color_cerrado= \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->andWhere(['=','cerrado', 1])->all();
-        $traslado = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario_saliente', $id])->all();
+        if($codigo == 0){
+            $traslado = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario_saliente', $id])->all();
+        }else{
+           $traslado = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario_entrante', $id])->all(); 
+        }    
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["entrada_cantidad"])){
                 $intIndice = 0;
@@ -1008,17 +1012,23 @@ class InventarioPuntoVentaController extends Controller
                 $consulta = InventarioPuntoVenta::findOne($inventario->codigo_enlace_bodega); 
                 if($model->unidades <= $consulta->stock_inventario){
                     $table = new \app\models\TrasladoReferenciaPunto();
-                    $table->id_inventario_saliente = $talla->id_inventario;
+                    $table->id_inventario_saliente = $inventario->codigo_enlace_bodega;
                     $table->id_inventario_entrante = $id;
-                    $table->id_punto_saliente = $talla->id_punto;
-                    $table->id_punto_entrante = $id_punto;
-                    $table->id_talla = $talla->id_talla;
-                    $table->id_color = $talla->id_color;
-                    $table->unidades = $cantidad;
+                    $table->id_punto_saliente = 1;
+                    $table->id_punto_entrante = $inventario->id_punto;
+                    $table->unidades = $model->unidades;
                     $table->fecha_proceso = date('Y-m-d');
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->aplicado = 1;
                     $table->save(); 
+                    //descargar de bodega
+                    $consulta->stock_inventario -= $model->unidades;
+                    $consulta->save();
+                    //suma al nuevo inventario
+                    $inventario->stock_inventario += $model->unidades;
+                    $inventario->stock_unidades += $model->unidades;
+                    $inventario->save();
+                    return $this->redirect(['index']);
                 }else{
                     Yii::$app->getSession()->setFlash('error', 'La cantidad a trasladar no puede ser mayor que el STOCK en BODEGA.');
                     return $this->redirect(['index']);
@@ -1108,6 +1118,115 @@ class InventarioPuntoVentaController extends Controller
         ]); 
     }
   
+    //ENVIAR INVENTARIO POR PRIMERA VEZ A PUNTO DE VENTA (APLICA TALLA)
+    public function actionEnviar_referencia_punto($id, $id_punto) {
+        $model = InventarioPuntoVenta::findOne($id);
+        $talla_color = \app\models\DetalleColorTalla::find()->where(['=','codigo_producto', $model->codigo_producto])
+                                                            ->andWhere(['=','id_inventario', $id])->all();
+        if(isset($_POST["enviar_referencia"])){
+            if(isset($_POST["nuevo_envio_bodega"])){
+                $intIndice = 0;
+                $cantidad = 0;
+                $auxiliar = 0;
+                foreach ($_POST["nuevo_envio_bodega"] as $intCodigo):
+                    $cantidad = $_POST["cantidades"][$intIndice];
+                    if($cantidad > 0){
+                        $talla = \app\models\DetalleColorTalla::findOne($intCodigo);
+                        if($cantidad <= $talla->stock_punto){
+                            if($auxiliar <> $_POST["id_punto_saliente"][$intIndice]){
+                                $table = new InventarioPuntoVenta();
+                                $table->codigo_producto = $model->codigo_producto;
+                                $table->codigo_barra = $model->codigo_producto;
+                                $table->nombre_producto = $model->nombre_producto;
+                                $table->costo_unitario = $model->costo_unitario;
+                                $table->stock_unidades += $cantidad;
+                                $table->stock_inventario += $cantidad;
+                                $table->id_proveedor = $model->id_proveedor;
+                                $table->id_marca = $model->id_marca;
+                                $table->id_categoria = $model->id_categoria;
+                                $table->iva_incluido = $model->iva_incluido;
+                                $table->inventario_inicial = $model->inventario_inicial;
+                                $table->aplica_inventario = $model->aplica_inventario;
+                                $table->aplica_talla_color = $model->aplica_talla_color;
+                                $table->porcentaje_iva = $model->porcentaje_iva;
+                                $table->fecha_proceso = date('Y-m-d');
+                                $table->user_name = Yii::$app->user->identity->username;
+                                $table->venta_publico = $model->venta_publico;
+                                $table->codigo_enlace_bodega = $model->id_inventario;
+                                $table->id_punto = $_POST["id_punto_saliente"][$intIndice];
+                                $table->inventario_aprobado = 1;
+                                $table->save();
+                                $conId = InventarioPuntoVenta::find()->orderBy('id_inventario DESC')->one();
+                                $model->stock_inventario -= $cantidad;  
+                                $model->save(false);
+                                //creamos cada talla con la combinacion de tallas
+                                $insertarTalla = new \app\models\DetalleColorTalla();
+                                $insertarTalla->id_inventario = $conId->id_inventario;
+                                $insertarTalla->codigo_producto = $model->codigo_producto;
+                                $insertarTalla->id_color = $talla->id_color;
+                                $insertarTalla->id_talla = $talla->id_talla;
+                                $insertarTalla->id_punto = $_POST["id_punto_saliente"][$intIndice];
+                                $insertarTalla->cantidad = $cantidad;
+                                $insertarTalla->stock_punto =  $cantidad;
+                                $insertarTalla->cerrado = 1;
+                                $insertarTalla->user_name = Yii::$app->user->identity->username;
+                                $insertarTalla->save(false);
+                                ////*****////
+                                //actualizar talla
+                                $talla->stock_punto -= $cantidad;
+                                $talla->save(false);
+                                $auxiliar = $_POST["id_punto_saliente"][$intIndice];
+                                $intIndice++; 
+                            }else{
+                                $model->stock_inventario -= $cantidad;  
+                                $model->save(false);
+                                //creamos cada talla con la combinacion de tallas
+                                $insertarTalla = new \app\models\DetalleColorTalla();
+                                $insertarTalla->id_inventario = $conId->id_inventario;
+                                $insertarTalla->codigo_producto = $model->codigo_producto;
+                                $insertarTalla->id_color = $talla->id_color;
+                                $insertarTalla->id_talla = $talla->id_talla;
+                                $insertarTalla->id_punto = $_POST["id_punto_saliente"][$intIndice];
+                                $insertarTalla->cantidad = $cantidad;
+                                $insertarTalla->stock_punto =  $cantidad;
+                                $insertarTalla->cerrado = 1;
+                                $insertarTalla->user_name = Yii::$app->user->identity->username;
+                                $insertarTalla->save(false);
+                                ////*****////
+                                //actualizar talla
+                                $talla->stock_punto -= $cantidad;
+                                $talla->save(false);
+                                $conTallas = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $conId->id_inventario])->andWhere(['=','id_punto', $_POST["id_punto_saliente"][$intIndice]])->all();
+                                $suma =0;
+                                foreach ($conTallas as $sumar):
+                                    $suma += $sumar->stock_punto;
+                                endforeach;
+                                //actualizar cantidades en el inventario del punto de venta
+                                $invSumar = InventarioPuntoVenta::findOne($conId->id_inventario);
+                                $invSumar->stock_inventario = $suma;
+                                $invSumar->stock_unidades = $suma;
+                                $invSumar->save();
+                                $auxiliar = $_POST["id_punto_saliente"][$intIndice];
+                                $intIndice++;   
+                            }    
+                        }else{
+                            Yii::$app->getSession()->setFlash('error', 'La cantidad a trasladar no puede ser mayor que el STOCK de la talla.');
+                        }    
+                    }else{
+                        $intIndice++;  
+                    }
+                endforeach;
+            }
+       }        
+        return $this->render('submit_referencia_punto', [
+            'model' => $model,
+            'id' => $id,
+            'id_punto'=> $id_punto,
+            'talla_color' => $talla_color,
+
+            
+        ]); 
+    }
     
     /**
      * Creates a new InventarioPuntoVenta model.
