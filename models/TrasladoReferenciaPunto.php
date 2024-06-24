@@ -36,7 +36,8 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inventario_saliente', 'id_punto_saliente', 'id_punto_entrante', 'unidades','id_talla','id_color','aplicado','id_inventario_entrante'], 'integer'],
+            [['id_inventario_saliente', 'id_punto_saliente', 'id_punto_entrante', 'unidades','id_talla','id_color','aplicado',
+                'id_inventario_entrante','id_detalle'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['id_inventario_saliente'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioPuntoVenta::className(), 'targetAttribute' => ['id_inventario_saliente' => 'id_inventario']],
@@ -44,6 +45,7 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
             [['id_punto_entrante'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto_entrante' => 'id_punto']],
             [['id_talla'], 'exist', 'skipOnError' => true, 'targetClass' => Tallas::className(), 'targetAttribute' => ['id_talla' => 'id_talla']],
             [['id_color'], 'exist', 'skipOnError' => true, 'targetClass' => Colores::className(), 'targetAttribute' => ['id_color' => 'id_color']],
+            [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => DetalleColorTalla::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
         ];
     }
 
@@ -65,7 +67,7 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
             'id_talla' => 'Tallas:',
             'id_color' => 'Colores:',
             'aplicado' => 'Aplicado:',
-           
+           'id_detalle' => 'id_detalle',
         ];
     }
 
@@ -83,6 +85,14 @@ class TrasladoReferenciaPunto extends \yii\db\ActiveRecord
     public function getColores()
     {
         return $this->hasOne(Colores::className(), ['id_color' => 'id_color']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDetalleColor()
+    {
+        return $this->hasOne(DetalleColorTalla::className(), ['id_detalle' => 'id_detalle']);
     }
       /**
      * @return \yii\db\ActiveQuery

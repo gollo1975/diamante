@@ -52,6 +52,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             [['id_empresa'], 'unique'],
             [['declaracion'], 'string', 'max' => 500],
             ['porcentaje_reteiva', 'number'],
+            [['presentacion'], 'string', 'max' => 162],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
             [['codigo_municipio'], 'exist', 'skipOnError' => true, 'targetClass' => Municipios::className(), 'targetAttribute' => ['codigo_municipio' => 'codigo_municipio']],
             [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => ResolucionDian::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
@@ -95,6 +96,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'aplica_punto_venta' => 'aplica_punto_venta',
             'calificacion_proveedor' => '% Proveedor:',
             'aplica_factura_produccion' => 'Aplica factura produccion:',
+            'presentacion' => 'Presentacion:',
             
             
         ];

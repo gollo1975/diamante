@@ -110,10 +110,10 @@ $form = ActiveForm::begin([
                         <th scope="col" style='background-color:#B9D5CE;'>Bodega</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Marca</th>
-                        <th scope="col" style='background-color:#B9D5CE;'>Categoria</th>
-                        <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>M. Stock</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>P. costo</th>
                         <th scope="col" style='background-color:#B9D5CE;'>P. mayorista</th>
                         <th scope="col" style='background-color:#B9D5CE;'>P. deptal</th>
                         <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -124,9 +124,9 @@ $form = ActiveForm::begin([
                         <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Bodega</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Marca</th>
-                        <th scope="col" style='background-color:#B9D5CE;'>Categoria</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>M. Stock</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Precio venta</th>
                         <th scope="col" style='background-color:#B9D5CE;'></th>
                     </tr>
@@ -142,10 +142,10 @@ $form = ActiveForm::begin([
                         <td><?= $val->punto->nombre_punto?></td>
                         <td><?= $val->proveedor->nombre_completo?></td>
                         <td><?= $val->marca->marca?></td>
-                        <td><?= $val->categoria->categoria?></td>
-                        <td><?= $val->fecha_proceso?></td>
                         <td style="text-align: right;"><?= ''.number_format($val->stock_unidades,0)?></td>
-                        <td style="text-align: right; background-color:#CBDDE3; color: black"><?= ''.number_format($val->stock_inventario,0)?></td>
+                         <td style="text-align: right;"><?= ''.number_format($val->stock_inventario,0)?></td>
+                        <td style="text-align: right;"><?= ''.number_format($val->stock_minimo,0)?></td>
+                        <td style="text-align: right;"><?= ''.number_format($val->costo_unitario,0)?></td>
                         <td style="text-align: right;"><?= ''.number_format($val->precio_mayorista,0)?></td>
                         <td style="text-align: right;"><?= ''.number_format($val->precio_deptal,0)?></td>
                         <td style= 'width: 25px; height: 10px;'>
@@ -158,9 +158,9 @@ $form = ActiveForm::begin([
                         <td><?= $val->nombre_producto?></td>
                         <td><?= $val->punto->nombre_punto?></td>
                         <td><?= $val->marca->marca?></td>
-                        <td><?= $val->categoria->categoria?></td>
                         <td style="text-align: right;"><?= ''.number_format($val->stock_unidades,0)?></td>
                         <td style="text-align: right; background-color:#CBDDE3; color: black"><?= ''.number_format($val->stock_inventario,0)?></td>
+                         <td style="text-align: right;"><?= ''.number_format($val->stock_minimo,0)?></td>
                         <td style="text-align: right;"><?= ''.number_format($val->precio_deptal,0)?></td>
                         <td style= 'width: 25px; height: 10px;'>
                              <a href="<?= Url::toRoute(["inventario-punto-venta/view_search", "id" => $val->id_inventario, 'tokenAcceso' => $tokenAcceso, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>

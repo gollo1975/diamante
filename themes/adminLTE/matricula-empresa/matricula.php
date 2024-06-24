@@ -94,6 +94,9 @@ $banco = ArrayHelper::map(\app\models\EntidadBancarias::find()->all(), 'codigo_b
         <div class="row">           
             <?= $form->field($model, 'declaracion', ['template' => '{label}<div class="col-sm-10  form-group">{input}{error}</div>'])->textarea(['rows' => 3]) ?>
         </div> 
+        <div class="row">           
+            <?= $form->field($model, 'presentacion', ['template' => '{label}<div class="col-sm-10  form-group">{input}{error}</div>'])->textarea(['rows' => 3, 'size'=> 100]) ?>
+        </div> 
         <div class="panel-footer text-right">			                        
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success",]) ?>
        

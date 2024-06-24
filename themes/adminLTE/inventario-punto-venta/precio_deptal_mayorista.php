@@ -100,15 +100,17 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size:90%;'>                
-                    <th scope="col" style='background-color:#B9D5CE;'>Codigo producto</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Marca</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Categoria</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
-                     <th scope="col" style='background-color:#B9D5CE;'>Vr. costo</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>M. Stock</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Vr. costo</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Pv. Deptal</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Pv. Mayorista</th>
+                    <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                                       
@@ -123,9 +125,10 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
                             <td><?= $val->nombre_producto ?></td>
                             <td><?= $val->proveedor->nombre_completo ?></td>
                             <td><?= $val->marca->marca ?></td>
-                            <td><?= $val->categoria->categoria?></td>
-                             <td><?= $val->punto->nombre_punto ?></td>
-                             <td style="text-align: right"><?= ''.number_format($val->costo_unitario,0)?></td>
+                            <td><?= $val->punto->nombre_punto ?></td>
+                            <td style="text-align: right"><?= ''.number_format($val->stock_inventario,0)?></td> 
+                            <td style="text-align: right"><?= ''.number_format($val->stock_minimo,0)?></td> 
+                            <td style="text-align: right"><?= ''.number_format($val->costo_unitario,0)?></td>
                             <td style="text-align: right"><?= ''.number_format($val->precio_deptal,0)?></td>
                             <td style="text-align: right"><?= ''.number_format($val->precio_mayorista,0)?></td>
                             <td style="width: 25px; height: 25px;">
@@ -144,6 +147,22 @@ $conCatergoria = ArrayHelper::map(app\models\Categoria::find()->orderBy('categor
                                     </div>
                                 </div> 
                             </td>
+                             <td style="width: 25px; height: 25px;">
+                              <!-- este ajas permite crear los precios al deptal y mayorista -->
+                                <?= Html::a('<span class="glyphicon glyphicon-tasks"></span> ',
+                                    ['/inventario-punto-venta/crear_minimo_stock','id' => $val->id_inventario],
+                                    [
+                                        'title' => 'Permite crear el minimo stock de cada producto',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalcrearminimostock'.$val->id_inventario,
+                                    ])    
+                                ?>
+                                <div class="modal remote fade" id="modalcrearminimostock<?= $val->id_inventario ?>">
+                                    <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                         <div class="modal-content"></div>
+                                    </div>
+                                </div> 
+                             </td>  
                             <td style="width: 25px; height: 25px;">
                                <a href="<?= Url::toRoute(["inventario-punto-venta/view_descuentos_comerciales", "id" => $val->id_inventario, 'id_punto' => $val->id_punto]) ?>" ><span class="glyphicon glyphicon-minus-sign" title="Permite crear las reglas de decuentos"></span></a>
                             </td>

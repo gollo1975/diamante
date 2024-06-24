@@ -7,7 +7,7 @@ use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 
-$this->title = 'TRASLADO DE REFERENCIAS';
+$this->title = 'TRASLADO DE REFERENCIAS (Punto de venta saliente)';
 $this->params['breadcrumbs'][] = ['label' => 'Traslasdo de referencias', 'url' => ['view_traslado', 'id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]];
 $this->params['breadcrumbs'][] = $id_punto;
 $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_punto', 1])->orderBy ('nombre_punto ASC')->all(), 'id_punto', 'nombre_punto');
@@ -25,7 +25,7 @@ $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
                             'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
-                            'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                            'labelOptions' => ['class' => 'col-sm-4 control-label'],
                             'options' => []
                         ],
 
@@ -39,7 +39,6 @@ $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_
 
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
-                    <?= $formulario->field($form, 'q')->input("search") ?>
                     <?= $formulario->field($form, 'punto')->widget(Select2::classname(), [
                         'data' => $conPunto,
                         'options' => ['prompt' => 'Seleccione...'],
@@ -79,8 +78,10 @@ $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_
                         <thead>
                         <tr>
                             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Referencia/th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Referencia</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Talla</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Color</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
@@ -93,8 +94,10 @@ $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_
                                         <td><?= $val->codigo_producto ?></td>
                                         <td><?= $val->inventario->nombre_producto ?></td>
                                         <td><?= $val->stock_punto ?></td>
+                                        <td><?= $val->talla->nombre_talla ?></td>
+                                        <td><?= $val->color->colores ?></td>
                                         <td><?= $val->punto->nombre_punto ?></td>
-                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"></td> 
+                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"><?= $val->id_detalle ?></td> 
                                     </tr>
                                 <?php endforeach;
                             }   ?>

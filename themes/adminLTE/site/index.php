@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Diamante ERP', 'url' => ['index']]
 $this->title = $empresa->nombre_sistema;
 ?>
 
-<div class="panel panel-success">
+<div class="panel panel-primary">
         <div class="login-logo">
             <a href="#"><b><?= $empresa->nombre_sistema ?></a>
        </div>
@@ -69,6 +69,7 @@ $this->title = $empresa->nombre_sistema;
           </div>
       </div>
     </section> 
+        
 
 <!-- Remove the container if you want to extend the Footer to full width. -->
    <div class="container my-5">
@@ -85,7 +86,7 @@ $this->title = $empresa->nombre_sistema;
              >
       <!-- Left -->
       <div class="me-5">
-          <span class="badge"> <h4><font face="arial">DIAMANTE SJ SAS</font></h4></span>
+          <span class="badge"> <h4><font face="arial"><?= $empresa->razon_social_completa?></font></h4></span>
       </div>
       <!-- Left -->
 
@@ -101,23 +102,23 @@ $this->title = $empresa->nombre_sistema;
         <!-- Grid row -->
         <div class="row mt-3">
           <!-- Grid column -->
-          <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+          <div class="col-md-3 col-lg-6 col-xl-3 mx-auto mb-4">
             <!-- Content -->
             <h4 class="text-uppercase fw-bold"><b><span class="badge"><font face="arial">NUESTRA COMPAÑIA</font></span></b></h4>
             <hr
                 class="mb-4 mt-0 d-inline-block mx-auto"
                 style="width: 100px; background-color: black; height: 3px"
                 />
-            <p>
-                <b>DIAMANTE SJ SAS</b>, Es una empresa especializada en diseño de software con altos estandares en tecnologia y enfocada al desarrollo de productos en la web.
+            <p style ="text-align: justify">
+                <b><font face="arial"><?= $empresa->razon_social_completa?></font></b>, <font face="arial"><?= $empresa->presentacion?> </font>
             </p>
           </div>
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+         <!-- <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
             <!-- Links -->
-            <h6 class="text-uppercase fw-bold"><span class="badge"><font face="arial">PRODUCTOS</font></span></h6>
+           <!-- <h6 class="text-uppercase fw-bold"><span class="badge"><font face="arial">PRODUCTOS</font></span></h6>
             <hr
                 class="mb-4 mt-0 d-inline-block mx-auto"
                 style="width: 100px; background-color: black; height: 3px"
@@ -138,28 +139,10 @@ $this->title = $empresa->nombre_sistema;
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
-            <!-- Links -->
-            <h4 class="text-uppercase fw-bold"><span class="badge"><font face="arial">SERVICIOS</font></span></h4>
-            <hr
-                class="mb-4 mt-0 d-inline-block mx-auto"
-                style="width: 100px; background-color: black; height: 3px"
-                />
-            <p>
-              <a href="#!" class="text-black">Seguridad informatica</a>
-            </p>
-            <p>
-              <a href="#!" class="text-black">Cloud hosting</a>
-            </p>
-            <p>
-              <a href="#!" class="text-black">Servidores linux</a>
-            </p>
-           
-          </div>
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+          <div class="col-md-4 col-lg-6 col-xl-3 mx-auto mb-md-0 mb-4">
             <!-- Links -->
             <h4 class="text-uppercase fw-bold"><span class="badge"><font face="arial">CONTACTO</font></span></h4>
             <hr
@@ -167,8 +150,8 @@ $this->title = $empresa->nombre_sistema;
                 style="width: 100px; background-color: black; height: 3px"
                 />
             <p><i class='glyphicon glyphicon-user'></i>  Medellin - Colombia</p>
-            <p><i class='glyphicon glyphicon-envelope'></i>  soporte@diamante.com</p>
-            <p><i class='glyphicon glyphicon-phone'></i>  323 308 36 29</p>
+            <p><i class='glyphicon glyphicon-envelope'></i>  soporte@diamantesj.com</p>
+            <p><i class='glyphicon glyphicon-phone'></i>  323 308 36 29 - 323 552 28 23</p>
           </div>
           <!-- Grid column -->
         </div>

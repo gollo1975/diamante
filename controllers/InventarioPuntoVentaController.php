@@ -489,7 +489,7 @@ class InventarioPuntoVentaController extends Controller
     public function actionView_traslado($id, $id_punto, $sw) {
         $talla_color = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
         $conPunto = \app\models\PuntoVenta::find()->andWhere(['<>','id_punto', 1])->orderBy('nombre_punto DESC')->all();
-        $asignacion = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario_saliente', $id])->orderBy('id_traslado DESC')->all();
+        $asignacion = \app\models\TrasladoReferenciaPunto::find()->where(['=','id_inventario_entrante', $id])->orderBy('id_traslado DESC')->all();
         $inventario = \app\models\InventarioPuntoVenta::findOne($id);
         if($sw == 0){
             if(isset($_POST["enviar_traslado_punto"])){
@@ -600,29 +600,36 @@ class InventarioPuntoVentaController extends Controller
      //BUSCA PRODUCTO DEL INVENTARIO PARA REPROGRAMARLO
     public function actionBuscar_punto_venta($id, $id_punto, $sw){
         $form = new \app\models\FormModeloBuscar();
-        $q = null;
         $punto = null;
         $operacion = null;
         $pages = null;
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
-                $q = Html::encode($form->q);  
-                $punto= Html::encode($form->punto);  
-                $operacion = \app\models\DetalleColorTalla::find()
-                        ->where(['=','codigo_producto',$q])
-                        ->orwhere(['=','id_punto',$punto])
-                        ->andWhere(['>','stock_punto', 0]);
-                $operacion = $operacion->orderBy('id_punto DESC');                    
-                $count = clone $operacion;
-                $to = $count->count();
-                $pages = new Pagination([
-                    'pageSize' => 10,
-                    'totalCount' => $count->count()
-                ]);
-                $operacion = $operacion
-                        ->offset($pages->offset)
-                        ->limit($pages->limit)
-                        ->all();         
+                $punto= Html::encode($form->punto); 
+                if($punto <> null){
+                    if ($punto <> $id_punto){
+                        $operacion = \app\models\DetalleColorTalla::find()
+                                ->where(['=','id_punto',$punto])
+                                ->andWhere(['>','stock_punto', 0]);
+                        $operacion = $operacion->orderBy('id_punto DESC');                    
+                        $count = clone $operacion;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count()
+                        ]);
+                        $operacion = $operacion
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all(); 
+                    }else{
+                        Yii::$app->session->setFlash('warning', 'El punto saliente es IGUAL al punto de venta entrante. Selecciona un nuevo punto de venta.'); 
+                        return $this->redirect(['buscar_punto_venta','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
+                    }    
+                }else{
+                     Yii::$app->session->setFlash('error', 'Debe se seleccionar el punto de venta donde se va a trasladar la referencia.'); 
+                      return $this->redirect(['buscar_punto_venta','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
+                }    
             } else {
                 $form->getErrors();
             }                    
@@ -635,23 +642,24 @@ class InventarioPuntoVentaController extends Controller
                     $registro = \app\models\DetalleColorTalla::find()->where(['=','id_detalle', $intCodigo])->one();
                     $buscarRegistro = \app\models\DetalleColorTalla::find()->where(['=','id_punto', $id_punto])->all();
                     foreach ($buscarRegistro as $buscar):
+                        
                         if($registro->codigo_producto == $buscar->codigo_producto && $registro->id_color = $buscar->id_color
                                 && $registro->id_talla ==  $buscar->id_talla){
-                           
                             $table = new \app\models\TrasladoReferenciaPunto();
-                            $table->id_inventario_saliente = $buscar->id_inventario;
+                            $table->id_inventario_saliente = $registro->id_inventario;
                             $table->id_inventario_entrante = $id;
+                            $table->id_punto_entrante =  $id_punto;
                             $table->id_punto_saliente = $punto;
                             $table->id_talla = $registro->id_talla;
                             $table->id_color = $registro->id_color;
-                            $table->id_punto_entrante =  $id_punto;
+                            $table->id_detalle = $intCodigo;
                             $table->fecha_proceso = date('Y-m-d');
                             $table->user_name = Yii::$app->user->identity->username;
                             $table->save(false);
                         }
                     endforeach;
                 }
-                return $this->redirect(['view_traslado','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
+               return $this->redirect(['view_traslado','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
             }
         }
         return $this->render('importar_referencia_punto', [
@@ -1544,6 +1552,32 @@ class InventarioPuntoVentaController extends Controller
         ]);
     }
     
+    //PERMITE CREAR EL MINITO STOCK DE CADA PRODUCTO
+    public function actionCrear_minimo_stock($id) {
+        $model = new \app\models\FormModeloCambiarCantidad();
+        $table = InventarioPuntoVenta::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["aplicar_stock"])) {
+                if($model->aplicar == 1){ //NO
+                    $table->stock_minimo = $model->minimo;
+                    $table->save(false);
+                    $this->redirect(["inventario-punto-venta/crear_precio_venta", 'id' => $id]);
+                }else{
+                    $total_unidades = InventarioPuntoVenta::find()->where(['=','codigo_producto', $table->codigo_producto])->all();
+                    foreach ($total_unidades as $total):
+                        $total->stock_minimo = $model->minimo;
+                        $total->save(false);
+                    endforeach;
+                    $this->redirect(["inventario-punto-venta/crear_precio_venta", 'id' => $id]);
+                }    
+            }
+        }
+        return $this->renderAjax('_form_aplicar_stock_minimo', [
+            'model' => $model,
+            'id' => $id,
+        ]);
+    }
+    
     //DESCARGAR INVENTARIO DE BODEGA
     public function actionDescargar_inventario_bodega($token, $id, $codigo){
         $bodega = InventarioPuntoVenta::findOne($codigo);
@@ -1628,6 +1662,7 @@ class InventarioPuntoVentaController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
         
                                      
         $objPHPExcel->setActiveSheetIndex(0)
@@ -1640,18 +1675,19 @@ class InventarioPuntoVentaController extends Controller
                     ->setCellValue('G1', 'INVENTARIO INICIAL')
                     ->setCellValue('H1', 'UNIDADES ENTRADAS')
                     ->setCellValue('I1', 'STOCK')
-                    ->setCellValue('J1', 'VALOR UNITARIO')
-                    ->setCellValue('K1', 'SUBTOTAL')
-                    ->setCellValue('L1', 'IMPUESTO')
-                    ->setCellValue('M1', 'VALOR TOTAL')
-                    ->setCellValue('N1', 'USER NAME')
-                    ->setCellValue('O1', 'CODIGO EAN')
-                    ->setCellValue('P1', 'MARCA')
-                    ->setCellValue('Q1', 'CATEGORIA')
-                    ->setCellValue('R1', 'PRECIO DEPTAL')
-                    ->setCellValue('S1', 'PRECIO MAYORISTA')
-                    ->setCellValue('T1', 'APLICA DESCTO PUNTO')
-                    ->setCellValue('U1', 'APLICA DESCTO MAYORISTA');
+                    ->setCellValue('J1', 'MINIMO STOCK')
+                    ->setCellValue('K1', 'VALOR UNITARIO')
+                    ->setCellValue('L1', 'SUBTOTAL')
+                    ->setCellValue('M1', 'IMPUESTO')
+                    ->setCellValue('N1', 'VALOR TOTAL')
+                    ->setCellValue('O1', 'USER NAME')
+                    ->setCellValue('P1', 'CODIGO EAN')
+                    ->setCellValue('Q1', 'MARCA')
+                    ->setCellValue('R1', 'CATEGORIA')
+                    ->setCellValue('S1', 'PRECIO DEPTAL')
+                    ->setCellValue('T1', 'PRECIO MAYORISTA')
+                    ->setCellValue('U1', 'APLICA DESCTO PUNTO')
+                    ->setCellValue('V1', 'APLICA DESCTO MAYORISTA');
             $i = 2;
         
         foreach ($tableexcel as $val) {
@@ -1666,18 +1702,19 @@ class InventarioPuntoVentaController extends Controller
                     ->setCellValue('G' . $i, $val->inventarioInicial)
                     ->setCellValue('H' . $i, $val->inventarioInicial)
                     ->setCellValue('I' . $i, $val->stock_unidades)
-                    ->setCellValue('J' . $i, $val->costo_unitario)
-                    ->setCellValue('K' . $i, $val->subtotal)
-                    ->setCellValue('L' . $i, $val->valor_iva)
-                    ->setCellValue('M' . $i, $val->total_inventario)
-                    ->setCellValue('N' . $i, $val->user_name)
-                    ->setCellValue('O' . $i, $val->codigo_barra)
-                    ->setCellValue('P' . $i, $val->marca->marca)
-                    ->setCellValue('Q' . $i, $val->categoria->categoria)
-                    ->setCellValue('R' . $i, $val->precio_deptal)
-                    ->setCellValue('S' . $i, $val->precio_mayorista)
-                    ->setCellValue('T' . $i, $val->aplicaDescuentoPunto)
-                    ->setCellValue('U' . $i, $val->aplicaDescuentoDistribuidor) ;
+                    ->setCellValue('J' . $i, $val->stock_minimo)
+                    ->setCellValue('K' . $i, $val->costo_unitario)
+                    ->setCellValue('L' . $i, $val->subtotal)
+                    ->setCellValue('M' . $i, $val->valor_iva)
+                    ->setCellValue('N' . $i, $val->total_inventario)
+                    ->setCellValue('O' . $i, $val->user_name)
+                    ->setCellValue('P' . $i, $val->codigo_barra)
+                    ->setCellValue('Q' . $i, $val->marca->marca)
+                    ->setCellValue('R' . $i, $val->categoria->categoria)
+                    ->setCellValue('S' . $i, $val->precio_deptal)
+                    ->setCellValue('T' . $i, $val->precio_mayorista)
+                    ->setCellValue('U' . $i, $val->aplicaDescuentoPunto)
+                    ->setCellValue('V' . $i, $val->aplicaDescuentoDistribuidor) ;
             $i++;
         }
 
