@@ -110,7 +110,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                             ?>
                                         </td> 
                                         <td style= 'width: 25px; height: 10px;'>
-                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['inventario-punto-venta/aplicar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado], [
+                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['inventario-punto-venta/aplicar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw'=> $sw, 'nuevo_punto'=> $val->id_punto_saliente], [
                                                           'class' => '',
                                                           'title' => 'Proceso que permite cargar estas existencias a la referencia seleccionada.', 
                                                           'data' => [

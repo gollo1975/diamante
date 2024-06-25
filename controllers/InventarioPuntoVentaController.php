@@ -599,6 +599,7 @@ class InventarioPuntoVentaController extends Controller
     //BUSCAR PUNTOS DE VENTA PARA TRASLADAR REFERENCIAS
      //BUSCA PRODUCTO DEL INVENTARIO PARA REPROGRAMARLO
     public function actionBuscar_punto_venta($id, $id_punto, $sw){
+        $codigo = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->one();
         $form = new \app\models\FormModeloBuscar();
         $punto = null;
         $operacion = null;
@@ -610,7 +611,8 @@ class InventarioPuntoVentaController extends Controller
                     if ($punto <> $id_punto){
                         $operacion = \app\models\DetalleColorTalla::find()
                                 ->where(['=','id_punto',$punto])
-                                ->andWhere(['>','stock_punto', 0]);
+                                ->andWhere(['>','stock_punto', 0])
+                                ->andWhere(['=','codigo_producto', $codigo->codigo_producto]);
                         $operacion = $operacion->orderBy('id_punto DESC');                    
                         $count = clone $operacion;
                         $to = $count->count();
@@ -640,6 +642,7 @@ class InventarioPuntoVentaController extends Controller
                 $intIndice = 0;
                 foreach ($_POST["nuevo_traslado"] as $intCodigo) {
                     $registro = \app\models\DetalleColorTalla::find()->where(['=','id_detalle', $intCodigo])->one();
+                    $color =$registro->id_color;
                     $buscarRegistro = \app\models\DetalleColorTalla::find()->where(['=','id_punto', $id_punto])->all();
                     foreach ($buscarRegistro as $buscar):
                         
@@ -651,7 +654,7 @@ class InventarioPuntoVentaController extends Controller
                             $table->id_punto_entrante =  $id_punto;
                             $table->id_punto_saliente = $punto;
                             $table->id_talla = $registro->id_talla;
-                            $table->id_color = $registro->id_color;
+                            $table->id_color = $color;
                             $table->id_detalle = $intCodigo;
                             $table->fecha_proceso = date('Y-m-d');
                             $table->user_name = Yii::$app->user->identity->username;
@@ -659,7 +662,7 @@ class InventarioPuntoVentaController extends Controller
                         }
                     endforeach;
                 }
-               return $this->redirect(['view_traslado','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
+                return $this->redirect(['view_traslado','id' => $id, 'id_punto' => $id_punto, 'sw' => $sw]);
             }
         }
         return $this->render('importar_referencia_punto', [
@@ -676,12 +679,17 @@ class InventarioPuntoVentaController extends Controller
     public function actionModificar_cantidades($id, $id_punto, $id_traslado, $sw) {
         $model = new \app\models\FormModeloCambiarCantidad();
         $conRegistro = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
-       
+        $existencia = $conRegistro->detalleColor->stock_punto;
         if ($model->load(Yii::$app->request->post())) {
-            if (isset($_POST["asignar_unidades"])) { 
-                $conRegistro->unidades = $model->nueva_cantidad;
-                $conRegistro->save();
-                $this->redirect(["inventario-punto-venta/view_traslado", 'id' => $id, 'id_punto' =>$id_punto, 'sw' => $sw]);
+            if (isset($_POST["asignar_unidades"])) {
+                if($model->nueva_cantidad <= $existencia){
+                    $conRegistro->unidades = $model->nueva_cantidad;
+                    $conRegistro->save();
+                    $this->redirect(["inventario-punto-venta/view_traslado", 'id' => $id, 'id_punto' =>$id_punto, 'sw' => $sw]);
+                }else{
+                    Yii::$app->session->setFlash('warning', 'La cantidad a trasladar es mayor que las existencias de la talla.'); 
+                   $this->redirect(["inventario-punto-venta/view_traslado", 'id' => $id, 'id_punto' =>$id_punto, 'sw' => $sw]);
+                }   
             }    
         }
          if (Yii::$app->request->get()) {
@@ -699,8 +707,20 @@ class InventarioPuntoVentaController extends Controller
         $inventario = InventarioPuntoVenta::findOne($id);
         $traslado = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
         if($sw == 0){
-             
-             // return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);
+            $talla_color = \app\models\DetalleColorTalla::findOne($traslado->id_detalle); //restar inventario
+            $talla_color->stock_punto -= $traslado->unidades;
+          //  $talla_color->save();
+            //actualiza nuevo inventario
+            $talla = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
+            foreach ($talla as $tallas):
+                if($talla_color->id_color == $tallas->id_color && $talla_color->id_talla == $tallas->id_talla){
+                  $tallas->stock_punto += $traslado->unidades;
+                 // $tallas->save();
+                 echo $inventario->stock_inventario -= $traslado->unidades;
+                  //$inventario->save();
+                }
+            endforeach;
+              //return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);
         }else{
             $conExistencia = InventarioPuntoVenta::find()->where(['=','codigo_producto', $inventario->codigo_producto])->andWhere(['=','id_punto', $nuevo_punto])->one();    
             $inventario->stock_inventario -= $traslado->unidades;
