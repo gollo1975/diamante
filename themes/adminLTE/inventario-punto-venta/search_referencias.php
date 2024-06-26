@@ -20,6 +20,7 @@ use yii\bootstrap;
 
 $this->title = 'BUSQUEDA DE REFERENCIAS';
 $this->params['breadcrumbs'][] = $this->title;
+$form->codigo_producto = null;
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <?php $formulario = ActiveForm::begin([
@@ -92,7 +93,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td><?= $val->marca->marca ?></td>
                                 <td style="text-align: right"><?= '$'.number_format($val->precio_deptal,0) ?></td>
                                 <td style="text-align: right"><?= ''.number_format($val->stock_inventario,0) ?></td>
-                                
                                 <td style= 'width: 25px; height: 10px;'>
                                      <a href="<?= Url::toRoute(["inventario-punto-venta/view_search", "id" => $val->id_inventario, 'tokenAcceso' => $tokenAcceso, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                                 </td>     

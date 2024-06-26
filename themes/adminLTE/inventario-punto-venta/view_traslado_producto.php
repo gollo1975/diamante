@@ -96,45 +96,51 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
                                         <td><?= $val->puntoEntrante->nombre_punto?></td>
                                         <td><?= $val->tallas->nombre_talla?></td>
                                         <td><?= $val->colores->colores?></td> 
-                                        <td style="text-align: right"><?= ''. number_format( $val->unidades,0)?></td>
+                                        <td style="text-align: right; background-color: #FAE4D7"><?= ''. number_format( $val->unidades,0)?></td>
                                         <td><?= $val->fecha_hora_registro?></td>
                                         <td><?= $val->registroAplicado?></td>
-                                        <td style= 'width: 25px; height: 25px;'>
-                                            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw' => $sw], [
-                                                       'class' => '',
-                                                       'data' => [
-                                                           'confirm' => 'Esta seguro de eliminar el registro?',
-                                                           'method' => 'post',
-                                                       ],
-                                                   ])
-                                            ?>
-                                        </td> 
-                                        <td style= 'width: 25px; height: 10px;'>
-                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['inventario-punto-venta/aplicar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw'=> $sw, 'nuevo_punto'=> $val->id_punto_saliente], [
-                                                          'class' => '',
-                                                          'title' => 'Proceso que permite cargar estas existencias a la referencia seleccionada.', 
-                                                          'data' => [
-                                                              'confirm' => 'Esta seguro de aplicar el traslado de la referencia:  ('.$model->nombre_producto.') al punto de venta de ('.$val->puntoEntrante->nombre_punto.').',
-                                                              'method' => 'post',
-                                                          ],
-                                            ]);?>
-                                        </td> 
-                                        <td style="width: 25px; height: 25px;">
-                                                <!-- Inicio Nuevo Detalle proceso -->
-                                                  <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                      ['/inventario-punto-venta/modificar_cantidades', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'sw' => $sw, 'id_traslado' => $val->id_traslado],
-                                                      [
-                                                          'title' => 'Ingresar existencia a trasladar',
-                                                          'data-toggle'=>'modal',
-                                                          'data-target'=>'#modalmodificarcantidades'.$val->id_traslado,
-                                                      ])    
-                                                 ?>
-                                              <div class="modal remote fade" id="modalmodificarcantidades<?= $val->id_traslado ?>">
-                                                  <div class="modal-dialog modal-lg" style ="width: 550px;">
-                                                      <div class="modal-content"></div>
+                                        <?php if($val->aplicado == 0){?>
+                                            <td style= 'width: 25px; height: 25px;'>
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw' => $sw], [
+                                                           'class' => '',
+                                                           'data' => [
+                                                               'confirm' => 'Esta seguro de eliminar el registro?',
+                                                               'method' => 'post',
+                                                           ],
+                                                       ])
+                                                ?>
+                                            </td> 
+                                            <td style= 'width: 25px; height: 10px;'>
+                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['inventario-punto-venta/aplicar_traslado', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'id_traslado' => $val->id_traslado, 'sw'=> $sw, 'nuevo_punto'=> $val->id_punto_saliente], [
+                                                              'class' => '',
+                                                              'title' => 'Proceso que permite cargar estas existencias a la referencia seleccionada.', 
+                                                              'data' => [
+                                                                  'confirm' => 'Esta seguro de aplicar el traslado de la referencia:  ('.$model->nombre_producto.') al punto de venta de ('.$val->puntoEntrante->nombre_punto.').',
+                                                                  'method' => 'post',
+                                                              ],
+                                                ]);?>
+                                            </td> 
+                                            <td style="width: 25px; height: 25px;">
+                                                    <!-- Inicio Nuevo Detalle proceso -->
+                                                      <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
+                                                          ['/inventario-punto-venta/modificar_cantidades', 'id' => $model->id_inventario, 'id_punto' => $id_punto, 'sw' => $sw, 'id_traslado' => $val->id_traslado],
+                                                          [
+                                                              'title' => 'Ingresar existencia a trasladar',
+                                                              'data-toggle'=>'modal',
+                                                              'data-target'=>'#modalmodificarcantidades'.$val->id_traslado,
+                                                          ])    
+                                                     ?>
+                                                  <div class="modal remote fade" id="modalmodificarcantidades<?= $val->id_traslado ?>">
+                                                      <div class="modal-dialog modal-lg" style ="width: 550px;">
+                                                          <div class="modal-content"></div>
+                                                      </div>
                                                   </div>
-                                              </div>
-                                         </td>
+                                             </td>
+                                        <?php }else{?>
+                                             <td style="width: 25px; height: 25px;"></td>
+                                             <td style="width: 25px; height: 25px;"></td>
+                                             <td style="width: 25px; height: 25px;"></td>
+                                        <?php }?>     
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

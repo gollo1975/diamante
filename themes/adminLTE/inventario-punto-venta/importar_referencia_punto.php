@@ -97,7 +97,7 @@ $conPunto = ArrayHelper::map(\app\models\PuntoVenta::find()->andWhere(['<>','id_
                                         <td><?= $val->talla->nombre_talla ?></td>
                                         <td><?= $val->color->colores ?></td>
                                         <td><?= $val->punto->nombre_punto ?></td>
-                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"><?= $val->id_detalle ?></td> 
+                                        <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_traslado[]" value="<?= $val->id_detalle ?>"></td> 
                                     </tr>
                                 <?php endforeach;
                             }   ?>
