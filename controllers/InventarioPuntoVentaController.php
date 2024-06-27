@@ -259,7 +259,7 @@ class InventarioPuntoVentaController extends Controller
            'form'=> $form,
            'model' => $model,  
            'tokenAcceso' => $tokenAcceso,
-            'token' => $token,
+           'token' => $token,
         ]);
         
     }
@@ -539,7 +539,7 @@ class InventarioPuntoVentaController extends Controller
                             'asignacion'=> $asignacion,
                             'sw' => $sw,
                 ]);
-        }else{
+        }else{ ///PERMITE TRASLADAR LOS PRODUCTOS DE UN PUNTO DE VENTA A OTRO NO APLICA TALLAS
             $form = new \app\models\FiltroBusquedaInventarioPunto();
             $unidades = null;
             $punto_venta = null;
@@ -554,13 +554,14 @@ class InventarioPuntoVentaController extends Controller
                             if($conExistencia){
                                 if($punto_venta <> $id_punto){
                                     $table = new \app\models\TrasladoReferenciaPunto();
-                                    $table->id_inventario_saliente = $id;
-                                    $table->id_punto_saliente = $id_punto;
-                                    $table->id_punto_entrante = $punto_venta;
+                                    $table->id_inventario_saliente = $conExistencia->id_inventario;
+                                    $table->id_inventario_entrante = $id;
+                                    $table->id_punto_saliente = $punto_venta;
+                                    $table->id_punto_entrante = $id_punto;
                                     $table->unidades = $unidades;
                                     $table->fecha_proceso = date('Y-m-d');
                                     $table->user_name = Yii::$app->user->identity->username;
-                                   $table->save();
+                                    $table->save();
                                     return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto,'sw'=> $sw]);
                                 }else{
                                     Yii::$app->session->setFlash('info', 'El punto de venta seleccionado es IGUAL al punto de venta del PRODUCTO actual. Favor seleccionar otro punrto de venta.');
@@ -643,6 +644,7 @@ class InventarioPuntoVentaController extends Controller
                 foreach ($_POST["nuevo_traslado"] as $intCodigo) {
                     $registro = \app\models\DetalleColorTalla::find()->where(['=','id_detalle', $intCodigo])->one();
                     $color =$registro->id_color;
+                    $ConpuntoVenta = \app\models\PuntoVenta::findOne($id_punto);
                     $buscarRegistro = \app\models\DetalleColorTalla::find()->where(['=','id_punto', $id_punto])->all();
                     foreach ($buscarRegistro as $buscar):
                         
@@ -659,6 +661,8 @@ class InventarioPuntoVentaController extends Controller
                             $table->fecha_proceso = date('Y-m-d');
                             $table->user_name = Yii::$app->user->identity->username;
                             $table->save(false);
+                        }else{
+                           Yii::$app->session->setFlash('error', 'La  TALLA Y COLOR seleccionada no se encuentra codificada en el local de ('.$ConpuntoVenta->nombre_punto.'). Favor valide la información');  
                         }
                     endforeach;
                 }
@@ -706,35 +710,57 @@ class InventarioPuntoVentaController extends Controller
     public function actionAplicar_traslado($id, $id_punto, $id_traslado, $sw, $nuevo_punto){
         $inventario = InventarioPuntoVenta::findOne($id);
         $traslado = \app\models\TrasladoReferenciaPunto::findOne($id_traslado);
-        if($sw == 0){
-            $talla_color = \app\models\DetalleColorTalla::findOne($traslado->id_detalle); //restar inventario
-            $talla_color->stock_punto -= $traslado->unidades;
-          //  $talla_color->save();
-            //actualiza nuevo inventario
-            $talla = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
-            foreach ($talla as $tallas):
-                if($talla_color->id_color == $tallas->id_color && $talla_color->id_talla == $tallas->id_talla){
-                  $tallas->stock_punto += $traslado->unidades;
-                 // $tallas->save();
-                 echo $inventario->stock_inventario -= $traslado->unidades;
-                  //$inventario->save();
-                }
-            endforeach;
-              //return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);
+        if($traslado->unidades >0 ){ 
+            if($sw == 0){
+                //resta del inventario del punto de venta saliente
+                $inventarioSaliente = InventarioPuntoVenta::findOne($traslado->id_inventario_saliente);
+                $inventarioSaliente->stock_inventario -= $traslado->unidades;
+                $inventarioSaliente->save();
+                //resta de la talla y color saliente
+                $talla_color = \app\models\DetalleColorTalla::findOne($traslado->id_detalle); //restar inventario
+                $talla_color->stock_punto -= $traslado->unidades;
+                $talla_color->save();
+                //actualiza nuevo inventario
+                $talla = \app\models\DetalleColorTalla::find()->where(['=','id_inventario', $id])->all();
+                foreach ($talla as $tallas):
+                    if($talla_color->id_color == $tallas->id_color && $talla_color->id_talla == $tallas->id_talla){
+                       //actualizar la talla y color del nuevo traslado
+                       $tallas->stock_punto += $traslado->unidades;
+                       $tallas->cantidad += $traslado->unidades;
+                       $tallas->save();
+                       //actualizar el inventario del punto de venta de la referencia
+                       $inventario->stock_inventario += $traslado->unidades;
+                       $inventario->stock_unidades += $traslado->unidades;
+                       $inventario->save();
+                       //actualiza el registro del traslado, cierra el registro
+                       $traslado->aplicado = 1;
+                       $traslado->save();
+                    }
+                endforeach;
+                 Yii::$app->session->setFlash('success', 'El traslado se aplico con exito en el modulo de inventario.');
+                return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);
+            }else{
+               //RESTA EL INVENTARIO DE SALIDA
+                $conExistencia = InventarioPuntoVenta::find()->where(['=','id_inventario', $traslado->id_inventario_saliente])->one();    
+                $conExistencia ->stock_inventario -= $traslado->unidades;
+                $conExistencia ->save();
+               
+                //SUMA EL INVETARIO DE SALIDA
+                $conActualizaEntrada = InventarioPuntoVenta::findOne($id);
+                $conActualizaEntrada->stock_inventario += $traslado->unidades;
+                $conActualizaEntrada->stock_unidades += $traslado->unidades;
+                $conActualizaEntrada->save();
+                
+                // cierra el registro
+                $traslado->aplicado = 1;
+                $traslado->save();
+                Yii::$app->session->setFlash('success', 'El traslado se aplico con exito en el modulo de inventario.');
+                return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);
+            }
         }else{
-            $conExistencia = InventarioPuntoVenta::find()->where(['=','codigo_producto', $inventario->codigo_producto])->andWhere(['=','id_punto', $nuevo_punto])->one();    
-            $inventario->stock_inventario -= $traslado->unidades;
-            $inventario->save();
-            $traslado->id_inventario_entrante = $conExistencia->id_inventario;
-            $traslado->aplicado = 1;
-            $traslado->save();
-            $inventario_actualizado = InventarioPuntoVenta::findOne($conExistencia->id_inventario);
-            $inventario_actualizado->stock_inventario += $traslado->unidades;
-            $inventario_actualizado->stock_unidades += $traslado->unidades;
-            $inventario_actualizado->save();
-            Yii::$app->session->setFlash('success', 'El traslado se aplico con exito en el modulo de inventario.');
-            return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);
-        }
+            Yii::$app->session->setFlash('warning', 'No se puede aplicar el traslado porque no ha ingresado las unidades. Favor valide la información.');
+            return $this->redirect(['view_traslado','id' =>$id, 'id_punto' => $id_punto, 'sw' => $sw]);   
+        }    
        
     }
     
