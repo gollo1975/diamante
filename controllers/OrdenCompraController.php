@@ -32,20 +32,7 @@ use app\models\FormModeloBuscar;
  */
 class OrdenCompraController extends Controller
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
+    
 
     /**
      * Lists all OrdenCompra models.
