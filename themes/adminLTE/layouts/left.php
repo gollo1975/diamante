@@ -408,7 +408,7 @@
                                                 'items' => [
                                                     ['label' => 'Precio de venta', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/crear_precio_venta']],
                                                     ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/validador_imagen']],
-                                                    ['label' => 'Enviar masivos', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/send_masivo_producto']],
+                                                    ['label' => 'Enviar a pto venta', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/send_masivo_producto']],
                                                     
                                                 ]],
                                                 ['label' => 'Traslados pto venta', 'icon' => 'plus-square-o', 'url' => ['/inventario-punto-venta/traslado_producto']],
