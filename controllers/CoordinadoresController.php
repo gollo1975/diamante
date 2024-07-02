@@ -59,8 +59,7 @@ class CoordinadoresController extends Controller
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',50])->all()){
                 $searchModel = new CoordinadoresSearch();
                 $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-               echo "fdsfdsfds";
-                return $this->render('index', [
+                 return $this->render('index', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
                 ]);
