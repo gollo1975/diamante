@@ -49,24 +49,42 @@ $view = 'inventario-productos';
                     <td><?= Html::encode($model->codigo_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nombre_producto') ?></th>
                     <td><?= Html::encode($model->nombre_producto) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_iva') ?></th>
-                    <td><?= Html::encode($model->aplicaIva) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
+                    <td><?= Html::encode($model->fecha_proceso) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
+                    <td><?= Html::encode($model->fecha_vencimiento) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
-                    <td><?= Html::encode($model->fecha_proceso) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
-                    <td><?= Html::encode($model->fecha_vencimiento) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
-                    <td><?= Html::encode($model->fecha_creacion) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_iva') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_iva,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_iva') ?></th>
+                    <td><?= Html::encode($model->aplicaIva) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
+                    <td><?= Html::encode($model->fecha_creacion) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proveedor') ?></th>
+                    <td><?= Html::encode($model->proveedor->nombre_completo) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
+                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
+                </tr>
+               
+                <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'inventario_inicial') ?></th>
+                    <td><?= Html::encode($model->inventarioInicial) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
+                    <td><?= Html::encode($model->aplicaInventario) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_iva') ?></th>
+                    <td><?= Html::encode($model->porcentaje_iva) ?></td>
+                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_inventario') ?></th>
+                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_inventario,0)) ?></td>
+                </tr>
+                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_ean') ?></th>
@@ -75,26 +93,14 @@ $view = 'inventario-productos';
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->unidades_entradas,0)) ?></td>
                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'stock_unidades') ?></th>
                     <td style="text-align: right; background-color:#F5EEF8;"><?= Html::encode(''.number_format($model->stock_unidades,0)) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
-                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
+                    
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'inventario_inicial') ?></th>
-                    <td><?= Html::encode($model->inventarioInicial) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
-                    <td><?= Html::encode($model->aplicaInventario) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_iva') ?></th>
-                    <td><?= Html::encode($model->porcentaje_iva) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Aplica_presupuesto') ?></th>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_presupuesto') ?></th>
                     <td><?= Html::encode($model->aplicaPresupuesto) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_inventario') ?></th>
-                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_inventario,0)) ?></td>
-                </tr>
-                <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'activar_producto_venta') ?></th>
                     <td><?= Html::encode($model->activarProducto) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proveedor') ?></th>
-                    <td><?= Html::encode($model->proveedor->nombre_completo) ?></td>
+                   
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion_producto') ?></th>
                     <td colspan="5"><?= Html::encode($model->descripcion_producto)?></td>
                 </tr>

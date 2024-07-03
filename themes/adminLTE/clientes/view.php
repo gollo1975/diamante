@@ -48,15 +48,12 @@ $view = 'clientes';
                     <th style='background-color:#F0F3EF;'>Tipo documento:</th>
                     <td><?= $model->tipoDocumento->tipo_documento ?></td>
                     <th style='background-color:#F0F3EF;'>Nit/Cedula:</th>
-                    <td><?= $model->nit_cedula ?></td>
-                    <th style='background-color:#F0F3EF;' >Dv:</th>
-                    <td><?= $model->dv ?></td>
-                      <th style='background-color:#F0F3EF;' >Cliente:</th>
+                    <td><?= $model->nit_cedula ?>-<?= $model->dv ?></td>
+                    <th style='background-color:#F0F3EF;' >Cliente:</th>
                     <td><?= $model->nombre_completo ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'>Forma pago:</th>
-                    <td><?= $model->formaPago ?></td>
+                    
                     <th style='background-color:#F0F3EF;'>Telefono:</th>
                     <td><?= $model->telefono ?></td>
                     <th style='background-color:#F0F3EF;'>Celular:</th>
@@ -75,50 +72,56 @@ $view = 'clientes';
                     <td><?= $model->tipoRegimen ?></td>
                     <th style='background-color:#F0F3EF;'>Tipo empresa:</th>
                     <td><?= $model->naturaleza->naturaleza ?></td>
-                    <th style='background-color:#F0F3EF;'>Tipo sociedad:</th>
-                    <td><?= $model->tipoSociedad ?></td>
+                 
                     
                 </tr>
                  <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'>Forma pago:</th>
+                    <td><?= $model->formaPago ?></td>
                     <th style='background-color:#F0F3EF;'>Plazo:</th>
                     <td><?= $model->plazo ?></td>
-                    <th style='background-color:#F0F3EF;'>Autoretenedor:</th>
-                    <td><?= $model->autoretenedorVenta ?></td>
-                    <th style='background-color:#F0F3EF;'>Fecha registro:</th>
-                    <td><?= $model->fecha_creacion ?></td>
                     <th style='background-color:#F0F3EF;'>User nuevo:</th>
                     <td><?= $model->user_name ?></td>
                     <th style='background-color:#F0F3EF;'>User editado:</th>
                     <td><?= $model->user_name_editar ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
+                    <th style='background-color:#F0F3EF;'>Fecha registro:</th>
+                    <td><?= $model->fecha_creacion ?></td>
                     <th style='background-color:#F0F3EF;'>Fecha editado:</th>
                     <td><?= $model->fecha_editado ?></td>
                     <th style='background-color:#F0F3EF;'>Posicion venta:</th>
                     <td><?= $model->posicion->posicion ?></td>
-                    <th style='background-color:#F0F3EF;'>Activo:</th>
-                    <td><?= $model->estadoCliente ?></td>
+                    
                     <th style='background-color:#F0F3EF;'>Agente comercial:</th>
                     <td><?= $model->agenteComercial->nombre_completo ?></td>
-                    <th style='background-color:#F0F3EF;'>Presupuesto:</th>
-                    <td style="text-align: right"><?= ''.number_format($model->presupuesto_comercial,0) ?></td>
+                    
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'>G. presupuesto:</th>
                     <td style="text-align: right"><?= ''.number_format($model->gasto_presupuesto_comercial,0) ?></td>
                     <th style='background-color:#F0F3EF;'>Tipo cliente:</th>
                     <td ><?= $model->tipoCliente->concepto ?></td>
-                    <th style='background-color:#F0F3EF;'>Vender en mora:</th>
-                    <td ><?= $model->ventaMora ?></td>
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
+                   
+                    <th style='background-color:#F0F3EF;'>Activo:</th>
+                    <td><?= $model->estadoCliente ?></td>
                      <th style='background-color:#F0F3EF;'>Cupo asignado:</th>
                     <td style="text-align: right"><?= ''.number_format($model->cupo_asignado,0) ?></td>
                     
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'>Observación:</th>
-                    <td colspan="9"><?= $model->observacion ?></td>
+                    <th style='background-color:#F0F3EF;'>Tipo sociedad:</th>
+                    <td><?= $model->tipoSociedad ?></td>
+                      <th style='background-color:#F0F3EF;'>Autoretenedor:</th>
+                    <td><?= $model->autoretenedorVenta ?></td>
+                    <th style='background-color:#F0F3EF;'>Vender en mora:</th>
+                    <td ><?= $model->ventaMora ?></td>
+                    <th style='background-color:#F0F3EF;'>Presupuesto:</th>
+                    <td style="text-align: right"><?= ''.number_format($model->presupuesto_comercial,0) ?></td>
+                </tr>
+                <tr style="font-size: 90%;">
+                     <th style='background-color:#F0F3EF;'>Observación:</th>
+                    <td colspan="8"><?= $model->observacion ?></td>
                 </tr>
             </table>
         </div>

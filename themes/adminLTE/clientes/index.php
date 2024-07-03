@@ -91,13 +91,12 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
         <table class="table table-bordered table-hover">
             <thead>
            <tr style="font-size: 90%;">    
-                <th scope="col" style='background-color:#B9D5CE;'>Tipo documento</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Tipo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cedula/Nit</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Dirección</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Teléfono</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Celular</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Email</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Teléfono</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Celular</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Estado actual del cliente">Act.</span></th>
@@ -117,7 +116,6 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
                 <td><?= $val->direccion ?></td>
                 <td><?= $val->telefono ?></td>
                 <td><?= $val->celular ?></td>
-                 <td><?= $val->email_cliente ?></td>
                 <td><?= $val->codigoDepartamento->departamento ?></td>
                 <td><?= $val->codigoMunicipio->municipio ?></td>
                 <?php if($val->estado_cliente == 0){?>
