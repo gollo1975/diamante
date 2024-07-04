@@ -48,7 +48,7 @@ $vendedor = ArrayHelper::map(\app\models\AgentesComerciales::find()->orderBy ('n
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtro" style="display:none">
+    <div class="panel-body" id="filtro" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "numero_pedido")->input("search") ?>
             <?= $formulario->field($form, "documento")->input("search") ?>

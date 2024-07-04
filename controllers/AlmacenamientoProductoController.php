@@ -689,10 +689,20 @@ class AlmacenamientoProductoController extends Controller
    //PROCESO QUE PERMITE SUBIR LAS UNIDADES A DESPACHAR 
     public function actionCantidad_despachada($id_pedido, $id_detalle, $sw){
         $model = new \app\models\ModeloDocumento(); 
-        if($sw == 0){
+        $matricula = \app\models\MatriculaEmpresa::findOne(1);
+         if($sw == 0){
            $detalle = PedidoDetalles::findOne($id_detalle); 
         }else{
             $detalle = PedidoPresupuestoComercial::findOne($id_detalle);
+        }
+        if($matricula->aplica_fabricante == 0){
+            $almacenamiento = \app\models\AlmacenamientoProductoDetalles::find()
+                                                                   ->where(['=','id_inventario', $detalle->inventario->id_inventario])
+                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_almacenamiento ASC')->all();
+        }else{
+            $almacenamiento = \app\models\AlmacenamientoProductoEntradaDetalles::find()
+                                                                   ->where(['=','id_inventario', $detalle->inventario->id_inventario])
+                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_almacenamiento ASC')->all();
         }
         
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
@@ -706,7 +716,11 @@ class AlmacenamientoProductoController extends Controller
                        $valor = 0 ;
                         foreach ($_POST["seleccione_item"] as $intCodigo):
                             $cantidad = 0; $sobrante = 0; $restar = 0; $unidad_inventario = 0;
-                            $base = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                            if($matricula->aplica_fabricante == 0){
+                                $base = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                            }else{
+                                $base = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($intCodigo);
+                            }    
                             if($base->cantidad < $model->cantidad_despachada){
                                 $cantidad = $base->cantidad;
                                 $sobrante = $model->cantidad_despachada - $cantidad;
@@ -745,11 +759,11 @@ class AlmacenamientoProductoController extends Controller
                         return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
                    }else{
                        Yii::$app->getSession()->setFlash('info', 'Debe se chequear el RACK para descargar el inventario.');
-                        return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                        return $this->redirect(['cantidad_despachada', 'id_pedido' => $id_pedido, 'id_detalle' => $id_detalle, 'sw' => $sw]);
                    }
                 }else{
                     Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayor que las unidades vendidas.');
-                    return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+                    return $this->redirect(['cantidad_despachada', 'id_pedido' => $id_pedido, 'id_detalle' => $id_detalle, 'sw' => $sw]);
                 }  
             }
         }
@@ -761,6 +775,7 @@ class AlmacenamientoProductoController extends Controller
                         'id_pedido' => $id_pedido,
                         'detalle' => $detalle,
                         'sw' => $sw,
+                        'almacenamiento' => $almacenamiento,
         ]); 
         
     }

@@ -252,7 +252,8 @@ class InventarioProductosController extends Controller
                                 ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                 ->andWhere(['=', 'activar_producto_venta', 1])
                                 ->andFilterWhere(['=', 'id_grupo', $grupo])
-                                ->andWhere(['=', 'aplica_regla_comercial', 1]);
+                                ->andWhere(['=', 'aplica_regla_comercial', 1])
+                                ->andWhere(['=', 'aplica_presupuesto', 1]);
                         
                         $table = $table->orderBy('id_inventario DESC');
                         $tableexcel = $table->all();
@@ -276,6 +277,7 @@ class InventarioProductosController extends Controller
                 } else {
                     $table = InventarioProductos::find()->Where(['=', 'aplica_regla_comercial', 1])
                                                         ->andWhere(['=', 'activar_producto_venta', 1])
+                                                        ->andWhere(['=', 'aplica_presupuesto', 1])
                                                         ->orderBy('id_inventario DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
@@ -468,18 +470,25 @@ class InventarioProductosController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $presentacion = \app\models\PresentacionProducto::findOne($model->id_presentacion);
-            if($presentacion){
-                $model->user_name = Yii::$app->user->identity->username;
-                $model->codigo_ean = $model->codigo_producto;
-                $model->nombre_producto = $presentacion->descripcion;
-                $model->stock_unidades = $model->unidades_entradas;
-                $model->save();
-                $id = $model->id_inventario;
-                $this->ActualizarTotalesProducto($id);
+        if ($model->load(Yii::$app->request->post())){
+            $buscar = InventarioProductos::find()->where(['=','codigo_producto', $model->codigo_producto])->one();
+            if(!$buscar){
+                if($model->save()){
+                    $presentacion = \app\models\PresentacionProducto::findOne($model->id_presentacion);
+                    if($presentacion){
+                        $model->user_name = Yii::$app->user->identity->username;
+                        $model->codigo_ean = $model->codigo_producto;
+                        $model->nombre_producto = $presentacion->descripcion;
+                        $model->stock_unidades = $model->unidades_entradas;
+                        $model->save();
+                        $id = $model->id_inventario;
+                        $this->ActualizarTotalesProducto($id);
+                    }    
+                    return $this->redirect(['index']);
+                }   
+            }else{
+                Yii::$app->getSession()->setFlash('error', 'El CODIGO ('.$model->codigo_producto.') ya esta ingresado con otra referencia en el sistema. Validar la informacion.');
             }    
-            return $this->redirect(['index']);
         }
 
         return $this->render('create', [

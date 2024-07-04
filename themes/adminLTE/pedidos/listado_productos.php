@@ -22,15 +22,15 @@ $this->title = 'Nuevo pedido';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
-          <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+          <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
             <?php if($model->autorizado == 0 && $model->numero_pedido == 0){?>
-                <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-sm']);?>
+                <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
             <?php }else{
                 if($model->autorizado == 1  && $model->numero_pedido == 0){?>
-                    <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-sm']);?>
-                    <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
+                    <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
+                    <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-xs',
                                'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
-                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Observacion',
+                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
                                               ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],
                                                 ['title' => 'Crear observaciones al pedido',
                                                  'data-toggle'=>'modal',
@@ -110,16 +110,17 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
             <div class="panel-body">
                 <table class="table table-responsive">
                     <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "Documento") ?></th>
-                        <td><?= Html::encode($model->documento) ?></td>
                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?></th>
                         <td><?= Html::encode($model->cliente) ?></td>
-                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
-                        <td><?= Html::encode($model->fecha_proceso) ?></td>
+                       
                     </tr>
                     <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "fecha_entrega") ?></th>
-                        <td><?= Html::encode($model->fecha_entrega) ?></td>
+                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
+                        <td><?= Html::encode($model->fecha_proceso)?> - F. entrega: <?= Html::encode($model->fecha_entrega)?></td>
+                       
+                                             
+                    </tr>
+                     <tr style="font-size: 90%;">
                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                         <td colspan="4"><?= Html::encode($model->observacion) ?></td>
                         
@@ -163,7 +164,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <tbody>
                                     <?php
                                     $cadena = '';
-                                    $item = \app\models\Documentodir::findOne(8);
+                                    $item = \app\models\Documentodir::findOne(21);
                                     foreach ($variable as $val): 
                                         $regla = app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $val->id_inventario])->andWhere(['=','estado_regla', 0])->one();
                                         $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();

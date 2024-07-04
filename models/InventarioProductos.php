@@ -227,5 +227,4 @@ class InventarioProductos extends \yii\db\ActiveRecord
         }
         return $aplicadescuentodistribuidor;
     }
-    
 }

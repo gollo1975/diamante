@@ -9,7 +9,7 @@ use yii\helpers\ArrayHelper;
 use yii\widgets\LinkPager;
 use kartik\select2\Select2;
 //models
-$this->title = 'Listar despacho ('.$detalle->inventario->codigo_producto.')';
+$this->title = 'Listar despacho (Referencia: '.$detalle->inventario->codigo_producto.')';
 $this->params['breadcrumbs'][] = ['label' => 'Listar despacho', 'url' => ['view_listar', 'id_pedido' => $id_pedido]];
 $this->params['breadcrumbs'][] = $id_pedido;
 ?>
@@ -60,26 +60,23 @@ $this->params['breadcrumbs'][] = $id_pedido;
                     </tr>
                 </thead>
                 <?php
-                   $almacenamiento = \app\models\AlmacenamientoProductoDetalles::find()
-                                                                   ->where(['=','id_inventario', $detalle->inventario->id_inventario])
-                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_almacenamiento ASC')->all();
-                        if($almacenamiento){
-                            foreach ($almacenamiento as $val): ?>
-                                <tr style="font-size: 90%;">
-                                    <td> <?= $val->codigo_producto ?></td>
-                                    <td> <?= $val->producto ?></td>
-                                    <td> <?= $val->piso->descripcion ?></td>
-                                    <td> <?= $val->rack->descripcion ?></td>
-                                    <td> <?= $val->posicion->posicion ?></td>
-                                    <td> <?= $val->numero_lote ?></td>
-                                    <td> <?= $val->fecha_almacenamiento ?></td>
-                                    <td style="text-align: right"> <?= ''.number_format($val->cantidad,0) ?></td>
-                                    <td style= 'width: 20px;'><input type="checkbox" name="seleccione_item[]" value="<?= $val->id ?>"></td> 
-                                </tr>
-                            <?php endforeach; 
-                        }else{
-                             Yii::$app->getSession()->setFlash('info', 'Este producto NO presenta almacenamiento en los diferentes RACKS de la empresa. Contactar al administrador.');
-                        }?>    
+                if(count($almacenamiento) > 0){
+                    foreach ($almacenamiento as $val): ?>
+                        <tr style="font-size: 90%;">
+                            <td> <?= $val->codigo_producto ?></td>
+                            <td> <?= $val->producto ?></td>
+                            <td> <?= $val->piso->descripcion ?></td>
+                            <td> <?= $val->rack->descripcion ?></td>
+                            <td> <?= $val->posicion->posicion ?></td>
+                            <td> <?= $val->numero_lote ?></td>
+                            <td> <?= $val->fecha_almacenamiento ?></td>
+                            <td style="text-align: right"> <?= ''.number_format($val->cantidad,0) ?></td>
+                            <td style= 'width: 20px;'><input type="checkbox" name="seleccione_item[]" value="<?= $val->id ?>"></td> 
+                        </tr>
+                    <?php endforeach; 
+                }else{
+                        Yii::$app->getSession()->setFlash('info', 'Este producto NO presenta almacenamiento en los diferentes RACKS de la empresa. Contactar al administrador.');
+                }?>    
             </table> 
             <div class="panel-footer text-right">
                 <?= Html::submitButton("<span class='glyphicon glyphicon-send'></span> Enviar", ["class" => "btn btn-success btn-sm", 'name' => 'cantidaddespachada']) ?>     
