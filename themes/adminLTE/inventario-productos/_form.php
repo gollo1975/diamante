@@ -100,6 +100,9 @@ $provedor = ArrayHelper::map(Proveedor::find()->orderBy('nombre_completo ASC')->
                        'allowClear' => true
                    ],
                ]); ?> 
+             <?= $form->field($model, 'activar_producto_venta')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
+        </div>
+        <div class="row">
              <?= $form->field($model, 'descripcion_producto', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div> 
         <div class="panel-footer text-right">			

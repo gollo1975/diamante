@@ -173,6 +173,7 @@ $view = 'inventario-productos';
                                         <th scope="col" style='background-color:#B9D5CE;'>T. Entrada</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Soporte</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Lote</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>F. entrada</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Vr. Unit.</th>
@@ -189,6 +190,7 @@ $view = 'inventario-productos';
                                                 <td><?= $val->entrada->tipoEntrada?></td>    
                                                 <td><?= $val->entrada->proveedor->nombre_completo?></td>
                                                 <td><?= $val->entrada->numero_soporte?></td>
+                                                <td><?= $val->numero_lote?></td>
                                                 <td><?= $val->entrada->fecha_proceso?></td>
                                                 <td style="text-align: right;"><?= ''.number_format($val->cantidad,0)?></td>
                                                 <td style="text-align: right;"><?= ''.number_format($val->valor_unitario,0)?></td>

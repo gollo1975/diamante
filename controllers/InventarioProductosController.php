@@ -382,7 +382,7 @@ class InventarioProductosController extends Controller
                 ->limit($pages->limit)
                 ->all();
         $to = $count->count();
-        $entradas = \app\models\EntradaProductoTerminadoDetalle::find()->where(['=','id_inventario', $id])->all();
+        $entradas = \app\models\EntradaProductoTerminadoDetalle::find()->where(['=','id_inventario', $id])->orderBy('id_detalle DESC')->all();
         return $this->render('view', [
             'model' => $model,
             'token' => $token,

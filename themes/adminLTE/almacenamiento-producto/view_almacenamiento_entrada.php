@@ -175,7 +175,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Numero piso</b></th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero rack</th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Ubicación</th> 
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Numero soporte</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Numero lote</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Codigo</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Unidades</th>

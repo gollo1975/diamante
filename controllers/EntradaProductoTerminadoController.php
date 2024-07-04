@@ -503,6 +503,7 @@ class EntradaProductoTerminadoController extends Controller
                     $table = EntradaProductoTerminadoDetalle::findOne($intCodigo);
                     $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
                     $table->cantidad = $_POST["cantidad"]["$intIndice"];
+                    $table->numero_lote = $_POST["numero_lote"]["$intIndice"];
                     $table->fecha_vencimiento = $_POST["fecha_vcto"]["$intIndice"];
                     $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
                     if($_POST["actualizar_precio"]["$intIndice"] == 1){

@@ -110,7 +110,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'id_presentacion' => 'Presentacion:',
             'aplica_presupuesto' => 'Presupuesto',
             'aplica_regla_comercial' => 'Aplica regla comercial:',
-            'activar_producto_venta' => 'Activado:',
+            'activar_producto_venta' => 'Activar producto:',
             'id_proveedor' => 'Proveedor:',
             'aplica_descuento' => 'Aplica descuento:',
             'aplica_descuento_distribuidor' => 'aplica_descuento_distribuidor',

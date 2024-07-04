@@ -84,7 +84,8 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                 <tr style ='font-size:90%;'>                
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>                        
-                    <th scope="col" align="center" style='background-color:#B9D5CE;'>Editar precio Unit.</th>  
+                    <th scope="col" align="center" style='background-color:#B9D5CE;'>Editar precio</th> 
+                    <th scope="col" align="center" style='background-color:#B9D5CE;'>No lote</th>
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>F. vcto</th>  
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>  
                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>  
@@ -109,7 +110,8 @@ $entrada = \app\models\EntradaProductoTerminado::findOne($id);
                                 <option value="1">SI</option>
 
                         </select> </td> 
-                        <td style="padding-right: 1;padding-right: 0; "><input type="date" name="fecha_vcto[]" value="<?= $val->fecha_vencimiento ?>" size="7" required="true"> </td> 
+                        <td style="padding-right: 1;padding-right: 0; "><input type="text" name="numero_lote[]" value="<?= $val->numero_lote ?>" size="10" required = 'true' style="text-align: right"> </td> 
+                        <td style="padding-right: 1;padding-right: 0; "><input type="date" name="fecha_vcto[]" value="<?= $val->fecha_vencimiento ?>" size="7" required = 'true'> </td> 
                         <td style="padding-right: 1;padding-right: 0; "><input type="text" name="cantidad[]" value="<?= $val->cantidad ?>" size="7" required="true" style="text-align: right"> </td> 
                         <td> <?= $val->porcentaje_iva ?></td>  
                         <td style="padding-right: 1;padding-right: 0;"><input type="text" name="valor_unitario[]" value="<?= $val->valor_unitario ?>" size="7" style="text-align: right"> </td> 
