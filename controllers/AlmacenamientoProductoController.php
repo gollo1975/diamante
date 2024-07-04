@@ -136,7 +136,9 @@ class AlmacenamientoProductoController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $producto = null;
-                $model = null;
+                $tipo_busqueda = 0;
+                $contador = AlmacenamientoProductoDetalles::find()->all();
+                $contar = count($contador);
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -147,7 +149,8 @@ class AlmacenamientoProductoController extends Controller
                         $rack = Html::encode($form->rack);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
-                        $table = AlmacenamientoProductoDetalles::find()
+                        if($contar > 0){
+                            $table = AlmacenamientoProductoDetalles::find()
                                     ->andFilterWhere(['between', 'fecha_almacenamiento', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'numero_lote', $lote])
                                     ->andFilterWhere(['=', 'codigo_producto', $codigo])
@@ -155,6 +158,16 @@ class AlmacenamientoProductoController extends Controller
                                     ->andFilterWhere(['=', 'id_piso', $piso])
                                     ->andfilterWhere(['=', 'id_rack', $rack])
                                     ->andfilterWhere(['=', 'id_posicion', $posicion]);
+                        }else{
+                           $table = \app\models\AlmacenamientoProductoEntradaDetalles::find()
+                                    ->andFilterWhere(['between', 'fecha_almacenamiento', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'numero_lote', $lote])
+                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
+                                    ->andFilterWhere(['like', 'producto', $producto])
+                                    ->andFilterWhere(['=', 'id_piso', $piso])
+                                    ->andfilterWhere(['=', 'id_rack', $rack])
+                                    ->andfilterWhere(['=', 'id_posicion', $posicion]);
+                        } 
                         $table = $table->orderBy('id DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -167,18 +180,30 @@ class AlmacenamientoProductoController extends Controller
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                 ->all();
-                        if (isset($_POST['excel'])) {
-                            $check = isset($_REQUEST['id  DESC']);
-                            $this->actionExcelAlmacenamiento($tableexcel);
+                        if($contar > 0){
+                            if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id  DESC']);
+                                $this->actionExcelAlmacenamiento($tableexcel);
+                            }
+                        }else{
+                            if (isset($_POST['excel'])) {
+                                $check = isset($_REQUEST['id  DESC']);
+                                $this->actionExcelAlmacenamientoEntrada($tableexcel);
+                            }  
                         }
                     } else {
                         $form->getErrors();
                     }
                 }else{
-                    $table = AlmacenamientoProductoDetalles::find()->orderBy('id_posicion DESC');   
+                    if($contar > 0){
+                        $table = AlmacenamientoProductoDetalles::find()->orderBy('id_posicion DESC');  
+                    }else{
+                        $table = \app\models\AlmacenamientoProductoEntradaDetalles::find()->orderBy('id_posicion DESC');  
+                    }
+                     
                     $count = clone $table;
                     $pages = new Pagination([
-                        'pageSize' => 10,
+                        'pageSize' => 15,
                         'totalCount' => $count->count(),
                     ]);
                     $tableexcel = $table->all();
@@ -186,14 +211,23 @@ class AlmacenamientoProductoController extends Controller
                             ->offset($pages->offset)
                             ->limit($pages->limit)
                             ->all();
-                    if(isset($_POST['excel'])){                    
-                        $this->actionExcelAlmacenamiento($tableexcel); 
-                    }
+                    if($contar > 0){
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id  DESC']);
+                            $this->actionExcelAlmacenamiento($tableexcel);
+                        }
+                    }else{
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id  DESC']);
+                            $this->actionExcelAlmacenamientoEntrada($tableexcel);
+                        }  
+                    }   
                 } 
                 return $this->render('mover_posicion', [
                             'model' => $model,
                             'form' => $form,
                             'pagination' => $pages,
+                            'contar' => $contar,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -588,9 +622,14 @@ class AlmacenamientoProductoController extends Controller
     }
     
     //VISTA DE MOVER POSICIONES
-    public function actionView_posiciones($id_posicion) {
-        $model = AlmacenamientoProductoDetalles::findOne($id_posicion);
-        $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id', $id_posicion])->orderBy('id_movimiento DESC')->all();
+    public function actionView_posiciones($id_posicion, $sw) {
+        if($sw == 0){
+            $model = AlmacenamientoProductoDetalles::findOne($id_posicion); 
+            $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id', $id_posicion])->orderBy('id_movimiento DESC')->all();
+        }else{
+            $model = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion); 
+            $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id_entrada', $id_posicion])->orderBy('id_movimiento DESC')->all();
+        }
         return $this->render('view_mover_posiciones', [
             'model' => $model,
             'posiciones' => $posiciones,
@@ -773,6 +812,7 @@ class AlmacenamientoProductoController extends Controller
             $posicion_anterior = $table->posicion->posicion;
         }else{
             $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
+             $posicion_anterior = $table->posicion->posicion;
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
@@ -798,7 +838,7 @@ class AlmacenamientoProductoController extends Controller
                             $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion) ;
                             $table->id_posicion = $model->posicion;
                             $table->save();
-                            return $this->redirect(['mover_posicion_entrada']);
+                            return $this->redirect(['mover_posiciones']);
                         }
                     }else{
                          Yii::$app->getSession()->setFlash('info', 'Debe se seleccionar una posicion para el cambio de almacenamiento.');
@@ -821,9 +861,14 @@ class AlmacenamientoProductoController extends Controller
     }
     
     //CAMBIAR O MOVER DE RACK Y POSICION
-    public function actionCambiar_almacenamiento_rack($id_rack, $id_almacenamiento) {
+    public function actionCambiar_almacenamiento_rack($id_rack, $id_almacenamiento, $sw) {
         $model = new \app\models\ModeloMoverPosicionRack();
-        $conRacks = AlmacenamientoProductoDetalles::find()->where(['=','id_rack', $id_rack])->all(); 
+        if($sw == 0){
+            $conRacks = AlmacenamientoProductoDetalles::find()->where(['=','id_rack', $id_rack])->all(); 
+        }else{
+            $conRacks = \app\models\AlmacenamientoProductoEntradaDetalles::find()->where(['=','id_rack', $id_rack])->all(); 
+        }
+        
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
@@ -832,11 +877,20 @@ class AlmacenamientoProductoController extends Controller
             if(isset($_POST["cambiar_posicion"])){
                 if(isset($_POST["seleccione_item"])){
                     if($model->nuevo_rack <> ''){
-                        $almacenamiento = AlmacenamientoProductoDetalles::findOne($id_almacenamiento);
+                        if($sw == 0){
+                           $almacenamiento = AlmacenamientoProductoDetalles::findOne($id_almacenamiento); 
+                        }else{
+                           $almacenamiento = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_almacenamiento); 
+                        }
+                        
                         foreach ($_POST["seleccione_item"] as $intCodigo):
                             $valor = 0;
                             $descontar = 0;
-                            $table = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                            if($sw == 0){
+                                $table = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                            }else{
+                               $table = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($intCodigo);  
+                            }
                             $Racks = TipoRack::findOne($model->nuevo_rack);
                             $rackSaliente = TipoRack::findOne($table->id_rack);
                             if($Racks->controlar_capacidad == 1){ //controla el stock en el rack
@@ -859,7 +913,12 @@ class AlmacenamientoProductoController extends Controller
                                     $cambio->cantidad = $table->cantidad;
                                     $cambio->fecha_proceso = date('Y-m-d');
                                     $cambio->user_name = Yii::$app->user->identity->username;
-                                    $cambio->id = $intCodigo;
+                                    if($sw == 0){
+                                        $cambio->id = $intCodigo; 
+                                    }else{
+                                        $cambio->id_entrada = $intCodigo; 
+                                    }
+                                  
                                     $cambio->save(); 
                                     //actualiza rack
                                     $Racks->capacidad_actual = $valor;
@@ -885,7 +944,7 @@ class AlmacenamientoProductoController extends Controller
                                 }else{
                                    $cambio->id_piso = $model->nuevo_piso; 
                                     $cambio->id_piso_nuevo = $model->nuevo_piso;
-                                   $almacenamiento->id_piso = $model->nuevo_piso;
+                                    $almacenamiento->id_piso = $model->nuevo_piso;
                                 }
                                 $cambio->id_rack = $table->id_rack;
                                 $cambio->id_rack_nuevo = $model->nuevo_rack;
@@ -896,8 +955,13 @@ class AlmacenamientoProductoController extends Controller
                                 $cambio->cantidad = $table->cantidad;
                                 $cambio->fecha_proceso = date('Y-m-d');
                                 $cambio->user_name = Yii::$app->user->identity->username;
-                                $cambio->id = $intCodigo;
-                                $cambio->save(); 
+                                if($sw == 0){
+                                    $cambio->id = $intCodigo; 
+                                }else{
+                                    $cambio->id_entrada = $intCodigo; 
+                                }
+                               
+                                $cambio->save(false); 
                                 //actualiza rack
                                 $Racks->capacidad_actual = $valor;
                                 $Racks->save();
@@ -1116,7 +1180,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->id_inventario = $conProducto->id_inventario;
                                     $table->codigo_producto = $conProducto->codigo_producto;
                                     $table->producto = $conProducto->nombre_producto;
-                                    $table->numero_lote = $conProducto->numero_soporte;
+                                    $table->numero_lote = $conProducto->numero_lote;
                                     $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
                                     $table->save(false);
                                     $cant = $model->cantidad;
@@ -1139,7 +1203,7 @@ class AlmacenamientoProductoController extends Controller
                                 $table->id_inventario = $conProducto->id_inventario;
                                 $table->codigo_producto = $conProducto->codigo_producto;
                                 $table->producto = $conProducto->nombre_producto;
-                                $table->numero_lote = $conProducto->numero_soporte;
+                                $table->numero_lote = $conProducto->numero_lote;
                                 $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
                                 $table->save(false);
                                 $cant = $model->cantidad;
@@ -1310,6 +1374,7 @@ class AlmacenamientoProductoController extends Controller
                 $table->codigo_producto = $detalle->codigo_producto;
                 $table->nombre_producto = $dato->nombre_producto;
                 $table->unidad_producidas = $detalle->cantidad;
+                $table->numero_lote = $detalle->numero_lote;
                 $table->fecha_almacenamiento = date('Y-m-d');
                 $table->user_name = Yii::$app->user->identity->username;
                 $table->save(false);
@@ -1455,7 +1520,7 @@ class AlmacenamientoProductoController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-    
+    //EXCEL QUE EXPORTA EL ALMACENAMIENTO CON ORDEN DE PRODUCCION
      public function actionExcelAlmacenamiento($tableexcel) {                
         $objPHPExcel = new \PHPExcel();
         // Set document properties
@@ -1527,6 +1592,90 @@ class AlmacenamientoProductoController extends Controller
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="Producto_almacenado.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+    
+    //EXCEL QUE EXPORTA ALAMCENAMIENTO CON ENTRADAS DE PRODUCTOS
+      public function actionExcelAlmacenamientoEntrada($tableexcel) {                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID ALMACENAMIENTO')
+                    ->setCellValue('B1', 'TIPO DOCUMENTO')
+                    ->setCellValue('C1', 'NRO PISO')
+                    ->setCellValue('D1', 'NRO RACK')
+                    ->setCellValue('E1', 'CAPACIDAD')
+                    ->setCellValue('F1', 'U. ALMACENADAS')
+                    ->setCellValue('G1', 'STOCK')
+                    ->setCellValue('H1', 'POSICION')
+                    ->setCellValue('I1', 'PROVEEDOR')
+                    ->setCellValue('J1', 'CODIGO PRODUCTO')
+                    ->setCellValue('K1', 'NOMBRE PRODUCTO')
+                    ->setCellValue('L1', 'NRO LOTE')
+                    ->setCellValue('M1', 'FECHA ALMACENAMIENTO');
+                    
+                   
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A' . $i, $val->id_almacenamiento)
+                ->setCellValue('B' . $i, $val->almacenamiento->documento->concepto)
+                ->setCellValue('C' . $i, $val->piso->descripcion)
+                ->setCellValue('D' . $i, $val->rack->descripcion)
+                ->setCellValue('E' . $i, $val->rack->capacidad_instalada)
+                ->setCellValue('F' . $i, $val->rack->capacidad_actual)
+                ->setCellValue('G' . $i, $val->cantidad)
+                ->setCellValue('H' . $i, $val->posicion->posicion)
+                ->setCellValue('I' . $i, $val->entrada->proveedor->nombre_completo)
+                ->setCellValue('J' . $i, $val->codigo_producto)
+                ->setCellValue('K' . $i, $val->producto)
+                ->setCellValue('L' . $i, $val->numero_lote)
+                ->setCellValue('M' . $i, $val->fecha_almacenamiento);
+        $i++;
+             
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Almacenamiento');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Producto_almacenado_Entrada.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');

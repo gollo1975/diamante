@@ -114,7 +114,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Entrada</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Soporte</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrada</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
@@ -138,7 +138,7 @@ $form = ActiveForm::begin([
                 <?php } ?>    
                    <td><?= $val->tipoEntrada?></td>    
                 <td><?= $val->proveedor->nombre_completo?></td>
-                <td><?= $val->numero_soporte?></td>
+                <td><?= $val->total_unidades?></td>
                 <td><?= $val->fecha_proceso?></td>
                 <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
                 <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>

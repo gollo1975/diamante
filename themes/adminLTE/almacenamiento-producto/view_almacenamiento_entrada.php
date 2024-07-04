@@ -107,18 +107,18 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <?php }else{?>
                                                 <td><?= $val->documento->concepto ?></td>
                                             <?php }?>
-                                            <td><?= $val->numero_soporte ?></td>
+                                            <td><?= $val->numero_lote ?></td>
                                             <?php if($val->unidades_almacenadas <>  $val->unidad_producidas){?>
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-floppy-disk"></span>',
-                                                       ['/almacenamiento-producto/subir_documento_entrada', 'id_orden' => $model->id_entrada, 'id' => $val->id_almacenamiento, 'token' =>$token, 'sw' => 1],
+                                                       ['/almacenamiento-producto/subir_documento', 'id_orden' => $model->id_entrada, 'id' => $val->id_almacenamiento, 'token' =>$token, 'sw' => 1],
                                                          ['title' => 'Subir el documento del almacenamiento',
                                                           'data-toggle'=>'modal',
                                                           'data-target'=>'#modalsubirdocumento',
                                                          ])    
                                                    ?>
                                                    <div class="modal remote fade" id="modalsubirdocumento">
-                                                        <div class="modal-dialog modal-lg" style ="width: 550px;">    
+                                                        <div class="modal-dialog modal-lg" style ="width: 580px;">    
                                                             <div class="modal-content"></div>
                                                         </div>
                                                    </div>

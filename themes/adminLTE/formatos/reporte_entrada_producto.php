@@ -72,7 +72,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(24, 5, utf8_decode("PROVEEDOR:"), 0, 0, 'L');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(65, 5, utf8_decode($orden->proveedor->nombre_completo), 0, 0, 'L');
+        $this->Cell(55, 5, utf8_decode($orden->proveedor->nombre_completo), 0, 0, 'L');
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(24, 5, utf8_decode("TIPO ORDEN:"), 0, 0, 'J');
         if($orden->id_orden_compra == null){
@@ -80,7 +80,7 @@ class PDF extends FPDF {
         $this->Cell(38, 5, utf8_decode('NO FOUND'), 0, 0, 'J');
         }else{
              $this->SetFont('Arial', '', 8);
-        $this->Cell(40, 5, utf8_decode($orden->ordenCompra->tipoOrden->descripcion_orden), 0, 0, 'J');
+        $this->Cell(53, 5, utf8_decode($orden->ordenCompra->tipoOrden->descripcion_orden), 0, 0, 'J');
         }
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("SUBTOTAL:"), 0, 0, 'J');
@@ -91,11 +91,11 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(24, 5, utf8_decode("F. ENTRADA:"), 0, 0, 'L');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(65, 5, utf8_decode($orden->fecha_proceso), 0, 0, 'L');
+        $this->Cell(55, 5, utf8_decode($orden->fecha_proceso), 0, 0, 'L');
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(24, 5, utf8_decode("TIPO ENTRADA:"), 0, 0, 'J');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(38, 5, utf8_decode($orden->tipoEntrada), 0, 0, 'J');
+        $this->Cell(53, 5, utf8_decode($orden->tipoEntrada), 0, 0, 'J');
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("IMPUESTO:"), 0, 0, 'J');
         $this->SetFont('Arial', '', 8);
@@ -105,11 +105,11 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(24, 5, utf8_decode("AUTORIZADO:"), 0, 0, 'L');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(65, 5, utf8_decode($orden->autorizadoCompra), 0, 0, 'L');
+        $this->Cell(55, 5, utf8_decode($orden->autorizadoCompra), 0, 0, 'L');
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(24, 5, utf8_decode("No SOPORTE:"), 0, 0, 'J');
         $this->SetFont('Arial', '', 8);
-        $this->Cell(38, 5, utf8_decode($orden->numero_soporte), 0, 0, 'J');
+        $this->Cell(53, 5, utf8_decode($orden->numero_soporte), 0, 0, 'J');
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("TOTAL:"), 0, 0, 'J');
         $this->SetFont('Arial', '', 8);

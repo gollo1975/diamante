@@ -148,11 +148,11 @@ class EntradaProductoTerminadoController extends Controller
                 foreach ($_POST["detalle_entrada"] as $intCodigo):
                     $table = EntradaProductoTerminadoDetalle::findOne($intCodigo);
                     $table->id_inventario= $_POST["id_inventario"]["$intIndice"];
-                     $inven = InventarioPuntoVenta::findOne($table->id_inventario);
+                    $inven = InventarioProductos::findOne($table->id_inventario);
                     $table->codigo_producto = $inven->codigo_producto;
                     $table->cantidad = $_POST["cantidad"]["$intIndice"];
                     $table->actualizar_precio = $_POST["actualizar_precio"]["$intIndice"];
-                    $table->porcentaje_iva = $_POST["porcentaje_iva"]["$intIndice"];
+                    $table->numero_lote = $_POST["numero_lote"]["$intIndice"];
                     $table->fecha_vencimiento = $_POST["fecha_vcto"]["$intIndice"];
                     $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
                     $auxiliar =  $table->cantidad * $table->valor_unitario;
@@ -426,15 +426,17 @@ class EntradaProductoTerminadoController extends Controller
     protected function ActualizarLineas($id) {
         $entrada = EntradaProductoTerminado::findOne($id);
         $detalle = EntradaProductoTerminadoDetalle::find()->where(['=','id_entrada', $id])->all();
-        $subtotal = 0; $iva = 0; $total = 0;
+        $subtotal = 0; $iva = 0; $total = 0; $unidades = 0;
         foreach ($detalle as $detalles):
             $subtotal += $detalles->subtotal;
             $iva += $detalles->total_iva;
             $total += $detalles->total_entrada;
+            $unidades += $detalles->cantidad;
         endforeach;
         $entrada->subtotal = $subtotal;
         $entrada->impuesto = $iva;
         $entrada->total_salida = $total;
+        $entrada->total_unidades = $unidades;
         $entrada->save(false);
     }
     

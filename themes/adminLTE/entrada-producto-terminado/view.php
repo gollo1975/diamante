@@ -130,8 +130,8 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripción</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Editar precio</th>  
-                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>F. vcto</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>       
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Lote</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>F. vcto</th>  
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
@@ -160,9 +160,9 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                             <option value="0">NO</option>
                                                             <option value="1">SI</option>
 
-                                                    </select> </td>       
+                                                    </select> </td>  
+                                                     <td style="padding-right: 1;padding-right: 0; "><input type="text" name="numero_lote[]" value="<?= $val->numero_lote ?>" size="10" required="true" style="text-align: right"> </td> 
                                                     <td style="padding-right: 1;padding-right: 0; "><input type="date" name="fecha_vcto[]" value="<?= $val->fecha_vencimiento ?>" size="7" required="true"> </td> 
-                                                    <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('porcentaje_iva[]', $val->porcentaje_iva, $configuracionIva, ['class' => 'col-sm-10', 'prompt' => 'Seleccione', 'required' => true]) ?></td>
                                                     <td style="padding-right: 1;padding-right: 0; "><input type="text" name="cantidad[]" value="<?= $val->cantidad ?>" size="7" required="true" style="text-align: right"> </td> 
                                                     <td style="padding-right: 1;padding-right: 0;"><input type="text" name="valor_unitario[]" value="<?= $val->valor_unitario ?>" size="7" style="text-align: right"> </td> 
                                                     <td style="text-align: right"><?= ''.number_format($val->total_iva,0) ?></td>
@@ -172,8 +172,8 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                   <td><?= $val->inventario->codigo_producto ?></td>    
                                                   <td><?= $val->inventario->nombre_producto ?></td>  
                                                   <td style="text-align: left"><?= $val->actualizarPrecio ?></td> 
-                                                   <td style="text-align: right"><?= $val->fecha_vencimiento ?></td>  
-                                                  <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>  
+                                                  <td style="text-align: right"><?= $val->numero_lote ?></td> 
+                                                  <td style="text-align: right"><?= $val->fecha_vencimiento ?></td>  
                                                   <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                   <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
                                                   <td style="text-align: right"><?= ''.number_format($val->total_iva,0) ?></td>

@@ -64,9 +64,9 @@ class AlmacenamientoProductoEntradaDetalles extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'id_almacenamiento' => 'Id Almacenamiento',
-            'id_rack' => 'Id Rack',
-            'id_posicion' => 'Id Posicion',
-            'id_piso' => 'Id Piso',
+            'id_rack' => 'Rack:',
+            'id_posicion' => 'Posicion:',
+            'id_piso' => 'Piso:',
             'id_entrada' => 'Id Entrada',
             'id_inventario' => 'Id Inventario',
             'cantidad' => 'Cantidad',

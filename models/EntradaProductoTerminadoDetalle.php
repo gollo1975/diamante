@@ -38,7 +38,7 @@ class EntradaProductoTerminadoDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_entrada', 'id_inventario', 'actualizar_precio', 'cantidad', 'valor_unitario', 'total_iva', 'subtotal', 'total_entrada'], 'integer'],
+            [['id_entrada', 'id_inventario', 'actualizar_precio', 'cantidad', 'valor_unitario', 'total_iva', 'subtotal', 'total_entrada','numero_lote'], 'integer'],
             [['fecha_vencimiento'], 'safe'],
             [['porcentaje_iva'], 'number'],
             ['codigo_producto', 'string'],
@@ -65,6 +65,7 @@ class EntradaProductoTerminadoDetalle extends \yii\db\ActiveRecord
             'subtotal' => 'Subtotal',
             'total_entrada' => 'Total Entrada',
             'codigo_producto' => 'Codigo producto:',
+            'numero_lote' => 'numero_lote:',
         ];
     }
 

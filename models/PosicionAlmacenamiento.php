@@ -43,7 +43,7 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_piso', 'id_rack', 'id_rack_nuevo', 'id_posicion', 'id_posicion_nueva', 'cantidad', 'id'], 'integer'],
+            [['id_piso', 'id_rack', 'id_rack_nuevo', 'id_posicion', 'id_posicion_nueva', 'cantidad', 'id','id_entrada'], 'integer'],
             [['fecha_proceso'], 'safe'],
             [['codigo', 'user_name'], 'string', 'max' => 15],
             [['producto'], 'string', 'max' => 40],
@@ -54,6 +54,7 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
             [['id_posicion'], 'exist', 'skipOnError' => true, 'targetClass' => Posiciones::className(), 'targetAttribute' => ['id_posicion' => 'id_posicion']],
             [['id_posicion_nueva'], 'exist', 'skipOnError' => true, 'targetClass' => Posiciones::className(), 'targetAttribute' => ['id_posicion_nueva' => 'id_posicion']],
             [['id'], 'exist', 'skipOnError' => true, 'targetClass' => AlmacenamientoProductoDetalles::className(), 'targetAttribute' => ['id' => 'id']],
+            [['id_entrada'], 'exist', 'skipOnError' => true, 'targetClass' => AlmacenamientoProductoEntradaDetalles::className(), 'targetAttribute' => ['id_entrada' => 'id']],
         ];
     }
 
@@ -75,6 +76,7 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
             'fecha_proceso' => 'Fecha Proceso',
             'user_name' => 'User Name',
             'id' => 'ID',
+            'id_entrada' => 'id_entrada',
         ];
     }
 
@@ -129,5 +131,13 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
     public function getAlmacenamientoLote()
     {
         return $this->hasOne(AlmacenamientoProductoDetalles::className(), ['id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAlmacenamientoEntrada()
+    {
+        return $this->hasOne(AlmacenamientoProductoEntradaDetalles::className(), ['id_entrada' => 'id_entrada']);
     }
 }

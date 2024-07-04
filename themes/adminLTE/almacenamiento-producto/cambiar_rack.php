@@ -69,7 +69,7 @@ $conPiso = ArrayHelper::map(app\models\Pisos::find()->all(), 'id_piso', 'descrip
                         <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Posicion</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Capacidad</th>
-                        <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                          <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
                         <th scope="col" style='background-color:#B9D5CE;'></th>

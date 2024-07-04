@@ -40,7 +40,7 @@ class AlmacenamientoProductoEntrada extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_entrada', 'id_documento', 'numero_soporte', 'id_inventario', 'unidad_producidas', 'unidades_almacenadas', 'unidades_faltantes'], 'integer'],
+            [['id_entrada', 'id_documento', 'numero_soporte', 'id_inventario', 'unidad_producidas', 'unidades_almacenadas', 'unidades_faltantes','numero_lote'], 'integer'],
             [['fecha_almacenamiento'], 'safe'],
             [['codigo_producto', 'user_name'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -67,6 +67,7 @@ class AlmacenamientoProductoEntrada extends \yii\db\ActiveRecord
             'unidades_almacenadas' => 'Unidades Almacenadas',
             'unidades_faltantes' => 'Unidades Faltantes',
             'fecha_almacenamiento' => 'Fecha Almacenamiento',
+            'numero_lote' => 'numero_lote',
             'user_name' => 'User Name',
         ];
     }

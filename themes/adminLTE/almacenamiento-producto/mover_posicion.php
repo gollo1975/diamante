@@ -137,9 +137,10 @@ $form = ActiveForm::begin([
                     <td><?= $val->rack->descripcion?></td>
                     <td><?= $val->rack->capacidad_actual?></td>
                     <td style= 'width: 10%; height: 10%;'>
+                    <?php if($contar > 0){?>
                         <?= $val->posicion->posicion ?> &nbsp;&nbsp; <?= Html::a('<span class="glyphicon glyphicon-list"></span> ',
                             ['/almacenamiento-producto/cambiar_posicion', 'id_posicion' => $val->id, 'sw' => 0],
-                              ['title' => 'Permite mover la posision de almacenamiento',
+                              ['title' => 'Permite mover la posicion de almacenamiento',
                                'data-toggle'=>'modal',
                                'data-target'=>'#modalmoverposicion',
                               ])    
@@ -149,15 +150,38 @@ $form = ActiveForm::begin([
                                  <div class="modal-content"></div>
                              </div>
                         </div>
+                    <?php }else{?>
+                        <?= $val->posicion->posicion ?> &nbsp;&nbsp; <?= Html::a('<span class="glyphicon glyphicon-list"></span> ',
+                            ['/almacenamiento-producto/cambiar_posicion', 'id_posicion' => $val->id, 'sw' => 1],
+                              ['title' => 'Permite mover la posicion de almacenamiento',
+                               'data-toggle'=>'modal',
+                               'data-target'=>'#modalmoverposicion',
+                              ])    
+                        ?>
+                        <div class="modal remote fade" id="modalmoverposicion">
+                             <div class="modal-dialog modal-lg" style ="width: 550px;">    
+                                 <div class="modal-content"></div>
+                             </div>
+                        </div>
+                    <?php }?>    
                     </td>    
                     <td><?= $val->fecha_almacenamiento?></td>
                     <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
-                    <td style= 'width: 25px; height: 20px;'>
-                         <a href="<?= Url::toRoute(["almacenamiento-producto/cambiar_almacenamiento_rack", 'id_rack' => $val->id_rack,'id_almacenamiento' => $val->id]) ?>" ><span class="glyphicon glyphicon-th-large"></span></a>
-                    </td>
-                    <td style= 'width: 25px; height: 20px;'>
-                         <a href="<?= Url::toRoute(["almacenamiento-producto/view_posiciones", "id_posicion" => $val->id]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                    </td>
+                    <?php if($contar > 0){?>
+                        <td style= 'width: 25px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/cambiar_almacenamiento_rack", 'id_rack' => $val->id_rack,'id_almacenamiento' => $val->id, 'sw' => 0]) ?>" ><span class="glyphicon glyphicon-th-large"></span></a>
+                        </td>
+                        <td style= 'width: 25px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_posiciones", "id_posicion" => $val->id, 'sw' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        </td>
+                    <?php }else{?>
+                        <td style= 'width: 25px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/cambiar_almacenamiento_rack", 'id_rack' => $val->id_rack,'id_almacenamiento' => $val->id, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-th-large"></span></a>
+                        </td>
+                        <td style= 'width: 25px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_posiciones", "id_posicion" => $val->id, 'sw' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        </td>
+                    <?php }?>    
                 </tr>            
             <?php endforeach; 
         ?>

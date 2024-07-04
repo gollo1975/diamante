@@ -22,12 +22,13 @@ class FiltroBusquedaAlmacenamiento extends Model
     public $producto;
     public $proveedor;
     public $tipo_entrada;
+    public $tipo_busqueda;
 
 
     public function rules()
     {
         return [  
-           [['orden', 'lote','piso','rack','posicion','proveedor','tipo_entrada'], 'integer'],
+           [['orden', 'lote','piso','rack','posicion','proveedor','tipo_entrada','tipo_busqueda'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
             [['producto','codigo'], 'string'],
         ];
@@ -47,6 +48,7 @@ class FiltroBusquedaAlmacenamiento extends Model
             'codigo' => 'Codigo producto',
             'proveedor' => 'Nombre proveedor:',
             'tipo_entrada' => 'Tipo entrada:',
+            'tipo_busqueda' => 'Tipo_busqueda:',
         ];
     }
     
