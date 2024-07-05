@@ -42,8 +42,6 @@ $view = 'programacion-citas';
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_programacion") ?></th>
-                    <td><?= Html::encode($model->id_programacion) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_inicio') ?></th>
                     <td><?= Html::encode($model->fecha_inicio) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_final') ?></th>
@@ -135,7 +133,7 @@ $view = 'programacion-citas';
                                       ])    
                                     ?>
                                     <div class="modal remote fade" id="modalcrearnuevacita">
-                                        <div class="modal-dialog modal-lg" style ="width: 435px;">    
+                                        <div class="modal-dialog modal-lg" style ="width: 460px;">    
                                              <div class="modal-content"></div>
                                         </div>
                                     </div>   

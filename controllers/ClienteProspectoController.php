@@ -452,6 +452,80 @@ class ClienteProspectoController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
     
+    //MUESTRAS LOS PROSPECTOS
+     public function actionExcelconsultaProspecto($tableexcel) {
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("EMPRESA")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+       
+        $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A1', 'TIPO DOCUMENTO')
+                ->setCellValue('B1', 'DOCUMENTO')
+                ->setCellValue('C1', 'PROSPECTO')
+                ->setCellValue('D1', 'EMAIL')
+                ->setCellValue('E1', 'CELULAR')
+                ->setCellValue('F1', 'DEPARTAMENTO')
+                ->setCellValue('G1', 'MUNICIPIO')
+                ->setCellValue('H1', 'VENDEDOR')
+                ->setCellValue('I1', 'USER NAME')
+                ->setCellValue('J1', 'FECHA REGISTRO');
+                
+        $i = 2;
+
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->tipoDocumento->tipo_documento)
+                    ->setCellValue('B' . $i, $val->nit_cedula)
+                    ->setCellValue('C' . $i, $val->nombre_completo)
+                    ->setCellValue('D' . $i, $val->email_prospecto)
+                    ->setCellValue('E' . $i, $val->celular)
+                    ->setCellValue('F' . $i, $val->codigoDepartamento->departamento)
+                    ->setCellValue('G' . $i, $val->codigoMunicipio->municipio)
+                    ->setCellValue('H' . $i, $val->agente->nombre_completo)
+                    ->setCellValue('I' . $i, $val->user_name)
+                    ->setCellValue('J' . $i, $val->fecha_registro);
+                    
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Prospectos.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+    
+    //MUESTRAS TODAS LAS CITAS
      public function actionExcelconsultaCitaProspecto($tableexcel) {
         $objPHPExcel = new \PHPExcel();
         // Set document properties
