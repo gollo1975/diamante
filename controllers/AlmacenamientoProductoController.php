@@ -628,7 +628,7 @@ class AlmacenamientoProductoController extends Controller
             $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id', $id_posicion])->orderBy('id_movimiento DESC')->all();
         }else{
             $model = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($id_posicion); 
-            $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id_entrada', $id_posicion])->orderBy('id_movimiento DESC')->all();
+            $posiciones = \app\models\PosicionAlmacenamiento::find()->where(['=','id_detalle', $id_posicion])->orderBy('id_movimiento DESC')->all();
         }
         return $this->render('view_mover_posiciones', [
             'model' => $model,

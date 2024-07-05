@@ -86,32 +86,36 @@ $this->params['breadcrumbs'][] = $model->id;
                                 </thead>
                                 <body>
                                      <?php
-                                     foreach ($posiciones as $val): ?>
-                                        <tr style="font-size: 90%;">
-                                            <td><?= $val->codigo ?></td>
-                                            <td><?= $val->producto ?></td>
-                                            <td><?= $val->piso->descripcion ?></td>
-                                             <?php if($val->id_piso_nuevo == null){?>
-                                                <td><?= 'NO FOUND' ?></td>
-                                            <?php }else{?>
-                                                <td><?= $val->pisoNuevo->descripcion ?></td>
-                                            <?php }?>
-                                            <td><?= $val->posicion->posicion ?></td>
-                                            <?php if($val->id_posicion_nueva == null){?>
-                                                <td><?= 'NO FOUND' ?></td>
-                                            <?php }else{?>
-                                                <td><?= $val->posicionNueva->posicion ?></td>
-                                            <?php }?>
-                                            <td><?= $val->rack->descripcion?></td>
-                                            <?php if($val->id_rack_nuevo == null){?>
-                                                <td><?= 'NO FOUND' ?></td>
-                                            <?php }else{?>
-                                                <td><?= $val->rackNuevo->descripcion?></td>
-                                            <?php }?>
-                                            <td style="text-align: right"><?= ''.number_format($val->cantidad,0)?></td>  
-                                            <td><?= $val->fecha_proceso ?></td>
-                                       </tr>
-                                     <?php endforeach;?>          
+                                     if($posiciones){
+                                        foreach ($posiciones as $val): ?>
+                                           <tr style="font-size: 90%;">
+                                               <td><?= $val->codigo ?></td>
+                                               <td><?= $val->producto ?></td>
+                                               <td><?= $val->piso->descripcion ?></td>
+                                                <?php if($val->id_piso_nuevo == null){?>
+                                                   <td><?= 'NO FOUND' ?></td>
+                                               <?php }else{?>
+                                                   <td><?= $val->pisoNuevo->descripcion ?></td>
+                                               <?php }?>
+                                               <td><?= $val->posicion->posicion ?></td>
+                                               <?php if($val->id_posicion_nueva == null){?>
+                                                   <td><?= 'NO FOUND' ?></td>
+                                               <?php }else{?>
+                                                   <td><?= $val->posicionNueva->posicion ?></td>
+                                               <?php }?>
+                                               <td><?= $val->rack->descripcion?></td>
+                                               <?php if($val->id_rack_nuevo == null){?>
+                                                   <td><?= 'NO FOUND' ?></td>
+                                               <?php }else{?>
+                                                   <td><?= $val->rackNuevo->descripcion?></td>
+                                               <?php }?>
+                                               <td style="text-align: right"><?= ''.number_format($val->cantidad,0)?></td>  
+                                               <td><?= $val->fecha_proceso ?></td>
+                                          </tr>
+                                        <?php endforeach;
+                                     }else{
+                                         Yii::$app->getSession()->setFlash('warning', 'Esta referencia no tiene movimiento de posiciones o nuevo almacenamiento.');
+                                     }?>          
                                 </body>
                             </table>    
                         </div>
