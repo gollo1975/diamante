@@ -15,6 +15,7 @@ class FormModeloNuevaCitaCliente extends Model
     public $tipo_visita;
     public $hora_visita;
     public $nota;
+    public $fecha_cita;
 
     public function rules()
     {
@@ -22,7 +23,8 @@ class FormModeloNuevaCitaCliente extends Model
 
            [['cliente','tipo_visita', 'hora_visita'], 'required', 'message' => 'Campo requerido'], 
            [['cliente','tipo_visita'], 'integer'],
-            [['hora_visita','nota'], 'string'],
+           [['hora_visita','nota'], 'string'],
+           [['fecha_cita'], 'safe'],
         ];
     }
 
@@ -33,6 +35,7 @@ class FormModeloNuevaCitaCliente extends Model
             'tipo_visita' => 'Tipo visita:',
             'hora_visita' => 'Hora visita:',
             'nota' => 'Nota',
+            'fecha_cita' => 'Fecha cita:',
             
 
         ];

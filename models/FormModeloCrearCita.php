@@ -14,13 +14,14 @@ class FormModeloCrearCita extends Model
     public $desde;
     public $hasta;
     public $anocierre;
+    public $vendedor;
 
     public function rules()
     {
         return [
 
            [['desde','hasta'], 'safe'],
-           [['anocierre'], 'integer'],
+           [['anocierre','vendedor'], 'integer'],
         ];
     }
 
@@ -30,6 +31,7 @@ class FormModeloCrearCita extends Model
             'desde' => 'Desde:',
             'hasta' => 'Hasta:',
             'anocierre' => 'Año',
+            'vendedor' => 'Vendedor:',
 
         ];
     }

@@ -609,7 +609,7 @@ class IndicadorComercialController extends Controller
                         ->setCellValue('E1', 'DESDE')
                         ->setCellValue('F1', 'HASTA')
                         ->setCellValue('G1', 'TOTAL VISITAS')
-                        ->setCellValue('H1', 'No VISITAS')
+                        ->setCellValue('H1', 'VISITAS REALIZADAS')
                         ->setCellValue('I1', 'No VISITAS NO REALES')
                         ->setCellValue('J1', '% EFICIENCIA')
                         ->setCellValue('K1', 'FECHA_REGISTRO')

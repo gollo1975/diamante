@@ -72,7 +72,8 @@ $this->params['breadcrumbs'][] = $model->id_programacion;
                                         <tr style="font-size: 90%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cliente</th>   
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo visita</th>       
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Hora visita</th>       
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Hora visita</th> 
+                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Fecha</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'<span title="Visita cumplida">Cump.</span></th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
@@ -84,6 +85,7 @@ $this->params['breadcrumbs'][] = $model->id_programacion;
                                                 <td><?= $val->cliente->nombre_completo ?></td>
                                                 <td><?= $val->tipoVisita->nombre_visita ?></td>
                                                 <td><?= $val->hora_visita ?></td>
+                                                 <td><?= $val->fecha_cita_comercial ?></td>
                                                 <?php if($val->cumplida == 0){?>
                                                     <td style="color: red"><?= $val->citaCumplida ?></td>
                                                 <?php }else{?>

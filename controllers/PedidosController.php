@@ -448,11 +448,7 @@ class PedidosController extends Controller
         if($cliente->forma_pago == 1){
             $contar = 0;
             $fecha_actual = date('Y-m-d');
-            $facturas = FacturaVenta::find()->where(['=','id_cliente', $id])->andWhere(['>','saldo_factura', 0])->all();
-            foreach ($facturas as $factura):
-               $contar += $factura->saldo_factura;
-            endforeach;
-            if($contar <= $cliente->cupo_asignado){
+            if($cliente->presupuesto_comercial > 0){
                 $factura_mora = FacturaVenta::find()->where(['=','id_cliente', $id])->andWhere(['>','saldo_factura', 0])
                                                 ->andWhere(['<','fecha_vencimiento', $fecha_actual])->orderBy('id_factura ASC')->one();
 
@@ -472,9 +468,10 @@ class PedidosController extends Controller
                     return $this->redirect(['listado_clientes']);
                 }    
             }else{
-                Yii::$app->getSession()->setFlash('warning', 'El cliente '.$cliente->nombre_completo.' NO tiene mas cupo para hacer pedidos. Favor contactar a cartera.'); 
+                Yii::$app->getSession()->setFlash('warning', 'El cliente '.$cliente->nombre_completo.' NO tiene presupuesto comercial. Favor contactar a cartera.'); 
                 return $this->redirect(['listado_clientes']);
-            }    
+            }
+           
        }else{
             if($cliente->cupo_asignado > 0){
                 $contar = 0;
@@ -483,7 +480,7 @@ class PedidosController extends Controller
                 foreach ($facturas as $factura):
                    $contar += $factura->saldo_factura;
                 endforeach;
-                if($contar <= $cliente->cupo_asignado){
+                if($cliente->cupo_asignado >= $contar ){
                     $factura_mora = FacturaVenta::find()->where(['=','id_cliente', $id])->andWhere(['>','saldo_factura', 0])
                                                     ->andWhere(['<','fecha_vencimiento', $fecha_actual])->orderBy('id_factura ASC')->one();
 
@@ -1004,27 +1001,33 @@ class PedidosController extends Controller
     public function actionAutorizado($id, $tokenAcceso, $token, $id_cliente, $pedido_virtual) {
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
-        if($cliente->forma_pago == 2){
-            if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
-                if($pedido->autorizado == 0){
-                    $pedido->autorizado = 1;
+        $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->one();
+        if($detalle){
+            if($cliente->forma_pago == 2){
+                if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
+                    if($pedido->autorizado == 0){
+                        $pedido->autorizado = 1;
+                    }else{
+                        $pedido->autorizado = 0;
+                    }
+                    $pedido->save();
+                    $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]);
+                }else{
+                   Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
+                  $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
+                }    
+            }else{
+               if($pedido->autorizado == 0){
+                        $pedido->autorizado = 1;
                 }else{
                     $pedido->autorizado = 0;
                 }
                 $pedido->save();
-                $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]);
-            }else{
-               Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
-              $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
-            }    
+                $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
+            }  
         }else{
-           if($pedido->autorizado == 0){
-                    $pedido->autorizado = 1;
-            }else{
-                $pedido->autorizado = 0;
-            }
-            $pedido->save();
-            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
+             Yii::$app->getSession()->setFlash('error', 'Este pedido NO se puede autorizar porque no tiene productos ingresados. Favor enviar al menos un producto al pedido.');  
+             $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
         }    
     }
     //CREAR EL CONSECUTIVO DEL PEDIDO

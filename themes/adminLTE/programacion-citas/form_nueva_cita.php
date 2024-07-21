@@ -47,6 +47,15 @@ $tipovisita = ArrayHelper::map(TipoVisitaComercial::find()->orderBy('nombre_visi
                         <?= $form->field($model, 'hora_visita')->input ('time'); ?>
                     </div>
                     <div class="row">
+                    <?= $form->field($model, 'fecha_cita')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                            'value' => date('d-M-Y', strtotime('+2 days')),
+                            'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                            'pluginOptions' => [
+                                'format' => 'yyyy-m-d',
+                                'todayHighlight' => true]])
+                        ?>
+                    </div>    
+                    <div class="row">
                         <?= $form->field($model, 'nota')->textArea(['maxlength' => true, 'size' => 40]) ?>
                     </div
                 </div>  

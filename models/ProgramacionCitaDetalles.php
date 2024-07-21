@@ -37,8 +37,8 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
         return [
             [['id_programacion', 'id_cliente', 'id_tipo_visita','cumplida','tipo_visita'], 'integer'],
             [['id_cliente', 'id_tipo_visita', 'hora_visita'], 'required'],
-            [['hora_visita'], 'string'],
-            [['fecha_registro','fecha_informe'], 'safe'],
+            [['hora_visita'], 'time'],
+            [['fecha_registro','fecha_informe','fecha_cita_comercial'], 'safe'],
             [['nota'], 'string', 'max' => 100],
             [['descripcion_gestion'], 'string'],
             [['desde', 'hasta'], 'safe'],
@@ -67,6 +67,7 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
             'fecha_informe' => 'Fecha informe:',
             'descripcion_gestion' => 'Gestion visita:',
             'tipo_visita' => 'Tipo visita:',
+            'fecha_cita_comercial' => 'fecha_cita_comercial',
         ];
     }
 

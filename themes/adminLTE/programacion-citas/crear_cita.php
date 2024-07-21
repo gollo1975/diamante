@@ -13,6 +13,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 ?>
+
 <?php
 $form = ActiveForm::begin([
             "method" => "post",
@@ -21,11 +22,12 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
-            'template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>',
+            'template' => '{label}<div class="col-sm-9 form-group">{input}{error}</div>',
             'labelOptions' => ['class' => 'col-sm-3 control-label'],
             'options' => []
         ],
         ]);
+$convendedor = ArrayHelper::map(\app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 ?>
 
     <div class="modal-header">
@@ -58,6 +60,11 @@ $form = ActiveForm::begin([
                                 'required' => true]])
                         ?>
                     </div>
+                    <?php if($sw == 1){?>
+                        <div class="row">
+                            <?= $form->field($model, 'vendedor')->dropDownList($convendedor, ['prompt' => 'Seleccione...']) ?>
+                        </div>
+                    <?php }?>
                 </div>  
                     <div class="panel-footer text-right">
                        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'crear_cita_cliente']) ?>                    

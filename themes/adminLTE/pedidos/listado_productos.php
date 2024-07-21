@@ -22,6 +22,7 @@ $this->title = 'Nuevo pedido';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
+<p>
           <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
             <?php if($model->autorizado == 0 && $model->numero_pedido == 0){?>
                 <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
@@ -64,7 +65,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                 } 
             
             }?>
-
+</p>
 
 
 <div class="panel panel-success">

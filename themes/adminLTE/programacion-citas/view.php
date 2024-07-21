@@ -22,7 +22,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'Detalle de la cita';
+$this->title = 'Citas de ('.$model->agente->nombre_completo.')';
 $this->params['breadcrumbs'][] = ['label' => 'Programacion de citas', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_programacion;
 $view = 'programacion-citas';
@@ -64,7 +64,7 @@ $view = 'programacion-citas';
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#listadovisitas" aria-controls="listadovisitas" role="tab" data-toggle="tab">Listado de visitas <span class="badge"><?= count($detalle_visita) ?></span></a></li>
+            <li role="presentation" class="active"><a href="#listadovisitas" aria-controls="listadovisitas" role="tab" data-toggle="tab">Listado de citas <span class="badge"><?= count($detalle_visita) ?></span></a></li>
           
         </ul>
             <div class="tab-content">
@@ -77,10 +77,13 @@ $view = 'programacion-citas';
                                         <tr style="font-size: 90%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cliente</th>       
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Visita</th>       
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Hora</th>    
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Hora</th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Fecha</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Motivo</th>  
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
+                                            <th scope="col" style='background-color:#B9D5CE;'></th>
+                                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                                         </tr>
                                     </thead>
                                     <body>
@@ -88,8 +91,9 @@ $view = 'programacion-citas';
                                          foreach ($detalle_visita as $val):?>
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->cliente->nombre_completo ?></td>
-                                                 <td><?= $val->tipoVisita->nombre_visita ?></td>
+                                                <td><?= $val->tipoVisita->nombre_visita ?></td>
                                                 <td><?= $val->hora_visita ?></td>
+                                                <td><?= $val->fecha_cita_comercial ?></td>
                                                 <td><?= $val->nota ?></td>
                                                 <?php if($model->proceso_cerrado == 0 && $tokenAcceso == 3){?>
                                                     <td style= 'width: 25px; height: 25px;'>
@@ -116,6 +120,24 @@ $view = 'programacion-citas';
                                                                 ])
                                                         ?>
                                                     </td>
+                                                <?php }else{?>  
+                                                    <td style= 'width: 25px; height: 25px;'></td>   
+                                                    <td style= 'width: 25px; height: 25px;'></td>
+                                                    <td style= 'width: 25px; height: 25px;'>
+                                                        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',
+                                                           ['/programacion-citas/editar_cita_cliente', 'id' => $model->id_programacion, 'detalle' => $val->id_visita, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso],
+                                                             ['title' => 'Editar la cita para cliente',
+                                                              'data-toggle'=>'modal',
+                                                              'data-target'=>'#modaleditarcitacliente',
+                                                             ])    
+                                                       ?>
+                                                       <div class="modal remote fade" id="modaleditarcitacliente">
+                                                            <div class="modal-dialog modal-lg" style ="width: 450px;">    
+                                                                <div class="modal-content"></div>
+                                                            </div>
+                                                       </div>
+                                                    </td>    
+                                                    <td><input type="checkbox" name="listado_citas[]" value="<?= $val->id_visita ?>"></td>    
                                                 <?php }?>    
                                             </tr>
                                          <?php endforeach;?>          
@@ -140,14 +162,22 @@ $view = 'programacion-citas';
                                 </div>    
    
                             <?php }else{?>
-                                <div class="panel-footer text-right">
-                                    <?php if($model->proceso_cerrado == 1){ ?>
-                                      <div class="panel-footer text-right">
-                                        <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_citas', 'id' => $model->id_programacion], ['class' => 'btn btn-primary btn-sm']);?>
-                                      </div>  
-                                     <?php }?>
-                                </div>     
-                           <?php }?>
+                                    <?php if($model->proceso_cerrado == 0 && $tokenAcceso <> 3){?>
+                                        <div class="panel-footer text-right" >
+                                            <?= Html::a('<span class="glyphicon glyphicon-import"></span>Impotar programaciones', ['programacion-citas/cargar_programacion_excel', 'id' => $model->id_programacion, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                                           <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminar_todo']) ?>
+                                        </div>                                           
+                                    <?php }else{?>    
+
+                                        <div class="panel-footer text-right">
+                                            <?php if($model->proceso_cerrado == 1){ ?>
+                                              <div class="panel-footer text-right">
+                                                <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_citas', 'id' => $model->id_programacion], ['class' => 'btn btn-primary btn-sm']);?>
+                                              </div>  
+                                             <?php }?>
+                                        </div> 
+                                    <?php }    
+                            }?>
                         </div>
                     </div>
                 </div>    
@@ -156,5 +186,18 @@ $view = 'programacion-citas';
         </div>             
         <?php ActiveForm::end(); ?>  
 </div>
+<script type="text/javascript">
+	function marcar(source) 
+	{
+		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
+		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
+		{
+			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
+			{
+				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
+			}
+		}
+	}
+</script>
 
    

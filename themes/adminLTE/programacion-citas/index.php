@@ -98,7 +98,8 @@ $form = ActiveForm::begin([
     <div class="panel-heading">
         Registros <span class="badge"><?= $pagination->totalCount ?></span>
     </div>
-    <?php if($tokenAcceso == 3){?>
+    <?php if($tokenAcceso == 3){ //acceso a vendedores
+        ?>
         <table class="table table-responsive">
             <thead>
                 <tr style="font-size: 90%;">   
@@ -123,26 +124,27 @@ $form = ActiveForm::begin([
                         <td><?= $val->total_citas ?></td>
                         <td><?= $val->procesoCerrado ?></td>
                         <td style= 'width: 25px; height: 25px;'>
-                         <?php if(count($contador) > 0){?>
-                         <?php }else{?>    
-                            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                    ['/programacion-citas/editar_cita', 'id' => $val->id_programacion, 'agente' => $agente],
-                                    [
-                                        'title' => 'Permite editar las fechas de la programacion',
-                                        'data-toggle'=>'modal',
-                                        'data-target'=>'#modaleditarcitas'.$val->id_programacion,
-                                    ])    
-                               ?>
-                            <div class="modal remote fade" id="modaleditarcitas<?= $val->id_programacion ?>">
-                                <div class="modal-dialog modal-lg" style ="width: 400px;">
-                                    <div class="modal-content"></div>
-                                </div>
-                            </div>
-                        </td>
-                         <?php }?>
+                            <?php if(count($contador) > 0){?>
+                            <?php }else{?>    
+                               <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
+                                       ['/programacion-citas/editar_cita', 'id' => $val->id_programacion, 'agente' => $agente],
+                                       [
+                                           'title' => 'Permite editar las fechas de la programacion',
+                                           'data-toggle'=>'modal',
+                                           'data-target'=>'#modaleditarcitas'.$val->id_programacion,
+                                       ])    
+                                  ?>
+                               <div class="modal remote fade" id="modaleditarcitas<?= $val->id_programacion ?>">
+                                   <div class="modal-dialog modal-lg" style ="width: 400px;">
+                                       <div class="modal-content"></div>
+                                   </div>
+                               </div>
+                            <?php }?>
+                        </td>    
                         <td style= 'width: 25px; height: 25px;'>
                             <a href="<?= Url::toRoute(["programacion-citas/view", "id" => $val->id_programacion, 'agenteToken' => $agente, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
+                        
                 <?php }else{?>
                     <td style='background-color:#F0F3EF;'><?= $val->id_programacion ?></td>
                     <td style='background-color:#F0F3EF;'><?= $val->fecha_inicio?></td>
@@ -159,7 +161,8 @@ $form = ActiveForm::begin([
             <?php endforeach; ?>
             </tbody>
         </table>
-    <?php }else{?>
+    <?php }else{ //acceso a administradores
+        ?>
          <table class="table table-bordered table-hover">
             <thead>
                 <tr style="font-size: 90%;">   
@@ -191,7 +194,7 @@ $form = ActiveForm::begin([
                     <td><?= $val->porcentaje_eficiencia ?>%</td>
                     <td><?= $val->procesoCerrado ?></td>
                     <td style= 'width: 25px; height: 25px;'>
-                        <a href="<?= Url::toRoute(["programacion-citas/view", "id" => $val->id_programacion, 'agenteToken' => $agente, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        <a href="<?= Url::toRoute(["programacion-citas/view", "id" => $val->id_programacion, 'agenteToken' => $val->id_agente, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
                 <?php }else{ ?>
                         <td style='background-color:#F0F3EF;'><?= $val->id_programacion ?></td>
@@ -205,7 +208,7 @@ $form = ActiveForm::begin([
                         <td style='background-color:#F0F3EF;'><?= $val->porcentaje_eficiencia  ?>%</td>
                         <td style='background-color:#F0F3EF;'><?= $val->procesoCerrado ?></td>
                         <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
-                            <a href="<?= Url::toRoute(["programacion-citas/view", "id" => $val->id_programacion, 'agenteToken' => $agente, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="<?= Url::toRoute(["programacion-citas/view", "id" => $val->id_programacion, 'agenteToken' => $val->id_agente, 'tokenAcceso' => $tokenAcceso]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                 <?php }?>        
             </tr>
@@ -216,7 +219,7 @@ $form = ActiveForm::begin([
             if($tokenAcceso == 3){?>
                 <div class="panel-footer text-right" >            
                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Programar dia',
-                       ['/programacion-citas/crearcita','agente' => $agente],
+                       ['/programacion-citas/crearcita','agente' => $agente, 'sw' => 0],
                          ['title' => 'Crear nueva cita para cliente',
                           'data-toggle'=>'modal',
                           'data-target'=>'#modalcrearcita',
@@ -229,7 +232,24 @@ $form = ActiveForm::begin([
                         </div>
                    </div>
                </div>
-            <?php }?>    
+            <?php }else{ //permite crear agenda por administradores
+                ?> 
+                <div class="panel-footer text-right" >            
+                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Programar agenda',
+                            ['/programacion-citas/crearcita','sw' => 1, 'agente' => $agente],
+                              ['title' => 'Crear nueva citapara cliente',
+                               'data-toggle'=>'modal',
+                               'data-target'=>'#modalcrearcita',
+                               'class' => 'btn btn-success btn-xs'
+                              ])    
+                        ?>
+                        <div class="modal remote fade" id="modalcrearcita">
+                             <div class="modal-dialog modal-lg" style ="width: 450px;">    
+                                 <div class="modal-content"></div>
+                             </div>
+                        </div>
+                    </div>
+            <?php }?>
        <?php $form->end() ?>
     </div>
 </div>
