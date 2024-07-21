@@ -21,7 +21,7 @@ class FormSubirArchivoExcel extends Model
             
            [['fileProgramacion'], 'file',
             'skipOnEmpty' => false,
-            'uploadRequired' => 'Debe de seleccionar al menos un acrhivo.',    
+            'uploadRequired' => 'Debe de seleccionar al menos un archivo para importar.',    
             'extensions' => 'xlsx, xls',            
             'wrongExtension' => 'El archivo no contiene una extension permitida.',
             'maxFiles' => 1,
