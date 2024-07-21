@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
                Solo se importan archivos de excel con extensión (xlsx y xls).
             </li>
             <li>
-               Los campos que se necesitan son (codigo_progrmacion, id_cliente, id_tipo_visita, hora_visita, nota, fecha_cita_comercial). 
+               Los campos que se necesitan son (codigo_programacion, id_cliente, id_tipo_visita, hora_visita, nota, fecha_cita_comercial). 
             </li>
             <li>
                La HORA_VISITA: Debe de ser en formato entero o texto, ejemplo (12:30:00), debe de ser 123000. Debe de contener 6 digitos
