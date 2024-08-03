@@ -128,9 +128,9 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Aprobado</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Almacenado</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso aprobado">Ap.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso almacenado">Alm.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerr.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th score="col" style='background-color:#B9D5CE;'></th>  
                  <th score="col" style='background-color:#B9D5CE;'></th>  

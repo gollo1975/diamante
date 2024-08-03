@@ -127,10 +127,8 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total </th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerrado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso cerrado">Cerr.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Producto aprobado">Ap.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
@@ -145,10 +143,8 @@ $form = ActiveForm::begin([
                 <td><?= $val->fecha_proceso?></td>
                 <td><?= $val->fecha_entrega?></td>
                  <td><?= $val->tipoOrden?></td>
-                <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->iva,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->total_orden,0)?></td>
                 <td><?= $val->cerrarOrden?></td>
+                 <td><?= $val->productoAprobado?></td>
                  <td style= 'width: 25px; height: 10px;'>
                     <a href="<?= Url::toRoute(["orden-produccion/view", "id" => $val->id_orden_produccion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
                 </td>
