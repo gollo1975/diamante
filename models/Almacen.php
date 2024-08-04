@@ -42,6 +42,7 @@ class Almacen extends \yii\db\ActiveRecord
         return [
             [['almacen'], 'required'],
             [['fecha_registro'], 'safe'],
+            [['predeterminado'], 'integer'],
             [['almacen'], 'string', 'max' => 30],
             [['user_name'], 'string', 'max' => 15],
         ];
@@ -57,6 +58,7 @@ class Almacen extends \yii\db\ActiveRecord
             'almacen' => 'Almacen/Bodega',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'User Name',
+            'predeterminado' => 'Predeterminado',
         ];
     }
 
@@ -67,4 +69,15 @@ class Almacen extends \yii\db\ActiveRecord
     {
         return $this->hasMany(OrdenProduccion::className(), ['id_almacen' => 'id_almacen']);
     }
+   
+    
+    public function getInicialBodega()
+     {
+        if($this->predeterminado == 0){
+            $predeterminado = 'NO';
+        }else{
+          $predeterminado = 'SI';
+        }
+        return $predeterminado;
+     }
 }

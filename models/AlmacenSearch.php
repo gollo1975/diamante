@@ -17,7 +17,7 @@ class AlmacenSearch extends Almacen
     public function rules()
     {
         return [
-            [['id_almacen'], 'integer'],
+            [['id_almacen','predeterminado'], 'integer'],
             [['almacen', 'fecha_registro', 'user_name'], 'safe'],
         ];
     }
@@ -60,6 +60,7 @@ class AlmacenSearch extends Almacen
         $query->andFilterWhere([
             'id_almacen' => $this->id_almacen,
             'fecha_registro' => $this->fecha_registro,
+            'predeterminado' => $this->predeterminado,
         ]);
 
         $query->andFilterWhere(['like', 'almacen', $this->almacen])

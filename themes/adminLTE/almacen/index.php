@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [                
                 'attribute' => 'almacen',
-                'contentOptions' => ['class' => 'col-lg-5'],
+                'contentOptions' => ['class' => 'col-lg-3'],
             ],
              [                
                 'attribute' => 'fecha_registro',
@@ -37,6 +37,15 @@ $this->params['breadcrumbs'][] = $this->title;
             
              [                
                 'attribute' => 'user_name',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            [
+                'attribute' => 'predeterminado',
+                'value' => function($model) {
+                    $almacen = app\models\Almacen::findOne($model->id_almacen);
+                    return $almacen->inicialBodega;
+                },
+                'filter' => ArrayHelper::map(app\models\Almacen::find()->all(), 'predeterminado', 'inicialBodega'),
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
              [

@@ -577,7 +577,6 @@ class OrdenProduccionController extends Controller
                         $table = OrdenProduccionProductos::findOne($intCodigo);
                         $table->cantidad = $_POST["cantidad_producto"][$intIndice];
                         $table->cantidad_real = $_POST["cantidad_producto"][$intIndice];
-                        $table->id_medida_producto = $_POST["tipo_medida"][$intIndice];
                         $table->save(false);
                         $intIndice++;
                     endforeach;
@@ -801,6 +800,7 @@ class OrdenProduccionController extends Controller
     public function actionCreate()
     {
         $model = new OrdenProduccion();
+        $model->fecha_proceso = date('Y-m-d');
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);

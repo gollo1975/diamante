@@ -59,15 +59,15 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                'data' => ['confirm' => 'Esta seguro de generar el numero de lote a esta orden de producción!.', 'method' => 'post']]);
                 }else{
                     if($token == 0 && $model->proceso_auditado == 0){
-                        echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
+                        echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir OP', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
                     }else{
                         if($token == 0 && $model->proceso_auditado == 1 && $model->exportar_materia_prima == 0){ 
                             echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 7, 'codigo' => $model->id_orden_produccion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
-                            echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);
+                            echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir OP', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);
                             echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar materia prima', ['exportar_materia_prima', 'id' => $model->id_orden_produccion, 'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
                                    'data' => ['confirm' => 'Esta seguro de ENVIAR los materiales al modulo de INVENTARIO DE MATERIAS PRIMAS!.', 'method' => 'post']]);
                         }else{
-                            echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
+                            echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir OP', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
                             echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 7, 'codigo' => $model->id_orden_produccion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
                         }
                     }               
@@ -164,15 +164,14 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                         <tr style="font-size: 90%;">
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código producto</b></th>
-                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 25%'>Descripción producto</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 25%'>Presentación producto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Proyectadas</th>  
-                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad real</th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad real</th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Marca</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo medida</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>F. Vcto</th> 
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>User name</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cerrado</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Registro exportado a inventarios">Exp.</span></th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
@@ -183,27 +182,25 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                          <?php
                                          foreach ($detalle_orden as $val):?>
                                             <tr style="font-size: 90%;">
-                                                <td><?= $val->id_detalle ?></td>
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="descripcion[]" value="<?= $val->descripcion ?>" size ="45" maxlength="40" required="true"> </td> 
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_producto[]" value="<?= $val->cantidad ?>" style="text-align: right" size="9" required="true"> </td> 
                                                     <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
-                                                    <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('tipo_medida[]', $val->id_medida_producto, $medida, ['class' => 'col-sm-12', 'prompt' => 'Seleccione', 'required' => true]) ?></td>
+                                                    <td><?= $val->presentacionProducto->marca->marca ?></td>
+                                                    <td><?= $val->medidaProducto->descripcion ?></td>
                                                     <td style="text-align: right"><?= $val->numero_lote ?></td>  
                                                     <td><?= $val->fecha_vencimiento ?></td>
-                                                    <td><?= $val->user_name ?></td>
-                                                    
                                                     <td><?= $val->cerrarLinea ?></td>
                                                      <td><?= $val->documentoExportado ?></td>
                                                 <?php }else{?>
                                                    <td><?= $val->descripcion ?></td>
                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                    <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
+                                                    <td><?= $val->presentacionProducto->marca->marca ?></td>
                                                    <td><?= $val->medidaProducto->descripcion ?></td>
                                                    <td style="text-align: right"><?= $val->numero_lote ?></td>  
                                                    <td><?= $val->fecha_vencimiento ?></td>
-                                                   <td><?= $val->user_name ?></td>
                                                    <td><?= $val->cerrarLinea ?></td>
                                                    <td><?= $val->documentoExportado ?></td>
                                                 <?php }?>   

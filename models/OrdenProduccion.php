@@ -147,9 +147,9 @@ class OrdenProduccion extends \yii\db\ActiveRecord
     
     public function getTipoOrden() {
         if($this->tipo_orden == 0 ){
-            $tipoorden = 'REPROGRAMACION';
+            $tipoorden = 'PORTAFOLIO ACTUAL';
         }else{
-            $tipoorden = 'PRODUCTO NUEVO';
+            $tipoorden = 'NUEVO PRODUCTO';
         }
         return $tipoorden;
     }

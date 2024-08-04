@@ -27,6 +27,9 @@ use yii\helpers\ArrayHelper;
         <div class="row">
             <?= $form->field($model, 'almacen')->textInput(['maxlength' => true]) ?>  					
         </div>
+        <div class="row">
+            <?= $form->field($model, 'predeterminado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+        </div> 
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("almacen/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

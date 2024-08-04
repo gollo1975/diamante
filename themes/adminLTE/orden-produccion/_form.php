@@ -34,7 +34,7 @@ $form = ActiveForm::begin([
 
 <?php
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
-$almacen = ArrayHelper::map(Almacen::find()->orderBy ('almacen ASC')->all(), 'id_almacen', 'almacen');
+$almacen = ArrayHelper::map(Almacen::find()->orderBy ('predeterminado DESC')->all(), 'id_almacen', 'almacen');
 $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy ('nombre_proceso ASC')->all(), 'id_proceso_produccion', 'nombre_proceso');
 ?>
 <div class="panel panel-success">
@@ -53,20 +53,13 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
             ]); ?> 
              <?= $form->field($model, 'id_almacen')->widget(Select2::classname(), [
                 'data' => $almacen,
-                'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ]); ?> 
         </div>        
         <div class="row">
-            <?=  $form->field($model, 'fecha_proceso')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
+            <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => true]) ?> 
              <?=  $form->field($model, 'fecha_entrega')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                            'value' => date('Y-m-d', strtotime('+2 days')),
                            'options' => ['placeholder' => 'Seleccione una fecha ...'],
@@ -77,7 +70,7 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
         </div>
         
         <div class="row">
-            <?= $form->field($model, 'tipo_orden')->dropdownList(['0' => 'REPROGRAMACION', '1' => 'PRODUCTO NUEVO'], ['prompt' => 'Seleccione...']) ?>
+            <?= $form->field($model, 'tipo_orden')->dropdownList(['0' => 'PORTAFOLIO ACTUAL', '1' => 'NUEVO PRODUCTO'], ['prompt' => 'Seleccione...']) ?>
              <?= $form->field($model, 'id_proceso_produccion')->widget(Select2::classname(), [
                 'data' => $conProcesoProduccion,
                 'options' => ['prompt' => 'Seleccione...'],

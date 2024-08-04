@@ -90,7 +90,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(20, 5, utf8_decode("AUTORIZADO:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(24, 5, utf8_decode($orden->user_name), 0, 0, 'L',1);
+        $this->Cell(24, 5, utf8_decode($orden->autorizadoOrden), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(26, 5, utf8_decode("ALMACEN:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
@@ -137,23 +137,47 @@ class PDF extends FPDF {
         //Lineas del encabezado
         $this->Line(10,70,10,102);
         $this->Line(33,70,33,102);
+        $this->Line(10,77,202,77);//fila entre registro
         $this->Line(96,70,96,102);
+        $this->Line(10,81,202,81);//fila entre registro
         $this->Line(119,70,119,102);
+        $this->Line(10,86,202,86);//fila entre registro
         $this->Line(147,70,147,102);
+        $this->Line(10,91,202,91);//fila entre registro
         $this->Line(177,70,177,102);
+        $this->Line(10,96,202,96);//fila entre registro
         $this->Line(202,70,202,102);
         $this->Line(10,102,202,102);//linea horizontal inferior  
         //Líneas MATERIA PRIMAS FACE 1
         $this->Line(10,110,10,170);
         $this->Line(74,120,74,170);
+        $this->Line(10,128,202,128);//fila entre registro
         $this->Line(138,120,138,170);
+        $this->Line(10,132,202,132);//fila entre registro
         $this->Line(202,110,202,170);
+        $this->Line(10,136,202,136);//fila entre registro
+        $this->Line(10,140,202,140);//fila entre registro
+        $this->Line(10,144,202,144);//fila entre registro
+        $this->Line(10,148,202,148);//fila entre registro
+        $this->Line(10,152,202,152);//fila entre registro
+        $this->Line(10,156,202,156);//fila entre registro
+        $this->Line(10,160,202,160);//fila entre registro
+        $this->Line(10,164,202,164);//fila entre registro
         $this->Line(10,170,202,170);//linea horizontal inferior
         //Líneas MATERIA PRIMA FACE 2
         $this->Line(10,110,10,230);
+        $this->Line(10,191,202,191);//fila entre registro
         $this->Line(74,110,74,230);
+        $this->Line(10,195,202,195);//fila entre registro
         $this->Line(138,110,138,230);
+        $this->Line(10,199,202,199);//fila entre registro
         $this->Line(202,110,202,230);
+        $this->Line(10,203,202,203);//fila entre registro
+        $this->Line(10,207,202,207);//fila entre registro
+        $this->Line(10,211,202,211);//fila entre registro
+        $this->Line(10,215,202,215);//fila entre registro
+        $this->Line(10,219,202,219);//fila entre registro
+        $this->Line(10,223,202,223);//fila entre registro
         $this->Line(10,230,202,230);//linea horizontal inferior
         
       
@@ -194,8 +218,10 @@ class PDF extends FPDF {
 		
         foreach ($producto as $detalle) {                                                           
             $pdf->Cell(23, 4, $detalle->codigo_producto, 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 8);
             $pdf->Cell(63, 4, utf8_decode($detalle->descripcion), 0, 0, 'L');
-            $pdf->Cell(23, 4, $detalle->cantidad, 0, 0, 'C');
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->Cell(23, 4, ''.number_format($detalle->cantidad,0), 0, 0, 'R');
             $pdf->Cell(28, 4, $detalle->numero_lote, 0, 0, 'C');
             $pdf->Cell(30, 4, $detalle->medidaProducto->descripcion, 0, 0, 'C');
             $pdf->Cell(25, 4, $detalle->fecha_vencimiento, 0, 0, 'C');	
