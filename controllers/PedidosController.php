@@ -371,17 +371,26 @@ class PedidosController extends Controller
                                             ->orderBy('subtotal_factura DESC')
                                             ->limit (1)
                                             ->all();       
-                                $model = $table;
                             }else{
-                                $query =new Query();
-                                $table = FacturaVenta::find()->select([new Expression('SUM(subtotal_factura) as subtotal_factura, cliente, nit_cedula, total_factura,id_agente,id_cliente'), 'id_agente'])
-                                            ->where(['between','fecha_inicio', $desde, $hasta])
-                                            ->groupBy('id_agente')
-                                            ->orderBy('subtotal_factura ASC')
-                                            ->limit (1)
-                                            ->all();       
-                                $model = $table;
-                            }    
+                                if($busqueda == 2){
+                                    $query =new Query();
+                                    $table = FacturaVenta::find()->select([new Expression('SUM(subtotal_factura) as subtotal_factura, cliente, nit_cedula, total_factura,id_agente,id_cliente'), 'id_agente'])
+                                                ->where(['between','fecha_inicio', $desde, $hasta])
+                                                ->groupBy('id_agente')
+                                                ->orderBy('subtotal_factura ASC')
+                                                ->limit (1)
+                                                ->all();       
+                                }else{
+                                    $query =new Query();
+                                    $table = \app\models\FacturaVentaDetalle::find()->select([new Expression('SUM(cantidad) as cantidad, id_inventario, codigo_producto, producto'), 'id_inventario'])
+                                                ->where(['between','fecha_venta', $desde, $hasta])
+                                                ->groupBy('id_inventario')
+                                                ->orderBy('cantidad DESC')
+                                                ->limit (1)
+                                                ->all();  
+                                }   
+                            } 
+                            $model = $table;
                         }else{
                             Yii::$app->getSession()->setFlash('info', 'Debe de seleccionar el tipo de busqueda y las fechas. Favor validar la informacion.'); 
                             return $this->redirect(['search_maestro_pedidos']);

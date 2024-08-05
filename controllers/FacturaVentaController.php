@@ -895,6 +895,7 @@ class FacturaVentaController extends Controller
             $base->subtotal = $detalle->subtotal;
             $base->impuesto = $detalle->impuesto;
             $base->total_linea = $detalle->total_linea;
+            $base->fecha_venta = date('Y-m-d');
             $base->save(false);
         endforeach;
     }

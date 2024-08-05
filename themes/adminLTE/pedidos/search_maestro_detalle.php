@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
 	
     <div class="panel-body" id="filtropedido" style="display:block">
         <div class="radio radio-inline" style="text-align: left" >
-            <?= $formulario->field($form, 'busqueda')->label(false)->radioList([1 =>'Clientes con mas ventas',2 =>'Vendedor con menos ventas']);?>
+            <?= $formulario->field($form, 'busqueda')->label(false)->radioList([1 =>'Clientes con mas ventas',2 =>'Vendedor con menos ventas', 3 =>'Producto mas vendido']);?>
              <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),
                 'options' => ['placeholder' => 'Fecha de inicio ...'],
@@ -85,16 +85,27 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style="font-size: 90%;">   
-                    <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                     <th scope="col" style='background-color:#B9D5CE;'>Agente comercial</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Desde</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Hasta</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Total factura</th>
-                    <th scope="col" style='background-color:#B9D5CE;'></th>
-                </tr>
+                <?php if($busqueda == 1 || $busqueda == 2){?>
+                    <tr style="font-size: 90%;">   
+                        <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                         <th scope="col" style='background-color:#B9D5CE;'>Agente comercial</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Desde</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Hasta</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Total factura</th>
+                        <th scope="col" style='background-color:#B9D5CE;'></th>
+                    </tr>
+                <?php }else{ ?>
+                    <tr style="font-size: 90%;">   
+                        <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Proveedor</th>
+                         <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                  
+                    </tr>
+                <?php }?>    
             </thead>
             <tbody>
                 <?php
@@ -115,20 +126,32 @@ $form = ActiveForm::begin([
                             </tr>
                         <?php endforeach;
                     }else{
-                       foreach ($model as $val):?>
-                            <tr style="font-size: 90%;">
-                                <td style='background-color:#B9D5EE;'><?=  $val->nit_cedula?></td>
-                                <td style='background-color:#B9D5EE;'><?=  $val->cliente?></td>
-                                <td style='background-color:#B9D5EE;'><?=  $val->agenteFactura->nombre_completo?></td>
-                                <td style='background-color:#B9D5EE;'><?=  $desde?></td>
-                                <td style='background-color:#B9D5EE;'><?=  $hasta?></td>
-                                <td style="text-align: right; background-color:#B9D5EE;"><?=  '$'.number_format($val->subtotal_factura,0)?></td>
-                                <td style="text-align: right; background-color:#B9D5EE;"><?=  '$'.number_format($val->total_factura,0)?></td>
-                                <td style= 'width: 25px; height: 10px; '>
-                                    <a href="<?= Url::toRoute(["pedidos/listado_facturas", "desde" => $desde, 'hasta' => $hasta,'id_cliente' => $val->id_cliente, 'id_agente' => $val->id_agente, 'busqueda' => $busqueda]) ?>" ><span class="glyphicon glyphicon-list-alt"></span></a>
-                                </td>
-                            </tr>
-                        <?php endforeach; 
+                        if($busqueda == 2){
+                            foreach ($model as $val):?>
+                                 <tr style="font-size: 90%;">
+                                     <td style='background-color:#B9D5EE;'><?=  $val->nit_cedula?></td>
+                                     <td style='background-color:#B9D5EE;'><?=  $val->cliente?></td>
+                                     <td style='background-color:#B9D5EE;'><?=  $val->agenteFactura->nombre_completo?></td>
+                                     <td style='background-color:#B9D5EE;'><?=  $desde?></td>
+                                     <td style='background-color:#B9D5EE;'><?=  $hasta?></td>
+                                     <td style="text-align: right; background-color:#B9D5EE;"><?=  '$'.number_format($val->subtotal_factura,0)?></td>
+                                     <td style="text-align: right; background-color:#B9D5EE;"><?=  '$'.number_format($val->total_factura,0)?></td>
+                                     <td style= 'width: 25px; height: 10px; '>
+                                         <a href="<?= Url::toRoute(["pedidos/listado_facturas", "desde" => $desde, 'hasta' => $hasta,'id_cliente' => $val->id_cliente, 'id_agente' => $val->id_agente, 'busqueda' => $busqueda]) ?>" ><span class="glyphicon glyphicon-list-alt"></span></a>
+                                     </td>
+                                 </tr>
+                             <?php endforeach; 
+                        }else{
+                            foreach ($model as $val):?>
+                                 <tr style="font-size: 90%;">
+                                    <td style='background-color:#B9D5EE;'><?=  $val->inventario->proveedor->nit_cedula?></td>
+                                    <td style='background-color:#B9D5EE;'><?=  $val->inventario->proveedor->razon_social?></td>
+                                    <td style='background-color:#B9D5EE;'><?=  $val->codigo_producto?></td>
+                                    <td style='background-color:#B9D5EE;'><?=  $val->producto?></td>
+                                     <td style="text-align: right; background-color:#B9D5EE;"><?=  ''.number_format($val->cantidad,0)?></td>
+                                 </tr>
+                             <?php endforeach; 
+                        }     
                     }    
                 }?>        
             </tbody>
