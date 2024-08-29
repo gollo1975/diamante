@@ -8,7 +8,7 @@ use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 
-$this->title = 'MATERIAS PRIMAS';
+$this->title = 'MATERIA DE EMPAQUE';
 $this->params['breadcrumbs'][] = ['label' => 'Materias primas', 'url' => ['view', 'id' => $id, 'token' => $token]];
 $this->params['breadcrumbs'][] = $id;
 ?>

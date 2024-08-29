@@ -59,7 +59,7 @@ class PresentacionProducto extends \yii\db\ActiveRecord
         return [
             'id_presentacion' => 'Id',
             'id_grupo' => 'Grupo producto',
-            'descripcion' => 'Descripcion',
+            'descripcion' => 'Producto',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'User name',
             'id_marca' => 'Marca:',

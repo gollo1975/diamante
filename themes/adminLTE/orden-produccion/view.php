@@ -60,6 +60,8 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                 }else{
                     if($token == 0 && $model->proceso_auditado == 0){
                         echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir OP', ['imprimirordenproduccion', 'id' => $model->id_orden_produccion], ['class' => 'btn btn-default btn-sm']);            
+                        echo Html::a('<span class="glyphicon glyphicon-plus"></span> Crear  solicitud empaque', ['crear_solicitud_empaque', 'id_orden' => $model->id_orden_produccion, 'token'=> $token],['class' => 'btn btn-info btn-sm',
+                               'data' => ['confirm' => 'Esta seguro de CREAR la solicitud del material de empaque a la orden de producción No ('.$model->numero_orden.').', 'method' => 'post']]); 
                     }else{
                         if($token == 0 && $model->proceso_auditado == 1 && $model->exportar_materia_prima == 0){ 
                             echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 7, 'codigo' => $model->id_orden_produccion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);

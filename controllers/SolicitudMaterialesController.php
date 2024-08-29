@@ -322,14 +322,19 @@ class SolicitudMaterialesController extends Controller
      //SE AUTORIZA O DESAUTORIZA EL PRODUCTO
     public function actionAutorizado($id, $token) {
         $model = $this->findModel($id);
-        if ($model->autorizado == 0){  
-            $model->autorizado = 1;
-            $model->update();
-            $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' =>$token]); 
-        } else{
-                $model->autorizado = 0;
+        if(\app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->one()){
+            if ($model->autorizado == 0){  
+                $model->autorizado = 1;
                 $model->update();
-                $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' =>$token]);  
+                $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' =>$token]); 
+            } else{
+                    $model->autorizado = 0;
+                    $model->update();
+                    $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' =>$token]);  
+            }    
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Debe se seleccionar el material de empaque para generar la solictud.'); 
+            $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' => $token]); 
         }    
     }
     

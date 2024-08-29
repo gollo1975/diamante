@@ -184,7 +184,7 @@ class PDF extends FPDF {
     }
     function EncabezadoDetalles() {
         $this->Ln(12);
-        $header = array('CODIGO', ('PRODUCTO'), ('CANTIDAD'), ('No LOTE'), ('MEDIDA'),('FECHA VCTO'));
+        $header = array('CODIGO', ('PRODUCTO'), ('CANTIDAD'), ('No LOTE'), ('MARCA'),('FECHA VCTO'));
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
         $this->SetDrawColor(0, 0, 0);
@@ -223,7 +223,7 @@ class PDF extends FPDF {
             $pdf->SetFont('Arial', '', 7);
             $pdf->Cell(23, 4, ''.number_format($detalle->cantidad,0), 0, 0, 'R');
             $pdf->Cell(28, 4, $detalle->numero_lote, 0, 0, 'C');
-            $pdf->Cell(30, 4, $detalle->medidaProducto->descripcion, 0, 0, 'C');
+            $pdf->Cell(30, 4, $detalle->presentacionProducto->marca->marca, 0, 0, 'C');
             $pdf->Cell(25, 4, $detalle->fecha_vencimiento, 0, 0, 'C');	
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              

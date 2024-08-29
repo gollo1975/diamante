@@ -1624,6 +1624,32 @@ class OrdenProduccionController extends Controller
         $orden->save();
         return $this->redirect(['index_ordenes_produccion']);
     }
+    
+    //PROCESO QUE GENERA LA SOLICITUD DE MATERIAL DE EMPAQUE
+    
+    public function actionCrear_solicitud_empaque($id_orden, $token) {
+        if(\app\models\SolicitudMateriales::find()->where(['=','id_orden_produccion', $id_orden])->one()){
+             Yii::$app->getSession()->setFlash('warning', 'Esta orden de producción ya tiene generada la solicitud de MATERIAL DE EMPAQUE. Ver (Produccion->Movimiento->Solicitud materiales).'); 
+            $this->redirect(["view", 'id' => $id_orden, 'token' => $token]); 
+        }else{
+            $orden = OrdenProduccion::findOne($id_orden);
+            $tipo = \app\models\TipoSolicitud::findOne(2);
+            $table = new \app\models\SolicitudMateriales();
+            $table->id_orden_produccion = $id_orden;
+            $table->id_solicitud = $tipo->id_solicitud;
+            $table->id_grupo = $orden->id_grupo;
+            $table->unidades = $orden->unidades;
+            $table->numero_lote = $orden->numero_lote;
+            $table->numero_orden_produccion = $orden->numero_orden;
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save(false);
+            $nuevo_registro = \app\models\SolicitudMateriales::find()->orderBy('codigo DESC')->one();
+            $id = $nuevo_registro->codigo;
+            return $this->redirect(['solicitud-materiales/view', 'id' => $id, 'token' => $token]);
+        }    
+
+    }
+    
     /**
      * Finds the OrdenProduccion model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

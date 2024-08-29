@@ -8,7 +8,7 @@ use app\models\GrupoProducto;
 /* @var $searchModel app\models\MunicipioSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'PRESENTACION DEL PRODUCTO';
+$this->title = 'PRODUCTOS';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="presentacion-producto-index">

@@ -25,7 +25,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'SOLICITUD DE MATERIALES (Detalle)';
+$this->title = 'SOLICITUD MATERIAL DE EMPAQUE';
 $this->params['breadcrumbs'][] = ['label' => 'Solicitud de materiales', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->codigo;
 $view = 'solicitud-materiales';

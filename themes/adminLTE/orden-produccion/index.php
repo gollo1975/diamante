@@ -122,7 +122,6 @@ $form = ActiveForm::begin([
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Número</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Almacen</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
@@ -142,7 +141,6 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 90%;'>                
                     <td><?= $val->numero_orden?></td>
                     <td><?= $val->grupo->nombre_grupo?></td>
-                    <td><?= $val->almacen->almacen?></td>
                      <td><?= $val->tipoProceso->nombre_proceso?></td>
                     <td><?= $val->numero_lote?></td>
                     <td><?= $val->fecha_proceso?></td>
