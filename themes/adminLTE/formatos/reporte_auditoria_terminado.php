@@ -74,7 +74,12 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(20, 5, utf8_decode("TAMAÑO LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(172, 5, utf8_decode($auditoria->ensamble->ordenProduccion->tamano_lote), 0, 0, 'L',1);
+        $this->Cell(24, 5, utf8_decode($auditoria->ensamble->ordenProduccion->tamano_lote), 0, 0, 'L',1);
+        $this->SetFont('Arial', 'B', 7);
+        $this->Cell(26, 5, utf8_decode("PRODUCTO:"), 0, 0, 'R', 1);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(122, 5, utf8_decode($auditoria->ensamble->ordenProduccion->producto->nombre_producto), 0, 0, 'L', 1);
+        
         
         $this->EncabezadoDetalles();
                  

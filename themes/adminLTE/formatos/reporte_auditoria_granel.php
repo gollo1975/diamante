@@ -25,7 +25,7 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
-        $this->Cell(162, 7, utf8_decode("PROCESO DE AUDITORIA"), 0, 0, 'l', 0);
+        $this->Cell(162, 7, utf8_decode("ANALISIS DE PRODUCTO EN PROCESO"), 0, 0, 'l', 0);
         $this->Cell(30, 7, utf8_decode('N°. '.str_pad($auditoria->numero_auditoria, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
@@ -74,7 +74,13 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(20, 5, utf8_decode("TAMAÑO LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(172, 5, utf8_decode($auditoria->ordenProduccion->tamano_lote), 0, 0, 'L',1);
+        $this->Cell(24, 5, utf8_decode($auditoria->ordenProduccion->tamano_lote), 0, 0, 'L',1);
+        $this->SetFont('Arial', 'B', 7);
+        $this->Cell(26, 5, utf8_decode("PRODUCTO:"), 0, 0, 'L', 1);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(122, 5, utf8_decode($auditoria->ordenProduccion->producto->nombre_producto), 0, 0, 'L', 1);
+                
+
         
         $this->EncabezadoDetalles();
                  

@@ -65,18 +65,18 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
-        $this->Cell(162, 7, utf8_decode("ORDEN DE PRODUCCION"), 0, 0, 'l', 0);
+        $this->Cell(162, 7, utf8_decode("OP  -  " .$orden->producto->nombre_producto), 0, 0, 'l', 0);
         $this->Cell(30, 7, utf8_decode('N°. '.str_pad($orden->numero_orden, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(20, 5, utf8_decode("TIPO ORDEN:"), 0, 0, 'L', 1);
+        $this->Cell(20, 5, utf8_decode("T.PROCESO:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(24, 5, utf8_decode($orden->tipoOrden), 0, 0, 'L',1);
+        $this->Cell(24, 5, utf8_decode($orden->tipoProceso->nombre_proceso), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(26, 5, utf8_decode("GRUPO:"), 0, 0, 'L', 1);
+        $this->Cell(26, 5, utf8_decode("TIPO ORDEN:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(50, 5, utf8_decode($orden->grupo->nombre_grupo), 0, 0, 'L', 1);
+        $this->Cell(50, 5, utf8_decode($orden->tipoOrden), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(25, 5, utf8_decode("T. LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
@@ -92,17 +92,16 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 7);
         $this->Cell(24, 5, utf8_decode($orden->autorizadoOrden), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(26, 5, utf8_decode("ALMACEN:"), 0, 0, 'L', 1);
+        $this->Cell(26, 5, utf8_decode("GRUPO:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(50, 5, utf8_decode($orden->almacen->almacen), 0, 0, 'L', 1);
+        $this->Cell(50, 5, utf8_decode($orden->grupo->nombre_grupo), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(25, 5, utf8_decode("CERRADO:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
         $this->Cell(15, 5, utf8_decode($orden->cerrarOrden), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(17, 5, utf8_decode("C. UNITARIO:"), 0, 0, 'R', 1);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(15, 5, ''. number_format($orden->costo_unitario,0), 0, 0, 'R', 1);
+        $this->Cell(32, 5, utf8_decode(""), 0, 0, 'L', 1);
+                
         //FIN
         $this->SetXY(10, 56);
         $this->SetFont('Arial', 'B', 7);
@@ -138,13 +137,13 @@ class PDF extends FPDF {
         $this->Line(10,70,10,102);
         $this->Line(33,70,33,102);
         $this->Line(10,77,202,77);//fila entre registro
-        $this->Line(96,70,96,102);
+        $this->Line(106,70,106,102);
         $this->Line(10,81,202,81);//fila entre registro
-        $this->Line(119,70,119,102);
+        $this->Line(136,70,136,102);
         $this->Line(10,86,202,86);//fila entre registro
-        $this->Line(147,70,147,102);
+       
         $this->Line(10,91,202,91);//fila entre registro
-        $this->Line(177,70,177,102);
+        $this->Line(171,70,171,102);
         $this->Line(10,96,202,96);//fila entre registro
         $this->Line(202,70,202,102);
         $this->Line(10,102,202,102);//linea horizontal inferior  
@@ -184,7 +183,7 @@ class PDF extends FPDF {
     }
     function EncabezadoDetalles() {
         $this->Ln(12);
-        $header = array('CODIGO', ('PRODUCTO'), ('CANTIDAD'), ('No LOTE'), ('MARCA'),('FECHA VCTO'));
+        $header = array('CODIGO', ('PRESENTACION'), ('CANTIDAD'), ('No LOTE'),('FECHA VCTO'));
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
         $this->SetDrawColor(0, 0, 0);
@@ -192,7 +191,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 7);
 
         //creamos la cabecera de la tabla.
-        $w = array(23, 63, 23, 28, 30, 25);
+        $w = array(23, 73, 30, 35, 31);
         for ($i = 0; $i < count($header); $i++)
             if ($i == 0 || $i == 1)
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -219,12 +218,11 @@ class PDF extends FPDF {
         foreach ($producto as $detalle) {                                                           
             $pdf->Cell(23, 4, $detalle->codigo_producto, 0, 0, 'L');
             $pdf->SetFont('Arial', '', 8);
-            $pdf->Cell(63, 4, utf8_decode($detalle->descripcion), 0, 0, 'L');
+            $pdf->Cell(73, 4, utf8_decode($detalle->descripcion), 0, 0, 'L');
             $pdf->SetFont('Arial', '', 7);
-            $pdf->Cell(23, 4, ''.number_format($detalle->cantidad,0), 0, 0, 'R');
-            $pdf->Cell(28, 4, $detalle->numero_lote, 0, 0, 'C');
-            $pdf->Cell(30, 4, $detalle->presentacionProducto->marca->marca, 0, 0, 'C');
-            $pdf->Cell(25, 4, $detalle->fecha_vencimiento, 0, 0, 'C');	
+            $pdf->Cell(30, 4, ''.number_format($detalle->cantidad,0), 0, 0, 'R');
+            $pdf->Cell(35, 4, $detalle->numero_lote, 0, 0, 'C');
+            $pdf->Cell(31, 4, $detalle->fecha_vencimiento, 0, 0, 'C');	
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }

@@ -4,12 +4,12 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\PresentacionProducto;
+use app\models\Productos;
 
 /**
- * PresentacionProductoSearch represents the model behind the search form of `app\models\PresentacionProducto`.
+ * ProductosSearch represents the model behind the search form of `app\models\Productos`.
  */
-class PresentacionProductoSearch extends PresentacionProducto
+class ProductosSearch extends Productos
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class PresentacionProductoSearch extends PresentacionProducto
     public function rules()
     {
         return [
-            [['id_presentacion', 'id_grupo','id_producto'], 'integer'],
-            [['descripcion', 'fecha_registro', 'user_name'], 'safe'],
+            [['id_producto', 'id_grupo', 'id_marca', 'entradas', 'salidas', 'saldo_unidades'], 'integer'],
+            [['nombre_producto', 'fecha_registro', 'user_name'], 'safe'],
         ];
     }
 
@@ -40,7 +40,7 @@ class PresentacionProductoSearch extends PresentacionProducto
      */
     public function search($params)
     {
-        $query = PresentacionProducto::find();
+        $query = Productos::find();
 
         // add conditions that should always apply here
 
@@ -58,15 +58,17 @@ class PresentacionProductoSearch extends PresentacionProducto
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id_presentacion' => $this->id_presentacion,
-            'id_grupo' => $this->id_grupo,
-            'fecha_registro' => $this->fecha_registro,
             'id_producto' => $this->id_producto,
+            'id_grupo' => $this->id_grupo,
+            'id_marca' => $this->id_marca,
+            'entradas' => $this->entradas,
+            'salidas' => $this->salidas,
+            'saldo_unidades' => $this->saldo_unidades,
+            'fecha_registro' => $this->fecha_registro,
         ]);
 
-        $query->andFilterWhere(['like', 'descripcion', $this->descripcion])
-            ->andFilterWhere(['like', 'user_name', $this->user_name])
-            ->andFilterWhere(['=', 'id_producto', $this->id_producto]);
+        $query->andFilterWhere(['like', 'nombre_producto', $this->nombre_producto])
+            ->andFilterWhere(['like', 'user_name', $this->user_name]);
 
         return $dataProvider;
     }

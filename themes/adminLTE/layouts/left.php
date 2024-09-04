@@ -156,19 +156,9 @@
                                                ['label' => 'Medida materia prima', 'icon' => 'plus-square-o', 'url' => ['medida-materia-prima/index']],   
                                                ['label' => 'Medida producto', 'icon' => 'plus-square-o', 'url' => ['medida-producto-terminado/index']],   
                                                ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],  
-                                               ['label' => 'Grupo productos', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
-                                               ['label' => 'Presentacion producto', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
-                                               [
-                                                'label' => 'Ordenes y calidad',
-                                                'icon' => 'check',
-                                                'url' => '#',
-                                                'items' => [
-                                                    ['label' => 'Especificaciones', 'icon' => 'plus-square-o', 'url' => ['especificacion-producto/index']],
-                                                    ['label' => 'Concepto analisis', 'icon' => 'plus-square-o', 'url' => ['concepto-analisis/index']],
-                                                    ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 
-                                                    ['label' => 'Formula auditoria', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
-                                                ]], 
-                                               
+                                               ['label' => 'Grupo', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
+                                                ['label' => 'Productos', 'icon' => 'plus-square-o', 'url' => ['productos/index']],
+                                               ['label' => 'Presentacion', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
                                                ['label' => 'Tipo devolucion', 'icon' => 'plus-square-o', 'url' => ['tipo-devolucion-productos/index']], 
                                             ],
                                         ],
@@ -186,17 +176,6 @@
                                                     ['label' => 'Precios y descuentos', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/crear_precio_venta']],
                                                     ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
                                                     ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/view_archivo']],
-                                                ]],
-                                                [
-                                                'label' => 'Control calidad',
-                                                'icon' => 'check',
-                                                'url' => '#',
-                                                'items' => [
-                                                    ['label' => 'Cargar OP', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
-                                                    ['label' => 'Auditoria granel', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
-                                                    ['label' => 'Cargar OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index']],
-                                                    ['label' => 'Auditoria OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_auditoria_ensamble']],
-                                                    
                                                 ]],
                                                 ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 
                                                 ['label' => 'Devolucion productos', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/index']], 
@@ -249,9 +228,51 @@
                                                     ['label' => 'Entradas', 'icon' => 'plus-square-o', 'url' => ['/entrada-producto-terminado/index']],
                                                 ]],
                                                 ['label' => 'Orden produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index']],
+                                                ['label' => 'Descargar ME-IP', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_descargar_inventario']],
                                                 ['label' => 'Solicitud materiales', 'icon' => 'plus-square-o', 'url' => ['/solicitud-materiales/index']],
                                                 ['label' => 'Entrega materiales', 'icon' => 'plus-square-o', 'url' => ['/entrega-materiales/index']],
                                             ],
+                                        ],
+                                    ],
+                                ],
+                                //TERMINA 
+                                //  INICIO MODULO DE CALIDAD
+                                [
+                                    'label' => 'CALIDAD',
+                                    'icon' => 'user',
+                                    'url' => '#',
+                                    'items' => [
+                                        [
+                                            'label' => 'Administración',
+                                            'icon' => 'database',
+                                            'url' => '#',
+                                            'items' => [
+                                                    ['label' => 'Especificaciones', 'icon' => 'plus-square-o', 'url' => ['especificacion-producto/index']],
+                                                    ['label' => 'Concepto analisis', 'icon' => 'plus-square-o', 'url' => ['concepto-analisis/index']],
+                                                    ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 
+                                                    ['label' => 'Formula auditoria', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
+                                                ], 
+                                               
+                                            ],
+                                        [
+                                            'label' => 'Consultas',
+                                            'icon' => 'question',
+                                            'url' => '#',
+                                            'items' => [
+                                             //     ['label' => 'Devolucion productos    ', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/search_consulta_devolucion']],
+                                            ],
+                                        ],
+                                        [
+                                            'label' => 'Movimiento',
+                                            'icon' => 'cube',
+                                            'url' => '#',
+                                            'items' => [
+                                                    ['label' => 'Cargar OP', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_ordenes_produccion']],
+                                                    ['label' => 'Auditoria granel', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index_resultado_auditoria']],
+                                                    ['label' => 'Cargar OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index']],
+                                                    ['label' => 'Auditoria OE', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_auditoria_ensamble']],
+                                                    
+                                                   ],
                                         ],
                                     ],
                                 ],

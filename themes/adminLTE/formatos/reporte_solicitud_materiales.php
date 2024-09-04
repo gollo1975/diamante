@@ -32,9 +32,9 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 7);
         $this->Cell(32, 5, utf8_decode($solicitud->solicitud->descripcion), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(23, 5, utf8_decode("GRUPO:"), 0, 0, 'L', 1);
+        $this->Cell(23, 5, utf8_decode("PRODUCTO:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(60, 5, utf8_decode($solicitud->grupo->nombre_grupo), 0, 0, 'L', 1);
+        $this->Cell(60, 5, utf8_decode($solicitud->ordenProduccion->producto->nombre_producto), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(25, 5, utf8_decode("NUMERO LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);

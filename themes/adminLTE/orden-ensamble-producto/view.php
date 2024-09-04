@@ -65,27 +65,7 @@ if($sw == 0){
                     if ($model->proceso_auditado == 0){
                         echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
                     }else{
-                        if($model->inventario_exportado == 0 && $model->exportar_material_empaque == 0){
-                            echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar a inventarios', ['/orden-ensamble-producto/exportar_producto_inventario', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'sw' =>$sw,'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
-                                       'data' => ['confirm' => 'Esta seguro de exportar los productos que se encuentra en la OE al modulo de inventarios de productos!.', 'method' => 'post']]);
-                            echo Html::a('<span class="glyphicon glyphicon-arrow-down"></span> Descargar material empaque', ['/orden-ensamble-producto/exportar_material_empaque', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'sw' =>$sw,'token'=> $token],['class' => 'btn btn-success btn-sm',
-                                           'data' => ['confirm' => 'Esta seguro de ENVIAR este material de empaque al modulo de MATERIAS PRIMAS para ser descargado.!.', 'method' => 'post']]);    
-                             echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
-                        }else{
-                            if($model->inventario_exportado == 0){
-                                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
-                                echo Html::a('<span class="glyphicon glyphicon-export"></span> Exportar a inventarios', ['/orden-ensamble-producto/exportar_producto_inventario', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'sw' =>$sw,'token'=> $token,'grupo' =>$model->id_grupo],['class' => 'btn btn-info btn-sm',
-                                       'data' => ['confirm' => 'Esta seguro de exportar los productos que se encuentra en la OE al modulo de inventarios de productos!.', 'method' => 'post']]);
-                            }else{
-                                if($model->exportar_material_empaque == 0){
-                                    echo Html::a('<span class="glyphicon glyphicon-arrow-down"></span> Descargar material empaque', ['/orden-ensamble-producto/exportar_material_empaque', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'sw' =>$sw,'token'=> $token],['class' => 'btn btn-success btn-sm',
-                                               'data' => ['confirm' => 'Esta seguro de ENVIAR este material de empaque al modulo de MATERIAS PRIMAS para ser descargado.!.', 'method' => 'post']]);    
-                                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);   
-                                }else{
-                                    echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);                   
-                                }    
-                            } 
-                        }
+                         echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_orden_ensamble', 'id' => $model->id_ensamble], ['class' => 'btn btn-default btn-sm']);
                     }    
                 }    
             }  

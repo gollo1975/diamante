@@ -814,6 +814,7 @@ class OrdenProduccionController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'sw' => 0,
         ]);
     }
 
@@ -827,6 +828,7 @@ class OrdenProduccionController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $ConProducto = \app\models\Productos::find()->Where(['=','id_grupo', $model->id_grupo])->orderBy('nombre_producto ASC')->all(); 
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
@@ -838,6 +840,8 @@ class OrdenProduccionController extends Controller
 
         return $this->render('update', [
             'model' => $model,
+            'sw' => 1,
+            'ConProducto' => ArrayHelper::map($ConProducto, "id_producto", "nombre_producto"),
         ]);
     }
 
@@ -907,8 +911,17 @@ class OrdenProduccionController extends Controller
                    $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);   
                 }else{
                     //proceso de generar consecutivo
-                    $lista = \app\models\Consecutivos::findOne(3);
                     $solicitud = OrdenProduccion::findOne($id);
+                    if($solicitud->id_proceso_produccion == 1){
+                         $lista = \app\models\Consecutivos::findOne(21);
+                    }else{
+                        if($solicitud->id_proceso_produccion == 2 ){
+                             $lista = \app\models\Consecutivos::findOne(3);
+                        }else{
+                             $lista = \app\models\Consecutivos::findOne(22);
+                        }
+                    }
+                   
                     $solicitud->numero_orden = $lista->numero_inicial + 1;
                     $solicitud->save(false);
                     $lista->numero_inicial = $solicitud->numero_orden;
@@ -1648,6 +1661,20 @@ class OrdenProduccionController extends Controller
             return $this->redirect(['solicitud-materiales/view', 'id' => $id, 'token' => $token]);
         }    
 
+    }
+    
+     
+    //PROCESO QUE CARGA LOS PRODUCTOS DE CADA GRUPO
+    public function actionCargarproducto($id){
+        $rows = \app\models\Productos::find()->where(['=','id_grupo', $id])
+                                              ->orderBy('nombre_producto desc')->all();
+
+        echo "<option value='' required>Seleccione el producto...</option>";
+        if(count($rows)>0){
+            foreach($rows as $row){
+                echo "<option value='$row->id_producto' required>$row->nombre_producto</option>";
+            }
+        }
     }
     
     /**

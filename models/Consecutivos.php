@@ -29,6 +29,7 @@ class Consecutivos extends \yii\db\ActiveRecord
         return [
             [['concepto', 'numero_inicial'], 'required'],
             [['numero_inicial'], 'integer'],
+            [['abreviatura'], 'string', 'max' => 1],
             [['concepto'], 'string', 'max' => 40],
         ];
     }
@@ -42,6 +43,7 @@ class Consecutivos extends \yii\db\ActiveRecord
             'id_consecutivo' => 'Id Consecutivo',
             'concepto' => 'Concepto',
             'numero_inicial' => 'Numero Inicial',
+            'abreviatura' => 'abreviatura',
         ];
     }
 }

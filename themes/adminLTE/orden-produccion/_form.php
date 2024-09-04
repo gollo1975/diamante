@@ -43,21 +43,20 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
     </div>
     
     <div class="panel-body">
-        <div class="row">
-             <?= $form->field($model, 'id_grupo')->widget(Select2::classname(), [
-                'data' => $grupo,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-             <?= $form->field($model, 'id_almacen')->widget(Select2::classname(), [
-                'data' => $almacen,
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-        </div>        
+        <?php if($sw == 0){?>
+            <div class="row">
+                <?= $form->field($model, 'id_grupo')->dropDownList($grupo,['prompt'=>'Seleccione...', 'onchange'=>' $.get( "'.Url::toRoute('orden-produccion/cargarproducto').'", { id: $(this).val() } ) .done(function( data ) {
+                $( "#'.Html::getInputId($model, 'id_producto',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
+                <?= $form->field($model, 'id_producto')->dropDownList(['prompt' => 'Seleccione...']) ?>
+            </div> 
+        <?php }else{?>
+            <div class="row">
+                <?= $form->field($model, 'id_grupo')->dropDownList($grupo,['prompt'=>'Seleccione...', 'onchange'=>' $.get( "'.Url::toRoute('orden-produccion/cargarproducto').'", { id: $(this).val() } ) .done(function( data ) {
+                       $( "#'.Html::getInputId($model, 'id_producto',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
+                        <?= $form->field($model, 'id_producto')->dropDownList($ConProducto, ['prompt' => 'Seleccione...']) ?>
+            </div>   
+        <?php } ?>          
+
         <div class="row">
             <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => true]) ?> 
              <?=  $form->field($model, 'fecha_entrega')->widget(DatePicker::className(), ['name' => 'check_issue_date',
@@ -84,6 +83,12 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
                <?= $form->field($model, 'responsable')->input(['text', 'maxlength' => true]) ?>
         </div>
         <div class = "row">
+             <?= $form->field($model, 'id_almacen')->widget(Select2::classname(), [
+                'data' => $almacen,
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
             <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'maxlength' => true, 'size' => '100']) ?>
         </div>
             

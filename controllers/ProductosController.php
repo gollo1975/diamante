@@ -3,17 +3,17 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\PresentacionProducto;
-use app\models\PresentacionProductoSearch;
-use app\models\UsuarioDetalle;
+use app\models\Productos;
+use app\models\ProductosSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\models\UsuarioDetalle;
 
 /**
- * PresentacionProductoController implements the CRUD actions for PresentacionProducto model.
+ * ProductosController implements the CRUD actions for Productos model.
  */
-class PresentacionProductoController extends Controller
+class ProductosController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -31,14 +31,14 @@ class PresentacionProductoController extends Controller
     }
 
     /**
-     * Lists all PresentacionProducto models.
+     * Lists all Productos models.
      * @return mixed
      */
-    public function actionIndex()
+   public function actionIndex()
     {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',16])->all()){
-                $searchModel = new PresentacionProductoSearch();
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',113])->all()){
+                $searchModel = new ProductosSearch();
                 $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
                 return $this->render('index', [
@@ -54,7 +54,7 @@ class PresentacionProductoController extends Controller
     }
 
     /**
-     * Displays a single PresentacionProducto model.
+     * Displays a single Productos model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -67,19 +67,15 @@ class PresentacionProductoController extends Controller
     }
 
     /**
-     * Creates a new PresentacionProducto model.
+     * Creates a new Productos model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new PresentacionProducto();
+        $model = new Productos();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $producto = \app\models\Productos::findOne($model->id_producto);
-            $model->id_grupo = $producto->id_grupo;
-            $model->user_name = Yii::$app->user->identity->username;
-            $model->save();
             return $this->redirect(['index']);
         }
 
@@ -89,7 +85,7 @@ class PresentacionProductoController extends Controller
     }
 
     /**
-     * Updates an existing PresentacionProducto model.
+     * Updates an existing Productos model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -100,8 +96,6 @@ class PresentacionProductoController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $producto = \app\models\Productos::findOne($model->id_producto);
-            $model->id_grupo = $producto->id_grupo;
             return $this->redirect(['index']);
         }
 
@@ -111,37 +105,37 @@ class PresentacionProductoController extends Controller
     }
 
     /**
-     * Deletes an existing PresentacionProducto model.
+     * Deletes an existing Productos model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-   public function actionDelete($id)
+    public function actionDelete($id)
     {
         try {
             $this->findModel($id)->delete();
             Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
-            $this->redirect(["presentacion-producto/index"]);
+            $this->redirect(["productos/index"]);
         } catch (IntegrityException $e) {
-            $this->redirect(["presentacion-producto/index"]);
+            $this->redirect(["productos/index"]);
             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
         } catch (\Exception $e) {            
             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociado en otros procesos');
-            $this->redirect(["presentacion-producto/index"]);
+            $this->redirect(["productos/index"]);
         }
     }
 
     /**
-     * Finds the PresentacionProducto model based on its primary key value.
+     * Finds the Productos model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return PresentacionProducto the loaded model
+     * @return Productos the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = PresentacionProducto::findOne($id)) !== null) {
+        if (($model = Productos::findOne($id)) !== null) {
             return $model;
         }
 

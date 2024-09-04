@@ -796,11 +796,12 @@ class InventarioProductosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
                                
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
                     ->setCellValue('B1', 'CODIGO')
-                    ->setCellValue('C1', 'PRODUCTO')
+                    ->setCellValue('C1', 'PRESENTACION')
                     ->setCellValue('D1', 'DESCRIPCION')
                     ->setCellValue('E1', 'FECHA PROCESO')
                     ->setCellValue('F1', 'FECHA VCTO')
@@ -816,8 +817,9 @@ class InventarioProductosController extends Controller
                     ->setCellValue('P1', 'USER NAME')
                     ->setCellValue('Q1', 'FECHA_ CREACION')
                     ->setCellValue('R1', 'CODIGO EAN')
-                     ->setCellValue('S1', 'GRUPO')
-                    ->setCellValue('T1', 'CLASIFICACION');
+                    ->setCellValue('S1', 'GRUPO')
+                    ->setCellValue('T1', 'PRODUCTO')
+                    ->setCellValue('U1', 'CLASIFICACION');
             $i = 2;
         
         foreach ($tableexcel as $val) {
@@ -849,7 +851,8 @@ class InventarioProductosController extends Controller
                     ->setCellValue('Q' . $i, $val->fecha_creacion)
                     ->setCellValue('R' . $i, $val->codigo_ean)
                     ->setCellValue('S' . $i, $val->grupo->nombre_grupo)
-                    ->setCellValue('T' . $i, $val->grupo->clasificacionInventario->descripcion);
+                    ->setCellValue('T' . $i, $val->producto->nombre_producto)
+                    ->setCellValue('U' . $i, $val->grupo->clasificacionInventario->descripcion);
             $i++;
         }
 

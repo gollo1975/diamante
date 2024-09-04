@@ -52,8 +52,8 @@ class OrdenProduccion extends \yii\db\ActiveRecord
         return [
             [['numero_orden', 'id_almacen', 'id_grupo', 'numero_lote', 'subtotal', 'iva', 'total_orden', 'autorizado', 'cerrar_orden',
                 'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado','producto_almacenado','exportar_inventario','exportar_materia_prima',
-                'tamano_lote','id_proceso_produccion','seguir_proceso_ensamble','proceso_auditado','orden_cerrada_ensamble'], 'integer'],
-            [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable','id_proceso_produccion'], 'required'],
+                'tamano_lote','id_proceso_produccion','seguir_proceso_ensamble','proceso_auditado','orden_cerrada_ensamble','id_producto'], 'integer'],
+            [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable','id_proceso_produccion','id_producto'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro','fecha_cambio'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
@@ -61,6 +61,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             [['id_almacen'], 'exist', 'skipOnError' => true, 'targetClass' => Almacen::className(), 'targetAttribute' => ['id_almacen' => 'id_almacen']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_proceso_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => TipoProcesoProduccion::className(), 'targetAttribute' => ['id_proceso_produccion' => 'id_proceso_produccion']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -74,6 +75,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             'numero_orden' => 'Numero orden:',
             'id_almacen' => 'Almacen/Bodega:',
             'id_grupo' => 'Grupo producto:',
+            'id_producto' => 'Producto:',
             'numero_lote' => 'Numero lote:',
             'fecha_proceso' => 'Fecha proceso:',
             'fecha_entrega' => 'Fecha entrega:',
@@ -125,6 +127,14 @@ class OrdenProduccion extends \yii\db\ActiveRecord
     public function getTipoProceso()
     {
         return $this->hasOne(TipoProcesoProduccion::className(), ['id_proceso_produccion' => 'id_proceso_produccion']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProducto()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
     
     public function getAutorizadoOrden() {

@@ -40,14 +40,13 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_grupo', 'descripcion','id_marca', 'id_medida_producto'], 'required'],
-            [['id_grupo','id_marca','id_medida_producto'], 'integer'],
+            [['id_producto', 'descripcion', 'id_medida_producto'], 'required'],
+            [['id_grupo','id_medida_producto','id_producto'], 'integer'],
             [['fecha_registro'], 'safe'],
-            [['descripcion'], 'string', 'max' => 40],
+            [['descripcion'], 'string', 'max' => 70],
             [['user_name'], 'string', 'max' => 15],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
-            [['id_marca'], 'exist', 'skipOnError' => true, 'targetClass' => Marca::className(), 'targetAttribute' => ['id_marca' => 'id_marca']],
-            [['id_medida_producto'], 'exist', 'skipOnError' => true, 'targetClass' => MedidaProductoTerminado::className(), 'targetAttribute' => ['id_medida_producto' => 'id_medida_producto']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -59,11 +58,11 @@ class PresentacionProducto extends \yii\db\ActiveRecord
         return [
             'id_presentacion' => 'Id',
             'id_grupo' => 'Grupo producto',
-            'descripcion' => 'Producto',
+            'id_producto' => 'Producto',
+            'descripcion' => 'Presentacion producto',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'User name',
-            'id_marca' => 'Marca:',
-            'id_medida_producto' => 'Medida:',
+           'id_medida_producto' => 'Medida:',
         ];
     }
 
@@ -83,8 +82,13 @@ class PresentacionProducto extends \yii\db\ActiveRecord
         return $this->hasOne(MedidaProductoTerminado::className(), ['id_medida_producto' => 'id_medida_producto']);
     }
     
-    public function getMarca()
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProducto()
     {
-        return $this->hasOne(Marca::className(), ['id_marca' => 'id_marca']);
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
+    
+  
 }

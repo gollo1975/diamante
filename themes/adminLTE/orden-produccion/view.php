@@ -86,8 +86,8 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_orden_produccion") ?></th>
                     <td><?= Html::encode($model->id_orden_produccion) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
-                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
+                    <td><?= Html::encode($model->producto->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_almacen') ?></th>
                     <td><?= Html::encode($model->almacen->almacen) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
@@ -170,7 +170,6 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                             <th scope="col" align="center" style='background-color:#B9D5CE; width: 25%'>Presentación producto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Proyectadas</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad real</th>
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Marca</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo medida</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>F. Vcto</th> 
@@ -189,7 +188,6 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="descripcion[]" value="<?= $val->descripcion ?>" size ="45" maxlength="40" required="true"> </td> 
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_producto[]" value="<?= $val->cantidad ?>" style="text-align: right" size="9" required="true"> </td> 
                                                     <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
-                                                    <td><?= $val->presentacionProducto->marca->marca ?></td>
                                                     <td><?= $val->medidaProducto->descripcion ?></td>
                                                     <td style="text-align: right"><?= $val->numero_lote ?></td>  
                                                     <td><?= $val->fecha_vencimiento ?></td>
@@ -199,7 +197,6 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                    <td><?= $val->descripcion ?></td>
                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                    <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
-                                                    <td><?= $val->presentacionProducto->marca->marca ?></td>
                                                    <td><?= $val->medidaProducto->descripcion ?></td>
                                                    <td style="text-align: right"><?= $val->numero_lote ?></td>  
                                                    <td><?= $val->fecha_vencimiento ?></td>

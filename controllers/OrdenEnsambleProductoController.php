@@ -204,6 +204,77 @@ class OrdenEnsambleProductoController extends Controller
         }    
     }
     
+    //PROCESO QUE PERMITE DESCARGAR EL MATERIAL DE EMPAQUE
+     public function actionIndex_descargar_inventario() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',112])->all()){
+                $form = new FiltroBusquedaOrdenEnsamble();
+                $numero_ensamble = null;
+                $numero_lote = null;
+                $fecha_inicio = null;
+                $fecha_corte = null;
+                $orden = null;
+                $grupo = null; $tipo_proceso = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $numero_ensamble = Html::encode($form->numero_ensamble);
+                        $numero_lote = Html::encode($form->numero_lote);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $orden = Html::encode($form->orden);
+                        $grupo = Html::encode($form->grupo);
+                        $table = OrdenEnsambleProducto::find()
+                                    ->andFilterWhere(['=', 'numero_orden_ensamble', $numero_ensamble])
+                                    ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
+                                    ->andFilterWhere(['=', 'id_orden_produccion', $orden])
+                                    ->andFilterWhere(['=', 'numero_lote', $numero_lote])
+                                    ->andFilterWhere(['=', 'id_grupo', $grupo])
+                                    ->andWhere(['=', 'proceso_auditado', 1]);
+                                    $table = $table->orderBy('id_ensamble DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = OrdenEnsambleProducto::find()
+                                         ->Where(['=', 'proceso_auditado', 1])
+                                         ->orderBy('id_ensamble DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                   
+                }
+                $to = $count->count();
+                return $this->render('index_descargar', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
     /**
      * Displays a single OrdenEnsambleProducto model.
      * @param integer $id
@@ -761,13 +832,13 @@ class OrdenEnsambleProductoController extends Controller
     }
    
     //PERMITE EXPORTAR TODOS LOS PRODUCTOS APROBADOS
-    public function actionExportar_producto_inventario($id, $id_orden_produccion, $token, $grupo, $sw) {
+    public function actionExportar_producto_inventario($id, $id_orden_produccion, $grupo) {
         $ordenP = \app\models\OrdenProduccion::findOne($id_orden_produccion);
         $orden_ensamble = OrdenEnsambleProducto::findOne($id);
         $detalle = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', 'null'])->all();
         if($orden_ensamble->proceso_auditado == 0){
             Yii::$app->getSession()->setFlash('error', 'No se puede exportar el inventario al modulo de producto terminado porque esta orden de ensable no se ha auditado. Favor valide la informacion.'); 
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token,'sw' => $sw]);
+            $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
         }else {
             if($ordenP->tipo_orden == 0){ //reprogramacion de productos
                 if(count($detalle) > 0){
@@ -789,10 +860,10 @@ class OrdenEnsambleProductoController extends Controller
                             
                         }
                     endforeach;
-                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token,'sw' => $sw]);
+                    $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
                 }else{
                     Yii::$app->getSession()->setFlash('warning', 'Los productos que se crearon en esta orden de produccion ya fueron importados al modulo de inventario.'); 
-                     $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token,'sw' => $sw]);
+                     $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
                 }    
             }else{ //INGRESA PRODUCTO NUEVO AL SISTEMA
                 if(count($detalle) > 0){
@@ -808,6 +879,7 @@ class OrdenEnsambleProductoController extends Controller
                             $table->unidades_entradas = $detalles->cantidad_real;
                             $table->stock_unidades = $detalles->cantidad_real;
                             $table->id_grupo = $grupo;
+                            $table->id_producto = $producto->ordenProduccion->id_producto;
                             $table->id_detalle = $detalles->id_detalle;
                             $table->aplica_iva = $producto->aplica_iva;
                             $table->porcentaje_iva = $producto->porcentaje_iva;
@@ -830,10 +902,10 @@ class OrdenEnsambleProductoController extends Controller
                         }    
                    endforeach;
                     Yii::$app->getSession()->setFlash('success', 'Los productos realcionados en esta ORDEN DE ENSAMBLE se exportaron con EXITO al modulo de inventario de producto terminado.');  
-                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+                    $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
                 }else{
                     Yii::$app->getSession()->setFlash('warning', 'Este producto no cumple con los requisistos para importar. Validar el porcentaje de cumplimiento en la vista de presentacion del producto. Este debe ser mayor a 0.');  
-                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+                    $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
                 }    
             }
         }    
@@ -853,7 +925,7 @@ class OrdenEnsambleProductoController extends Controller
     }
     
      //PROCESO QUE DESCARGA EL MATERIAL DE EMPAQUE DE LA ORDEN DE ENSAMBLE
-    public function actionExportar_material_empaque($id, $token, $id_orden_produccion, $sw) {
+    public function actionExportar_material_empaque($id, $id_orden_produccion) {
         $orden = OrdenEnsambleProducto::findOne($id);
         $detalle = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->andWhere(['=','importado', 0])->all();
         if(count($detalle) > 0){
@@ -862,7 +934,7 @@ class OrdenEnsambleProductoController extends Controller
                 $materia = \app\models\MateriaPrimas::findOne($detalles->id_materia_prima);
                 if ($materia){
                     if($materia->aplica_inventario == 1){
-                        $materia->stock -= $detalles->unidades_reales;
+                        $materia->stock -= $detalles->unidades_utilizadas;
                         $materia->save(false);
                         $detalles->importado = 1;
                         $detalles->save();
@@ -874,10 +946,11 @@ class OrdenEnsambleProductoController extends Controller
                 $orden->save(false);
             endforeach;
             Yii::$app->getSession()->setFlash('success', 'Se exportaron  ('.$con.') registros al modulo de materias primas con EXITO.');
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+            $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
         }else{
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw ]);
             Yii::$app->getSession()->setFlash('info', 'No hay registros para exportar.'); 
+            $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
+           
         }    
         
     }
