@@ -66,7 +66,18 @@ class PDF extends FPDF {
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
         $this->Cell(162, 7, utf8_decode("OP  -  " .$orden->producto->nombre_producto), 0, 0, 'l', 0);
-        $this->Cell(30, 7, utf8_decode('N°. '.str_pad($orden->numero_orden, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        if($orden->id_proceso_produccion == 1){
+            $conse = app\models\Consecutivos::findOne(21);
+            $this->Cell(30, 7, utf8_decode('N°. '.$conse->abreviatura.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        }else{
+            if($orden->id_proceso_produccion == 2){
+                $conse = app\models\Consecutivos::findOne(3);
+                $this->Cell(30, 7, utf8_decode('N°. '.$conse->abreviatura.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+            }else{
+                  $conse = app\models\Consecutivos::findOne(22);
+                $this->Cell(30, 7, utf8_decode('N°. '.$conse->abreviatura.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+            }
+        }
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 7);
@@ -137,13 +148,12 @@ class PDF extends FPDF {
         $this->Line(10,70,10,102);
         $this->Line(33,70,33,102);
         $this->Line(10,77,202,77);//fila entre registro
-        $this->Line(106,70,106,102);
+        $this->Line(127,70,127,102);
         $this->Line(10,81,202,81);//fila entre registro
-        $this->Line(136,70,136,102);
+        $this->Line(152,70,152,102);
         $this->Line(10,86,202,86);//fila entre registro
-       
         $this->Line(10,91,202,91);//fila entre registro
-        $this->Line(171,70,171,102);
+        $this->Line(177,70,177,102);
         $this->Line(10,96,202,96);//fila entre registro
         $this->Line(202,70,202,102);
         $this->Line(10,102,202,102);//linea horizontal inferior  
@@ -191,7 +201,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 7);
 
         //creamos la cabecera de la tabla.
-        $w = array(23, 73, 30, 35, 31);
+        $w = array(23, 94, 25, 25, 25);
         for ($i = 0; $i < count($header); $i++)
             if ($i == 0 || $i == 1)
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -217,12 +227,12 @@ class PDF extends FPDF {
 		
         foreach ($producto as $detalle) {                                                           
             $pdf->Cell(23, 4, $detalle->codigo_producto, 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 8);
-            $pdf->Cell(73, 4, utf8_decode($detalle->descripcion), 0, 0, 'L');
             $pdf->SetFont('Arial', '', 7);
-            $pdf->Cell(30, 4, ''.number_format($detalle->cantidad,0), 0, 0, 'R');
-            $pdf->Cell(35, 4, $detalle->numero_lote, 0, 0, 'C');
-            $pdf->Cell(31, 4, $detalle->fecha_vencimiento, 0, 0, 'C');	
+            $pdf->Cell(94, 4, utf8_decode($detalle->descripcion), 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->Cell(25, 4, ''.number_format($detalle->cantidad,0), 0, 0, 'R');
+            $pdf->Cell(25, 4, $model->numero_lote, 0, 0, 'C');
+            $pdf->Cell(25, 4, $detalle->fecha_vencimiento, 0, 0, 'C');	
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }

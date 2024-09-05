@@ -41,10 +41,10 @@ class OrdenProduccionProductos extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'codigo_producto', 'cantidad', 'cerrar_linea','numero_lote','id_medida_producto','aplica_iva','id_inventario',
+            [['id_orden_produccion', 'codigo_producto', 'cantidad', 'cerrar_linea','id_medida_producto','aplica_iva','id_inventario',
                 'importado','costo_unitario','cantidad_real','id_presentacion','orden_ensamble_creado'], 'integer'],
             [['descripcion'], 'string', 'max' => 40],
-            ['user_name', 'string', 'max' => 15],
+            [['user_name','numero_lote'], 'string', 'max' => 15],
             ['porcentaje_iva', 'number'],
             ['fecha_vencimiento', 'safe'],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],

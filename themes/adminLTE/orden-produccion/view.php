@@ -54,7 +54,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generarorden', 'id' => $model->id_orden_produccion, 'token'=> $token,'id_grupo' =>$model->id_grupo],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar el numero de la orden de producción. Antes de generar la ORDEN DE PRODUCCION, debe de actualizar las cantidades y la fecha de vencimiento por la vista de inicial.', 'method' => 'post']]);
             }else{
-                if($model->numero_orden > 0 && $model->numero_lote == 0){
+                if($model->numero_orden > 0 && $model->numero_lote == ''){
                     echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar lote', ['generarlote', 'id' => $model->id_orden_produccion, 'token'=> $token, 'fecha_actual' =>$model->fecha_proceso],['class' => 'btn btn-warning btn-sm',
                                'data' => ['confirm' => 'Esta seguro de generar el numero de lote a esta orden de producción!.', 'method' => 'post']]);
                 }else{
@@ -189,7 +189,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_producto[]" value="<?= $val->cantidad ?>" style="text-align: right" size="9" required="true"> </td> 
                                                     <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
                                                     <td><?= $val->medidaProducto->descripcion ?></td>
-                                                    <td style="text-align: right"><?= $val->numero_lote ?></td>  
+                                                    <td><?= $val->numero_lote ?></td>  
                                                     <td><?= $val->fecha_vencimiento ?></td>
                                                     <td><?= $val->cerrarLinea ?></td>
                                                      <td><?= $val->documentoExportado ?></td>
@@ -198,7 +198,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                    <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
                                                    <td><?= $val->medidaProducto->descripcion ?></td>
-                                                   <td style="text-align: right"><?= $val->numero_lote ?></td>  
+                                                   <td><?= Html::encode($model->numero_lote) ?></td>  
                                                    <td><?= $val->fecha_vencimiento ?></td>
                                                    <td><?= $val->cerrarLinea ?></td>
                                                    <td><?= $val->documentoExportado ?></td>

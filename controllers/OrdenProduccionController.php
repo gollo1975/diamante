@@ -811,7 +811,7 @@ class OrdenProduccionController extends Controller
             $model->save();
             return $this->redirect(['index']);
         }
-
+        $model->responsable = Yii::$app->user->identity->nombrecompleto;
         return $this->render('create', [
             'model' => $model,
             'sw' => 0,
@@ -1022,16 +1022,25 @@ class OrdenProduccionController extends Controller
     }
     // CODIGO QUE GENERA EL LOTE
     public function actionGenerarlote($id, $token, $fecha_actual) {
-        $numero = 0;
+       
         $mes = substr($fecha_actual, 5, 2);
         $anio = substr($fecha_actual, 2, 2);
         $orden = OrdenProduccion::findOne($id);
         $detalle = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-        if ($orden->numero_lote == 0){
+        if ($orden->numero_lote == ''){
             $valor = 0;
             $valor = round($orden->subtotal / $orden->unidades);
-            $numero = $mes.$anio.$orden->numero_orden;
-            $orden->numero_lote = $numero;
+            $contador = strlen($orden->numero_orden);
+            $numero = $orden->numero_orden;
+            $longitud =4  ;
+            function formatear_numero($numero, $longitud) {
+                return str_pad($numero, $longitud, "0", STR_PAD_LEFT);
+                }
+            $numero = $numero;
+            $numero_formateado = formatear_numero($numero, $longitud);
+
+            $numero_lote = $mes.$anio.$numero_formateado;
+            $orden->numero_lote = $numero_lote;
             $orden->cerrar_orden = 1;
             $orden->costo_unitario = $valor;
             $orden->save();

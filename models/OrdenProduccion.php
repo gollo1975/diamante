@@ -55,7 +55,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
                 'tamano_lote','id_proceso_produccion','seguir_proceso_ensamble','proceso_auditado','orden_cerrada_ensamble','id_producto'], 'integer'],
             [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable','id_proceso_produccion','id_producto'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro','fecha_cambio'], 'safe'],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name', 'numero_lote'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
             ['responsable', 'string', 'max' => 40],
             [['id_almacen'], 'exist', 'skipOnError' => true, 'targetClass' => Almacen::className(), 'targetAttribute' => ['id_almacen' => 'id_almacen']],

@@ -80,7 +80,7 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
         </div>    
          <div class="row">
              <?= $form->field($model, 'tamano_lote')->textInput(['maxlength' => true]) ?> 
-               <?= $form->field($model, 'responsable')->input(['text', 'maxlength' => true]) ?>
+               <?= $form->field($model, 'responsable')->textInput(['maxlength' => true,  'readonly' => true]) ?>
         </div>
         <div class = "row">
              <?= $form->field($model, 'id_almacen')->widget(Select2::classname(), [
