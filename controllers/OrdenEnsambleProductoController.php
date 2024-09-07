@@ -525,6 +525,8 @@ class OrdenEnsambleProductoController extends Controller
         $detalle_empaque = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         $sw = 0;
         foreach ($detalle_empaque as $detalle):
+          
+        echo $detalle->unidades_reales;
                 if($orden->total_unidades <> $detalle->unidades_reales){
                    $sw = 1;
                 }

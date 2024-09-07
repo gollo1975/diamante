@@ -10,6 +10,7 @@ use yii\filters\VerbFilter;
 use app\models\Items;
 use app\models\ItemsSearch;
 use app\models\UsuarioDetalle;
+use app\models\MedidaMateriaPrima;
 /**
  * ItemsController implements the CRUD actions for Items model.
  */
@@ -75,10 +76,12 @@ class ItemsController extends Controller
     {
         $model = new Items();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+      /*  if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index']);
-        }
+        }*/
+     var_dump($model->codificar);
 
+       // $model->codificar = 1;
         return $this->render('create', [
             'model' => $model,
         ]);

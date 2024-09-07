@@ -1022,7 +1022,6 @@ class OrdenProduccionController extends Controller
     }
     // CODIGO QUE GENERA EL LOTE
     public function actionGenerarlote($id, $token, $fecha_actual) {
-       
         $mes = substr($fecha_actual, 5, 2);
         $anio = substr($fecha_actual, 2, 2);
         $orden = OrdenProduccion::findOne($id);
@@ -1038,15 +1037,23 @@ class OrdenProduccionController extends Controller
                 }
             $numero = $numero;
             $numero_formateado = formatear_numero($numero, $longitud);
-
-            $numero_lote = $mes.$anio.$numero_formateado;
+            if($orden->id_proceso_produccion == 3){
+                $conse = \app\models\Consecutivos::findOne(22);
+            }else{
+                if($orden->id_proceso_produccion == 1){
+                    $conse = \app\models\Consecutivos::findOne(21);
+                }else{
+                    $conse = \app\models\Consecutivos::findOne(3);
+                }
+            }
+            $numero_lote = $conse->abreviatura.$mes.$anio.$numero_formateado;
             $orden->numero_lote = $numero_lote;
             $orden->cerrar_orden = 1;
             $orden->costo_unitario = $valor;
-            $orden->save();
+            $orden->save(false);
             foreach ($detalle as $detalles):
                 $detalles->cerrar_linea  = 1;
-                $detalles->numero_lote = $numero;
+                $detalles->numero_lote = $numero_lote;
                 $detalles->costo_unitario = $valor;
                 $detalles->save();
             endforeach;
@@ -1506,7 +1513,7 @@ class OrdenProduccionController extends Controller
                 $ordenProduccion->save();
                 if($auditoria->continua == 1){
                     $ordenProduccion->seguir_proceso_ensamble = 1;
-                    $ordenProduccion->save();
+                    $ordenProduccion->save(false);
                 }
                 $this->redirect(["orden-produccion/view_auditoria_orden_produccion", 'id_auditoria' => $id_auditoria]);  
             }    
@@ -1642,8 +1649,15 @@ class OrdenProduccionController extends Controller
     //permite cerrar las ordens de produccion sin hacerle ordenes de ensamble
     public function actionCerrar_orden_produccion($id) {
         $orden = OrdenProduccion::findOne($id);
+        $detalle = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
+        $suma =0;
+        foreach ($detalle as $cantidad):
+            $suma += $cantidad->cantidad_real;
+        endforeach;
+        $orden->unidades_reales = $suma;
         $orden->orden_cerrada_ensamble = 1;
-        $orden->save();
+        $orden->producto_aprobado = 1;
+        $orden->save(false);
         return $this->redirect(['index_ordenes_produccion']);
     }
     

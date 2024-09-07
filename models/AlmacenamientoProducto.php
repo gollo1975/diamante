@@ -39,9 +39,9 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_documento', 'numero_lote', 'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes','id_inventario'], 'integer'],
+            [['id_orden_produccion', 'id_documento',  'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes','id_inventario'], 'integer'],
             [['fecha_almacenamiento'], 'safe'],
-            [['codigo_producto', 'user_name'], 'string', 'max' => 15],
+            [['codigo_producto', 'user_name','numero_lote'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_documento'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoAlmacenamiento::className(), 'targetAttribute' => ['id_documento' => 'id_documento']],
@@ -55,9 +55,9 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_almacenamiento' => 'Id Almacenamiento',
-            'id_orden_produccion' => 'Id Orden Produccion',
-            'id_documento' => 'Id Documento',
+            'id_almacenamiento' => 'Id',
+            'id_orden_produccion' => 'Orden Produccion',
+            'id_documento' => 'Documento',
             'numero_lote' => 'Numero lote',
             'codigo_producto' => 'Codigo Producto',
             'nombre_producto' => 'Nombre Producto',

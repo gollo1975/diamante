@@ -1374,7 +1374,7 @@ class AlmacenamientoProductoController extends Controller
                 $table->id_inventario = $dato->id_inventario;
                 $table->codigo_producto = $detalle->codigo_producto;
                 $table->nombre_producto = $detalle->descripcion;
-                $table->unidades_producidas = $detalle->cantidad;
+                $table->unidades_producidas = $detalle->cantidad_real;
                 $table->fecha_almacenamiento = date('Y-m-d');
                 $table->numero_lote = $detalle->numero_lote;
                 $table->user_name = Yii::$app->user->identity->username;
@@ -1397,7 +1397,7 @@ class AlmacenamientoProductoController extends Controller
             }    
         endforeach;
         if($sw == 0){
-            Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lotes de la orden de produccion No ('. $id_orden.') al modulo de almacenamiento con éxito.');
+            Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lote de la orden de produccion No ('. $id_orden.') al modulo de almacenamiento con éxito.');
             return $this->redirect(['cargar_orden_produccion']);
         }else{
             Yii::$app->getSession()->setFlash('success', 'Se exporto (' . $con.') lineas de la entrada No ('. $id_orden.') al modulo de almacenamiento con éxito.');

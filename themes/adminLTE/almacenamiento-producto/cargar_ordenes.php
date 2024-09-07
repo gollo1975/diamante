@@ -88,11 +88,12 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 90%;'>         
                  <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No Orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo producto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Bodega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Unidades fabricadas</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F. Orden</th>
+                <th scope="col" style='background-color:#B9D5CE;'>U. fabricadas</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                          
             </tr>
@@ -105,10 +106,11 @@ $form = ActiveForm::begin([
                 <td><?= $val->id_orden_produccion?></td>
                 <td><?= $val->numero_orden?></td>
                 <td><?= $val->grupo->nombre_grupo?></td>
+                <td><?= $val->producto->nombre_producto?></td>
                  <td><?= $val->almacen->almacen?></td>
                 <td><?= $val->numero_lote?></td>
                 <td><?= $val->fecha_proceso?></td>
-                <td style="text-align: right"><?= ''.number_format($val->unidades, 0)?></td>
+                <td style="text-align: right"><?= ''.number_format($val->unidades_reales,0)?></td>
                 <?php if($almacenar){?>
                     <td style= 'width: 20px; height: 20px;'>
                              <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de los lotes"></span></a>

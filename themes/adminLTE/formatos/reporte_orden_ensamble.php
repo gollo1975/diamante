@@ -218,7 +218,7 @@ class PDF extends FPDF {
         //SEGUNDO NOMBRE
         $pdf->SetXY(110, 20);
         $this->SetFont('', 'B', 12);
-        $pdf->Cell(20, 5, 'ORDEN DE ENSAMBLE', 0, 0, 'C',0);
+        $pdf->Cell(20, 5, 'RENDIMIENTO Y CONCILIACION', 0, 0, 'C',0);
        
     }
     

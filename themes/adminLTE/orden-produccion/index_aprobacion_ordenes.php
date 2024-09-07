@@ -151,7 +151,7 @@ $form = ActiveForm::begin([
                         <td style= 'width: 25px; height: 10px;'>
                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
                                            'class' => '',
-                                           'title' => 'Proceso que permite cargar los conceptos de auditoria. (Auditoria OP)', 
+                                           'title' => 'Proceso que permite crear la auditoria a PRODUCTO GRANEL.)', 
                                            'data' => [
                                                'confirm' => 'Esta seguro de crear la auditoria a la orden de produccion Nro:  ('.$val->numero_orden.').',
                                                'method' => 'post',
@@ -163,7 +163,7 @@ $form = ActiveForm::begin([
                          <td style= 'width: 25px; height: 10px;'>
                             <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_orden_ensamble', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
                                            'class' => '',
-                                           'title' => 'Proceso que permite crear la orden de ensamble a la orden de produccion.', 
+                                           'title' => 'Proceso que permite crear la ORDEN DE ENSAMBLE.', 
                                            'data' => [
                                                'confirm' => 'Esta seguro de crear la ORDEN DE ENSAMBLE a la orden de produccion  Nro:  ('.$val->numero_orden.').',
                                                'method' => 'post',

@@ -51,8 +51,8 @@ $this->params['breadcrumbs'][] = $id_orden;
                     <td><?= Html::encode($model->numero_orden) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
-                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades_reales') ?></th>
+                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades_reales,0)) ?></td>
                 </tr>
             </table>    
         </div>
@@ -172,14 +172,14 @@ $this->params['breadcrumbs'][] = $id_orden;
                             <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr style="font-size: 90%;">
-                                        <th scope="col"  style='background-color:#B9D5CE;'><b>Numero piso</b></th>                        
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Numero rack</th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'><b>Piso</b></th>                        
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Rack</th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Ubicación</th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero lote</th>
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Fecha lote</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>F.Almacenamiento</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Codigo</th>
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Unidades</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Presentacion</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Entradas</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
                                     </tr>
                                 </thead>

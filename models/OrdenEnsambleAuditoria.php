@@ -45,11 +45,11 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_auditoria', 'numero_orden', 'numero_lote', 'id_ensamble', 'id_etapa', 'id_grupo', 'id_forma', 'condiciones_analisis', 'cerrar_auditoria'], 'integer'],
+            [['numero_auditoria', 'numero_orden', 'id_ensamble', 'id_etapa', 'id_grupo', 'id_forma', 'condiciones_analisis', 'cerrar_auditoria'], 'integer'],
             [['fecha_proceso','fecha_analisis'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','numero_lote'], 'string', 'max' => 15],
             [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],

@@ -52,7 +52,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
         return [
             [['numero_orden', 'id_almacen', 'id_grupo', 'numero_lote', 'subtotal', 'iva', 'total_orden', 'autorizado', 'cerrar_orden',
                 'tipo_orden', 'unidades', 'costo_unitario','producto_aprobado','producto_almacenado','exportar_inventario','exportar_materia_prima',
-                'tamano_lote','id_proceso_produccion','seguir_proceso_ensamble','proceso_auditado','orden_cerrada_ensamble','id_producto'], 'integer'],
+                'tamano_lote','id_proceso_produccion','seguir_proceso_ensamble','proceso_auditado','orden_cerrada_ensamble','id_producto','unidades_reales'], 'integer'],
             [['id_almacen', 'id_grupo', 'fecha_proceso', 'fecha_entrega', 'responsable','id_proceso_produccion','id_producto'], 'required'],
             [['fecha_proceso', 'fecha_entrega', 'fecha_registro','fecha_cambio'], 'safe'],
             [['user_name', 'numero_lote'], 'string', 'max' => 15],
@@ -101,6 +101,7 @@ class OrdenProduccion extends \yii\db\ActiveRecord
             'fecha_cambio' => 'fecha_cambio',
             'proceso_auditado' => 'proceso_auditado',
             'orden_cerrada_ensamble' => 'orden_cerrada_ensamble',
+            'unidades_reales' => 'unidades_reales',
             
         ];
     }

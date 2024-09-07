@@ -64,12 +64,12 @@ class PosicionAlmacenamiento extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_movimiento' => 'Id Movimiento',
-            'id_piso' => 'Id Piso',
-            'id_rack' => 'Id Rack',
-            'id_rack_nuevo' => 'Id Rack Nuevo',
-            'id_posicion' => 'Id Posicion',
-            'id_posicion_nueva' => 'Id Posicion Nueva',
+            'id_movimiento' => 'Id',
+            'id_piso' => 'Piso:',
+            'id_rack' => 'Rack:',
+            'id_rack_nuevo' => 'Rack Nuevo:',
+            'id_posicion' => 'Posicion:',
+            'id_posicion_nueva' => 'Posicion Nueva',
             'codigo' => 'Codigo',
             'producto' => 'Producto',
             'cantidad' => 'Cantidad',

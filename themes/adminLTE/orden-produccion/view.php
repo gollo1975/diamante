@@ -198,7 +198,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                    <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
                                                    <td><?= $val->medidaProducto->descripcion ?></td>
-                                                   <td><?= Html::encode($model->numero_lote) ?></td>  
+                                                   <td><?= Html::encode($val->numero_lote) ?></td>  
                                                    <td><?= $val->fecha_vencimiento ?></td>
                                                    <td><?= $val->cerrarLinea ?></td>
                                                    <td><?= $val->documentoExportado ?></td>

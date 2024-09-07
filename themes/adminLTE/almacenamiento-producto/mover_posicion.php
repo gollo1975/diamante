@@ -114,7 +114,7 @@ $form = ActiveForm::begin([
         <thead>
             <tr style ='font-size: 90%;'>        
             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-            <th scope="col" style='background-color:#B9D5CE;'>Producto</th>    
+            <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>    
             <th scope="col" style='background-color:#B9D5CE;'>Piso</th> 
             <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
             <th scope="col" style='background-color:#B9D5CE;'>U. rack</th>

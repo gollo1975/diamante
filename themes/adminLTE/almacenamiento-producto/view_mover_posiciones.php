@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $model->id;
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "codigo_producto") ?></th>
                     <td><?= Html::encode($model->codigo_producto) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'producto') ?></th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presentacion') ?></th>
                     <td><?= Html::encode($model->producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_piso') ?></th>
                     <td><?= Html::encode($model->piso->descripcion) ?></td>
@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $model->id;
                                 <thead>
                                     <tr style="font-size: 90%;">
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>   
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Presentacion</th>   
                                         <th scope="col"  style='background-color:#B9D5CE;'>Piso anterior</th>   
                                         <th scope="col"  style='background-color:#B9D5CE;'>Nuevo piso</th>   
                                         <th scope="col"  style='background-color:#B9D5CE;'>Posicion anterior</th> 

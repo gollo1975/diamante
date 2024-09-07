@@ -41,10 +41,10 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'numero_lote', 'id_etapa','autorizado','total_unidades','inventario_exportado',
+            [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'id_etapa','autorizado','total_unidades','inventario_exportado',
                 'proceso_auditado','exportar_material_empaque'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro','fecha_hora_cierre'], 'safe'],
-            [['user_name','peso_neto'], 'string', 'max' => 15],
+            [['user_name','peso_neto','numero_lote'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
             [['responsable'], 'string', 'max' => 50],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],

@@ -37,11 +37,11 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','numero_lote','cerrar_auditoria','id_grupo'], 'integer'],
+            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','cerrar_auditoria','id_grupo'], 'integer'],
             [['fecha_proceso','fecha_cierre'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','numero_lote'], 'string', 'max' => 15],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],

@@ -60,6 +60,7 @@ $this->params['breadcrumbs'][] = $id_pedido;
                     </tr>
                 </thead>
                 <?php
+                
                 if(count($almacenamiento) > 0){
                     foreach ($almacenamiento as $val): ?>
                         <tr style="font-size: 90%;">

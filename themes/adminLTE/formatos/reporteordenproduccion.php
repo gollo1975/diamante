@@ -66,18 +66,8 @@ class PDF extends FPDF {
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
         $this->Cell(162, 7, utf8_decode("OP  -  " .$orden->producto->nombre_producto), 0, 0, 'l', 0);
-        if($orden->id_proceso_produccion == 1){
-            $conse = app\models\Consecutivos::findOne(21);
-            $this->Cell(30, 7, utf8_decode('N°. '.$conse->abreviatura.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
-        }else{
-            if($orden->id_proceso_produccion == 2){
-                $conse = app\models\Consecutivos::findOne(3);
-                $this->Cell(30, 7, utf8_decode('N°. '.$conse->abreviatura.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
-            }else{
-                  $conse = app\models\Consecutivos::findOne(22);
-                $this->Cell(30, 7, utf8_decode('N°. '.$conse->abreviatura.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
-            }
-        }
+         $this->Cell(30, 7, utf8_decode('N°. '.str_pad($orden->numero_orden, 4, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 7);

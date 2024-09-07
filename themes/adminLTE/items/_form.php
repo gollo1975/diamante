@@ -23,18 +23,31 @@ use app\models\TipoSolicitud;
 <?php
 $iva = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DESC')->all(), 'id_iva', 'valor_iva');
 $conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('descripcion ASC')->all(), 'id_solicitud', 'descripcion');
+$conMedida = ArrayHelper::map(app\models\MedidaMateriaPrima::find()->orderBy ('descripcion ASC')->all(), 'id_medida', 'descripcion');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
-        <h4>ITEMS</h4>
+        <h4>INSUMO</h4>
     </div>
-    <div class="panel-body">        														   		
+    <div class="panel-body">        	
+        <div class="row">
+            <?= $form->field($model, 'codigo')->textInput(['maxlength' => true]) ?>  					
+        </div>
         <div class="row">
             <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>  					
         </div>
         <div class="row">
             <?= $form->field($model, 'id_solicitud')->widget(Select2::classname(), [
                 'data' => $conSolicitud,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+        </div>    
+         <div class="row">
+            <?= $form->field($model, 'id_medida')->widget(Select2::classname(), [
+                'data' => $conMedida,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -49,8 +62,13 @@ $conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('descripcion AS
                     'allowClear' => true
                 ],
             ]); ?> 
-        </div>        
-
+        </div>     
+        <div class="row">
+            <?= $form->field($model, 'convertir_gramo')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
+        </div>
+         <div class="row checkbox checkbox-success" align ="center">
+                <?= $form->field($model, 'codificar')->checkbox(['label' => 'Codificar este insumos en materia prima', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;' , 'id'=>'codificar']) ?>
+        </div>
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("items/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

@@ -93,11 +93,11 @@ class PDF extends FPDF {
         $this->Line(10,30,202,30);//linea inferior horizontal
        
         //Lineas del encabezado
-        $this->Line(10,74,10,125);
-        $this->Line(74,74,74,125);
-        $this->Line(164,74,164,125);
-        $this->Line(202,74,202,125);
-        $this->Line(10,125,202,125);//linea horizontal inferior  
+        $this->Line(10,74,10,150);
+        $this->Line(74,74,74,150);
+        $this->Line(164,74,164,150);
+        $this->Line(202,74,202,150);
+        $this->Line(10,150,202,150);//linea horizontal inferior  
     }
     function EncabezadoDetalles() {
         $this->Ln(10);
@@ -135,24 +135,24 @@ class PDF extends FPDF {
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }
-	$pdf->SetXY(10, 135);
+	$pdf->SetXY(10, 155);
         $this->SetFont('Arial', 'B', 8);
         $pdf->MultiCell(146, 4, utf8_decode('OBSERVACION: '.$model->observacion),0,'J');
 	//firma trabajador
-        $pdf->SetXY(10, 160);
+        $pdf->SetXY(10, 180);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(35, 5, '________________________________', 0, 0, 'L',0);
-         $pdf->SetXY(10, 165);
+         $pdf->SetXY(10, 185);
         $pdf->Cell(35, 5, 'ANALISTA JR CALIDAD', 0, 0, 'L',0);
-        $pdf->SetXY(10, 170);
+        $pdf->SetXY(10, 190);
         $pdf->Cell(35, 5, utf8_decode('Realizado'), 0, 0, 'L',0);
         // SEGUNDA FIRMA
-        $pdf->SetXY(120, 160);
+        $pdf->SetXY(120, 180);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(120, 5, '________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(120, 165);
+        $pdf->SetXY(120, 185);
         $pdf->Cell(120, 5, 'DIRECTOR TECNICO', 0, 0, 'L',0);
-        $pdf->SetXY(120, 170);
+        $pdf->SetXY(120, 190);
         $pdf->Cell(120, 5, utf8_decode('Aprobado'), 0, 0, 'L',0);
         //liena
         //linea
