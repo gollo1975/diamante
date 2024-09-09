@@ -122,7 +122,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                     <thead>
                                         <tr style="font-size: 90%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripción</th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Insumos</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Editar precio</th>  
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>F. vencimiento</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>       

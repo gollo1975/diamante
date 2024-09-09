@@ -56,16 +56,10 @@ $area = ArrayHelper::map(AreaEmpresa::find()->orderBy ('descripcion ASC')->all()
                     'allowClear' => true
                 ],
             ]); ?> 
-        </div>        
-        <div class="row">
-            <?=  $form->field($model, 'fecha_entrega')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
-           <?= $form->field($model, 'documento_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
+        </div>    
+        <div class="row">        
+            <?= $form->field($model, 'fecha_entrega')->textInput(['maxlength' => true, 'readonly' => true]) ?>
+            <?= $form->field($model, 'documento_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
         </div>
         
         <div class="row">

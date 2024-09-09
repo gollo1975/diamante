@@ -43,13 +43,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
             <?= $form->field($model, 'id_orden_compra')->dropDownList(['prompt' => 'Seleccione...']) ?>
         </div>    
         <div class="row">
-            <?=  $form->field($model, 'fecha_proceso')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
+             <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => 'true']) ?>
              <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
              
         </div>

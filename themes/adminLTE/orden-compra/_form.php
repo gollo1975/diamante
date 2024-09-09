@@ -59,13 +59,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->where(['=','requisito_validado'
             ]); ?> 
         </div>        
         <div class="row">
-            <?=  $form->field($model, 'fecha_creacion')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
+            <?= $form->field($model, 'fecha_creacion')->textInput(['maxlength' => true, 'readonly' => true]) ?>
              <?=  $form->field($model, 'fecha_entrega')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                            'value' => date('Y-m-d', strtotime('+2 days')),
                            'options' => ['placeholder' => 'Seleccione una fecha ...'],

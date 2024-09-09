@@ -25,8 +25,10 @@ $this->params['breadcrumbs'][] = $model->id_items;
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
                <tr style ='font-size:90%;'>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?>:</th>
-                    <td><?= Html::encode($model->id_items) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_items') ?>:</th>
+                    <td><?= Html::encode($model->id_items) ?></td>    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo') ?>:</th>
+                    <td><?= Html::encode($model->codigo) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Materia_prima') ?>:</th>
                     <td><?= Html::encode($model->descripcion) ?></td>
               </tr>
@@ -35,6 +37,24 @@ $this->params['breadcrumbs'][] = $model->id_items;
                     <td><?= Html::encode($model->iva->valor_iva) ?>%</td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?>:</th>
                     <td><?= Html::encode($model->tipoSolicitud->descripcion) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_medida') ?>:</th>
+                    <td><?= Html::encode($model->medida->descripcion) ?></td>
+              </tr>
+               <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?>:</th>
+                    <td><?= Html::encode($model->user_name) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora') ?>:</th>
+                    <td><?= Html::encode($model->fecha_hora) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'convertir_gramo') ?>:</th>
+                    <td><?= Html::encode($model->convertirGramo) ?></td>
+              </tr>
+              <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?>:</th>
+                    <td><?= Html::encode($model->aplicaInventario) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'inventario_inicial') ?>:</th>
+                    <td><?= Html::encode($model->inventarioInicial) ?></td>
+                     <th style='background-color:#F0F3EF;'></th>
+                    <td></td>
               </tr>
             </table>
         </div>

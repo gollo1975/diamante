@@ -139,9 +139,9 @@ class MateriaPrimas extends \yii\db\ActiveRecord
     
     public function getInventarioInicial() {
         if($this->inventario_inicial == 0){
-            $inventarioinicial = 'SI';
-        }else{
             $inventarioinicial = 'NO';
+        }else{
+            $inventarioinicial = 'SI';
         }
         return $inventarioinicial;
     }

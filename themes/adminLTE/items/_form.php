@@ -29,10 +29,16 @@ $conMedida = ArrayHelper::map(app\models\MedidaMateriaPrima::find()->orderBy ('d
     <div class="panel-heading">
         <h4>INSUMO</h4>
     </div>
-    <div class="panel-body">        	
-        <div class="row">
-            <?= $form->field($model, 'codigo')->textInput(['maxlength' => true]) ?>  					
-        </div>
+    <div class="panel-body">  
+        <?php if($sw == 0){ ?>     
+            <div class="row">
+                <?= $form->field($model, 'codigo')->textInput(['maxlength' => true]) ?>  					
+            </div>
+        <?php }else{?>
+            <div class="row">
+                <?= $form->field($model, 'codigo')->textInput(['maxlength' => true, 'readonly' => true]) ?>  					
+            </div>
+        <?php }?>
         <div class="row">
             <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>  					
         </div>
@@ -65,6 +71,12 @@ $conMedida = ArrayHelper::map(app\models\MedidaMateriaPrima::find()->orderBy ('d
         </div>     
         <div class="row">
             <?= $form->field($model, 'convertir_gramo')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
+        </div>
+         <div class="row">
+            <?= $form->field($model, 'aplica_inventario')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
+        </div>
+         <div class="row">
+            <?= $form->field($model, 'inventario_inicial')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
         </div>
          <div class="row checkbox checkbox-success" align ="center">
                 <?= $form->field($model, 'codificar')->checkbox(['label' => 'Codificar este insumos en materia prima', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;' , 'id'=>'codificar']) ?>

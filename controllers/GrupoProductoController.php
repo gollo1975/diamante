@@ -203,39 +203,22 @@ class GrupoProductoController extends Controller
         $operacion = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 1])->orderBy('materia_prima ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
+        $clasificacion = null;
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
-                $q = Html::encode($form->q);                                
-                    $operacion = \app\models\MateriaPrimas::find()
-                            ->where(['like','materia_prima',$q])
-                            ->orwhere(['=','codigo_materia_prima',$q])
-                            ->andWhere(['>','stock', 0]);
-                    $operacion = $operacion->orderBy('materia_prima ASC');                    
-                    $count = clone $operacion;
-                    $to = $count->count();
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count()
-                    ]);
-                    $operacion = $operacion
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();         
+                $q = Html::encode($form->q);    
+                $clasificacion = Html::encode($form->clasificacion); 
+                $operacion = \app\models\MateriaPrimas::find()
+                        ->andFilterWhere(['like','materia_prima', $q])
+                        ->andFilterWhere(['=','codigo_materia_prima', $q])
+                        ->andFilterWhere(['=','id_solicitud',$clasificacion])
+                        ->andWhere(['>','stock', 0]) 
+                        ->orderBy('materia_prima ASC')->all();                    
             } else {
                 $form->getErrors();
             }                    
         }else{
-            $table = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 1])->orderBy('materia_prima ASC');
-            $tableexcel = $table->all();
-            $count = clone $table;
-            $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count(),
-            ]);
-             $operacion = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
+            $table = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 1])->orderBy('materia_prima ASC')->all();
         }
         //PROCESO DE GUARDAR
          if (isset($_POST["guardarmateriaprima"])) {
@@ -261,7 +244,6 @@ class GrupoProductoController extends Controller
         }
         return $this->render('importar_materia_prima', [
             'operacion' => $operacion,            
-            'pagination' => $pages,
             'id_grupo' => $id_grupo,
             'form' => $form,
             'sw' => $sw,

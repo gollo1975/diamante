@@ -6,11 +6,13 @@ use app\models\TiposMaquinas;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
+use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
 
 $this->title = 'Items';
 $this->params['breadcrumbs'][] = ['label' => 'Listado de items', 'url' => ['view', 'id' => $id ]];
 $this->params['breadcrumbs'][] = $id;
+$conSolicitud = ArrayHelper::map(app\models\TipoSolicitud::find()->orderBy ('id_solicitud ASC')->all(), 'id_solicitud', 'descripcion');
 ?>
     <div class="modal-body">
         <p>
@@ -39,6 +41,13 @@ $this->params['breadcrumbs'][] = $id;
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
                     <?= $formulario->field($form, "q")->input("search") ?>
+                    <?= $formulario->field($form, 'clasificacion')->widget(Select2::classname(), [
+                        'data' => $conSolicitud,
+                        'options' => ['prompt' => 'Seleccione...'],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ],
+                    ]); ?> 
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -67,7 +76,7 @@ $this->params['breadcrumbs'][] = $id;
                      <table class="table table-bordered table-hover">
                         <thead>
                         <tr>
-                            <th scope="col" style='background-color:#B9D5CE;'>Id</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Descripción</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Clasificacion</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Porcentaje</th>
@@ -77,7 +86,7 @@ $this->params['breadcrumbs'][] = $id;
                         <tbody>
                         <?php foreach ($operacion as $val): ?>
                         <tr style="font-size: 85%;">
-                            <td><?= $val->id_items ?></td>
+                            <td><?= $val->codigo ?></td>
                             <td><?= $val->descripcion ?></td>
                              <td><?= $val->tipoSolicitud->descripcion ?></td>
                             <td><?= $val->iva->valor_iva ?>%</td>

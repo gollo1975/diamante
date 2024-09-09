@@ -16,6 +16,7 @@ class FormModeloBuscar extends Model
     public $fecha_entrega;
     public $etapa;
     public $punto;
+    public $clasificacion;
 
 
 
@@ -23,9 +24,9 @@ class FormModeloBuscar extends Model
     {
         return [
 
-            [['q','nombre'], 'match', 'pattern' => '/^[a-z0-9\s]+$/i', 'message' => 'Sólo se aceptan números y letras'],  
+            [['q','nombre'], 'string'],  
             [['observacion'], 'string'],
-            [['etapa','punto'], 'integer'],
+            [['etapa','punto','clasificacion'], 'integer'],
             [['fecha_entrega'], 'safe'],
         ];
     }
@@ -39,6 +40,7 @@ class FormModeloBuscar extends Model
             'fecha_entrega' => 'F. entrega:',
             'etapa' => 'Etapa proceso:',
             'punto' => 'Punto de venta:',
+            'clasificacion' => 'Clasificación:',
 
         ];
     }

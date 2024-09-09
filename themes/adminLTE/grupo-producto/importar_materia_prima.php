@@ -1,15 +1,16 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use app\models\Ordenproduccion;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
 
 $this->title = 'Inventario materia prima';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw ]];
 $this->params['breadcrumbs'][] = $id_grupo;
+$clasificar = ArrayHelper::map(app\models\TipoSolicitud::find()->orderBy('descripcion ASC')->all(), 'id_solicitud', 'descripcion');
 ?>
     <div class="modal-body">
         <p>
@@ -38,7 +39,14 @@ $this->params['breadcrumbs'][] = $id_grupo;
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
                     <?= $formulario->field($form, "q")->input("search") ?>
-                </div>
+                     <?= $formulario->field($form, 'clasificacion')->widget(Select2::classname(), [
+                     'data' => $clasificar,
+                     'options' => ['prompt' => 'Seleccione un registro ...'],
+                     'pluginOptions' => [
+                         'allowClear' => true
+                     ],
+                 ]); ?>
+             </div>  
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
                     <a align="right" href="<?= Url::toRoute(["grupo-producto/buscarmateriaprima", 'id_grupo' => $id_grupo, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
@@ -60,7 +68,7 @@ $this->params['breadcrumbs'][] = $id_grupo;
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading">
-                    Materiales <span class="badge"><?= $pagination->totalCount ?></span>
+                    Materiales <span class="badge"><?= count($operacion)?></span>
                 </div>
                 <div class="panel-body">
                      <table class="table table-bordered table-hover">
@@ -92,7 +100,6 @@ $this->params['breadcrumbs'][] = $id_grupo;
                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarmateriaprima']) ?>
                 </div>
             </div>
-            <?= LinkPager::widget(['pagination' => $pagination]) ?>
         </div>
         
     </div>

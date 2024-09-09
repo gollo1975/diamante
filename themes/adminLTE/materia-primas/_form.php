@@ -42,10 +42,17 @@ $conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('id_solicitud A
     </div>
     
     <div class="panel-body">
-        <div class="row">
-            <?= $form->field($model, 'codigo_materia_prima')->textInput(['maxlength' => true]) ?>
-            <?= $form->field($model, 'materia_prima')->textInput(['maxlength' => true, 'size' => '30']) ?>
+        <?php if($sw == 0){?>
+            <div class="row">
+                <?= $form->field($model, 'codigo_materia_prima')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'materia_prima')->textInput(['maxlength' => true, 'size' => '30']) ?>
+            </div>
+        <?php }else{?>
+             <div class="row">
+                <?= $form->field($model, 'codigo_materia_prima')->textInput(['maxlength' => true, 'readonly' => true]) ?>
+                <?= $form->field($model, 'materia_prima')->textInput(['maxlength' => true, 'size' => '30']) ?>
         </div>
+        <?php }?>
         <div class="row">
             <?=  $form->field($model, 'fecha_entrada')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                            'value' => date('Y-m-d', strtotime('+2 days')),
@@ -81,7 +88,7 @@ $conSolicitud = ArrayHelper::map(TipoSolicitud::find()->orderBy ('id_solicitud A
              <?= $form->field($model, 'aplica_inventario')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
         </div>
         <div class="row">
-             <?= $form->field($model, 'inventario_inicial')->dropDownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione una opcion...']) ?>
+             <?= $form->field($model, 'inventario_inicial')->dropDownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione una opcion...']) ?>
              <?= $form->field($model, 'id_solicitud')->widget(Select2::classname(), [
                 'data' => $conSolicitud,
                 'options' => ['prompt' => 'Seleccione...'],

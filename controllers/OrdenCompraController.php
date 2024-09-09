@@ -315,7 +315,7 @@ class OrdenCompraController extends Controller
             $model->update();
             return $this->redirect(['view', 'id' => $model->id_orden_compra, 'token' => $token]);
         }
-
+        $model->fecha_creacion = date('Y-m-d');
         return $this->render('create', [
             'model' => $model,
             'token' => $token,

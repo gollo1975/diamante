@@ -26,10 +26,16 @@ $depto = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->al
     <div class="panel-heading">
         <h4>MUNICIPIOS</h4>
     </div>
-    <div class="panel-body">        														   		
-        <div class="row">
-            <?= $form->field($model, 'codigo_municipio')->textInput(['maxlength' => true]) ?>    
-        </div>
+    <div class="panel-body">  
+        <?php if($sw == 0){?>        
+            <div class="row">
+                <?= $form->field($model, 'codigo_municipio')->textInput(['maxlength' => true]) ?>    
+            </div>
+        <?php }else{?>
+            <div class="row">
+                <?= $form->field($model, 'codigo_municipio')->textInput(['maxlength' => true, 'readonly' => true]) ?>    
+            </div>
+        <?php }?>
         <div class="row">
             <?= $form->field($model, 'municipio')->textInput(['maxlength' => true]) ?>  					
         </div>
@@ -52,7 +58,7 @@ $depto = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->al
             </div>
         <?php } ?>
         <div class="panel-footer text-right">            
-            <a href="<?= Url::toRoute("muninipios/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <a href="<?= Url::toRoute("municipios/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		
         </div>
     </div>

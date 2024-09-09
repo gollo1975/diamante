@@ -129,8 +129,8 @@ $view = 'orden-compra';
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                         <tr style="font-size: 90%;">
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripción</th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Insumos</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>       
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
@@ -144,7 +144,7 @@ $view = 'orden-compra';
                                          <?php
                                          foreach ($detalle_compras as $val):?>
                                             <tr style="font-size: 90%;">
-                                                <td><?= $val->id_detalle ?></td>
+                                                <td><?= $val->items->codigo ?></td>
                                                 <td><?= $val->items->descripcion ?></td>
                                                 <td><?= $val->porcentaje ?></td>
                                                 <?php if($model->autorizado == 0){?>

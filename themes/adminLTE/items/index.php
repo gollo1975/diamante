@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             [                
-                'attribute' => 'id_items',
+                'attribute' => 'codigo',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [                

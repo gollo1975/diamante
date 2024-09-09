@@ -281,7 +281,7 @@ class EntradaMateriaPrimaController extends Controller
             $model->update();
             return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
         }
-
+        $model->fecha_proceso = date('Y-m-d');
         return $this->render('create', [
             'model' => $model,
              'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
@@ -403,7 +403,7 @@ class EntradaMateriaPrimaController extends Controller
         $model = $this->findModel($id);
         $orden = OrdenCompra::find()->where(['=','id_orden_compra', $id_compra])->one();
         $detalle = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->all(); // carga el detalle
-        $codigo = 0;
+        
         foreach ($detalle as $detalles):
             $materia = MateriaPrimas::find()->where(['=','id_materia_prima', $detalles->id_materia_prima])->one();
             if($materia){
@@ -423,8 +423,9 @@ class EntradaMateriaPrimaController extends Controller
                        $materia->stock_gramos = round($materia->stock * 1000);
                    }
                 } 
-                $materia->save(false);
-                $this->ActualizarCostoMateriaPrima($codigo);
+                  $materia->save(false);
+                  $codigo = $detalles->id_materia_prima;
+                  $this->ActualizarCostoMateriaPrima($codigo);
             }
         endforeach;
         $model->enviar_materia_prima = 1;
@@ -435,10 +436,14 @@ class EntradaMateriaPrimaController extends Controller
     }
     //proceso para multiplicar inventario
     protected function ActualizarCostoMateriaPrima($codigo) {
-        $iva = 0; $subtotal = 0;
+        $iva = 0; $subtotal = 0; $cant = 0;
         $materia = MateriaPrimas::find()->where(['=','id_materia_prima', $codigo])->one();
         $iva = round((($materia->total_cantidad * $materia->stock)* $materia->porcentaje_iva)/100);
         $subtotal = round($materia->stock * $materia->valor_unidad);
+        if($materia->convertir_gramos == 1){
+            $cant = $materia->stock * 1000;
+            $materia->stock_gramos = $cant;
+        }
         $materia->valor_iva = $iva;
         $materia->subtotal = $subtotal;
         $materia->total_materia_prima = $subtotal + $iva;

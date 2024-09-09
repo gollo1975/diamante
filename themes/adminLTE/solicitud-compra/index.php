@@ -145,13 +145,27 @@ $form = ActiveForm::begin([
                 <td style= 'width: 25px; height: 10px;'>
                     <a href="<?= Url::toRoute(["solicitud-compra/view", "id" => $val->id_solicitud_compra, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>
+                
                 <?php if($val->numero_solicitud == 0){?>
                     <td style= 'width: 25px; height: 10px;'>
                        <a href="<?= Url::toRoute(["solicitud-compra/update", "id" => $val->id_solicitud_compra]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                     </td>
-                <?php }else{?>
-                    <td style= 'width: 25px; height: 10px;'></td>
-                <?php }?>    
+                <?php }else{
+                    if($val->importado == 0){?>
+                        <td style= 'width: 25px; height: 10px;'>
+                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['orden-compra/create'], [
+                                           'class' => '',
+                                           'title' => 'Proceso que permite crear LA ORDEN DE COMPRA AL PROVEEDOR)', 
+                                           'data' => [
+                                               'confirm' => 'Esta seguro de crearle la ORDEN DE COMPRA para ser enviada al PROVEEDOR.',
+                                               'method' => 'post',
+                                           ],
+                             ])?>
+                        </td> 
+                    <?php }else{ ?>
+                        <td style= 'width: 25px; height: 10px;'></td>
+                    <?php }   
+                }?>    
             </tr>            
             <?php endforeach; ?>
             </tbody>    

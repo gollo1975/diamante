@@ -17,8 +17,9 @@ class ItemsSearch extends Items
     public function rules()
     {
         return [
-            [['id_items','id_iva','id_solicitud'], 'integer'],
-            [['descripcion'], 'safe'],
+            [['id_items','id_iva','id_solicitud','id_medida','user_name'], 'integer'],
+            [['descripcion','codigo'], 'string'],
+            [['fecha_hora'], 'safe'],
             
         ];
     }
@@ -59,7 +60,7 @@ class ItemsSearch extends Items
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id_items' => $this->id_items,
+            'codigo' => $this->codigo,
             'id_iva' => $this->id_iva,
             'id_solicitud' => $this->id_solicitud,
         ]);

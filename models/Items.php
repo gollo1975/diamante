@@ -39,7 +39,7 @@ class Items extends \yii\db\ActiveRecord
             [['descripcion'], 'string', 'max' => 40],
             [['codigo','user_name'], 'string', 'max' => 15],
             [['fecha_hora'], 'safe'],
-            [['id_iva','id_solicitud','id_medida' ,'convertir_gramo','codificar'],'integer'],
+            [['id_iva','id_solicitud','id_medida' ,'convertir_gramo','codificar','aplica_inventario', 'inventario_inicial'],'integer'],
             [['id_iva'], 'exist', 'skipOnError' => true, 'targetClass' => ConfiguracionIva::className(), 'targetAttribute' => ['id_iva' => 'id_iva']],
             [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSolicitud::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
             [['id_medida'], 'exist', 'skipOnError' => true, 'targetClass' => MedidaMateriaPrima::className(), 'targetAttribute' => ['id_medida' => 'id_medida']],
@@ -57,7 +57,9 @@ class Items extends \yii\db\ActiveRecord
             'descripcion' => 'Descripcion',
             'id_solicitud' => 'Clasificacion',
             'id_medida' => 'Medida',
-            'codigo' => 'Codigo insumo',
+            'codigo' => 'Codigo',
+            'inventario_inicial' => 'Inventario inicial',
+            'aplica_inventario' => 'Aplica inventario',
         ];
     }
     
@@ -74,5 +76,30 @@ class Items extends \yii\db\ActiveRecord
     public function getMedida()
     {
         return $this->hasOne(MedidaMateriaPrima::className(), ['id_medida' => 'id_medida']);
+    }
+    
+    public function getConvertirGramo() {
+        if($this->convertir_gramo == 0){
+            $convertigramo = 'NO';
+        }else{
+            $convertigramo = 'SI';
+        }
+        return $convertigramo;
+    }
+    public function getAplicaInventario() {
+        if($this->aplica_inventario == 0){
+            $aplicainventario = 'NO';
+        }else{
+            $aplicainventario = 'SI';
+        }
+        return $aplicainventario;
+    }
+    public function getInventarioInicial() {
+        if($this->inventario_inicial == 0){
+            $inventarioinicial = 'NO';
+        }else{
+            $inventarioinicial = 'SI';
+        }
+        return $inventarioinicial;
     }
 }

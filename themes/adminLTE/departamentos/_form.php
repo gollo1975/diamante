@@ -26,10 +26,16 @@ $pais = ArrayHelper::map(Pais::find()->all(), 'codigo_pais', 'pais');
     <div class="panel-heading">
         <h4>DEPARTAMENTOS</h4>
     </div>
-    <div class="panel-body">        														   		
-        <div class="row">
-            <?= $form->field($model, 'codigo_departamento')->textInput(['maxlength' => true]) ?>    
-        </div>
+    <div class="panel-body"> 
+        <?php if($sw == 0){?>        
+            <div class="row">
+                <?= $form->field($model, 'codigo_departamento')->textInput(['maxlength' => true]) ?>    
+            </div>
+        <?php }else{?>
+            <div class="row">
+                <?= $form->field($model, 'codigo_departamento')->textInput(['maxlength' => true, 'readonly' => true]) ?>    
+            </div>
+        <?php }?>  
         <div class="row">
             <?= $form->field($model, 'departamento')->textInput(['maxlength' => true]) ?>  					
         </div>

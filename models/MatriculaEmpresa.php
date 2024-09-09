@@ -43,7 +43,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion', 'codigo_departamento', 'codigo_municipio'], 'required'],
+            [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion'], 'required'],
             [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion','tipo_regimen','id_naturaleza','aplica_punto_venta','calificacion_proveedor',
                 'aplica_factura_produccion','aplica_fabricante'], 'integer'],
             [['razon_social', 'razon_social_completa', 'direccion','email','representante_legal'], 'string', 'max' => 50],

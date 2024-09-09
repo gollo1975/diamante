@@ -337,6 +337,7 @@ class MateriaPrimasController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'sw' =>0,
         ]);
     }
     
@@ -427,6 +428,7 @@ class MateriaPrimasController extends Controller
         }
         return $this->render('update', [
             'model' => $model,
+            'sw' => 1,
 
         ]);
     }

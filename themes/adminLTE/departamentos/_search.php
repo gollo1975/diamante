@@ -22,21 +22,7 @@ use yii\widgets\ActiveForm;
                 ],
     ]);
     ?>
-    <div class="panel panel-success panel-filters" style="display:none">
-        <div class="panel-heading">
-            Filtros <i class="glyphicon glyphicon-filter"></i>
-        </div>
-        <div class="panel-body" style="display:none">
-            <div class="row">
-                <?= $form->field($model, 'codigo_departamento') ?>
-                <?= $form->field($model, 'departamento') ?>
-                <?= $form->field($model, 'estado_registro') ?>
-            </div>
-            <div class="panel-footer text-right" style="display:none">
-        <?= Html::submitButton('Buscar ' . Html::tag('i', '', ['class' => 'fa fa-search']), ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Limpiar ' . Html::tag('i', '', ['class' => 'fa fa-eraser']), ['class' => 'btn btn-info']) ?>
-            </div>
-        </div>
+   
 
 <?php ActiveForm::end(); ?>
 

@@ -278,7 +278,7 @@ class SolicitudCompraController extends Controller
             $model->update();
             return $this->redirect(['view','id' =>$model->id_solicitud_compra, 'token' => $token]);
         }
-
+        $model->fecha_entrega = date('Y-m-d');
         return $this->render('create', [
             'model' => $model,
         ]);
@@ -323,25 +323,26 @@ class SolicitudCompraController extends Controller
         $operacion = \app\models\Items::find()->where(['=','id_solicitud', $id_solicitud])->orderBy('descripcion ASC')->all();
         $form = new FormModeloBuscar();
         $q = null;
-        $mensaje = '';
+        $clasificacion = null;
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
-                $q = Html::encode($form->q);                                
-                    $operacion = Items::find()
-                            ->where(['like','descripcion',$q])
-                            ->orwhere(['=','id_items',$q])
-                            ->andWhere(['=','id_solicitud', $id_solicitud]);
-                    $operacion = $operacion->orderBy('descripcion ASC');                    
-                    $count = clone $operacion;
-                    $to = $count->count();
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count()
-                    ]);
-                    $operacion = $operacion
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();         
+                echo $q = Html::encode($form->q);  
+                $clasificacion = Html::encode($form->clasificacion);  
+                $operacion = Items::find()
+                        ->Where(['=','codigo', $q])
+                        ->orWhere(['like','descripcion', $q])
+                        ->andfilterWhere(['=','id_solicitud', $clasificacion]);
+                $operacion = $operacion->orderBy('descripcion ASC');                    
+                $count = clone $operacion;
+                $to = $count->count();
+                $pages = new Pagination([
+                    'pageSize' => 15,
+                    'totalCount' => $count->count()
+                ]);
+                $operacion = $operacion
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();         
             } else {
                 $form->getErrors();
             }                    
@@ -382,7 +383,6 @@ class SolicitudCompraController extends Controller
         }
         return $this->render('crearnuevositems', [
             'operacion' => $operacion,            
-            'mensaje' => $mensaje,
             'pagination' => $pages,
             'id' => $id,
             'form' => $form,

@@ -76,14 +76,45 @@ class ItemsController extends Controller
     {
         $model = new Items();
 
-      /*  if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
-        }*/
-     var_dump($model->codificar);
+        if ($model->load(Yii::$app->request->post())){
+            $buscar = Items::find()->where(['=','codigo', $model->codigo])->one();
+            if($buscar){
+                Yii::$app->getSession()->setFlash('error', 'Este CODIGO ya se encuentra registrado en los INSUMOS DE COMPRA.');  
+            }else{
+                $model->save();
+                $model->user_name = Yii::$app->user->identity->username; 
+                $model->save();
+                if($model->codificar == 1){
+                    $table = new \app\models\MateriaPrimas();
+                    $table->codigo_materia_prima = $model->codigo;
+                    $table->materia_prima = $model->descripcion;
+                    $table->descripcion = $model->descripcion;
+                    $table->id_medida = $model->id_medida;
+                    $table->id_solicitud = $model->id_solicitud;
+                    $table->valor_unidad = 0;
+                    if($model->id_iva <> 0){
+                        $table->aplica_iva = 1;
+                    }
+                    $table->porcentaje_iva = $model->iva->valor_iva;
+                    $table->convertir_gramos = $model->convertir_gramo;
+                    $table->fecha_entrada = date('Y-m-d');
+                    $table->usuario_creador = Yii::$app->user->identity->username;
+                    $table->aplica_inventario = $model->aplica_inventario;
+                    $table->inventario_inicial = $model->inventario_inicial;
+                    $table->codigo_ean = $model->codigo;
+                    $table->save();
+                    return $this->redirect(['index']);
+                }else{
+                    return $this->redirect(['index']);    
+                }
+            }
+        }
+ 
 
        // $model->codificar = 1;
         return $this->render('create', [
             'model' => $model,
+            'sw' => 0,
         ]);
     }
 
@@ -97,13 +128,39 @@ class ItemsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
-        }
+            $table = \app\models\MateriaPrimas::find()->where(['=','codigo_materia_prima', $model->codigo])->one();
+            if($table){
+                if($model->codificar == 1){
+                    $table->codigo_materia_prima = $model->codigo;
+                    $table->materia_prima = $model->descripcion;
+                    $table->descripcion = $model->descripcion;
+                    $table->id_medida = $model->id_medida;
+                    $table->id_solicitud = $model->id_solicitud;
+                    $table->valor_unidad = 0;
+                    if($model->id_iva <> 0){
+                        $table->aplica_iva = 1;
+                    }
+                    $table->porcentaje_iva = $model->iva->valor_iva;
+                    $table->convertir_gramos = $model->convertir_gramo;
+                    $table->fecha_entrada = date('Y-m-d');
+                    $table->usuario_creador = Yii::$app->user->identity->username;
+                    $table->usuario_editado = Yii::$app->user->identity->username;
+                    $table->aplica_inventario = $model->aplica_inventario;
+                    $table->inventario_inicial = $model->inventario_inicial;
+                    $table->codigo_ean = $model->codigo;
+                    $table->save();
+                    return $this->redirect(['index']);
+                }
+            }else{   
+                Yii::$app->getSession()->setFlash('error', 'Este CODIGO NO se encuentra registrado en el proceso de MATERIAS PRIMAS.');  
+                return $this->redirect(['index']);
+            }    
+        }    
 
         return $this->render('update', [
             'model' => $model,
+            'sw' => 1,
         ]);
     }
 
