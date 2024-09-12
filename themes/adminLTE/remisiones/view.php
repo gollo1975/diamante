@@ -19,6 +19,7 @@ use kartik\depdrop\DepDrop;
 $this->title = 'REMISIONES ('.$punto_venta->nombre_punto.')';
 $this->params['breadcrumbs'][] = $this->title;
 $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision', $model->id_remision])->one();
+$empresa = \app\models\MatriculaEmpresa::findOne(1);
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
@@ -30,20 +31,25 @@ $buscarRecibo = app\models\ReciboCajaPuntoVenta::find()->where(['=','id_remision
             echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar remision', ['generar_remision', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-default btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la remision de salida al cliente: ('.$model->cliente->nombre_completo.').', 'method' => 'post']]);
             if(!$buscarRecibo){
-                echo  Html::a('<span class="glyphicon glyphicon-plus"></span> Recibo de pago',
-                  ['/recibo-caja-punto-venta/crear_recibo_caja_remision', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],
-                    ['title' => 'Generar recibos de caja',
-                     'data-toggle'=>'modal',
-                     'data-target'=>'#modalcrearreciboremision'.$model->id_remision,
-                     'class' => 'btn btn-info btn-sm'
-                    ])    
-                ?>
-                <div class="modal remote fade" id="modalcrearreciboremision<?=$model->id_remision?>">
-                       <div class="modal-dialog modal-lg" style ="width: 600px;">    
-                           <div class="modal-content"></div>
-                       </div>
-                </div>  
-            <?php }
+                if($empresa->recibo_caja_automatico == 0){
+                    echo  Html::a('<span class="glyphicon glyphicon-plus"></span> Recibo de pago',
+                      ['/recibo-caja-punto-venta/crear_recibo_caja_remision', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],
+                        ['title' => 'Generar recibos de caja',
+                         'data-toggle'=>'modal',
+                         'data-target'=>'#modalcrearreciboremision'.$model->id_remision,
+                         'class' => 'btn btn-info btn-sm'
+                        ])    
+                    ?>
+                    <div class="modal remote fade" id="modalcrearreciboremision<?=$model->id_remision?>">
+                           <div class="modal-dialog modal-lg" style ="width: 600px;">    
+                               <div class="modal-content"></div>
+                           </div>
+                    </div>  
+                <?php } else {
+                    echo Html::a('<span class="glyphicon glyphicon-plus"></span> Recibo de pago', ['/recibo-caja-punto-venta/crear_recibo_automatico', 'id' => $model->id_remision, 'accesoToken' => $accesoToken],['class' => 'btn btn-info btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de generar el recibo de pago al cliente: ('.$model->cliente->nombre_completo.').', 'method' => 'post']]);
+                }
+            }
             
         }else{
             if($model->exportar_inventario == 0){?>

@@ -39,6 +39,7 @@ class TipoCliente extends \yii\db\ActiveRecord
         return [
             'id_tipo_cliente' => 'Id Tipo Cliente',
             'concepto' => 'Concepto',
+            
         ];
     }
 }

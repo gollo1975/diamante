@@ -16,7 +16,7 @@ use app\models\AgentesComerciales;
 use app\models\TipoCliente;
 
 //asdshdghasdhas;
-$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
+$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
 $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_cliente', 1])->all(), 'id_tipo_documento', 'documento');
 $posicion = ArrayHelper::map(PosicionPrecio::find()->all(), 'id_posicion', 'posicion');

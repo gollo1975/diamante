@@ -31,7 +31,7 @@ $form = ActiveForm::begin([
 ?>
 
 <?php
-$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
+$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
 $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_proveedor', 1])->all(), 'id_tipo_documento', 'documento');
 $cargo = ArrayHelper::map(Cargos::find()->orderBy('nombre_cargo DESC')->all(), 'id_cargo', 'nombre_cargo');

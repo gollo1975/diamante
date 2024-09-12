@@ -34,7 +34,7 @@ $form = ActiveForm::begin([
 ?>
 
 <?php
-$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
+$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->all(), 'codigo_departamento', 'departamento');
 $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_cliente', 1])->all(), 'id_tipo_documento', 'documento');
 $posicion = ArrayHelper::map(PosicionPrecio::find()->all(), 'id_posicion', 'posicion');

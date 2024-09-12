@@ -171,6 +171,7 @@ class ReciboCajaPuntoVentaController extends Controller
     public function actionCrear_recibo_caja_remision($id, $accesoToken) {
 
         $model = new \app\models\FormModeloNuevoReciboPunto();
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
                 if (isset($_POST["nuevo_recibo_pago_remision"])) {
@@ -199,18 +200,44 @@ class ReciboCajaPuntoVentaController extends Controller
                         $consecutivo->numero_inicial = $recibo->numero_recibo;
                         $consecutivo->save();
                         $this->redirect(["/remisiones/view", 'id' => $id, 'accesoToken' => $accesoToken]);
-                    }else{
-                        Yii::$app->getSession()->setFlash('warning', 'El valor a cancelar es DIFERENTE al valor de la REMISION. Validar nuevamente la informacion.');
-                        $this->redirect(["/remisiones/view", 'id' => $id, 'accesoToken' => $accesoToken]);
-                    }    
+                    }
                 }
             } else {
                 $model->getErrors();
             }
         }
         return $this->renderAjax('/recibo-caja-punto-venta/form_nuevo_recibo_remision', [
-            'model' => $model,
-        ]);
+        'model' => $model]);
+    }
+    
+    //RECIBO AUTOMATICO
+    public function actionCrear_recibo_automatico($id, $accesoToken) {
+        $remision = \app\models\Remisiones::find()->Where(['=', 'id_remision', $id])->one();
+        $formaPago = FormaPago::find()->where(['=','abreviatura', 'EF'])->one();
+        $table = new ReciboCajaPuntoVenta();
+        $table->id_remision = $id;
+        $table->id_tipo = 2;
+        $table->id_punto = $accesoToken;
+        $table->codigo_banco = 1001;
+        $table->id_forma_pago = $formaPago->id_forma_pago;
+        $table->fecha_recibo = date('Y-m-d');
+        $table->valor_abono = $remision->total_remision;
+        $table->valor_saldo = 0;
+        $table->numero_transacion = 0;
+        $table->user_name = Yii::$app->user->identity->username;
+        $table->save(false);
+        $remision->estado_remision = 1;
+        $remision->save();
+        $nroRecibo = ReciboCajaPuntoVenta::find()->orderBy('id_recibo DESC')->limit(1)->one();
+        //proceso de generar consecutivo
+        $consecutivo = \app\models\Consecutivos::findOne(19);
+        $recibo = ReciboCajaPuntoVenta::findOne($nroRecibo->id_recibo);
+        $recibo->numero_recibo = $consecutivo->numero_inicial + 1;
+        $recibo->save();
+        $consecutivo->numero_inicial = $recibo->numero_recibo;
+        $consecutivo->save();
+        Yii::$app->getSession()->setFlash('success', 'El recibo de pago ya se creo automaticamente para esta remision .');
+        $this->redirect(["/remisiones/view", 'id' => $id, 'accesoToken' => $accesoToken]);
     }
     
     
