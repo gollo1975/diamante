@@ -445,15 +445,6 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'items' => [
                                                         ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta/search_maestro_factura']],
                                                 ]],
-                                                [
-                                                    'label' => 'Facturas pto venta',
-                                                    'icon' => 'cart-plus',
-                                                    'url' => '#',
-                                                    'items' => [
-                                                        ['label' => 'Maestro factura', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_factura']],
-                                                        ['label' => 'Ventas clientes', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/search_maestro_referencia']],
-                                                        ['label' => 'Cierre caja', 'icon' => 'plus-square-o', 'url' => ['/cierre-caja/search_cierre_caja']],
-                                                ]],
                                             ]],
                                             [
                                                 'label' => 'Movimientos',
@@ -467,17 +458,6 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
 
                                                  ],
                                             ],
-                                            [
-                                                'label' => 'Punto de venta',
-                                                'icon' => 'folder-open',
-                                                'url' => '#',
-                                                'items' => [
-                                                    ['label' => 'Factura punto', 'icon' => 'plus-square-o', 'url' => ['/factura-venta-punto/index']],
-                                                    ['label' => 'Remision', 'icon' => 'plus-square-o', 'url' => ['/remisiones/index']],
-                                                    ['label' => 'Cierre de caja', 'icon' => 'plus-square-o', 'url' => ['/cierre-caja/index']],
-
-                                                 ],
-                                            ]
                                         ],
                                     ],
                                     //TERMINA FACTURACION
