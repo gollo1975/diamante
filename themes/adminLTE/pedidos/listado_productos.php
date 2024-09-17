@@ -18,56 +18,53 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\filters\AccessControl;
 
-$this->title = 'Nuevo pedido';
+$this->title = 'Pedido virtual : '.$model->pedidoVirtual.'';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
-<p>
-          <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
-            <?php if($model->autorizado == 0 && $model->numero_pedido == 0){?>
-                <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
-            <?php }else{
-                if($model->autorizado == 1  && $model->numero_pedido == 0){?>
-                    <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
-                    <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-xs',
-                               'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
-                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
-                                              ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],
-                                                ['title' => 'Crear observaciones al pedido',
-                                                 'data-toggle'=>'modal',
-                                                 'data-target'=>'#modalcrearobservacion',
-                                                 'class' => 'btn btn-info btn-xs'
-                                                ])    
-                    ?>
-                    <div class="modal remote fade" id="modalcrearobservacion">
-                           <div class="modal-dialog modal-lg" style ="width: 500px;">    
-                               <div class="modal-content"></div>
-                           </div>
-                    </div>
-                <?php }else{
-                    if($model->cerrar_pedido == 0){
-                        echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
-                    }else{?>
-                    <div class="btn-group btn-sm" role="group">
-                        <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                           Imprimir
-                           <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                                <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Pedido', ['imprimir_pedido', 'id' => $model->id_pedido]) ?></li>
-                                <?php if($model->presupuesto > 0){?>
-                                    <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Presupuesto pedido', ['imprimir_presupuesto', 'id' => $model->id_pedido]) ?></li>
-                                <?php }?>    
-                        </ul>
-                    </div>    
-                    <?php }    
-                } 
-            
-            }?>
-</p>
 
-
+    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']);
+    if($model->autorizado == 0 && $model->numero_pedido == 0){?>
+          <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);
+    }else{
+        if($model->autorizado == 1  && $model->numero_pedido == 0){?>
+              <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
+              <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-xs',
+                         'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
+               <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
+                                        ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],
+                                          ['title' => 'Crear observaciones al pedido',
+                                           'data-toggle'=>'modal',
+                                           'data-target'=>'#modalcrearobservacion',
+                                           'class' => 'btn btn-info btn-xs'
+                                          ])    
+              ?>
+              <div class="modal remote fade" id="modalcrearobservacion">
+                     <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                         <div class="modal-content"></div>
+                     </div>
+              </div>
+          <?php }else{
+              if($model->cerrar_pedido == 0){
+                  echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
+                     'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
+              }else{ ?>
+                  <div class="btn-group btn-sm" role="group">
+                      <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                         Imprimir
+                         <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                              <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Pedido', ['imprimir_pedido', 'id' => $model->id_pedido]) ?></li>
+                              <?php if($model->presupuesto > 0){?>
+                                  <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Presupuesto pedido', ['imprimir_presupuesto', 'id' => $model->id_pedido]) ?></li>
+                              <?php }?>    
+                      </ul>
+                  </div>    
+              <?php }      
+            } 
+      }?>
+<br>
 <div class="panel panel-success">
     <div class="panel-body">
         <script language="JavaScript">
