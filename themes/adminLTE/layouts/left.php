@@ -29,7 +29,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
             </div>
         </form>
         <!-- /.search form -->
-        <?php if ($empresa->modulo_completo == 0){?>
+        <?php if ($empresa->modulo_completo == 0){?> <!--APLICA PARA EL SOFTWARE COMPLETO CON TODOS LOS MODULOS, ESTOS ES FABRICACION Y DISTRIBUCION-->
            
             <?=
             dmstr\widgets\Menu::widget(
@@ -179,7 +179,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'url' => '#',
                                                     'items' => [
                                                         ['label' => 'Precios y descuentos', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/crear_precio_venta']],
-                                                        ['label' => 'Configuración', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
+                                                        ['label' => 'Presupuesto', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
                                                         ['label' => 'Cargar imagenes', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/view_archivo']],
                                                     ]],
                                                     ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 
@@ -354,7 +354,8 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                 'url' => '#',
                                                 'items' => [
                                                     ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/index']],
-                                                      ['label' => 'Anular pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/anular_pedidos']],
+                                                    ['label' => 'Pedido virtual', 'icon' => 'plus-square-o', 'url' => ['/pedidos/pedido_virtual']],
+                                                    ['label' => 'Anular pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/anular_pedidos']],
                                                     ['label' => 'Indicador comercial', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/index']],
                                                     ['label' => 'Regla comercial', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/regla_comercial']],
                                                     ['label' => 'Citas prospectos', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/listado_cita_prospecto']],

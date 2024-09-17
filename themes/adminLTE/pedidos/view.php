@@ -108,8 +108,8 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->usuario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_agente') ?></th>
                     <td><?= Html::encode($model->agentePedido->nombre_completo) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presupuesto_gastado') ?>:</th>
-                    <td style="text-align: right"><?= Html::encode(''.number_format($model->clientePedido->gasto_presupuesto_comercial,0)) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_entrega') ?>:</th>
+                    <td ><?= Html::encode($model->fecha_entrega) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presupuesto_asignado') ?>:</th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->clientePedido->presupuesto_comercial,0)) ?></td>
                 </tr>
@@ -133,87 +133,163 @@ $view = 'pedidos';
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto comercial <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
-            <li role="presentation"><a href="#detallepedido" aria-controls="detallepedido" role="tab" data-toggle="tab">Detalle pedido <span class="badge"><?= count($detalle_pedido) ?></span></a></li>
+            <li role="presentation" class="active"><a href="#detallepedido" aria-controls="detallepedido" role="tab" data-toggle="tab">Detalle pedido <span class="badge"><?= count($detalle_pedido) ?></span></a></li>
+            <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto comercial <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
         </ul>
-            <div class="tab-content">
-                 <div role="tabpanel" class="tab-pane active" id="presupuestocomercial">
-                    <div class="table-responsive">
-                        <div class="panel panel-success">
-                            <div class="panel-body">
-                                <table class="table table-bordered table-hover">
-                                    <thead>
-                                        <tr style="font-size: 90%;">
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del producto</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo presupuesto</th>
-                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Stock</th>    
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
-                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
-                                            <th scope="col" style='background-color:#B9D5CE;'></th> 
-                                        </tr>
-                                    </thead>
-                                    <body>
-                                         <?php
-                                         $subtotal = 0; $impuesto = 0; $total = 0;
-                                         foreach ($pedido_presupuesto as $val):
-                                              $subtotal += $val->subtotal;
-                                            $impuesto += $val->impuesto;
-                                            $total += $val->total_linea;
-                                             ?>
-                                            <tr style="font-size: 90%;">
-                                                <td><?= $val->inventario->codigo_producto ?></td>
-                                                <td><?= $val->inventario->nombre_producto ?></td>
-                                                <td><?= $val->presupuesto->descripcion ?></td>
-                                                <td style="background-color:#CBAAE3; color: black"><?= $val->inventario->stock_unidades ?></td>
-                                                <?php if($val->cantidad == 0){?>
-                                                      <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
-                                                <?php }else{?>
-                                                      <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                                <?php }?>      
-                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
-                                                <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
-                                                <td style= 'width: 25px; height: 25px;'>
-                                                    <?php if($model->cerrar_pedido == 0){?>
-                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_presupuesto', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'token' => $token, 'sw' => 1], [
-                                                                    'class' => '',
-                                                                    'data' => [
-                                                                        'confirm' => 'Esta seguro de eliminar este producto del presupuesto comercial?',
-                                                                        'method' => 'post',
-                                                                    ],
-                                                                ])
-                                                        ?>
-                                                    <?php }?>
-                                               </td>
-                                            </tr>
-                                         <?php endforeach;?>          
-                                    </body>
-                                    <tr>
-                                        <td colspan="7"></td>
-                                        <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
-                                        <td colspan="2"></td>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="detallepedido">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style="font-size: 90%;">
+                                        <th scope="col" style='background-color:#B9D5CE;'><b>Codigo</b></th>  
+                                        <th scope="col" style='background-color:#B9D5CE;'>Presentación</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Subtotal.</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Total</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'></th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                               <?php
+                               $subtotal = 0; $impuesto = 0; $total = 0;
+                               foreach ($detalle_pedido as $val):
+                                   $subtotal += $val->subtotal;
+                                   $impuesto += $val->impuesto;
+                                   $total += $val->total_linea;
+                                   ?>
+                               <tr style="font-size: 90%;">
+                                    <td><?= $val->inventario->codigo_producto ?></td>
+                                   <td><?= $val->inventario->nombre_producto ?></td>
+                                   <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                   <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                   <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                   <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
+                                   <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
+                                   <td style= 'width: 25px; height: 25px;'>
+                                        <?php if($model->autorizado == 0){?>
+                                            <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle], [
+                                                        'class' => '',
+                                                        'data' => [
+                                                            'confirm' => 'Esta seguro de eliminar este producto del pedido?',
+                                                            'method' => 'post',
+                                                        ],
+                                                    ])
+                                            ?>
+                                        <?php }?>
+                                   </td>
+                               </tr>
+                               </tbody>
+                               <?php endforeach; ?>
+
+                               <tr>
+                                    <td colspan="5"></td>
+                                    <td style="text-align: right;"><b>Subtotal:</b></td>
+                                    <td align="right" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                    <td colspan="1"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5"></td>
+                                    <td style="text-align: right;"><b>Impuesto:</b></td>
+                                    <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
+                                    <td colspan="1"></td>
+                                </tr>
+                                 <tr>
+                                    <td colspan="5"></td>
+                                    <td style="text-align: right;"><b>Total:</b></td>
+                                    <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
+                                    <td colspan="1"></td>
+                                </tr>
+                           </table>
+                       </div>
+                       <div class="panel-footer text-right">
+                           <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido', 'id' => $model->id_pedido, 'token' => $token], ['class' => 'btn btn-primary btn-sm']);?>
+                       </div>
+                   </div>
+                </div>
+            </div>        
+            <!--TERMINA PRIMER TBAS-->
+            <div role="tabpanel" class="tab-pane" id="presupuestocomercial">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style="font-size: 90%;">
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>                        
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo presupuesto</th>
+                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Stock</th>    
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
+                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>                        
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'></th> 
                                     </tr>
-                                    <tr>
-                                        <td colspan="7"></td>
-                                        <td style="text-align: right;"><b>Impuesto:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
-                                        <td colspan="2"></td>
+                                </thead>
+                            <body>
+                                 <?php
+                                 $subtotal = 0; $impuesto = 0; $total = 0;
+                                 foreach ($pedido_presupuesto as $val):
+                                      $subtotal += $val->subtotal;
+                                    $impuesto += $val->impuesto;
+                                    $total += $val->total_linea;
+                                     ?>
+                                    <tr style="font-size: 90%;">
+                                        <td><?= $val->inventario->codigo_producto ?></td>
+                                        <td><?= $val->inventario->nombre_producto ?></td>
+                                        <td><?= $val->presupuesto->descripcion ?></td>
+                                        <td style="background-color:#CBAAE3; color: black"><?= $val->inventario->stock_unidades ?></td>
+                                        <?php if($val->cantidad == 0){?>
+                                              <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
+                                        <?php }else{?>
+                                              <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                        <?php }?>      
+                                        <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                        <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                        <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
+                                        <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
+                                        <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
+                                        <td style= 'width: 25px; height: 25px;'>
+                                            <?php if($model->cerrar_pedido == 0){?>
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_presupuesto', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'token' => $token, 'sw' => 1], [
+                                                            'class' => '',
+                                                            'data' => [
+                                                                'confirm' => 'Esta seguro de eliminar este producto del presupuesto comercial?',
+                                                                'method' => 'post',
+                                                            ],
+                                                        ])
+                                                ?>
+                                            <?php }?>
+                                       </td>
                                     </tr>
-                                     <tr>
-                                        <td colspan="7"></td>
-                                        <td style="text-align: right;"><b>Total:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
-                                        <td colspan="2"></td>
-                                    </tr>
-                                </table>
-                            </div>
+                                 <?php endforeach;?>          
+                            </body>
+                            <tr>
+                                <td colspan="7"></td>
+                                <td style="text-align: right;"><b>Subtotal:</b></td>
+                                <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                                <td style="text-align: right;"><b>Impuesto:</b></td>
+                                <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
+                                <td colspan="2"></td>
+                            </tr>
+                             <tr>
+                                <td colspan="7"></td>
+                                <td style="text-align: right;"><b>Total:</b></td>
+                                <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </table>
+                        </div>
                             <?php
                             if($cliente->presupuesto_comercial == 0 ){
                                 Yii::$app->getSession()->setFlash('info', 'No se le asignado presupuesto a este cliente. Contactar al representante de ventas');     
@@ -233,87 +309,12 @@ $view = 'pedidos';
                                         <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido_presupuesto', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);?>
                                     </div>                           
                             <?php }?>
-                                
-                        </div>
+
                     </div>
-                </div>    
-                <!--TERMINA TBAS-->
-                  <div role="tabpanel" class="tab-pane" id="detallepedido">
-                    <div class="table-responsive">
-                        <div class="panel panel-success">
-                          <div class="panel-body">
-                                <table class="table table-bordered table-hover">
-                                   <thead>
-                                       <tr style="font-size: 90%;">
-                                            <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Subtotal.</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Total</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'></th>
-                                       </tr>
-                                   </thead>
-                                   <tbody>
-                                   <?php
-                                   $subtotal = 0; $impuesto = 0; $total = 0;
-                                   foreach ($detalle_pedido as $val):
-                                       $subtotal += $val->subtotal;
-                                       $impuesto += $val->impuesto;
-                                       $total += $val->total_linea;
-                                       ?>
-                                   <tr style="font-size: 90%;">
-                                       <td><?= $val->inventario->nombre_producto ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
-                                       <td style= 'width: 25px; height: 25px;'>
-                                            <?php if($model->autorizado == 0){?>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle], [
-                                                            'class' => '',
-                                                            'data' => [
-                                                                'confirm' => 'Esta seguro de eliminar este producto del pedido?',
-                                                                'method' => 'post',
-                                                            ],
-                                                        ])
-                                                ?>
-                                            <?php }?>
-                                       </td>
-                                   </tr>
-                                   </tbody>
-                                   <?php endforeach; ?>
-                                    
-                                   <tr>
-                                        <td colspan="4"></td>
-                                        <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
-                                        <td colspan="1"></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4"></td>
-                                        <td style="text-align: right;"><b>Impuesto:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
-                                        <td colspan="1"></td>
-                                    </tr>
-                                     <tr>
-                                        <td colspan="4"></td>
-                                        <td style="text-align: right;"><b>Total:</b></td>
-                                        <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
-                                        <td colspan="1"></td>
-                                    </tr>
-                               </table>
-                           </div>
-                           <div class="panel-footer text-right">
-                               <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido', 'id' => $model->id_pedido, 'token' => $token], ['class' => 'btn btn-primary btn-sm']);?>
-                           </div>
-                       </div>
                 </div>
-            </div>   
-                <!--TERMINA TABS-->
-          
-            </div>  
+            </div>    
+            <!--TERMINA TBAS-->
+        </div>   
     </div>
   <?php ActiveForm::end(); ?>  
 </div>

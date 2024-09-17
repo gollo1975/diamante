@@ -39,7 +39,7 @@ class FiltroBusquedaPedidos extends Model
     public function attributeLabels()
     {
         return [   
-            'documento' => 'Documento:',
+            'documento' => 'Documento del cliente:',
             'cliente' => 'Nombre del cliente:',
             'vendedor' => 'Agente comercial:',
             'pedido_cerrado' => 'Pedido cerrado:',

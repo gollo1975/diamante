@@ -61,7 +61,7 @@ class PedidosController extends Controller
      * Lists all Pedidos models.
      * @return mixed
      */
-     public function actionIndex($token = 0) {
+    public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',36])->all()){
                 $form = new FiltroBusquedaPedidos();
@@ -171,6 +171,7 @@ class PedidosController extends Controller
             return $this->redirect(['site/login']);
         }
     }
+    
     //CREAR PEDIDOS A CLIENTES
      public function actionListado_clientes() {
         if (Yii::$app->user->identity){
@@ -450,6 +451,7 @@ class PedidosController extends Controller
             return $this->redirect(['site/login']);
         }
       }
+    
     //PROCESO QUE CREA NUEVO PEDIDO
     public function actionCrear_nuevo_pedido($id) {
         //valide cupo
@@ -519,6 +521,83 @@ class PedidosController extends Controller
            }
        }
     }
+    
+    public function actionPedido_virtual() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',36])->all()){
+                $form = new FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $vendedores = null; $numero_pedido = null;
+                $pedido_anulado = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $numero_pedido = Html::encode($form->numero_pedido);
+                        $table = Pedidos::find()
+                                ->andFilterWhere(['=', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','id_agente', $vendedores])
+                                ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                                ->andWhere(['=','pedido_anulado', 0])
+                                ->andWhere(['=','pedido_virtual', 1])
+                                ->andWhere(['=','cerrar_pedido', 1])
+                                 ->andWhere(['=','facturado', 0]);
+                        $table = $table->orderBy('id_pedido DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = Pedidos::find()->Where(['=','cerrar_pedido', 1])
+                                            ->andWhere(['=','pedido_anulado', 0])
+                                            ->andWhere(['=','pedido_virtual', 1])
+                                             ->andWhere(['=','facturado', 0])->orderBy('id_pedido DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('pedido_virtual', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
     /**
      * Displays a single Pedidos model.
      * @param integer $id
@@ -538,6 +617,18 @@ class PedidosController extends Controller
             'pedido_presupuesto' => $pedido_presupuesto,
             'cliente' => $cliente,
         ]);   
+    }
+    
+    //VISTA QUE PERMITE MOSTRAR LOS PEDIDOS VIRTUALES
+    public function actionView_pedido_virtual($id, $idToken) {
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
+        return $this->render('view_pedido_virtual', [
+            'model' => $this->findModel($id),
+            'detalle_pedido' => $detalle_pedido,
+            'pedido_presupuesto' => $pedido_presupuesto,
+            'idToken' => $idToken,
+        ]);     
     }
     
     //VISTA DE ANULAR PEDIDO Y DETALLES DEL PRESUPUESTO
@@ -1330,6 +1421,44 @@ class PedidosController extends Controller
         $cliente->save();
        
     }
+    
+    //PROCESO QUE PERMITE BUSCAR INVENTARIO
+    public function actionSearch_inventario_pedido($id, $id_inventario, $idToken) {
+        $inventario = InventarioProductos::findOne($id_inventario);
+       if($inventario->stock_unidades > 0){
+            Yii::$app->getSession()->setFlash('info', 'Este producto tiene ('.$inventario->stock_unidades.') unidades en existencia en el módulo de inventario.');   
+            return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' => 1]);
+        }else{
+              Yii::$app->getSession()->setFlash('warning', 'Este producto NO tiene existencia en el módulo de inventario. Contactar al departamento de producción.');   
+              return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
+        }
+    }
+    
+    //PROCESO QUE INTEGRA LAS EXISTENCIAS AL PEDIDO VIRTUAL
+    public function actionCargar_inventario_pedido($id, $id_inventario, $idToken, $pedido) {
+        $inventario = InventarioProductos::findOne($id_inventario);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        if($pedido == 0){
+            $detalle_pedido = PedidoDetalles::find()->where(['=','id_inventario', $id_inventario])->one();
+        }else{
+          //para presupuesto  
+        }
+       // if($inventario->stock_unidades >= $detalle_pedido->cantidad){
+        if($empresa->aplica_inventario_incompleto == 0){
+                $inventario->stock_unidades -= $inventario->stock_unidades;
+                $inventario->save();
+                $detalle_pedido->cargar_existencias = 1;
+                $detalle_pedido->cantidad = $inventario->stock_unidades;
+                $detalle_pedido->save();
+                return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Las existencias que hay en bodega son menores que las cantidades vendidas. Pedir autorización para cargar estas unidades.');   
+            return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
+        }    
+        
+       
+    }
+    
     //REPORTES
     public function actionImprimir_pedido($id) {
         $model = Pedidos::findOne($id);
