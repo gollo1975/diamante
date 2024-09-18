@@ -473,6 +473,7 @@ class PedidosController extends Controller
                     $table->usuario = Yii::$app->user->identity->username;
                     $table->fecha_proceso = date('Y-m-d');
                     $table->id_agente = $cliente->id_agente;
+                    $table->liberado_inventario = 1;
                     $table->save();
                     return $this->redirect(['/pedidos/index']);
                 }else{
@@ -505,6 +506,7 @@ class PedidosController extends Controller
                         $table->usuario = Yii::$app->user->identity->username;
                         $table->fecha_proceso = date('Y-m-d');
                         $table->id_agente = $cliente->id_agente;
+                         $table->liberado_inventario = 1;
                         $table->save();
                         return $this->redirect(['/pedidos/index']);
                     }else{
@@ -697,6 +699,11 @@ class PedidosController extends Controller
                     $table->dv = $conCliente->dv;
                     $table->cliente = $conCliente->nombre_completo;
                     $table->pedido_virtual = $model->pedido_virtual;
+                    if($model->pedido_virtual == 1){
+                        $table->liberado_inventario = 0;
+                    }else{
+                        $table->liberado_inventario = 1;
+                    }
                     $table->save(false);
                     $this->redirect(["pedidos/index"]);
                 } else {
@@ -820,6 +827,7 @@ class PedidosController extends Controller
                                         $table->id_inventario = $intCodigo;
                                         $table->cantidad = $_POST["cantidad_productos"]["$intIndice"];
                                         $table->user_name = Yii::$app->user->identity->username;
+                                        $table->cargar_existencias = 1;
                                         $table->save(false);
                                         $datos = $intCodigo;
                                         $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual);
@@ -894,6 +902,9 @@ class PedidosController extends Controller
                     $table->cantidad = $cantidad;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->fecha_registro = date('Y-m-d');
+                    if($model->pedido_virtual == 0){
+                        $table->cargar_existencias = 1;
+                    }
                     $table->save(false);
                     $datos = $id_inventario;
                     $token = 0;
@@ -1425,11 +1436,14 @@ class PedidosController extends Controller
     //PROCESO QUE PERMITE BUSCAR INVENTARIO
     public function actionSearch_inventario_pedido($id, $id_inventario, $idToken) {
         $inventario = InventarioProductos::findOne($id_inventario);
+        $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $id_inventario])->one();
        if($inventario->stock_unidades > 0){
+           $detalle->consultado = 1;
+           $detalle->save();
             Yii::$app->getSession()->setFlash('info', 'Este producto tiene ('.$inventario->stock_unidades.') unidades en existencia en el módulo de inventario.');   
             return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' => 1]);
         }else{
-              Yii::$app->getSession()->setFlash('warning', 'Este producto NO tiene existencia en el módulo de inventario. Contactar al departamento de producción.');   
+              Yii::$app->getSession()->setFlash('warning', 'La presentacion del producto '.$inventario->nombre_producto.', NO tiene existencia en el módulo de inventario. Contactar al departamento de producción.');   
               return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
         }
     }
@@ -1439,24 +1453,54 @@ class PedidosController extends Controller
         $inventario = InventarioProductos::findOne($id_inventario);
         $empresa = \app\models\MatriculaEmpresa::findOne(1);
         if($pedido == 0){
-            $detalle_pedido = PedidoDetalles::find()->where(['=','id_inventario', $id_inventario])->one();
+            $detalle_pedido = PedidoDetalles::find()->where(['=','id_inventario', $id_inventario])->andWhere(['=','id_pedido', $id])->one();
         }else{
           //para presupuesto  
         }
-       // if($inventario->stock_unidades >= $detalle_pedido->cantidad){
-        if($empresa->aplica_inventario_incompleto == 0){
-                $inventario->stock_unidades -= $inventario->stock_unidades;
-                $inventario->save();
+      
+        if($empresa->aplica_inventario_incompleto == 0){ //PERMITE SUBIR LAS POCAS EXISTENCIA QUE HAY EN BODEGA
                 $detalle_pedido->cargar_existencias = 1;
                 $detalle_pedido->cantidad = $inventario->stock_unidades;
                 $detalle_pedido->save();
+                //actualiza inventario
+                $inventario->stock_unidades -= $inventario->stock_unidades;
+                $inventario->save();
+                $this->ActualizarLineaPedidoVirtual($detalle_pedido); 
                 return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
         }else{
-            Yii::$app->getSession()->setFlash('error', 'Las existencias que hay en bodega son menores que las cantidades vendidas. Pedir autorización para cargar estas unidades.');   
-            return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
+            if($inventario->stock_unidades >= $detalle_pedido->cantidad){
+                $detalle_pedido->cargar_existencias = 1;
+                $detalle_pedido->save();
+                //actualiza inventario
+                $inventario->stock_unidades -= $detalle_pedido->cantidad;
+                $inventario->save();
+                return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
+            }else{
+                Yii::$app->getSession()->setFlash('error', 'Las existencias que hay en bodega son menores que las cantidades vendidas. Pedir autorización para cargar estas unidades.');   
+                return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]); 
+            }
+            
         }    
-        
-       
+    }
+    
+    //PROCESO QUE ACTULIZA DESPUES DE DESCARGAR INVENTARIO
+    protected function ActualizarLineaPedidoVirtual($detalle_pedido) {
+        $total = 0;
+        $subtotal = 0; $porcentaje = 0;
+        $impuesto = 0;
+        $total = $detalle_pedido->cantidad * $detalle_pedido->valor_unitario;
+        if($detalle_pedido->inventario->aplica_iva == 0){
+            $porcentaje = ($detalle_pedido->inventario->porcentaje_iva) / 100;
+            $impuesto = round($total * $porcentaje);
+        }else{
+            $porcentaje = 0;
+            $impuesto = 0;
+        }
+        $detalle_pedido->subtotal = $total - $impuesto;
+        $detalle_pedido->impuesto = $impuesto;
+        $detalle_pedido->total_linea = $total;
+        $detalle_pedido->save();
+
     }
     
     //REPORTES

@@ -143,13 +143,13 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                             ],
                                               ])?>
                                          </td>
-                                         <?php if($idToken == 1){?>
+                                         <?php if($val->consultado == 1){?>
                                              <td style= 'width: 25px; height: 10px;'>
                                                  <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> ', ['cargar_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken, 'pedido' => 0], [
                                                             'class' => '',
-                                                            'title' => 'Proceso que permite cargar las  existencias de inventarios al produto)', 
+                                                            'title' => 'Proceso que permite validar si hay existencias en el modulo de inventario y asi subirlas al pedido.', 
                                                             'data' => [
-                                                                'confirm' => 'Desea cargar desde el modulo de inventario las '.$val->cantidad.' unidades vendidas al producto ('.$val->inventario->nombre_producto.').',
+                                                                'confirm' => 'Desea cargar desde el modulo de inventario las '.$val->cantidad.' unidades vendidas al producto ('.$val->inventario->nombre_producto.'). Tener presente que si no hay todas las existencias se cierra el proceso y no se puede abrir nuevamente.',
                                                                 'method' => 'post',
                                                             ],
                                               ])?>
@@ -185,10 +185,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <tr style="font-size: 90%;">
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>                        
-                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo presupuesto</th>
-                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Stock</th>    
-                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
-                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantida vendida</th>       
+                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Valor unitario</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
@@ -206,8 +204,6 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <tr style="font-size: 90%;">
                                         <td><?= $val->inventario->codigo_producto ?></td>
                                         <td><?= $val->inventario->nombre_producto ?></td>
-                                        <td><?= $val->presupuesto->descripcion ?></td>
-                                        <td style="background-color:#CBAAE3; color: black"><?= $val->inventario->stock_unidades ?></td>
                                         <?php if($val->cantidad == 0){?>
                                               <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
                                         <?php }else{?>

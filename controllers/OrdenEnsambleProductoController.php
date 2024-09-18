@@ -903,7 +903,7 @@ class OrdenEnsambleProductoController extends Controller
                             $orden_ensamble->save(false);
                         }    
                    endforeach;
-                    Yii::$app->getSession()->setFlash('success', 'Los productos realcionados en esta ORDEN DE ENSAMBLE se exportaron con EXITO al modulo de inventario de producto terminado.');  
+                    Yii::$app->getSession()->setFlash('success', 'Los productos relacionados en esta ORDEN DE ENSAMBLE se exportaron con EXITO al modulo de inventario de producto terminado.');  
                     $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
                 }else{
                     Yii::$app->getSession()->setFlash('warning', 'Este producto no cumple con los requisistos para importar. Validar el porcentaje de cumplimiento en la vista de presentacion del producto. Este debe ser mayor a 0.');  

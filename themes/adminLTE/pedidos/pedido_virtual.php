@@ -116,6 +116,7 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Fecha pedido</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Fecha entrega</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Liberado</th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
                 </tr>
             </thead>
@@ -131,6 +132,7 @@ $form = ActiveForm::begin([
                             <td><?= $val->clientePedido->codigoMunicipio->municipio ?></td>
                             <td><?= $val->fecha_proceso ?></td>
                             <td><?= $val->fecha_entrega ?></td>
+                            <td><?= $val->pedidoLiberado ?></td>
                             <td style= 'width: 25px; height: 25px;'>
                                 <a href="<?= Url::toRoute(["pedidos/view_pedido_virtual", "id" => $val->id_pedido, 'idToken' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                             </td>
