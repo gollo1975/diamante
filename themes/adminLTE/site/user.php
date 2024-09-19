@@ -58,8 +58,8 @@ $form = ActiveForm::begin([
                     <td><?= Html::encode($model->perfil) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'emailusuario') ?>:</th>
                     <td><?= Html::encode($model->emailusuario) ?></td>
-                    <th></th>
-                    <td></td>
+                  <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'modulo') ?></th>
+                    <td><?= Html::encode($model->tipoModulo) ?></td>
                 </tr>                                
             </table>
         </div>

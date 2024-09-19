@@ -9,6 +9,7 @@ use app\models\UsuarioDetalle;
 use app\models\FiltroBusquedaBancos;
 use app\models\Municipios;
 use app\models\Departamentos;
+use app\models\BancoEmpleado;
 //clases
 use yii\helpers\Url;
 use yii\web\UploadedFile;
@@ -117,7 +118,24 @@ class EntidadBancariasController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
-
+   
+    //PERMITE CREAR BANCOS DE EMPLEADOS
+    public function actionIndex_banco_empleado() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',114])->all()){
+                $model = \app\models\BancoEmpleado::find()
+                        ->orderBy('id_banco ASC')->all();
+                return $this->render('index_banco_empleado', [
+                            'model' => $model,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+   
     /**
      * Displays a single EntidadBancarias model.
      * @param string $id
@@ -177,6 +195,52 @@ class EntidadBancariasController extends Controller
             'model' => $model,
         ]);
     }
+    
+    //CREAR BANCOS DE EMPLEADOS
+    public function actionCrear_bancos() {
+        $model = new \app\models\BancoEmpleado();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {
+           $table = new \app\models\BancoEmpleado();
+           $table->entidad = $model->entidad;
+           $table->codigo_interfaz = $model->codigo_interfaz;
+           $table->save();
+            return $this->redirect(['index_banco_empleado']);
+        }
+        return $this->render('_form_create', [
+            'model' => $model,
+        ]);
+        
+    }
+    
+    //ACTUALIZA BANCO DE EMPLEADO
+    public function actionUpdate_banco($id_banco) {
+        $model = new BancoEmpleado();
+        $banco = BancoEmpleado::findOne($id_banco);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {
+           $banco->entidad = $model->entidad;
+           $banco->codigo_interfaz = $model->codigo_interfaz;
+            $banco->save();
+            return $this->redirect(['index_banco_empleado']);
+        }
+        if (Yii::$app->request->get("id_banco")) {
+           $model->entidad = $banco->entidad;
+           $model->codigo_interfaz = $banco->codigo_interfaz;
+                 
+        }
+         return $this->render('_form_create', [
+            'model' => $model,
+            'id_banco' => $id_banco,
+        ]);
+    }
+    
 
     /**
      * Updates an existing EntidadBancarias model.

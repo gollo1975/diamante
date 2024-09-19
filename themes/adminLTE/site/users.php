@@ -71,9 +71,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th scope="col" style='background-color:#B9D5CE;'>Nombre Completo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Identificación</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Email</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Punto de venta</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Perfil</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Estado</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Módulo</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>                               
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -95,6 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php }?>    
                 <td><?= $val->perfil ?></td>
                 <td><?= $val->estado ?></td>
+                <td><?= $val->tipoModulo ?></td>
                 <td style="width: 25px;">				
                    <a href="<?= Url::toRoute(["site/view", "id" => $val->codusuario]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>

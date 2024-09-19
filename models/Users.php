@@ -31,6 +31,7 @@ class Users extends \yii\db\ActiveRecord{
             'activo' => 'Estado',
             'fechaproceso' => 'Fecha Creación',  
             'id_punto' => 'Punto de venta',
+            'modulo' => 'Modulo:',
             [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
         ];
     }
@@ -62,6 +63,24 @@ class Users extends \yii\db\ActiveRecord{
             $estado = "Desactivo";
         }
         return $estado;
+    }
+    
+     public function getTipoModulo()
+    {
+        if($this->modulo == ''){
+             $tipomodulo = "No found";
+        }else{
+            if($this->modulo == 1){
+            $tipomodulo = "Producción";
+            }else{
+                if($this->modulo == 2){
+                    $tipomodulo = "Nómina";
+                }else{
+                    $tipomodulo = "Contabilidad";
+                }    
+            }
+        }    
+        return $tipomodulo;
     }
 
 }

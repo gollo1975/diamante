@@ -285,6 +285,7 @@ class SiteController extends Controller {
                 $table->accessToken = $this->randKey("abcdef0123456789", 200);
                 $table->activo = 1;
                 $table->id_punto = $model->id_punto;
+                $table->modulo = $model->modulo;
 
                 //Si el registro es guardado correctamente
                 if ($table->insert()) {
@@ -320,6 +321,7 @@ class SiteController extends Controller {
                     $table->emailusuario = $model->emailusuario;
                     $table->activo = $model->activo;
                     $table->id_punto = $model->id_punto;
+                    $table->modulo = $model->modulo;
                     if ($table->update()) {
                         $msg = "El registro ha sido actualizado correctamente";
                         return $this->redirect(["site/users"]);
@@ -346,6 +348,7 @@ class SiteController extends Controller {
                 $model->emailusuario = $table->emailusuario;
                 $model->activo = $table->activo;
                 $model->id_punto = $table->id_punto;
+                $model->modulo = $table->modulo;
             } else {
                 return $this->redirect(["site/users"]);
             }

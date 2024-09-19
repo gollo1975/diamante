@@ -58,7 +58,10 @@ $form = ActiveForm::begin([
                     'allowClear' => true
                 ],
             ]); ?> 
-        </div>    
+        </div> 
+        <div class="row">            
+            <?= $form->field($model, 'modulo')->dropdownList(['1' => 'Producción', '2' => 'Nómina', '3' => 'Contabilidad'], ['prompt' => 'Seleccione...']) ?>
+        </div>
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("site/users") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>    
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>
