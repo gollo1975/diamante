@@ -40,9 +40,9 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     {
         return [
             [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado',
-                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','numero_lote','cargar_existencias'], 'integer'],
+                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','numero_lote'], 'string'],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_presupuesto'], 'exist', 'skipOnError' => true, 'targetClass' => PresupuestoEmpresarial::className(), 'targetAttribute' => ['id_presupuesto' => 'id_presupuesto']],
@@ -74,6 +74,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
             'fecha_alistamiento' => 'Fecha alistamiento:',
             'numero_lote' => 'numero_lote',
             'cargar_existencias' => 'cargar_existencias',
+            'consultado' => 'Consultado:',
         ];
     }
 

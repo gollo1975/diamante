@@ -261,7 +261,8 @@ class AlmacenamientoProductoController extends Controller
                             ->andFilterWhere(['=','id_agente', $vendedores])
                             ->andWhere(['=','cerrar_pedido', 1])
                             ->andWhere(['=', 'pedido_anulado', 0])
-                            ->andWhere(['=', 'facturado', 0]);
+                            ->andWhere(['=', 'facturado', 0])
+                            ->andWhere(['=', 'liberado_inventario', 1]);
                         $table = $table->orderBy('id_pedido DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -285,6 +286,7 @@ class AlmacenamientoProductoController extends Controller
                     $table = \app\models\Pedidos::find()->Where(['=','cerrar_pedido', 1])
                             ->andWhere(['=', 'facturado', 0])
                             ->andWhere(['=', 'pedido_anulado', 0])
+                            ->andWhere(['=', 'liberado_inventario', 1])
                             ->orderBy('id_pedido DESC');   
                     $count = clone $table;
                     $pages = new Pagination([
@@ -599,8 +601,8 @@ class AlmacenamientoProductoController extends Controller
     //VISTA QUE LISTAS LOS PEDIDOS
     public function actionView_listar($id_pedido){
         $model = Pedidos::findOne($id_pedido);
-        $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->all();  
-        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id_pedido])->all();
+        $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->andWhere(['=','cargar_existencias', 1])->all();  
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id_pedido])->andWhere(['=','cargar_existencias', 1])->all();
         if(isset($_POST["regenerar_linea"])){
             if(isset($_POST["numero_linea"])){
                 foreach ($_POST["numero_linea"] as $intCodigo){

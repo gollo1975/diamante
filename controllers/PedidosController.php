@@ -1434,9 +1434,13 @@ class PedidosController extends Controller
     }
     
     //PROCESO QUE PERMITE BUSCAR INVENTARIO
-    public function actionSearch_inventario_pedido($id, $id_inventario, $idToken) {
+    public function actionSearch_inventario_pedido($id, $id_inventario, $idToken, $sw) {
         $inventario = InventarioProductos::findOne($id_inventario);
-        $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $id_inventario])->one();
+        if($sw == 0){
+            $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $id_inventario])->one();
+        }else{
+           $detalle = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $id_inventario])->one();
+        }
        if($inventario->stock_unidades > 0){
            $detalle->consultado = 1;
            $detalle->save();
@@ -1455,7 +1459,7 @@ class PedidosController extends Controller
         if($pedido == 0){
             $detalle_pedido = PedidoDetalles::find()->where(['=','id_inventario', $id_inventario])->andWhere(['=','id_pedido', $id])->one();
         }else{
-          //para presupuesto  
+          $detalle_pedido = PedidoPresupuestoComercial::find()->where(['=','id_inventario', $id_inventario])->andWhere(['=','id_pedido', $id])->one();
         }
       
         if($empresa->aplica_inventario_incompleto == 0){ //PERMITE SUBIR LAS POCAS EXISTENCIA QUE HAY EN BODEGA
@@ -1503,6 +1507,75 @@ class PedidosController extends Controller
 
     }
     
+    //LIBERAR PEDIDO VIRTUAL
+    public function actionLiberar_pedido_virtual($id,$idToken) {
+        $model = Pedidos::findOne($id);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        if($empresa->aplica_inventario_incompleto == 0){
+           $model->liberado_inventario = 1;
+           $model->save();
+           $this->TotalPedidoVirtual($id, $model);
+           return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]); 
+        }else{
+            $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
+            $detalleP = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+            $sw = 0;
+            foreach ($detalle as $detalles):
+                if($detalles->cargar_existencias == 0){
+                    $sw = 1;
+                }
+            endforeach;
+            if($sw == 0){
+                 $sw1 = 0;
+                foreach ($detalleP as $valor):
+                    if($valor->cargar_existencias == 0){
+                        $sw1 = 1;
+                    }
+                endforeach;    
+                if($sw1 == 0){
+                    $model->liberado_inventario = 1;
+                    $model->save();
+                    $this->TotalPedidoVirtual($id, $model);
+                    return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]); 
+                }else{
+                     Yii::$app->getSession()->setFlash('warning', 'El presupuesto comercial NO esta completo, ni las unidades vendidas han sido validadas. Revise la información');   
+                    return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);  
+                }
+            }else{
+                Yii::$app->getSession()->setFlash('error', 'El pedido virtual no esta completo, ni las unidades vendidas han sido validadas. Revise la información');   
+                return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);  
+            }
+        }
+    }
+    
+    //PROCESO QUE TOTALIZA EL PEDIDO Y PRESUPUESTO
+    protected function TotalPedidoVirtual($id, $model) {
+        $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
+        $subtotal = 0;
+        $impuesto = 0;
+        $total = 0;
+        foreach ($detalle as $detalles):
+            $subtotal += $detalles->subtotal;
+            $impuesto += $detalles->impuesto;
+            $total += $detalles->total_linea;
+        endforeach;
+        $model->subtotal = $subtotal;
+        $model->impuesto = $impuesto;
+        $model->gran_total = $total;
+        $model->save();
+        // proceso que actualiza el presupuesto
+        $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        $subtotal = 0;
+        $impuesto = 0;
+        $total = 0;
+        foreach ($presupuesto as $valor):
+            $subtotal += $valor->subtotal;
+            $impuesto += $valor->impuesto;
+            $total += $valor->total_linea;
+        endforeach;
+        $model->valor_presupuesto = $subtotal + $impuesto + $total;
+        $model->save();
+    }
     //REPORTES
     public function actionImprimir_pedido($id) {
         $model = Pedidos::findOne($id);

@@ -99,7 +99,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'aplica_factura_produccion' => 'Aplica factura produccion:',
             'presentacion' => 'Presentacion:',
             'aplica_fabricante' => 'aplica_fabricante',
-            'aplica_inventario_incompleto' => 'Aplicar inventario incompleto:',
+            'aplica_inventario_incompleto' => 'Aplicar inventario completo:',
             
             
         ];

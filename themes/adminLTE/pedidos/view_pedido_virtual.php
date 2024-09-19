@@ -28,8 +28,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
 <div class="orden-compra-view">
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
+      <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['pedido_virtual'], ['class' => 'btn btn-primary btn-sm']) ?>
     <div class="btn-group btn-sm" role="group">    
-         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['pedido_virtual'], ['class' => 'btn btn-primary btn-sm']) ?>
+       
          <button type="button" class="btn btn-info  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Imprimir
             <span class="caret"></span>
@@ -40,7 +41,11 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                      <li><?= Html::a('<span class="glyphicon glyphicon-print"></span> Presupuesto pedido', ['imprimir_presupuesto', 'id' => $model->id_pedido]) ?></li>
                  <?php }?>    
          </ul>
-     </div>    
+     </div>
+    <?php if($model->liberado_inventario ==0){
+        echo Html::a('<span class="glyphicon glyphicon-check"></span> Liberar pedido virtual', ['liberar_pedido_virtual', 'id' => $model->id_pedido, 'idToken' =>$idToken],['class' => 'btn btn-warning btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de LIBERAR EL PEDIDO VIRTUAL del cliente  '. $model->cliente.' para ser despachado.', 'method' => 'post']]);
+    }?>
     <div class="panel panel-success">
         <div class="panel-heading">
             DETALLES DEL PEDIDO
@@ -134,7 +139,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                    <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
                                    <?php if($val->cargar_existencias == 0){?>
                                         <td style= 'width: 25px; height: 10px;'>
-                                             <?= Html::a('<span class="glyphicon glyphicon-search"></span> ', ['search_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken], [
+                                             <?= Html::a('<span class="glyphicon glyphicon-search"></span> ', ['search_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken,'sw' => 0], [
                                                             'class' => '',
                                                             'title' => 'Proceso que permite buscar existencias de inventarios)', 
                                                             'data' => [
@@ -145,7 +150,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                          </td>
                                          <?php if($val->consultado == 1){?>
                                              <td style= 'width: 25px; height: 10px;'>
-                                                 <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> ', ['cargar_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken, 'pedido' => 0], [
+                                                 <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> ', ['cargar_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken, 'pedido' => 0 , 'sw' => 0], [
                                                             'class' => '',
                                                             'title' => 'Proceso que permite validar si hay existencias en el modulo de inventario y asi subirlas al pedido.', 
                                                             'data' => [
@@ -191,6 +196,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'></th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'></th> 
                                     </tr>
                                 </thead>
                             <body>
@@ -213,7 +219,37 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                         <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
-                                        <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
+                                        <?php if($val->cargar_existencias == 0){?>
+                                        <td style= 'width: 25px; height: 10px;'>
+                                             <?= Html::a('<span class="glyphicon glyphicon-search"></span> ', ['search_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken,'sw' => 1], [
+                                                            'class' => '',
+                                                            'title' => 'Proceso que permite buscar existencias de inventarios)', 
+                                                            'data' => [
+                                                                'confirm' => 'Desea buscar existencias en el módulo de inventarios de la presentacion del producto ('.$val->inventario->nombre_producto.').',
+                                                                'method' => 'post',
+                                                            ],
+                                              ])?>
+                                         </td>
+                                         <?php if($val->consultado == 1){?>
+                                             <td style= 'width: 25px; height: 10px;'>
+                                                 <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> ', ['cargar_inventario_pedido', 'id_inventario' => $val->id_inventario, 'id' => $model->id_pedido, 'idToken' => $idToken, 'pedido' => 1], [
+                                                            'class' => '',
+                                                            'title' => 'Proceso que permite validar si hay existencias en el modulo de inventario y asi subirlas al pedido.', 
+                                                            'data' => [
+                                                                'confirm' => 'Desea cargar desde el modulo de inventario las '.$val->cantidad.' unidades vendidas al producto ('.$val->inventario->nombre_producto.'). Tener presente que si no hay todas las existencias se cierra el proceso y no se puede abrir nuevamente.',
+                                                                'method' => 'post',
+                                                            ],
+                                              ])?>
+                                             </td>
+                                         <?php }else{?>
+                                             <td style= 'width: 25px; height: 10px;'></td>
+                                         <?php }
+                                   }else{?>
+                                             <td style= 'width: 25px; height: 10px;'>
+                                                 <span class="glyphicon glyphicon-thumbs-up"></span>
+                                             </td>
+                                      <td style= 'width: 25px; height: 10px;'></td>
+                                   <?php }?>          
                                         
                                     </tr>
                                  <?php endforeach;?>          

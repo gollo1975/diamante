@@ -65,7 +65,7 @@ class OrdenProduccionController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $almacen = null;
-                $autorizado = null;
+                $producto = null;
                 $grupo = null; $tipo_proceso = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
@@ -76,12 +76,12 @@ class OrdenProduccionController extends Controller
                         $almacen = Html::encode($form->almacen);
                         $grupo = Html::encode($form->grupo);
                         $tipo_proceso = Html::encode($form->tipo_proceso);
-                        $autorizado = Html::encode($form->autorizado);
+                        $producto = Html::encode($form->producto);
                         $table = OrdenProduccion::find()
                                     ->andFilterWhere(['=', 'numero_orden', $numero])
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'id_almacen', $almacen])
-                                    ->andFilterWhere(['=', 'autorizado', $autorizado])
+                                    ->andFilterWhere(['=', 'id_producto', $producto])
                                     ->andFilterWhere(['=', 'numero_lote', $lote])
                                     ->andFilterWhere(['=', 'id_proceso_produccion', $tipo_proceso])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);

@@ -51,8 +51,8 @@ $this->params['breadcrumbs'][] = $id_orden;
                     <td><?= Html::encode($model->numero_orden) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades_reales') ?></th>
-                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades_reales,0)) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
+                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
                 </tr>
             </table>    
         </div>
@@ -80,10 +80,10 @@ $this->params['breadcrumbs'][] = $id_orden;
                                 <thead>
                                     <tr style="font-size: 90%;">
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Producto</th>                        
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Uni. Producidas</th> 
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Uni. almacenadas</th>  
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Uni. faltantes</th>  
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Presentación</th>  
+                                        <th scope="col"  style='background-color:#B9D5CE;'>U. Fabricadas</th> 
+                                        <th scope="col"  style='background-color:#B9D5CE;'>U. Almacenadas</th>  
+                                        <th scope="col"  style='background-color:#B9D5CE;'>U. Faltantes</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Tipo documento</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero lote</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
@@ -176,10 +176,10 @@ $this->params['breadcrumbs'][] = $id_orden;
                                         <th scope="col"  style='background-color:#B9D5CE;'>Rack</th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Ubicación</th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero lote</th>
-                                        <th scope="col"  style='background-color:#B9D5CE;'>F.Almacenamiento</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>F. Almacenamiento</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Codigo</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'>Presentacion</th>
-                                        <th scope="col"  style='background-color:#B9D5CE;'>Entradas</th>
+                                        <th scope="col"  style='background-color:#B9D5CE;'>Stock</th>
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
                                     </tr>
                                 </thead>

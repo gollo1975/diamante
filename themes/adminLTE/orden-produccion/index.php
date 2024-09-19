@@ -47,6 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ]);
 
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$conProducto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
 $almacen = ArrayHelper::map(Almacen::find()->orderBy ('almacen ASC')->all(), 'id_almacen', 'almacen');
 $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy ('nombre_proceso ASC')->all(), 'id_proceso_produccion', 'nombre_proceso');
 
@@ -96,7 +97,13 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
                 ],
             ]); ?> 
             <?= $formulario->field($form, "lote")->input("search") ?>
-            <?= $formulario->field($form, 'autorizado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+            <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                'data' => $conProducto,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
