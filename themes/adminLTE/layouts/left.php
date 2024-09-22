@@ -566,8 +566,26 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 'items' => [
                                                                     ['label' => 'Empresariales', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index']],
                                                                     ['label' => 'Empleados', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index_banco_empleado']],
-                                                                ]],
+                                                                    ]
+                                                                ],
                                                             ],
+                                                        ],
+                                                        [
+                                                            'label' => 'Empleados',
+                                                            'icon' => 'user',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                [
+                                                                'label' => 'Configuración',
+                                                                'icon' => 'connectdevelop',
+                                                                'url' => '#',
+                                                                'items' => [
+                                                                    ['label' => 'Tipo de estudio', 'icon' => 'plus-square-o', 'url' => ['/departamentos/indexdepartamento']],
+                                                                    ]
+                                                                ],
+                                                                ['label' => 'Empleado', 'icon' => 'plus-square-o', 'url' => ['/empleados/index']],
+                                                                
+                                                                ],
                                                         ],
                                                     ],
                                                 ],
