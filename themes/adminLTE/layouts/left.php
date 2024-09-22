@@ -570,6 +570,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 ],
                                                             ],
                                                         ],
+                                                        //todo lo referente a empleados
                                                         [
                                                             'label' => 'Empleados',
                                                             'icon' => 'user',
@@ -584,6 +585,34 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                     ]
                                                                 ],
                                                                 ['label' => 'Empleado', 'icon' => 'plus-square-o', 'url' => ['/empleados/index']],
+                                                                
+                                                                ],
+                                                        ],
+                                                        //todo la referente a contratos
+                                                        [
+                                                            'label' => 'Contratos',
+                                                            'icon' => 'list',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                [
+                                                                'label' => 'Configuración',
+                                                                'icon' => 'connectdevelop',
+                                                                'url' => '#',
+                                                                'items' => [
+                                                                    ['label' => 'Caja de compensación', 'icon' => 'plus-square-o', 'url' => ['/caja-compensacion/index']],
+                                                                    ['label' => 'Centro trabajo', 'icon' => 'plus-square-o', 'url' => ['/centro-trabajo/index']],
+                                                                    ['label' => 'Entidad pension', 'icon' => 'plus-square-o', 'url' => ['/entidad-pension/index']],
+                                                                    ['label' => 'Entidad salud', 'icon' => 'plus-square-o', 'url' => ['/entidad-salud/index']],
+                                                                    ['label' => 'Tipo contrato', 'icon' => 'plus-square-o', 'url' => ['/tipo-contrato/index']],
+                                                                    ['label' => 'Tiempo servicio', 'icon' => 'plus-square-o', 'url' => ['/tiempo-servicio/index']],
+                                                                    ['label' => 'Tipo cotizante', 'icon' => 'plus-square-o', 'url' => ['/tipo-cotizante/index']],
+                                                                    ['label' => 'Subtipo cotizante', 'icon' => 'plus-square-o', 'url' => ['/subtipo-cotizante/index']],
+                                                                    ['label' => 'Motivo terminación', 'icon' => 'plus-square-o', 'url' => ['/motivo-terminacion/index']],
+                                                                    ['label' => 'Grupo de pago', 'icon' => 'plus-square-o', 'url' => ['/grupo-pago/index']],
+                                                                    ['label' => 'Periodo de pago', 'icon' => 'plus-square-o', 'url' => ['/periodo-pago/index']],
+                                                                    ]
+                                                                ],
+                                                                ['label' => 'Contrato', 'icon' => 'plus-square-o', 'url' => ['/contratos/index']],
                                                                 
                                                                 ],
                                                         ],
