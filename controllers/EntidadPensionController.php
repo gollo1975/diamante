@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\EntidadPension;
 use app\models\EntidadPensionSearch;
+use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -35,15 +36,22 @@ class EntidadPensionController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new EntidadPensionSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',120])->all()){
+                $searchModel = new EntidadPensionSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }        
     }
-
     /**
      * Displays a single EntidadPension model.
      * @param integer $id
@@ -65,13 +73,18 @@ class EntidadPensionController extends Controller
     public function actionCreate()
     {
         $model = new EntidadPension();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entidad_pension]);
+        if ($model->load(Yii::$app->request->post()) && $model->save(false)) {
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
             'model' => $model,
+            'sw' => 0,
         ]);
     }
 
@@ -87,11 +100,12 @@ class EntidadPensionController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entidad_pension]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'sw' => 1,
         ]);
     }
 
@@ -104,9 +118,17 @@ class EntidadPensionController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["entidad-pension/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["entidad-pension/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+            $this->redirect(["entidad-pension/index"]);
+        }
     }
 
     /**

@@ -2,26 +2,42 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SubtipoCotizante */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="subtipo-cotizante-form">
 
-    <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>
+<?php
+$form = ActiveForm::begin([
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+                'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-3 control-label'],
+                'options' => []
+            ],
+        ]);
+?>
 
-    <?= $form->field($model, 'codigo_interfaz')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'user_name')->textInput(['maxlength' => true]) ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        Información Subtipo Cotizante
     </div>
-
-    <?php ActiveForm::end(); ?>
-
+    <div class="panel-body">        														   		
+        <div class="row">
+            <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>    
+        </div>  
+        <div class="row">
+            <?= $form->field($model, 'codigo_interfaz')->textInput(['maxlength' => true]) ?>    
+        </div> 
+        <div class="panel-footer text-right">                
+            <a href="<?= Url::toRoute("subtipo-cotizante/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success",]) ?>		
+        </div>
+    </div>
 </div>
+<?php ActiveForm::end(); ?>

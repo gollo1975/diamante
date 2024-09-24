@@ -2,48 +2,77 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\GrupoPago */
 
-$this->title = $model->id_grupo_pago;
-$this->params['breadcrumbs'][] = ['label' => 'Grupo Pagos', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
+$this->title = 'GRUPO DE PAGO';
+$this->params['breadcrumbs'][] = ['label' => 'Grupos de Pago', 'url' => ['index']];
+$this->params['breadcrumbs'][] = $model->id_grupo_pago;
+$view = 'grupo_pago';
 ?>
 <div class="grupo-pago-view">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id_grupo_pago], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id_grupo_pago], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+<!--<?= Html::encode($this->title) ?>-->
+      <p>
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index', 'id' => $model->id_grupo_pago], ['class' => 'btn btn-primary btn-sm']) ?>
     </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id_grupo_pago',
-            'grupo_pago',
-            'codigo_departamento',
-            'codigo_municipio',
-            'id_sucursal',
-            'ultimo_pago_nomina',
-            'ultimo_pago_prima',
-            'ultimo_pago_cesantia',
-            'limite_devengado',
-            'dias_pago',
-            'estado',
-            'observacion',
-            'user_name',
-            'fecha_hora_registro',
-        ],
-    ]) ?>
-
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            Grupo de Pago
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered table-striped table-hover">
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo_pago') ?>:</th>
+                    <td><?= Html::encode($model->id_grupo_pago) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'grupo_pago') ?>:</th>
+                    <td><?= Html::encode($model->grupo_pago) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_periodo_pago') ?>:</th>
+                    <td><?= Html::encode($model->periodoPago->nombre_periodo) ?></td>
+                    
+                </tr>                
+                 <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_departamento') ?>:</th>
+                    <td><?= Html::encode($model->departamento->departamento) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_municipio') ?>:</th>
+                    <td><?= Html::encode($model->municipios->municipio) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_sucursal') ?>:</th>
+                     <td><?= Html::encode($model->sucursalPila->sucursal) ?></td>
+                  
+                   
+                </tr>   
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'ultimo_pago_prima') ?>:</th>
+                    <td><?= Html::encode($model->ultimo_pago_prima) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'ultimo_pago_cesantia') ?>:</th>
+                    <td><?= Html::encode($model->ultimo_pago_cesantia) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'dias_pago') ?>:</th>
+                    <td><?= Html::encode($model->dias_pago) ?></td>
+                </tr>  
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'activo') ?>:</th>
+                    <td><?= Html::encode($model->activo) ?></td>  
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_registro') ?>:</th>
+                    <td><?= Html::encode($model->fecha_hora_registro) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'limite_devengado') ?>:</th>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->limite_devengado,0)) ?></td>
+                </tr>  
+                 <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?>:</th>
+                    <td colspan = "6"><?= Html::encode($model->observacion) ?></td>  
+                </tr>    
+            </table>
+        </div>
+    </div>
+    <?php $form = ActiveForm::begin([
+    'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+    'fieldConfig' => [
+        'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+        'labelOptions' => ['class' => 'col-sm-3 control-label'],
+        'options' => []
+    ],
+    ]); ?>        
+    <?php ActiveForm::end(); ?>
 </div>

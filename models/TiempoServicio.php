@@ -23,6 +23,15 @@ class TiempoServicio extends \yii\db\ActiveRecord
     {
         return 'tiempo_servicio';
     }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->tiempo_servicio = strtoupper($this->tiempo_servicio); 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -43,11 +52,11 @@ class TiempoServicio extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_tiempo' => 'Id Tiempo',
-            'tiempo_servicio' => 'Tiempo Servicio',
-            'horas_dia' => 'Horas Dia',
-            'pago_incapacidad_general' => 'Pago Incapacidad General',
-            'pago_incapacidad_laboral' => 'Pago Incapacidad Laboral',
+            'id_tiempo' => 'Id',
+            'tiempo_servicio' => 'Tiempo del servicio',
+            'horas_dia' => 'Horas dia',
+            'pago_incapacidad_general' => '% Incapacidad general',
+            'pago_incapacidad_laboral' => '% Incapacidad laboral',
             'user_name' => 'User Name',
         ];
     }

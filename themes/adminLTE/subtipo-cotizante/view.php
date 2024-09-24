@@ -2,38 +2,39 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SubtipoCotizante */
 
-$this->title = $model->id_subtipo_cotizante;
-$this->params['breadcrumbs'][] = ['label' => 'Subtipo Cotizantes', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
+$this->title = 'SUBTIPO DE COTIZANTE';
+$this->params['breadcrumbs'][] = ['label' => 'Subtipos Cotizantes', 'url' => ['index']];
+$this->params['breadcrumbs'][] = $model->id_subtipo_cotizante;
 ?>
-<div class="subtipo-cotizante-view">
+<div class="tipo-cotizante-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <!--<h1><?= Html::encode($this->title) ?></h1>-->
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id_subtipo_cotizante], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id_subtipo_cotizante], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index', 'id' => $model->id_subtipo_cotizante], ['class' => 'btn btn-primary']) ?>
+	
     </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id_subtipo_cotizante',
-            'descripcion',
-            'codigo_interfaz',
-            'user_name',
-        ],
-    ]) ?>
-
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            Subtipo Cotizante
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered table-striped table-hover">
+                <tr>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_subtipo_cotizante') ?>:</th>
+                    <td><?= Html::encode($model->id_subtipo_cotizante) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion') ?>:</th>
+                    <td><?= Html::encode($model->descripcion) ?></td>  
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_interfaz') ?>:</th>
+                    <td><?= Html::encode($model->codigo_interfaz) ?></td>  
+                </tr>                
+            </table>
+        </div>
+    </div>
 </div>

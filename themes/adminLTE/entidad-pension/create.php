@@ -2,19 +2,21 @@
 
 use yii\helpers\Html;
 
+
 /* @var $this yii\web\View */
 /* @var $model app\models\EntidadPension */
 
-$this->title = 'Create Entidad Pension';
-$this->params['breadcrumbs'][] = ['label' => 'Entidad Pensions', 'url' => ['index']];
+$this->title = 'NUEVA';
+$this->params['breadcrumbs'][] = ['label' => 'Entidades de Pension', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="entidad-pension-create">
+<div class="tipo-documento-create">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <!--<h1><?= Html::encode($this->title) ?></h1>-->
 
     <?= $this->render('_form', [
         'model' => $model,
+        'sw' => 0,
     ]) ?>
 
 </div>

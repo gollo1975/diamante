@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\CentroTrabajo;
 use app\models\CentroTrabajoSearch;
+use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,15 +34,23 @@ class CentroTrabajoController extends Controller
      * Lists all CentroTrabajo models.
      * @return mixed
      */
-    public function actionIndex()
+   public function actionIndex()
     {
-        $searchModel = new CentroTrabajoSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',118])->all()){
+                $searchModel = new CentroTrabajoSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }        
     }
 
     /**
@@ -67,11 +76,14 @@ class CentroTrabajoController extends Controller
         $model = new CentroTrabajo();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_centro_trabajo]);
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
             'model' => $model,
+            'sw' => 0,
         ]);
     }
 
@@ -87,11 +99,12 @@ class CentroTrabajoController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_centro_trabajo]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
+             'sw' => 1,
         ]);
     }
 
@@ -104,9 +117,17 @@ class CentroTrabajoController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["centro-trabajo/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["centro-trabajo/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+            $this->redirect(["centro-trabajo/index"]);
+        }
     }
 
     /**

@@ -10,22 +10,18 @@ use yii\widgets\ActiveForm;
 
 <div class="tipo-cotizante-search">
 
-    <?php $form = ActiveForm::begin([
-        'action' => ['index'],
-        'method' => 'get',
-    ]); ?>
+    <?php
+    $form = ActiveForm::begin([
+                'action' => ['index'],
+                'options' => ['class' => 'form-horizontal'],
+                'fieldConfig' => [
+                    'template' => '{label}<div class="col-sm-4 form-group">{input}</div>',
+                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                    'options' => [ 'tag' => false,]
+                ],
+    ]);
+    ?>
+   <?php ActiveForm::end(); ?>
 
-    <?= $form->field($model, 'id_tipo_cotizante') ?>
-
-    <?= $form->field($model, 'tipo') ?>
-
-    <?= $form->field($model, 'codigo_intefaz') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
-    </div>
-
-    <?php ActiveForm::end(); ?>
-
+   
 </div>

@@ -19,6 +19,7 @@ class EntidadPensionSearch extends EntidadPension
         return [
             [['id_entidad_pension', 'estado'], 'integer'],
             [['entidad'], 'safe'],
+            [['codigo_interfaz'], 'string'],
         ];
     }
 
@@ -60,9 +61,11 @@ class EntidadPensionSearch extends EntidadPension
         $query->andFilterWhere([
             'id_entidad_pension' => $this->id_entidad_pension,
             'estado' => $this->estado,
+            'codigo_interfaz' => $this->codigo_interfaz,
         ]);
 
         $query->andFilterWhere(['like', 'entidad', $this->entidad]);
+        $query->andFilterWhere(['=', 'codigo_interfaz', $this->codigo_interfaz]);
 
         return $dataProvider;
     }

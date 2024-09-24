@@ -17,7 +17,7 @@ class GrupoPagoSearch extends GrupoPago
     public function rules()
     {
         return [
-            [['id_grupo_pago', 'id_sucursal', 'limite_devengado', 'dias_pago', 'estado'], 'integer'],
+            [['id_grupo_pago', 'id_sucursal', 'limite_devengado', 'dias_pago', 'estado','id_periodo_pago'], 'integer'],
             [['grupo_pago', 'codigo_departamento', 'codigo_municipio', 'ultimo_pago_nomina', 'ultimo_pago_prima', 'ultimo_pago_cesantia', 'observacion', 'user_name', 'fecha_hora_registro'], 'safe'],
         ];
     }
@@ -66,6 +66,7 @@ class GrupoPagoSearch extends GrupoPago
             'limite_devengado' => $this->limite_devengado,
             'dias_pago' => $this->dias_pago,
             'estado' => $this->estado,
+            'id_periodo_pago' => $this->id_periodo_pago,
             'fecha_hora_registro' => $this->fecha_hora_registro,
         ]);
 
@@ -73,7 +74,8 @@ class GrupoPagoSearch extends GrupoPago
             ->andFilterWhere(['like', 'codigo_departamento', $this->codigo_departamento])
             ->andFilterWhere(['like', 'codigo_municipio', $this->codigo_municipio])
             ->andFilterWhere(['like', 'observacion', $this->observacion])
-            ->andFilterWhere(['like', 'user_name', $this->user_name]);
+            ->andFilterWhere(['like', 'user_name', $this->user_name])
+             ->andFilterWhere(['=', 'id_periodo_pago', $this->id_periodo_pago]);
 
         return $dataProvider;
     }

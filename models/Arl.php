@@ -27,7 +27,7 @@ class Arl extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['dscripcion', 'porcentaje'], 'required'],
+            [['descripcion', 'porcentaje'], 'required'],
             [['porcentaje'], 'number'],
             [['dscripcion'], 'string', 'max' => 30],
         ];
@@ -40,8 +40,12 @@ class Arl extends \yii\db\ActiveRecord
     {
         return [
             'id_arl' => 'Id Arl',
-            'dscripcion' => 'Dscripcion',
+            'descripcion' => 'Dscripcion',
             'porcentaje' => 'Porcentaje',
         ];
+    }
+    public function getCompleto() {
+        return " {$this->descripcion} - {$this->porcentaje} %";
+        
     }
 }

@@ -29,6 +29,16 @@ class CajaCompensacion extends \yii\db\ActiveRecord
     {
         return 'caja_compensacion';
     }
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->caja = strtoupper($this->caja); 
+        $this->codigo = strtoupper($this->codigo); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -54,14 +64,14 @@ class CajaCompensacion extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_caja' => 'Id Caja',
-            'caja' => 'Caja',
-            'telefono' => 'Telefono',
-            'direccion' => 'Direccion',
-            'codigo' => 'Codigo',
-            'codigo_municipio' => 'Codigo Municipio',
-            'estado' => 'Estado',
-            'porcentaje' => 'Porcentaje',
+            'id_caja' => 'Id',
+            'caja' => 'Caja de compensación:',
+            'telefono' => 'Telefono:',
+            'direccion' => 'Direccion:',
+            'codigo' => 'Codigo interfaz:',
+            'codigo_municipio' => 'Municipio:',
+            'estado' => 'Activo',
+            'porcentaje' => 'Porcentaje:',
             'user_name' => 'User Name',
             'fecha_hora_registro' => 'Fecha Hora Registro',
         ];
@@ -73,5 +83,14 @@ class CajaCompensacion extends \yii\db\ActiveRecord
     public function getCodigoMunicipio()
     {
         return $this->hasOne(Municipios::className(), ['codigo_municipio' => 'codigo_municipio']);
+    }
+    
+    public function getActivo() {
+        if($this->estado == 0){
+            $activo = 'SI';
+        }else{
+            $activo = 'NO';
+        }
+        return $activo;
     }
 }

@@ -4,34 +4,39 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\TiempoServicioSearch */
+/* @var $model app\models\TipoReciboSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
 <div class="tiempo-servicio-search">
 
-    <?php $form = ActiveForm::begin([
-        'action' => ['index'],
-        'method' => 'get',
-    ]); ?>
+    <?php
+    $form = ActiveForm::begin([
+                'action' => ['index'],
+                'options' => ['class' => 'form-horizontal'],
+                'fieldConfig' => [
+                    'template' => '{label}<div class="col-sm-4 form-group">{input}</div>',
+                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                    'options' => [ 'tag' => false,]
+                ],
+    ]);
+    ?>
+    <div class="panel panel-success panel-filters" style="display:none">
+        <div class="panel-heading">
+            Filtros <i class="glyphicon glyphicon-filter"></i>
+        </div>
+        <div class="panel-body" style="display:none">
+            <div class="row">
+                <?= $form->field($model, 'id_tiempo') ?>
+                <?= $form->field($model, 'tiempo_servicio') ?>
+            </div>
+            <div class="panel-footer text-right" style="display:none">
+        <?= Html::submitButton('Buscar ' . Html::tag('i', '', ['class' => 'fa fa-search']), ['class' => 'btn btn-primary']) ?>
+        <?= Html::resetButton('Limpiar ' . Html::tag('i', '', ['class' => 'fa fa-eraser']), ['class' => 'btn btn-info']) ?>
+            </div>
+        </div>
 
-    <?= $form->field($model, 'id_tiempo') ?>
+<?php ActiveForm::end(); ?>
 
-    <?= $form->field($model, 'tiempo_servicio') ?>
-
-    <?= $form->field($model, 'horas_dia') ?>
-
-    <?= $form->field($model, 'pago_incapacidad_general') ?>
-
-    <?= $form->field($model, 'pago_incapacidad_laboral') ?>
-
-    <?php // echo $form->field($model, 'user_name') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
     </div>
-
-    <?php ActiveForm::end(); ?>
-
 </div>

@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\EntidadSalud;
 use app\models\EntidadSaludSearch;
+use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,15 +34,23 @@ class EntidadSaludController extends Controller
      * Lists all EntidadSalud models.
      * @return mixed
      */
-    public function actionIndex()
+   public function actionIndex()
     {
-        $searchModel = new EntidadSaludSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',119])->all()){
+                $searchModel = new EntidadSaludSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }        
     }
 
     /**
@@ -67,11 +76,14 @@ class EntidadSaludController extends Controller
         $model = new EntidadSalud();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entidad_salud]);
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
             'model' => $model,
+            'sw' => 0,
         ]);
     }
 
@@ -87,11 +99,12 @@ class EntidadSaludController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entidad_salud]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'sw' => 1,
         ]);
     }
 
@@ -102,11 +115,19 @@ class EntidadSaludController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+  public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["entidad-salud/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["entidad-salud/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+            $this->redirect(["entidad-salud/index"]);
+        }
     }
 
     /**

@@ -18,7 +18,7 @@ class EntidadSaludSearch extends EntidadSalud
     {
         return [
             [['id_entidad_salud', 'estado'], 'integer'],
-            [['entidad_salud', 'user_name'], 'safe'],
+            [['entidad_salud', 'user_name','codigo_interfaz'], 'safe'],
         ];
     }
 
@@ -60,10 +60,12 @@ class EntidadSaludSearch extends EntidadSalud
         $query->andFilterWhere([
             'id_entidad_salud' => $this->id_entidad_salud,
             'estado' => $this->estado,
+            'codigo_interfaz' => $this->codigo_interfaz,
         ]);
 
         $query->andFilterWhere(['like', 'entidad_salud', $this->entidad_salud])
-            ->andFilterWhere(['like', 'user_name', $this->user_name]);
+             ->andFilterWhere(['like', 'user_name', $this->user_name])
+             ->andFilterWhere(['like', 'codigo_interfaz', $this->codigo_interfaz]);    ;
 
         return $dataProvider;
     }

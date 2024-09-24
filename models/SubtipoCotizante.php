@@ -41,7 +41,7 @@ class SubtipoCotizante extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_subtipo_cotizante' => 'Id Subtipo Cotizante',
+            'id_subtipo_cotizante' => 'Id',
             'descripcion' => 'Descripcion',
             'codigo_interfaz' => 'Codigo Interfaz',
             'user_name' => 'User Name',

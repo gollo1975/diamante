@@ -2,19 +2,21 @@
 
 use yii\helpers\Html;
 
+
 /* @var $this yii\web\View */
 /* @var $model app\models\TipoContrato */
 
-$this->title = 'Create Tipo Contrato';
-$this->params['breadcrumbs'][] = ['label' => 'Tipo Contratos', 'url' => ['index']];
+$this->title = 'NUEVO';
+$this->params['breadcrumbs'][] = ['label' => 'Tipos Contratos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tipo-contrato-create">
+<div class="tipo-documento-create">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <!--<h1><?= Html::encode($this->title) ?></h1>-->
 
     <?= $this->render('_form', [
         'model' => $model,
+        'sw' => 0,
     ]) ?>
 
 </div>

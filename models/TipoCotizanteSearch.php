@@ -18,7 +18,7 @@ class TipoCotizanteSearch extends TipoCotizante
     {
         return [
             [['id_tipo_cotizante'], 'integer'],
-            [['tipo', 'codigo_intefaz'], 'safe'],
+            [['tipo', 'codigo_interfaz'], 'safe'],
         ];
     }
 
@@ -59,11 +59,11 @@ class TipoCotizanteSearch extends TipoCotizante
         // grid filtering conditions
         $query->andFilterWhere([
             'id_tipo_cotizante' => $this->id_tipo_cotizante,
+            'codigo_interfaz' => $this->codigo_interfaz,
         ]);
 
         $query->andFilterWhere(['like', 'tipo', $this->tipo])
-            ->andFilterWhere(['like', 'codigo_intefaz', $this->codigo_intefaz]);
-
+            ->andFilterWhere(['=', 'codigo_interfaz', $this->codigo_interfaz]);
         return $dataProvider;
     }
 }

@@ -3,17 +3,37 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\TipoContrato;
-use app\models\TipoContratoSearch;
-use app\models\UsuarioDetalle;
+use yii\helpers\Url;
+use yii\web\UploadedFile;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use yii\base\Model;
 use yii\web\Controller;
+use yii\web\Response;
+use yii\web\Session;
+use yii\data\Pagination;
+use yii\filters\AccessControl;
+use yii\helpers\Html;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\widgets\ActiveForm;
+use Codeception\Lib\HelperModule;
+use kartik\date\DatePicker;
+use kartik\time\TimePicker;
+use kartik\select2\Select2;
+
+
+
+//models
+use app\models\Contratos;
+use app\models\ContratosSearch;
+use app\models\UsuarioDetalle;
+
 
 /**
- * TipoContratoController implements the CRUD actions for TipoContrato model.
+ * ContratosController implements the CRUD actions for Contratos model.
  */
-class TipoContratoController extends Controller
+class ContratosController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -31,30 +51,22 @@ class TipoContratoController extends Controller
     }
 
     /**
-     * Lists all TipoContrato models.
+     * Lists all Contratos models.
      * @return mixed
      */
-   public function actionIndex()
+    public function actionIndex()
     {
-        if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',121])->all()){
-                $searchModel = new TipoContratoSearch();
-                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $searchModel = new ContratosSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-                return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
-                ]);
-        }else{
-                return $this->redirect(['site/sinpermiso']);
-            }
-        }else{
-            return $this->redirect(['site/login']);
-        }        
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**
-     * Displays a single TipoContrato model.
+     * Displays a single Contratos model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -67,32 +79,30 @@ class TipoContratoController extends Controller
     }
 
     /**
-     * Creates a new TipoContrato model.
+     * Creates a new Contratos model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($id_empleado)
     {
-        $model = new TipoContrato();
+        $model = new Contratos();
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->user_name = Yii::$app->user->identity->username;
+        if ($model->load(Yii::$app->request->post())){
+            $model->id_empleado = $id_empleado;   
             $model->save();
             return $this->redirect(['index']);
         }
 
         return $this->render('create', [
             'model' => $model,
-            'sw' => 0,
         ]);
     }
 
     /**
-     * Updates an existing TipoContrato model.
+     * Updates an existing Contratos model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -103,17 +113,16 @@ class TipoContratoController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
+            return $this->redirect(['view', 'id' => $model->id_contrato]);
         }
 
         return $this->render('update', [
             'model' => $model,
-            'sw' => 1,
         ]);
     }
 
     /**
-     * Deletes an existing TipoContrato model.
+     * Deletes an existing Contratos model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -127,15 +136,15 @@ class TipoContratoController extends Controller
     }
 
     /**
-     * Finds the TipoContrato model based on its primary key value.
+     * Finds the Contratos model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return TipoContrato the loaded model
+     * @return Contratos the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = TipoContrato::findOne($id)) !== null) {
+        if (($model = Contratos::findOne($id)) !== null) {
             return $model;
         }
 

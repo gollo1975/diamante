@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\GrupoPago;
 use app\models\GrupoPagoSearch;
+use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,15 +34,23 @@ class GrupoPagoController extends Controller
      * Lists all GrupoPago models.
      * @return mixed
      */
-    public function actionIndex()
+   public function actionIndex()
     {
-        $searchModel = new GrupoPagoSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',125])->all()){
+                $searchModel = new GrupoPagoSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }         
     }
 
     /**
@@ -65,13 +74,19 @@ class GrupoPagoController extends Controller
     public function actionCreate()
     {
         $model = new GrupoPago();
-
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_grupo_pago]);
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
             'model' => $model,
+            'sw' => 0,
         ]);
     }
 
@@ -87,11 +102,12 @@ class GrupoPagoController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_grupo_pago]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'sw' => 1,
         ]);
     }
 

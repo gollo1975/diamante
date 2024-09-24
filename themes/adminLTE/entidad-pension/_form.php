@@ -2,26 +2,47 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\EntidadPension */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="entidad-pension-form">
 
-    <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'id_entidad_pension')->textInput() ?>
+<?php
+$form = ActiveForm::begin([
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+                'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-3 control-label'],
+                'options' => []
+            ],
+        ]);
+?>
 
-    <?= $form->field($model, 'entidad')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'estado')->textInput() ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        Información Entidad Pension
     </div>
-
-    <?php ActiveForm::end(); ?>
-
+    <div class="panel-body">        														   		
+        <div class="row">
+            <?= $form->field($model, 'entidad')->textInput(['maxlength' => true]) ?>    
+        </div>
+         <div class="row">
+            <?= $form->field($model, 'codigo_interfaz')->textInput(['maxlength' => true]) ?>    
+        </div>
+        <?php if($sw == 1){?>
+            <div class="row">
+                <?= $form->field($model, 'estado')->dropdownList(['0' => 'SI', '1' => 'NO']) ?>
+            </div>
+        <?php }?>
+        <div class="panel-footer text-right">                
+            <a href="<?= Url::toRoute("entidad-pension/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success",]) ?>		
+        </div>
+    </div>
 </div>
+<?php ActiveForm::end(); ?>

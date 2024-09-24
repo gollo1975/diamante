@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\TipoCotizante;
 use app\models\TipoCotizanteSearch;
+use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,15 +34,23 @@ class TipoCotizanteController extends Controller
      * Lists all TipoCotizante models.
      * @return mixed
      */
-    public function actionIndex()
+   public function actionIndex()
     {
-        $searchModel = new TipoCotizanteSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',123])->all()){
+                $searchModel = new TipoCotizanteSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }        
     }
 
     /**
@@ -65,9 +74,13 @@ class TipoCotizanteController extends Controller
     public function actionCreate()
     {
         $model = new TipoCotizante();
+          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_tipo_cotizante]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +100,7 @@ class TipoCotizanteController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_tipo_cotizante]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
@@ -104,9 +117,17 @@ class TipoCotizanteController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["tipo-cotizante/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["tipo-cotizante/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+            $this->redirect(["tipo-cotizante/index"]);
+        }
     }
 
     /**

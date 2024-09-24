@@ -21,6 +21,16 @@ class CentroTrabajo extends \yii\db\ActiveRecord
     {
         return 'centro_trabajo';
     }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->centro_trabajo = strtoupper($this->centro_trabajo); 
+
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -41,10 +51,19 @@ class CentroTrabajo extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_centro_trabajo' => 'Id Centro Trabajo',
+            'id_centro_trabajo' => 'Codigo',
             'centro_trabajo' => 'Centro Trabajo',
-            'estado' => 'Estado',
+            'estado' => 'Activo',
             'user_name' => 'User Name',
         ];
+    }
+    
+    public function getActivo() {
+        if($this->estado == 0){
+            $estado = 'SI';
+        }else{
+            $estado = 'NO';
+        }
+        return $estado;
     }
 }

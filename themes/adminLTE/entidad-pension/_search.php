@@ -10,22 +10,17 @@ use yii\widgets\ActiveForm;
 
 <div class="entidad-pension-search">
 
-    <?php $form = ActiveForm::begin([
-        'action' => ['index'],
-        'method' => 'get',
-    ]); ?>
-
-    <?= $form->field($model, 'id_entidad_pension') ?>
-
-    <?= $form->field($model, 'entidad') ?>
-
-    <?= $form->field($model, 'estado') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
-    </div>
-
-    <?php ActiveForm::end(); ?>
+    <?php
+    $form = ActiveForm::begin([
+                'action' => ['index'],
+                'options' => ['class' => 'form-horizontal'],
+                'fieldConfig' => [
+                    'template' => '{label}<div class="col-sm-4 form-group">{input}</div>',
+                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                    'options' => [ 'tag' => false,]
+                ],
+    ]);
+    ?>
+<?php ActiveForm::end(); ?>
 
 </div>

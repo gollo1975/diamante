@@ -2,38 +2,62 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use app\models\Municipios;
+use yii\helpers\ArrayHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\CajaCompensacion */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="caja-compensacion-form">
 
-    <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'caja')->textInput(['maxlength' => true]) ?>
+<?php
+$form = ActiveForm::begin([
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+                'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-3 control-label'],
+                'options' => []
+            ],
+        ]);
+$municipio = ArrayHelper::map(Municipios::find()->all(), 'codigo_municipio', 'municipio');
+?>
 
-    <?= $form->field($model, 'telefono')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'direccion')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'codigo')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'codigo_municipio')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'estado')->textInput() ?>
-
-    <?= $form->field($model, 'porcentaje')->textInput() ?>
-
-    <?= $form->field($model, 'user_name')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'fecha_hora_registro')->textInput() ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        Información Caja Compensacion
     </div>
-
-    <?php ActiveForm::end(); ?>
-
+    <div class="panel-body">        														   		
+        <div class="row">
+            <?= $form->field($model, 'caja')->textInput(['maxlength' => true]) ?>    
+        </div>
+        <div class="row">
+            <?= $form->field($model, 'telefono')->textInput(['maxlength' => true]) ?>    
+        </div>
+        <div class="row">
+            <?= $form->field($model, 'direccion')->textInput(['maxlength' => true]) ?>    
+        </div>
+        <div class="row">
+            <?= $form->field($model, 'porcentaje')->textInput(['maxlength' => true]) ?>    
+        </div>
+        <div class="row">
+            <?= $form->field($model, 'codigo_municipio')->dropDownList($municipio, ['prompt' => 'Seleccione una opcion...']) ?>
+        </div>
+         <div class="row">
+            <?= $form->field($model, 'codigo')->textInput(['maxlength' => true]) ?>    
+        </div>
+        <?php if($sw == 1){?>
+            <div class="row">
+                <?= $form->field($model, 'estado')->dropdownList(['0' => 'SI', '1' => 'NO']) ?>
+            </div>
+        <?php }?>
+        <div class="panel-footer text-right">                
+            <a href="<?= Url::toRoute("caja-compensacion/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success",]) ?>		
+        </div>
+    </div>
 </div>
+<?php ActiveForm::end(); ?>

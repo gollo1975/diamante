@@ -20,6 +20,16 @@ class TipoCotizante extends \yii\db\ActiveRecord
     {
         return 'tipo_cotizante';
     }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->tipo = strtoupper($this->tipo); 
+        $this->codigo_interfaz = strtoupper($this->codigo_interfaz); 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -29,7 +39,7 @@ class TipoCotizante extends \yii\db\ActiveRecord
         return [
             [['tipo'], 'required'],
             [['tipo'], 'string', 'max' => 30],
-            [['codigo_intefaz'], 'string', 'max' => 10],
+            [['codigo_interfaz'], 'string', 'max' => 10],
         ];
     }
 
@@ -39,9 +49,9 @@ class TipoCotizante extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_tipo_cotizante' => 'Id Tipo Cotizante',
-            'tipo' => 'Tipo',
-            'codigo_intefaz' => 'Codigo Intefaz',
+            'id_tipo_cotizante' => 'Id',
+            'tipo' => 'Tipo cotizante',
+            'codigo_interfaz' => 'Codigo interfaz',
         ];
     }
 }

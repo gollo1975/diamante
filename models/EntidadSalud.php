@@ -21,6 +21,16 @@ class EntidadSalud extends \yii\db\ActiveRecord
     {
         return 'entidad_salud';
     }
+    
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->entidad_salud = strtoupper($this->entidad_salud); 
+        $this->codigo_interfaz = strtoupper($this->codigo_interfaz); 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -32,6 +42,7 @@ class EntidadSalud extends \yii\db\ActiveRecord
             [['estado'], 'integer'],
             [['entidad_salud'], 'string', 'max' => 40],
             [['user_name'], 'string', 'max' => 15],
+            [['codigo_interfaz'], 'string', 'max' => 10],
         ];
     }
 
@@ -41,10 +52,20 @@ class EntidadSalud extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_entidad_salud' => 'Id Entidad Salud',
-            'entidad_salud' => 'Entidad Salud',
-            'estado' => 'Estado',
+            'id_entidad_salud' => 'Codigo',
+            'entidad_salud' => 'Entidad de salud',
+            'estado' => 'Activo',
             'user_name' => 'User Name',
+            'codigo_interfaz' => 'Codigo interfaz',
         ];
+    }
+    
+    public function getActivo() {
+        if($this->estado == 0){
+            $activo = 'SI';
+        }else{
+            $activo = 'NO';
+        }
+        return $activo;
     }
 }

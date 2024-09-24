@@ -108,6 +108,7 @@ $tipoEmpleado = ArrayHelper::map(\app\models\TipoEmpleado::find()->orderBy('desc
                 <th scope="col" style='background-color:#B9D5CE;'>Municipio residencia</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>  
                 <th scope="col" style='background-color:#B9D5CE;'></th> 
+                <th scope="col" style='background-color:#B9D5CE;'></th> 
             </tr>
             </thead>
             <tbody>
@@ -123,14 +124,26 @@ $tipoEmpleado = ArrayHelper::map(\app\models\TipoEmpleado::find()->orderBy('desc
                         <td><?= $val->fecha_retiro ?></td>
                         <td><?= $val->codigoDepartamentoResidencia->departamento ?></td>
                         <td><?= $val->codigoMunicipioResidencia->municipio ?></td>
-
-                        
                         <td style= 'width: 25px; height: 20px;'>
                             <a href="<?= Url::toRoute(["empleados/view", "id" => $val->id_empleado, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                         <td style= 'width: 25px; height: 20px;'>
                             <a href="<?= Url::toRoute(["empleados/update", "id" => $val->id_empleado])?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                         </td>
+                        <?php if($val->estado <> 1){?>
+                            <td style= 'width: 25px; height: 10px;'>
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['contratos/create', 'id_empleado' => $val->id_empleado], [
+                                                  'class' => '',
+                                                  'title' => 'Proceso que permite crear contratos de trabajo.', 
+                                              'data' => [
+                                                  'confirm' => 'Esta seguro de crear el contrato de trabajo al empleado :  ('.$val->nombre_completo.').',
+                                                  'method' => 'post',
+                                              ],
+                                ]);?>
+                            </td> 
+                        <?php }else{?>
+                            <td style= 'width: 25px; height: 10px;'></td>
+                        <?php }?>
                     </tr>
                 <?php endforeach; ?>
             </tbody>        

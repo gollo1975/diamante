@@ -28,6 +28,15 @@ class TipoContrato extends \yii\db\ActiveRecord
     {
         return 'tipo_contrato';
     }
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->prorroga = strtoupper($this->prorroga); 
+      
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -51,14 +60,14 @@ class TipoContrato extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_tipo_contrato' => 'Id Tipo Contrato',
-            'contrato' => 'Contrato',
+            'id_tipo_contrato' => 'Codigo',
+            'contrato' => 'Tipo de contrato',
             'prorroga' => 'Prorroga',
-            'numero_prorrogas' => 'Numero Prorrogas',
+            'numero_prorrogas' => 'Numero de prorrogas',
             'prefijo' => 'Prefijo',
-            'id_configuracion_prefijo' => 'Id Configuracion Prefijo',
+            'id_configuracion_prefijo' => 'Tipo de formato',
             'abreviatura' => 'Abreviatura',
-            'estado' => 'Estado',
+            'estado' => 'Activo',
             'user_name' => 'User Name',
         ];
     }
@@ -69,5 +78,30 @@ class TipoContrato extends \yii\db\ActiveRecord
     public function getConfiguracionPrefijo()
     {
         return $this->hasOne(ConfiguracionFormatoPrefijo::className(), ['id_configuracion_prefijo' => 'id_configuracion_prefijo']);
+    }
+    
+     public function getContratos()
+    {
+        return $this->hasMany(Contrato::className(), ['id_tipo_contrato' => 'id_tipo_contrato']);
+    }
+    
+      public function getProrrogacontrato()
+    {
+        if($this->prorroga == 0){
+            $prorroga = "NO";
+        }else{
+            $prorroga = "SI";
+        }
+        return $prorroga;
+    }
+    
+    public function getActivo()
+    {
+        if($this->estado == 0){
+            $estado = "SI";
+        }else{
+            $estado = "NO";
+        }
+        return $estado;
     }
 }

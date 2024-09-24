@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\SubtipoCotizante;
 use app\models\SubtipoCotizanteSearch;
+use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,15 +34,23 @@ class SubtipoCotizanteController extends Controller
      * Lists all SubtipoCotizante models.
      * @return mixed
      */
-    public function actionIndex()
+     public function actionIndex()
     {
-        $searchModel = new SubtipoCotizanteSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',124])->all()){
+                $searchModel = new SubtipoCotizanteSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+                return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]);
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }        
     }
 
     /**
@@ -65,9 +74,15 @@ class SubtipoCotizanteController extends Controller
     public function actionCreate()
     {
         $model = new SubtipoCotizante();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_subtipo_cotizante]);
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +102,7 @@ class SubtipoCotizanteController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_subtipo_cotizante]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
@@ -104,9 +119,17 @@ class SubtipoCotizanteController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["subtipo-cotizante/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["subtipo-cotizante/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+            $this->redirect(["subtipo-cotizante/index"]);
+        }
     }
 
     /**
