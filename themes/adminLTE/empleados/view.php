@@ -128,7 +128,7 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
     <div>
         <ul class="nav nav-tabs" role="tablist">
            
-            <li role="presentation" class="active"><a href="#contrato" aria-controls="contrato" role="tab" data-toggle="tab">Contratos <span class="badge"><?= 1 ?></span></a></li>
+            <li role="presentation" class="active"><a href="#contrato" aria-controls="contrato" role="tab" data-toggle="tab">Contratos <span class="badge"><?= count($contrato) ?></span></a></li>
             <li role="presentation"><a href="#incapacidad" aria-controls="incapacidad" role="tab" data-toggle="tab">Incapacidades <span class="badge"><?= 1 ?></span></a></li>
             <li role="presentation"><a href="#licencia" aria-controls="licencia" role="tab" data-toggle="tab">Licencias <span class="badge"><?= 1 ?></span></a></li>
             <li role="presentation"><a href="#credito" aria-controls="licencia" role="tab" data-toggle="tab">Créditos <span class="badge"><?= 1 ?></span></a></li>
@@ -143,8 +143,8 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                 <thead>
                                     <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE;'>Número</th>                        
-                                        <th scope="col" style='background-color:#B9D5CE;'Tipo contrato</th>                        
-                                        <th scope="col" style='background-color:#B9D5CE;'Tiempo</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Tipo contrato</th>                        
+                                        <th scope="col" style='background-color:#B9D5CE;'>Tiempo</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Grupo pago</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha inicio</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha final</th>
@@ -154,7 +154,26 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                     </tr>
                                 </thead>
                                 <tbody>
-                                   
+                                    <?php
+                                     foreach ($contrato as $valor):?>
+                                        <tr style='font-size:85%;'>
+                                            <td><?= $valor->id_contrato ?></td>
+                                            <td><?= $valor->tipoContrato->abreviatura?></td>
+                                            <td><?= $valor->tiempo->tiempo_servicio ?></td>
+                                            <td><?= $valor->grupoPago->grupo_pago ?></td>
+                                            <td><?= $valor->fecha_inicio ?></td>
+                                            <?php if($valor->fecha_final == '2099-12-30'){?>
+                                                <td style='background-color:#B9D5CE;'><?= 'INDEFINIDO'?></td>
+                                            <?php }else{?>
+                                                <td style='background-color:#B9D5DE;'><?= $valor->fecha_final ?></td>
+                                            <?php } ?>                                                
+                                            
+                                            <td><?= $valor->cargo->nombre_cargo ?></td>
+                                            <td align="right"><?= '$'.number_format($valor->salario,0) ?></td>
+                                            <td><?= $valor->activo ?></td>
+                                            
+                                        </tr>
+                                   <?php endforeach; ?>    
                                 </tbody>      
                             </table>
                         </div>

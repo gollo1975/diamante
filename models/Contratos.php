@@ -110,10 +110,10 @@ class Contratos extends \yii\db\ActiveRecord
             [['codigo_municipio_laboral'], 'exist', 'skipOnError' => true, 'targetClass' => Municipios::className(), 'targetAttribute' => ['codigo_municipio_laboral' => 'codigo_municipio']],
             [['id_tipo_contrato'], 'exist', 'skipOnError' => true, 'targetClass' => TipoContrato::className(), 'targetAttribute' => ['id_tipo_contrato' => 'id_tipo_contrato']],
             [['id_tipo_salario'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSalario::className(), 'targetAttribute' => ['id_tipo_salario' => 'id_tipo_salario']],
-            [['id_tipo_salario'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSalario::className(), 'targetAttribute' => ['id_tipo_salario' => 'id_tipo_salario']],
             [['id_tipo_cotizante'], 'exist', 'skipOnError' => true, 'targetClass' => TipoCotizante::className(), 'targetAttribute' => ['id_tipo_cotizante' => 'id_tipo_cotizante']],
             [['id_subtipo_cotizante'], 'exist', 'skipOnError' => true, 'targetClass' => SubtipoCotizante::className(), 'targetAttribute' => ['id_subtipo_cotizante' => 'id_subtipo_cotizante']],
             [['id_configuracion_eps'], 'exist', 'skipOnError' => true, 'targetClass' => ConfiguracionEps::className(), 'targetAttribute' => ['id_configuracion_eps' => 'id_configuracion_eps']],
+            [['id_centro_trabajo'], 'exist', 'skipOnError' => true, 'targetClass' => CentroTrabajo::className(), 'targetAttribute' => ['id_centro_trabajo' => 'id_centro_trabajo']],
         ];
     }
 
@@ -160,7 +160,7 @@ class Contratos extends \yii\db\ActiveRecord
             'id_centro_trabajo' => 'Centro de trabajo:',
             'id_grupo_pago' => 'Grupo pago:',
             'fecha_preaviso' => 'Fecha preaviso:',
-            'dias_contrato' => 'Horario trabajo: ',
+            'dias_contrato' => 'Dias del contrato: ',
             'generar_liquidacion' => 'Generar liquidacion:',
             'observacion' => 'Observacion:',
             'user_name' => 'User Name',
@@ -293,14 +293,6 @@ class Contratos extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTipoSalario0()
-    {
-        return $this->hasOne(TipoSalario::className(), ['id_tipo_salario' => 'id_tipo_salario']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getTipoCotizante()
     {
         return $this->hasOne(TipoCotizante::className(), ['id_tipo_cotizante' => 'id_tipo_cotizante']);
@@ -320,5 +312,32 @@ class Contratos extends \yii\db\ActiveRecord
     public function getConfiguracionEps()
     {
         return $this->hasOne(ConfiguracionEps::className(), ['id_configuracion_eps' => 'id_configuracion_eps']);
+    }
+    
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCentroTrabajo()
+    {
+        return $this->hasOne(CentroTrabajo::className(), ['id_centro_trabajo' => 'id_centro_trabajo']);
+    }
+    
+    public function getAplicaAuxilio() {
+        if($this->aplica_auxilio_transporte == 0){
+             $aplicaauxilio = 'NO';
+        }else{
+            $aplicaauxilio = 'SI';
+        }
+        return $aplicaauxilio;
+    }
+    
+     public function getActivo() {
+        if($this->contrato_activo == 0){
+             $contratoactivo = 'SI';
+        }else{
+            $contratoactivo = 'NO';
+        }
+        return $contratoactivo;
     }
 }

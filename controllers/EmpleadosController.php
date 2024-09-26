@@ -88,7 +88,7 @@ class EmpleadosController extends Controller
                                 ->limit($pages->limit)
                                     ->all();
                         if(isset($_POST['excel'])){                    
-                            $this->actionExcelClientes($tableexcel);
+                            $this->actionExcelEmpleados($tableexcel);
                         }
                     } else {
                         $form->getErrors();
@@ -132,9 +132,11 @@ class EmpleadosController extends Controller
      */
     public function actionView($id, $token)
     {
+        $contrato = \app\models\Contratos::find()->where(['id_empleado' => $id])->orderBy('id_contrato DESC')->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
             'token' => $token, 
+            'contrato' => $contrato,
         ]);
     }
 
@@ -230,5 +232,166 @@ class EmpleadosController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+     public function actionExcelEmpleados($tableexcel) {                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('X')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Y')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Z')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AC')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AD')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AE')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AF')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AG')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('AH')->setAutoSize(true);
+
+                              
+        $objPHPExcel->setActiveSheetIndex(0)
+                     ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'TIPO EMPLEADO')
+                    ->setCellValue('C1', 'TIPO DOCUMENTO')
+                    ->setCellValue('D1', 'DOCUMENTO')
+                    ->setCellValue('E1', 'NOMBRE 1')
+                    ->setCellValue('F1', 'NOMBRE 2')
+                    ->setCellValue('G1', 'APELLIDO 1')                    
+                    ->setCellValue('H1', 'APELLIDO 2')
+                    ->setCellValue('I1', 'FECHA EXPEDICION')
+                    ->setCellValue('J1', 'CIUDAD EXPEDICION')
+                    ->setCellValue('K1', 'DIRECCION')
+                    ->setCellValue('L1', 'TELEFONO')
+                    ->setCellValue('M1', 'CELULAR')
+                    ->setCellValue('N1', 'EMAIL')
+                    ->setCellValue('O1', 'DEPARTAMENTO')
+                    ->setCellValue('P1', 'MUNICIPIO')
+                    ->setCellValue('Q1', 'BARRIO')
+                    ->setCellValue('R1', 'GENERO')
+                    ->setCellValue('S1', 'ESTADO CIVIL')
+                    ->setCellValue('T1', 'FECHA NACIMIENTO')
+                    ->setCellValue('U1', 'CIUDAD NACIMIENTO')
+                    ->setCellValue('V1', 'CONTRATO ACTIVO')
+                    ->setCellValue('W1', 'FECHA INGRESO')
+                    ->setCellValue('X1', 'FECHA RETIRO')
+                    ->setCellValue('Y1', 'PADRE FAMILIA')
+                    ->setCellValue('Z1', 'CABEZA HOGAR')
+                    ->setCellValue('AA1', 'NIVEL ESTUDIO')
+                    ->setCellValue('AB1', 'DISCAPACITADO')
+                    ->setCellValue('AC1', 'BANCO')
+                    ->setCellValue('AD1', 'TIPO CUENTA')
+                    ->setCellValue('AE1', 'No CUENTA')
+                    ->setCellValue('AF1', 'USUARIO CREACION')
+                    ->setCellValue('AG1', 'USUARIO EDITADO')
+                    ->setCellValue('AH1', 'OBSERVACION');
+                   
+        $i = 2  ;
+        
+        foreach ($tableexcel as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_empleado)
+                    ->setCellValue('B' . $i, $val->tipoEmpleado->descripcion)
+                    ->setCellValue('C' . $i, $val->tipoDocumento->tipo_documento)
+                    ->setCellValue('D' . $i, $val->nit_cedula)
+                    ->setCellValue('E' . $i, $val->nombre1)
+                    ->setCellValue('F' . $i, $val->nombre2)
+                    ->setCellValue('G' . $i, $val->apellido1)                    
+                    ->setCellValue('H' . $i, $val->apellido2)
+                    ->setCellValue('I' . $i, $val->fecha_expedicion_documento)
+                    ->setCellValue('J' . $i, $val->codigoMunicipioExpedicion->municipio)
+                    ->setCellValue('K' . $i, $val->direccion)
+                    ->setCellValue('L' . $i, $val->telefono)
+                    ->setCellValue('M' . $i, $val->celular)
+                    ->setCellValue('N' . $i, $val->email_empleado)
+                    ->setCellValue('O' . $i, $val->codigoDepartamentoResidencia->departamento)
+                    ->setCellValue('P' . $i, $val->codigoMunicipioExpedicion->municipio)
+                    ->setCellValue('Q' . $i, $val->barrio)
+                    ->setCellValue('R' . $i, $val->generoEmpleado)
+                    ->setCellValue('S' . $i, $val->estadoCivil)
+                    ->setCellValue('T' . $i, $val->fecha_nacimiento)
+                    ->setCellValue('U' . $i, $val->codigoMunicipioNacimiento->municipio)
+                    ->setCellValue('V' . $i, $val->estadoActivo)
+                    ->setCellValue('W' . $i, $val->fecha_ingreso);
+                   if($val->fecha_retiro == '2099-12-30'){
+                        $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('X' . $i, 'INDEFINIDO');
+                   }else{
+                         $objPHPExcel->setActiveSheetIndex(0)
+                         ->setCellValue('X' . $i, $val->fecha_retiro);
+                   }
+                   $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('Y' . $i, $val->padreFamilia)
+                    ->setCellValue('Z' . $i, $val->cabezaHogar);
+                    if($val->id_profesion == ''){
+                         $objPHPExcel->setActiveSheetIndex(0)
+                         ->setCellValue('AA' . $i, 'NO HAY INFORMACION');
+                    }else{
+                        $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('AA' . $i, $val->profesion->profesion);
+                    }
+                    $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('AB' . $i, $val->discapacidadEmpleado)
+                    ->setCellValue('AC' . $i, $val->banco->entidad)
+                    ->setCellValue('AD' . $i, $val->tipocuenta)
+                    ->setCellValue('AE' . $i, $val->numero_cuenta)
+                    ->setCellValue('AF' . $i, $val->user_name)
+                    ->setCellValue('AG' . $i, $val->user_name_editado)
+                    ->setCellValue('AH' . $i, $val->observacion);
+                   
+                   
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Empleados');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Empleados.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }

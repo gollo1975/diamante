@@ -76,7 +76,7 @@ $tipoEmpleado = ArrayHelper::map(\app\models\TipoEmpleado::find()->orderBy('desc
                     'allowClear' => true
                 ],
             ]); ?> 
-            <?= $formulario->field($form, 'estado')->dropdownList(['' => 'TODOS','1' => 'SI', '0' => 'NO'], ['prompt' => 'Seleccione...']) ?>
+            <?= $formulario->field($form, 'estado')->dropdownList(['' => 'TODOS','0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
@@ -121,7 +121,11 @@ $tipoEmpleado = ArrayHelper::map(\app\models\TipoEmpleado::find()->orderBy('desc
                         <td><?= $val->direccion ?></td>
                         <td><?= $val->celular ?></td>
                         <td><?= $val->fecha_ingreso ?></td>
-                        <td><?= $val->fecha_retiro ?></td>
+                        <?php if($val->fecha_retiro == '2099-12-30'){?>
+                        <td style="background-color: #d7d9ff;"><?= 'INDEFINIDO' ?></td>
+                        <?php }else{?>
+                            <td><?= $val->fecha_retiro ?></td>
+                        <?php }?>    
                         <td><?= $val->codigoDepartamentoResidencia->departamento ?></td>
                         <td><?= $val->codigoMunicipioResidencia->municipio ?></td>
                         <td style= 'width: 25px; height: 20px;'>
@@ -130,7 +134,7 @@ $tipoEmpleado = ArrayHelper::map(\app\models\TipoEmpleado::find()->orderBy('desc
                         <td style= 'width: 25px; height: 20px;'>
                             <a href="<?= Url::toRoute(["empleados/update", "id" => $val->id_empleado])?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                         </td>
-                        <?php if($val->estado <> 1){?>
+                        <?php if($val->estado == '' || $val->estado == 1){?>
                             <td style= 'width: 25px; height: 10px;'>
                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['contratos/create', 'id_empleado' => $val->id_empleado], [
                                                   'class' => '',

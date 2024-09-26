@@ -43,9 +43,9 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion'], 'required'],
-            [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion','tipo_regimen','id_naturaleza','aplica_punto_venta','calificacion_proveedor',
-                'aplica_factura_produccion','aplica_fabricante','recibo_caja_automatico','modulo_completo','aplica_inventario_incompleto'], 'integer'],
+            [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion','id_tipo_regimen'], 'required'],
+            [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion','id_naturaleza','aplica_punto_venta','calificacion_proveedor',
+                'aplica_factura_produccion','aplica_fabricante','recibo_caja_automatico','modulo_completo','aplica_inventario_incompleto','id_tipo_regimen'], 'integer'],
             [['razon_social', 'razon_social_completa', 'direccion','email','representante_legal'], 'string', 'max' => 50],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'codigo_departamento', 'codigo_municipio','codigo_banco'], 'string', 'max' => 10],
             [['telefono', 'celular'], 'string', 'max' => 15],
@@ -59,6 +59,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => ResolucionDian::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
             [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => ResolucionDian::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
             [['codigo_banco'], 'exist', 'skipOnError' => true, 'targetClass' => EntidadBancarias::className(), 'targetAttribute' => ['codigo_banco' => 'codigo_banco']],
+            [['id_tipo_regimen'], 'exist', 'skipOnError' => true, 'targetClass' => TipoRegimen::className(), 'targetAttribute' => ['id_tipo_regimen' => 'id_tipo_regimen']],
         ];
     }
 
@@ -91,7 +92,6 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'porcentaje_reteiva' => 'Porcentaje reteiva',
             'sugiere_retencion' => 'Sugiere retencion',
             'id_naturaleza' =>'Naturaleza',
-            'tipo_regimen' => 'Tipo regimen',
             'declaracion' => 'Declaracion',
             'codigo_banco' => 'Codigo banco',
             'aplica_punto_venta' => 'aplica_punto_venta',
@@ -100,6 +100,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'presentacion' => 'Presentacion:',
             'aplica_fabricante' => 'aplica_fabricante',
             'aplica_inventario_incompleto' => 'Aplicar inventario completo:',
+            'id_tipo_regimen' => 'Tipo regimen:',
             
             
         ];
@@ -112,6 +113,14 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Departamentos::className(), ['codigo_departamento' => 'codigo_departamento']);
     }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTipoRegimen()
+    {
+        return $this->hasOne(TipoRegimen::className(), ['id_tipo_regimen' => 'id_tipo_regimen']);
+    }
+    
      public function getNaturaleza()
     {
         return $this->hasOne(NaturalezaSociedad::className(), ['id_naturaleza' => 'id_naturaleza']);
@@ -136,14 +145,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
     {
         return $this->hasOne(ResolucionDian::className(), ['id_resolucion' => 'id_resolucion']);
     }
-    public function getTiporegimen() {
-        if($this->tipo_regimen == 0){
-            $tiporegimen = 'SIMPLICADO';
-        }else{
-            $tiporegimen = 'COMUN';
-        }
-        return $tiporegimen;
-    }
+   
     
    
 }

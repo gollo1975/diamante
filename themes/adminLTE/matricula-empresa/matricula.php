@@ -34,6 +34,7 @@ $departamento = ArrayHelper::map(Departamentos::find()->all(), 'codigo_departame
 $municipio = ArrayHelper::map(Municipios::find()->all(), 'codigo_municipio', 'municipio');
 $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza', 'naturaleza');
 $banco = ArrayHelper::map(\app\models\EntidadBancarias::find()->all(), 'codigo_banco', 'entidad_bancaria');
+$tipoR = ArrayHelper::map(\app\models\TipoRegimen::find()->all(), 'id_tipo_regimen', 'regimen');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -82,7 +83,7 @@ $banco = ArrayHelper::map(\app\models\EntidadBancarias::find()->all(), 'codigo_b
         </div>  
         <div class="row">                        
             <?= $form->field($model, 'id_naturaleza')->dropDownList($naturaleza, ['prompt' => 'Seleccione una resolucion...']) ?>
-            <?= $form->field($model, 'tipo_regimen')->dropdownList(['0' => 'SIMPLIFICADO', '1' => 'COMUN'], ['prompt' => 'Seleccione...']) ?>
+             <?= $form->field($model, 'id_tipo_regimen')->dropDownList($tipoR, ['prompt' => 'Seleccione...']) ?>
         </div>  
         <div class="row">   
              <?= $form->field($model, 'codigo_banco')->dropDownList($banco, ['prompt' => 'Seleccione una resolucion...']) ?>

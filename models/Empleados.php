@@ -305,13 +305,23 @@ class Empleados extends \yii\db\ActiveRecord
         }
         return $discapacidadempleado;
     }
-     public function getTipoCuenta() {
+    
+    public function getTipoCuenta() {
         if($this->tipo_cuenta == 'S'){
             $tipocuenta = 'AHORRO';
         }else{
             $tipocuenta = 'CORRIENTE';
         }
         return $tipocuenta;
+    }
+    
+    public function getEstadoActivo() {
+        if($this->estado == 0){
+            $estadoactivo = 'SI';
+        }else{
+            $estadoactivo = 'NO';
+        }
+        return $estadoactivo;
     }
     
     

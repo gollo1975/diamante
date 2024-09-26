@@ -79,6 +79,13 @@ class TipoContrato extends \yii\db\ActiveRecord
     {
         return $this->hasOne(ConfiguracionFormatoPrefijo::className(), ['id_configuracion_prefijo' => 'id_configuracion_prefijo']);
     }
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+     public function getFormatoContenidos()
+    {
+        return $this->hasone(FormatoContenido::className(), ['id_configuracion_prefijo' => 'id_configuracion_prefijo']);
+    }
     
      public function getContratos()
     {
