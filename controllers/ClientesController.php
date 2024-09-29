@@ -100,7 +100,23 @@ class ClientesController extends Controller
                     } else {
                         $form->getErrors();
                     }
-                } 
+                }else{
+                    $table = Clientes::find()
+                            ->orderBy('id_cliente desc');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaClientes($tableexcel);
+                    }
+                }
                 return $this->render('index', [
                             'model' => $model,
                             'form' => $form,

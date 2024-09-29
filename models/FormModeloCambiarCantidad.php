@@ -31,8 +31,8 @@ class FormModeloCambiarCantidad extends Model
         return [
 
            [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual','descuento','cantidad_real','tamano_lote','estado',
-               'nueva_cantidad','minimo','aplicar'], 'integer'],
-           ['fecha', 'safe'], 
+           'nueva_cantidad','minimo','aplicar'], 'integer'],
+           [['fecha'], 'safe'], 
            ['porcentaje_aplicacion', 'number'], 
         ];
     }

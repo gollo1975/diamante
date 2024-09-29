@@ -692,8 +692,8 @@ class PedidosController extends Controller
         $table = Pedidos::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
             if (isset($_POST["editarcliente"])) { 
-                $conCliente = Clientes::find()->where(['=','id_cliente', $model->cliente])->andWhere(['>','cupo_asignado', 0])->one();
-                if ($conCliente){
+                $conCliente = Clientes::find()->where(['=','id_cliente', $model->cliente])->one();
+                if ($conCliente->forma_pago == 1){
                     $table->id_cliente = $model->cliente;
                     $table->documento = $conCliente->nit_cedula;
                     $table->dv = $conCliente->dv;
@@ -706,10 +706,25 @@ class PedidosController extends Controller
                     }
                     $table->save(false);
                     $this->redirect(["pedidos/index"]);
-                } else {
-                   Yii::$app->getSession()->setFlash('warning', 'El cliente NO TIENE cupo asignado.'); 
-                   return $this->redirect(['index']);
-                }    
+                }else{
+                    if ($conCliente->cupo_asignado > 0){
+                        $table->id_cliente = $model->cliente;
+                        $table->documento = $conCliente->nit_cedula;
+                        $table->dv = $conCliente->dv;
+                        $table->cliente = $conCliente->nombre_completo;
+                        $table->pedido_virtual = $model->pedido_virtual;
+                        if ($model->pedido_virtual == 1) {
+                            $table->liberado_inventario = 0;
+                        } else {
+                            $table->liberado_inventario = 1;
+                        }
+                        $table->save(false);
+                        $this->redirect(["pedidos/index"]);
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'Este cliente se le vende a credito y no tiene asignado un CUPO DE CREDITO. Validar la informacion con cartera.'); 
+                        return $this->redirect(['index']);
+                    }
+                } 
             }    
         }
          if (Yii::$app->request->get()) {
