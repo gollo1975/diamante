@@ -57,7 +57,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(30, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
-        $this->Cell(40, 5, utf8_decode($config->tipoRegimen), 0, 0, 'L', 1);
+        $this->Cell(40, 5, utf8_decode($config->tipoRegimen->regimen), 0, 0, 'L', 1);
         $this->SetXY(40, 5);
         //DATOS DE LA FACTURA
           $this->SetXY(135, 7);

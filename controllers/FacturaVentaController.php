@@ -102,7 +102,7 @@ class FacturaVentaController extends Controller
                         $form->getErrors();
                     }
                 }else{
-                    $table = FacturaVenta::find()->Where(['=','numero_factura', 0])->orderBy('id_factura DESC');
+                    $table = FacturaVenta::find()->orderBy('id_factura DESC');
                     $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 20,

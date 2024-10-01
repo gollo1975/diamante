@@ -610,6 +610,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                     ['label' => 'Motivo terminación', 'icon' => 'plus-square-o', 'url' => ['/motivo-terminacion/index']],
                                                                     ['label' => 'Grupo de pago', 'icon' => 'plus-square-o', 'url' => ['/grupo-pago/index']],
                                                                     ['label' => 'Periodo de pago', 'icon' => 'plus-square-o', 'url' => ['/periodo-pago/index']],
+                                                                    ['label' => 'Parametros', 'icon' => 'plus-square-o', 'url' => ['/contratos/parametro_contrato']],
                                                                     ]
                                                                 ],
                                                                 ['label' => 'Contrato', 'icon' => 'plus-square-o', 'url' => ['/contratos/index']],

@@ -340,4 +340,13 @@ class Contratos extends \yii\db\ActiveRecord
         }
         return $contratoactivo;
     }
+    
+      public function getGeneraProrroga() {
+        if($this->genera_prorroga == 0){
+             $contratoactivo = 'SI';
+        }else{
+            $contratoactivo = 'NO';
+        }
+        return $contratoactivo;
+    }
 }

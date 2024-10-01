@@ -133,6 +133,70 @@ class ContratosController extends Controller
         }
     }
 
+    //PARAMETROS DEL CONTRATO
+    public function actionParametro_contrato()
+    {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',127])->all()){
+               $form = new \app\models\FormFiltroContrato();
+                $identificacion = null;
+                $id_grupo_pago = null;
+                $id_empleado = null;
+                $id_tiempo = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $identificacion = Html::encode($form->identificacion);
+                        $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $id_tiempo = Html::encode($form->id_tiempo);
+                        $table = Contratos::find()
+                                ->andFilterWhere(['like', 'nit_cedula', $identificacion])
+                                ->andFilterWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])
+                                ->andFilterWhere(['=', 'id_tiempo', $id_tiempo])
+                                ->andFilterWhere(['=', 'contrato_activo', 0])
+                                ->orderBy('id_contrato desc');
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = Contratos::find()
+                            ->where(['=','contrato_activo', 0])
+                            ->orderBy('id_contrato desc');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }
+                $to = $count->count();
+                return $this->render('parametrocontrato', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+    
     /**
      * Displays a single Contratos model.
      * @param integer $id
@@ -151,6 +215,33 @@ class ContratosController extends Controller
             'adicion_salario' => $adicion_salario,
             'prorrogas' => $prorrogas,
         ]);
+    }
+    
+    public function actionViewparameters($id)
+    {
+    $cambioeps = \app\models\CambioEps::find()->where(['=','id_contrato', $id])->orderBy('id_cambio DESC')->all();  
+    $cambiopension = \app\models\CambioPension::find()->where(['=','id_contrato', $id])->orderBy('id_cambio DESC')->all();
+       if(Yii::$app->request->post())
+        {
+            $intIndice = 0;
+            if (isset($_POST["seleccion"])) {
+                foreach ($_POST["seleccion"] as $intCodigo)
+                {
+                   // $abono = Credito::findOne($intCodigo);                    
+                    //if(CambioSalario::deleteAll("id_cambio_salario=:id_cambio_salario", [":id_cambio_salario" => $intCodigo]))
+                    //{                        
+                    //} 
+                }
+                 return $this->redirect(['contrato/viewParameters', 'id' => $id]);
+            }
+        }
+
+        return $this->render('viewParameters', [
+            'model' => $this->findModel($id),
+            'id' => $id,
+            'cambioeps' => $cambioeps,
+            'cambiopension' => $cambiopension,
+            ]);
     }
 
     /**
@@ -327,8 +418,6 @@ class ContratosController extends Controller
                if ($contrato){
                    $fecha_nomina = strtotime(date($contrato->ultimo_pago_nomina, time()));
                    $fecha_aplicacion = strtotime($model->fecha_aplicacion);
-                   var_dump($fecha_aplicacion);
-                   var_dump($fecha_nomina);
                    if ($fecha_aplicacion > $fecha_nomina) {
                         $table = new \app\models\CambioSalario();
                         $table->nuevo_salario = $model->nuevo_salario;
@@ -604,6 +693,146 @@ class ContratosController extends Controller
             ]);
         
     }
+    //parameter del contrato, permite subir los devengados
+       public function actionAcumulado_devengado($id) {                
+        $model = new \app\models\FormParametroContrato();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {            
+            if ($model->validate()) {
+                $archivo = Contratos::findOne($id);
+                if (isset($_POST["actualizar"])) { 
+                    $archivo->ibp_prima_inicial = $model->ibp_prima_inicial;
+                    $archivo->ibp_cesantia_inicial = $model->ibp_cesantia_inicial;
+                    $archivo->ibp_recargo_nocturno = $model->ibp_recargo_nocturno;
+                    $archivo->ultima_pago_prima = $model->ultima_prima;
+                    $archivo->ultima_pago_cesantia = $model->ultima_cesantia;
+                    $archivo->ultima_pago_vacacion = $model->ultima_vacacion;
+                    $archivo->ultimo_pago_nomina = $model->ultimo_pago;
+                    $archivo->user_name_editado = Yii::$app->user->identity->username; 
+                    $archivo->save(false);
+                    $this->redirect(["contratos/viewparameters", 'id' => $id]);                                                     
+                }
+            }
+        }
+        if (Yii::$app->request->get("id")) {
+            $table = Contratos::find()->where(['id_contrato' => $id])->one();            
+            if ($table) {                                
+                $model->id_contrato = $table->id_contrato;                
+                $model->fecha_inicio = $table->fecha_inicio; 
+                $model->fecha_final = $table->fecha_final;
+                $model->ultima_prima = $table->ultima_pago_prima;
+                $model->ultima_cesantia = $table->ultima_pago_cesantia;
+                $model->ultima_vacacion = $table->ultima_pago_vacacion;
+                $model->ultimo_pago = $table->ultimo_pago_nomina;
+                $model->ibp_cesantia_inicial = $table->ibp_cesantia_inicial;
+                $model->ibp_prima_inicial = $table->ibp_prima_inicial;
+                $model->ibp_recargo_nocturno = $table->ibp_recargo_nocturno;
+                
+            }
+            
+        }
+        
+        return $this->renderAjax('_acumulardevengado', ['model' => $model, 'id' => $id]);
+    }
+    
+     //PERMITE CAMBIAR DE EPS EN E CONTRATO
+    public function actionCambioeps($id)
+     { 
+        $model = new \app\models\CambioEps();
+        $contrato = Contratos::find()->where(['=','id_contrato',$id])->one();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) { 
+               if ($contrato){
+                   if($contrato->id_entidad_salud ==  $model->id_entidad_salud_nueva){
+                         try{
+                            Yii::$app->getSession()->setFlash('error', 'Debes de seleccionar una nueva eps para el cambio.!');
+                         } catch (Exception $ex) {
+                            Yii::$app->getSession()->setFlash('error', 'Debes de seleccionar una nueva eps para el cambio!');
+                         }
+                   }else{      
+                        $table = new \app\models\CambioEps();
+                        $table->id_contrato = $id;
+                        $table->id_entidad_salud_anterior = $contrato->id_entidad_salud; 
+                        $table->id_entidad_salud_nueva = $model->id_entidad_salud_nueva;
+                        $table->user_name = Yii::$app->user->identity->username; 
+                        $table->observacion = $model->observacion;
+                        $table->fecha_cambio = date('Y-m-d');
+                        $table->save(false);
+                        $contrato->id_entidad_salud = $table->id_entidad_salud_nueva;
+                        $contrato->save();
+                        $this->redirect(["contratos/viewparameters", 'id' => $id]);    
+                   }     
+                }else{                
+                    Yii::$app->getSession()->setFlash('error', 'El Número del contrato no existe!');
+                }
+            
+        }else{
+           $model->id_entidad_salud_anterior =  $contrato->id_entidad_salud;
+           $model->id_contrato =  $id;
+        }
+       return $this->render('_formcambioeps', [
+            'model' => $model,
+            'contrato' => $contrato,
+            'id' => $id,
+         
+        ]);
+    }
+    
+    public function actionCambiopension($id)
+     { 
+        $model = new \app\models\CambioPension();
+        $contrato = Contratos::find()->where(['=','id_contrato',$id])->one();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {    
+           
+            if ($model->validate()) {
+               if ($contrato){
+                   if($contrato->id_entidad_pension ==  $model->id_entidad_pension_nueva){
+                         try{
+                            Yii::$app->getSession()->setFlash('error', 'Debes de seleccionar una nueva entidad de pension para el cambio!');
+                         } catch (Exception $ex) {
+                            Yii::$app->getSession()->setFlash('error', 'Debes de seleccionar una nueva entidad de pension para el cambioo!');
+                         }
+                   }else{      
+                        $table = new \app\models\CambioPension();
+                        $table->id_contrato = $id;
+                        $table->id_entidad_pension_anterior = $contrato->id_entidad_pension; 
+                        $table->id_entidad_pension_nueva = $model->id_entidad_pension_nueva;
+                        $table->user_name = Yii::$app->user->identity->username; 
+                        $table->observacion = $model->observacion;
+                        $table->fecha_cambio = date('Y-m-d');
+                        $table->insert();
+                        $contrato->id_entidad_pension = $table->id_entidad_pension_nueva;
+                        $contrato->update();
+                        $this->redirect(["contratos/viewparameters", 'id' => $id]);    
+                   }     
+                }else{                
+                    Yii::$app->getSession()->setFlash('error', 'El Número del contrato no existe!');
+                }
+            }else{
+                 $model->getErrors();
+            }    
+        }else{
+           $model->id_entidad_pension_anterior =  $contrato->id_entidad_pension;
+           $model->id_contrato =  $id;
+        }
+       return $this->render('_formcambiopension', [
+            'model' => $model,
+            'contrato' => $contrato,
+            'id' => $id,
+         
+        ]);
+    }
+    
     //IMPRESIONES
      public function actionImprimir_contrato_laboral($id)
     {

@@ -173,6 +173,21 @@ class NotaCreditoController extends Controller
                     } else {
                         $form->getErrors();
                     }
+                }else{
+                    $table = FacturaVenta::find()->where(['>','saldo_factura', 0])->andWhere(['<>','estado_factura', 3])->orderBy('id_factura DESC');  
+                    $count = clone $table->limit(1);
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelNotaCredito($tableexcel);
+                    }
                 }
                 return $this->render('listado_factura', [
                             'model' => $model,

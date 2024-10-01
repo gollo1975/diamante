@@ -101,9 +101,8 @@ $form = ActiveForm::begin([
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        <?php if($model){?>
             Registros <span class="badge"><?= count($model) ?></span>
-        <?php }?>    
+
     </div>
         <table class="table table-bordered table-hover">
             <thead>
@@ -125,7 +124,6 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php
-            if($model){
                 $fecha_dia = date('Y-m-d');
                 foreach ($model as $val):
                     $dato = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $val->id_factura])->all();
@@ -180,8 +178,7 @@ $form = ActiveForm::begin([
                             <td></td>
                         <?php }?>    
                    </tr>            
-                <?php endforeach;
-            }?>
+                <?php endforeach;?>
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
@@ -192,6 +189,5 @@ $form = ActiveForm::begin([
      </div>
 </div>
 <?php $form->end() ?>
- <?php if($model){?>
+
      <?= LinkPager::widget(['pagination' => $pagination]) ?>
- <?php }?>
