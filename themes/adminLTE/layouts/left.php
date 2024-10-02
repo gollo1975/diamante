@@ -543,8 +543,6 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                             'icon' => 'share',
                                             'url' => '#',
                                             'items' => [
-                                                //['label' => 'Gii', 'icon' => 'file-code-o', 'url' => ['/gii'],],
-                                                //['label' => 'Debug', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                                 [
                                                     'label' => 'CONTRATACION',
                                                     'icon' => 'dashboard',
@@ -619,6 +617,58 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                         ],
                                                     ],
                                                 ],
+                                                //INICIA MODULO DE GESTION HUMANA
+                                                [
+                                                    'label' => 'GESTION HUMANA',
+                                                    'icon' => 'user',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                        [
+                                                            'label' => 'Administracion',
+                                                            'icon' => 'database',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['/incapacidades/index']],  
+                                                                ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['/licencias/index']],
+                                                                [
+                                                                'label' => 'Bancos',
+                                                                'icon' => 'connectdevelop',
+                                                                'url' => '#',
+                                                                'items' => [
+                                                                    ['label' => 'Empresariales', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index']],
+                                                                    ['label' => 'Empleados', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index_banco_empleado']],
+                                                                    ]
+                                                                ],
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],//TERMINA /MODULO
+                                                //INICIA MODULO DE SEGURIDAD EN EL TRABAJO
+                                                [
+                                                    'label' => 'SG - SST',
+                                                    'icon' => 'medkit',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                        [
+                                                            'label' => 'Configuracion',
+                                                            'icon' => 'database',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['configuracion-incapacidad/index']],  
+                                                                ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['configuracion-licencia/index']],
+                                                                [
+                                                                'label' => 'Bancos',
+                                                                'icon' => 'connectdevelop',
+                                                                'url' => '#',
+                                                                'items' => [
+                                                                    ['label' => 'Empresariales', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index']],
+                                                                    ['label' => 'Empleados', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index_banco_empleado']],
+                                                                    ]
+                                                                ],
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],//TERMINA /MODULO
                                             ],
                                         ],
                                     ],    
