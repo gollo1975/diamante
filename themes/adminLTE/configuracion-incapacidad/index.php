@@ -10,7 +10,7 @@ use app\models\ConfiguracionIncapacidad;
 /* @var $searchModel app\models\ConceptoSalariosSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'CONFIGURACION INCAPACIDADES';
+$this->title = 'Configuracion incapacidades';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="configuracion-incapacidad-index">

@@ -3,17 +3,17 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\ConceptoSalarios;
-use app\models\ConceptoSalariosSearch;
+use app\models\DiagnosticoIncapacidad;
+use app\models\DiagnosticoIncapacidadSearch;
 use app\models\UsuarioDetalle;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * ConceptoSalariosController implements the CRUD actions for ConceptoSalarios model.
+ * DiagnosticoIncapacidadController implements the CRUD actions for DiagnosticoIncapacidad model.
  */
-class ConceptoSalariosController extends Controller
+class DiagnosticoIncapacidadController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -31,30 +31,30 @@ class ConceptoSalariosController extends Controller
     }
 
     /**
-     * Lists all ConceptoSalarios models.
+     * Lists all DiagnosticoIncapacidad models.
      * @return mixed
      */
-    public function actionIndex()
+     public function actionIndex()
     {
-       if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',133])->all()){
-                $searchModel = new ConceptoSalariosSearch();
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',130])->all()){
+                $searchModel = new DiagnosticoIncapacidadSearch();
                 $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
                 return $this->render('index', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
                 ]);
-            }else{
-                    return $this->redirect(['site/sinpermiso']);
-                }
+        }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
         }else{
             return $this->redirect(['site/login']);
-        }         
+        }    
     }
 
     /**
-     * Displays a single ConceptoSalarios model.
+     * Displays a single DiagnosticoIncapacidad model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -67,15 +67,17 @@ class ConceptoSalariosController extends Controller
     }
 
     /**
-     * Creates a new ConceptoSalarios model.
+     * Creates a new DiagnosticoIncapacidad model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new ConceptoSalarios();
+        $model = new DiagnosticoIncapacidad();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
             return $this->redirect(['index']);
         }
 
@@ -85,7 +87,7 @@ class ConceptoSalariosController extends Controller
     }
 
     /**
-     * Updates an existing ConceptoSalarios model.
+     * Updates an existing DiagnosticoIncapacidad model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -105,39 +107,37 @@ class ConceptoSalariosController extends Controller
     }
 
     /**
-     * Deletes an existing ConceptoSalarios model.
+     * Deletes an existing DiagnosticoIncapacidad model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-   public function actionDelete($id)
+    public function actionDelete($id)
     {
         try {
             $this->findModel($id)->delete();
             Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
-            $this->redirect(["concepto-salarios/index"]);
+            $this->redirect(["diagnostico-incapacidad/index"]);
         } catch (IntegrityException $e) {
-            $this->redirect(["concepto-salarios/index"]);
+            $this->redirect(["diagnostico-incapacidad/index"]);
             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
         } catch (\Exception $e) {            
             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
-            $this->redirect(["concepto-salarios/index"]);
+            $this->redirect(["diagnostico-incapacidad/index"]);
         }
     }
-    
-    
 
     /**
-     * Finds the ConceptoSalarios model based on its primary key value.
+     * Finds the DiagnosticoIncapacidad model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return ConceptoSalarios the loaded model
+     * @return DiagnosticoIncapacidad the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = ConceptoSalarios::findOne($id)) !== null) {
+        if (($model = DiagnosticoIncapacidad::findOne($id)) !== null) {
             return $model;
         }
 

@@ -2,60 +2,83 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use app\models\ConceptoSalarios;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ConceptoSalariosSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Concepto Salarios';
+$this->title = 'Concepto de nomina';
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <div class="concepto-salarios-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Create Concepto Salarios', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+   <?= $this->render('_search', ['model' => $searchModel]); ?>
+   <?php $newButton = Html::a('Nuevo ' . Html::tag('i', '', ['class' => 'glyphicon glyphicon-plus']), ['create'], ['class' => 'btn btn-success btn-sm']); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'codigo_salario',
-            'nombre_concepto',
-            'compone_salario',
-            'inicio_nomina',
-            'aplica_porcentaje',
-            //'porcentaje',
-            //'porcentaje_tiempo_extra',
-            //'prestacional',
-            //'ingreso_base_prestacional',
-            //'ingreso_base_cotizacion',
-            //'debito_credito',
-            //'adicion',
-            //'auxilio_transporte',
-            //'concepto_incapacidad',
-            //'concepto_pension',
-            //'concepto_salud',
-            //'concepto_vacacion',
-            //'provisiona_vacacion',
-            //'provisiona_indemnizacion',
-            //'tipo_adicion',
-            //'recargo_nocturno',
-            //'hora_extra',
-            //'concepto_comision',
-            //'concepto_licencia',
-            //'fsp',
-            //'concepto_prima',
-            //'concepto_cesantias',
-            //'intereses',
-            //'fecha_creacion',
-
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'attribute' => 'codigo_salario',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            [
+                'attribute' => 'nombre_concepto',
+                'contentOptions' => ['class' => 'col-lg-3'],
+            ],
+            [
+                'attribute' => 'porcentaje',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            [
+                'attribute' => 'porcentaje_tiempo_extra',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+           [
+                'attribute' => 'debito_credito',
+                'value' => function($model) {
+                    $inicionomina = ConceptoSalarios::findOne($model->codigo_salario);
+                    return $inicionomina->inicionomina;
+                },
+                'filter' => ArrayHelper::map(ConceptoSalarios::find()->all(), 'debito_credito', 'debitocredito'),
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            
+            [
+                'attribute' => 'prestacional',
+                'value' => function($model) {
+                    $prestacion = ConceptoSalarios::findOne($model->codigo_salario);
+                    return $prestacion->prestacion;
+                },
+                'filter' => ArrayHelper::map(ConceptoSalarios::find()->all(), 'prestacional', 'prestacion'),
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            [
+                'attribute' => 'tipo_adicion',
+                'value' => function($model) {
+                    $tipoadicion = ConceptoSalarios::findOne($model->codigo_salario);
+                    return $tipoadicion->tipoadicion;
+                },
+                'filter' => ArrayHelper::map(ConceptoSalarios::find()->all(), 'tipo_adicion', 'tipoadicion'),
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],            
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
+            
+        ],
+       'tableOptions' => ['class' => 'table table-bordered table-success'],
+        'summary' => '<div class="panel panel-success "><div class="panel-heading">Registros  {totalCount} </div>',
+        'layout' => '{summary}{items}</div><div class="row"><div class="col-sm-8">{pager}</div><div class="col-sm-4 text-right">' . $newButton . '</div></div>',
+        'pager' => [
+            'nextPageLabel' => '<i class="fa fa-forward"></i>',
+            'prevPageLabel' => '<i class="fa fa-backward"></i>',
+            'lastPageLabel' => '<i class="fa fa-fast-forward"></i>',
+            'firstPageLabel' => '<i class="fa fa-fast-backward"></i>',
         ],
     ]); ?>
 </div>

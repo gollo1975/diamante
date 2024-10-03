@@ -539,7 +539,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                         ['label' => 'MENÚ PRINCIPAL', 'options' => ['class' => 'header']],
                                         ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                                         [
-                                            'label' => 'NOMINA ',
+                                            'label' => 'TALENTO HUMANO ',
                                             'icon' => 'share',
                                             'url' => '#',
                                             'items' => [
@@ -650,21 +650,66 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'url' => '#',
                                                     'items' => [
                                                         [
-                                                            'label' => 'Configuracion',
+                                                            'label' => 'Administracion',
                                                             'icon' => 'database',
                                                             'url' => '#',
                                                             'items' => [
-                                                                ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['configuracion-incapacidad/index']],  
-                                                                ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['configuracion-licencia/index']],
+                                                                ['label' => 'Diagnostico medico', 'icon' => 'plus-square-o', 'url' => ['diagnostico-incapacidad/index']],
                                                                 [
-                                                                'label' => 'Bancos',
+                                                                'label' => 'Configuracion',
                                                                 'icon' => 'connectdevelop',
                                                                 'url' => '#',
                                                                 'items' => [
-                                                                    ['label' => 'Empresariales', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index']],
-                                                                    ['label' => 'Empleados', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index_banco_empleado']],
+                                                                    ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['configuracion-incapacidad/index']],  
+                                                                    ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['configuracion-licencia/index']],
+                                                                    ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['configuracion-licencia/index']],
                                                                     ]
                                                                 ],
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE MOVIMIENTO
+                                                        [
+                                                            'label' => 'Movimiento',
+                                                            'icon' => 'book',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['incapacidad/index']],
+                                                                ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],//TERMINA /MODULO
+                                                //INICIA NOMINA
+                                                [
+                                                    'label' => 'NOMINA',
+                                                    'icon' => 'money',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                        [
+                                                            'label' => 'Administracion',
+                                                            'icon' => 'database',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                               // ['label' => 'Diagnostico medico', 'icon' => 'plus-square-o', 'url' => ['diagnostico-incapacidad/index']],
+                                                                [
+                                                                'label' => 'Configuracion',
+                                                                'icon' => 'connectdevelop',
+                                                                'url' => '#',
+                                                                'items' => [
+                                                                    ['label' => 'Concepto de nomina', 'icon' => 'plus-square-o', 'url' => ['concepto-salarios/index']],  
+                                                                    ['label' => 'Salarios', 'icon' => 'plus-square-o', 'url' => ['configuracion-salario/index']],  
+                                                                    ]
+                                                                ],
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE MOVIMIENTO
+                                                        [
+                                                            'label' => 'Movimiento',
+                                                            'icon' => 'book',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                             //   ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['incapacidad/index']],
+                                                               // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
                                                             ],
                                                         ],
                                                     ],
