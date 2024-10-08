@@ -24,7 +24,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'Detalle factura de venta';
+$this->title = 'Factura de venta';
 $this->params['breadcrumbs'][] = ['label' => 'Factura de venta', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_factura;
 $view = 'factura-venta';

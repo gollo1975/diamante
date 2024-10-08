@@ -708,7 +708,17 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'icon' => 'book',
                                                             'url' => '#',
                                                             'items' => [
-                                                             //   ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['incapacidad/index']],
+                                                                ['label' => 'Generar nomina', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/index']],
+                                                               // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE MOVIMIENTO
+                                                        [
+                                                            'label' => 'Utilidades',
+                                                            'icon' => 'cube',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                 ['label' => 'Periodos de pago', 'icon' => 'plus-square-o', 'url' => ['periodo-pago-nomina/index_search']],
                                                                // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
                                                             ],
                                                         ],
