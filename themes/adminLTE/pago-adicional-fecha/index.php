@@ -90,7 +90,9 @@ $this->params['breadcrumbs'][] = $this->title;
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
+            <?php foreach ($model as $val):
+                $buscar = \app\models\PagoAdicionalPermanente::find()->where(['=','id_pago_fecha', $val->id_pago_fecha])->one();
+                ?>
             <tr>                
                 <td><?= $val->id_pago_fecha?></td>
                 <td><?= $val->fecha_corte?></td>
@@ -106,23 +108,40 @@ $this->params['breadcrumbs'][] = $this->title;
                    </td>
                    <td>
                    </td>
-                <?php }else{?> 
-                    <td style="width: 25px;">
-                        <a href="<?= Url::toRoute(["pago-adicional-fecha/view", "id" => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>                   
-                   </td>
-                   <td style="width: 25px;">
-                        <a href="<?= Url::toRoute(["pago-adicional-fecha/update", "id" => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
-                   </td>
-                    <td style="width: 25px;">
-                      <?= Html::a('', ['eliminar', 'id' => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte], [
-                        'class' => 'glyphicon glyphicon-trash',
-                        'data' => [
-                            'confirm' => 'Esta seguro de eliminar el registro?',
-                            'method' => 'post',
-                        ],
-                      ]) ?>
-                  </td>
-                <?php }?>    
+                <?php }else{
+                    if($buscar){?>
+                        <td style="width: 25px;">
+                            <a href="<?= Url::toRoute(["pago-adicional-fecha/view", "id" => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>                   
+                       </td>
+                       <td style="width: 25px;">
+                            <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['pago-adicional-fecha/cerrar_proceso', 'id' => $val->id_pago_fecha], [
+                                                   'class' => '',
+                                                   'title' => 'Proceso que cierra el registro de los adicionales.', 
+                                                   'data' => [
+                                                       'confirm' => 'Esta seguro de CERRAR el registro que permite el ingreso de ADICIONALES al pago de nomina.',
+                                                       'method' => 'post',
+                                                   ],
+                             ]);?>
+                       </td>   
+                       <td style="width: 25px;"></td>
+                    <?php }else{?> 
+                        <td style="width: 25px;">
+                            <a href="<?= Url::toRoute(["pago-adicional-fecha/view", "id" => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>                   
+                        </td>
+                        <td style="width: 25px;">
+                             <a href="<?= Url::toRoute(["pago-adicional-fecha/update", "id" => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                        </td>
+                        <td style="width: 25px;">
+                           <?= Html::a('', ['eliminar', 'id' => $val->id_pago_fecha, 'fecha_corte' => $val->fecha_corte], [
+                             'class' => 'glyphicon glyphicon-trash',
+                             'data' => [
+                                 'confirm' => 'Esta seguro de eliminar el registro?',
+                                 'method' => 'post',
+                             ],
+                           ]) ?>
+                       </td>
+                    <?php }   
+                }?>    
              </tr>            
             </tbody>            
             <?php endforeach; ?>
