@@ -698,6 +698,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 'items' => [
                                                                     ['label' => 'Concepto de nomina', 'icon' => 'plus-square-o', 'url' => ['concepto-salarios/index']],  
                                                                     ['label' => 'Salarios', 'icon' => 'plus-square-o', 'url' => ['configuracion-salario/index']],  
+                                                                    ['label' => 'Tipos de credito', 'icon' => 'plus-square-o', 'url' => ['configuracion-credito/index']],
                                                                     ]
                                                                 ],
                                                             ],
@@ -712,7 +713,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
                                                             ],
                                                         ],
-                                                        //COMIENZA MEDU DE MOVIMIENTO
+                                                        //COMIENZA MEDU DE UTILIDADES
                                                         [
                                                             'label' => 'Utilidades',
                                                             'icon' => 'cube',
@@ -720,6 +721,16 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'items' => [
                                                                  ['label' => 'Periodos de pago', 'icon' => 'plus-square-o', 'url' => ['periodo-pago-nomina/index_search']],
                                                                // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE PROCESOS
+                                                        [
+                                                            'label' => 'Procesos',
+                                                            'icon' => 'exchange',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                 ['label' => 'Creditos', 'icon' => 'plus-square-o', 'url' => ['credito/index']],
+                                                                 ['label' => 'Pago adicional x fecha', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-fecha/index']],
                                                             ],
                                                         ],
                                                     ],
