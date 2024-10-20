@@ -79,9 +79,11 @@ class ProgramacionNomina extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_grupo_pago', 'id_periodo_pago_nomina', 'id_tipo_nomina', 'id_contrato', 'id_empleado', 'cedula_empleado', 'salario_contrato', 'nro_pago', 'total_devengado', 'total_pagar', 'total_deduccion', 'total_auxilio_transporte', 'ibc_prestacional', 'vlr_ibp_medio_tiempo', 'ibc_no_prestacional', 'total_licencia', 'total_incapacidad', 'ajuste_incapacidad', 'dias_vacacion', 'horas_vacacion', 'ibc_vacacion', 'dias_pago', 'dia_real_pagado', 'estado_generado', 'estado_liquidado', 'estado_cerrado', 'factor_dia', 'salario_medio_tiempo', 'salario_promedio', 'dias_ausentes', 'total_ibc_no_prestacional', 'importar_prima', 'pago_aplicado'], 'integer'],
+            [['id_grupo_pago', 'id_periodo_pago_nomina', 'id_tipo_nomina', 'id_contrato', 'id_empleado', 'cedula_empleado', 'salario_contrato', 'nro_pago', 'total_devengado', 'total_pagar', 'total_deduccion', 'total_auxilio_transporte', 'ibc_prestacional', 'vlr_ibp_medio_tiempo', 
+                'ibc_no_prestacional', 'total_licencia', 'total_incapacidad', 'ajuste_incapacidad', 'dias_vacacion', 'horas_vacacion', 'ibc_vacacion', 'dias_pago', 'dia_real_pagado', 'estado_generado', 'estado_liquidado', 'estado_cerrado', 'salario_medio_tiempo',
+                'salario_promedio', 'dias_ausentes', 'total_ibc_no_prestacional', 'importar_prima', 'pago_aplicado'], 'integer'],
             [['fecha_inicio_contrato', 'fecha_final_contrato', 'fecha_ultima_prima', 'fecha_ultima_cesantia', 'fecha_ultima_vacacion', 'fecha_desde', 'fecha_hasta', 'fecha_real_corte', 'fecha_creacion', 'fecha_inicio_vacacion', 'fecha_final_vacacion'], 'safe'],
-            [['total_tiempo_extra', 'total_recargo', 'horas_pago'], 'number'],
+            [['total_tiempo_extra', 'total_recargo', 'horas_pago','factor_dia'], 'number'],
             [['user_name'], 'string', 'max' => 15],
             [['id_grupo_pago'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoPago::className(), 'targetAttribute' => ['id_grupo_pago' => 'id_grupo_pago']],
             [['id_periodo_pago_nomina'], 'exist', 'skipOnError' => true, 'targetClass' => PeriodoPagoNomina::className(), 'targetAttribute' => ['id_periodo_pago_nomina' => 'id_periodo_pago_nomina']],
