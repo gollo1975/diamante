@@ -25,7 +25,7 @@ $view = 'programacion nomina';
 
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-info btn-lg dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Novedades
+                      Horas extras
                       <span class="caret"></span>
                     </button>
 
@@ -34,12 +34,12 @@ $view = 'programacion nomina';
                        $count = count($detalles);
                        if ($count == 0){
 
-                           ?> <li><?= Html::a('<span class="glyphicon glyphicon-time "></span>Tiempo extra', ['novedadeserror', 'id' => $model->id_periodo_pago_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta]) ?></li> <?php
+                           ?> <li><?= Html::a('<span class="glyphicon glyphicon-time "></span>Generar', ['novedadeserror', 'id' => $model->id_periodo_pago_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta]) ?></li> <?php
                        }else{
                           if($model->id_tipo_nomina == 3 || $model->id_tipo_nomina == 2){?>
-                           <li><?= Html::a('<span class="glyphicon glyphicon-time "></span>Tiempo extra', ['novedadeserror', 'id' => $model->id_periodo_pago_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta]) ?></li>
+                           <li><?= Html::a('<span class="glyphicon glyphicon-time "></span>Generar', ['novedadeserror', 'id' => $model->id_periodo_pago_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta]) ?></li>
                           <?php }else{?>
-                            <li><?= Html::a('<span class="glyphicon glyphicon-time"></span>Tiempo extra', ['/novedad-tiempo-extra/novedades', 'id' => $model->id_periodo_pago_nomina], ['target' => '_blank']) ?></li>
+                            <li><?= Html::a('<span class="glyphicon glyphicon-time"></span>Generar', ['/novedad-tiempo-extra/novedades', 'id' => $model->id_periodo_pago_nomina], ['target' => '_blank']) ?></li>
                           <?php }
                        }
                        ?>
@@ -179,69 +179,57 @@ $view = 'programacion nomina';
                                     <th scope="col" style='background-color:#B9D5CE;'>Id</th>  
                                     <th scope="col" style='background-color:#B9D5CE;'>Nro_pago</th>
                                     <th scope="col" style='background-color:#B9D5CE;'>Documento</th>                        
-                                     <th scope="col" style='background-color:#B9D5CE;'>Empleado</th>    
-                                     <th scope="col" style='background-color:#B9D5CE;'>Inicio Contrato</th>  
-                                     <th scope="col" style='background-color:#B9D5CE;'>Fecha final</th>
-                                     <th scope="col" style='background-color:#B9D5CE;'>No cont.</th>  
+                                    <th scope="col" style='background-color:#B9D5CE;'>Empleado</th>    
+                                    <th scope="col" style='background-color:#B9D5CE;'>Inicio Contrato</th>  
+                                    <th scope="col" style='background-color:#B9D5CE;'>Fecha final</th>
+                                    <th scope="col" style='background-color:#B9D5CE;'>No cont.</th>  
                                     <th scope="col" style='background-color:#B9D5CE;'>Salario</th>    
                                     <th scope="col"style='background-color:#B9D5CE;'>Devengado</th>                        
                                     <th scope="col"style='background-color:#B9D5CE;'>Deducción</th>   
                                     <th scope="col" style='background-color:#B9D5CE;'>Dias</th>   
                                     <th scope="col" style='background-color:#B9D5CE;'>Horas</th>
                                     <th scope="col" style='background-color:#B9D5CE;'><span title="Tiempo de servicio">Ts</span></th>
-                                     <th scope="col" style='background-color:#B9D5CE;'></th>
-                                      <th scope="col" style='background-color:#B9D5CE;'></th>
-                                        <th scope="col" style='background-color:#B9D5CE;'></th>
-                                    <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
+                                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                                   
                                 </tr>
                                 </thead>
                                 <tbody>
                                     <?php
-                                      $c =''; $m = ''; $s = '';
-                                      $c = 'C'; $m = 'M'; $s = 'S';
                                      foreach ($detalles as $val): 
                                         $contrato = \app\models\Contratos::find()->where(['=','id_contrato', $val->id_contrato])->one();
                                         ?>
                                     <tr style='font-size:85%;'>
                                         <?php
                                           if($val->fecha_inicio_vacacion <> ''){?>
-                                             <td style="background-color:#DCFFFC;"><?= $val->id_programacion ?></td>  
-                                             <td style="background-color:#DCFFFC;"><?= $val->nro_pago ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= $val->cedula_empleado ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= $val->empleado->nombre_completo ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= $val->fecha_inicio_contrato ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= $val->fecha_final_contrato ?></td>
-                                             <td style="background-color:#DCFFFC;"><?= $val->id_contrato ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= '$'.number_format($val->salario_contrato,0) ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= '$'.number_format($val->total_devengado,0) ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= '$'.number_format($val->total_deduccion,0) ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= $val->dia_real_pagado ?></td>
-                                            <td style="background-color:#DCFFFC;"><?= $val->horas_pago ?></td>
-                                          <?php }else{?>    
-                                            <td ><?= $val->id_programacion ?></td>  
-                                             <td><?= $val->nro_pago ?></td>
-                                            <td><?= $val->cedula_empleado ?></td>
-                                            <td><?= $val->empleado->nombre_completo ?></td>
-                                            <td><?= $val->fecha_inicio_contrato ?></td>
-                                            <td><?= $val->fecha_final_contrato ?></td>
-                                             <td><?= $val->id_contrato ?></td>
-                                             <td style="text-align: right"><?= '$'.number_format($val->salario_contrato,0) ?></td>
-                                            <td style="text-align: right"><?= '$'.number_format($val->total_devengado,0) ?></td>
-                                            <td style="text-align: right"><?= '$'.number_format($val->total_deduccion,0) ?></td>
-                                            <td><?= $val->dia_real_pagado ?></td>
-                                            <td><?= $val->horas_pago ?></td>
-                                          <?php }?>  
-                                        <td>
-                                            <?php if($contrato->id_tiempo == 1){
-                                              echo $c;
-                                            }else{
-                                                if($contrato->id_tiempo == 2){
-                                                   echo $m;
-                                                }else{
-                                                    echo $s;
-                                                }
-                                            }?></td>
-                                        
+                                                <td style="background-color:#DCFFFC;"><?= $val->id_programacion ?></td>  
+                                                <td style="background-color:#DCFFFC;"><?= $val->nro_pago ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= $val->cedula_empleado ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= $val->empleado->nombre_completo ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= $val->fecha_inicio_contrato ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= $val->fecha_final_contrato ?></td>
+                                                 <td style="background-color:#DCFFFC;"><?= $val->id_contrato ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= '$'.number_format($val->salario_contrato,0) ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= '$'.number_format($val->total_devengado,0) ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= '$'.number_format($val->total_deduccion,0) ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= $val->dia_real_pagado ?></td>
+                                                <td style="background-color:#DCFFFC;"><?= $val->horas_pago ?></td>
+                                           <?php }else{?>    
+                                                <td ><?= $val->id_programacion ?></td>  
+                                                 <td><?= $val->nro_pago ?></td>
+                                                <td><?= $val->cedula_empleado ?></td>
+                                                <td><?= $val->empleado->nombre_completo ?></td>
+                                                <td><?= $val->fecha_inicio_contrato ?></td>
+                                                <td><?= $val->fecha_final_contrato ?></td>
+                                                <td><?= $val->id_contrato ?></td>
+                                                <td style="text-align: right"><?= '$'.number_format($val->salario_contrato,0) ?></td>
+                                                <td style="text-align: right"><?= '$'.number_format($val->total_devengado,0) ?></td>
+                                                <td style="text-align: right"><?= '$'.number_format($val->total_deduccion,0) ?></td>
+                                                <td><?= $val->dia_real_pagado ?></td>
+                                                <td><?= $val->horas_pago ?></td>
+                                            <?php }?>  
+                                                  <td><?= $val->contrato->tiempo->abreviatura ?></td>                               
                                             <?php
                                             if($val->estado_generado == 1 and $val->estado_cerrado == 0){?>
                                                 <td style="width: 0.5%; height: 0.5%; ">  
@@ -306,7 +294,7 @@ $view = 'programacion nomina';
                                              </div>
                                             <?php }?>
                                         </td>   
-                                        <td ><input type="checkbox" name="id_programacion[]" value="<?= $val->id_programacion ?>"></td>
+                                        
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>

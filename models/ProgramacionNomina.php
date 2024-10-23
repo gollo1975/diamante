@@ -100,7 +100,7 @@ class ProgramacionNomina extends \yii\db\ActiveRecord
     {
         return [
             'id_programacion' => 'Id Programacion',
-            'id_grupo_pago' => 'Id Grupo Pago',
+            'id_grupo_pago' => 'Grupo de pago:',
             'id_periodo_pago_nomina' => 'Id Periodo Pago Nomina',
             'id_tipo_nomina' => 'Id Tipo Nomina',
             'id_contrato' => 'Id Contrato',
@@ -134,7 +134,7 @@ class ProgramacionNomina extends \yii\db\ActiveRecord
             'dias_vacacion' => 'Dias Vacacion',
             'horas_vacacion' => 'Horas Vacacion',
             'ibc_vacacion' => 'Ibc Vacacion',
-            'dias_pago' => 'Dias Pago',
+            'dias_pago' => 'Dias de pago',
             'dia_real_pagado' => 'Dia Real Pagado',
             'horas_pago' => 'Horas Pago',
             'estado_generado' => 'Estado Generado',

@@ -42,7 +42,7 @@ class TiempoServicio extends \yii\db\ActiveRecord
             [['tiempo_servicio', 'horas_dia'], 'required'],
             [['horas_dia', 'pago_incapacidad_general', 'pago_incapacidad_laboral'], 'number'],
             [['tiempo_servicio'], 'string', 'max' => 90],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','abreviatura'], 'string', 'max' => 15],
         ];
     }
 
@@ -58,6 +58,7 @@ class TiempoServicio extends \yii\db\ActiveRecord
             'pago_incapacidad_general' => '% Incapacidad general',
             'pago_incapacidad_laboral' => '% Incapacidad laboral',
             'user_name' => 'User Name',
+            'abreviatura' => 'abreviatura',
         ];
     }
 }

@@ -205,6 +205,9 @@ class ProgramacionNominaController extends Controller
                     $table->cedula_empleado = $val->empleado->nit_cedula;
                     $table->salario_contrato = $val->salario;
                     $table->fecha_inicio_contrato = $val->fecha_inicio;
+                    if($val->tiempo->abreviatura == 'MT'){
+                        $table->salario_medio_tiempo = $val->salario;
+                    }
                     if ($val->contrato_activo == 1) {
                         $table->fecha_final_contrato = $val->fecha_final;
                     } 
@@ -397,6 +400,14 @@ class ProgramacionNominaController extends Controller
                 }
             }
             
+            //PROCESO QUE PERMITE SUBIR HORAS EXTRAS
+            $novedad_tiempo_extra = \app\models\NovedadTiempoExtra::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['>', 'nro_horas', 0])->orderBy('id_empleado DESC')->all();
+            if (count($novedad_tiempo_extra) > 0) {
+                foreach ($novedad_tiempo_extra as $tiempo_extra) {
+                   $this->Novedadtiempoextra($tiempo_extra, $id, $fecha_desde, $fecha_hasta, $id_grupo_pago);
+                }
+            }
+            
             //PROCESO PARA INGRESAR LOS CREDITOS
                $creditosempleado = \app\models\Credito::find()->where(['<=', 'fecha_inicio', $fecha_hasta])
                                 ->andWhere(['=', 'estado_credito', 0])
@@ -418,7 +429,7 @@ class ProgramacionNominaController extends Controller
         }else{
             //PROCESO PARA PRIMAS
         }
-        return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+      //  return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
         
     }
     //PROCES QUE GENERA EL SALARIO BASICO
@@ -430,12 +441,12 @@ class ProgramacionNominaController extends Controller
             $table->id_programacion = $val->id_programacion;
             $table->salario_basico = $val->salario_contrato;
             $table->id_periodo_pago_nomina = $val->id_periodo_pago_nomina;
-            if ($val->factor_dia == 8) {
+            if ($val->contrato->tiempo->abreviatura == 'TC') {
                 $table->vlr_hora = $val->salario_contrato / $jornada;
                 $table->vlr_dia = $val->salario_contrato / 30;
                 $table->porcentaje = 100;
             } else {
-                if ($val->salario_contrato <= $val->salario_medio_tiempo) {
+                if ($val->salario_contrato == $val->salario_medio_tiempo) {
                     $Vlr_dia_medio_tiempo = 0;
                     $sw = 1;
                     $jornada2 = $jornada / 2;
@@ -543,9 +554,9 @@ class ProgramacionNominaController extends Controller
                     }
                 }
             }
-            $table->insert(false);
-            $val->dia_real_pagado = $table->dias_reales;
-            $val->save(false);
+           $table->insert(false);
+           $val->dia_real_pagado = $table->dias_reales;
+           $val->save(false);
             return ($total_dias);
         }
     }
@@ -657,6 +668,30 @@ class ProgramacionNominaController extends Controller
         }    
     }
     
+    //PROCESO QUE CARGAS LAS HORAS EXTRAS
+    //controlador del tiempo extra
+    protected function Novedadtiempoextra($tiempo_extra, $id, $fecha_desde, $fecha_hasta, $id_grupo_pago) {
+        $contador = 0;
+        $contador_recargo = 0;
+        $programacion_nonima = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->one();
+        $prognomdetalle = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $tiempo_extra->id_programacion])->andWhere(['=', 'codigo_salario', $tiempo_extra->codigo_salario])->one();
+        if (!$prognomdetalle) {
+            $detalle = new \app\models\ProgramacionNominaDetalle();
+            $detalle->id_programacion = $tiempo_extra->id_programacion;
+            $detalle->codigo_salario = $tiempo_extra->codigo_salario;
+            $detalle->vlr_hora = $tiempo_extra->vlr_hora;
+            $detalle->id_periodo_pago_nomina = $id;
+            $detalle->horas_periodo_reales = $tiempo_extra->nro_horas;
+            $detalle->salario_basico = $tiempo_extra->salario_contrato;
+            $detalle->vlr_devengado = round($tiempo_extra->total_novedad);
+            $detalle->fecha_desde = $fecha_desde;
+            $detalle->fecha_hasta = $fecha_hasta;
+            $detalle->porcentaje = $tiempo_extra->porcentaje;
+            $detalle->id_grupo_pago = $id_grupo_pago;
+            $detalle->save(false);
+        }
+    }
+    
     //PROCESO QUE CARGA LOS CREDITOS
     protected function Modulocredito($fecha_desde, $fecha_hasta, $credito, $id, $id_grupo_pago) {
         $programacion_nonima = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['=', 'id_empleado', $credito->id_empleado])->one();
@@ -733,7 +768,18 @@ class ProgramacionNominaController extends Controller
                 }
             }
             return $this->redirect(['programacion-nomina/view', 'id' => $id, 'id_grupo_pago' =>$id_grupo_pago, 'fecha_desde' =>$fecha_desde, 'fecha_hasta' => $fecha_hasta]);
-        }    
+        }   
+        
+    //ERROR DE LAS NOVEDADES
+    public function actionNovedadeserror($id, $id_grupo_pago, $fecha_desde, $fecha_hasta) {
+        Yii::$app->getSession()->setFlash('error', 'Debe de cargar  los empleados en la nomina para generar las novedades!');
+        return $this->redirect(['view',
+                    'id' => $id,
+                    'id_grupo_pago' => $id_grupo_pago,
+                    'fecha_desde' => $fecha_desde,
+                    'fecha_hasta' => $fecha_hasta,
+        ]);
+    }
         
     /**
      * Finds the ProgramacionNomina model based on its primary key value.
@@ -750,4 +796,85 @@ class ProgramacionNominaController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    ///PROCESO DE EXCEL
+    public function actionExcelpago($id) {
+        $nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion DESC')->all();
+         $objPHPExcel = new \PHPExcel();
+         $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+                            
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'NRO PAGO')
+                    ->setCellValue('B1', 'GRUPO PAGO')
+                    ->setCellValue('C1', 'TIPO PAGO')
+                    ->setCellValue('D1', 'PERIODO PAGO')
+                    ->setCellValue('E1', 'NRO CONTRATO')
+                    ->setCellValue('F1', 'DOCUMENTO')
+                    ->setCellValue('G1', 'EMPLEADO')   
+                    ->setCellValue('H1', 'FECHA INICIO')
+                    ->setCellValue('I1', 'FECHA CORTE')
+                    ->setCellValue('J1', 'TOTAL DEVENGADO')
+                    ->setCellValue('K1', 'TOTAL DEDUCCION')
+                    ->setCellValue('L1', 'NETO PAGAR')
+                    ->setCellValue('M1', 'IBP');
+        $i = 2;
+        
+        foreach ($nomina as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->nro_pago)
+                    ->setCellValue('B' . $i, $val->grupoPago->grupo_pago)
+                    ->setCellValue('C' . $i, $val->tipoNomina->tipo_pago)
+                    ->setCellValue('D' . $i, $id)
+                    ->setCellValue('E' . $i, $val->id_contrato)
+                    ->setCellValue('F' . $i, $val->cedula_empleado)                    
+                    ->setCellValue('G' . $i, $val->empleado->nombre_completo)
+                    ->setCellValue('H' . $i, $val->fecha_desde)
+                    ->setCellValue('I' . $i, $val->fecha_hasta)
+                    ->setCellValue('J' . $i, round($val->total_devengado,0))
+                    ->setCellValue('K' . $i, round($val->total_deduccion,0))
+                    ->setCellValue('L' . $i, round($val->total_pagar,0))
+                     ->setCellValue('M' . $i, round($val->ibc_prestacional,0));
+            $i++;
+        }
+        $j = $i + 1;
+               
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Nomina general.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
 }
