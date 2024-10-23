@@ -147,20 +147,19 @@ $view = 'programacion nomina';
             <?php
             $conIncapacidad = count($incapacidad);
             $conLicencia = count($licencia);
-            //$conTiempo_extra = count($novedad_tiempo);
             $conCredito = count($credito_empleado);
             $conInteres = 0;
             if($conInteres == 0){?>
                 <li role="presentation" class="active"><a href="#empleado" aria-controls="empleado" role="tab" data-toggle="tab">Empleados <span class="badge"><?= $con ?></span></a></li>
                 <li role="presentation"><a href="#incapacidad" aria-controls="incapacidad" role="tab" data-toggle="tab">Incapacidades <span class="badge"><?= $conIncapacidad ?></span></a></li>
                 <li role="presentation"><a href="#licencia" aria-controls="licencia" role="tab" data-toggle="tab">Licencias <span class="badge"><?= $conLicencia ?></span></a></li>
-                <li role="presentation"><a href="#novedades" aria-controls="novedades" role="tab" data-toggle="tab">Novedades <span class="badge"><?= 1 ?></span></a></li>
+                <li role="presentation"><a href="#novedades" aria-controls="novedades" role="tab" data-toggle="tab">Novedades <span class="badge"><?= count($novedad_tiempo) ?></span></a></li>
                 <li role="presentation"><a href="#credito" aria-controls="credito" role="tab" data-toggle="tab">Créditos <span class="badge"><?= $conCredito ?></span></a></li>
             <?php }else{?>
                 <li role="presentation" class="active"><a href="#empleado" aria-controls="empleado" role="tab" data-toggle="tab">Empleados <span class="badge"><?= $con ?></span></a></li>
                 <li role="presentation"><a href="#incapacidad" aria-controls="incapacidad" role="tab" data-toggle="tab">Incapacidades <span class="badge"><?= $conIncapacidad ?></span></a></li>
                 <li role="presentation"><a href="#licencia" aria-controls="licencia" role="tab" data-toggle="tab">Licencias <span class="badge"><?= $conLicencia ?></span></a></li>
-                <li role="presentation"><a href="#novedades" aria-controls="novedades" role="tab" data-toggle="tab">Novedades <span class="badge"><?= 1 ?></span></a></li>
+                <li role="presentation"><a href="#novedades" aria-controls="novedades" role="tab" data-toggle="tab">Novedades <span class="badge"><?= count($novedad_tiempo) ?></span></a></li>
                 <li role="presentation"><a href="#credito" aria-controls="credito" role="tab" data-toggle="tab">Créditos <span class="badge"><?= $conCredito ?></span></a></li>
                 <li role="presentation"><a href="#intereses" aria-controls="intereses" role="tab" data-toggle="tab">Intereses <span class="badge"><?= 1 ?></span></a></li>
                 
@@ -355,7 +354,7 @@ $view = 'programacion nomina';
                                         <td><?= $val->numero_incapacidad ?></td>  
                                         <td><?= $val->codigoIncapacidad->nombre ?></td>   
                                         <td><?= $val->identificacion ?></td>   
-                                        <td><?= $val->empleado->nombrecorto ?></td>   
+                                        <td><?= $val->empleado->nombre_completo ?></td>   
                                         <td><?= $val->fecha_inicio ?></td>   
                                         <td><?= $val->fecha_final ?></td>   
                                         <td><?= '$'.number_format($val->salario,0) ?></td>
@@ -393,7 +392,7 @@ $view = 'programacion nomina';
                                         <td><?= $val->id_licencia_pk ?></td>  
                                         <td><?= $val->codigoLicencia->concepto ?></td>   
                                         <td><?= $val->identificacion ?></td>   
-                                        <td><?= $val->empleado->nombrecorto ?></td>   
+                                        <td><?= $val->empleado->nombre_completo ?></td>   
                                         <td><?= $val->fecha_desde ?></td>   
                                         <td><?= $val->fecha_hasta ?></td>   
                                         <td><?= '$'.number_format($val->salario,0) ?></td>
@@ -420,14 +419,27 @@ $view = 'programacion nomina';
                                     <th scope="col" style='background-color:#B9D5CE;'>Código</th>  
                                      <th scope="col" style='background-color:#B9D5CE;'>Concepto salario</th>  
                                     <th scope="col" style='background-color:#B9D5CE;'>Nro_Horas</th>    
-                                    <th scope="col" style='background-color:#B9D5CE;'>Vlr_Hora</th>                        
+                                    <th scope="col" style='background-color:#B9D5CE;'>Valor hora</th>                        
                                     <th scope="col" style='background-color:#B9D5CE;'>Total_Novedad</th>                        
                                     <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th> 
                                      <th scope="col" style='background-color:#B9D5CE;'>Usuario</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                  
+                                    <?php foreach ($novedad_tiempo as $val): ?>
+                                    <tr style='font-size:85%;'>
+                                        <td><?= $val->id_novedad ?></td>  
+                                        <td><?= $val->empleado->nit_cedula ?></td>   
+                                        <td><?= $val->empleado->nombre_completo ?></td>
+                                        <td><?= $val->codigo_salario ?></td>   
+                                        <td><?= $val->codigoSalario->nombre_concepto ?></td>   
+                                        <td style="text-align: right"><?= $val->nro_horas ?></td>   
+                                        <td style="text-align: right"><?= $val->vlr_hora ?></td>   
+                                        <td style="text-align: right"><?= '$'.number_format($val->total_novedad,0) ?></td>
+                                        <td><?= $val->fecha_creacion ?></td> 
+                                        <td><?= $val->user_name ?></td>   
+                                    </tr>
+                                    <?php endforeach; ?>
                                 </tbody>
                             </table>
                        </div>    
@@ -446,7 +458,7 @@ $view = 'programacion nomina';
                                     <th scope="col" style='background-color:#B9D5CE;'>Tipo crédito</th>
                                     <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                                     <th scope="col" style='background-color:#B9D5CE;'>Empleado</th>
-                                    <th scope="col" style='background-color:#B9D5CE;'>Vlr_Credito</th>                
+                                    <th scope="col" style='background-color:#B9D5CE;'>Valor credito</th>                
                                     <th scope="col" style='background-color:#B9D5CE;'>Cuota</th>  
                                     <th scope="col" style='background-color:#B9D5CE;'>Saldo</th> 
                                     <th scope="col" style='background-color:#B9D5CE;'><span title="Numero de cuotas">N_C</span></th>
@@ -461,11 +473,11 @@ $view = 'programacion nomina';
                                     <tr style='font-size:85%;'>
                                          <td><?= $val->id_credito?></td>
                                          <td><?= $val->codigoCredito->nombre_credito?></td>
-                                         <td><?= $val->empleado->identificacion?></td>
-                                         <td><?= $val->empleado->nombrecorto?></td>
-                                         <td><?= '$'.number_format($val->vlr_credito,0)?></td>
-                                         <td><?= '$'.number_format($val->vlr_cuota,0)?></td>
-                                         <td><?= '$'.number_format($val->saldo_credito,0)?></td>
+                                         <td><?= $val->empleado->nit_cedula?></td>
+                                         <td><?= $val->empleado->nombre_completo?></td>
+                                         <td style="text-align: right"><?= '$'.number_format($val->valor_credito,0)?></td>
+                                         <td style="text-align: right"><?= '$'.number_format($val->valor_cuota,0)?></td>
+                                         <td style="text-align: right"><?= '$'.number_format($val->saldo_credito,0)?></td>
                                          <td><?= $val->numero_cuotas?></td>
                                          <td><?= $val->numero_cuota_actual?></td>
                                          <td><?= $val->Estadocredito?></td>

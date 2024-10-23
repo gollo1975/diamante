@@ -54,11 +54,11 @@ class TiempoServicio extends \yii\db\ActiveRecord
         return [
             'id_tiempo' => 'Id',
             'tiempo_servicio' => 'Tiempo del servicio',
-            'horas_dia' => 'Horas dia',
             'pago_incapacidad_general' => '% Incapacidad general',
             'pago_incapacidad_laboral' => '% Incapacidad laboral',
             'user_name' => 'User Name',
             'abreviatura' => 'abreviatura',
+            'horas_dia' => 'Valor hora:',
         ];
     }
 }

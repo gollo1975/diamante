@@ -139,20 +139,19 @@ class ProgramacionNominaController extends Controller
                         ->andWhere(['<=', 'fecha_desde', $fecha_hasta])
                         ->andWhere(['>=', 'fecha_hasta', $fecha_desde])
                         ->orderBy('identificacion ASC')->all();
-        //$novedad_tiempo = NovedadTiempoExtra::find()->where(['=', 'id_periodo_pago_nomina', $id])->orderBy('id_empleado ASC')->all();
+        $novedad_tiempo = \app\models\NovedadTiempoExtra::find()->where(['=', 'id_periodo_pago_nomina', $id])->orderBy('id_empleado ASC')->all();
         $credito_empleado = \app\models\Credito::find()->where(['<=', 'fecha_inicio', $fecha_hasta])
-                        ->andWhere(['=', 'estado_credito', 1])
-                        ->andWhere(['=', 'estado_periodo', 1])
+                        ->andWhere(['=', 'estado_credito', 0])
+                        ->andWhere(['=', 'estado_periodo', 0])
                         ->andWhere(['>', 'saldo_credito', 0])
                         ->andWhere(['=', 'id_grupo_pago', $id_grupo_pago])
                         ->orderBy('id_empleado DESC')->all();
-        
         return $this->render('view', [
                     'detalles' => $detalles,
                     'model' => $model,
                     'incapacidad' => $incapacidad,
                     'licencia' => $licencia,
-                   // 'novedad_tiempo' => $novedad_tiempo,
+                    'novedad_tiempo' => $novedad_tiempo,
                     'credito_empleado' => $credito_empleado,
                   //  'intereses' => $intereses,
         ]);
@@ -408,6 +407,17 @@ class ProgramacionNominaController extends Controller
                 }
             }
             
+            // codigo que valida las incapacidades del mismo periodo
+            $incapacidad = \app\models\Incapacidad::find()->where(['=', 'id_grupo_pago', $id_grupo_pago])
+                    ->andWhere(['<=', 'fecha_inicio', $fecha_hasta])
+                    ->andWhere(['>=', 'fecha_final', $fecha_desde])
+                    ->all();
+            if (count($incapacidad) > 0) {
+                foreach ($incapacidad as $valor_incapacidad) {
+                  $this->ModuloIncapacidad($fecha_desde, $fecha_hasta, $valor_incapacidad, $id, $id_grupo_pago);
+                }
+            }
+            
             //PROCESO PARA INGRESAR LOS CREDITOS
                $creditosempleado = \app\models\Credito::find()->where(['<=', 'fecha_inicio', $fecha_hasta])
                                 ->andWhere(['=', 'estado_credito', 0])
@@ -429,7 +439,7 @@ class ProgramacionNominaController extends Controller
         }else{
             //PROCESO PARA PRIMAS
         }
-      //  return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+        return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
         
     }
     //PROCES QUE GENERA EL SALARIO BASICO
@@ -692,6 +702,49 @@ class ProgramacionNominaController extends Controller
         }
     }
     
+    //PROCESO QUE CARGA LAS INCAPACIDADES DEL PERIODO
+    //controlador de las incapacidades
+    protected function ModuloIncapacidad($fecha_desde, $fecha_hasta, $valor_incapacidad, $id, $id_grupo_pago) {
+        $contador = 0;
+        $pro_nonima = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['=', 'id_empleado', $valor_incapacidad->id_empleado])->one();
+        if($pro_nonima){
+            $tipo_incapacidad = \app\models\ConfiguracionIncapacidad::find()->where(['=', 'codigo_incapacidad', $valor_incapacidad->codigo_incapacidad])->one();
+            $prognomdetalle = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $pro_nonima->id_programacion])
+                    ->andWhere(['=', 'codigo_salario', $tipo_incapacidad->codigo_salario])
+                    ->andWhere(['=', 'id_incapacidad', $valor_incapacidad->id_incapacidad])
+                    ->one();
+            if (!$prognomdetalle) {
+                $detalleIncapacidad = new \app\models\ProgramacionNominaDetalle();
+                $detalleIncapacidad->id_programacion = $pro_nonima->id_programacion;
+                $detalleIncapacidad->codigo_salario = $tipo_incapacidad->codigo_salario;
+                $detalleIncapacidad->salario_basico = $valor_incapacidad->salario;
+                $detalleIncapacidad->vlr_dia = $valor_incapacidad->vlr_hora * $pro_nonima->factor_dia;
+                $detalleIncapacidad->vlr_hora = $valor_incapacidad->vlr_hora;
+                $detalleIncapacidad->id_incapacidad = $valor_incapacidad->id_incapacidad;
+                $detalleIncapacidad->fecha_desde = $valor_incapacidad->fecha_inicio;
+                $detalleIncapacidad->fecha_hasta = $valor_incapacidad->fecha_final;
+                $detalleIncapacidad->vlr_incapacidad = round($valor_incapacidad->valor_dia * $valor_incapacidad->dias_incapacidad);
+                $detalleIncapacidad->nro_horas_incapacidad = round($valor_incapacidad->dias_incapacidad * $pro_nonima->factor_dia);
+                $detalleIncapacidad->horas_periodo = $valor_incapacidad->dias_incapacidad * $pro_nonima->factor_dia;
+                $detalleIncapacidad->horas_periodo_reales = $valor_incapacidad->dias_incapacidad * $pro_nonima->factor_dia;
+                $detalleIncapacidad->dias = $valor_incapacidad->dias_incapacidad;
+                $detalleIncapacidad->dias_reales = $valor_incapacidad->dias_incapacidad;
+                $detalleIncapacidad->dias_incapacidad_descontar = $valor_incapacidad->dias_incapacidad;
+                $detalleIncapacidad->id_periodo_pago_nomina = $id;
+                $detalleIncapacidad->dias_descontar_transporte = $valor_incapacidad->dias_incapacidad;
+                $detalleIncapacidad->porcentaje = $valor_incapacidad->porcentaje_pago;
+                $detalleIncapacidad->id_grupo_pago =  $id_grupo_pago;
+                if ($valor_incapacidad->pagar_empleado == 1) {
+                    $detalleIncapacidad->vlr_devengado = $detalleIncapacidad->vlr_incapacidad;
+                    $detalleIncapacidad->vlr_ajuste_incapacidad = $valor_incapacidad->ibc_total_incapacidad -  $detalleIncapacidad->vlr_devengado ;
+                }else{
+                    $detalleIncapacidad->vlr_ajuste_incapacidad = $valor_incapacidad->ibc_total_incapacidad;
+                }
+                $detalleIncapacidad->insert(false);
+            }
+        }    
+    }
+    
     //PROCESO QUE CARGA LOS CREDITOS
     protected function Modulocredito($fecha_desde, $fecha_hasta, $credito, $id, $id_grupo_pago) {
         $programacion_nonima = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['=', 'id_empleado', $credito->id_empleado])->one();
@@ -865,6 +918,106 @@ class ProgramacionNominaController extends Controller
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="Nomina general.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
+    
+    public function actionExceldetallepago($id) {
+         $detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion DESC')->all();
+         $objPHPExcel = new \PHPExcel();
+         $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+                                   
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID_PROGRAMACION')
+                    ->setCellValue('B1', 'PERIODO PAGO')
+                    ->setCellValue('C1', 'TIPO PAGO')
+                    ->setCellValue('D1', 'GRUPO PAGO')
+                    ->setCellValue('E1', 'EMPLEADO')
+                    ->setCellValue('F1', 'DESDE')
+                    ->setCellValue('G1', 'HASTA')
+                    ->setCellValue('H1', 'CONCEPTO') 
+                    ->setCellValue('I1', 'DIAS REALES') 
+                    ->setCellValue('J1', 'DEVENGADO')
+                    ->setCellValue('K1', 'DEDUCCION')
+                    ->setCellValue('L1', 'DIAS INCAPACITADO')
+                    ->setCellValue('M1', 'DIAS LICENCIA');
+                                    
+        $i = 2;
+       
+        foreach ($detalle as $val) {
+            $concepto = \app\models\ConceptoSalarios::find()->where(['=','codigo_salario', $val->codigo_salario])->one();   
+            if($concepto->auxilio_transporte == 1){
+                $objPHPExcel->setActiveSheetIndex(0)
+                     ->setCellValue('A' . $i, $val->id_programacion)
+                     ->setCellValue('B' . $i, $id)
+                     ->setCellValue('C' . $i, $val->programacion->tipoNomina->tipo_pago)
+                     ->setCellValue('D' . $i, $val->programacion->grupoPago->grupo_pago)    
+                     ->setCellValue('E' . $i, $val->programacion->empleado->nombre_completo)
+                     ->setCellValue('F' . $i, $val->fecha_desde)
+                     ->setCellValue('G' . $i, $val->fecha_hasta)
+                     ->setCellValue('H' . $i, $val->codigoSalario->nombre_concepto) 
+                     ->setCellValue('I' . $i, $val->dias_reales)    
+                     ->setCellValue('J' . $i, round($val->auxilio_transporte,0))
+                     ->setCellValue('K' . $i, round($val->vlr_deduccion,0))
+                     ->setCellValue('L' . $i, $val->dias_incapacidad_descontar)
+                     ->setCellValue('M' . $i, $val->dias_licencia_descontar);
+                $i++;
+            }else{
+               $objPHPExcel->setActiveSheetIndex(0)
+                     ->setCellValue('A' . $i, $val->id_programacion)
+                     ->setCellValue('B' . $i, $id)
+                     ->setCellValue('C' . $i, $val->programacion->tipoNomina->tipo_pago)  
+                     ->setCellValue('D' . $i, $val->programacion->grupoPago->grupo_pago)  
+                     ->setCellValue('E' . $i, $val->programacion->empleado->nombre_completo)
+                     ->setCellValue('F' . $i, $val->fecha_desde)
+                     ->setCellValue('G' . $i, $val->fecha_hasta)
+                     ->setCellValue('H' . $i, $val->codigoSalario->nombre_concepto) 
+                     ->setCellValue('I' . $i, $val->dias_reales)  
+                     ->setCellValue('j' . $i, round($val->vlr_devengado,0))
+                     ->setCellValue('k' . $i, round($val->vlr_deduccion,0))
+                     ->setCellValue('l' . $i, $val->dias_incapacidad_descontar)
+                     ->setCellValue('M' . $i, $val->dias_licencia_descontar);   
+                $i++; 
+            }    
+        }
+        $k = $i + 1;
+               
+        $objPHPExcel->getActiveSheet()->setTitle('Detalle nomina');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Nomina detalle.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');

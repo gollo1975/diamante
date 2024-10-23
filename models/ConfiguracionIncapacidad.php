@@ -36,7 +36,7 @@ class ConfiguracionIncapacidad extends \yii\db\ActiveRecord
         return [
             [['nombre', 'codigo_salario'], 'required'],
             [['genera_pago', 'genera_ibc', 'codigo_salario', 'codigo'], 'integer'],
-            [['porcentaje'], 'number'],
+            [['porcentaje','tope_maximo_salario'], 'number'],
             [['nombre'], 'string', 'max' => 120],
             [['user_name'], 'string', 'max' => 15],
             [['codigo_salario'], 'exist', 'skipOnError' => true, 'targetClass' => ConceptoSalarios::className(), 'targetAttribute' => ['codigo_salario' => 'codigo_salario']],
@@ -57,6 +57,7 @@ class ConfiguracionIncapacidad extends \yii\db\ActiveRecord
             'porcentaje' => 'Porcentaje',
             'codigo' => 'Alterno',
             'user_name' => 'User Name',
+            'tope_maximo_salario' => 'Salario maximo',
         ];
     }
 

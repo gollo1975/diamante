@@ -153,7 +153,6 @@ class LicenciaController extends Controller
          $configuracionlicencia  = ConfiguracionLicencia::find()->where(['codigo_licencia'=>$model->codigo_licencia])->one();
         if ($model->load(Yii::$app->request->post())) {           
             if ($model->validate()) {
-
                 //inicio de grabado
                 if($empleado){
                     $empleado = Empleados::find()->where(['id_empleado'=>$model->id_empleado])->one();
@@ -164,11 +163,10 @@ class LicenciaController extends Controller
                    $fecha_inicio_licencia = strtotime($model->fecha_desde);
                    $fecha_final_licencia = strtotime(date($model->fecha_hasta, time()));
                     if($fecha_contrato > $fecha_inicio_licencia){
-                        $mensaje  = " Error al digitalizar, La fecha de inicio de la licencia No puede ser inferior a la fecha de inicio del contrato";          
+                        Yii::$app->getSession()->setFlash('error', 'La fecha de inicio de la licencia No puede ser inferior a la fecha de inicio del contrato.');           
                     }else{
                         if($fecha_final_licencia < $fecha_inicio_lice){
-                           
-                             $mensaje  = " Error de fechas, La fecha de inicio de la licencia es igual a la fecha final...sdadasdadas"; 
+                            Yii::$app->getSession()->setFlash('error', 'La fecha de inicio de la licencia es igual a la fecha final.');           
                         }else{   
                             $incapacidad = \app\models\Incapacidad::find()->where(['=','id_empleado', $model->id_empleado])->all();
                             $contIncap = count($incapacidad);
@@ -238,7 +236,7 @@ class LicenciaController extends Controller
                 } else {
                     Yii::$app->getSession()->setFlash('error', 'No existe el documento del empleado.');
                 }
-            } else {
+            }else {
                 $model->getErrors();
             }
         }
