@@ -113,15 +113,16 @@ $view = 'programacion nomina';
     <?php }   
      if($estado_generado == 2 && $estado_liquidado == 1){?>                     
         <div class="panel-footer text-center"> 
-            <?= Html::a('<span class="glyphicon glyphicon-triangle-left"></span> Deshacer_proceso', ['deshacer', 'id' => $model->id_periodo_pago_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta], ['class' => 'btn btn-primary btn-sm']) ?>    
-            <?= Html::a('<span class="glyphicon glyphicon-level-up"></span> Validar_registros', ['validarregistros', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta],['class' => 'btn btn-warning btn-sm',
-                      'data' => ['confirm' => 'Este proceso valida todos los registros de las '. $model->tipoNomina->tipo_pago. ' y actualiza licencias e incapacidades. Esta seguro de validar los registros?', 'method' => 'post']]) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-file"></span> Generar devengados', ['programacion-nomina/generar_devengados', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta], ['class' => 'btn btn-success btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-minus-sign"></span> Generar descuentos', ['programacion-nomina/generar_descuentos', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta], ['class' => 'btn btn-warning btn-sm']) ?>
         </div>     
     <?php }
     if($estado_cerrado == 1 && $estado_liquidado == 2){?>                     
         <div class="panel-footer text-center"> 
             <div>
-                <?= Html::a('<span class="glyphicon glyphicon-open-file"></span> Aplicar_pagos', ['aplicarpagos', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina,'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta],['class' => 'btn btn-info btn-lg',
+                <?= Html::a('<span class="glyphicon glyphicon-file"></span> Generar devengados', ['programacion-nomina/generar_devengados', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta], ['class' => 'btn btn-success btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-minus-sign"></span> Generar descuentos', ['programacion-nomina/generar_descuentos', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina, 'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta], ['class' => 'btn btn-warning btn-sm']) ?>
+                <?= Html::a('<span class="glyphicon glyphicon-check"></span> Aplicar_pagos', ['programacion-nomina/aplicar_pagos_nomina', 'id' => $model->id_periodo_pago_nomina, 'tipo_nomina' =>$model->id_tipo_nomina,'id_grupo_pago' =>$model->id_grupo_pago, 'fecha_desde' => $model->fecha_desde, 'fecha_hasta' =>$model->fecha_hasta],['class' => 'btn btn-info btn-sm',
                       'data' => ['confirm' => 'Esta función cierra todos los procesos del pago de las ' . $model->tipoNomina->tipo_pago. '. Esta seguro de ejecutar este proceso?', 'method' => 'post']]) ?>
             </div>
 
@@ -238,7 +239,7 @@ $view = 'programacion nomina';
                                                             'title' => 'Comprobante de pago',
                                                             'data-toggle'=>'modal',
                                                             'data-target'=>'#modalvernomina'.$val->id_programacion,
-                                                            'class' => 'btn btn-info btn-xs'
+                                                            'class' => ''
                                                         ]
                                                     );
                                                     ?>
@@ -249,7 +250,7 @@ $view = 'programacion nomina';
                                                      </div>
                                                </td>
                                                 <td style="width: 25px;">				
-                                                    <a href="<?= Url::toRoute(["programacion-nomina/editarcolillapagonomina", 'id' => $model->id_periodo_pago_nomina,"id_programacion" => $val->id_programacion, 'id_grupo_pago' => $val->id_grupo_pago, 'id' => $val->id_periodo_pago_nomina, 'fecha_desde' => $val->fecha_desde, 'fecha_hasta' => $val->fecha_hasta]) ?>" ><span class="glyphicon glyphicon-book"></span></a>
+                                                    <a href="<?= Url::toRoute(["programacion-nomina/editarcolillapagonomina", 'id' => $model->id_periodo_pago_nomina,"id_programacion" => $val->id_programacion, 'id_grupo_pago' => $val->id_grupo_pago, 'id' => $val->id_periodo_pago_nomina, 'fecha_desde' => $val->fecha_desde, 'fecha_hasta' => $val->fecha_hasta]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
                                                 </td>
                                             <?php }else{?>
                                                    <td style="width: 0.5%; height: 0.5%; ">  
@@ -259,7 +260,7 @@ $view = 'programacion nomina';
                                                                 'title' => 'Comprobante de pago',
                                                                 'data-toggle'=>'modal',
                                                                 'data-target'=>'#modalvernomina'.$val->id_programacion,
-                                                                'class' => 'btn btn-info btn-xs'
+                                                                'class' => ''
                                                             ]
                                                         );
                                                         ?>
@@ -282,7 +283,7 @@ $view = 'programacion nomina';
                                                        'title' => 'Modificar colilla de pago',
                                                        'data-toggle'=>'modal',
                                                        'data-target'=>'#modaleditarcolillapagosabatino'.$val->id_programacion,
-                                                       'class' => 'btn btn-primary btn-xs'
+                                                       'class' => ''
                                                    ]
                                                );
                                                ?>

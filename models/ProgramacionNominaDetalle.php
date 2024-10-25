@@ -73,7 +73,10 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_programacion', 'codigo_salario', 'horas_periodo', 'horas_periodo_reales', 'dias', 'dias_reales', 'dias_transporte', 'factor_dia', 'salario_basico', 'vlr_devengado', 'vlr_ibc_medio_tiempo', 'vlr_devengado_no_prestacional', 'vlr_neto_pagar', 'descuento_salud', 'descuento_pension', 'auxilio_transporte', 'vlr_licencia', 'dias_licencia_descontar', 'vlr_incapacidad', 'id_incapacidad', 'nro_horas_incapacidad', 'dias_incapacidad_descontar', 'vlr_ajuste_incapacidad', 'deduccion', 'id_credito', 'id_periodo_pago_nomina', 'id_grupo_pago', 'dias_salario', 'dias_descontar_transporte', 'id_licencia', 'porcentaje', 'vlr_licencia_no_pagada', 'vlr_vacacion'], 'integer'],
+            [['id_programacion', 'codigo_salario', 'horas_periodo', 'horas_periodo_reales', 'dias', 'dias_reales', 'dias_transporte', 'factor_dia', 'salario_basico', 'vlr_devengado', 'valor_tiempo_extra', 'vlr_devengado_no_prestacional',
+                'vlr_neto_pagar', 'descuento_salud', 'descuento_pension', 'auxilio_transporte', 'vlr_licencia', 'dias_licencia_descontar', 'vlr_incapacidad', 'id_incapacidad', 'nro_horas_incapacidad', 'dias_incapacidad_descontar',
+                'vlr_ajuste_incapacidad', 'deduccion', 'id_credito', 'id_periodo_pago_nomina', 'id_grupo_pago', 'dias_salario', 'dias_descontar_transporte', 'id_licencia', 'porcentaje', 'vlr_licencia_no_pagada', 'vlr_vacacion',
+                'aplico_dias_licencia','aplico_dias_incapacidad','descuento_fondo_solidaridad'], 'integer'],
             [['fecha_desde', 'fecha_hasta'], 'safe'],
             [['vlr_deduccion', 'vlr_credito', 'vlr_hora', 'vlr_dia', 'nro_horas'], 'number'],
             [['id_credito'], 'exist', 'skipOnError' => true, 'targetClass' => Credito::className(), 'targetAttribute' => ['id_credito' => 'id_credito']],
@@ -105,7 +108,7 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
             'fecha_hasta' => 'Fecha Hasta',
             'salario_basico' => 'Salario Basico',
             'vlr_devengado' => 'Vlr Devengado',
-            'vlr_ibc_medio_tiempo' => 'Vlr Ibc Medio Tiempo',
+            'valor_tiempo_extra' => 'Valor_tiempo_extra',
             'vlr_devengado_no_prestacional' => 'Vlr Devengado No Prestacional',
             'vlr_deduccion' => 'Vlr Deduccion',
             'vlr_credito' => 'Vlr Credito',
@@ -133,6 +136,9 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
             'porcentaje' => 'Porcentaje',
             'vlr_licencia_no_pagada' => 'Vlr Licencia No Pagada',
             'vlr_vacacion' => 'Vlr Vacacion',
+            'aplico_dias_incapacidad' => 'aplico_dias_incapacidad',
+            'aplico_dias_licencia' => 'aplico_dias_licencia',
+            'descuento_fondo_solidaridad' => 'descuento_fondo_solidaridad',
         ];
     }
 

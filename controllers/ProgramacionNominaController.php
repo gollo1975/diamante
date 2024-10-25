@@ -431,10 +431,23 @@ class ProgramacionNominaController extends Controller
                        $this->Modulocredito($fecha_desde, $fecha_hasta, $credito, $id, $id_grupo_pago);
                     }
                 }
-                ///sigue aca
-                
-                
-                
+                //PROCESO QUE CARGA LAS LICENCIAS
+                $licencias = \app\models\Licencia::find()->where(['=', 'id_grupo_pago', $id_grupo_pago])
+                        ->andWhere(['<=', 'fecha_desde', $fecha_hasta])
+                        ->andWhere(['>=', 'fecha_hasta', $fecha_desde])
+                        ->all();
+                $contLicencia = count($licencias);
+                if (count($licencias) > 0) {
+                    foreach ($licencias as $valor_licencia) {
+                       $this->ModuloLicencias($fecha_desde, $fecha_hasta, $valor_licencia, $id, $id_grupo_pago);
+                    }
+                }
+                //PROCESO QUE CIERRA LOS DEVENGADOS Y GENERA EL SEGUNDO PROCESO
+                $nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                foreach ($nomina as $valores):
+                    $valores->estado_generado = 1;
+                    $valores->save();
+                endforeach;
 
         }else{
             //PROCESO PARA PRIMAS
@@ -679,7 +692,6 @@ class ProgramacionNominaController extends Controller
     }
     
     //PROCESO QUE CARGAS LAS HORAS EXTRAS
-    //controlador del tiempo extra
     protected function Novedadtiempoextra($tiempo_extra, $id, $fecha_desde, $fecha_hasta, $id_grupo_pago) {
         $contador = 0;
         $contador_recargo = 0;
@@ -694,6 +706,7 @@ class ProgramacionNominaController extends Controller
             $detalle->horas_periodo_reales = $tiempo_extra->nro_horas;
             $detalle->salario_basico = $tiempo_extra->salario_contrato;
             $detalle->vlr_devengado = round($tiempo_extra->total_novedad);
+            $detalle->valor_tiempo_extra = round($tiempo_extra->total_novedad);
             $detalle->fecha_desde = $fecha_desde;
             $detalle->fecha_hasta = $fecha_hasta;
             $detalle->porcentaje = $tiempo_extra->porcentaje;
@@ -703,7 +716,6 @@ class ProgramacionNominaController extends Controller
     }
     
     //PROCESO QUE CARGA LAS INCAPACIDADES DEL PERIODO
-    //controlador de las incapacidades
     protected function ModuloIncapacidad($fecha_desde, $fecha_hasta, $valor_incapacidad, $id, $id_grupo_pago) {
         $contador = 0;
         $pro_nonima = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['=', 'id_empleado', $valor_incapacidad->id_empleado])->one();
@@ -772,6 +784,387 @@ class ProgramacionNominaController extends Controller
             }
        }    
     }
+    
+    //codigo que valide las licencias
+    protected function ModuloLicencias($fecha_desde, $fecha_hasta, $valor_licencia, $id, $id_grupo_pago) {
+        $contador = 0;
+        $pro_nonima = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['=', 'id_empleado', $valor_licencia->id_empleado])->one();
+        if($pro_nonima){
+            $empresa = \app\models\MatriculaEmpresa::findOne(1);
+            $jornada2 = $empresa->horas_jornada_laboral / 2;
+            $tipo_licencia = \app\models\ConfiguracionLicencia::find()->where(['=', 'codigo_licencia', $valor_licencia->codigo_licencia])->one();
+            $prognomdetalle = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $pro_nonima->id_programacion])
+                    ->andWhere(['=', 'codigo_salario', $tipo_licencia->codigo_salario])
+                    ->andWhere(['=', 'id_licencia', $valor_licencia->id_licencia_pk])
+                    ->one();
+            if (!$prognomdetalle) {
+                $detalleLicencia = new \app\models\ProgramacionNominaDetalle();
+                $detalleLicencia->id_programacion = $pro_nonima->id_programacion;
+                $detalleLicencia->codigo_salario = $tipo_licencia->codigo_salario;
+                $detalleLicencia->salario_basico = $valor_licencia->salario;
+                $detalleLicencia->porcentaje = $tipo_licencia->porcentaje;
+                $detalleLicencia->id_grupo_pago = $id_grupo_pago;
+                $detalleLicencia->vlr_dia = $valor_licencia->salario / 30;
+                if ($pro_nonima->contrato->tiempo->abreviatura == 'TC') {
+                    $detalleLicencia->vlr_hora = $valor_licencia->salario / $empresa->horas_jornada_laboral;
+                } else {
+                    $detalleLicencia->vlr_hora = $valor_licencia->salario / $jornada2;
+                }
+
+                $detalleLicencia->fecha_desde = $valor_licencia->fecha_desde;
+                $detalleLicencia->fecha_hasta = $valor_licencia->fecha_hasta;
+                $detalleLicencia->id_licencia = $valor_licencia->id_licencia_pk;
+                //codigo para calcular los dias
+                $fecha_final_licencia = strtotime($valor_licencia->fecha_hasta);
+                $fecha_inicio_licencia = strtotime($valor_licencia->fecha_desde);
+                $fecha_desde = strtotime($fecha_desde);
+                $fecha_hasta = strtotime($fecha_hasta);
+
+                if ($fecha_inicio_licencia < $fecha_desde) {
+                    if ($fecha_final_licencia >= $fecha_hasta) {
+                        $total_dias = ($fecha_hasta) - $fecha_desde;
+                        $total_dias = round($total_dias / 86400) + 1;
+                    } else {
+                        $total_dias = ($fecha_final_licencia) - $fecha_desde;
+                        $total_dias = round($total_dias / 86400) + 1;
+                    }
+                    $detalleLicencia->dias = $total_dias;
+                    $detalleLicencia->dias_reales = $total_dias;
+                    $detalleLicencia->horas_periodo = $total_dias * $pro_nonima->factor_dia;
+                    $detalleLicencia->horas_periodo_reales = $total_dias * $pro_nonima->factor_dia;
+                    $detalleLicencia->id_periodo_pago_nomina = $id;
+                    $detalleLicencia->nro_horas = $total_dias * $pro_nonima->factor_dia;
+                    $detalleLicencia->dias_licencia_descontar = $total_dias;
+                    if ($valor_licencia->pagar_empleado == 1) {
+                        $detalleLicencia->vlr_devengado = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        $detalleLicencia->vlr_licencia = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                    } else {
+                        $detalleLicencia->vlr_licencia = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        $detalleLicencia->vlr_devengado = 0;
+                        $detalleLicencia->vlr_licencia_no_pagada = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                    }
+                    if ($valor_licencia->afecta_transporte == 1) {
+                        $detalleLicencia->dias_descontar_transporte = $total_dias;
+                    }
+                } else {
+                    if ($fecha_final_licencia <= $fecha_hasta) {
+                        $total_dias = $fecha_final_licencia - $fecha_inicio_licencia;
+                        $total_dias = round($total_dias / 86400) + 1;
+                        $detalleLicencia->dias = $total_dias;
+                        $detalleLicencia->dias_reales = $total_dias;
+                        $detalleLicencia->horas_periodo = $total_dias * $pro_nonima->factor_dia;
+                        $detalleLicencia->horas_periodo_reales = $total_dias * $pro_nonima->factor_dia;
+                        $detalleLicencia->id_periodo_pago_nomina = $id;
+                        $detalleLicencia->nro_horas = $total_dias * $pro_nonima->factor_dia;
+                        $detalleLicencia->dias_licencia_descontar = $total_dias;
+                        if ($valor_licencia->pagar_empleado == 1) {
+                            $detalleLicencia->vlr_devengado = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                            $detalleLicencia->vlr_licencia = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        } else {
+                            $detalleLicencia->vlr_licencia = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                            $detalleLicencia->vlr_devengado = 0;
+                            $detalleLicencia->vlr_licencia_no_pagada = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        }
+                        if ($valor_licencia->afecta_transporte == 1) {
+                            $detalleLicencia->dias_descontar_transporte = $total_dias;
+                        }
+                    } else {
+                        $total_dias = $fecha_hasta - $fecha_inicio_licencia;
+                        $total_dias = round($total_dias / 86400) + 1;
+                        $detalleLicencia->dias = $total_dias;
+                        $detalleLicencia->dias_reales = $total_dias;
+                        $detalleLicencia->horas_periodo = $total_dias * $pro_nonima->factor_dia;
+                        $detalleLicencia->horas_periodo_reales = $total_dias * $pro_nonima->factor_dia;
+                        $detalleLicencia->id_periodo_pago_nomina = $id;
+                        $detalleLicencia->nro_horas = $total_dias * $pro_nonima->factor_dia;
+                        $detalleLicencia->dias_licencia_descontar = $total_dias;
+                        $detalleLicencia->vlr_devengado = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        if ($valor_licencia->pagar_empleado == 1) {
+                            $detalleLicencia->vlr_devengado = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                            $detalleLicencia->vlr_licencia = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        } else {
+                            $detalleLicencia->vlr_licencia = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                            $detalleLicencia->vlr_devengado = 0;
+                            $detalleLicencia->vlr_licencia_no_pagada = round($detalleLicencia->vlr_hora * $detalleLicencia->horas_periodo);
+                        }
+                        if ($valor_licencia->afecta_transporte == 1) {
+                            $detalleLicencia->dias_descontar_transporte = $total_dias;
+                        }
+                    }
+                }
+                $detalleLicencia->insert(false);
+                //codigo que actualiza el IBP
+            }
+        }    
+    }
+    
+    //PROCESO QUE VALIDE LAS DEDUCCIONES // SEGUNDO PROCESO//////********
+    /************************/
+    public function actionGenerar_descuentos($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina) {
+       if($tipo_nomina == 1){
+           
+            //PROCESO QUE BUSCAR LAS LICENCIAS PARA DESCONTAR DIAS
+            $buscarLicencia = \app\models\ProgramacionNominaDetalle::find()->where(['<>','id_licencia', ''])
+                                                                          ->andWhere(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion ASC')->all();
+            if(count($buscarLicencia) > 0){
+                $auxiliar = 0;
+                foreach ($buscarLicencia as $licencias):
+                    $contar = 0;
+                    if($auxiliar <> $licencias->id_programacion){
+                        $Consulta = \app\models\ProgramacionNominaDetalle::find()->where (['=','id_programacion', $licencias->id_programacion])->andwhere(['<>','id_licencia', ''])->all();
+                        foreach ($Consulta as $resultado):
+                            $contar += $resultado->dias_licencia_descontar;
+                            $id_programacion = $resultado->id_programacion;
+                        endforeach;
+                        $this->DescontarDiasLicencias($contar, $id_programacion);
+                        $auxiliar = $licencias->id_programacion;
+                    }else{
+                        $auxiliar = $licencias->id_programacion;
+                    }    
+                endforeach;
+            }    
+            
+            //PROCESO QUE BUSCAR LAS INCAPACIDADES PARA DESCONTAR DIAS
+            $buscarIncapacidad = \app\models\ProgramacionNominaDetalle::find()->where(['<>','id_incapacidad', ''])
+                                                                          ->andWhere(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion ASC')->all();
+           if(count($buscarIncapacidad)> 0){
+                $auxiliar = 0;
+                foreach ($buscarIncapacidad as $incapacidades):
+                    $contar = 0;
+                    if($auxiliar <> $incapacidades->id_programacion){
+                        $Consulta = \app\models\ProgramacionNominaDetalle::find()->where (['=','id_programacion', $incapacidades->id_programacion])->andwhere(['<>','id_incapacidad', ''])->all();
+                        foreach ($Consulta as $resultado):
+                            $contar += $resultado->dias_incapacidad_descontar;
+                            $id_programacion = $resultado->id_programacion;
+                        endforeach;
+                        $this->DescontarDiasIncapacidades($contar, $id_programacion);
+                        $auxiliar = $incapacidades->id_programacion;
+                    }else{
+                        $auxiliar = $incapacidades->id_programacion;
+                    }    
+                endforeach;
+            }
+            //PROCESO QUE TOTALIZA RESULTADOS
+            $nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+            foreach ($nomina as $nominas):
+                //PERMITE ACUMULAR LOS DEVENGADOS PRESTACIONA
+                $salarios = \app\models\ConceptoSalarios::find()->where(['=','ingreso_base_cotizacion', 1])->all();
+                $sumar = 0;
+                foreach ($salarios as $salario):
+                    $detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                                            ->andWhere(['=','codigo_salario', $salario->codigo_salario])->one();
+                    if($detalle){
+                        $sumar += $detalle->vlr_devengado + $detalle->vlr_licencia;
+                    }
+                endforeach;
+                $nominas->ibc_prestacional = $sumar;
+                $nominas->save();
+                
+               //PERMITE ACUMULAR LOS DEVENGADOS POR RECARGOS NOCTURNOS  
+                $recargoNocturno = \app\models\ConceptoSalarios::find()->where(['=','recargo_nocturno', 1])->all();
+                $recargo = 0;
+                foreach ($recargoNocturno as $recargoN):
+                    $detalleR = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                                            ->andWhere(['=','codigo_salario', $recargoN->codigo_salario])->one();
+                    if($detalleR){
+                        $recargo += $detalleR->valor_tiempo_extra;
+                    }
+                endforeach;
+                $nominas->total_recargo = $recargo;
+                $nominas->save();
+                
+                //PROCESO QUE BUSCA LOS DEVENGADOS
+                $detallenomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])->all();
+                $contar = 0; $auxilio = 0; $noprestacional = 0;
+                $licencia = 0; $incapacidad = 0; $tiempo_extra = 0;
+                foreach ($detallenomina as $key => $detallenominas):
+                    $contar += $detallenominas->vlr_devengado + $detallenominas->auxilio_transporte;
+                    $auxilio += $detallenominas->auxilio_transporte; 
+                    $licencia += $detallenominas->vlr_licencia;
+                    $incapacidad += $detallenominas->vlr_incapacidad;
+                    $noprestacional += $detallenominas->vlr_devengado_no_prestacional;
+                    $tiempo_extra += $detallenominas->valor_tiempo_extra;
+                endforeach;
+                $nominas->total_devengado = $contar;
+                $nominas->total_auxilio_transporte = $auxilio;
+                $nominas->ibc_no_prestacional = $noprestacional;
+                $nominas->total_licencia = $licencia;
+                $nominas->total_incapacidad = $incapacidad;
+                $nominas->total_tiempo_extra = $tiempo_extra;
+                $nominas->save();    
+            endforeach;
+            
+            // PROCESO QUE HACE EL DESCUENTOS DE SALUD Y PENSION Y FONDO DE SOLIDARIDA
+            $nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+            foreach ($nomina as $key => $nominas):
+                //PROCESO QUE CARGA LA SALUD
+                $configuracionEps = \app\models\ConfiguracionEps::findOne($nominas->contrato->id_configuracion_eps);
+                $salud = \app\models\ConceptoSalarios::find()->where(['=','concepto_salud', 1])->one();
+                $detalleNomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                                              ->andWhere(['=','codigo_salario', $salud->codigo_salario])->one();
+                if(!$detalleNomina){
+                    if($configuracionEps->id_configuracion_eps == 1){
+                        $table = new \app\models\ProgramacionNominaDetalle();
+                        $table->id_programacion = $nominas->id_programacion;
+                        $table->codigo_salario = $salud->codigo_salario;
+                        $table->porcentaje = $configuracionEps->porcentaje_empleado_eps;
+                        $table->fecha_desde = $fecha_desde;
+                        $table->fecha_hasta = $fecha_hasta;
+                        $table->id_periodo_pago_nomina = $id;
+                        $table->vlr_deduccion = round(($nominas->ibc_prestacional * $configuracionEps->porcentaje_empleado_eps) / 100);
+                        $table->descuento_salud = $table->vlr_deduccion;
+                        $table->id_grupo_pago = $id_grupo_pago;
+                        $table->save();
+                    }    
+                }
+                //PROCESO DE PENSION
+                $configuracionPension = \app\models\ConfiguracionPension::findOne($nominas->contrato->id_configuracion_pension);
+                $pension = \app\models\ConceptoSalarios::find()->where(['=','concepto_pension', 1])->one();
+                $detalleNominaP = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                                              ->andWhere(['=','codigo_salario', $pension->codigo_salario])->one();
+                if(!$detalleNominaP){
+                    if($configuracionEps->id_configuracion_eps == 4){
+                    }else{
+                        if($configuracionPension->id_configuracion_pension == 1 || $configuracionPension->id_configuracion_pension == 3 ){
+                           $table = new \app\models\ProgramacionNominaDetalle();
+                           $table->id_programacion = $nominas->id_programacion;
+                           $table->codigo_salario = $pension->codigo_salario;
+                           $table->porcentaje = $configuracionPension->porcentaje_empleado;
+                           $table->vlr_deduccion = round(($nominas->ibc_prestacional * $configuracionPension->porcentaje_empleado) / 100); 
+                           $table->fecha_desde = $fecha_desde;
+                           $table->fecha_hasta = $fecha_hasta;
+                           $table->id_periodo_pago_nomina = $id;
+                           $table->descuento_pension = $table->vlr_deduccion;
+                           $table->id_grupo_pago = $id_grupo_pago;
+                           $table->save();
+                        }
+                    }    
+                }
+                
+                //PROCESO DEL FONDO DE SOLIDARIDA PENSIONAL
+                $grupoPago = \app\models\GrupoPago::findOne($id_grupo_pago);
+                if($grupoPago->dias_pago == 7){
+                   $salarioPromedio = $nominas->total_devengado * 4;   
+                }else{
+                    if($grupoPago->dias_pago == 10){
+                        $salarioPromedio = $nominas->total_devengado * 3;
+                    }else{
+                        if($grupoPago->dias_pago == 14){
+                            $salarioPromedio = $nominas->total_devengado * 2;
+                        }else{
+                            if($grupoPago->dias_pago == 15){
+                               $salarioPromedio = $nominas->total_devengado * 2; 
+                            }else{
+                                $salarioPromedio = $nominas->total_devengado;
+                            }
+                        }    
+                    }
+                }
+                $fondoSolidaridad = \app\models\FondoSolidaridadPensional::find()->one();
+                $Fsp = \app\models\ConceptoSalarios::find()->where(['=','fsp', 1])->one();
+                $detalleFsp = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                                              ->andWhere(['=','codigo_salario', $Fsp->codigo_salario])->one();
+                if(!$detalleFsp){
+                    if($salarioPromedio >= $fondoSolidaridad->rango1 && $salarioPromedio < $fondoSolidaridad->rango2){
+                       $table = new \app\models\ProgramacionNominaDetalle();
+                        $table->id_programacion = $nominas->id_programacion;
+                        $table->codigo_salario = $Fsp->codigo_salario;
+                        $table->porcentaje = $fondoSolidaridad->porcentaje;
+                        $table->vlr_deduccion = round(($nominas->total_devengado * $fondoSolidaridad->porcentaje) / 100); 
+                        $table->fecha_desde = $fecha_desde;
+                        $table->fecha_hasta = $fecha_hasta;
+                        $table->id_periodo_pago_nomina = $id;
+                        $table->descuento_fondo_solidaridad = $table->vlr_deduccion;
+                        $table->id_grupo_pago = $id_grupo_pago;
+                        $table->save();
+                    }
+                }
+                //TOTAL DESCUENTOS Y SALDOS DE PAGOS
+                $buscar_Descto = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])->all();
+                $sumarD = 0;
+                foreach ($buscar_Descto as $key => $buscar):
+                    $sumarD += $buscar->vlr_deduccion;
+                endforeach;
+                $nominas->total_deduccion = $sumarD;
+                $nominas->save();
+            endforeach;
+            //PROCESO QUE CIERRA Y ACTUALIZA
+            $nominaTotal = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+            $valor = 0;
+            foreach ($nominaTotal as $key => $nominaT) {
+                $nominaT->total_pagar = $nominaT->total_devengado - $nominaT->total_deduccion;
+                $nominaT->estado_liquidado = 1;
+                $nominaT->save();
+            }
+            
+       }else{
+           ///proceso para primas
+       } 
+       return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+    }
+    
+    //PROCESO QUE PERMITE DESCONTAR LICENCIAS
+    protected function DescontarDiasLicencias($contar, $id_programacion) {
+        $detalleTransporte = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])
+                                                                          ->andWhere(['>','dias_transporte', 0])->andWhere(['=','aplico_dias_licencia', 0])->one();
+        $nomina = ProgramacionNomina::findOne($id_programacion);
+        if($detalleTransporte){
+           $detalleTransporte->dias_reales = $detalleTransporte->dias_reales - $contar;
+           $detalleTransporte->dias_transporte = $detalleTransporte->dias_reales; 
+           $detalleTransporte->auxilio_transporte = round($detalleTransporte->dias_transporte * $detalleTransporte->vlr_dia);
+           $detalleTransporte->aplico_dias_licencia = 1;
+           $detalleTransporte->save();
+           $nomina->dia_real_pagado = $detalleTransporte->dias_reales;
+           $nomina->save();
+        }
+        $detalleSalario = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])
+                                                                       ->andWhere(['=','codigo_salario', 1])->andWhere(['=','aplico_dias_licencia', 0])->one();
+        $nomina = ProgramacionNomina::findOne($id_programacion);
+        if($detalleSalario){
+            $detalleSalario->dias_reales = $detalleSalario->dias_reales - $contar;
+            $detalleSalario->dias_salario = $detalleSalario->dias_reales;
+            $detalleSalario->vlr_devengado = round($detalleSalario->vlr_dia * $detalleSalario->dias_reales);
+            $detalleSalario->aplico_dias_licencia = 1;
+            $detalleSalario->horas_periodo_reales = round($nomina->dia_real_pagado * $nomina->factor_dia);
+            $detalleSalario->save();
+            $nomina->dia_real_pagado = $detalleSalario->dias_reales;
+            $nomina->horas_pago = round($nomina->dia_real_pagado * $nomina->factor_dia); 
+            $nomina->save();
+        }
+    }
+    
+    //PROCESO QUE RESTA LOS DIAS DE LAS INCAPACIDADES
+    protected function DescontarDiasIncapacidades($contar, $id_programacion) {
+        $detalleTransporte = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])
+                                                                          ->andWhere(['>','dias_transporte', 0])->andWhere(['=','aplico_dias_incapacidad', 0])->one();
+        $nomina = ProgramacionNomina::findOne($id_programacion);
+        if($detalleTransporte){
+           $detalleTransporte->dias_reales = $detalleTransporte->dias_reales - $contar;
+           $detalleTransporte->dias_transporte = $detalleTransporte->dias_reales; 
+           $detalleTransporte->auxilio_transporte = round($detalleTransporte->dias_transporte * $detalleTransporte->vlr_dia);
+           $detalleTransporte->aplico_dias_incapacidad = 1;
+           $detalleTransporte->save();
+           $nomina->dia_real_pagado = $detalleTransporte->dias_reales;
+           $nomina->horas_pago = round($nomina->dia_real_pagado * $nomina->factor_dia);
+           $nomina->save();
+        }
+        $detalleSalario = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])
+                                                                       ->andWhere(['=','codigo_salario', 1])->andWhere(['=','aplico_dias_incapacidad', 0])->one();
+          $nomina = ProgramacionNomina::findOne($id_programacion);
+        if($detalleSalario){
+            $detalleSalario->dias_reales = $detalleSalario->dias_reales - $contar;
+            $detalleSalario->dias_salario = $detalleSalario->dias_reales;
+            $detalleSalario->vlr_devengado = round( $detalleSalario->vlr_dia * $detalleSalario->dias_reales);
+            $detalleSalario->aplico_dias_incapacidad = 1;
+            $detalleSalario->horas_periodo_reales = round($nomina->dia_real_pagado * $nomina->factor_dia);
+            $detalleSalario->save();
+            $nomina->dia_real_pagado = $detalleSalario->dias_reales;
+            $nomina->horas_pago = round($nomina->dia_real_pagado * $nomina->factor_dia); 
+            $nomina->save();
+        }
+      
+    }
+    
     /**
      * Deletes an existing ProgramacionNomina model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -813,7 +1206,7 @@ class ProgramacionNominaController extends Controller
                     }
                 } 
                 try {
-                $dato->delete();
+                
                 } catch (IntegrityException $e) {
                     Yii::$app->getSession()->setFlash('error', 'Error al eliminar la programacion de nomina, tiene registros asociados en otros procesos de la nómina');
                 } catch (\Exception $e) {
@@ -832,6 +1225,48 @@ class ProgramacionNominaController extends Controller
                     'fecha_desde' => $fecha_desde,
                     'fecha_hasta' => $fecha_hasta,
         ]);
+    }
+    
+    //PERMITE VISUALIZAR LA NOMINA
+    public function actionVernomina($id_programacion, $id_empleado, $id_grupo_pago, $id_periodo_pago_nomina)
+    {
+        $model = new \app\models\FormSoportePagoNomina();
+       
+        $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])->orderBy('vlr_deduccion ASC')->all();
+        
+        if (Yii::$app->request->get("id_programacion")) {
+           $nomina = ProgramacionNomina::find()->where(['=','id_programacion', $id_programacion])->one();            
+            if ($nomina) {                                
+                $model->id_programacion = $id_programacion;
+                $model->id_empleado = $nomina->id_empleado;
+                $model->cedula_empleado = $nomina->cedula_empleado;
+                $model->salario_contrato = $nomina->salario_contrato;
+                $model->promedio = $nomina->ibc_prestacional;
+                $model->nro_pago = $nomina->nro_pago;
+                $model->fecha_desde = $nomina->fecha_desde;
+                $model->fecha_hasta = $nomina->fecha_hasta;
+                $model->dias_pago = $nomina->dias_pago;
+                $model->dia_real_pagado = $nomina->dia_real_pagado;
+                $model->total_devengado = $nomina->total_devengado;
+                $model->total_deduccion = $nomina->total_deduccion;
+                $model->id_contrato = $nomina->id_contrato;
+                $model->total_pagar = $nomina->total_pagar;
+                $model->fecha_inicio_contrato = $nomina->fecha_inicio_contrato;
+                $model->id_periodo_pago_nomina= $nomina->id_periodo_pago_nomina;
+                $model->dias_ausentes = $nomina->dias_ausentes;
+                $model->usuariosistema = $nomina->user_name;
+                $model->fecha_creacion = $nomina->fecha_creacion;
+            }
+        }
+       return $this->renderAjax('vernominapago',[
+               'model' => $model,
+               'detalle_nomina' => $detalle_nomina,
+               'id' => $id_programacion,
+               'id_empleado' => $id_empleado,
+               'id_grupo_pago' => $id_grupo_pago,
+               'id_periodo_pago_nomina' => $id_periodo_pago_nomina,    
+                  
+               ]);
     }
         
     /**
