@@ -354,7 +354,8 @@ class ProgramacionNominaController extends Controller
         }
         return $this->render('form', ['model' => $model]);
     }
-
+   
+//* SEGUNDO PROCESO DEL BOTON GENERAR DESCUENTOS*/
     public function actionGenerar_devengados($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
     {
         if($tipo_nomina == 1){ //PROCESA REGISTROS DE NOMINA
@@ -1164,7 +1165,52 @@ class ProgramacionNominaController extends Controller
         }
       
     }
+    //FIN PROCESO SEGUNDO BOTON
     
+    //INICIA PROCESO DEL TERCER BOTON APLICAR PAGOS
+    public function actionAplicar_pagos_nomina($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
+    {
+        if($tipo_nomina == 1){
+            $detalleNomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_periodo_pago_nomina', $id])
+                                                                         ->andWhere(['<>','id_credito', ''])->all();
+            foreach ($detalleNomina as $key => $detalle) {
+                $credito = \app\models\Credito::findOne($detalle->id_credito);
+                if($credito){
+                    $nro_cuotas = $credito->numero_cuotas;
+                    $table = new \app\models\AbonoCredito();
+                    $table->id_credito = $detalle->id_credito;
+                    if($credito->id_tipo_pago == 1){
+                        $table->observacion = 'Deduccion por nomina';
+                        $table->id_tipo_pago = 1;
+                    }else{
+                        if($credito->id_tipo_pago == 2){
+                            $table->observacion = 'Deduccion por pago de primas';
+                            $table->id_tipo_pago = 2;
+                        }else{
+                            $table->observacion = 'Deduccion por pago de cesantias';
+                            $table->id_tipo_pago = 3;
+                        }  
+                    }    
+                   echo $table->valor_abono = $detalle->vlr_deduccion;
+                    $table->saldo = $credito->saldo_credito - $detalle->vlr_deduccion;
+                    $table->valor_abono = $detalle->vlr_deduccion;
+                    $table->fecha_abono = date('Y-m-d'); 
+                    $table->cuota_pendiente = (($nro_cuotas) - ($credito->numero_cuota_actual + 1));
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save(false);
+                    $credito->saldo_credito = $table->saldo;
+                    $credito->numero_cuota_actual += 1;
+                    if($credito->saldo_credito <= 0){
+                        $credito->estado_credito = 1;
+                        $credito->estado_periodo = 1;
+                    }
+                    $credito->save(false);
+                }
+            }//termina el foreach
+        }else{
+            ////PROCESO DE PRIMAS
+        }
+    }
     /**
      * Deletes an existing ProgramacionNomina model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
