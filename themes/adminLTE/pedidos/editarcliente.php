@@ -36,7 +36,7 @@ if($tokenAcceso == 3){
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                   EDITAR CLIENTE
+                   EDITAR REGISTROS DEL PEDIDO
                 </div>
                 <div class="panel-body">
                     <div class="row">
@@ -44,6 +44,9 @@ if($tokenAcceso == 3){
                     </div>
                     <div class="row">
                         <?= $form->field($model, 'pedido_virtual')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+                    </div>
+                    <div class="row">
+                        <?= $form->field($model, 'tipo_pedido')->dropdownList(['0' => 'COMERCIAL', '1' => 'REQUERIMIENTO'], ['prompt' => 'Seleccione...']) ?>
                     </div>
                 </div>  
                     <div class="panel-footer text-right">

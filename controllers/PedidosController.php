@@ -74,6 +74,7 @@ class PedidosController extends Controller
                 $tokenAgente = Yii::$app->user->identity->username; 
                 $presupuesto = null;
                 $vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
+                $empresa = \app\models\MatriculaEmpresa::findOne(1);
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -162,6 +163,7 @@ class PedidosController extends Controller
                             'token' => $token,
                             'tokenAcceso' => $tokenAcceso,
                             'tokenAgente' =>$tokenAgente,
+                            'empresa' => $empresa,
                           
                 ]);
             }else{
@@ -699,6 +701,7 @@ class PedidosController extends Controller
                     $table->dv = $conCliente->dv;
                     $table->cliente = $conCliente->nombre_completo;
                     $table->pedido_virtual = $model->pedido_virtual;
+                    $table->tipo_pedido = $model->tipo_pedido;
                     if($model->pedido_virtual == 1){
                         $table->liberado_inventario = 0;
                     }else{
@@ -713,6 +716,7 @@ class PedidosController extends Controller
                         $table->dv = $conCliente->dv;
                         $table->cliente = $conCliente->nombre_completo;
                         $table->pedido_virtual = $model->pedido_virtual;
+                        $table->tipo_pedido = $model->tipo_pedido;
                         if ($model->pedido_virtual == 1) {
                             $table->liberado_inventario = 0;
                         } else {
@@ -730,6 +734,7 @@ class PedidosController extends Controller
          if (Yii::$app->request->get()) {
             $model->cliente = $table->id_cliente;
             $model->pedido_virtual = $table->pedido_virtual;
+            $model->tipo_pedido = $table->tipo_pedido;
          }
         return $this->renderAjax('editarcliente', [
             'model' => $model,
@@ -739,7 +744,7 @@ class PedidosController extends Controller
         ]);
     }
     
-    //PROCESO QUE MUESTRAS EL LISTADO DE INVENTARIO ACTIVO
+    //PROCESO QUE MUESTRAS EL LISTADO DE INVENTARIO ACTIVO y PERITE PEDIDO VIRTUAL Y PEDIDO EN LINEA
     public function actionAdicionar_productos($id, $tokenAcceso, $token, $pedido_virtual) {
         $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
         $model = Pedidos::findOne($id);
@@ -887,13 +892,125 @@ class PedidosController extends Controller
             'pedido_virtual' => $pedido_virtual,
         ]);
     }
+    
+    //PROCESO QUE MUESTRAS EL LISTADO DE INVENTARIO ACTIVO y PERITE PEDIDO VIRTUAL Y PEDIDO EN LINEA
+    public function actionAdicionar_producto_pedido($id, $tokenAcceso, $token, $pedido_virtual,$tipo_pedido) {
+        $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        $model = Pedidos::findOne($id);
+        $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
+        $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
+        $form = new FormModeloBuscar();
+        $q = null;
+        $nombre = null;
+        if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $q = Html::encode($form->q);                                
+                $nombre = Html::encode($form->nombre); 
+                if($q == ''){
+                    $conSql = InventarioProductos::find()
+                            ->Where(['like','nombre_producto', $nombre])
+                            ->andwhere(['=','venta_publico', 0])
+                            ->andWhere(['=','activar_producto_venta', 1]);
+                }else{
+                    $conSql = InventarioProductos::find()
+                        ->where(['=','codigo_producto', $q])
+                        ->andwhere(['=','venta_publico', 0])
+                        ->andWhere(['=','activar_producto_venta', 1]);
+                }    
+                 $conSql = $conSql->orderBy('nombre_producto ASC');  
+                $count = clone $conSql;
+                $to = $count->count();
+                $pages = new Pagination([
+                    'pageSize' => 7,
+                    'totalCount' => $count->count()
+                ]);
+                $variable = $conSql
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();         
+            } else {
+                $form->getErrors();
+            }                    
+        }else{
+            $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
+                                                     ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC');
+            $tableexcel = $inventario->all();
+            $count = clone $inventario;
+            $pages = new Pagination([
+                        'pageSize' => 7,
+                        'totalCount' => $count->count(),
+            ]);
+             $variable = $inventario
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+        }
+        if (isset($_POST["cargar_producto"])) {
+            if(isset($_POST["nuevo_producto"])){
+                $intIndice = 0;
+                foreach ($_POST["nuevo_producto"] as $intCodigo) {
+                    $ingreso = \app\models\PedidoDetalles::find()
+                            ->where(['=', 'id_inventario', $intCodigo])
+                            ->andWhere(['=', 'id_pedido', $id])
+                            ->all();
+                    $reg = count($ingreso);
+                    if($reg == 0){
+                        $dato = 0;
+                        $dato = $model->clientePedido->id_posicion;
+                        if($_POST["cantidad_productos"]["$intIndice"] > 0){
+                            $precio = \app\models\InventarioPrecioVenta::find()->where(['=','id_posicion', $dato])
+                                                           ->andWhere(['=','id_inventario', $intCodigo])->one();
+                            if($precio){
+                                $valor = 0; $datos = 0;
+                                $producto = InventarioProductos::findOne($intCodigo);
+                                $table = new \app\models\PedidoDetalles();
+                                $table->id_pedido = $id;
+                                $table->id_inventario = $intCodigo;
+                                $table->cantidad = $_POST["cantidad_productos"]["$intIndice"];
+                                $table->user_name = Yii::$app->user->identity->username;
+                                $table->cargar_existencias = 1;
+                                $table->save(false);
+                                $datos = $intCodigo;
+                                $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
+                                $this->ActualizarTotalesPedido($id);
+                            }else{
+                                Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.');
+                                return $this->redirect(['adicionar_producto_pedido','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual,'tipo_pedido' => $tipo_pedido]);
+                            }
+                        }    
+                    }    
+                     $intIndice++;
+                }
+                return $this->redirect(['adicionar_producto_pedido','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }
+        }
+        return $this->render('listado_productos', [ 
+            'id' => $id,
+            'variable' => $variable,
+            'tokenAcceso' => $tokenAcceso,
+            'model' => $model,
+            'form' => $form,
+             'pagination' => $pages,
+            'detalle_pedido' => $detalle_pedido,
+            'token' => $token,
+            'pedido_presupuesto' => $pedido_presupuesto,
+            'cliente' => $cliente,
+            'pedido_virtual' => $pedido_virtual,
+            'tipo_pedido' => $tipo_pedido,
+        ]);
+    }
+
     //ADICIONAR PRODUCTOS A PRESUPUESTO A TRAVES DE LA REGLA DEL PRODUCTO
-    public function actionCrear_regla_pedido($id, $tokenAcceso, $token, $sw, $id_inventario, $id_cliente, $pedido_virtual) {
+    public function actionCrear_regla_pedido($id, $tokenAcceso, $token, $sw, $id_inventario, $id_cliente, $pedido_virtual, $tipo_pedido) {
         //consulta para no duplicar
         $cliente = Clientes::findOne($id_cliente);
         if($cliente->presupuesto_comercial == 0 ){
-            Yii::$app->getSession()->setFlash('info', 'El cliente '.$cliente->nombre_completo.' NO tiene presupuesto comercial asignado. Contactar al representante de ventas');     
-            return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]); 
+            Yii::$app->getSession()->setFlash('info', 'El cliente '.$cliente->nombre_completo.' NO tiene presupuesto comercial asignado. Contactar al representante de ventas');  
+            if($tipo_pedido == 0){
+                return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual,'tipo_pedido' => $tipo_pedido]); 
+            }else{
+               return $this->redirect(['adicionar_producto_pedido','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual,'tipo_pedido' => $tipo_pedido]);     
+            }    
         }else{    
             $model = Pedidos::findOne($id);
             $pedido_detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','id_inventario', $id_inventario])->one(); //permite buscar la cantidad de unidades
@@ -923,45 +1040,78 @@ class PedidosController extends Controller
                     $table->save(false);
                     $datos = $id_inventario;
                     $token = 0;
-                    $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual);
+                    $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
                     $this->TotalPresupuestoPedido($id, $sw);
-                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]);
+                    if($tipo_pedido == 0){
+                        return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }else{
+                        return $this->redirect(['adicionar_producto_pedido','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }    
                 }else{
                     Yii::$app->getSession()->setFlash('warning', 'Para aplicar la regla comercial, se deben de crear el  presupuesto comercial.');
-                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]); 
+                    if($tipo_pedido == 0){
+                        return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                    }else{
+                        return $this->redirect(['adicionar_producto_pedido','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                    }    
                 }    
             } else{
                 Yii::$app->getSession()->setFlash('info', 'Este producto ya esta ingresado en el presupuesto comercial.');
-                return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]); 
+                if($tipo_pedido == 0){
+                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }else{
+                    return $this->redirect(['adicionar_producto_pedido','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }  
             }   
         }    
     }
     
     //PROCESO QUE INCORPORA PRESUPUESTO AL PEDID
-    public function actionAdicionar_presupuesto($id, $token, $sw, $tokenAcceso, $pedido_virtual) {
+    public function actionAdicionar_presupuesto($id, $token, $sw, $tokenAcceso, $pedido_virtual, $tipo_pedido) {
         $model = Pedidos::findOne($id);
-        $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
-                                                 ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])
-                                                 ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC')->all();
+        if($tipo_pedido == 0){
+            $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
+                                                     ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])
+                                                     ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC')->all();
+        }else{
+            $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
+                                                     ->andWhere(['=','aplica_presupuesto', 1])
+                                                     ->andWhere(['=','activar_producto_venta', 1])->orderBy('nombre_producto ASC')->all();
+        }    
         $form = new FormModeloBuscar();
         $q = null;
         $nombre = null;
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
                 $q = Html::encode($form->q);                                
-                $nombre = Html::encode($form->nombre);       
-                if($q == ''){
-                    $conSql = InventarioProductos::find()
-                            ->Where(['like','nombre_producto', $nombre])
+                $nombre = Html::encode($form->nombre);  
+                if($tipo_pedido == 0){
+                    if($q == ''){
+                        $conSql = InventarioProductos::find()
+                                ->Where(['like','nombre_producto', $nombre])
+                                ->andwhere(['=','venta_publico', 0])
+                                ->andwhere(['=','aplica_presupuesto', 1])
+                                ->andwhere(['>','stock_unidades', 0]);
+                    }else{
+                        $conSql = InventarioProductos::find()
+                            ->where(['=','codigo_producto', $q])
                             ->andwhere(['=','venta_publico', 0])
-                            ->andwhere(['=','aplica_presupuesto', 1])
+                            ->andwhere(['=','aplica_presupuesto', 1])    
                             ->andwhere(['>','stock_unidades', 0]);
+                    } 
                 }else{
-                    $conSql = InventarioProductos::find()
-                        ->where(['=','codigo_producto', $q])
-                        ->andwhere(['=','venta_publico', 0])
-                        ->andwhere(['=','aplica_presupuesto', 1])    
-                        ->andwhere(['>','stock_unidades', 0]);
+                    if($q == ''){
+                        $conSql = InventarioProductos::find()
+                                ->Where(['like','nombre_producto', $nombre])
+                                ->andwhere(['=','venta_publico', 0])
+                                ->andwhere(['=','aplica_presupuesto', 1]);
+                               
+                    }else{
+                        $conSql = InventarioProductos::find()
+                            ->where(['=','codigo_producto', $q])
+                            ->andwhere(['=','venta_publico', 0])
+                            ->andwhere(['=','aplica_presupuesto', 1]);    
+                    }    
                 }    
                 $conSql = $conSql->orderBy('nombre_producto ASC');  
                 $count = clone $conSql;
@@ -978,10 +1128,17 @@ class PedidosController extends Controller
                 $form->getErrors();
             }                    
         }else{
-            $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
+            if($tipo_pedido == 0){
+                $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
                                                  ->andWhere(['>','stock_unidades', 0])->andWhere(['=','aplica_presupuesto', 1])
                                                  ->andWhere(['=','activar_producto_venta', 1])
                                                  ->orderBy('nombre_producto ASC');
+            }else{
+                 $inventario = InventarioProductos::find()->where(['=','venta_publico', 0])
+                                                 ->andWhere(['=','aplica_presupuesto', 1])
+                                                 ->andWhere(['=','activar_producto_venta', 1])
+                                                 ->orderBy('nombre_producto ASC');
+            }    
             $tableexcel = $inventario->all();
             $count = clone $inventario;
             $pages = new Pagination([
@@ -1010,7 +1167,27 @@ class PedidosController extends Controller
                                 $valor = 0;
                                 $producto = InventarioProductos::findOne($intCodigo);
                                 $valor = $producto->stock_unidades;
-                                if($_POST["cantidades"]["$intIndice"] <= $valor ){
+                                if($tipo_pedido == 0){
+                                    if($_POST["cantidades"]["$intIndice"] <= $valor ){
+                                        $presupuesto = \app\models\PresupuestoEmpresarial::findOne(1);
+                                        $table = new PedidoPresupuestoComercial();
+                                        $table->id_pedido = $id;
+                                        $table->id_inventario = $intCodigo;
+                                        $table->id_presupuesto = $presupuesto->id_presupuesto;
+                                        $table->cantidad = $_POST["cantidades"]["$intIndice"];
+                                        $table->user_name = Yii::$app->user->identity->username;
+                                        $table->fecha_registro = date('Y-m-d');
+                                        $table->save(false);
+                                        $datos = 0;
+                                        $datos = $intCodigo;
+                                        $token = 0;
+                                        $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
+                                        $this->TotalPresupuestoPedido($id, $sw);
+                                    }else{
+                                        Yii::$app->getSession()->setFlash('error', 'Las unidades vendidas es mayor que el STOCK de inventarios. Favor validar las cantidades.');
+                                        return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]);
+                                    }  
+                                }else{
                                     $presupuesto = \app\models\PresupuestoEmpresarial::findOne(1);
                                     $table = new PedidoPresupuestoComercial();
                                     $table->id_pedido = $id;
@@ -1023,21 +1200,26 @@ class PedidosController extends Controller
                                     $datos = 0;
                                     $datos = $intCodigo;
                                     $token = 0;
-                                    $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual);
+                                    $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
                                     $this->TotalPresupuestoPedido($id, $sw);
-                                }else{
-                                    Yii::$app->getSession()->setFlash('error', 'Las unidades vendidas es mayor que el STOCK de inventarios. Favor validar las cantidades.');
-                                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]);
                                 }    
                             }else{
                                 Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.');
-                                return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual]);
+                                if($tipo_pedido == 0){
+                                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                                }else{
+                                    return $this->redirect(['adicionar_producto_pedido','id' => $id, 'token' => $token, 'tokenAcceso' =>$tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                                }    
                             }
                         }    
                     }    
                     $intIndice ++;
                 endforeach;
-                return $this->redirect(['adicionar_productos','id' => $id, 'token' => 1, 'tokenAcceso' =>$tokenAcceso, 'sw' => $sw, 'pedido_virtual' => $pedido_virtual]);
+                if($tipo_pedido == 0){
+                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => 1, 'tokenAcceso' =>$tokenAcceso, 'sw' => $sw, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }else{
+                    return $this->redirect(['adicionar_producto_pedido','id' => $id, 'token' => 1, 'tokenAcceso' =>$tokenAcceso, 'sw' => $sw, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }    
             }
         }
         return $this->render('listado_productos_presupuesto', [ 
@@ -1050,6 +1232,7 @@ class PedidosController extends Controller
             'tokenAcceso' => $tokenAcceso,
             'sw' => $sw,
             'pedido_virtual' => $pedido_virtual,
+            'tipo_pedido' => $tipo_pedido,
             ]);
     }
    
@@ -1078,7 +1261,7 @@ class PedidosController extends Controller
     }
         
     //PROCESO QUE ACTUALIA INVENTARIO Y PRECIOS
-    protected function ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual) {
+    protected function ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido) {
         $auxiliar = 0; $porcentaje = 0;
         $subtotal = 0; $impuesto = 0;
         $pedido = Pedidos::findOne($id);
@@ -1098,7 +1281,9 @@ class PedidosController extends Controller
         }else{
             $auxiliar = $inventario->stock_unidades;
         }
-        $inventario->stock_unidades = $auxiliar;
+        if($tipo_pedido == 0){
+            $inventario->stock_unidades = $auxiliar;
+        }    
         $inventario->subtotal = round($inventario->costo_unitario * $inventario->stock_unidades);
         $inventario->valor_iva = round($inventario->subtotal  * $inventario->porcentaje_iva)/100;
         $inventario->total_inventario = round($inventario->subtotal  + $inventario->valor_iva);
@@ -1242,24 +1427,35 @@ class PedidosController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     //ELIMINAR DETALLES DEL PEDIDO
-      public function actionEliminar_detalle($id,$detalle, $tokenAcceso, $token, $pedido_virtual)
+      public function actionEliminar_detalle($id,$detalle, $tokenAcceso, $token, $pedido_virtual, $tipo_pedido)
     {                                
         $detalle = \app\models\PedidoDetalles::findOne($detalle);
-        $this->DevolucionProductosInventario($id, $detalle, $pedido_virtual);
-        $this->ActualizarTotalesProducto($detalle);
-        $detalle->delete();
-        $this->ActualizarTotalesPedido($id);
-        $this->redirect(["adicionar_productos",'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual]);        
+        if($tipo_pedido == 0){
+            $this->DevolucionProductosInventario($id, $detalle, $pedido_virtual);
+            $this->ActualizarTotalesProducto($detalle);
+            $detalle->delete();
+            $this->ActualizarTotalesPedido($id);
+            $this->redirect(["adicionar_productos",'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);        
+        }else{
+            $detalle->delete();
+             $this->redirect(["adicionar_producto_pedido",'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);        
+        }    
     }
     
    //ELIMINAR DETALLES DEL PRESUPUESTO
-      public function actionEliminar_detalle_presupuesto($id,$detalle, $token, $sw, $tokenAcceso, $pedido_virtual) 
+      public function actionEliminar_detalle_presupuesto($id,$detalle, $token, $sw, $tokenAcceso, $pedido_virtual, $tipo_pedido) 
     {                                
         $detalles = PedidoPresupuestoComercial::findOne($detalle);
-        $this->DevolucionProductosPresupuesto($id, $detalle, $pedido_virtual);
-        $detalles->delete();
-        $this->SumarPresupuesto($detalle, $id);
-        $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso, 'pedido_virtual' => $pedido_virtual]);        
+        if($tipo_pedido == 0){
+            $this->DevolucionProductosPresupuesto($id, $detalle, $pedido_virtual);
+            $detalles->delete();
+            $this->SumarPresupuesto($detalle, $id);
+            $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' =>$tipo_pedido]);        
+        }else{
+            $detalles->delete();
+            $this->SumarPresupuesto($detalle, $id);
+            $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' =>$tipo_pedido]);        
+        }    
     }
     protected function SumarPresupuesto($detalle, $id) {
         $suma = 0;

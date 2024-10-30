@@ -157,13 +157,22 @@ class Pedidos extends \yii\db\ActiveRecord
         return $pedidovalidado;
     }
     
-     public function getPedidoLiberado() {
+    public function getPedidoLiberado() {
         if($this->liberado_inventario == 0 ){
             $pedidoliberado = 'NO';
         }else{
             $pedidoliberado = 'SI';
         }
         return $pedidoliberado;
+    }
+    
+    public function getTipoPedido() {
+        if($this->tipo_pedido == 0 ){
+            $tipopedido = 'Comercial';
+        }else{
+            $tipopedido = 'Requerimiento';
+        }
+        return $tipopedido;
     }
     
 }

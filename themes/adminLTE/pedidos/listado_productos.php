@@ -18,21 +18,21 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\filters\AccessControl;
 
-$this->title = 'Pedido virtual : '.$model->pedidoVirtual.'';
+$this->title = 'Pre-pedido: '.$model->tipoPedido.'';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
 
     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']);
     if($model->autorizado == 0 && $model->numero_pedido == 0){?>
-          <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);
+          <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-default btn-xs']);
     }else{
         if($model->autorizado == 1  && $model->numero_pedido == 0){?>
-              <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-default btn-xs']);?>
-              <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-xs',
+              <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-default btn-xs']);?>
+              <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual,'tipo_pedido' => $tipo_pedido],['class' => 'btn btn-warning btn-xs',
                          'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
-                                        ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual],
+                                        ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],
                                           ['title' => 'Crear observaciones al pedido',
                                            'data-toggle'=>'modal',
                                            'data-target'=>'#modalcrearobservacion',
@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
               </div>
           <?php }else{
               if($model->cerrar_pedido == 0){
-                  echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual],['class' => 'btn btn-warning btn-sm',
+                  echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],['class' => 'btn btn-warning btn-sm',
                      'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
               }else{ ?>
                   <div class="btn-group btn-sm" role="group">
@@ -73,17 +73,32 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                 if (divC.style.display == "none"){divC.style.display = "block";}else{divC.style.display = "none";}
             }
         </script>
-        <?php $formulario = ActiveForm::begin([
-            "method" => "get",
-            "action" => Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]),
-            "enableClientValidation" => true,
-            'options' => ['class' => 'form-horizontal'],
-            'fieldConfig' => [
-                            'template' => '{label}<div class="col-sm-3 form-group">{input}{error}</div>',
-                            'labelOptions' => ['class' => 'col-sm-2 control-label'],
-                            'options' => []
-                        ],
-        ]);
+        <?php
+        if($tipo_pedido == 0){
+            $formulario = ActiveForm::begin([
+                "method" => "get",
+                "action" => Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]),
+                "enableClientValidation" => true,
+                'options' => ['class' => 'form-horizontal'],
+                'fieldConfig' => [
+                                'template' => '{label}<div class="col-sm-3 form-group">{input}{error}</div>',
+                                'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                                'options' => []
+                            ],
+            ]);
+        }else{
+            $formulario = ActiveForm::begin([
+                "method" => "get",
+                "action" => Url::toRoute(["pedidos/adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]),
+                "enableClientValidation" => true,
+                'options' => ['class' => 'form-horizontal'],
+                'fieldConfig' => [
+                                'template' => '{label}<div class="col-sm-3 form-group">{input}{error}</div>',
+                                'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                                'options' => []
+                            ],
+            ]);
+        }    
         ?>
         <div class="panel panel-success panel-filters">
             <div class="panel-heading" onclick="mostrarfiltro()">
@@ -96,8 +111,12 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                 </div>
 
                 <div class="panel-footer text-right">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]); 
+                    if($tipo_pedido == 0){?>
+                        <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <?php }else{?>
+                        <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <?php }?>    
                 </div>
             </div>
         </div>
@@ -248,7 +267,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                        <?php if($tokenAcceso == 3){?>
                                             <td style= 'width: 25px; height: 25px;'>
                                                 <?php if($regla && $regla->limite_venta <= $val->cantidad){?>
-                                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario,'id_cliente' => $model->id_cliente, 'pedido_virtual' => $pedido_virtual], [
+                                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario,'id_cliente' => $model->id_cliente, 'pedido_virtual' => $pedido_virtual,'tipo_pedido' => $tipo_pedido], [
                                                                    'class' => '',
                                                                    'title' => 'Proceso que permite agregar el producto al presupuesto comercial.', 
                                                                    'data' => [
@@ -263,7 +282,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                         <?php }?>     
                                        <td style= 'width: 25px; height: 25px;'>
                                             <?php if($model->autorizado == 0){?>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $pedido_virtual], [
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido], [
                                                             'class' => '',
                                                             'data' => [
                                                                 'confirm' => 'Esta seguro de eliminar este producto del pedido?',
@@ -341,7 +360,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                 <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?php if($model->cerrar_pedido == 0){?>
-                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_presupuesto', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'token' => $token, 'sw' => 1, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual], [
+                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_presupuesto', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'token' => $token, 'sw' => 1, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], [
                                                                     'class' => '',
                                                                     'data' => [
                                                                         'confirm' => 'Esta seguro de eliminar este producto del presupuesto comercial?',
@@ -381,7 +400,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                 if($cliente->presupuesto_comercial >= $cliente->gasto_presupuesto_comercial){
                                     if($model->cerrar_pedido == 0 && count($detalle_pedido) > 0){?>
                                         <div class="panel-footer text-right">
-                                           <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Adicionar', ['pedidos/adicionar_presupuesto', 'id' => $model->id_pedido, 'token' => $token, 'sw' => 0, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
+                                           <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Adicionar', ['pedidos/adicionar_presupuesto', 'id' => $model->id_pedido, 'token' => $token, 'sw' => 0, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                                         </div>     
                                     <?php }
                                 }else{

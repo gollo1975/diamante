@@ -172,11 +172,17 @@ $form = ActiveForm::begin([
                             <?php }?>    
                         </td>
                         <?php
-                        if($val->numero_pedido == 0 ){?>   
-                            <td style= 'width: 25px; height: 25px;'>
-                                <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
-                            </td>
-                        <?php }else{  ?>    
+                        if($val->numero_pedido == 0 ){
+                            if($empresa->inventario_enlinea == 0){ ?>   
+                                <td style= 'width: 25px; height: 25px;'>
+                                    <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
+                                </td>
+                            <?php }else{ ?>
+                                <td style= 'width: 25px; height: 25px;'>
+                                    <a href="<?= Url::toRoute(["pedidos/adicionar_producto_pedido", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $val->pedido_virtual,'tipo_pedido' => $empresa->inventario_enlinea]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
+                                </td>
+                            <?php }    
+                        }else{  ?>    
                             <td style= 'width: 25px; height: 25px;'>
                                 <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $val->pedido_virtual]) ?>" ><span class="glyphicon glyphicon-share-alt"></span></a>
                             </td>

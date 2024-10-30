@@ -24,6 +24,7 @@ class FormModeloCambiarCantidad extends Model
     public $nueva_cantidad;
     public $minimo;
     public $aplicar;
+    public $tipo_pedido;
 
 
     public function rules()
@@ -31,7 +32,7 @@ class FormModeloCambiarCantidad extends Model
         return [
 
            [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual','descuento','cantidad_real','tamano_lote','estado',
-           'nueva_cantidad','minimo','aplicar'], 'integer'],
+           'nueva_cantidad','minimo','aplicar','tipo_pedido'], 'integer'],
            [['fecha'], 'safe'], 
            ['porcentaje_aplicacion', 'number'], 
         ];
@@ -54,6 +55,7 @@ class FormModeloCambiarCantidad extends Model
             'nueva_cantidad' => 'Nueva cantidad:',
             'minimo' => 'Stock minimo:',
             'aplicar' => 'Aplicar a todos:',
+            'tipo_pedido' => 'Tipo de pedido:',
 
         ];
     }
