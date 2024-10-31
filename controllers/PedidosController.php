@@ -67,7 +67,7 @@ class PedidosController extends Controller
                 $form = new FiltroBusquedaPedidos();
                 $documento = null; $fecha_inicio = null;
                 $cliente = null; $fecha_corte = null;
-                $facturado = null; $pedido_cerrado = null;
+                $pedido_cerrado = null;
                 $vendedores = null; $numero_pedido = null;
                 $pedido_anulado = null;
                 $tokenAcceso = Yii::$app->user->identity->role;
@@ -79,36 +79,35 @@ class PedidosController extends Controller
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
                         $cliente = Html::encode($form->cliente);
-                        $facturado = Html::encode($form->facturado);
                         $vendedores = Html::encode($form->vendedor);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $pedido_cerrado = Html::encode($form->pedido_cerrado);
                         $numero_pedido = Html::encode($form->numero_pedido);
-                        $pedido_anulado = Html::encode($form->pedido_anulado);
+                        //$pedido_anulado = Html::encode($form->pedido_anulado);
                         $presupuesto = Html::encode($form->presupuesto);
                         if($tokenAcceso == 3){
                             $table = Pedidos::find()
                                     ->andFilterWhere(['=', 'documento', $documento])
                                     ->andFilterWhere(['=', 'id_cliente', $cliente])
-                                    ->andFilterWhere(['=', 'facturado', $facturado])
                                     ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
                                     ->andFilterWhere(['=','numero_pedido', $numero_pedido])
                                     ->andFilterWhere(['=','presupuesto', $presupuesto])
-                                    ->andFilterWhere(['=','pedido_anulado', $pedido_anulado])
+                                    ->andWhere(['=','pedido_liberado', 0])
                                     ->andWhere(['=','id_agente', $vendedor->id_agente]);
+                                  
                         }else{
                             $table = Pedidos::find()
                                     ->andFilterWhere(['=', 'documento', $documento])
                                     ->andFilterWhere(['=', 'id_cliente', $cliente])
-                                    ->andFilterWhere(['=', 'facturado', $facturado])
                                     ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
                                     ->andFilterWhere(['=','numero_pedido', $numero_pedido])
                                     ->andFilterWhere(['=','presupuesto', $presupuesto])
-                                    ->andFilterWhere(['=','pedido_anulado', $pedido_anulado])
-                                    ->andFilterWhere(['=','id_agente', $vendedores]);
+                                    ->andFilterWhere(['=','id_agente', $vendedores])
+                                    ->andWhere(['=','pedido_liberado', 0]);
+                                   
                         }    
                         $table = $table->orderBy('id_pedido DESC');
                         $tableexcel = $table->all();
@@ -129,16 +128,23 @@ class PedidosController extends Controller
                         $form->getErrors();
                     }
                 } else {
+                   
                     if($tokenAcceso == 3){
                         $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])
-                                               ->andWhere(['=','facturado', 0])->orderBy('id_pedido DESC');
+                                               ->andWhere(['=','pedido_liberado', 0])
+                                               ->andWhere(['=','pedido_anulado', 0])
+                                               ->orderBy('id_pedido DESC');
                     }
                     if($tokenAcceso == 1){
                         $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])
-                                                ->andWhere(['=','facturado', 0])->orderBy('id_pedido DESC');
+                                                 ->andWhere(['=','pedido_anulado', 0])
+                                                ->andWhere(['=','pedido_liberado', 0])
+                                                ->orderBy('id_pedido DESC');
                     }
                     if($tokenAcceso == 2){
-                       $table = Pedidos::find()->Where(['=','facturado', 0])->orderBy('id_pedido DESC');
+                       $table = Pedidos::find()->Where(['=','facturado', 0])
+                                                ->andWhere(['=','pedido_anulado', 0])->andWhere(['=','pedido_liberado', 0])
+                                                ->orderBy('id_pedido DESC');
                     }
                    
                     $count = clone $table;
@@ -165,6 +171,89 @@ class PedidosController extends Controller
                             'tokenAgente' =>$tokenAgente,
                             'empresa' => $empresa,
                           
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
+    //PEDIDOS PARA VALIDAR EL INVENTARIO Y ENVIAR A LOGISTICA
+    public function actionPedidoslistos() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',141])->all()){
+                $form = new FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $pedido_cerrado = null;
+                $vendedores = null; $numero_pedido = null;
+                $pedido_anulado = null;
+                $presupuesto = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $pedido_cerrado = Html::encode($form->pedido_cerrado);
+                        $numero_pedido = Html::encode($form->numero_pedido);
+                        $pedido_anulado = Html::encode($form->pedido_anulado);
+                        $presupuesto = Html::encode($form->presupuesto);
+                        $table = Pedidos::find()
+                                ->andFilterWhere(['=', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','cerrar_pedido', $pedido_cerrado])
+                                ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                                ->andFilterWhere(['=','presupuesto', $presupuesto])
+                                ->andFilterWhere(['=','pedido_anulado', $pedido_anulado])
+                                ->andFilterWhere(['=','id_agente', $vendedores])
+                                ->andWhere(['=','pedido_liberado', 1])
+                                ->andWhere(['=','facturado', 0]);
+                        $table = $table->orderBy('id_pedido DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                     $table = Pedidos::find()->Where(['=','facturado', 0])->andWhere(['=','pedido_liberado', 1])->orderBy('id_pedido DESC');
+                                 
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('pedido_liberado_inventario', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                         
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']);
@@ -745,7 +834,7 @@ class PedidosController extends Controller
     }
     
     //PROCESO QUE MUESTRAS EL LISTADO DE INVENTARIO ACTIVO y PERITE PEDIDO VIRTUAL Y PEDIDO EN LINEA
-    public function actionAdicionar_productos($id, $tokenAcceso, $token, $pedido_virtual) {
+    public function actionAdicionar_productos($id, $tokenAcceso, $token, $pedido_virtual, $tipo_pedido) {
         $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
         $model = Pedidos::findOne($id);
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
@@ -848,13 +937,17 @@ class PedidosController extends Controller
                                         $table->cantidad = $_POST["cantidad_productos"]["$intIndice"];
                                         $table->user_name = Yii::$app->user->identity->username;
                                         $table->cargar_existencias = 1;
+                                        $table->pedido_liberado = 1;
                                         $table->save(false);
                                         $datos = $intCodigo;
-                                        $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual);
+                                        $pedido = Pedidos::findOne($id);
+                                        $pedido->liberado_inventario = 1;
+                                        $pedido->save();
+                                        $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
                                         $this->ActualizarTotalesPedido($id);
                                     }else{
                                         Yii::$app->getSession()->setFlash('error', 'Las unidades vendidas es mayor que el STOCK de inventarios. Favor validar las cantidades.');
-                                        return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual]);
+                                        return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                                     }  
                                 }else{
                                     $table = new \app\models\PedidoDetalles();
@@ -864,18 +957,18 @@ class PedidosController extends Controller
                                     $table->user_name = Yii::$app->user->identity->username;
                                     $table->save(false);
                                     $datos = $intCodigo;
-                                    $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual);
+                                    $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
                                     $this->ActualizarTotalesPedido($id); 
                                 }    
                             }else{
                                 Yii::$app->getSession()->setFlash('warning', 'El producto no tiene precio de venta al publico. Contactar al administrador.');
-                                return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual]);
+                                return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                             }
                         }    
                     }    
                      $intIndice++;
                 }
-                return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]);
+                return $this->redirect(['adicionar_productos','id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
             }
         }
         return $this->render('listado_productos', [ 
@@ -890,11 +983,12 @@ class PedidosController extends Controller
             'pedido_presupuesto' => $pedido_presupuesto,
             'cliente' => $cliente,
             'pedido_virtual' => $pedido_virtual,
+            'tipo_pedido' => $tipo_pedido,
         ]);
     }
     
     //PROCESO QUE MUESTRAS EL LISTADO DE INVENTARIO ACTIVO y PERITE PEDIDO VIRTUAL Y PEDIDO EN LINEA
-    public function actionAdicionar_producto_pedido($id, $tokenAcceso, $token, $pedido_virtual,$tipo_pedido) {
+    public function actionAdicionar_producto_pedido($id, $tokenAcceso, $token, $pedido_virtual, $tipo_pedido) {
         $pedido_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
         $model = Pedidos::findOne($id);
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
@@ -1346,7 +1440,7 @@ class PedidosController extends Controller
         }    
     }
     //PROCESO QUE AUTORIZADO O DESAUTORIZA
-    public function actionAutorizado($id, $tokenAcceso, $token, $id_cliente, $pedido_virtual) {
+    public function actionAutorizado($id, $tokenAcceso, $token, $id_cliente, $pedido_virtual, $tipo_pedido) {
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
         $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->one();
@@ -1359,10 +1453,18 @@ class PedidosController extends Controller
                         $pedido->autorizado = 0;
                     }
                     $pedido->save();
-                    $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]);
+                    if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }else{
+                        $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }
                 }else{
                    Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
-                  $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
+                   if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }else{
+                        $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }
                 }    
             }else{
                if($pedido->autorizado == 0){
@@ -1371,15 +1473,23 @@ class PedidosController extends Controller
                     $pedido->autorizado = 0;
                 }
                 $pedido->save();
-                $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
+                if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }else{
+                    $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }
             }  
         }else{
-             Yii::$app->getSession()->setFlash('error', 'Este pedido NO se puede autorizar porque no tiene productos ingresados. Favor enviar al menos un producto al pedido.');  
-             $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual]); 
+            Yii::$app->getSession()->setFlash('error', 'Este pedido NO se puede autorizar porque no tiene productos ingresados. Favor enviar al menos un producto al pedido.');  
+            if($tipo_pedido == 0){
+                return $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }else{
+                return $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }
         }    
     }
     //CREAR EL CONSECUTIVO DEL PEDIDO
-    public function actionCrear_pedido_cliente($id, $tokenAcceso, $token, $pedido_virtual) {
+    public function actionCrear_pedido_cliente($id, $tokenAcceso, $token, $pedido_virtual, $tipo_pedido) {
         //proceso de generar consecutivo
         $consecutivo = \app\models\Consecutivos::findOne(5);
         $pedido = Pedidos::findOne($id);
@@ -1387,7 +1497,12 @@ class PedidosController extends Controller
         $pedido->save(false);
         $consecutivo->numero_inicial = $pedido->numero_pedido;
         $consecutivo->save(false);
-        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso,'token' => $token, 'pedido_virtual' => $pedido_virtual]);  
+        if($tipo_pedido == 0){
+            return $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso,'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);  
+        }else{
+            return $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso,'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);  
+        }
+        
     }
     
     //LISTAR FACTURAS POR CLIENTE
@@ -1512,7 +1627,7 @@ class PedidosController extends Controller
     }
     
     //PROCESO QUE CIERRA EL PEDIDO
-    public function actionCerrar_pedido($id, $token, $tokenAcceso, $pedido_virtual) {
+    public function actionCerrar_pedido($id, $token, $tokenAcceso, $pedido_virtual, $tipo_pedido) {
         $suma = 0;
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::findOne($pedido->id_cliente);
@@ -1521,20 +1636,29 @@ class PedidosController extends Controller
         $cliente->save();
         $pedido->cerrar_pedido = 1;
         $pedido->save(false);
-        $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual]);    
+        if($tipo_pedido == 0){
+            return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+        }else{
+           return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+        }
+           
     }
     
-    public function actionCrear_observacion($id, $token, $tokenAcceso, $pedido_virtual) {
+    public function actionCrear_observacion($id, $token, $tokenAcceso, $pedido_virtual, $tipo_pedido) {
          $model = new FormModeloBuscar();
          $pedido = Pedidos::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
-                if (isset($_POST["crear_observaciones"])) {
-                    $table = Pedidos::findOne($id);
-                    $table->observacion = $model->observacion;
-                    $table->fecha_entrega = $model->fecha_entrega;
-                    $table->save(false);
-                    return $this->redirect(['adicionar_productos','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual]);
+            if (isset($_POST["crear_observaciones"])) {
+                $table = Pedidos::findOne($id);
+                $table->observacion = $model->observacion;
+                $table->fecha_entrega = $model->fecha_entrega;
+                $table->save(false);
+                if($tipo_pedido == 0){
+                   return $this->redirect(["pedidos/adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }else{
+                   return $this->redirect(["pedidos/adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
                 }
+            }
         }
         if (Yii::$app->request->get()) {
             $model->observacion= $pedido->observacion;
@@ -1547,6 +1671,7 @@ class PedidosController extends Controller
            'token' => $token,
            'tokenAcceso' => $tokenAcceso,
            'pedido_virtual' => $pedido_virtual,
+           'tipo_pedido' => $tipo_pedido,
             
         ]);      
     }
@@ -1661,6 +1786,103 @@ class PedidosController extends Controller
               Yii::$app->getSession()->setFlash('warning', 'La presentacion del producto '.$inventario->nombre_producto.', NO tiene existencia en el módulo de inventario. Contactar al departamento de producción.');   
               return $this->redirect(['view_pedido_virtual', 'id' => $id, 'idToken' =>$idToken]);
         }
+    }
+    
+    //PROCESO QUE VALIDA LINEA POR LINE EL DETALLE DEL PEDIDO
+    public function actionValidar_lineas_pedido($id)
+    {
+        $pedido= Pedidos::findOne($id);
+        $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $pedido->id_pedido]);
+        $sw = 0; $conValidado = 0; $conNoalcanza = 0; $conSinexistencia = 0; $conTodas = 0;
+        foreach ($detalle_pedido as $key => $detalle):
+            $inventario = InventarioProductos::findOne ($detalle->id_inventario);
+            if($inventario->stock_unidades > 0){
+                if($inventario->stock_unidades >= $detalle->cantidad){
+                    $detalle->linea_validada = 1;
+                    $detalle->save();
+                    $sw = 0;
+                    $conTodas += 1;
+                }else{
+                   $sw = 1;
+                   break;
+                }
+            }
+        endforeach;
+        if($sw == 0){
+            $pedido->liberado_inventario = 1;
+            $pedido->save();
+            Yii::$app->getSession()->setFlash('success', 'Se validaron '.$conTodas.' registros del pre-pedido comercial No '. $pedido->numero_pedido .' con exito. Puede descargara el inventario del modulo.');   
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No se puede despachar el pedido porque NO hay existencias para cubrir la totalidad del pedido No (' .$pedido->numero_pedido. ').');   
+        }   
+        return $this->redirect(['pedidos/index']);
+    }
+    
+    //PROCESO QUE VALIDA LINEA POR LINE EL PRESUPUESTO COMERCIAL
+    public function actionValidar_lineas_presupuesto($id)
+    {
+        $pedido= Pedidos::findOne($id);
+        $detalle_presupuesto = PedidoPresupuestoComercial::findAll(['id_pedido' => $pedido->id_pedido]);
+        $sw = 0; $conTodas = 0;
+        foreach ($detalle_presupuesto as $key => $detalle):
+            $inventario = InventarioProductos::findOne ($detalle->id_inventario);
+            if($inventario->stock_unidades > 0){
+                if($inventario->stock_unidades >= $detalle->cantidad){
+                    $detalle->linea_validada = 1;
+                    $detalle->save();
+                    $sw = 0;
+                    $conTodas += 1;
+                }else{
+                   $sw = 1;
+                   break;
+                }
+            }
+        endforeach;
+        if($sw == 0){
+            $pedido->liberado_inventario = 1;
+            $pedido->save();
+            Yii::$app->getSession()->setFlash('success', 'Se validaron '.$conTodas.' registros del presupuesto comercial No '. $pedido->numero_pedido .' con exito. Puede descargara el inventario del modulo.');   
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No se puede despachar el pedido porque NO hay existencias para cubrir la totalidad del pedido No (' .$pedido->numero_pedido. ').');   
+            $pedido->liberado_inventario = 0;
+            $pedido->save();
+        }   
+        return $this->redirect(['pedidos/index']);
+    }
+    
+    
+    //PROCESO QUE DESCARGAR LAS UNIDADES VENDIDAS DE PEDIDOS Y DE PRESUPUESTO
+    public function actionValidar_linea_inventario($id) {
+        $pedido = Pedidos::findOne($id);
+        $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $pedido->id_pedido]);
+        $sumaPedido = 0; $sumarP = 0;
+        foreach ($detalle_pedido as $key => $detalle) :
+            $inventario = InventarioProductos::findOne ($detalle->id_inventario);
+            $inventario->stock_unidades -= $detalle->cantidad;
+            if($inventario->stock_unidades >= 0){
+                $inventario->save();
+                $sumaPedido += 1;
+            }else{
+                break;
+            }    
+        endforeach;
+        ///descarga de presupuesto
+        $presupuestos = PedidoPresupuestoComercial::findAll(['id_pedido' => $pedido->id_pedido]);
+        foreach ($presupuestos as $key => $presupuesto) :
+             $inventario = InventarioProductos::findOne ($presupuesto->id_inventario);
+             $inventario->stock_unidades -= $presupuesto->cantidad;
+             if($inventario->stock_unidades >= 0){
+                $inventario->save();
+                $sumarP += 1;
+             }else{
+                 break;  
+             }
+            
+        endforeach;
+        $pedido->pedido_liberado = 1;
+        $pedido->save();
+        Yii::$app->getSession()->setFlash('success', 'Se descargo al modulo de inventario ('.$sumaPedido. ') referencias vendidas en el pedido y ('. $sumarP .') del presupuesto comercial.');   
+        return $this->redirect(['pedidos/index']);
     }
     
     //PROCESO QUE INTEGRA LAS EXISTENCIAS AL PEDIDO VIRTUAL

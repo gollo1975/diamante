@@ -22,7 +22,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'Detalle del pedido';
+$this->title = 'Listado de pedidos ';
 $this->params['breadcrumbs'][] = ['label' => 'Pedido cliente', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 $view = 'pedidos';
@@ -35,9 +35,13 @@ $view = 'pedidos';
             <?php }else{
                 if($token == 1){?>
                     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_orden_compra', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
-                <?php }else{?>
-                    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_pedidos', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
-                <?php }           
+                <?php }else{
+                    if($token == 1){
+                        echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_pedidos', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);
+                    }else{
+                        echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['pedidoslistos'], ['class' => 'btn btn-primary btn-sm']);
+                    }    
+                }           
             }
             if ($model->autorizado == 1 && $model->cerrar_pedido == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar pedido', ['cerrar_pedido', 'id' => $model->id_pedido, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
@@ -223,7 +227,6 @@ $view = 'pedidos';
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo presupuesto</th>
-                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Stock</th>    
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
                                          <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>                        
@@ -244,7 +247,6 @@ $view = 'pedidos';
                                         <td><?= $val->inventario->codigo_producto ?></td>
                                         <td><?= $val->inventario->nombre_producto ?></td>
                                         <td><?= $val->presupuesto->descripcion ?></td>
-                                        <td style="background-color:#CBAAE3; color: black"><?= $val->inventario->stock_unidades ?></td>
                                         <?php if($val->cantidad == 0){?>
                                               <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
                                         <?php }else{?>
@@ -271,19 +273,19 @@ $view = 'pedidos';
                                  <?php endforeach;?>          
                             </body>
                             <tr>
-                                <td colspan="7"></td>
+                                <td colspan="6"></td>
                                 <td style="text-align: right;"><b>Subtotal:</b></td>
                                 <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
-                                <td colspan="7"></td>
+                                <td colspan="6"></td>
                                 <td style="text-align: right;"><b>Impuesto:</b></td>
                                 <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
                                 <td colspan="2"></td>
                             </tr>
                              <tr>
-                                <td colspan="7"></td>
+                                <td colspan="6"></td>
                                 <td style="text-align: right;"><b>Total:</b></td>
                                 <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
                                 <td colspan="2"></td>

@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         if($model->autorizado == 1  && $model->numero_pedido == 0){?>
               <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-default btn-xs']);?>
               <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual,'tipo_pedido' => $tipo_pedido],['class' => 'btn btn-warning btn-xs',
-                         'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '.', 'method' => 'post']]);?>
+                         'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '. Aviso. Al crear el pedido NO puede hacer mas modificaciones.', 'method' => 'post']]);?>
                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
                                         ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],
                                           ['title' => 'Crear observaciones al pedido',
@@ -99,27 +99,29 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                             ],
             ]);
         }    
-        ?>
-        <div class="panel panel-success panel-filters">
-            <div class="panel-heading" onclick="mostrarfiltro()">
-                Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
-            </div>
-            <div class="panel-body" id="filtro" style="display:none">
-                <div class="row" >
-                    <?= $formulario->field($form, "q")->input("search") ?>
-                    <?= $formulario->field($form, "nombre")->input("search") ?>
+        if($model->autorizado == 0){
+            ?>
+            <div class="panel panel-success panel-filters">
+                <div class="panel-heading" onclick="mostrarfiltro()">
+                    Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
                 </div>
+                <div class="panel-body" id="filtro" style="display:none">
+                    <div class="row" >
+                        <?= $formulario->field($form, "q")->input("search") ?>
+                        <?= $formulario->field($form, "nombre")->input("search") ?>
+                    </div>
 
-                <div class="panel-footer text-right">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]); 
-                    if($tipo_pedido == 0){?>
-                        <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
-                    <?php }else{?>
-                        <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
-                    <?php }?>    
+                    <div class="panel-footer text-right">
+                        <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]); 
+                        if($tipo_pedido == 0){?>
+                            <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_productos", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                        <?php }else{?>
+                            <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                        <?php }?>    
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php }?>
         <div class="panel panel-success">
             <div class="panel-heading">
                 DETALLES DEL PEDIDO
@@ -156,11 +158,17 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         ]); ?>
         <div>
             <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#listadoproductos" aria-controls="listadoproductos" role="tab" data-toggle="tab">Inventarios <span class="badge"><?= $pagination->totalCount ?></span></a></li>
-                <li role="presentation"><a href="#detallepedido" aria-controls="detallepedido" role="tab" data-toggle="tab">Pedido <span class="badge"><?= count($detalle_pedido) ?></span></a></li>
-                <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
+                <?php if($model->autorizado == 0){?>
+                    <li role="presentation" class="active"><a href="#listadoproductos" aria-controls="listadoproductos" role="tab" data-toggle="tab">Inventarios <span class="badge"><?= $pagination->totalCount ?></span></a></li>
+                    <li role="presentation"><a href="#detallepedido" aria-controls="detallepedido" role="tab" data-toggle="tab">Pedido <span class="badge"><?= count($detalle_pedido) ?></span></a></li>
+                    <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
+                <?php }else{?>
+                    <li role="presentation" class="active"><a href="#detallepedido" aria-controls="detallepedido" role="tab" data-toggle="tab">Pedido <span class="badge"><?= count($detalle_pedido) ?></span></a></li>
+                    <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
+                <?php }?>    
             </ul>
             <div class="tab-content">
+                <?php if($model->autorizado == 0){?>
                 <div role="tabpanel" class="tab-pane active" id="listadoproductos">
                     <div class="table-responsive">
                         <div class="panel panel-success">
@@ -227,9 +235,14 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                         </div>
                         <?= LinkPager::widget(['pagination' => $pagination]) ?>
                     </div>
-                </div>    
+                </div>  
+                <?php }?>
                 <!-- TERMINA TABS-->  
-                <div role="tabpanel" class="tab-pane" id="detallepedido">
+                <?php if($model->autorizado == 0){?>
+                    <div role="tabpanel" class="tab-pane" id="detallepedido">
+                <?php }else{?>
+                     <div role="tabpanel" class="tab-pane active" id="detallepedido">    
+                <?php }?>    
                     <div class="table-responsive">
                         <div class="panel panel-success">
                           <div class="panel-body">
@@ -359,7 +372,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                 <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
                                                 <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                 <td style= 'width: 20px; height: 20px;'>
-                                                    <?php if($model->cerrar_pedido == 0){?>
+                                                    <?php if($model->autorizado == 0){?>
                                                         <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_presupuesto', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'token' => $token, 'sw' => 1, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], [
                                                                     'class' => '',
                                                                     'data' => [
@@ -398,7 +411,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                 Yii::$app->getSession()->setFlash('info', 'El cliente '.$model->cliente.' NO tiene presupuesto comercial asignado. Contactar al representante de ventas');     
                             }else{   
                                 if($cliente->presupuesto_comercial >= $cliente->gasto_presupuesto_comercial){
-                                    if($model->cerrar_pedido == 0 && count($detalle_pedido) > 0){?>
+                                    if($model->autorizado == 0 && count($detalle_pedido) > 0){?>
                                         <div class="panel-footer text-right">
                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span>Adicionar', ['pedidos/adicionar_presupuesto', 'id' => $model->id_pedido, 'token' => $token, 'sw' => 0, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                                         </div>     
@@ -407,7 +420,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     Yii::$app->getSession()->setFlash('info', 'Ha superado el presupuesto comercial. Favor eliminar productos o solicitar autorizacion de presupuesto.');     
                                 }
                             }    
-                            if($model->cerrar_pedido == 1){?>    
+                            if($model->autorizado == 1){?>    
                                     <div class="panel-footer text-right">
                                         <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido_presupuesto', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);?>
                                     </div>                           

@@ -43,7 +43,7 @@ class Pedidos extends \yii\db\ActiveRecord
         return [
             [['numero_pedido', 'id_cliente','id_agente', 'dv', 'cantidad', 'subtotal', 'impuesto', 'gran_total', 'autorizado', 'cerrar_pedido', 'facturado',
                 'valor_presupuesto','presupuesto','pedido_anulado','valor_eliminado_presupuesto','valor_eliminado_pedido','pedido_validado',
-                'pedido_virtual','liberado_inventario'], 'integer'],
+                'pedido_virtual','liberado_inventario','pedido_liberado'], 'integer'],
             [['fecha_proceso'], 'required'],
             [['fecha_proceso','fecha_entrega','fecha_cierre_alistamiento'], 'safe'],
             [['documento', 'usuario'], 'string', 'max' => 15],
@@ -86,6 +86,7 @@ class Pedidos extends \yii\db\ActiveRecord
             'fecha_entrega' => 'F. entrega:',
             'fecha_cierre_alistamiento' => 'Fecha validado:',
             'liberado_inventario' => 'Liberado:',
+            'pedido_liberado' => 'pedido_liberado',
         ];
     }
 
@@ -173,6 +174,15 @@ class Pedidos extends \yii\db\ActiveRecord
             $tipopedido = 'Requerimiento';
         }
         return $tipopedido;
+    }
+    
+     public function getPedidoListo() {
+        if($this->pedido_liberado == 0 ){
+            $pedidoliberado = 'NO';
+        }else{
+            $pedidoliberado = 'SI';
+        }
+        return $pedidoliberado;
     }
     
 }

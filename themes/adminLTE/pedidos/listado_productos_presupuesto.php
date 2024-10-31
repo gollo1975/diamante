@@ -19,11 +19,11 @@ use yii\web\Response;
 use yii\filters\AccessControl;
 
 $this->title = 'Regla comercial(Productos)';
-$this->params['breadcrumbs'][] = ['label' => 'Presupuesto producto', 'url' => ['adicionar_presupuesto', 'id'=> $id, 'sw' => $sw, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual]];
+$this->params['breadcrumbs'][] = ['label' => 'Presupuesto producto', 'url' => ['adicionar_presupuesto', 'id'=> $id, 'sw' => $sw, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual ,'tipo_pedido' => $tipo_pedido ]];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
 <p>
-    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['adicionar_productos','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual], ['class' => 'btn btn-primary btn-sm']) ?>
+    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['adicionar_productos','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
 </p>
     <div class="panel-body">
         <script language="JavaScript">

@@ -354,7 +354,8 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'cube',
                                                     'url' => '#',
                                                     'items' => [
-                                                        ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/index']],
+                                                        ['label' => 'Pre-pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/index']],
+                                                        ['label' => 'Pedidos listos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/pedidoslistos']],
                                                         ['label' => 'Pedido virtual', 'icon' => 'plus-square-o', 'url' => ['/pedidos/pedido_virtual']],
                                                         ['label' => 'Anular pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/anular_pedidos']],
                                                         ['label' => 'Indicador comercial', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/index']],
