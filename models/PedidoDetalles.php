@@ -37,7 +37,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     {
         return [
             [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado','cantidad_despachada',
-                'historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado'], 'integer'],
+                'historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
             [['user_name','numero_lote'], 'string'],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
@@ -70,6 +70,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
             'numero_lote' => 'Numero lote:',
             'cargar_existencias' => 'cargar_existencias',
             'consultado' => 'consultado',
+            'cantidad_faltante' => 'cantidad_faltante',
         ];
     }
 

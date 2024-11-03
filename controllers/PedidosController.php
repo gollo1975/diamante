@@ -1793,29 +1793,38 @@ class PedidosController extends Controller
     {
         $pedido= Pedidos::findOne($id);
         $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $pedido->id_pedido]);
-        $sw = 0; $conValidado = 0; $conNoalcanza = 0; $conSinexistencia = 0; $conTodas = 0;
+        $sw = 0; $cantidad = 0;
         foreach ($detalle_pedido as $key => $detalle):
             $inventario = InventarioProductos::findOne ($detalle->id_inventario);
-            if($inventario->stock_unidades > 0){
-                if($inventario->stock_unidades >= $detalle->cantidad){
-                    $detalle->linea_validada = 1;
-                    $detalle->save();
-                    $sw = 0;
-                    $conTodas += 1;
-                }else{
-                   $sw = 1;
-                   break;
-                }
-            }
+            $cantidad =  $inventario->stock_unidades - $detalle->cantidad;
+            if($cantidad < 0){
+                $detalle->cantidad_faltante = $cantidad;
+                $detalle->save();
+           }else{
+                $detalle->cantidad_faltante = 0;
+                $detalle->save();       
+           }
         endforeach;
+        $sw = $this->CumplePedido($id, $sw);
         if($sw == 0){
             $pedido->liberado_inventario = 1;
             $pedido->save();
-            Yii::$app->getSession()->setFlash('success', 'Se validaron '.$conTodas.' registros del pre-pedido comercial No '. $pedido->numero_pedido .' con exito. Puede descargara el inventario del modulo.');   
+            Yii::$app->getSession()->setFlash('success', 'Se validaron todos las referencias del pre-pedido comercial No '. $pedido->numero_pedido .'. Puede descargara el inventario del modulo.');   
         }else{
-            Yii::$app->getSession()->setFlash('error', 'No se puede despachar el pedido porque NO hay existencias para cubrir la totalidad del pedido No (' .$pedido->numero_pedido. ').');   
+            Yii::$app->getSession()->setFlash('error', 'No se puede despachar el pedido No '. $pedido->numero_pedido .' porque NO hay existencias para cubrir la totalidad de las referencias.');   
         }   
         return $this->redirect(['pedidos/index']);
+    }
+    
+    //PROCESO QUE ACTUALIZA
+    protected function CumplePedido($id , $sw) {
+       $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $id]);  
+       foreach ($detalle_pedido as $key => $detalle):
+           if($detalle->cantidad_faltante < 0){
+               $sw = 1;
+           }
+       endforeach;
+       return $sw;
     }
     
     //PROCESO QUE VALIDA LINEA POR LINE EL PRESUPUESTO COMERCIAL
@@ -1823,68 +1832,82 @@ class PedidosController extends Controller
     {
         $pedido= Pedidos::findOne($id);
         $detalle_presupuesto = PedidoPresupuestoComercial::findAll(['id_pedido' => $pedido->id_pedido]);
-        $sw = 0; $conTodas = 0;
+        $sw = 0; $cantidad = 0;
         foreach ($detalle_presupuesto as $key => $detalle):
             $inventario = InventarioProductos::findOne ($detalle->id_inventario);
-            if($inventario->stock_unidades > 0){
-                if($inventario->stock_unidades >= $detalle->cantidad){
-                    $detalle->linea_validada = 1;
-                    $detalle->save();
-                    $sw = 0;
-                    $conTodas += 1;
-                }else{
-                   $sw = 1;
-                   break;
-                }
-            }
+            $cantidad =  $inventario->stock_unidades - $detalle->cantidad;
+            if($cantidad < 0){
+                $detalle->cantidad_faltante = $cantidad;
+                $detalle->save();
+           }else{
+                $detalle->cantidad_faltante = 0;
+                $detalle->save();       
+           }
         endforeach;
+        $sw = $this->CumplePresupuesto($id, $sw);
         if($sw == 0){
-            $pedido->liberado_inventario = 1;
+            $pedido->liberado_inventario_presupuesto = 1;
             $pedido->save();
-            Yii::$app->getSession()->setFlash('success', 'Se validaron '.$conTodas.' registros del presupuesto comercial No '. $pedido->numero_pedido .' con exito. Puede descargara el inventario del modulo.');   
+            Yii::$app->getSession()->setFlash('success', 'Se validaron todas la referencia del presupuesto comercial No '. $pedido->numero_pedido .'. Puede descargara el inventario del modulo.');   
         }else{
-            Yii::$app->getSession()->setFlash('error', 'No se puede despachar el pedido porque NO hay existencias para cubrir la totalidad del pedido No (' .$pedido->numero_pedido. ').');   
-            $pedido->liberado_inventario = 0;
-            $pedido->save();
+            Yii::$app->getSession()->setFlash('error', 'No se puede despachar el presupuesto comercial porque NO hay existencias para cubrir la totalidad del pedido No (' .$pedido->numero_pedido. ').');   
         }   
         return $this->redirect(['pedidos/index']);
     }
     
+    //proceso que actualiza el presupuesto
+    protected function CumplePresupuesto($id , $sw) {
+       $detalle_pedido = PedidoPresupuestoComercial::findAll(['id_pedido' => $id]);  
+       foreach ($detalle_pedido as $key => $detalle):
+           if($detalle->cantidad_faltante < 0){
+               $sw = 1;
+           }
+       endforeach;
+       return $sw;
+    }
     
-    //PROCESO QUE DESCARGAR LAS UNIDADES VENDIDAS DE PEDIDOS Y DE PRESUPUESTO
+    //PROCESO QUE DESCARGAR LAS UNIDADES VENDIDAS DE PEDIDOS
     public function actionValidar_linea_inventario($id) {
         $pedido = Pedidos::findOne($id);
         $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $pedido->id_pedido]);
-        $sumaPedido = 0; $sumarP = 0;
+        $sumaPedido = 0;
         foreach ($detalle_pedido as $key => $detalle) :
             $inventario = InventarioProductos::findOne ($detalle->id_inventario);
             $inventario->stock_unidades -= $detalle->cantidad;
-            if($inventario->stock_unidades >= 0){
-                $inventario->save();
-                $sumaPedido += 1;
-            }else{
-                break;
-            }    
+            $inventario->save();
+            $sumaPedido += 1;
         endforeach;
-        ///descarga de presupuesto
-        $presupuestos = PedidoPresupuestoComercial::findAll(['id_pedido' => $pedido->id_pedido]);
-        foreach ($presupuestos as $key => $presupuesto) :
-             $inventario = InventarioProductos::findOne ($presupuesto->id_inventario);
-             $inventario->stock_unidades -= $presupuesto->cantidad;
-             if($inventario->stock_unidades >= 0){
-                $inventario->save();
-                $sumarP += 1;
-             }else{
-                 break;  
-             }
-            
-        endforeach;
-        $pedido->pedido_liberado = 1;
+        $pedido->detalle_pedido_descargado_inventario = 1;
         $pedido->save();
-        Yii::$app->getSession()->setFlash('success', 'Se descargo al modulo de inventario ('.$sumaPedido. ') referencias vendidas en el pedido y ('. $sumarP .') del presupuesto comercial.');   
+        Yii::$app->getSession()->setFlash('success', 'Se descargo al modulo de inventario ('.$sumaPedido. ') referencias vendidas en el pedido No ('. $pedido->numero_pedido .').');   
         return $this->redirect(['pedidos/index']);
     }
     
+    //PROCESO QUE DESCARGAR LAS UNIDADES VENDIDAS DEL PRESUPUESTO COMERCIAL
+    public function actionDescargar_inventario_presupuesto($id) {
+        $pedido = Pedidos::findOne($id);
+        $detalle_pedido = PedidoPresupuestoComercial::findAll(['id_pedido' => $pedido->id_pedido]);
+        $sumaPedido = 0;
+        foreach ($detalle_pedido as $key => $detalle) :
+            $inventario = InventarioProductos::findOne ($detalle->id_inventario);
+            $inventario->stock_unidades -= $detalle->cantidad;
+            $inventario->save();
+            $sumaPedido += 1;
+        endforeach;
+        $pedido->presupuesto_descargado_inventario = 1;
+        $pedido->save();
+        Yii::$app->getSession()->setFlash('success', 'Se descargo al modulo de inventario ('.$sumaPedido. ') referencias vendidas en el presupuesto comercial No ('. $pedido->numero_pedido .').');   
+        return $this->redirect(['pedidos/index']);
+    }
+    
+    //CERRAR O LIBERAR PRE-PEDIDO
+    public function actionLiberar_pedido($id) {
+        $pedido = Pedidos::findOne($id);
+        $pedido->pedido_liberado = 1;
+        $pedido->save();
+        return $this->redirect(['pedidos/index']);
+    }
+        
     //PROCESO QUE INTEGRA LAS EXISTENCIAS AL PEDIDO VIRTUAL
     public function actionCargar_inventario_pedido($id, $id_inventario, $idToken, $pedido) {
         $inventario = InventarioProductos::findOne($id_inventario);

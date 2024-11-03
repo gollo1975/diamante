@@ -151,6 +151,7 @@ $view = 'pedidos';
                                         <th scope="col" style='background-color:#B9D5CE;'><b>Codigo</b></th>  
                                         <th scope="col" style='background-color:#B9D5CE;'>Presentación</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>C. Faltante</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Subtotal.</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
@@ -170,6 +171,7 @@ $view = 'pedidos';
                                     <td><?= $val->inventario->codigo_producto ?></td>
                                    <td><?= $val->inventario->nombre_producto ?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                   <td style="text-align: right; background-color: #ffcaca"><?= ''.number_format($val->cantidad_faltante,0) ?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
@@ -191,19 +193,19 @@ $view = 'pedidos';
                                <?php endforeach; ?>
 
                                <tr>
-                                    <td colspan="5"></td>
+                                    <td colspan="6"></td>
                                     <td style="text-align: right;"><b>Subtotal:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($subtotal,0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5"></td>
+                                    <td colspan="6"></td>
                                     <td style="text-align: right;"><b>Impuesto:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                  <tr>
-                                    <td colspan="5"></td>
+                                    <td colspan="6"></td>
                                     <td style="text-align: right;"><b>Total:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
                                     <td colspan="1"></td>
@@ -227,8 +229,9 @@ $view = 'pedidos';
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo presupuesto</th>
-                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
-                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>  
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>C. Faltante</th>  
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
@@ -251,7 +254,8 @@ $view = 'pedidos';
                                               <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
                                         <?php }else{?>
                                               <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                        <?php }?>      
+                                        <?php }?>   
+                                        <td style="text-align: right; background-color: #ffcaca"><?= ''.number_format($val->cantidad_faltante,0) ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>

@@ -514,7 +514,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                             'icon' => 'wrench',
                                             'url' => '#',
                                             'items' => [
-                                                ['label' => 'Configuración', 'icon' => 'cog', 'url' => ['parametros/parametros', 'id' => 1]],
+                                                ['label' => 'Configuración', 'icon' => 'cog', 'url' => ['matricula-empresa/parametros', 'id' => 1]],
                                                 ['label' => 'Empresa', 'icon' => 'nav-icon fas fa-file', 'url' => ['matricula-empresa/matricula', 'id' => 1]],
                                                 [
                                                 'label' => 'Contenido',

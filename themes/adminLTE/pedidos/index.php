@@ -221,13 +221,12 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. pedido</th>
-                    <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica presupuesto al cliente">Ap</span></th>
-                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido virtual">Pv</span></th>
-                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido validado para inventarios">Ok</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica presupuesto al cliente">A.P.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido virtual">P.V.</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido liberado x inventarios">L.V.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th> 
                     <th scope="col" style='background-color:#B9D5CE;'></th>
-                    <th scope="col" style='background-color:#B9D5CE;'></th>
-                    <th scope="col" style='background-color:#B9D5CE;'></th>
+                    
                     
                 </tr>
             </thead>
@@ -257,7 +256,8 @@ $form = ActiveForm::begin([
                     <td style= 'width: 25px; height: 25px;'>
                         <a href="<?= Url::toRoute(["pedidos/adicionar_productos", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 1, 'pedido_virtual' => $val->pedido_virtual, 'tipo_pedido' => $empresa->inventario_enlinea]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                     </td>
-                <?php }else{ ?>
+                    <?php 
+                   }else{ ?>
                         <td style='background-color:#F0F3EF;'><?= $val->numero_pedido ?></td>
                         <td style='background-color:#F0F3EF;'><?= $val->cliente ?></td>
                         <td style='background-color:#F0F3EF;'><?= $val->clientePedido->codigoDepartamento->departamento ?></td>
@@ -281,57 +281,116 @@ $form = ActiveForm::begin([
                         <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
                             <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido,'tokenAcceso' => $tokenAcceso,'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
-                         <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-user"></span> ', ['pedidos/validar_lineas_pedido', 'id' => $val->id_pedido], [
-                                           'class' => '',
-                                           'title' => 'Proceso que permite validar si hay inventario para este pedido.', 
-                                           'data' => [
-                                               'confirm' => 'Esta seguro de VALIDAR el Pedido Nro:  ('.$val->numero_pedido.') para verificar si hay existencias en el modulo de inventario.',
-                                               'method' => 'post',
-                                           ],
-                             ])?>
-                         </td>
-                         <?php if($val->liberado_inventario == 1){
-                                if($val->presupuesto == 0){
-                                    ?>
-                                   <td style= 'width: 25px; height: 10px;'>
-                                       <?= Html::a('<span class="glyphicon glyphicon-import"></span> ', ['pedidos/validar_linea_inventario', 'id' => $val->id_pedido], [
-                                                      'class' => '',
-                                                      'title' => 'Proceso que permite descargar la cantidad vendida del inventario.', 
-                                                      'data' => [
-                                                          'confirm' => '¿Esta seguro de enviar las unidadades vendidas al modulo de inventario?. Tener presente que debe descargar el presupuesto comercial.',
-                                                          'method' => 'post',
-                                                      ],
-                                        ])?>
-                                   </td>
-                                <?php }else{?>   
+                        <?php 
+                        if($val->presupuesto == 0){
+                            if($val->liberado_inventario == 0  && $val->detalle_pedido_descargado_inventario == 0){ ?>
+                                <td style= 'width: 25px; height: 10px;'>
+                                    <?= Html::a('<span class="glyphicon glyphicon-user"></span> ', ['pedidos/validar_lineas_pedido', 'id' => $val->id_pedido], [
+                                                   'class' => '',
+                                                   'title' => 'Proceso que permite validar si hay inventario para este pedido.', 
+                                                   'data' => [
+                                                       'confirm' => 'Esta seguro de VALIDAR el Pedido Nro:  ('.$val->numero_pedido.') para verificar si hay existencias en el modulo de inventario.',
+                                                       'method' => 'post',
+                                                   ],
+                                     ])?>
+                                </td>.
+                            <?php 
+                            }else{
+                                if($val->liberado_inventario == 1 && $val->detalle_pedido_descargado_inventario == 0){ ?>
                                     <td style= 'width: 25px; height: 10px;'>
-                                        <?= Html::a('<span class="glyphicon glyphicon-ruble"></span> ', ['pedidos/validar_lineas_presupuesto', 'id' => $val->id_pedido], [
+                                        <?= Html::a('<span class="glyphicon glyphicon-import"></span> ', ['pedidos/validar_linea_inventario', 'id' => $val->id_pedido], [
                                                        'class' => '',
-                                                       'title' => 'Proceso que permite validar el presupuesto comercial.', 
+                                                       'title' => 'Proceso que permite descargar la cantidad vendida del inventario.', 
                                                        'data' => [
-                                                           'confirm' => 'Esta seguro de VALIDAR el presupuesto comercial Nro:  ('.$val->numero_pedido.') para verificar si hay existencias en el modulo de inventario.',
+                                                           'confirm' => '¿Esta seguro de enviar las unidadades vendidas al modulo de inventario?. Tener presente que debe descargar el presupuesto comercial.',
                                                            'method' => 'post',
                                                        ],
                                          ])?>
                                     </td>
+                                <?php 
+                                }else{?>
                                     <td style= 'width: 25px; height: 10px;'>
-                                       <?= Html::a('<span class="glyphicon glyphicon-import"></span> ', ['pedidos/validar_linea_inventario', 'id' => $val->id_pedido], [
-                                                      'class' => '',
-                                                      'title' => 'Proceso que permite descargar la cantidad vendida del inventario.', 
-                                                      'data' => [
-                                                          'confirm' => '¿Esta seguro de enviar las unidadades vendidas al modulo de inventario?. Tener presente que debe descargar el presupuesto comercial.',
-                                                          'method' => 'post',
-                                                      ],
-                                        ])?>
-                                   </td>
-                                <?php }    
-                        }else{?>
-                            <td style= 'width: 25px; height: 10px;'></td>
-                             <td style= 'width: 25px; height: 10px;'></td>
-                         <?php }?>
-
-                <?php }?>        
+                                        <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['pedidos/liberar_pedido', 'id' => $val->id_pedido], [
+                                                       'class' => '',
+                                                       'title' => 'Proceso que permite liberar el pre-pedido para ser enviado a despacho.', 
+                                                       'data' => [
+                                                           'confirm' => '¿Esta seguro de CERRAR  o LIBERAR el pre-pedido?.',
+                                                           'method' => 'post',
+                                                       ],
+                                         ])?>
+                                    </td>
+                                <?php } 
+                            }
+                        }else{ //termina ciclo de pedido sin presupuesto
+                            if($val->liberado_inventario == 0  && $val->detalle_pedido_descargado_inventario == 0){ ?>
+                                <td style= 'width: 25px; height: 10px;'>
+                                    <?= Html::a('<span class="glyphicon glyphicon-user"></span> ', ['pedidos/validar_lineas_pedido', 'id' => $val->id_pedido], [
+                                                   'class' => '',
+                                                   'title' => 'Proceso que permite validar si hay inventario para este pedido.', 
+                                                   'data' => [
+                                                       'confirm' => 'Esta seguro de VALIDAR el Pedido Nro:  ('.$val->numero_pedido.') para verificar si hay existencias en el modulo de inventario.',
+                                                       'method' => 'post',
+                                                   ],
+                                     ])?>
+                                </td>.
+                            <?php 
+                            }else{
+                                if($val->liberado_inventario == 1 && $val->detalle_pedido_descargado_inventario == 0){ ?>
+                                    <td style= 'width: 25px; height: 10px;'>
+                                        <?= Html::a('<span class="glyphicon glyphicon-import"></span> ', ['pedidos/validar_linea_inventario', 'id' => $val->id_pedido], [
+                                                       'class' => '',
+                                                       'title' => 'Proceso que permite descargar la cantidad vendida del inventario.', 
+                                                       'data' => [
+                                                           'confirm' => '¿Esta seguro de enviar las unidadades vendidas al modulo de inventario?. Tener presente que debe descargar el presupuesto comercial.',
+                                                           'method' => 'post',
+                                                       ],
+                                         ])?>
+                                    </td>
+                                <?php 
+                                }else{
+                                    if($val->detalle_pedido_descargado_inventario == 1 && $val->liberado_inventario_presupuesto == 0){ ?>
+                                        <td style= 'width: 25px; height: 10px;'>
+                                            <?= Html::a('<span class="glyphicon glyphicon-ruble"></span> ', ['pedidos/validar_lineas_presupuesto', 'id' => $val->id_pedido], [
+                                                           'class' => '',
+                                                           'title' => 'Proceso que permite validar el presupuesto comercial.', 
+                                                           'data' => [
+                                                               'confirm' => 'Esta seguro de VALIDAR el presupuesto comercial Nro:  ('.$val->numero_pedido.') para verificar si hay existencias en el modulo de inventario.',
+                                                               'method' => 'post',
+                                                           ],
+                                             ])?>
+                                        </td>
+                                    <?php
+                                    }else{
+                                        if ($val->liberado_inventario_presupuesto == 1 && $val->presupuesto_descargado_inventario == 0){?>
+                                            <td style= 'width: 25px; height: 10px;'>
+                                                <?= Html::a('<span class="glyphicon glyphicon-import"></span> ', ['pedidos/descargar_inventario_presupuesto', 'id' => $val->id_pedido], [
+                                                               'class' => '',
+                                                               'title' => 'Proceso que permite descargar la cantidad vendida del presupuestodel al inventario.', 
+                                                               'data' => [
+                                                                   'confirm' => '¿Esta seguro de enviar las unidadades vendidas del presupuesto al modulo de inventario?.',
+                                                                   'method' => 'post',
+                                                               ],
+                                                 ])?>
+                                             </td>
+                                        <?php 
+                                        }else{?>
+                                            <td style= 'width: 25px; height: 10px;'>
+                                                <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['pedidos/liberar_pedido', 'id' => $val->id_pedido], [
+                                                               'class' => '',
+                                                               'title' => 'Proceso que permite liberar el pre-pedido para ser enviado a despacho.', 
+                                                               'data' => [
+                                                                   'confirm' => '¿Esta seguro de CERRAR  o LIBERAR el pre-pedido?.',
+                                                                   'method' => 'post',
+                                                               ],
+                                                 ])?>
+                                             </td>
+                                        <?php
+                                        }
+                                    }
+                                }    
+                            }    
+                        }     
+                    }?>        
             </tr>
             <?php endforeach; 
             }?>

@@ -55,7 +55,25 @@ class MatriculaEmpresaController extends Controller
         }
     }
 
-   
+     public function actionParametros($id)
+    {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',142])->all()){
+                $model = $this->findModel($id);
+                if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                }
+                return $this->render('parametros', [
+                    'model' => $model,
+                ]); 
+
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            } 
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     /**
      * Finds the MatriculaEmpresa model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

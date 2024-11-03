@@ -43,7 +43,7 @@ class Pedidos extends \yii\db\ActiveRecord
         return [
             [['numero_pedido', 'id_cliente','id_agente', 'dv', 'cantidad', 'subtotal', 'impuesto', 'gran_total', 'autorizado', 'cerrar_pedido', 'facturado',
                 'valor_presupuesto','presupuesto','pedido_anulado','valor_eliminado_presupuesto','valor_eliminado_pedido','pedido_validado',
-                'pedido_virtual','liberado_inventario','pedido_liberado'], 'integer'],
+                'pedido_virtual','liberado_inventario','pedido_liberado','detalle_pedido_descargado_inventario','liberado_inventario_presupuesto','presupuesto_descargado_inventario'], 'integer'],
             [['fecha_proceso'], 'required'],
             [['fecha_proceso','fecha_entrega','fecha_cierre_alistamiento'], 'safe'],
             [['documento', 'usuario'], 'string', 'max' => 15],

@@ -40,7 +40,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     {
         return [
             [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado',
-                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado'], 'integer'],
+                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
             [['user_name','numero_lote'], 'string'],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
