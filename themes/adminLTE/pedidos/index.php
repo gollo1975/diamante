@@ -293,7 +293,7 @@ $form = ActiveForm::begin([
                                                        'method' => 'post',
                                                    ],
                                      ])?>
-                                </td>.
+                                </td>
                             <?php 
                             }else{
                                 if($val->liberado_inventario == 1 && $val->detalle_pedido_descargado_inventario == 0){ ?>

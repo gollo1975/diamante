@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= $form->field($model, 'aplica_inventario_incompleto')->checkBox(['label' => 'Aplica inventario completo',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'aplica_inventario_incompleto']) ?>
             </div>
             <div class="checkbox checkbox-success" align ="left">
-                    <?= $form->field($model, 'inventario_enlinea')->checkBox(['label' => 'Inventario en linea','1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'inventario_enlinea']) ?>
+                    <?= $form->field($model, 'inventario_enlinea')->checkBox(['label' => 'Procesar inventario sin existencia','1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'inventario_enlinea']) ?>
                    
             </div>
         </div>

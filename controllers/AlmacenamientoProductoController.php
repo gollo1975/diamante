@@ -259,10 +259,10 @@ class AlmacenamientoProductoController extends Controller
                             ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
                             ->andFilterWhere(['=','numero_pedido', $numero_pedido])
                             ->andFilterWhere(['=','id_agente', $vendedores])
-                            ->andWhere(['=','cerrar_pedido', 1])
                             ->andWhere(['=', 'pedido_anulado', 0])
+                            ->andWhere(['=', 'pedido_validado', 0])
                             ->andWhere(['=', 'facturado', 0])
-                            ->andWhere(['=', 'liberado_inventario', 1]);
+                            ->andWhere(['=', 'pedido_liberado', 1]);
                         $table = $table->orderBy('id_pedido DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -286,7 +286,8 @@ class AlmacenamientoProductoController extends Controller
                     $table = \app\models\Pedidos::find()->Where(['=','cerrar_pedido', 1])
                             ->andWhere(['=', 'facturado', 0])
                             ->andWhere(['=', 'pedido_anulado', 0])
-                            ->andWhere(['=', 'liberado_inventario', 1])
+                            ->andWhere(['=', 'pedido_liberado', 1])
+                            ->andWhere(['=', 'pedido_validado', 0])
                             ->orderBy('id_pedido DESC');   
                     $count = clone $table;
                     $pages = new Pagination([
@@ -517,8 +518,6 @@ class AlmacenamientoProductoController extends Controller
                 $documento = null; $fecha_inicio = null;
                 $cliente = null; $fecha_corte = null;
                 $vendedores = null; $numero_pedido = null;
-                $model = null;
-                $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -553,6 +552,24 @@ class AlmacenamientoProductoController extends Controller
                         $form->getErrors();
                     }
                     
+                }else{
+                    $table = \app\models\Pedidos::find()->where(['=', 'facturado', 0])
+                            ->andWhere(['=', 'pedido_anulado', 0])
+                            ->andWhere(['=', 'pedido_validado', 1])
+                            ->orderBy('id_pedido DESC');   
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                        $this->actionExcelconsultaPedidos($tableexcel); 
+                    }
                 }
                 return $this->render('pedidos_listados', [
                             'model' => $model,
@@ -1517,10 +1534,29 @@ class AlmacenamientoProductoController extends Controller
     // CERRAR PEDIDO PARA FACTURACION
     public function actionPedido_validado_facturacion($id_pedido) {
         $pedido = Pedidos::findOne($id_pedido);
-        $pedido->pedido_validado = 1;
-        $pedido->fecha_cierre_alistamiento = date('Y-m-d');
-        $pedido->save();
-        return $this->redirect(["listar_pedidos"]);
+        $sw = 0;
+        //VALIDA QUE TODAS LAS LINEAS DEL DETALLE DEL PEDIDO
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
+        if(count($detalle_pedido) > 0){
+            $sw = 1;
+            Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del pedido para enviar a facturación.');
+            return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
+        }
+        //VALIDA QUE TODAS LAS LINEAS DEL PRESUPUESTO
+        $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
+        if(count($presupuesto) > 0){
+            $sw = 1;
+            Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del presupuesto comercial para enviar a facturación.');
+            return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
+        }
+        if($sw == 0){
+            $pedido->pedido_validado = 1;
+            $pedido->fecha_cierre_alistamiento = date('Y-m-d');
+            $pedido->save();
+            return $this->redirect(["listar_pedidos"]);
+        }else{
+            return $this->redirect(["listar_pedidos"]);
+        }    
     }
     /**
      * Finds the AlmacenamientoProducto model based on its primary key value.

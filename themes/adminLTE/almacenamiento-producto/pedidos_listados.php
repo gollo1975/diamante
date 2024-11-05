@@ -15,7 +15,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
-$this->title = 'CONSULTA (PEDIDOS LISTADOS)';
+$this->title = 'Consulta (PEDIDOS LISTADOS)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -129,7 +129,11 @@ $form = ActiveForm::begin([
                          <td><?= $val->agentePedido->nombre_completo ?></td>
                         <td><?= $val->fecha_proceso ?></td>
                         <td><?= $val->fecha_cierre_alistamiento ?></td>
-                         <td><?= $val->pedidoFacturado ?></td>
+                        <?php if($val->facturado == 0){?>
+                            <td style='background-color:#B9D5CE;'><?= $val->pedidoFacturado ?></td>
+                        <?php }else{?>
+                            <td <td style='background-color:#faf2cc'><?= $val->pedidoFacturado ?></td>
+                        <?php } ?>    
                         <td style="text-align: right"><?= ''.number_format($val->gran_total,0) ?></td>
                         <td style= 'width: 25px; height: 25px;'>
                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_pedido_listado", "id" => $val->id_pedido]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>

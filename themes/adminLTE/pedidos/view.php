@@ -36,10 +36,14 @@ $view = 'pedidos';
                 if($token == 1){?>
                     <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_orden_compra', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
                 <?php }else{
-                    if($token == 1){
+                    if($token == 2){
                         echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_pedidos', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);
                     }else{
-                        echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['pedidoslistos'], ['class' => 'btn btn-primary btn-sm']);
+                        if($token == 3){
+                            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_pedido_vendedor'], ['class' => 'btn btn-primary btn-sm']);
+                        }else{
+                            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['pedidoslistos'], ['class' => 'btn btn-primary btn-sm']);
+                        }    
                     }    
                 }           
             }

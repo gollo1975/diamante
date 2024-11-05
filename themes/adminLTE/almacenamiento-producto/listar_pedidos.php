@@ -112,7 +112,6 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>F. entrega</th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido virtual">P.V.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Vr. Presup.</th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Pedido validado">P. val.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica presupuesto al cliente">A.p.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>  
@@ -136,11 +135,10 @@ $form = ActiveForm::begin([
                             <td style="background-color: #e7c6ff"><?= $val->pedidoVirtual ?></td>
                         <?php }?>    
                         <td style="text-align: right"><?= ''.number_format($val->gran_total,0) ?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->valor_presupuesto,0) ?></td>
                         <?php if($val->pedido_validado == 0){ ?>
                         <td style='background-color:#B9D5CE;'><?= $val->pedidoValidado ?></td>
                         <?php }else{?>
-                            <td><?= $val->pedidoValidado ?></td>
+                            <td style='background-color: #faf2cc;'><?= $val->pedidoValidado ?></td>
                         <?php }
                         if($val->valor_presupuesto == 0){?>
                            <td><?= $val->presupuestoPedido ?></td>

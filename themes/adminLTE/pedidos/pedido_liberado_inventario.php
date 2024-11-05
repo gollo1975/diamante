@@ -173,7 +173,7 @@ $form = ActiveForm::begin([
                             <td style='background-color:#F7F3E1; color: black'><?= $val->pedidoAnulado ?></td>
                         <?php }?> 
                         <td style= 'width: 25px; height: 25px; background-color:#F0F3EF;'>
-                            <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido, 'token' => 3]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="<?= Url::toRoute(["pedidos/view", "id" => $val->id_pedido, 'token' => 4]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                 <?php }?>        
             </tr>

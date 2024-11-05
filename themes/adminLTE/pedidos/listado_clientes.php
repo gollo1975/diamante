@@ -78,12 +78,13 @@ $this->params['breadcrumbs'][] = $this->title;
             <tbody>
                 <?php 
                 if($vendedor->hacer_pedido == 0){
+                    $empresa = app\models\MatriculaEmpresa::findOne(1);
                     foreach ($model as $val): ?>
                         <tr style="font-size: 90%;">                   
                             <td><?= $val->nit_cedula ?></td>
                             <td><?= $val->nombre_completo ?></td>
                             <td style= 'width: 25px; height: 25px;'>
-                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_nuevo_pedido', 'id' => $val->id_cliente], [
+                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_nuevo_pedido', 'id' => $val->id_cliente, 'tipo_pedido' => $empresa->inventario_enlinea], [
                                               'class' => '',
                                               'data' => [
                                                   'confirm' => 'Esta seguro de crear un nuevo pedido a este cliente?',

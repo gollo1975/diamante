@@ -180,6 +180,39 @@ class PedidosController extends Controller
         }
     }
     
+    //DESABASTECIMIENTO DEL PRODUCTO
+    public function actionSearch_desabastecimiento($token = 4) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',144])->all()){
+                $table = PedidoDetalles::find()->Where(['<','cantidad_faltante', 0])
+                                               ->orderBy('id_inventario DESC');
+                $count = clone $table;
+                $pages = new Pagination([
+                    'pageSize' => 15,
+                    'totalCount' => $count->count(),
+                ]);
+                $tableexcel = $table->all();
+                $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                if(isset($_POST['excel'])){                    
+                        $this->actionExcelconsultaDesabastecimiento($tableexcel);
+                }
+
+                   return $this->render('search_desabastecimiento', [
+                        'model' => $model,
+                        'pagination' => $pages,
+                        'token' => $token,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     //PEDIDOS PARA VALIDAR EL INVENTARIO Y ENVIAR A LOGISTICA
     public function actionPedidoslistos() {
         if (Yii::$app->user->identity){
@@ -439,6 +472,76 @@ class PedidosController extends Controller
         }
     }
     
+    //permite mostrar los pedidos por vendedor
+    public function actionSearch_pedido_vendedor($token = 3) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',143])->all()){
+                $form = new FiltroBusquedaPedidos();
+                $documento = null; $fecha_inicio = null;
+                $cliente = null; $fecha_corte = null;
+                $facturado = null; $pedido_cerrado = null;
+                $vendedores = null; $numero_pedido = null;
+                $presupuesto = null;
+                $model = null;
+                $pages = null;
+                $tokenAcceso = Yii::$app->user->identity->role;
+                $documento_vendedor = AgentesComerciales::find()->where(['=','nit_cedula', Yii::$app->user->identity->username])->one();
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $cliente = Html::encode($form->cliente);
+                        $facturado = Html::encode($form->facturado);
+                        $vendedores = Html::encode($form->vendedor);
+                        $fecha_corte = Html::encode($form->fecha_corte);
+                        $fecha_inicio = Html::encode($form->fecha_inicio);
+                        $pedido_cerrado = Html::encode($form->pedido_cerrado);
+                        $numero_pedido = Html::encode($form->numero_pedido);
+                        $presupuesto = Html::encode($form->presupuesto);
+                        $table = Pedidos::find()
+                                ->andFilterWhere(['=', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_cliente', $cliente])
+                                ->andFilterWhere(['=', 'facturado', $facturado])
+                                ->andFilterWhere(['between','fecha_proceso', $fecha_inicio, $fecha_corte])
+                                ->andFilterWhere(['=','numero_pedido', $numero_pedido])
+                                ->andFilterWhere(['=','presupuesto', $presupuesto])
+                                ->andWhere(['=','cerrar_pedido', 1])
+                                ->andWhere(['=','id_agente', $documento_vendedor->id_agente]); 
+                            
+                        $table = $table->orderBy('id_pedido DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelconsultaPedidos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } 
+                return $this->render('search_pedido_vendedor', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                            'tokenAcceso' => $tokenAcceso,
+                            'documento_vendedor' => $documento_vendedor,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     // MAESTRO CONSULTA DE VENTAS, PEDIDOS, CLIENTES IA
     public function actionSearch_maestro_pedidos() {
         if (Yii::$app->user->identity){
@@ -544,10 +647,9 @@ class PedidosController extends Controller
       }
     
     //PROCESO QUE CREA NUEVO PEDIDO
-    public function actionCrear_nuevo_pedido($id) {
+    public function actionCrear_nuevo_pedido($id, $tipo_pedido) {
         //valide cupo
         $cliente = Clientes::find()->where(['=','id_cliente', $id])->one();
-        $swEntrada = 0;
         if($cliente->forma_pago == 1){
             $contar = 0;
             $fecha_actual = date('Y-m-d');
@@ -564,7 +666,9 @@ class PedidosController extends Controller
                     $table->usuario = Yii::$app->user->identity->username;
                     $table->fecha_proceso = date('Y-m-d');
                     $table->id_agente = $cliente->id_agente;
-                    $table->liberado_inventario = 1;
+                    if($tipo_pedido == 0){
+                        $table->liberado_inventario = 1;
+                    }    
                     $table->save();
                     return $this->redirect(['/pedidos/index']);
                 }else{
@@ -597,7 +701,9 @@ class PedidosController extends Controller
                         $table->usuario = Yii::$app->user->identity->username;
                         $table->fecha_proceso = date('Y-m-d');
                         $table->id_agente = $cliente->id_agente;
-                         $table->liberado_inventario = 1;
+                        if($tipo_pedido == 0){
+                           $table->liberado_inventario = 1;
+                        } 
                         $table->save();
                         return $this->redirect(['/pedidos/index']);
                     }else{
@@ -777,6 +883,18 @@ class PedidosController extends Controller
         ]);   
     }
     
+    //VISTA QUE MUESTRA EL DETALLE DE LOS PEDIDOS QUE LES FALTA UNIDADES
+    public function actionView_desabastecimiento($id_inventario)
+    {
+        $listado = PedidoDetalles::find()->where(['=','id_inventario', $id_inventario])->andWhere(['<','cantidad_faltante', 0])->all();
+        $model = InventarioProductos::findOne($id_inventario);
+        return $this->render('view_desabastecimiento' ,[
+            'id_inventario' => $id_inventario,
+            'listado' => $listado,
+            'model' => $model,
+            ]);
+    }
+    
    //PROCESO QUE EDITA EL CLIENTE
      public function actionEditarcliente($id, $tokenAcceso) {
         $model = new \app\models\FormModeloCambiarCantidad();
@@ -937,7 +1055,6 @@ class PedidosController extends Controller
                                         $table->cantidad = $_POST["cantidad_productos"]["$intIndice"];
                                         $table->user_name = Yii::$app->user->identity->username;
                                         $table->cargar_existencias = 1;
-                                        $table->pedido_liberado = 1;
                                         $table->save(false);
                                         $datos = $intCodigo;
                                         $pedido = Pedidos::findOne($id);
@@ -1632,13 +1749,18 @@ class PedidosController extends Controller
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::findOne($pedido->id_cliente);
         $suma = $cliente->gasto_presupuesto_comercial;
-        $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
-        $cliente->save();
-        $pedido->cerrar_pedido = 1;
-        $pedido->save(false);
         if($tipo_pedido == 0){
+            $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+            $cliente->save();
+            $pedido->cerrar_pedido = 1;
+            $pedido->pedido_liberado = 1;
+            $pedido->save(false);
             return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
         }else{
+            $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+            $cliente->save();
+            $pedido->cerrar_pedido = 1;
+            $pedido->save(false);
            return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
         }
            
@@ -2062,8 +2184,8 @@ class PedidosController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
     
-      //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
-        public function actionExcelconsultaPedidos($tableexcel) {                
+    //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
+    public function actionExcelconsultaPedidos($tableexcel) {                
             $objPHPExcel = new \PHPExcel();
             // Set document properties
             $objPHPExcel->getProperties()->setCreator("EMPRESA")
@@ -2154,6 +2276,7 @@ class PedidosController extends Controller
             $objWriter->save('php://output');
             exit;
         }
+    
     //EXCELEES // PERMITE EXPORTAR A EXCEL EL PEDIDO
     public function actionExcel_pedido($id) {                
         $detalle  = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all(); 
@@ -2357,5 +2480,82 @@ class PedidosController extends Controller
         $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
         $objWriter->save('php://output');
         exit;
+    }
+    
+    public function actionExcelconsultaDesabastecimiento($tableexcel)
+    {
+        $objPHPExcel = new \PHPExcel();
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("EMPRESA")
+                ->setLastModifiedBy("Abastecimiento")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A1', 'REFERENCIA')
+                        ->setCellValue('B1', 'PRESENTACION PRODUCTO')
+                        ->setCellValue('C1', 'PRODUCTO')
+                        ->setCellValue('D1', 'GRUPO')
+                        ->setCellValue('E1', 'UNIDADES VENDIDAS')
+                        ->setCellValue('F1', 'UNIDADES FALTANTES');
+            $i = 2;
+            $contar = 0;
+            $sumaVentas = 0;
+            $auxiliar = 0;
+            foreach ($tableexcel as $val) {
+               
+                 if($auxiliar <> $val->id_inventario){
+                     $datos = PedidoDetalles::find()->where(['=','id_inventario', $val->id_inventario])->andWhere(['<','cantidad_faltante', 0])->all(); 
+                       if(count($datos) > 0){
+                            $contar = 0;  
+                            $sumaVentas = 0;
+                            foreach ($datos as $key => $dato) {
+                               $contar += $dato->cantidad_faltante;
+                               $sumaVentas += $dato->cantidad;
+                            }
+                            $objPHPExcel->setActiveSheetIndex(0)
+                                ->setCellValue('A' . $i, $val->inventario->codigo_producto)
+                                ->setCellValue('B' . $i, $val->inventario->nombre_producto)
+                                ->setCellValue('C' . $i, $val->inventario->producto->nombre_producto)
+                                ->setCellValue('D' . $i, $val->inventario->producto->grupo->nombre_grupo)
+                                ->setCellValue('E' . $i, $sumaVentas)
+                                ->setCellValue('F' . $i, $contar);
+                               $i++;
+                       }
+                       $auxiliar = $val->id_inventario;
+                 }else{
+                     $auxiliar = $val->id_inventario;
+                 }       
+            
+            }
+            $objPHPExcel->getActiveSheet()->setTitle('Listado');
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            // Redirect output to a client’s web browser (Excel2007)
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Abastecimiento.xlsx"');
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+            $objWriter->save('php://output');
+            exit;
+        
     }
 }

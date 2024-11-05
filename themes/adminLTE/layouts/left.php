@@ -42,7 +42,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                 //['label' => 'Debug', 'icon' => 'dashboard', 'url' => ['/debug']],
                                 ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                                 [
-                                    'label' => 'PRODUCCION ',
+                                    'label' => 'CONTINUAR',
                                     'icon' => 'share',
                                     'url' => '#',
                                     'items' => [
@@ -192,6 +192,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'question',
                                                     'url' => '#',
                                                     'items' => [
+                                                        ['label' => 'Desabastecimiento', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_desabastecimiento']],
                                                         [
                                                         'label' => 'Materias prima',
                                                         'icon' => 'cart-plus',
@@ -379,7 +380,15 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             ['label' => 'Graficas', 'icon' => 'plus-square-o', 'url' => ['/indicador-comercial/search_indicador_vendedor']],
 
                                                         ]],
-                                                        ['label' => 'Pedidos', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedidos']], 
+                                                        //pedidos comerciales
+                                                        [
+                                                        'label' => 'Pedidos',
+                                                        'icon' => 'list',
+                                                        'url' => '#',
+                                                        'items' => [
+                                                            ['label' => 'General', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedidos']], 
+                                                            ['label' => 'Vendedor', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_pedido_vendedor']],
+                                                        ]],
                                                         ['label' => 'Citas prospecto', 'icon' => 'plus-square-o', 'url' => ['/cliente-prospecto/search_cita_prospecto']], 
                                                         [
                                                         'label' => 'Maestros IA',
