@@ -1243,6 +1243,7 @@ class PedidosController extends Controller
                     $table->id_inventario = $id_inventario;
                     $table->id_presupuesto = $presupuesto->id_presupuesto;
                     $table->cantidad = $cantidad;
+                    $table->venta_condicionado = 1;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->fecha_registro = date('Y-m-d');
                     if($model->pedido_virtual == 0){
@@ -1474,7 +1475,7 @@ class PedidosController extends Controller
     //PROCESO QUE ACTUALIA INVENTARIO Y PRECIOS
     protected function ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido) {
         $auxiliar = 0; $porcentaje = 0;
-        $subtotal = 0; $impuesto = 0;
+        $subtotal = 0; $impuesto = 0; $precio_venta = 0; $formula_iva = 0;
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::findOne($pedido->id_cliente);
         $inventario = InventarioProductos::find()->where(['=','id_inventario', $datos])->one();
@@ -1503,17 +1504,18 @@ class PedidosController extends Controller
         $precio = \app\models\InventarioPrecioVenta::find()->where(['=','id_posicion', $cliente->id_posicion])
                                                            ->andWhere(['=','id_inventario', $datos])->one();
         if($precio){
-            $detalle_pedido->valor_unitario = $precio->precio_venta_publico;
+            $formula_iva = ($inventario->porcentaje_iva / 100) + 1 ;
+            $detalle_pedido->valor_unitario = $precio->precio_venta_publico / $formula_iva;
             $subtotal = round($detalle_pedido->valor_unitario * $detalle_pedido->cantidad);
             if($inventario->aplica_iva == 0){
                 if($precio->iva_incluido == 0){
                    $detalle_pedido->subtotal = $subtotal; 
-                   $detalle_pedido->impuesto = round($subtotal * $inventario->porcentaje_iva)/100;                
+                    $detalle_pedido->impuesto = round($subtotal * $inventario->porcentaje_iva)/100;                
                    $detalle_pedido->total_linea = round($detalle_pedido->impuesto +  $subtotal);
                 }else{
-                    $porcentaje = ''.number_format($inventario->porcentaje_iva/100, 2);
-                    $impuesto = round($subtotal * $porcentaje);
-                    $subtotal = $subtotal - $impuesto;
+                    $porcentaje = $inventario->porcentaje_iva;
+                    $impuesto = round($subtotal * $porcentaje)/100;
+                    $subtotal = $subtotal;
                     $detalle_pedido->subtotal = $subtotal;
                     $detalle_pedido->impuesto = $impuesto; 
                     $detalle_pedido->total_linea = round($impuesto +  $subtotal);
@@ -1556,6 +1558,46 @@ class PedidosController extends Controller
             }
         }    
     }
+    
+    //ACTUALIZA PEDIDO AGRUPADO
+    //ACTUALIZA LOS SUBTOTALES
+    protected function ActualizarTotalesPedidoAgrupado($id) {
+        $subtotal = 0; $impuesto = 0; $total = 0; $cantidad = 0; $cantidad2 = 0;
+        $cupo = 0; $descuento_comercial = 0;
+        $subtotal2 = 0; $impuesto2 = 0; $total2 = 0;
+        $model = $this->findModel($id);
+        $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
+        $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
+        foreach ( $detalle as $detalles):
+            if($detalles->venta_condicionado == 0){
+                $subtotal += $detalles->subtotal;    
+                $impuesto += $detalles->impuesto;
+                $total += $detalles->total_linea;
+                $cantidad += $detalles->cantidad;
+            }else{
+                $subtotal2 += $detalles->subtotal;    
+                $impuesto2 += $detalles->impuesto;
+                $total2 += $detalles->total_linea;
+                $cantidad2 += $detalles->cantidad;
+            }
+        endforeach;
+        $model->descuento_comercial = $subtotal2; 
+        $model->cantidad = $cantidad + $cantidad2;
+        $model->subtotal = $subtotal - $descuento_comercial;    
+        $model->impuesto = $impuesto - $impuesto2;
+        $model->gran_total = $total - $total2;
+        
+        $model->save(false);
+        $cupo = $model->clientePedido->cupo_asignado;
+        if($cliente->forma_pago == 2){
+            if($total > $cupo){
+                $cupo = '$'.number_format($cupo,0);
+                Yii::$app->getSession()->setFlash('error', 'El cupo asignado para este cliente es: ('. $cupo. '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.'); 
+            }
+        }    
+    }
+    
+    
     //PROCESO QUE AUTORIZADO O DESAUTORIZA
     public function actionAutorizado($id, $tokenAcceso, $token, $id_cliente, $pedido_virtual, $tipo_pedido) {
         $pedido = Pedidos::findOne($id);
@@ -1699,6 +1741,7 @@ class PedidosController extends Controller
         $pedido->valor_presupuesto = $suma;
         $pedido->save(false);
     }
+   
     //PROCESO QUE REINTEGRA LAS UNIDADES AL INVENTARIO CUANDO SE ELIMINA
     protected function DevolucionProductosInventario($id, $detalle, $pedido_virtual) {
         $auxiliar = 0; $valor = 0;
@@ -1714,6 +1757,7 @@ class PedidosController extends Controller
         }    
         $inventario->save(false);
     }
+   
     //DEVUCION PRODUCTO PRESUPUESTO
      protected function DevolucionProductosPresupuesto($id, $detalle, $pedido_virtual) {
         $auxiliar = 0; $valor = 0;
@@ -1746,24 +1790,75 @@ class PedidosController extends Controller
     //PROCESO QUE CIERRA EL PEDIDO
     public function actionCerrar_pedido($id, $token, $tokenAcceso, $pedido_virtual, $tipo_pedido) {
         $suma = 0;
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         $pedido = Pedidos::findOne($id);
         $cliente = Clientes::findOne($pedido->id_cliente);
         $suma = $cliente->gasto_presupuesto_comercial;
-        if($tipo_pedido == 0){
-            $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
-            $cliente->save();
-            $pedido->cerrar_pedido = 1;
-            $pedido->pedido_liberado = 1;
-            $pedido->save(false);
-            return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+        if($empresa->agrupar_pedido == 0){
+            if($tipo_pedido == 0){
+                $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+                $cliente->save();
+                $pedido->cerrar_pedido = 1;
+                $pedido->pedido_liberado = 1;
+                $pedido->save(false);
+               return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+            }else{
+                $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+                $cliente->save();
+                $pedido->cerrar_pedido = 1;
+                $pedido->save(false);
+                return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+            } 
         }else{
-            $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
-            $cliente->save();
-            $pedido->cerrar_pedido = 1;
-            $pedido->save(false);
-           return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+           $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+            if(count($presupuesto) > 0){
+                foreach ($presupuesto as $key => $lineas) {
+                    $table = new PedidoDetalles();
+                    $table->id_pedido = $id;
+                    $table->id_inventario = $lineas->id_inventario;
+                    $table->cantidad = $lineas->cantidad;
+                    $table->valor_unitario = $lineas->valor_unitario;
+                    $table->subtotal = $lineas->subtotal;
+                    $table->impuesto = $lineas->impuesto;
+                    $table->total_linea = $lineas->total_linea;
+                    $table->user_name = $lineas->user_name;
+                    $table->venta_condicionado = 1;
+                    $table->cargar_existencias = $lineas->cargar_existencias;
+                    $table->save();
+                    $this->ActualizarTotalesPedidoAgrupado($id);
+                }
+                if($tipo_pedido == 0){
+                    $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+                    //$cliente->save();
+                    $pedido->cerrar_pedido = 1;
+                    $pedido->pedido_liberado = 1;
+                   // $pedido->save(false);
+                    //return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }else{
+                    $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+                    //$cliente->save();
+                    $pedido->cerrar_pedido = 1;
+                    //$pedido->save(false);
+                   // return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }  
+            }else{
+               
+                if($tipo_pedido == 0){
+                    $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+                    $cliente->save();
+                    $pedido->cerrar_pedido = 1;
+                    $pedido->pedido_liberado = 1;
+                    $pedido->save(false);
+                    return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }else{
+                    $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
+                    $cliente->save();
+                    $pedido->cerrar_pedido = 1;
+                    $pedido->save(false);
+                   return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                }  
+            }  
         }
-           
     }
     
     public function actionCrear_observacion($id, $token, $tokenAcceso, $pedido_virtual, $tipo_pedido) {

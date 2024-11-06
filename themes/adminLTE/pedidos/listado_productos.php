@@ -311,19 +311,19 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                    <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Subtotal:</b></td>
-                                        <td align="right" ><b><?= '$'.number_format($subtotal,0); ?></b></td>
+                                        <td align="right" ><b><?= '$'.number_format($model->subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Iva:</b></td>
-                                        <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
+                                        <td align="right" ><b><?= '$'.number_format($model->impuesto,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                      <tr>
                                         <td colspan="4"></td>
                                         <td style="text-align: right;"><b>Total:</b></td>
-                                        <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
+                                        <td align="right" ><b><?= '$'.number_format($model->gran_total,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                </table>

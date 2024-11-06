@@ -46,7 +46,7 @@ if($tokenAcceso == 3){
                         <?= $form->field($model, 'pedido_virtual')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
                     </div>
                     <div class="row">
-                        <?= $form->field($model, 'tipo_pedido')->dropdownList(['0' => 'COMERCIAL', '1' => 'REQUERIMIENTO'], ['prompt' => 'Seleccione...']) ?>
+                        <?= $form->field($model, 'tipo_pedido')->dropdownList(['0' => 'COMERCIAL', '1' => 'REQUERIMIENTO', '2' => 'ACONDICIONADO'], ['prompt' => 'Seleccione...']) ?>
                     </div>
                 </div>  
                     <div class="panel-footer text-right">

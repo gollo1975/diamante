@@ -40,7 +40,8 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
     {
         return [
             [['id_inventario', 'id_pedido', 'id_presupuesto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea','registro_eliminado',
-                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante'], 'integer'],
+                'cantidad_despachada','historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado',
+                'cantidad_faltante','venta_condicionado'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
             [['user_name','numero_lote'], 'string'],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -75,6 +76,7 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
             'numero_lote' => 'numero_lote',
             'cargar_existencias' => 'cargar_existencias',
             'consultado' => 'Consultado:',
+            'venta_condicionado' => 'Venta / Condicionado:',
         ];
     }
 
@@ -126,5 +128,14 @@ class PedidoPresupuestoComercial extends \yii\db\ActiveRecord
           $regenerarlinea = 'SI';
       }
       return $regenerarlinea;
+   }
+   
+   public function getVentaCondicionado() {
+      if($this->venta_condicionado == 0){
+           $ventacondicionado = 'V';
+      }else{
+          $ventacondicionado = 'B';
+      }
+      return $ventacondicionado;
    }
 }

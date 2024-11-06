@@ -46,7 +46,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             [['id_empresa', 'nit_empresa', 'dv', 'razon_social_completa', 'direccion','id_tipo_regimen'], 'required'],
             [['id_empresa', 'nit_empresa', 'dv', 'id_resolucion','documento_representante_legal','sugiere_retencion','id_naturaleza','aplica_punto_venta','calificacion_proveedor',
                 'aplica_factura_produccion','aplica_fabricante','recibo_caja_automatico','modulo_completo','aplica_inventario_incompleto','id_tipo_regimen',
-                'horas_jornada_laboral','inventario_enlinea'], 'integer'],
+                'horas_jornada_laboral','inventario_enlinea','agrupar_pedido'], 'integer'],
             [['razon_social', 'razon_social_completa', 'direccion','email','representante_legal'], 'string', 'max' => 50],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'codigo_departamento', 'codigo_municipio','codigo_banco'], 'string', 'max' => 10],
             [['telefono', 'celular'], 'string', 'max' => 15],
@@ -104,6 +104,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'id_tipo_regimen' => 'Tipo regimen:',
             'horas_jornada_laboral' => 'horas_jornada_laboral',
             'inventario_enlinea' => 'Inventario en linea:',
+            'agrupar_pedido' => 'agrupar_pedido',
             
             
         ];

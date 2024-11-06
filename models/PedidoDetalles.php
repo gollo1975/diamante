@@ -37,7 +37,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     {
         return [
             [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado','cantidad_despachada',
-                'historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante'], 'integer'],
+                'historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante','venta_condicionado'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
             [['user_name','numero_lote'], 'string'],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
@@ -71,6 +71,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
             'cargar_existencias' => 'cargar_existencias',
             'consultado' => 'consultado',
             'cantidad_faltante' => 'cantidad_faltante',
+            'venta_condicionado' => 'Venta /Condicionado:',
         ];
     }
 
@@ -109,11 +110,20 @@ class PedidoDetalles extends \yii\db\ActiveRecord
    }
    
    public function getRegenerarLinea() {
-      if($this-> regenerar_linea == 0){
+      if($this->regenerar_linea == 0){
            $regenerarlinea = 'NO';
       }else{
           $regenerarlinea = 'SI';
       }
       return $regenerarlinea;
+   }
+   
+   public function getVentaCondicionado() {
+      if($this->venta_condicionado == 0){
+           $ventacondicionado = 'V';
+      }else{
+          $ventacondicionado = 'B';
+      }
+      return $ventacondicionado;
    }
 }
