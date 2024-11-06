@@ -1510,11 +1510,11 @@ class PedidosController extends Controller
             if($inventario->aplica_iva == 0){
                 if($precio->iva_incluido == 0){
                    $detalle_pedido->subtotal = $subtotal; 
-                    $detalle_pedido->impuesto = round($subtotal * $inventario->porcentaje_iva)/100;                
+                    $detalle_pedido->impuesto = round(($subtotal * $inventario->porcentaje_iva)/100);                
                    $detalle_pedido->total_linea = round($detalle_pedido->impuesto +  $subtotal);
                 }else{
                     $porcentaje = $inventario->porcentaje_iva;
-                    $impuesto = round($subtotal * $porcentaje)/100;
+                    $impuesto = round(($subtotal * $porcentaje)/100);
                     $subtotal = $subtotal;
                     $detalle_pedido->subtotal = $subtotal;
                     $detalle_pedido->impuesto = $impuesto; 
@@ -1539,7 +1539,7 @@ class PedidosController extends Controller
         $model = $this->findModel($id);
         $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
-        foreach ( $detalle as $detalles):
+        foreach ($detalle as $detalles):
             $subtotal += $detalles->subtotal;    
             $impuesto += $detalles->impuesto;
             $total += $detalles->total_linea;
@@ -1566,6 +1566,7 @@ class PedidosController extends Controller
         $cupo = 0; $descuento_comercial = 0;
         $subtotal2 = 0; $impuesto2 = 0; $total2 = 0;
         $model = $this->findModel($id);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
         foreach ( $detalle as $detalles):
@@ -1583,10 +1584,9 @@ class PedidosController extends Controller
         endforeach;
         $model->descuento_comercial = $subtotal2; 
         $model->cantidad = $cantidad + $cantidad2;
-        $model->subtotal = $subtotal - $descuento_comercial;    
-        $model->impuesto = $impuesto - $impuesto2;
-        $model->gran_total = $total - $total2;
-        
+        $model->subtotal = $subtotal + $subtotal2;    
+        $model->impuesto = (($model->subtotal - $model->descuento_comercial) * $empresa->porcentaje_iva)/100;
+        $model->gran_total = round(($model->subtotal -$model->descuento_comercial) + $model->impuesto);
         $model->save(false);
         $cupo = $model->clientePedido->cupo_asignado;
         if($cliente->forma_pago == 2){
@@ -1711,7 +1711,8 @@ class PedidosController extends Controller
             $this->ActualizarTotalesPedido($id);
             $this->redirect(["adicionar_productos",'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);        
         }else{
-            $detalle->delete();
+             $detalle->delete();
+             $this->ActualizarTotalesPedido($id);
              $this->redirect(["adicionar_producto_pedido",'id' => $id, 'tokenAcceso' => $tokenAcceso, 'token' =>$token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);        
         }    
     }
@@ -1829,17 +1830,17 @@ class PedidosController extends Controller
                 }
                 if($tipo_pedido == 0){
                     $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
-                    //$cliente->save();
+                    $cliente->save();
                     $pedido->cerrar_pedido = 1;
                     $pedido->pedido_liberado = 1;
-                   // $pedido->save(false);
-                    //return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                    $pedido->save(false);
+                    return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
                 }else{
                     $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
-                    //$cliente->save();
+                    $cliente->save();
                     $pedido->cerrar_pedido = 1;
-                    //$pedido->save(false);
-                   // return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
+                    $pedido->save(false);
+                    return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
                 }  
             }else{
                
@@ -2406,6 +2407,7 @@ class PedidosController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
 
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -2427,7 +2429,8 @@ class PedidosController extends Controller
                     ->setCellValue('Q1', 'HISTORICO CANTIDAD VENDIDA')
                     ->setCellValue('R1', 'CANTIDAD DESPACHADA')
                     ->setCellValue('S1', 'FECHA VALIDADO')
-                    ->setCellValue('T1', 'NUMERO LOTE');
+                    ->setCellValue('T1', 'NUMERO LOTE')
+                    ->setCellValue('U1', 'TIPO VENTA');
                 ;
         $i = 2;
         
@@ -2453,7 +2456,8 @@ class PedidosController extends Controller
                     ->setCellValue('Q' . $i, $val->historico_cantidad_vendida)
                     ->setCellValue('R' . $i, $val->cantidad_despachada)
                     ->setCellValue('S' . $i, $val->fecha_alistamiento)
-                    ->setCellValue('T' . $i, $val->numero_lote);
+                    ->setCellValue('T' . $i, $val->numero_lote)
+                    ->setCellValue('U' . $i, $val->ventaCondicionado);
             $i++;
         }
 

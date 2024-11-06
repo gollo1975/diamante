@@ -248,80 +248,83 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                           <div class="panel-body">
                                 <table class="table table-responsive">
                                    <thead>
-                                       <tr style="font-size: 90%;">
+                                       <tr style="font-size: 85%;">
                                             <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
-                                           <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Subtotal.</th>
-                                           <th scope="col" style='background-color:#B9D5CE; width: 12%'>Iva</th>
-                                           <th scope="col" style='background-color:#B9D5CE; width: 14%'>Total</th>
+                                            <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
+                                           <th scope="col" style='background-color:#B9D5CE; text-align: right'>Cant.</th>
+                                           <th scope="col" style='background-color:#B9D5CE; text-align: right'>Vlr. unit.</th>
+                                            <th scope="col" style='background-color:#B9D5CE; text-align: right'>Subtotal</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
                                        </tr>
                                    </thead>
                                    <tbody>
-                                   <?php
-                                   $subtotal = 0; $impuesto = 0; $total = 0;
-                                   foreach ($detalle_pedido as $val):
-                                       $regla = app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $val->id_inventario])
-                                                                                         ->andWhere(['=','estado_regla', 0])->one();
-                                       
-                                       $subtotal += $val->subtotal;
-                                       $impuesto += $val->impuesto;
-                                       $total += $val->total_linea;
-                                       ?>
-                                   <tr style="font-size: 90%;">
-                                       <td><?= $val->inventario->nombre_producto ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                       <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
-                                       <?php if($tokenAcceso == 3){?>
-                                            <td style= 'width: 25px; height: 25px;'>
-                                                <?php if($regla && $regla->limite_venta <= $val->cantidad){?>
-                                                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario,'id_cliente' => $model->id_cliente, 'pedido_virtual' => $pedido_virtual,'tipo_pedido' => $tipo_pedido], [
-                                                                   'class' => '',
-                                                                   'title' => 'Proceso que permite agregar el producto al presupuesto comercial.', 
-                                                                   'data' => [
-                                                                       'confirm' => 'Este pruducto hace parte de la regla de bonificables. ¿Desea agregarlo al presupuesto comercial?',
-                                                                       'method' => 'post',
-                                                                   ],
-                                                     ])?>
-                                                <?php }?>
-                                             </td>
-                                        <?php }else{?>
-                                             <td style= 'width: 25px; height: 25px;'></td> 
-                                        <?php }?>     
-                                       <td style= 'width: 25px; height: 25px;'>
-                                            <?php if($model->autorizado == 0){?>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido], [
-                                                            'class' => '',
-                                                            'data' => [
-                                                                'confirm' => 'Esta seguro de eliminar este producto del pedido?',
-                                                                'method' => 'post',
-                                                            ],
-                                                        ])
-                                                ?>
-                                            <?php }?>
-                                       </td>
-                                   </tr>
-                                   </tbody>
-                                   <?php endforeach; ?>
+                                        <?php
+                                         foreach ($detalle_pedido as $val):
+                                             $regla = app\models\ProductoReglaComercial::find()->where(['=','id_inventario', $val->id_inventario])
+                                                                                              ->andWhere(['=','estado_regla', 0])->one();
+                                            ?>
+                                             <tr style="font-size: 85%;">
+                                                 <td><?= $val->inventario->nombre_producto ?></td>
+                                                 <td><?= $val->ventaCondicionado ?></td>
+                                                 <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                 <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                 <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+
+                                                 <?php if($tokenAcceso == 3 && $model->numero_pedido == 0){?>
+                                                      <td style= 'width: 25px; height: 25px;'>
+                                                          <?php if($regla && $regla->limite_venta <= $val->cantidad){?>
+                                                               <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['crear_regla_pedido', 'id' => $val->id_pedido, 'tokenAcceso' =>$tokenAcceso, 'token' =>$token, 'sw' => 0, 'id_inventario' => $val->id_inventario,'id_cliente' => $model->id_cliente, 'pedido_virtual' => $pedido_virtual,'tipo_pedido' => $tipo_pedido], [
+                                                                             'class' => '',
+                                                                             'title' => 'Proceso que permite agregar el producto al presupuesto comercial.', 
+                                                                             'data' => [
+                                                                                 'confirm' => 'Este pruducto hace parte de la regla de bonificables. ¿Desea agregarlo al presupuesto comercial?',
+                                                                                 'method' => 'post',
+                                                                             ],
+                                                               ])?>
+                                                          <?php }?>
+                                                       </td>
+                                                  <?php }else{?>
+                                                       <td style= 'width: 25px; height: 25px;'></td> 
+                                                  <?php }?>     
+                                                 <td style= 'width: 25px; height: 25px;'>
+                                                      <?php if($model->autorizado == 0){?>
+                                                          <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_pedido, 'detalle' => $val->id_detalle, 'tokenAcceso' => $tokenAcceso, 'token' => 1, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido], [
+                                                                      'class' => '',
+                                                                      'data' => [
+                                                                          'confirm' => 'Esta seguro de eliminar este producto del pedido?',
+                                                                          'method' => 'post',
+                                                                      ],
+                                                                  ])
+                                                          ?>
+                                                      <?php }?>
+                                                 </td>
+                                             </tr>
+                                         <?php endforeach; ?>
+                                </tbody>
+                                <tr>
+                                        <td colspan="8" style='background-color:#B9D5CE;'></td>
+                                    </tr>
                                    <tr>
-                                        <td colspan="4"></td>
-                                        <td style="text-align: right;"><b>Subtotal:</b></td>
+                                        <td colspan="3"></td>
+                                        <td style="text-align: right;"><b>Vr. bruto:</b></td>
                                         <td align="right" ><b><?= '$'.number_format($model->subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="4"></td>
+                                        <td colspan="3"></td>
+                                        <td style="text-align: right;"><b>Descuento:</b></td>
+                                        <td align="right" ><b><?= '$'.number_format($model->descuento_comercial,0); ?></b></td>
+                                        <td colspan="1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3"></td>
                                         <td style="text-align: right;"><b>Iva:</b></td>
                                         <td align="right" ><b><?= '$'.number_format($model->impuesto,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                      <tr>
-                                        <td colspan="4"></td>
+                                        <td colspan="3"></td>
                                         <td style="text-align: right;"><b>Total:</b></td>
                                         <td align="right" ><b><?= '$'.number_format($model->gran_total,0); ?></b></td>
                                         <td colspan="1"></td>
@@ -329,7 +332,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                </table>
                            </div>
                            <div class="panel-footer text-right">
-                               <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido', 'id' => $id, 'tokenAcceso' => $tokenAcceso], ['class' => 'btn btn-primary btn-sm']);?>
+                               <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Excel', ['excel_pedido', 'id' => $id, 'tokenAcceso' => $tokenAcceso], ['class' => 'btn btn-primary btn-xs']);?>
                            </div>
                        </div>
                 </div>
@@ -347,8 +350,6 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>       
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unit.</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE; '>Subtotal</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 12%'>Iva</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 14%'>Total</th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
                                     </thead>
@@ -368,8 +369,6 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                 <?php }?>      
                                                 <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
                                                 <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?php if($model->autorizado == 0){?>
@@ -387,19 +386,22 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                          <?php endforeach;?>          
                                     </body>
                                     <tr>
-                                        <td colspan="4"></td>
+                                        <td colspan="8" style='background-color:#B9D5CE;'></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
                                         <td style="text-align: right;"><b>Subtotal:</b></td>
                                         <td align="right"><b><?= '$'.number_format($subtotal,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="4"></td>
+                                        <td colspan="2"></td>
                                         <td style="text-align: right;"><b>Iva:</b></td>
                                         <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
                                         <td colspan="1"></td>
                                     </tr>
                                      <tr>
-                                        <td colspan="4"></td>
+                                        <td colspan="2"></td>
                                         <td style="text-align: right;"><b>Total:</b></td>
                                         <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
                                         <td colspan="1"></td>

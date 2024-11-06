@@ -53,7 +53,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             [['nombre_sistema', 'pagina_web'], 'string', 'max' => 30],
             [['id_empresa'], 'unique'],
             [['declaracion'], 'string', 'max' => 500],
-            ['porcentaje_reteiva', 'number'],
+            [['porcentaje_reteiva', 'porcentaje_iva'],'number'],
             [['presentacion'], 'string', 'max' => 162],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
             [['codigo_municipio'], 'exist', 'skipOnError' => true, 'targetClass' => Municipios::className(), 'targetAttribute' => ['codigo_municipio' => 'codigo_municipio']],
@@ -105,6 +105,7 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'horas_jornada_laboral' => 'horas_jornada_laboral',
             'inventario_enlinea' => 'Inventario en linea:',
             'agrupar_pedido' => 'agrupar_pedido',
+            'porcentaje_iva' => 'Porcentaje de iva:',
             
             
         ];
