@@ -171,7 +171,9 @@ $form = ActiveForm::begin([
             <?php endforeach; ?>
             </tbody>    
         </table> 
-        <div class="panel-footer text-right" >            
+        
+     </div>
+    <div class="panel-footer text-right" >            
            
             <div class="btn-group btn-sm" role="group">    
                    <button type="button" class="btn btn-success  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -200,6 +202,5 @@ $form = ActiveForm::begin([
                              ])?>
         </div>
       <?php $form->end() ?>
-     </div>
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>

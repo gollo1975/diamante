@@ -443,7 +443,6 @@ class RemisionesController extends Controller
             }
         endforeach;
         if($sw == 0){
-            var_dump(count($detalle));
             if(count($detalle) > 0 && $factura->valor_bruto > 0){
                 if($factura->autorizado == 0){
                     $factura->autorizado = 1;
@@ -453,7 +452,7 @@ class RemisionesController extends Controller
                 $factura->save();
                 $this->redirect(["view", 'id' => $id,'accesoToken' => $accesoToken]);  
             }else{
-                if(count($detalle)<= 0){
+                if(count($detalle)< 0){
                     if($factura->autorizado == 0){
                     $factura->autorizado = 1;
                     }else{
