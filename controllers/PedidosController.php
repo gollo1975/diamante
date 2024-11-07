@@ -2010,7 +2010,7 @@ class PedidosController extends Controller
     public function actionValidar_lineas_pedido($id)
     {
         $pedido= Pedidos::findOne($id);
-        $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $pedido->id_pedido]);
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['=','venta_condicionado', 0])->all();
         $sw = 0; $cantidad = 0;
         foreach ($detalle_pedido as $key => $detalle):
             $inventario = InventarioProductos::findOne ($detalle->id_inventario);
@@ -2036,7 +2036,7 @@ class PedidosController extends Controller
     
     //PROCESO QUE ACTUALIZA
     protected function CumplePedido($id , $sw) {
-       $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $id]);  
+       $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','venta_condicionado', 0])->all();
        foreach ($detalle_pedido as $key => $detalle):
            if($detalle->cantidad_faltante < 0){
                $sw = 1;
@@ -2087,7 +2087,7 @@ class PedidosController extends Controller
     //PROCESO QUE DESCARGAR LAS UNIDADES VENDIDAS DE PEDIDOS
     public function actionValidar_linea_inventario($id) {
         $pedido = Pedidos::findOne($id);
-        $detalle_pedido = PedidoDetalles::findAll(['id_pedido' => $pedido->id_pedido]);
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','venta_condicionado', 0])->all();
         $sumaPedido = 0;
         foreach ($detalle_pedido as $key => $detalle) :
             $inventario = InventarioProductos::findOne ($detalle->id_inventario);

@@ -22,6 +22,7 @@ use yii\filters\AccessControl;
 $this->title = 'Listar pedidos';
 $this->params['breadcrumbs'][] = ['label' => 'Listar pedidos', 'url' => ['listar_pedidos']];
 $this->params['breadcrumbs'][] = $model->id_pedido;
+$empresa = app\models\MatriculaEmpresa::findOne(1);
 ?>
 
 <div class="almacenamiento-producto-view_lsitar">
@@ -62,10 +63,15 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
        <div>
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#pedidocomercial" aria-controls="pedidocomercial" role="tab" data-toggle="tab">Pedido <span class="badge"><?= count($pedido_detalle) ?></span></a></li>
-                <?php if ($pedido_presupuesto){?>
-                    <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto comercial <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
-                <?php } ?>    
+                <?php if($empresa->agrupar_pedido == 0){?>
+                    <li role="presentation" class="active"><a href="#pedidocomercial" aria-controls="pedidocomercial" role="tab" data-toggle="tab">Pedido <span class="badge"><?= count($pedido_detalle) ?></span></a></li>
+                    <?php if ($pedido_presupuesto){?>
+                        <li role="presentation"><a href="#presupuestocomercial" aria-controls="presupuestocomercial" role="tab" data-toggle="tab">Presupuesto comercial <span class="badge"><?= count($pedido_presupuesto) ?></span></a></li>
+                    <?php }    
+                }else{ ?> 
+                    <li role="presentation" class="active"><a href="#pedidocomercial" aria-controls="pedidocomercial" role="tab" data-toggle="tab">Pedido <span class="badge"><?= count($pedido_detalle) ?></span></a></li>
+                <?php } ?>   
+                   
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="pedidocomercial">

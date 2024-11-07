@@ -424,7 +424,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                             }    
                             if($model->autorizado == 1){?>    
                                     <div class="panel-footer text-right">
-                                        <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Expotar excel', ['excel_pedido_presupuesto', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);?>
+                                        <?= Html::a('<span class="glyphicon glyphicon-download-alt"></span> Excel', ['excel_pedido_presupuesto', 'id' => $model->id_pedido], ['class' => 'btn btn-primary btn-sm']);?>
                                     </div>                           
                             <?php }?>
                                 

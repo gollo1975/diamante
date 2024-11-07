@@ -1534,28 +1534,47 @@ class AlmacenamientoProductoController extends Controller
     // CERRAR PEDIDO PARA FACTURACION
     public function actionPedido_validado_facturacion($id_pedido) {
         $pedido = Pedidos::findOne($id_pedido);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         $sw = 0;
-        //VALIDA QUE TODAS LAS LINEAS DEL DETALLE DEL PEDIDO
-        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
-        if(count($detalle_pedido) > 0){
-            $sw = 1;
-            Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del pedido para enviar a facturación.');
-            return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
-        }
-        //VALIDA QUE TODAS LAS LINEAS DEL PRESUPUESTO
-        $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
-        if(count($presupuesto) > 0){
-            $sw = 1;
-            Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del presupuesto comercial para enviar a facturación.');
-            return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
-        }
-        if($sw == 0){
-            $pedido->pedido_validado = 1;
-            $pedido->fecha_cierre_alistamiento = date('Y-m-d');
-            $pedido->save();
-            return $this->redirect(["listar_pedidos"]);
+        if($empresa->agrupar_pedido == 0){
+            //VALIDA QUE TODAS LAS LINEAS DEL DETALLE DEL PEDIDO
+            $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
+            if(count($detalle_pedido) > 0){
+                $sw = 1;
+                Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del pedido para enviar a facturación.');
+                return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
+            }
+            //VALIDA QUE TODAS LAS LINEAS DEL PRESUPUESTO
+            $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
+            if(count($presupuesto) > 0){
+                $sw = 1;
+                Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del presupuesto comercial para enviar a facturación.');
+                return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
+            }
+            if($sw == 0){
+                $pedido->pedido_validado = 1;
+                $pedido->fecha_cierre_alistamiento = date('Y-m-d');
+                $pedido->save();
+                return $this->redirect(["listar_pedidos"]);
+            }else{
+                return $this->redirect(["listar_pedidos"]);
+            }  
         }else{
-            return $this->redirect(["listar_pedidos"]);
+             //VALIDA QUE TODAS LAS LINEAS DEL DETALLE DEL PEDIDO
+            $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido',  $id_pedido])->andWhere(['=','linea_validada', 0])->all();
+            if(count($detalle_pedido) > 0){
+                $sw = 1;
+                Yii::$app->getSession()->setFlash('error', 'Se deben de validar todas las lineas del pedido para enviar a facturación.');
+                return $this->redirect(["view_listar",'id_pedido' => $id_pedido]);
+            }
+            if($sw == 0){
+                $pedido->pedido_validado = 1;
+                $pedido->fecha_cierre_alistamiento = date('Y-m-d');
+                $pedido->save();
+                return $this->redirect(["listar_pedidos"]);
+            }else{
+                return $this->redirect(["listar_pedidos"]);
+            }  
         }    
     }
     /**
