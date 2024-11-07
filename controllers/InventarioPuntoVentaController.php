@@ -57,7 +57,7 @@ class InventarioPuntoVentaController extends Controller
      */
     public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
-            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',19])->all()){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',145])->all()){
                 $form = new \app\models\FiltroBusquedaInventarioPunto();
                 $codigo = null;
                 $inventario_inicial = null;
