@@ -42,12 +42,13 @@ class ResolucionDian extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_resolucion', 'desde', 'hasta', 'fecha_vence'], 'required'],
+            [['numero_resolucion', 'desde', 'hasta', 'fecha_vence','id_documento'], 'required'],
             [['desde', 'hasta', 'fecha_vence', 'fecha_registro'], 'safe'],
-            [['estado_resolucion','rango_inicio','rango_final','vigencia'], 'integer'],
+            [['estado_resolucion','rango_inicio','rango_final','vigencia','codigo_interface','id_documento'], 'integer'],
             [['numero_resolucion'], 'string', 'max' => 30],
-            [['consecutivo','abreviatura'], 'string', 'max' => 3],
+            [['consecutivo'], 'string', 'max' => 3],
             [['user_name'], 'string', 'max' => 15],
+            [['id_documento'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoElectronico::className(), 'targetAttribute' => ['id_documento' => 'id_documento']],
         ];
     }
 
@@ -59,8 +60,8 @@ class ResolucionDian extends \yii\db\ActiveRecord
         return [
             'id_resolucion' => 'Id',
             'numero_resolucion' => 'Numero resolucion',
-            'desde' => 'Desde',
-            'hasta' => 'Hasta',
+            'desde' => 'Fecha inicio',
+            'hasta' => 'Fecha final',
             'fecha_vence' => 'Fecha vencimiento',
             'consecutivo' => 'Consecutivo',
             'fecha_registro' => 'Fecha Registro',
@@ -69,13 +70,15 @@ class ResolucionDian extends \yii\db\ActiveRecord
             'rango_inicio' => 'Rango inicio',
             'rango_final' => 'Rango final',
             'vigencia' => 'Vigencia',
-            'abreviatura' => 'Tipo proceso',
+            'id_documento' => 'Tipo documento',
+            'codigo_interface' => 'Codigo interface',
+          
         ];
     }
     
-     public function getMatriculaEmpresas()
+     public function getDocumentosElectronicos()
     {
-        return $this->hasMany(MatriculaEmpresa::className(), ['id_resolucion' => 'id_resolucion']);
+        return $this->hasOne(DocumentoElectronico::className(), ['id_documento' => 'id_documento']);
     }
     
     public function getActivo() {
@@ -85,13 +88,5 @@ class ResolucionDian extends \yii\db\ActiveRecord
             $estado = 'NO';
         }
         return $estado;
-    }
-    public function getAbreviaturaResolucion() {
-        if ($this->abreviatura == 'F'){
-            $abreviaturaresolucion = 'FABRICANTE';
-        }else{
-            $abreviaturaresolucion = 'PUNTO DE VENTA';
-        }
-        return $abreviaturaresolucion;
     }
 }

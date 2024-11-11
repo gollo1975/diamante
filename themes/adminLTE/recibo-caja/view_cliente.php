@@ -29,11 +29,15 @@ $view = 'recibo-caja';
 
     <!--<?= Html::encode($this->title) ?>-->
     <p>
-        <?php if($token == 0){?>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?php }else{?>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_clientes'], ['class' => 'btn btn-primary btn-sm']) ?>
-        <?php }?> 
+        <?php if($token == 0){
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);
+        }else{
+            if($token == 1){ 
+                 echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['cargar_cartera'], ['class' => 'btn btn-primary btn-sm']);
+            }else{
+                 echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_consulta_clientes'], ['class' => 'btn btn-primary btn-sm']);
+            }     
+        }?> 
         <?php if ($model->autorizado == 0 && $model->recibo_cerrado == 0) { ?>
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_recibo, 'token' =>$token, 'tokenAcceso' => $tokenAcceso], ['class' => 'btn btn-default btn-sm']);
         }else{
@@ -129,7 +133,7 @@ $view = 'recibo-caja';
                                 </tbody>      
                             </table>
                         </div>
-                        <?php if($token == 0 && $model->autorizado == 0){?>
+                        <?php if($model->autorizado == 0){?>
                             <div class="panel-footer text-right" >  
                                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizasaldorecibo']);?>    
                                <?= Html::a('<span class="glyphicon glyphicon-search"></span>Facturas', ['recibo-caja/buscar_facturas', 'id' => $model->id_recibo, 'id_cliente' =>$model->id_cliente, 'token' => $token, 'tokenAcceso' => $tokenAcceso],[ 'class' => 'btn btn-success btn-sm']) ?>                                            

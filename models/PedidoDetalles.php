@@ -120,7 +120,7 @@ class PedidoDetalles extends \yii\db\ActiveRecord
    
    public function getVentaCondicionado() {
       if($this->venta_condicionado == 0){
-           $ventacondicionado = 'V';
+           $ventacondicionado = 'C';
       }else{
           $ventacondicionado = 'B';
       }

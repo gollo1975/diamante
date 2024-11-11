@@ -296,7 +296,7 @@ $form = ActiveForm::begin([
                                 </td>
                             <?php 
                             }else{
-                                if($val->liberado_inventario == 1 && $val->detalle_pedido_descargado_inventario == 0){ ?>
+                               if($val->liberado_inventario == 1 && $val->detalle_pedido_descargado_inventario == 0){ ?>
                                     <td style= 'width: 25px; height: 10px;'>
                                         <?= Html::a('<span class="glyphicon glyphicon-import"></span> ', ['pedidos/validar_linea_inventario', 'id' => $val->id_pedido], [
                                                        'class' => '',
@@ -321,7 +321,8 @@ $form = ActiveForm::begin([
                                     </td>
                                 <?php } 
                             }
-                        }else{ //termina ciclo de pedido sin presupuesto
+                        }else{
+                            //termina ciclo de pedido sin presupuesto
                             if($val->liberado_inventario == 0  && $val->detalle_pedido_descargado_inventario == 0){ ?>
                                 <td style= 'width: 25px; height: 10px;'>
                                     <?= Html::a('<span class="glyphicon glyphicon-user"></span> ', ['pedidos/validar_lineas_pedido', 'id' => $val->id_pedido], [

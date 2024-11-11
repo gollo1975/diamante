@@ -158,7 +158,7 @@ class ReciboCajaController extends Controller
     }
     
    //LISTA TODOS LOS CLIENTES CON CARTERA PARA CADA VENDEDOR
-    public function actionCargar_cartera() {
+    public function actionCargar_cartera($token = 1) {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',55])->all()){
                 $form = new FiltroBusquedaRecibo();
@@ -245,6 +245,7 @@ class ReciboCajaController extends Controller
                                 'pagination' => $pages,
                                 'vendedor' => $vendedor,
                                 'tokenAcceso' => $tokenAcceso,
+                                 'token' => $token,
                     ]);
                 }else{ 
                    return $this->render('cargar_cliente_cartera_admon', [
@@ -252,6 +253,7 @@ class ReciboCajaController extends Controller
                                 'form' => $form,
                                 'pagination' => $pages,
                                 'tokenAcceso' => $tokenAcceso,
+                                'token' => $token,
                     ]); 
                 }   
             }else{
@@ -327,7 +329,7 @@ class ReciboCajaController extends Controller
         ]);
     }
     //PERMITE CREAR EL NUEVO RECIBO DE CAJA
-    public function actionCrear_nuevo_recibo($id_cliente, $tokenAcceso) {
+    public function actionCrear_nuevo_recibo($id_cliente, $tokenAcceso, $token) {
 
         $model = new \app\models\FormModeloNuevoRecibo();
         if ($model->load(Yii::$app->request->post())) {
@@ -346,7 +348,7 @@ class ReciboCajaController extends Controller
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->save(false);
                     $recibo = ReciboCaja::find()->orderBy('id_recibo DESC')->one();
-                    $this->redirect(["recibo-caja/view_cliente", 'id' => $recibo->id_recibo, 'tokenAcceso' => $tokenAcceso]);
+                    return $this->redirect(["recibo-caja/view_cliente", 'id' => $recibo->id_recibo, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
                 }
             } else {
                 $model->getErrors();
@@ -355,7 +357,6 @@ class ReciboCajaController extends Controller
         return $this->renderAjax('form_nuevo_recibo', [
                     'model' => $model,
                     'id_cliente' => $id_cliente,
-
                     'tokenAcceso' => $tokenAcceso,
         ]);
     }
@@ -573,14 +574,20 @@ class ReciboCajaController extends Controller
     //proceso que autoriza y desautoriza
     public function actionAutorizado($id, $token, $tokenAcceso) {
          $model = $this->findModel($id);
-         if($model->autorizado == 0){
-             $model->autorizado = 1;
-             $model->save();
+         $detalle_recibo = ReciboCajaDetalles::find()->where(['=','id_recibo', $id])->one();
+         if($detalle_recibo){
+            if($model->autorizado == 0){
+                $model->autorizado = 1;
+                $model->save();
+            }else{
+                $model->autorizado = 0;
+                $model->save();
+            }
+             return $this->redirect(['view_cliente','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
          }else{
-             $model->autorizado = 0;
-             $model->save();
-         }
-          return $this->redirect(['view_cliente','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
+            Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar una factura para descagar el pago.'); 
+            return $this->redirect(['view_cliente','id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso]);
+         }     
     }
     
      public function actionAutorizado_admon($id, $token) {

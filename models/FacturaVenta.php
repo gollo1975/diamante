@@ -61,8 +61,8 @@ class FacturaVenta extends \yii\db\ActiveRecord
         return [
           
             [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
-                'valor_reteiva', 'saldo_factura', 'forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente','estado_factura','dias_mora','valor_intereses_mora',
-                'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario','id_punto'], 'integer'],
+                'valor_reteiva', 'saldo_factura', 'id_forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente','estado_factura','dias_mora','valor_intereses_mora',
+                'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario','id_punto','descuento_comercial','id_resolucion'], 'integer'],
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada','fecha_editada'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento','porcentaje_mora'], 'number'],
             [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
@@ -70,12 +70,15 @@ class FacturaVenta extends \yii\db\ActiveRecord
             [['numero_resolucion'], 'string', 'max' => 30],
             [['consecutivo'], 'string', 'max' => 3],
             [['observacion'], 'string', 'max' => 200],
+            [['cufe'], 'string' ],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
             [['id_tipo_factura'], 'exist', 'skipOnError' => true, 'targetClass' => TipoFacturaVenta::className(), 'targetAttribute' => ['id_tipo_factura' => 'id_tipo_factura']],
             [['id_agente'], 'exist', 'skipOnError' => true, 'targetClass' => AgentesComerciales::className(), 'targetAttribute' => ['id_agente' => 'id_agente']],
             [['id_tipo_venta'], 'exist', 'skipOnError' => true, 'targetClass' => TipoVenta::className(), 'targetAttribute' => ['id_tipo_venta' => 'id_tipo_venta']],
             [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
+            [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => ResolucionDian::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
+            [['id_forma_pago'], 'exist', 'skipOnError' => true, 'targetClass' => FormaPago::className(), 'targetAttribute' => ['id_forma_pago' => 'id_forma_pago']],
  
             ];
     }
@@ -113,7 +116,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'valor_reteiva' => 'Reteiva:',
             'porcentaje_descuento' => '% Descto:',
             'saldo_factura' => 'Saldo factura',
-            'forma_pago' => 'Forma pago:',
+            'id_forma_pago' => 'Forma pago:',
             'plazo_pago' => 'Plazo:',
             'autorizado' => 'Autorizado:',
             'user_name' => 'User Name:',
@@ -132,6 +135,9 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'id_tipo_venta' => 'Tipo de venta:',
             'tipo_inventario' => 'Tipo inventario:',
             'id_punto' => 'Punto de venta:',
+            'descuento_comercial' => 'descuento_comercial',
+            'id_resolucion' => 'Resolucion',
+            'cufe' => 'cufe',
             
         ];
     }
@@ -143,7 +149,23 @@ class FacturaVenta extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Pedidos::className(), ['id_pedido' => 'id_pedido']);
     }
-
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getResolucionDian()
+    {
+        return $this->hasOne(ResolucionDian::className(), ['id_resolucion' => 'id_resolucion']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFormaPago()
+    {
+        return $this->hasOne(FormaPago::className(), ['id_forma_pago' => 'id_forma_pago']);
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -174,14 +196,6 @@ class FacturaVenta extends \yii\db\ActiveRecord
         return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
     }
     
-    public function getFormaPago() {
-        if($this->forma_pago == 1){
-            $formapago = 'CONTADO';
-        }else{
-            $formapago = 'CREDITO';
-        }
-        return $formapago;
-    }
     public function getAutorizadofactura() {
         if($this->autorizado == 0){
             $autorizadofactura = 'NO';

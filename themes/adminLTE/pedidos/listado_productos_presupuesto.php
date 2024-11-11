@@ -19,11 +19,15 @@ use yii\web\Response;
 use yii\filters\AccessControl;
 
 $this->title = 'Regla comercial(Productos)';
-$this->params['breadcrumbs'][] = ['label' => 'Presupuesto producto', 'url' => ['adicionar_presupuesto', 'id'=> $id, 'sw' => $sw, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual ,'tipo_pedido' => $tipo_pedido ]];
+$this->params['breadcrumbs'][] = ['label' => 'Presupuesto producto', 'url' => ['adicionar_presupuesto', 'id'=> $id, 'sw' => $sw, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual ,'tipo_pedido' => $tipo_pedido]];
 $this->params['breadcrumbs'][] = $model->id_pedido;
 ?>
 <p>
-    <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['adicionar_productos','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-primary btn-sm']) ?>
+    <?php if($tipo_pedido == 0){
+      echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['adicionar_productos','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-primary btn-sm']);
+    }else{
+        echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['adicionar_producto_pedido','id' =>$id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-primary btn-sm']);
+    }?>
 </p>
     <div class="panel-body">
         <script language="JavaScript">
@@ -34,7 +38,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
         </script>
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'sw' => $sw]),
+            "action" => Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token, 'tokenAcceso' => $tokenAcceso, 'sw' => $sw, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -56,7 +60,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
 
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["pedidos/adicionar_presupuesto", 'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'sw' => $sw, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>

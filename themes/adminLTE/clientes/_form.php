@@ -23,6 +23,7 @@ $posicion = ArrayHelper::map(PosicionPrecio::find()->all(), 'id_posicion', 'posi
 $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza', 'naturaleza');
 $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 $tipoCliente = ArrayHelper::map(TipoCliente::find()->all(), 'id_tipo_cliente', 'concepto');
+$formaPago = ArrayHelper::map(app\models\FormaPago::find()->all(), 'id_forma_pago', 'concepto');
 ?>
 
 <!--<h1>Nuevo proveedor</h1>-->
@@ -75,7 +76,7 @@ $form = ActiveForm::begin([
             <?= $form->field($model, 'codigo_municipio')->dropDownList(['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">
-            <?= $form->field($model, 'forma_pago')->dropdownList(['1' => 'CONTADO', '2' => 'CRÉDITO'], ['prompt' => 'Seleccione...', 'onchange' => 'fpago()', 'id' => 'forma_pago']) ?>
+            <?= $form->field($model, 'id_forma_pago')->dropdownList($formaPago, ['prompt' => 'Seleccione...']) ?>
             <?= $form->field($model, 'plazo')->input("text",['id' => 'plazo']) ?>
         </div>  
         <div class="row">

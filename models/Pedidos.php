@@ -173,7 +173,7 @@ class Pedidos extends \yii\db\ActiveRecord
         if($this->tipo_pedido == 0 ){
             $tipopedido = 'Comercial';
         }else{
-            if($this->tipo_pedido == 0 ){
+            if($this->tipo_pedido == 1 ){
                 $tipopedido = 'Requerimiento';
             }else{
                 $tipopedido = 'Acondicionado';

@@ -556,7 +556,7 @@ class ClientesController extends Controller
                     ->setCellValue('J' . $i, $val->codigoDepartamento->departamento)
                     ->setCellValue('K' . $i, $val->codigoMunicipio->municipio)
                     ->setCellValue('L' . $i, $val->tipoRegimen)
-                    ->setCellValue('M' . $i, $val->formaPago)
+                    ->setCellValue('M' . $i, $val->formaPago->concepto)
                     ->setCellValue('N' . $i, $val->plazo)
                     ->setCellValue('O' . $i, $val->autoretenedorVenta)
                     ->setCellValue('P' . $i, $val->naturaleza->naturaleza)

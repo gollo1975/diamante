@@ -42,7 +42,7 @@ $view = 'clientes';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'>Id:</th>
                     <td><?= $model->id_cliente ?></td>
                     <th style='background-color:#F0F3EF;'>Tipo documento:</th>
@@ -52,7 +52,7 @@ $view = 'clientes';
                     <th style='background-color:#F0F3EF;' >Cliente:</th>
                     <td><?= $model->nombre_completo ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     
                     <th style='background-color:#F0F3EF;'>Telefono:</th>
                     <td><?= $model->telefono ?></td>
@@ -63,7 +63,7 @@ $view = 'clientes';
                        <th style='background-color:#F0F3EF;'>Direccion:</th>
                     <td><?= $model->direccion ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'>Departamento:</th>
                     <td><?= $model->codigoDepartamento->departamento ?></td>
                     <th style='background-color:#F0F3EF;'>Municipio.</th>
@@ -75,9 +75,9 @@ $view = 'clientes';
                  
                     
                 </tr>
-                 <tr style="font-size: 90%;">
+                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'>Forma pago:</th>
-                    <td><?= $model->formaPago ?></td>
+                    <td><?= $model->formaPago->concepto ?></td>
                     <th style='background-color:#F0F3EF;'>Plazo:</th>
                     <td><?= $model->plazo ?></td>
                     <th style='background-color:#F0F3EF;'>User nuevo:</th>
@@ -85,7 +85,7 @@ $view = 'clientes';
                     <th style='background-color:#F0F3EF;'>User editado:</th>
                     <td><?= $model->user_name_editar ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'>Fecha registro:</th>
                     <td><?= $model->fecha_creacion ?></td>
                     <th style='background-color:#F0F3EF;'>Fecha editado:</th>
@@ -97,7 +97,7 @@ $view = 'clientes';
                     <td><?= $model->agenteComercial->nombre_completo ?></td>
                     
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'>G. presupuesto:</th>
                     <td style="text-align: right"><?= ''.number_format($model->gasto_presupuesto_comercial,0) ?></td>
                     <th style='background-color:#F0F3EF;'>Tipo cliente:</th>
@@ -109,7 +109,7 @@ $view = 'clientes';
                     <td style="text-align: right"><?= ''.number_format($model->cupo_asignado,0) ?></td>
                     
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'>Tipo sociedad:</th>
                     <td><?= $model->tipoSociedad ?></td>
                       <th style='background-color:#F0F3EF;'>Autoretenedor:</th>
@@ -119,7 +119,7 @@ $view = 'clientes';
                     <th style='background-color:#F0F3EF;'>Presupuesto:</th>
                     <td style="text-align: right"><?= ''.number_format($model->presupuesto_comercial,0) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'>Observación:</th>
                     <td colspan="8"><?= $model->observacion ?></td>
                 </tr>
@@ -164,7 +164,7 @@ $view = 'clientes';
                                 <tbody>
                                     <?php 
                                     foreach ($cupo as $cupos):?>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <td> <?= $cupos->id_cupo?></td>
                                         <?php if($cupos->descripcion == 0){?>
                                               <td> <?= 'CUPO INICIAL'?></td>
@@ -195,7 +195,7 @@ $view = 'clientes';
                                 </tbody>      
                             </table>
                         </div>
-                        <?php if($token == 0 && $model->forma_pago == 2){?>
+                        <?php if($token == 0 && $model->formaPago->codigo_api == 4){?>
                             <div class="panel-footer text-right" >  
                                 <!-- Inicio Nuevo Detalle proceso -->
                                   <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear cupo',
@@ -225,7 +225,7 @@ $view = 'clientes';
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE; width: 15px'>Código</th>                        
                                         <th scope="col" style='background-color:#B9D5CE; width: 80px'>Fecha proceso</th> 
                                         <th scope="col" style='background-color:#B9D5CE; width: 30px'>Usuario</th> 
@@ -235,7 +235,7 @@ $view = 'clientes';
                                 <body>
                                     <?php 
                                     foreach ($anotacion as $anotaciones):?>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <td> <?= $anotaciones->id_anotacion?></td>
                                         <td> <?= $anotaciones->fecha_registro?></td>
                                         <td> <?= $anotaciones->user_name?></td>
@@ -274,7 +274,7 @@ $view = 'clientes';
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE; '>Nombres</th>                        
                                         <th scope="col" style='background-color:#B9D5CE; '>Apellidos</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>Celular</th> 
@@ -287,7 +287,7 @@ $view = 'clientes';
                                 <body>
                                     <?php 
                                     foreach ($Concontacto as $val):?>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <td> <?= $val->nombres?></td>
                                         <td> <?= $val->apellidos?></td>
                                         <td> <?= $val->celular?></td>

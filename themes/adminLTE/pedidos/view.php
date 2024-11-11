@@ -67,7 +67,7 @@ $view = 'pedidos';
         </div>    
     <div class="panel panel-success">
         <div class="panel-heading">
-            DETALLES DEL PEDIDO
+            DETALLES DEL PEDIDO:   (<?= $model->tipoPedido?>)
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
@@ -88,7 +88,7 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->numero_pedido) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cantidad') ?></th>
                     <td><?= Html::encode($model->cantidad) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Vr_bruto') ?>:</th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
@@ -98,8 +98,8 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->cliente) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'impuesto') ?></th>
-                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->impuesto,0)) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Dscto_comercial') ?></th>
+                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->descuento_comercial,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
@@ -108,8 +108,8 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->pedidoAbierto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'facturado') ?></th>
                     <td><?= Html::encode($model->pedidoFacturado) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'gran_total') ?></th>
-                    <td style="text-align: right"><?= Html::encode(''.number_format($model->gran_total,0)) ?></td>                    
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'impuesto') ?></th>
+                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->impuesto,0)) ?></td>                  
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'usuario') ?></th>
@@ -118,8 +118,8 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->agentePedido->nombre_completo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_entrega') ?>:</th>
                     <td ><?= Html::encode($model->fecha_entrega) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presupuesto_asignado') ?>:</th>
-                    <td style="text-align: right"><?= Html::encode(''.number_format($model->clientePedido->presupuesto_comercial,0)) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'gran_total') ?></th>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->gran_total,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
@@ -154,6 +154,7 @@ $view = 'pedidos';
                                     <tr style="font-size: 90%;">
                                         <th scope="col" style='background-color:#B9D5CE;'><b>Codigo</b></th>  
                                         <th scope="col" style='background-color:#B9D5CE;'>Presentación</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>TV</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>C. Faltante</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Vr. unit.</th>
@@ -167,6 +168,7 @@ $view = 'pedidos';
                                <tr style="font-size: 90%;">
                                     <td><?= $val->inventario->codigo_producto ?></td>
                                    <td><?= $val->inventario->nombre_producto ?></td>
+                                    <td><?= $val->ventaCondicionado?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                    <td style="text-align: right; background-color: #ffcaca"><?= ''.number_format($val->cantidad_faltante,0) ?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
@@ -188,25 +190,25 @@ $view = 'pedidos';
                                <?php endforeach; ?>
 
                                <tr>
-                                    <td colspan="4"></td>
+                                    <td colspan="5"></td>
                                     <td style="text-align: right;"><b>Vr. bruto:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($model->subtotal,0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                 <tr>
-                                    <td colspan="4"></td>
+                                    <td colspan="5"></td>
                                     <td style="text-align: right;"><b>Descuento:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($model->descuento_comercial,0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                 <tr>
-                                    <td colspan="4"></td>
+                                    <td colspan="5"></td>
                                     <td style="text-align: right;"><b>Impuesto:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($model->impuesto, 0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                  <tr>
-                                    <td colspan="4"></td>
+                                    <td colspan="5"></td>
                                     <td style="text-align: right;"><b>Total:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($model->gran_total, 0); ?></b></td>
                                     <td colspan="1"></td>
@@ -228,7 +230,8 @@ $view = 'pedidos';
                                 <thead>
                                     <tr style="font-size: 90%;">
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>                        
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th> 
+                                        <th scope="col" align="center" style='background-color:#B9D5CE;'>TV</th> 
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Cant.</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>C. Faltante</th>  
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. Unitario</th>  
@@ -247,6 +250,7 @@ $view = 'pedidos';
                                     <tr style="font-size: 90%;">
                                         <td><?= $val->inventario->codigo_producto ?></td>
                                         <td><?= $val->inventario->nombre_producto ?></td>
+                                        <td><?= $val->ventaCondicionado?></td>
                                         <?php if($val->cantidad == 0){?>
                                               <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidades[]" value="<?= $val->cantidad?>" style="text-align: right" size="7" maxlength="true"> </td> 
                                         <?php }else{?>
@@ -272,19 +276,19 @@ $view = 'pedidos';
                                  <?php endforeach;?>          
                             </body>
                             <tr>
-                                <td colspan="4"></td>
+                                <td colspan="5"></td>
                                 <td style="text-align: right;"><b>Subtotal:</b></td>
                                 <td align="right"><b><?= '$ '.number_format($subtotal,0); ?></b></td>
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
-                                <td colspan="4"></td>
+                                <td colspan="5"></td>
                                 <td style="text-align: right;"><b>Impuesto:</b></td>
                                 <td align="right" ><b><?= '$ '.number_format($impuesto,0); ?></b></td>
                                 <td colspan="2"></td>
                             </tr>
                              <tr>
-                                <td colspan="4"></td>
+                                <td colspan="5"></td>
                                 <td style="text-align: right;"><b>Total:</b></td>
                                 <td align="right" ><b><?= '$ '.number_format($total,0); ?></b></td>
                                 <td colspan="2"></td>

@@ -51,14 +51,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ArrayHelper::map(app\models\ResolucionDian::find()->all(), 'estado_resolucion', 'activo'),
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
-                        [
-                'attribute' => 'abreviatura',
+           [
+                'attribute' => 'id_documento',
                 'value' => function($model) {
-                    $abre = app\models\ResolucionDian::findOne($model->id_resolucion);
-                    return $abre->abreviaturaResolucion;
+                    $documento = app\models\ResolucionDian::findOne($model->id_resolucion);
+                    return $documento->documentosElectronicos->concepto;
                 },
-                'filter' => ArrayHelper::map(app\models\ResolucionDian::find()->all(), 'abreviatura', 'abreviaturaResolucion'),
-                'contentOptions' => ['class' => 'col-lg-1'],
+                'filter' => ArrayHelper::map(app\models\DocumentoElectronico::find()->all(), 'id_documento', 'concepto'),
+                'contentOptions' => ['class' => 'col-lg-2'],
             ],
              [
                 'class' => 'yii\grid\ActionColumn', 

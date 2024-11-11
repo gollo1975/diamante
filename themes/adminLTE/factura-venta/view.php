@@ -38,21 +38,21 @@ $view = 'factura-venta';
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
         <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { ?>
-            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Modificar factura', ['update', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-success btn-sm']) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar factura', ['regenerar_factura', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-info btn-sm']) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);
+            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Modificar factura', ['update', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-success btn-xs']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar factura', ['regenerar_factura', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-info btn-xs']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
         } else {
             if ($model->autorizado == 1 && $model->numero_factura == 0){
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);
-                  echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
+                  echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura, 'token' => $token], ['class' => 'btn btn-default btn-sm']);            
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura, 'token' => $token], ['class' => 'btn btn-default btn-xs']);            
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-sm']);            
-               echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
+               echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
+                echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs',
                            'data' => ['confirm' => 'Esta seguro de enviar la factura de venta a la Dian.', 'method' => 'post']]);
             }
         }?>        
@@ -77,7 +77,7 @@ $view = 'factura-venta';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_factura') ?></th>
                     <td><?= Html::encode($model->numero_factura) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_pedido')?></th>
-                    <td><?= Html::encode($model->id_pedido) ?></td>
+                    <td><?= Html::encode($model->pedido->numero_pedido) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'telefono_cliente') ?></th>
                     <td><?= Html::encode($model->telefono_cliente) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Municipio') ?></th>
@@ -95,8 +95,8 @@ $view = 'factura-venta';
                     <td><?= Html::encode($model->user_name) ?></td>                    
                 </tr>
                 <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'forma_pago') ?></th>
-                    <td><?= Html::encode($model->formaPago) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_forma_pago') ?></th>
+                    <td><?= Html::encode($model->formaPago->concepto) ?></td>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'plazo_pago')?></th>
                     <td><?= Html::encode($model->plazo_pago) ?> Dias</td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura')?></th>
@@ -139,12 +139,12 @@ $view = 'factura-venta';
                                     <thead>
                                         <tr style="font-size: 90%;">
                                             <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                            <th scope="col"  style='background-color:#B9D5CE;'>Descripcion producto</th>                        
-                                            <th scope="col"  style='background-color:#B9D5CE;'>Cantidad</th>       
-                                             <th scope="col"  style='background-color:#B9D5CE;'>Vr. unitario</th>  
-                                            <th scope="col"  style='background-color:#B9D5CE;'>Subtotal</th>                        
-                                            <th scope="col"  style='background-color:#B9D5CE; width: 12%'>Impuesto</th>  
-                                            <th scope="col" style='background-color:#B9D5CE; width: 12%'>Total linea</th> 
+                                            <th scope="col"  style='background-color:#B9D5CE;'>Descripcion producto</th>     
+                                            <th scope="col"  style='background-color:#B9D5CE;'>TV</th>
+                                            <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Cantidad</th>       
+                                            <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Vr. unitario</th> 
+                                            <th scope="col"  style='background-color:#B9D5CE; text-align: left'>% Iva</th>  
+                                            <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Subtotal</th>                        
                                         </tr>
                                     </thead>
                                     <body>
@@ -153,11 +153,11 @@ $view = 'factura-venta';
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->producto ?></td>
+                                                <td><?= $val->tipo_venta ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                 <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>
                                                 <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                                <td style="text-align: right"><?= '$'.number_format($val->total_linea,0) ?></td>
                                            </tr>
                                          <?php endforeach;?>          
                                     </body>
@@ -168,37 +168,42 @@ $view = 'factura-venta';
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right;  background-color:#F0F3EF;"><b>VALOR BRUTO:</b></td>
+                                        <td style="text-align: right;  background-color:#F0F3EF;"><b>Valor Bruto:</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>DESCTO (<?= $model->porcentaje_descuento?> %) :</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Dscto Comercial:</b></td>
+                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
+                                    </tr>
+                                    <tr style="font-size: 90%;">
+                                        <td colspan="5"></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Dscto Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>SUBTOTAL:</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Subtotal:</b></td>
                                         <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>IMPUESTO (<?= $model->porcentaje_iva?> %) :</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Impuesto:</b></td>
                                         <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>RETENCION (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Retencion (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>RETE IVA (<?= $model->porcentaje_rete_iva?> %) :</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Rete Iva (<?= $model->porcentaje_rete_iva?> %) :</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>TOTAL PAGAR:</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Total Pagar:</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
                                     </tr>
                                 </table>

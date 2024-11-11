@@ -51,8 +51,8 @@ $this->params['breadcrumbs'][] = $model->id_resolucion;
                     <td><?= Html::encode($model->rango_final) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'vigencia') ?>:</th>
                     <td><?= Html::encode($model->vigencia) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'abreviatura') ?>:</th>
-                    <td><?= Html::encode($model->abreviaturaResolucion) ?></td>              
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_documento') ?>:</th>
+                    <td><?= Html::encode($model->documentosElectronicos->concepto) ?></td>              
                 </tr>       
             </table>
         </div>

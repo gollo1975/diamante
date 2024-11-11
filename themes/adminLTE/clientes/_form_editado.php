@@ -40,6 +40,7 @@ $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_cli
 $posicion = ArrayHelper::map(PosicionPrecio::find()->all(), 'id_posicion', 'posicion');
 $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza', 'naturaleza');
 $tipoCliente = ArrayHelper::map(TipoCliente::find()->all(), 'id_tipo_cliente', 'concepto');
+$formaPago = ArrayHelper::map(app\models\FormaPago::find()->all(), 'id_forma_pago', 'concepto');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -78,7 +79,7 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->all(), 'id_tipo_cliente', '
            <?= $form->field($model, 'codigo_municipio')->dropDownList($municipio, ['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">
-            <?= $form->field($model, 'forma_pago')->dropdownList(['1' => 'CONTADO', '2' => 'CRÉDITO'], ['prompt' => 'Seleccione...', 'onchange' => 'fpago()', 'id' => 'forma_pago']) ?>
+            <?= $form->field($model, 'id_forma_pago')->dropdownList($formaPago, ['prompt' => 'Seleccione...']) ?>
             <?= $form->field($model, 'plazo')->input("text",['id' => 'plazo']) ?>
         </div>    
         <div class="row">

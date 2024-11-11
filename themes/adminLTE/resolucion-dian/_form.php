@@ -9,6 +9,7 @@ use kartik\date\DatePicker;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 /* @var $form yii\widgets\ActiveForm */
+$documentos = ArrayHelper::map(app\models\DocumentoElectronico::find()->all(), 'id_documento', 'concepto')
 ?>
     <?php $form = ActiveForm::begin([
 		'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
@@ -66,15 +67,17 @@ use kartik\date\DatePicker;
           <div class="row">
             <?= $form->field($model, 'vigencia')->textInput(['maxlength' => true]) ?>    
         </div>
-        <div class="row">
-            <?= $form->field($model, 'abreviatura')->dropdownList(['F' => 'FABRICANTE', 'PV' => 'PUNTO DE VENTA'], ['prompt' => 'Seleccione...']) ?> 					
-        </div>
         <?php if($sw == 1 ){?>
             <div class="row">
                 <?= $form->field($model, 'estado_resolucion')->dropdownList(['0' => 'SI', '1' => 'NO'], ['prompt' => 'Seleccione...']) ?>
             </div>
         <?php } ?>
-        
+        <div class="row">
+                <?= $form->field($model, 'id_documento')->dropdownList($documentos, ['prompt' => 'Seleccione...']) ?>
+        </div>
+         <div class="row">
+            <?= $form->field($model, 'codigo_interface')->textInput(['maxlength' => true]) ?>    
+        </div>
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("resolucion-dian/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

@@ -35,6 +35,7 @@ use app\models\TipoFacturaVenta;
 use app\models\NotaCredito;
 use app\models\NotaCreditoDetalle;
 use app\models\ReciboCajaDetalles;
+use app\models\ResolucionDian;
 /**
  * FacturaVentaController implements the CRUD actions for FacturaVenta model.
  */
@@ -826,9 +827,9 @@ class FacturaVentaController extends Controller
             Yii::$app->getSession()->setFlash('warning', 'Este pedido esta en proceso de facturacion. Consulte con el administrador.'); 
             return $this->redirect(["factura-venta/crear_factura"]);
         }else{
-           $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
+            $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
-            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','abreviatura', 'F'])->one();
+            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','consecutivo', 'FE'])->one();
             $iva = \app\models\ConfiguracionIva::findOne(1);
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
             $venta = \app\models\TipoVenta::findOne(1);
@@ -844,10 +845,12 @@ class FacturaVentaController extends Controller
             $table->cliente = $pedido->cliente;
             $table->direccion = $pedido->clientePedido->direccion;
             $table->telefono_cliente = $pedido->clientePedido->celular;
+            $table->descuento_comercial = $pedido->descuento_comercial;
+            $table->id_resolucion = $resolucion->id_resolucion;
             $table->numero_resolucion = $resolucion->numero_resolucion;
+            $table->consecutivo = $resolucion->consecutivo;
             $table->desde = $resolucion->desde;
             $table->hasta = $resolucion->hasta;
-            $table->consecutivo = $resolucion->consecutivo;
             $table->fecha_inicio = $fecha_actual;
             $dias = $pedido->clientePedido->plazo;
             $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
@@ -867,7 +870,7 @@ class FacturaVentaController extends Controller
             }else{
                 $table->porcentaje_rete_fuente = 0; 
             }
-            $table->forma_pago = $pedido->clientePedido->forma_pago;        
+            $table->id_forma_pago = $pedido->clientePedido->id_forma_pago;        
             $table->plazo_pago = $pedido->clientePedido->plazo;
             $table->user_name = Yii::$app->user->identity->username;
             $table->save();
@@ -892,9 +895,11 @@ class FacturaVentaController extends Controller
             $base->producto = $detalle->inventario->nombre_producto;
             $base->cantidad = $detalle->cantidad;
             $base->valor_unitario = $detalle->valor_unitario;
+            $base->porcentaje_iva = $detalle->inventario->porcentaje_iva;
             $base->subtotal = $detalle->subtotal;
             $base->impuesto = $detalle->impuesto;
             $base->total_linea = $detalle->total_linea;
+            $base->tipo_venta = $detalle->ventaCondicionado;
             $base->fecha_venta = date('Y-m-d');
             $base->save(false);
         endforeach;
@@ -911,13 +916,23 @@ class FacturaVentaController extends Controller
             $descuento += $detalle->valor_descuento;
         endforeach;
         $factura->valor_bruto = $subtotal;
-        $factura->subtotal_factura = $subtotal;
-        $factura-> impuesto= $impuesto;
-        $factura->total_factura = $total;
-        $factura->saldo_factura = $total;
-        $factura->valor_retencion = 0;
-        $factura->valor_reteiva = 0;
-        $factura->descuento = $descuento;
+        $factura->subtotal_factura = $subtotal- $factura->descuento_comercial;
+        if($factura->subtotal_factura <= 0){
+            $factura-> impuesto= $impuesto;
+            $factura->total_factura = $total;
+            $factura->saldo_factura = $total;
+            $factura->valor_retencion = 0;
+            $factura->valor_reteiva = 0;
+            $factura->descuento = $descuento;
+        }else{
+            $factura-> impuesto= $impuesto;
+            $factura->total_factura = $total;
+            $factura->saldo_factura = $total;
+            $factura->valor_retencion = 0;
+            $factura->valor_reteiva = 0;
+            $factura->descuento = $descuento;
+        }
+        
         $factura->save(false);
     }
     //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS
