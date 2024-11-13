@@ -29,6 +29,8 @@ $this->params['breadcrumbs'][] = $model->id_medida_producto;
                     <td><?= Html::encode($model->id_medida_producto) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Descripción') ?>:</th>
                     <td><?= Html::encode($model->descripcion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_enlace') ?>:</th>
+                    <td><?= Html::encode($model->codigo_enlace) ?></td>
               </tr>
             </table>
         </div>

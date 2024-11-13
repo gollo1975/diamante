@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 use inquid\pdf\FPDF;
 use app\models\OrdenProduccion;

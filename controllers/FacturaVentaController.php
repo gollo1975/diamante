@@ -671,7 +671,7 @@ class FacturaVentaController extends Controller
                 $model->fecha_vencimiento = date('Y-m-d');
                 $model->fecha_generada = date('Y-m-d');
                 $model->porcentaje_iva = $iva->valor_iva;
-                $model->forma_pago = $cliente->forma_pago;
+                $model->id_forma_pago = $cliente->id_forma_pago;
                 $model->plazo_pago = $cliente->plazo;
                 $model->user_name = Yii::$app->user->identity->username;
                 if($sw == 1){
@@ -768,7 +768,7 @@ class FacturaVentaController extends Controller
             $model->cliente = $cliente->nombre_completo;
             $model->direccion = $cliente->direccion;
             $model->telefono_cliente = $cliente->telefono;
-            $model->forma_pago = $cliente->forma_pago;
+            $model->id_forma_pago = $cliente->id_forma_pago;
             $model->plazo_pago = $cliente->plazo;
             $model->fecha_inicio = $model->fecha_inicio;
             $model->fecha_vencimiento = $model->fecha_inicio;
@@ -829,7 +829,8 @@ class FacturaVentaController extends Controller
         }else{
             $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
-            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','consecutivo', 'FE'])->one();
+            $documento = \app\models\DocumentoElectronico::find()->where(['=','sigla', 'FE'])->one();
+            $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','id_documento', $documento->id_documento])->one();
             $iva = \app\models\ConfiguracionIva::findOne(1);
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
             $venta = \app\models\TipoVenta::findOne(1);
@@ -901,6 +902,7 @@ class FacturaVentaController extends Controller
             $base->total_linea = $detalle->total_linea;
             $base->tipo_venta = $detalle->ventaCondicionado;
             $base->fecha_venta = date('Y-m-d');
+            $base->numero_lote = $detalle->numero_lote;
             $base->save(false);
         endforeach;
     }

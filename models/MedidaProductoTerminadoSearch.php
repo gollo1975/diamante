@@ -18,7 +18,7 @@ class MedidaProductoTerminadoSearch extends MedidaProductoTerminado
     {
         return [
             [['id_medida_producto'], 'integer'],
-            [['descripcion'], 'safe'],
+            [['descripcion','codigo_enlace'], 'safe'],
         ];
     }
 
@@ -59,9 +59,11 @@ class MedidaProductoTerminadoSearch extends MedidaProductoTerminado
         // grid filtering conditions
         $query->andFilterWhere([
             'id_medida_producto' => $this->id_medida_producto,
+            'codigo_enlace' => $this->codigo_enlace,
         ]);
 
         $query->andFilterWhere(['like', 'descripcion', $this->descripcion]);
+        $query->andFilterWhere(['=', 'codigo_enlace', $this->codigo_enlace]);
 
         return $dataProvider;
     }
