@@ -44,7 +44,7 @@ class Pedidos extends \yii\db\ActiveRecord
             [['numero_pedido', 'id_cliente','id_agente', 'dv', 'cantidad', 'subtotal', 'impuesto', 'gran_total', 'autorizado', 'cerrar_pedido', 'facturado',
                 'valor_presupuesto','presupuesto','pedido_anulado','valor_eliminado_presupuesto','valor_eliminado_pedido','pedido_validado',
                 'pedido_virtual','liberado_inventario','pedido_liberado','detalle_pedido_descargado_inventario','liberado_inventario_presupuesto',
-                'presupuesto_descargado_inventario','descuento_comercial'], 'integer'],
+                'presupuesto_descargado_inventario','descuento_comercial','tipo_pedido','valor_bruto'], 'integer'],
             [['fecha_proceso'], 'required'],
             [['fecha_proceso','fecha_entrega','fecha_cierre_alistamiento'], 'safe'],
             [['documento', 'usuario'], 'string', 'max' => 15],
@@ -89,6 +89,8 @@ class Pedidos extends \yii\db\ActiveRecord
             'liberado_inventario' => 'Liberado:',
             'pedido_liberado' => 'pedido_liberado',
             'descuento_comercial' => 'descuento_comercial',
+            'tipo_pedido' => 'Tipo de pedido',
+            'valor_bruto' => 'valor_bruto',
         ];
     }
 
@@ -102,6 +104,10 @@ class Pedidos extends \yii\db\ActiveRecord
     public function getAgentePedido()
     {
         return $this->hasOne(AgentesComerciales::className(), ['id_agente' => 'id_agente']);
+    }
+    
+    public function getTipoPedido() {
+       return $this->hasOne(TipoPedido::className(), ['tipo_pedido' => 'tipo_pedido']);
     }
     public function getPedidoAbierto() {
         if($this->cerrar_pedido == 0 ){
@@ -168,20 +174,7 @@ class Pedidos extends \yii\db\ActiveRecord
         }
         return $pedidoliberado;
     }
-    
-    public function getTipoPedido() {
-        if($this->tipo_pedido == 0 ){
-            $tipopedido = 'Comercial';
-        }else{
-            if($this->tipo_pedido == 1 ){
-                $tipopedido = 'Requerimiento';
-            }else{
-                $tipopedido = 'Acondicionado';
-            }    
-        }
-        return $tipopedido;
-    }
-    
+      
      public function getPedidoListo() {
         if($this->pedido_liberado == 0 ){
             $pedidoliberado = 'NO';

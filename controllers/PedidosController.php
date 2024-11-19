@@ -650,7 +650,7 @@ class PedidosController extends Controller
     public function actionCrear_nuevo_pedido($id, $tipo_pedido) {
         //valide cupo
         $cliente = Clientes::find()->where(['=','id_cliente', $id])->one();
-        if($cliente->forma_pago == 1){
+        if($cliente->formaPago->codigo_api !== 4){
             $contar = 0;
             $fecha_actual = date('Y-m-d');
             if($cliente->presupuesto_comercial > 0){
@@ -666,10 +666,11 @@ class PedidosController extends Controller
                     $table->usuario = Yii::$app->user->identity->username;
                     $table->fecha_proceso = date('Y-m-d');
                     $table->id_agente = $cliente->id_agente;
+                    $table->tipo_pedido = 1;
                     if($tipo_pedido == 0){
                         $table->liberado_inventario = 1;
-                    }    
-                    $table->save();
+                    }   
+                    $table->save(false);
                     return $this->redirect(['/pedidos/index']);
                 }else{
                     Yii::$app->getSession()->setFlash('error', 'El cliente '.$cliente->nombre_completo.' Se encuentra en mora con la factura No '. $factura_mora->numero_factura .' por un valor de ( $'.number_format($factura_mora->saldo_factura).'). Favor contactar a cartera.'); 
@@ -700,6 +701,7 @@ class PedidosController extends Controller
                         $table->cliente = $cliente->nombre_completo;
                         $table->usuario = Yii::$app->user->identity->username;
                         $table->fecha_proceso = date('Y-m-d');
+                        $table->tipo_pedido = 1;
                         $table->id_agente = $cliente->id_agente;
                         if($tipo_pedido == 0){
                            $table->liberado_inventario = 1;
@@ -902,19 +904,24 @@ class PedidosController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if (isset($_POST["editarcliente"])) { 
                 $conCliente = Clientes::find()->where(['=','id_cliente', $model->cliente])->one();
-                if ($conCliente->forma_pago == 1){
+                $empresa = \app\models\MatriculaEmpresa::findOne(1);
+                if ($conCliente->formaPago->codigo_api !== 4){
                     $table->id_cliente = $model->cliente;
                     $table->documento = $conCliente->nit_cedula;
                     $table->dv = $conCliente->dv;
                     $table->cliente = $conCliente->nombre_completo;
-                    $table->pedido_virtual = $model->pedido_virtual;
-                    $table->tipo_pedido = $model->tipo_pedido;
-                    if($model->pedido_virtual == 1){
-                        $table->liberado_inventario = 0;
-                    }else{
-                        $table->liberado_inventario = 1;
-                    }
-                    $table->save(false);
+                   
+                    $table->tipo_pedido = $model->tipopedido;
+                    if($empresa->inventario_enlinea == 0){
+                        $table->pedido_virtual = $model->pedido_virtual;
+                        if($model->pedido_virtual == 1 ){
+                            $table->liberado_inventario = 0;
+                        }else{
+                            $table->liberado_inventario = 1;
+                        }
+                       
+                    }  
+                     $table->save(false);
                     $this->redirect(["pedidos/index"]);
                 }else{
                     if ($conCliente->cupo_asignado > 0){
@@ -922,13 +929,15 @@ class PedidosController extends Controller
                         $table->documento = $conCliente->nit_cedula;
                         $table->dv = $conCliente->dv;
                         $table->cliente = $conCliente->nombre_completo;
-                        $table->pedido_virtual = $model->pedido_virtual;
-                        $table->tipo_pedido = $model->tipo_pedido;
-                        if ($model->pedido_virtual == 1) {
-                            $table->liberado_inventario = 0;
-                        } else {
-                            $table->liberado_inventario = 1;
-                        }
+                        $table->tipo_pedido = $model->tipopedido;
+                        if($empresa->inventario_enlinea == 0){
+                            $table->pedido_virtual = $model->pedido_virtual;                        
+                            if ($model->pedido_virtual == 1) {
+                                $table->liberado_inventario = 0;
+                            } else {
+                                $table->liberado_inventario = 1;
+                            }
+                        }    
                         $table->save(false);
                         $this->redirect(["pedidos/index"]);
                     }else{
@@ -941,7 +950,7 @@ class PedidosController extends Controller
          if (Yii::$app->request->get()) {
             $model->cliente = $table->id_cliente;
             $model->pedido_virtual = $table->pedido_virtual;
-            $model->tipo_pedido = $table->tipo_pedido;
+            $model->tipopedido = $table->tipo_pedido;
          }
         return $this->renderAjax('editarcliente', [
             'model' => $model,
@@ -1180,6 +1189,7 @@ class PedidosController extends Controller
                                 $table->cantidad = $_POST["cantidad_productos"]["$intIndice"];
                                 $table->user_name = Yii::$app->user->identity->username;
                                 $table->cargar_existencias = 1;
+                                $table->venta_condicionado = $model->tipoPedido->codigo_interface;
                                 $table->save(false);
                                 $datos = $intCodigo;
                                 $this->ActualizarInventarioPrecio($datos, $id, $token, $pedido_virtual, $tipo_pedido);
@@ -1243,7 +1253,7 @@ class PedidosController extends Controller
                     $table->id_inventario = $id_inventario;
                     $table->id_presupuesto = $presupuesto->id_presupuesto;
                     $table->cantidad = $cantidad;
-                    $table->venta_condicionado = 1;
+                    $table->venta_condicionado = 'B';
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->fecha_registro = date('Y-m-d');
                     if($model->pedido_virtual == 0){
@@ -1362,7 +1372,7 @@ class PedidosController extends Controller
                             ->limit($pages->limit)
                             ->all();
         }
-         if (isset($_POST["importar_producto_presupuesto"])) {
+        if (isset($_POST["importar_producto_presupuesto"])) {
             if(isset($_POST["nuevo_producto_presupueso"])){
                  $intIndice = 0;
                 foreach ($_POST["nuevo_producto_presupueso"] as $intCodigo):
@@ -1388,7 +1398,7 @@ class PedidosController extends Controller
                                         $table->id_presupuesto = $presupuesto->id_presupuesto;
                                         $table->cantidad = $_POST["cantidades"]["$intIndice"];
                                         $table->user_name = Yii::$app->user->identity->username;
-                                        $table->venta_condicionado = 1;
+                                        $table->venta_condicionado = 'B';
                                         $table->fecha_registro = date('Y-m-d');
                                         $table->save(false);
                                         $datos = 0;
@@ -1405,7 +1415,7 @@ class PedidosController extends Controller
                                     $table = new PedidoPresupuestoComercial();
                                     $table->id_pedido = $id;
                                     $table->id_inventario = $intCodigo;
-                                    $table->venta_condicionado = 1;
+                                    $table->venta_condicionado = 'B';
                                     $table->id_presupuesto = $presupuesto->id_presupuesto;
                                     $table->cantidad = $_POST["cantidades"]["$intIndice"];
                                     $table->user_name = Yii::$app->user->identity->username;
@@ -1457,9 +1467,10 @@ class PedidosController extends Controller
         $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
         $detalle = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
         foreach ($detalle as $detalles):
-            $total += $detalles->total_linea;
+            $total += $detalles->subtotal;
         endforeach;
         $pedido->valor_presupuesto = $total;
+        $pedido->descuento_comercial = $total;
         $pedido->save();
         if($sw == 0 ){
             if($pedido->valor_presupuesto > 0){
@@ -1548,12 +1559,13 @@ class PedidosController extends Controller
             $cantidad += $detalles->cantidad;
         endforeach;
         $model->cantidad = $cantidad;
+        $model->valor_bruto = $subtotal;
         $model->subtotal = $subtotal;    
         $model->impuesto = $impuesto;
         $model->gran_total = $total;
         $model->save(false);
         $cupo = $model->clientePedido->cupo_asignado;
-        if($cliente->forma_pago == 2){
+        if($cliente->formaPago->codigo_api == 4){
             if($total > $cupo){
                 $cupo = '$'.number_format($cupo,0);
                 Yii::$app->getSession()->setFlash('error', 'El cupo asignado para este cliente es: ('. $cupo. '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.'); 
@@ -1566,32 +1578,36 @@ class PedidosController extends Controller
     protected function ActualizarTotalesPedidoAgrupado($id) {
         $subtotal = 0; $impuesto = 0; $total = 0; $cantidad = 0; $cantidad2 = 0;
         $cupo = 0; $descuento_comercial = 0;
-        $subtotal2 = 0; $impuesto2 = 0; $total2 = 0;
+    
         $model = $this->findModel($id);
         $empresa = \app\models\MatriculaEmpresa::findOne(1);
         $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
         $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
         foreach ( $detalle as $detalles):
-            if($detalles->venta_condicionado == 0){
+            if($detalles->venta_condicionado !== 'B'){ //ENTRA SI NOS SON BONIFICABLES
                 $subtotal += $detalles->subtotal;    
                 $impuesto += $detalles->impuesto;
                 $total += $detalles->total_linea;
                 $cantidad += $detalles->cantidad;
-            }else{
-                $subtotal2 += $detalles->subtotal;    
-                $impuesto2 += $detalles->impuesto;
-                $total2 += $detalles->total_linea;
+            }else{ ///SUMA LOS VALORES DE BONIFICABLE
                 $cantidad2 += $detalles->cantidad;
             }
         endforeach;
-        $model->descuento_comercial = $subtotal2; 
+        //totaliza
         $model->cantidad = $cantidad + $cantidad2;
-        $model->subtotal = $subtotal + $subtotal2;    
-        $model->impuesto = (($model->subtotal - $model->descuento_comercial) * $empresa->porcentaje_iva)/100;
-        $model->gran_total = round(($model->subtotal -$model->descuento_comercial) + $model->impuesto);
+        $model->valor_bruto = $subtotal;
+        if($model->valor_bruto <= 0){
+            $model->subtotal = $model->descuento_comercial; 
+            $model->impuesto = 0;
+            $model->gran_total = 0;
+        }else{
+            $model->subtotal = $subtotal - $model->descuento_comercial;    
+            $model->impuesto = round(($model->subtotal  * $empresa->porcentaje_iva)/100);
+            $model->gran_total = round($model->subtotal + $model->impuesto);
+        }    
         $model->save(false);
         $cupo = $model->clientePedido->cupo_asignado;
-        if($cliente->forma_pago == 2){
+        if($cliente->formaPago->codigo_api == 4){
             if($total > $cupo){
                 $cupo = '$'.number_format($cupo,0);
                 Yii::$app->getSession()->setFlash('error', 'El cupo asignado para este cliente es: ('. $cupo. '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.'); 
@@ -1603,12 +1619,12 @@ class PedidosController extends Controller
     //PROCESO QUE AUTORIZADO O DESAUTORIZA
     public function actionAutorizado($id, $tokenAcceso, $token, $id_cliente, $pedido_virtual, $tipo_pedido) {
         $pedido = Pedidos::findOne($id);
-        $only_presupuesto = $pedido->tipo_pedido;
+        echo $only_presupuesto = $pedido->tipo_pedido;
         $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
         $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->one();
-        if($only_presupuesto == 0){
+        if($only_presupuesto == 0 && $pedido->tipo_pedido == 1 || $pedido->tipo_pedido == 1){
             if($detalle){
-                if($cliente->forma_pago == 2){
+                if($cliente->formaPago->codigo_api == 4){
                     if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
                         if($pedido->autorizado == 0){
                             $pedido->autorizado = 1;
@@ -1653,7 +1669,7 @@ class PedidosController extends Controller
         }else{
             $detalle2 = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->one();
             if($detalle2){
-                if($cliente->forma_pago == 2){
+                if($cliente->formaPago->codigo_api == 4){
                     if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
                         if($pedido->autorizado == 0){
                             $pedido->autorizado = 1;
@@ -1860,7 +1876,7 @@ class PedidosController extends Controller
                 return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
             } 
         }else{
-           $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+            $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
             if(count($presupuesto) > 0){
                 foreach ($presupuesto as $key => $lineas) {
                     $table = new PedidoDetalles();
@@ -1872,7 +1888,7 @@ class PedidosController extends Controller
                     $table->impuesto = $lineas->impuesto;
                     $table->total_linea = $lineas->total_linea;
                     $table->user_name = $lineas->user_name;
-                    $table->venta_condicionado = 1;
+                    $table->venta_condicionado = 'B';
                     $table->cargar_existencias = $lineas->cargar_existencias;
                     $table->save();
                     $this->ActualizarTotalesPedidoAgrupado($id);
@@ -1886,7 +1902,7 @@ class PedidosController extends Controller
                     return $this->redirect(["adicionar_productos",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
                 }else{
                     $cliente->gasto_presupuesto_comercial = $suma + $pedido->valor_presupuesto;
-                    $cliente->save();
+                    $cliente->save(false);
                     $pedido->cerrar_pedido = 1;
                     $pedido->save(false);
                     return $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]); 
@@ -2058,7 +2074,7 @@ class PedidosController extends Controller
     public function actionValidar_lineas_pedido($id)
     {
         $pedido= Pedidos::findOne($id);
-        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['=','venta_condicionado', 0])->all();
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['<>','venta_condicionado', 'B'])->all();
         $sw = 0; $cantidad = 0;
         if(count($detalle_pedido) > 0){
             foreach ($detalle_pedido as $key => $detalle):
@@ -2082,7 +2098,7 @@ class PedidosController extends Controller
             }   
             return $this->redirect(['pedidos/index']);
       }else{
-        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['=','venta_condicionado', 1])->all();  
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['=','venta_condicionado', 'B'])->all();  
         foreach ($detalle_pedido as $key => $detalle):
                 $detalle->cargar_existencias = 1;
                 $detalle->save();       
@@ -2110,17 +2126,17 @@ class PedidosController extends Controller
     public function actionValidar_lineas_presupuesto($id)
     {
         $pedido= Pedidos::findOne($id);
-        $detalle_presupuesto = PedidoPresupuestoComercial::findAll(['id_pedido' => $pedido->id_pedido]);
+        $detalle_presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $pedido->id_pedido])->all();
         $sw = 0; $cantidad = 0;
         foreach ($detalle_presupuesto as $key => $detalle):
             $inventario = InventarioProductos::findOne ($detalle->id_inventario);
-            $cantidad =  $inventario->stock_unidades - $detalle->cantidad;
+            echo $cantidad =  $inventario->stock_unidades - $detalle->cantidad;
             if($cantidad < 0){
                 $detalle->cantidad_faltante = $cantidad;
-                $detalle->save();
+                $detalle->save(false);
            }else{
                 $detalle->cantidad_faltante = 0;
-                $detalle->save();       
+                $detalle->save(false);       
            }
         endforeach;
         $sw = $this->CumplePresupuesto($id, $sw);
@@ -2148,7 +2164,7 @@ class PedidosController extends Controller
     //PROCESO QUE DESCARGAR LAS UNIDADES VENDIDAS DE PEDIDOS
     public function actionValidar_linea_inventario($id) {
         $pedido = Pedidos::findOne($id);
-        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['=','venta_condicionado', 0])->all();
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $id])->andWhere(['<>','venta_condicionado', 'B'])->all();
         $sumaPedido = 0;
         if(count($detalle_pedido) > 0){
             

@@ -40,11 +40,12 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     {
         return [
             [['id_ensamble', 'id_materia_prima', 'unidades_solicitadas', 'unidades_devolucion', 'unidades_averias', 'unidades_utilizadas', 'unidades_sala_tecnica',
-                'unidades_muestra_retencion', 'unidades_reales','stock','importado'], 'integer'],
+                'unidades_muestra_retencion', 'unidades_reales','stock','importado','id_presentacion'], 'integer'],
             [['fecha_hora_carga'], 'safe'],
             [['user_name','alerta'], 'string', 'max' => 15],
             [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
+            [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProductoDetalle::className(), 'targetAttribute' => ['id_presentacion' => 'id']],
         ];
     }
 
@@ -78,6 +79,14 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     public function getEnsamble()
     {
         return $this->hasOne(OrdenEnsambleProducto::className(), ['id_ensamble' => 'id_ensamble']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductoEmpaque()
+    {
+        return $this->hasOne(OrdenEnsambleProductoDetalle::className(), ['id' => 'id_presentacion']);
     }
 
     /**

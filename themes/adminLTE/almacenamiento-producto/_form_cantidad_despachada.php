@@ -47,14 +47,14 @@ $this->params['breadcrumbs'][] = $id_pedido;
         <div class="panel-body">
             <table class="table table-bordered table-hover">
                 <thead>
-                    <tr style="font-size: 90%;">
+                    <tr style="font-size: 85%;">
                         <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                        <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Piso</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Posicion</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Lote</th>
-                         <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+                         <th scope="col" style='background-color:#B9D5CE;'>F. Vcto</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
                         <th scope="col" style='background-color:#B9D5CE;'></th>
                     </tr>
@@ -63,14 +63,14 @@ $this->params['breadcrumbs'][] = $id_pedido;
                 
                 if(count($almacenamiento) > 0){
                     foreach ($almacenamiento as $val): ?>
-                        <tr style="font-size: 90%;">
+                        <tr style="font-size: 85%;">
                             <td> <?= $val->codigo_producto ?></td>
                             <td> <?= $val->producto ?></td>
                             <td> <?= $val->piso->descripcion ?></td>
                             <td> <?= $val->rack->descripcion ?></td>
                             <td> <?= $val->posicion->posicion ?></td>
                             <td> <?= $val->numero_lote ?></td>
-                            <td> <?= $val->fecha_almacenamiento ?></td>
+                            <td style="background-color: #f8efc0"> <?= $val->fecha_vencimiento ?></td>
                             <td style="text-align: right"> <?= ''.number_format($val->cantidad,0) ?></td>
                             <td style= 'width: 20px;'><input type="checkbox" name="seleccione_item[]" value="<?= $val->id ?>"></td> 
                         </tr>

@@ -28,6 +28,8 @@ class TipoCliente extends \yii\db\ActiveRecord
         return [
             [['concepto'], 'required'],
             [['concepto'], 'string', 'max' => 30],
+            [['abreviatura'], 'string', 'max' => 1],
+            [['codigo_interface','aplica_descuento_comercial'], 'integer'],
         ];
     }
 
@@ -39,6 +41,9 @@ class TipoCliente extends \yii\db\ActiveRecord
         return [
             'id_tipo_cliente' => 'Id Tipo Cliente',
             'concepto' => 'Concepto',
+            'codigo_interface' => 'codigo_interface',
+            'abreviatura' => 'abreviatura',
+            'aplica_descuento_comercial' => 'aplica_descuento_comercial',
             
         ];
     }

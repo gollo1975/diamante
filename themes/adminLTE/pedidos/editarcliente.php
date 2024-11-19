@@ -21,6 +21,8 @@ $form = ActiveForm::begin([
             'options' => []
         ],
         ]);
+$empresa = \app\models\MatriculaEmpresa::findOne(1);
+$tipoPedido = ArrayHelper::map(app\models\TipoPedido::find()->all(), 'tipo_pedido', 'concepto');
 if($tokenAcceso == 3){
     $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])
                                                 ->andWhere(['=','id_agente', $agente_comercial])
@@ -42,11 +44,13 @@ if($tokenAcceso == 3){
                     <div class="row">
                         <?= $form->field($model, 'cliente')->dropDownList($cliente, ['prompt' => 'Seleccione...']) ?>
                     </div>
+                    <?php if($empresa->inventario_enlinea == 0){?>
+                        <div class="row">
+                            <?= $form->field($model, 'pedido_virtual')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+                        </div>
+                    <?php } ?>
                     <div class="row">
-                        <?= $form->field($model, 'pedido_virtual')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
-                    </div>
-                    <div class="row">
-                        <?= $form->field($model, 'tipo_pedido')->dropdownList(['0' => 'COMERCIAL', '1' => 'REQUERIMIENTO', '2' => 'ACONDICIONADO'], ['prompt' => 'Seleccione...']) ?>
+                        <?= $form->field($model, 'tipopedido')->dropdownList($tipoPedido, ['prompt' => 'Seleccione...']) ?>
                     </div>
                 </div>  
                     <div class="panel-footer text-right">

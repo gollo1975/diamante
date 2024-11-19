@@ -215,9 +215,11 @@ $form = ActiveForm::begin([
     <?php }else{?> <!--TERMINA EL CICLO DE LOS COMERCIALES-->
          <table class="table table-bordered table-hover">
             <thead>
-                <tr style="font-size: 90%;">   
+                <tr style="font-size: 85%;">   
                     <th scope="col" style='background-color:#B9D5CE;'>No pedido</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Tipo de pedido</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Tipo cliente</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. pedido</th>
@@ -234,9 +236,11 @@ $form = ActiveForm::begin([
             <?php
             if($model){
                 foreach ($model as $val): ?>
-            <tr style="font-size: 90%;">  
+            <tr style="font-size: 85%;">  
                 <?php if($val->cerrar_pedido == 0){?>                
                     <td><?= $val->numero_pedido ?></td>
+                    <td><?= $val->tipoPedido->concepto ?></td>
+                    <td><?= $val->clientePedido->tipoCliente->concepto ?></td>
                     <td><?= $val->cliente ?></td>
                     <td><?= $val->clientePedido->codigoDepartamento->departamento ?></td>
                     <td><?= $val->clientePedido->codigoMunicipio->municipio ?></td>
@@ -259,7 +263,9 @@ $form = ActiveForm::begin([
                     <?php 
                    }else{ ?>
                         <td style='background-color:#F0F3EF;'><?= $val->numero_pedido ?></td>
+                        <td style='background-color:#F0F3EF;'><?= $val->tipoPedido->concepto ?></td>
                         <td style='background-color:#F0F3EF;'><?= $val->cliente ?></td>
+                        <td style='background-color:#F0F3EF;'><?= $val->clientePedido->tipoCliente->concepto ?></td>
                         <td style='background-color:#F0F3EF;'><?= $val->clientePedido->codigoDepartamento->departamento ?></td>
                         <td style='background-color:#F0F3EF;'><?= $val->clientePedido->codigoMunicipio->municipio ?></td>
                         <td style='background-color:#F0F3EF;'><?= $val->fecha_proceso ?></td>
@@ -333,7 +339,7 @@ $form = ActiveForm::begin([
                                                        'method' => 'post',
                                                    ],
                                      ])?>
-                                </td>.
+                                </td>
                             <?php 
                             }else{
                                 if($val->liberado_inventario == 1 && $val->detalle_pedido_descargado_inventario == 0){ ?>

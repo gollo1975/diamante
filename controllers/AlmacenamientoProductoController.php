@@ -709,19 +709,26 @@ class AlmacenamientoProductoController extends Controller
     public function actionCantidad_despachada($id_pedido, $id_detalle, $sw){
         $model = new \app\models\ModeloDocumento(); 
         $matricula = \app\models\MatriculaEmpresa::findOne(1);
-         if($sw == 0){
+        $pedido = Pedidos::findOne($id_pedido);
+        if($sw == 0){
            $detalle = PedidoDetalles::findOne($id_detalle); 
         }else{
             $detalle = PedidoPresupuestoComercial::findOne($id_detalle);
         }
         if($matricula->aplica_fabricante == 0){
+            $orden = '';
+            if($pedido->clientePedido->tipoCliente->abreviatura == 'I'){
+                $orden = 'DESC';
+            }else{
+                  $orden = 'ASC';
+            }
             $almacenamiento = \app\models\AlmacenamientoProductoDetalles::find()
                                                                    ->where(['=','id_inventario', $detalle->inventario->id_inventario])
-                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_almacenamiento ASC')->all();
+                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_vencimiento '.$orden.'')->all();
         }else{
             $almacenamiento = \app\models\AlmacenamientoProductoEntradaDetalles::find()
                                                                    ->where(['=','id_inventario', $detalle->inventario->id_inventario])
-                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_almacenamiento ASC')->all();
+                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_vencimiento ASC')->all();
         }
         
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
@@ -795,6 +802,7 @@ class AlmacenamientoProductoController extends Controller
                         'detalle' => $detalle,
                         'sw' => $sw,
                         'almacenamiento' => $almacenamiento,
+                        'pedido' => $pedido,
         ]); 
         
     }
@@ -1068,12 +1076,14 @@ class AlmacenamientoProductoController extends Controller
                                     $table->id_piso = $model->piso;
                                     $table->id_posicion = $model->posicion; 
                                     $table->cantidad = $model->cantidad;
+                                    $table->fecha_vencimiento = 
                                     $table->id_inventario = $conProducto->id_inventario;
                                     $table->codigo_producto = $conProducto->codigo_producto;
                                     $table->producto = $conProducto->nombre_producto;
                                     $table->numero_lote = $conProducto->numero_lote;
                                     $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
                                     $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
+                                    $table->fecha_vencimiento = $conProducto->fecha_vencimiento;
                                     $table->save(false);
                                     $cant = $model->cantidad;
                                     $id_rack = $model->rack;
@@ -1098,6 +1108,7 @@ class AlmacenamientoProductoController extends Controller
                                 $table->numero_lote = $conProducto->numero_lote;
                                 $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
                                 $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
+                                $table->fecha_vencimiento = $conProducto->fecha_vencimiento;
                                 $table->save(false);
                                 $cant = $model->cantidad;
                                 $id_rack = $model->rack;
@@ -1127,6 +1138,7 @@ class AlmacenamientoProductoController extends Controller
                                         $table->numero_lote = $conProducto->numero_lote;
                                         $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
                                         $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
+                                        $table->fecha_vencimiento = $conProducto->fecha_vencimiento;
                                         $table->save(false);
                                         $cant = $model->cantidad;
                                         $id_rack = $model->rack;
@@ -1150,6 +1162,7 @@ class AlmacenamientoProductoController extends Controller
                                     $table->producto = $conProducto->nombre_producto;
                                     $table->numero_lote = $conProducto->numero_lote;
                                     $table->fecha_almacenamiento = $conProducto->fecha_almacenamiento;
+                                    $table->fecha_vencimiento = $conProducto->fecha_vencimiento;
                                     $table->fecha_proceso_lote = $conProducto->ordenProduccion->fecha_proceso;
                                     $table->save(false);
                                     $cant = $model->cantidad;
@@ -1397,6 +1410,7 @@ class AlmacenamientoProductoController extends Controller
                 $table->fecha_almacenamiento = date('Y-m-d');
                 $table->numero_lote = $detalle->numero_lote;
                 $table->user_name = Yii::$app->user->identity->username;
+                $table->fecha_vencimiento = $detalle->fecha_vencimiento;
                 $table->save(false);
                 $con += 1;
             }else{ //proceso que almacena entradas de producto
@@ -1410,6 +1424,7 @@ class AlmacenamientoProductoController extends Controller
                 $table->unidad_producidas = $detalle->cantidad;
                 $table->numero_lote = $detalle->numero_lote;
                 $table->fecha_almacenamiento = date('Y-m-d');
+                $table->fecha_vencimiento = $detalle->fecha_vencimiento;
                 $table->user_name = Yii::$app->user->identity->username;
                 $table->save(false);
                 $con += 1;

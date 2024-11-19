@@ -891,8 +891,10 @@ class OrdenProduccionController extends Controller
         $fase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_grupo', $id_grupo])->all();
         $sw = 0;
         $producto = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
+        $suma = 0;
         if(count($fase) > 0){
             foreach ($producto as $detalle):
+                $suma += $detalle->cantidad_real;
                 if($detalle->fecha_vencimiento == null){
                    $sw = 1;    
                 }
@@ -912,6 +914,8 @@ class OrdenProduccionController extends Controller
                 }else{
                     //proceso de generar consecutivo
                     $solicitud = OrdenProduccion::findOne($id);
+                    $solicitud->unidades = $suma;
+                    $solicitud->save(false);
                     if($solicitud->id_proceso_produccion == 1){
                          $lista = \app\models\Consecutivos::findOne(21);
                     }else{
@@ -1552,7 +1556,7 @@ class OrdenProduccionController extends Controller
                 $resultado->nombre_producto = $detalle->descripcion;
                 $resultado->cantidad_proyectada = $detalle->cantidad;
                 $resultado->cantidad_real = $detalle->cantidad_real;
-               $resultado->save(false);
+                $resultado->save(false);
             endforeach;
             $id = $ensamble->id_ensamble;
             $token = 0;

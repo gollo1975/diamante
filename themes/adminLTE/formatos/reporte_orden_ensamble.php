@@ -125,7 +125,7 @@ class PDF extends FPDF {
     }
 
     function Body($pdf, $model) {
-        $detalles = OrdenEnsambleProductoDetalle::find()->where(['=', 'id_ensamble', $model->id_ensamble])->all();
+        $detalles = OrdenEnsambleProductoDetalle::find()->where(['=', 'id_ensamble', $model->id_ensamble])->andWhere(['<>','porcentaje_rendimiento', ''])->all();
         $materiales = app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $model->id_ensamble])->all();
         $hola = (count($materiales));
         $pdf->SetX(10);

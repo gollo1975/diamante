@@ -86,6 +86,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                         <th scope="col"  style='background-color:#B9D5CE;'>U. Faltantes</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Tipo documento</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>Numero lote</th>  
+                                        <th scope="col"  style='background-color:#B9D5CE;'>F. Vencimiento</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'></th>
@@ -108,6 +109,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                 <td><?= $val->documento->concepto ?></td>
                                             <?php }?>
                                             <td><?= $val->numero_lote ?></td>
+                                             <td><?= $val->fecha_vencimiento ?></td>
                                             <?php if($val->unidades_almacenadas <>  $val->unidades_producidas){?>
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-floppy-disk"></span>',

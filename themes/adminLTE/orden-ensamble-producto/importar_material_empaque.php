@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $id;
 
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
-                    <?= $formulario->field($form, "q")->input("search") ?>
+                    <?= $formulario->field($form, "q", ['inputOptions' =>['autofocus' => 'autofocus', 'class' => 'form-control']]) ?>
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>

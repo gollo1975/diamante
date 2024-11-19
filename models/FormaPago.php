@@ -33,6 +33,7 @@ class FormaPago extends \yii\db\ActiveRecord
             [['fecha_registro'], 'safe'],
             [['concepto'], 'string', 'max' => 30],
             [['abreviatura'], 'string', 'max' => 2],
+            [['codigo_api'], 'integer'],
         ];
     }
 
@@ -46,6 +47,7 @@ class FormaPago extends \yii\db\ActiveRecord
             'concepto' => 'Concepto',
             'fecha_registro' => 'Fecha Registro',
             'abreviatura' => 'abreviatura',
+            'codigo_api' => 'codigo_api',
         ];
     }
 

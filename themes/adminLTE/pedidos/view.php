@@ -67,7 +67,7 @@ $view = 'pedidos';
         </div>    
     <div class="panel panel-success">
         <div class="panel-heading">
-            DETALLES DEL PEDIDO:   (<?= $model->tipoPedido?>)
+            DETALLES DEL PEDIDO:   (<?= $model->tipoPedido->concepto?>)
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
@@ -89,7 +89,7 @@ $view = 'pedidos';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cantidad') ?></th>
                     <td><?= Html::encode($model->cantidad) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Vr_bruto') ?>:</th>
-                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
+                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_bruto,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'documento') ?></th>
@@ -108,8 +108,8 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->pedidoAbierto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'facturado') ?></th>
                     <td><?= Html::encode($model->pedidoFacturado) ?></td>
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'impuesto') ?></th>
-                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->impuesto,0)) ?></td>                  
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
+                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>                  
                 </tr>
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'usuario') ?></th>
@@ -118,12 +118,14 @@ $view = 'pedidos';
                     <td><?= Html::encode($model->agentePedido->nombre_completo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_entrega') ?>:</th>
                     <td ><?= Html::encode($model->fecha_entrega) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'gran_total') ?></th>
-                    <td style="text-align: right"><?= Html::encode(''.number_format($model->gran_total,0)) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'impuesto') ?></th>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->impuesto,0)) ?></td>
                 </tr>
                 <tr style="font-size: 90%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
-                    <td  colspan="8"><?= Html::encode($model->observacion) ?></td>
+                    <td  colspan="5"><?= Html::encode($model->observacion) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'gran_total') ?></th>
+                    <td  style="text-align: right"><?= Html::encode(''.number_format($model->gran_total,0)) ?></td>
                 </tr>
               
             </table>
@@ -168,7 +170,7 @@ $view = 'pedidos';
                                <tr style="font-size: 90%;">
                                     <td><?= $val->inventario->codigo_producto ?></td>
                                    <td><?= $val->inventario->nombre_producto ?></td>
-                                    <td><?= $val->ventaCondicionado?></td>
+                                    <td><?= $val->venta_condicionado?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                    <td style="text-align: right; background-color: #ffcaca"><?= ''.number_format($val->cantidad_faltante,0) ?></td>
                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
@@ -192,13 +194,19 @@ $view = 'pedidos';
                                <tr>
                                     <td colspan="5"></td>
                                     <td style="text-align: right;"><b>Vr. bruto:</b></td>
-                                    <td align="right" ><b><?= '$ '.number_format($model->subtotal,0); ?></b></td>
+                                    <td align="right" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                 <tr>
                                     <td colspan="5"></td>
                                     <td style="text-align: right;"><b>Descuento:</b></td>
                                     <td align="right" ><b><?= '$ '.number_format($model->descuento_comercial,0); ?></b></td>
+                                    <td colspan="1"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5"></td>
+                                    <td style="text-align: right;"><b>Subtotal:</b></td>
+                                    <td align="right" ><b><?= '$ '.number_format($model->subtotal,0); ?></b></td>
                                     <td colspan="1"></td>
                                 </tr>
                                 <tr>

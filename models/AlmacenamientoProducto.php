@@ -40,7 +40,7 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
     {
         return [
             [['id_orden_produccion', 'id_documento',  'unidades_producidas', 'unidades_almacenadas', 'unidades_faltantes','id_inventario'], 'integer'],
-            [['fecha_almacenamiento'], 'safe'],
+            [['fecha_almacenamiento','fecha_vencimiento'], 'safe'],
             [['codigo_producto', 'user_name','numero_lote'], 'string', 'max' => 15],
             [['nombre_producto'], 'string', 'max' => 40],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
@@ -67,6 +67,7 @@ class AlmacenamientoProducto extends \yii\db\ActiveRecord
             'fecha_almacenamiento' => 'Fecha Almacenamiento',
             'user_name' => 'User Name',
             'id_inventario' => 'id_inventario',
+            'fecha_vencimiento' => 'fecha_vencimiento',
         ];
     }
 

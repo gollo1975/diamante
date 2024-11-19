@@ -103,9 +103,9 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 8);
         $this->Cell(80, 5, utf8_decode($pedido->fecha_entrega), 0, 0, 'l', 1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("User name:"), 0, 0, 'J', 1);
+        $this->Cell(17, 5, utf8_decode("Tipo pedido:"), 0, 0, 'J', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(69, 5, utf8_decode($pedido->usuario), 0, 0, 'L', 1);
+        $this->Cell(69, 5, utf8_decode($pedido->tipoPedido->concepto), 0, 0, 'L', 1);
         //FIN
         //Lineas del encabezado
         $this->Line(10, 64, 10, 200);
@@ -163,7 +163,7 @@ class PDF extends FPDF {
             $pdf->Cell(17, 4, $detalle->inventario->codigo_producto, 0, 0, 'L');
             $pdf->SetFont('Arial', '', 7);
             $pdf->Cell(80, 4, utf8_decode($detalle->inventario->nombre_producto), 0, 0, 'L');
-            $pdf->Cell(5, 4, utf8_decode($detalle->ventaCondicionado), 0, 0, 'C');
+            $pdf->Cell(5, 4, utf8_decode($detalle->venta_condicionado), 0, 0, 'C');
             $pdf->Cell(17, 4, $detalle->numero_lote, 0, 0, 'R');
             $pdf->Cell(17, 4, $detalle->cantidad, 0, 0, 'R');
             $pdf->Cell(28, 4, number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');

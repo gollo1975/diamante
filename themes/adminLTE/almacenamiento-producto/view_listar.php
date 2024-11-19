@@ -27,10 +27,12 @@ $empresa = app\models\MatriculaEmpresa::findOne(1);
 
 <div class="almacenamiento-producto-view_lsitar">
     <p>    
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['listar_pedidos'], ['class' => 'btn btn-primary btn-sm']);
-        if($model->pedido_validado == 0){
-            echo Html::a('<span class="glyphicon glyphicon-ok"></span> Pedido validado', ['pedido_validado_facturacion', 'id_pedido' => $model->id_pedido],['class' => 'btn btn-warning btn-sm',
-                           'data' => ['confirm' => 'Este pedido queda listo para facturacion. Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);
+        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['listar_pedidos'], ['class' => 'btn btn-primary btn-xs']);
+        if($model->pedido_validado == 0){?>
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Pedido validado', ['pedido_validado_facturacion', 'id_pedido' => $model->id_pedido],['class' => 'btn btn-warning btn-xs',
+                           'data' => ['confirm' => 'Este pedido queda listo para facturacion. Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);?>
+             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear packing', ['almacenamiento-producto/crear_packing_pedido', 'id_pedido' => $model->id_pedido],['class' => 'btn btn-success btn-xs',
+                           'data' => ['confirm' => 'Desea crear el PACKING de almacenamiento para el pedido No  '. $model->numero_pedido.'.', 'method' => 'post']]); 
         }?>    
     </p>    
         <div class="panel panel-success">
@@ -39,15 +41,17 @@ $empresa = app\models\MatriculaEmpresa::findOne(1);
             </div>
             <div class="panel-body">
                 <table class="table table-bordered table-striped table-hover">
-                    <tr style="font-size: 90%;">
-                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_pedido") ?></th>
-                        <td><?= Html::encode($model->id_pedido) ?></td>
+                    <tr style="font-size: 85%;">
                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_pedido') ?></th>
                         <td><?= Html::encode($model->numero_pedido) ?></td>
+                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "fecha_entrega") ?></th>
+                        <td><?= Html::encode($model->fecha_entrega) ?></td>
                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?></th>
                         <td><?= Html::encode($model->cliente) ?></td>
-                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Total_pedido') ?></th>
-                         <td style="text-align: right;"><?= Html::encode(''.number_format($model->gran_total,0)) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "cantidad") ?></th>
+                        <td><?= Html::encode($model->cantidad) ?></td>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Total_pedido') ?></th>
+                        <td style="text-align: right;"><?= Html::encode(''.number_format($model->gran_total,0)) ?></td>
                     </tr>
                 </table>
             </div>

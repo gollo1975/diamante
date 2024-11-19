@@ -23,6 +23,7 @@ use Codeception\Lib\HelperModule;
 //models
 use app\models\OrdenEnsambleProducto;
 use app\models\OrdenEnsambleProductoSearch;
+use app\models\OrdenEnsambleProductoEmpaque;
 use app\models\UsuarioDetalle;
 use app\models\FiltroBusquedaOrdenEnsamble;
 use app\models\OrdenEnsambleAuditoria;
@@ -285,7 +286,8 @@ class OrdenEnsambleProductoController extends Controller
     {
         $conPresentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
         $orden_ensamble = OrdenEnsambleProducto::findOne($id);
-        $conMateriales = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
+        $conMateriales = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->orderBy('id DESC')->all();
+        $conTerminadas = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->andWhere(['=','importado', 0])->orderBy('id DESC')->all();
         //actualizar listado de presentacion producto
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_listado_presentacion"])){
@@ -307,14 +309,25 @@ class OrdenEnsambleProductoController extends Controller
            if(isset($_POST["actualizar_material_empaque"])){
                 if(isset($_POST["listado_empaque"])){
                     $intIndice = 0;
-                    foreach ($_POST["listado_empaque"] as $intCodigo):
-                        $table = \app\models\OrdenEnsambleProductoEmpaque::findOne($intCodigo);
-                        $table->unidades_devolucion = $_POST["unidades_devolucion"][$intIndice];
-                        $table->unidades_averias = $_POST["unidades_averias"][$intIndice];
-                        $table->unidades_sala_tecnica = $_POST["unidades_sala_tecnica"][$intIndice];
-                        $table->unidades_muestra_retencion = $_POST["unidades_muestra_retencion"][$intIndice];
-                        $table->save();
-                        $intIndice++;
+                    $total_envasada = 0;
+                    $total_empacadas = 0;
+                     foreach ($_POST["listado_empaque"] as $intCodigo):
+                        $table = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id', $intCodigo])->andWhere(['=','importado', 0])->one();
+                        if($table){                    
+                            $table->unidades_devolucion = $_POST["unidades_devolucion"][$intIndice];
+                            $table->unidades_averias = $_POST["unidades_averias"][$intIndice];
+                            $total_envasada = $table->unidades_devolucion + $table->unidades_averias;
+                            $table->unidades_utilizadas = $table->unidades_solicitadas - $total_envasada;
+                            //retenidas
+                            $table->unidades_sala_tecnica = $_POST["unidades_sala_tecnica"][$intIndice];
+                            $table->unidades_muestra_retencion = $_POST["unidades_muestra_retencion"][$intIndice];
+                            $total_empacadas = $table->unidades_sala_tecnica + $table->unidades_muestra_retencion;
+                            $table->unidades_reales = $table->unidades_utilizadas - $total_empacadas;
+                            $table->save();
+                            $intIndice++;
+                        }else{
+                            $intIndice++;
+                        }    
                     endforeach;
                    // $this->TotalUnidadesLote($orden_ensamble);
                    return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
@@ -351,7 +364,22 @@ class OrdenEnsambleProductoController extends Controller
             'conPresentacion' => $conPresentacion,
             'conMateriales' => $conMateriales,
             'sw' => $sw,
+            'conTerminadas' => $conTerminadas,
         ]);
+    }
+    
+    //CERRAR LIENA DE EMPAQUE
+    public function actionCerrar_linea_empacada($id, $token, $sw, $id_producto) {
+        $empaque = OrdenEnsambleProductoEmpaque::findOne($id_producto);
+        if($empaque){
+            $empaque->importado = 1;
+            $empaque->save();
+            return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Registro No encontrado en el sistema.');
+            return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
+        }
+        
     }
     
     //VISTA QUE MUESTRA EL PROCESO DE LA SEGUNDA AUDITORIA
@@ -443,26 +471,43 @@ class OrdenEnsambleProductoController extends Controller
    //ELIMINAR DETALLE DE LA ORDEN DE ENSAMBLE
      public function actionEliminar_detalle_ensamble($id, $id_detalle, $token, $sw)
     {                                
-        $dato = \app\models\OrdenEnsambleProductoDetalle::findOne($id_detalle);
-        $dato->delete();
-        return $this->redirect(['view','id' => $id, 'token' => $token ,'sw' => $sw]);     
+         
+        try {
+            $dato = \app\models\OrdenEnsambleProductoDetalle::findOne($id_detalle);
+            $dato->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+             return $this->redirect(['orden-ensamble-producto/view','id' => $id, 'token' => $token ,'sw' => $sw]); 
+        } catch (IntegrityException $e) {
+             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+              return $this->redirect(['orden-ensamble-producto/view','id' => $id, 'token' => $token ,'sw' => $sw]); 
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+             return $this->redirect(['orden-ensamble-producto/view','id' => $id, 'token' => $token ,'sw' => $sw]); 
+        }
     }
 
     //AUTORIZAR Y DESAUTORIZAR UNA ORDEN DE ENSAMBLE
       public function actionAutorizado($id, $token, $sw) {
         $model = $this->findModel($id);
-        if($model->total_unidades == 0){
-           Yii::$app->getSession()->setFlash('info', 'Debe actualizar las unidades reales desde el boton ACTUALIZAR.'); 
+        $presentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', ''])->all();
+        $empacadas = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->one();
+        if(!$empacadas){
+           Yii::$app->getSession()->setFlash('error', 'No se puede autorizar el proceso porque NO hay unidades empacadas.'); 
             $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
         }else{
-            if ($model->autorizado == 0){  
-                $model->autorizado = 1;            
-                $model->update();
-                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
+            if(count($presentacion) > 0){
+                if ($model->autorizado == 0){  
+                    $model->autorizado = 1;            
+                    $model->update();
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
+                }else{
+                    $model->autorizado = 0;            
+                    $model->update();
+                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
+                }    
             }else{
-                $model->autorizado = 0;            
-                $model->update();
-                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
+                Yii::$app->getSession()->setFlash('warning', 'Falta completar el porcentaje de rendimiendo que esta en la vista numero 1.'); 
+                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
             }    
         }    
     }
@@ -480,21 +525,6 @@ class OrdenEnsambleProductoController extends Controller
                 foreach ($detalle_empaque as $empaque):
                     if($empaque->alerta == 'FALTA'){
                        $sw = 1;
-                       $suma1 = $empaque->unidades_devolucion + $empaque->unidades_averias;
-                       $empaque->unidades_utilizadas -= $suma1;
-                       $empaque->unidades_reales = $empaque->unidades_utilizadas;
-                       $empaque->save(false);
-                       $suma2 = $empaque->unidades_sala_tecnica + $empaque->unidades_muestra_retencion;
-                       $empaque->unidades_reales -= $suma2;
-                       $empaque->save(false);
-                    }else{
-                       $suma1 = $empaque->unidades_devolucion + $empaque->unidades_averias;
-                       $empaque->unidades_utilizadas -= $suma1;
-                       $empaque->unidades_reales = $empaque->unidades_utilizadas;
-                       $empaque->save(false);
-                       $suma2 = $empaque->unidades_sala_tecnica + $empaque->unidades_muestra_retencion;
-                       $empaque->unidades_reales -= $suma2;
-                       $empaque->save(false);
                     }
                 endforeach;
                 if($sw == 1){
@@ -522,46 +552,28 @@ class OrdenEnsambleProductoController extends Controller
     //PROCESO QUE CIERRA EN SU TOTALIDAD LA ORDEN DE ENSAMBLE
     public function actionCerrar_orden_ensamble($id, $token, $sw) {
         $orden = OrdenEnsambleProducto::findOne($id);
-        $detalle_empaque = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
         $sw = 0;
-        foreach ($detalle_empaque as $detalle):
-          
-        echo $detalle->unidades_reales;
-                if($orden->total_unidades <> $detalle->unidades_reales){
-                   $sw = 1;
-                }
-        endforeach;
-        if($sw == 1){
-            Yii::$app->getSession()->setFlash('warning', 'No se puede CERRAR la orden de ensamble porque las UNIDADES REALES no son iguales en el proceso. Favor corregir las unidades por la primer vista.'); 
-            $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
-        }else{
-            $detalle_producto = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
-            foreach ($detalle_producto as $producto):
-                if($producto->porcentaje_rendimiento == null){
-                    $sw = 1;
-                }
-            endforeach;
-            if($sw == 1){
-                Yii::$app->getSession()->setFlash('error', 'No se puede CERRAR la orden de ensamble porque el PORCENTAJE DE RENDIMIENTO debe de ser mayor a 0. Favor actualizar las unidades desde el LAPIZ.'); 
-                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
-            }else{
-                $detalle_ensamble = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->all();
-                foreach ($detalle_ensamble as $ensamble):
-                    $presentacion = \app\models\OrdenProduccionProductos::findOne ($ensamble->id_detalle);
-                    if($presentacion){
-                        $presentacion->orden_ensamble_creado = 1;
-                        $presentacion->save();
-                    }
-                endforeach;
-                $orden->cerrar_proceso = 1;
-                $orden->save();
-                $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+        $suma = 0;
+        $detalle_ensamble = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', ''])->all();
+        foreach ($detalle_ensamble as $ensamble):
+            $presentacion = \app\models\OrdenProduccionProductos::findOne ($ensamble->id_detalle);
+            if($presentacion){
+                $presentacion->orden_ensamble_creado = 1;
+                $presentacion->save();
             }
-        }    
+            $suma += $ensamble->cantidad_real;
+            $orden->total_unidades = $suma;
+            $orden->save();
+        endforeach;
+        
+        $orden->cerrar_proceso = 1;
+        $orden->save();
+        $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+           
     }
     
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
-    public function actionBuscar_material_empaque($id, $token, $id_solicitud, $sw){
+    public function actionBuscar_material_empaque($id, $token, $id_solicitud, $sw, $id_producto){
         $operacion = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
@@ -610,12 +622,14 @@ class OrdenEnsambleProductoController extends Controller
                     if(!$registro){
                         $orden = OrdenEnsambleProducto::findOne($id);
                         $materia = \app\models\MateriaPrimas::findOne($intCodigo);
+                        $presentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id', $id_producto])->one();
                         $table = new \app\models\OrdenEnsambleProductoEmpaque();
                         $table->id_ensamble = $id;
+                        $table->id_presentacion = $id_producto;
                         $table->id_materia_prima = $intCodigo;
-                        $table->unidades_solicitadas =  $orden->total_unidades;
-                        $table->unidades_utilizadas =  $orden->total_unidades;
-                        $table->unidades_reales =  $orden->total_unidades;
+                        $table->unidades_solicitadas =  $presentacion->cantidad_real;
+                        $table->unidades_utilizadas =  $presentacion->cantidad_real;
+                        $table->unidades_reales =  $presentacion->cantidad_real;
                         $table->user_name =  Yii::$app->user->identity->username;
                         if($orden->total_unidades <= $materia->stock){
                             $table->alerta = 'OK';
@@ -639,6 +653,7 @@ class OrdenEnsambleProductoController extends Controller
             'token' => $token,
             'id_solicitud' => $id_solicitud,
             'sw' =>$sw,
+            'id_producto' => $id_producto,
         ]);
     }
     
@@ -684,7 +699,7 @@ class OrdenEnsambleProductoController extends Controller
                 $table->porcentaje_rendimiento = $variable;
                 $table->save();
                 $orden_ensamble = OrdenEnsambleProducto::findOne($id); 
-                $this->TotalUnidadesLote($orden_ensamble);
+               // $this->TotalUnidadesLote($orden_ensamble);
                 $this->CambiarCantidadOrdenProduccion($codigo, $cantidad);
                 $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' =>$sw]);
             }    
