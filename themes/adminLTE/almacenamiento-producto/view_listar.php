@@ -26,15 +26,44 @@ $empresa = app\models\MatriculaEmpresa::findOne(1);
 ?>
 
 <div class="almacenamiento-producto-view_lsitar">
-    <p>    
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['listar_pedidos'], ['class' => 'btn btn-primary btn-xs']);
         if($model->pedido_validado == 0){?>
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Pedido validado', ['pedido_validado_facturacion', 'id_pedido' => $model->id_pedido],['class' => 'btn btn-warning btn-xs',
                            'data' => ['confirm' => 'Este pedido queda listo para facturacion. Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);?>
-             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear packing', ['almacenamiento-producto/crear_packing_pedido', 'id_pedido' => $model->id_pedido],['class' => 'btn btn-success btn-xs',
-                           'data' => ['confirm' => 'Desea crear el PACKING de almacenamiento para el pedido No  '. $model->numero_pedido.'.', 'method' => 'post']]); 
+            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear packing',
+                                 ['almacenamiento-producto/crear_packing_pedido', 'id_pedido' => $model->id_pedido],
+                                   ['title' => 'Generar cantidad de cajas para el packin',
+                                    'data-toggle'=>'modal',
+                                    'data-target'=>'#modalcrearpacking',
+                                    'class' => 'btn btn-success btn-xs'
+                                   ])    
+            ?> 
+            <div class="modal remote fade" id="modalcrearpacking">
+                         <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                             <div class="modal-content"></div>
+                         </div>
+            </div>
+            <!--Para validar la cantidad de remision-->
+            <?php if(\app\models\PackingPedido::find()->where(['=','id_pedido', $model->id_pedido])->one()){
+
+                echo Html::a('<span class="glyphicon glyphicon-eye-open"></span> Ver packin ',
+                                    ['almacenamiento-producto/listado_packin', 'id_pedido' => $model->id_pedido],
+                                    [
+                                        'class' => 'btn btn-info btn-xs',   
+                                        'title' => 'Ver listados de packing',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalverlistadopacking'.$model->id_pedido,
+                                    ])    
+                               ?>
+                <div class="modal remote fade" id="modalverlistadopacking<?= $model->id_pedido?>">
+                    <div class="modal-dialog modal-lg" style ="width: 830px;">
+                        <div class="modal-content"></div>
+                    </div>
+                </div>
+            <?php }
         }?>    
-    </p>    
+                 <br>
+                 <br>
         <div class="panel panel-success">
             <div class="panel-heading">
                 DETALLES DEL PEDIDO

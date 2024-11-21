@@ -709,6 +709,7 @@ class AlmacenamientoProductoController extends Controller
     public function actionCantidad_despachada($id_pedido, $id_detalle, $sw){
         $model = new \app\models\ModeloDocumento(); 
         $matricula = \app\models\MatriculaEmpresa::findOne(1);
+        $modelo = \app\models\PackingPedido::find()->where(['=','id_pedido', $id_pedido])->andWhere(['=','estado_packing', 0])->one();
         $pedido = Pedidos::findOne($id_pedido);
         if($sw == 0){
            $detalle = PedidoDetalles::findOne($id_detalle); 
@@ -735,67 +736,74 @@ class AlmacenamientoProductoController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-        if ($model->load(Yii::$app->request->post())) {
-            if(isset($_POST["cantidaddespachada"])){
-                if($model->cantidad_despachada <= $detalle->cantidad){ 
-                   if(isset($_POST["seleccione_item"])){
-                       $valor = 0 ;
-                        foreach ($_POST["seleccione_item"] as $intCodigo):
-                            $cantidad = 0; $sobrante = 0; $restar = 0; $unidad_inventario = 0;
-                            if($matricula->aplica_fabricante == 0){
-                                $base = AlmacenamientoProductoDetalles::findOne($intCodigo);
-                            }else{
-                                $base = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($intCodigo);
-                            }    
-                            if($base->cantidad < $model->cantidad_despachada){
-                                $cantidad = $base->cantidad;
-                                $sobrante = $model->cantidad_despachada - $cantidad;
-                                $restar = $cantidad - ($model->cantidad_despachada - $sobrante);
-                                $base->cantidad = $restar;
-                                $valor = $sobrante;
-                                $unidad_inventario = $restar;
-                            }else{
-                                if($valor > 0){
-                                    $cantidad = $base->cantidad - $valor;
-                                    $base->cantidad = $cantidad;
-                                    $valor = 0;
-                                    $unidad_inventario = $valor;
-                                }else{
-                                    $cantidad = $base->cantidad - $model->cantidad_despachada;
-                                    $base->cantidad = $cantidad;
-                                    $unidad_inventario = $model->cantidad_despachada;
-                                }   
-                            }
-                            $base->save(false);
-                            $id_rack = $base->id_rack;
-                            $unidades = $unidad_inventario;
-                            $this->ActualizarUnidadesRack($id_rack, $unidades);
-                        endforeach;
-                        $detalle->cantidad_despachada = $model->cantidad_despachada;
-                        $detalle->historico_cantidad_vendida = $detalle->cantidad;
-                        $detalle->linea_validada = 1;
-                        $detalle->numero_lote = $base->numero_lote;
-                        $detalle->fecha_alistamiento = date('Y-m-d');
-                        if($detalle->cantidad <> $model->cantidad_despachada){
-                            $detalle->regenerar_linea = 1;
+        if(\app\models\PackingPedido::find()->where(['=','id_pedido', $id_pedido])->andWhere(['=','estado_packing', 0])->one()){
+            if ($model->load(Yii::$app->request->post())) {
+                if(isset($_POST["cantidaddespachada"])){
+                    if($model->cantidad_despachada <= $detalle->cantidad){ 
+                    
+                        if(isset($_POST["seleccione_item"])){
+                             $valor = 0 ;
+                              foreach ($_POST["seleccione_item"] as $intCodigo):
+                                  $cantidad = 0; $sobrante = 0; $restar = 0; $unidad_inventario = 0;
+                                  if($matricula->aplica_fabricante == 0){
+                                      $base = AlmacenamientoProductoDetalles::findOne($intCodigo);
+                                  }else{
+                                      $base = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($intCodigo);
+                                  }    
+                                  if($base->cantidad < $model->cantidad_despachada){
+                                      $cantidad = $base->cantidad;
+                                      $sobrante = $model->cantidad_despachada - $cantidad;
+                                      $restar = $cantidad - ($model->cantidad_despachada - $sobrante);
+                                      $base->cantidad = $restar;
+                                      $valor = $sobrante;
+                                      $unidad_inventario = $restar;
+                                  }else{
+                                      if($valor > 0){
+                                          $cantidad = $base->cantidad - $valor;
+                                          $base->cantidad = $cantidad;
+                                          $valor = 0;
+                                          $unidad_inventario = $valor;
+                                      }else{
+                                          $cantidad = $base->cantidad - $model->cantidad_despachada;
+                                          $base->cantidad = $cantidad;
+                                          $unidad_inventario = $model->cantidad_despachada;
+                                      }   
+                                  }
+                                  $base->save(false);
+                                  $id_rack = $base->id_rack;
+                                  $unidades = $unidad_inventario;
+                                  $this->ActualizarUnidadesRack($id_rack, $unidades);
+                              endforeach;
+                              $detalle->cantidad_despachada = $model->cantidad_despachada;
+                              $detalle->historico_cantidad_vendida = $detalle->cantidad;
+                              $detalle->linea_validada = 1;
+                              $detalle->numero_lote = $base->numero_lote;
+                              $detalle->fecha_alistamiento = date('Y-m-d');
+                              if($detalle->cantidad <> $model->cantidad_despachada){
+                                  $detalle->regenerar_linea = 1;
+                              }else{
+                                 $detalle->regenerar_linea = 0; 
+                              }
+                              $detalle->save(false);
+                              return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
                         }else{
-                           $detalle->regenerar_linea = 0; 
-                        }
-                        $detalle->save(false);
-                        return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
-                   }else{
-                       Yii::$app->getSession()->setFlash('info', 'Debe se chequear el RACK para descargar el inventario.');
+                             Yii::$app->getSession()->setFlash('error', 'Debe se chequear el RACK o medio de almacenamiento para descargar el prodcuto del inventario.');
+                             return $this->redirect(['cantidad_despachada', 'id_pedido' => $id_pedido, 'id_detalle' => $id_detalle, 'sw' => $sw]);
+
+                        }     
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayor que las unidades vendidas.');
                         return $this->redirect(['cantidad_despachada', 'id_pedido' => $id_pedido, 'id_detalle' => $id_detalle, 'sw' => $sw]);
-                   }
-                }else{
-                    Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayor que las unidades vendidas.');
-                    return $this->redirect(['cantidad_despachada', 'id_pedido' => $id_pedido, 'id_detalle' => $id_detalle, 'sw' => $sw]);
-                }  
+                    }  
+                }
             }
-        }
-        if (Yii::$app->request->get()) {
-           $model->cantidad_vendida = $detalle->cantidad;
-        }
+            if (Yii::$app->request->get()) {
+               $model->cantidad_vendida = $detalle->cantidad;
+            }
+        }else{
+             Yii::$app->getSession()->setFlash('error', 'Debe de crear primero el packing para despachar el pedido.');
+             return $this->redirect(['view_listar', 'id_pedido' => $id_pedido]);
+        }    
         return $this->render('_form_cantidad_despachada', [
                         'model' => $model,
                         'id_pedido' => $id_pedido,
@@ -803,6 +811,8 @@ class AlmacenamientoProductoController extends Controller
                         'sw' => $sw,
                         'almacenamiento' => $almacenamiento,
                         'pedido' => $pedido,
+                        'modelo' => $modelo,
+                        'id_detalle' => $id_detalle
         ]); 
         
     }
@@ -842,9 +852,59 @@ class AlmacenamientoProductoController extends Controller
          return $this->renderAjax('form_subir_almacenamiento', [
                     'model' => $model,
                     'id' => $id,
-                    'id_orden' => $id_orden, 
+                    'id_orden' => $id_orden,
         ]);
     }
+    
+   
+    //ALMACENAR PRODUCTOS EN CAJA
+    public function actionAlmacenar_producto_caja($id_pedido, $id_detalle, $id_caja, $sw) {
+        $model = new \app\models\ModeloDocumento(); 
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["empacar_producto"])) {
+                    if($model->cantidad_despachada > 0){
+                        $linea_pedido = PedidoDetalles::findOne($id_detalle);
+                        $table = \app\models\PackingPedidoDetalle::findOne($id_caja) ;
+                        
+                            $table->codigo_producto = $linea_pedido->inventario->codigo_producto;
+                            $table->nombre_producto = $linea_pedido->inventario->nombre_producto;
+                            $table->fecha_packing = date('Y-m-d');
+                            $table->cantidad_despachada = $model->cantidad_despachada;
+                            $table->numero_caja = $table->numero_caja;
+                            $table->id_inventario = $linea_pedido->id_inventario;
+                            $table->save(false);
+                        return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+                    }else{
+                        Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacion, debe de ingreso al menos 1 unidad.');
+                        return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+                    }    
+                }
+            }else{
+              $model->getErrors();  
+            }
+         }
+         $table = \app\models\PackingPedidoDetalle::findOne($id_caja) ;
+         if (Yii::$app->request->get()) {
+            $model->cantidad_despachada = $table->cantidad_despachada;
+         }    
+         return $this->renderAjax('form_almacenar_caja', [
+                    'model' => $model,
+                    'id_pedido' => $id_pedido,
+                ]);
+    }
+    
+    //DUPLICAR CAJA PARA PACKING
+    public function actionDuplicar_caja_packing($id, $id_pedido, $id_detalle,$sw, $numero_caja) {
+        
+        $table = new \app\models\PackingPedidoDetalle();
+        $table->id_packing = $id;
+        $table->linea_duplicada = 1;
+        $table->numero_caja = $numero_caja;
+        $table->save();
+        return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+    }
+    
     
     //CAMBIAR DE POSICION
      public function actionCambiar_posicion($id_posicion, $sw) {
@@ -1591,6 +1651,69 @@ class AlmacenamientoProductoController extends Controller
                 return $this->redirect(["listar_pedidos"]);
             }  
         }    
+    }
+    
+    //CREAR PACKING
+    public function actionCrear_packing_pedido($id_pedido) {
+        $model = new \app\models\FormModeloPackin();
+        $pedido = Pedidos::findOne($id_pedido);
+        if ($model->load(Yii::$app->request->post())){
+            if ($model->validate()) {
+                if (isset($_POST["crear_packing"])) {
+                    if($model->unidades_porcaja !== '' && $model->cantidad_caja !== ''){
+                        $buscar = \app\models\PackingPedido::find()->where(['=','id_pedido', $id_pedido])->andWhere(['=','estado_packing', 0])->one();
+                        if(!$buscar){
+                            $table = new \app\models\PackingPedido();
+                            $table->id_pedido = $id_pedido;
+                            $table->id_cliente = $pedido->id_cliente;
+                            $table->nit_cedula_cliente = $pedido->documento;
+                            $table->cliente = $pedido->cliente;
+                            $table->fecha_packing = date('Y-m-d');
+                            $table->numero_pedido = $pedido->numero_pedido;
+                            $table->user_name = Yii::$app->user->identity->username;
+                            $table->save();
+                            //proceso que cargas las lineas
+                            $codigo = \app\models\PackingPedido::find()->orderBy('id_packing DESC')->one();
+                            for ($i = 1; $i <= $model->cantidad_caja; $i++) {
+                                $detalle = new \app\models\PackingPedidoDetalle();
+                                $detalle->id_packing = $codigo->id_packing;
+                                $detalle->numero_caja = $i;
+                                $detalle->save(false);
+                                if (!$detalle->save()) {
+                                    throw new \Exception('Error al guardar el detalle');
+                                }
+                            }
+                            return $this->redirect(["almacenamiento-producto/view_listar",'id_pedido' => $id_pedido]); 
+                        }else{
+                            Yii::$app->getSession()->setFlash('error', 'No se puede crear un nuevo packing porque existe un registro activo.'); 
+                            return $this->redirect(["almacenamiento-producto/view_listar",'id_pedido' => $id_pedido]);
+                        }    
+                       
+                     }else{
+                        Yii::$app->getSession()->setFlash('error', 'Los campos NO pueden ser vacios. Vuelva a intentarlo.');
+                    }
+                }
+                return $this->redirect(["almacenamiento-producto/view_listar",'id_pedido' => $id_pedido]);  
+            }else{
+                $model->getErrors();
+            }    
+        }
+       return $this->renderAjax('crear_packing_pedido', [
+            'model' => $model,       
+            'id_pedido' => $id_pedido,
+       
+        ]);      
+    }
+    
+    //consultar packing
+    //permite ver la remisiones
+    public function actionListado_packin($id_pedido) {
+        $model = \app\models\PackingPedido::find()->where(['=','id_pedido', $id_pedido])->orderBy('id_packing DESC')->all();
+        return $this->renderAjax('listado_packing', [
+            'id_pedido' => $id_pedido,
+            'model' => $model,
+            
+        ]); 
     }
     /**
      * Finds the AlmacenamientoProducto model based on its primary key value.

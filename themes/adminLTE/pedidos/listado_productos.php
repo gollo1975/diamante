@@ -29,8 +29,6 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
     }else{
         if($model->autorizado == 1  && $model->numero_pedido == 0){?>
               <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-default btn-xs']);?>
-              <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Crear pedido', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'tokenAcceso'=> $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual,'tipo_pedido' => $tipo_pedido],['class' => 'btn btn-warning btn-xs',
-                         'data' => ['confirm' => 'Esta seguro de CREAR el pedido al cliente ' .$model->cliente. '. Aviso. Al crear el pedido NO puede hacer mas modificaciones.', 'method' => 'post']]);?>
                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
                                         ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],
                                           ['title' => 'Crear observaciones al pedido',
