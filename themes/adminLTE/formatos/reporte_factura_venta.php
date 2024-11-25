@@ -157,7 +157,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("T. cliente:"), 0, 0, 'c', 0);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->tipoCliente->abreviatura), 0, 0, 'c', 0);
+        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->tipoCliente->concepto), 0, 0, 'c', 0);
         //FIN
          //Lineas del encabezado
         $this->Line(10,67,10,188); //la primera con la tercera es para la la raya iguales, la segunda es el lago o corto y la tercera es la tamaño de largo

@@ -314,7 +314,6 @@ class PedidosController extends Controller
                                     ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
                                     ->andFilterWhere(['like', 'nombre_completo', $nombre_completo])
                                     ->andWhere(['=', 'estado_cliente', 0])
-                                    ->andWhere(['=', 'id_tipo_cliente', 1])
                                     ->andWhere(['=','id_agente', $vendedor->id_agente]);
                         }
                         if($tokenAcceso == 1 || $tokenAcceso == 2){
@@ -322,10 +321,8 @@ class PedidosController extends Controller
                                 ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
                                 ->andFilterWhere(['like', 'nombre_completo', $nombre_completo])
                                 ->andWhere(['=','id_agente', $vendedor->id_agente])    
-                                ->andWhere(['=', 'estado_cliente', 0])
-                                ->andWhere(['=', 'id_tipo_cliente', 3])
-                                ->orWhere(['=', 'id_tipo_cliente', 2])
-                                ->orWhere(['=', 'id_tipo_cliente', 4]);    
+                                ->andWhere(['=', 'estado_cliente', 0]);
+                                 
                         }    
                         $table = $table->orderBy('nombre_completo ASC');
                         $tableexcel = $table->all();
@@ -349,15 +346,11 @@ class PedidosController extends Controller
                     if($tokenAcceso == 3){
                         $table = Clientes::find()->where(['=','estado_cliente', 0])
                             ->andWhere(['=','id_agente', $vendedor->id_agente])
-                             ->andWhere(['=', 'id_tipo_cliente', 1])    
                             ->orderBy('nombre_completo ASC');
                     }
                     if($tokenAcceso == 1 || $tokenAcceso == 2){
                         $table = Clientes::find()->where(['=','estado_cliente', 0])
                             ->andWhere(['=','id_agente', $vendedor->id_agente])
-                            ->andWhere(['=', 'id_tipo_cliente', 2])    
-                            ->orWhere(['=', 'id_tipo_cliente', 3]) 
-                            ->orWhere(['=', 'id_tipo_cliente', 4])      
                             ->orderBy('nombre_completo ASC');   
                     }
                     $count = clone $table;
@@ -656,8 +649,9 @@ class PedidosController extends Controller
             if($cliente->presupuesto_comercial > 0){
                 $factura_mora = FacturaVenta::find()->where(['=','id_cliente', $id])->andWhere(['>','saldo_factura', 0])
                                                 ->andWhere(['<','fecha_vencimiento', $fecha_actual])->orderBy('id_factura ASC')->one();
-
+                
                 if(!$factura_mora || $cliente->aplicar_venta_mora == 1){
+                    $tipoPedidoGenerado = $cliente->tipoCliente->abreviatura;
                     $table = new Pedidos();
                     $table->id_cliente = $id;
                     $table->documento = $cliente->nit_cedula;
@@ -666,7 +660,11 @@ class PedidosController extends Controller
                     $table->usuario = Yii::$app->user->identity->username;
                     $table->fecha_proceso = date('Y-m-d');
                     $table->id_agente = $cliente->id_agente;
-                    $table->tipo_pedido = 1;
+                    if($tipoPedidoGenerado == 'I'){
+                            $table->tipo_pedido = 2;
+                    }else{
+                            $table->tipo_pedido = 1;
+                    }
                     if($tipo_pedido == 0){
                         $table->liberado_inventario = 1;
                     }   
@@ -694,6 +692,7 @@ class PedidosController extends Controller
                                                     ->andWhere(['<','fecha_vencimiento', $fecha_actual])->orderBy('id_factura ASC')->one();
 
                     if(!$factura_mora || $cliente->aplicar_venta_mora == 1){
+                        $tipoPedidoGenerado = $cliente->tipoCliente->abreviatura;
                         $table = new Pedidos();
                         $table->id_cliente = $id;
                         $table->documento = $cliente->nit_cedula;
@@ -701,7 +700,11 @@ class PedidosController extends Controller
                         $table->cliente = $cliente->nombre_completo;
                         $table->usuario = Yii::$app->user->identity->username;
                         $table->fecha_proceso = date('Y-m-d');
-                        $table->tipo_pedido = 1;
+                        if($tipoPedidoGenerado == 'I'){
+                            $table->tipo_pedido = 2;
+                        }else{
+                            $table->tipo_pedido = 1;
+                        }
                         $table->id_agente = $cliente->id_agente;
                         if($tipo_pedido == 0){
                            $table->liberado_inventario = 1;
@@ -1574,46 +1577,8 @@ class PedidosController extends Controller
     }
     
     //ACTUALIZA PEDIDO AGRUPADO
-    //ACTUALIZA LOS SUBTOTALES
-    protected function ActualizarTotalesPedidoAgrupado($id) {
-        $subtotal = 0; $impuesto = 0; $total = 0; $cantidad = 0; $cantidad2 = 0;
-        $cupo = 0; $descuento_comercial = 0;
     
-        $model = $this->findModel($id);
-        $empresa = \app\models\MatriculaEmpresa::findOne(1);
-        $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
-        $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
-        foreach ( $detalle as $detalles):
-            if($detalles->venta_condicionado !== 'B'){ //ENTRA SI NOS SON BONIFICABLES
-                $subtotal += $detalles->subtotal;    
-                $impuesto += $detalles->impuesto;
-                $total += $detalles->total_linea;
-                $cantidad += $detalles->cantidad;
-            }else{ ///SUMA LOS VALORES DE BONIFICABLE
-                $cantidad2 += $detalles->cantidad;
-            }
-        endforeach;
-        //totaliza
-        $model->cantidad = $cantidad + $cantidad2;
-        $model->valor_bruto = $subtotal;
-        if($model->valor_bruto <= 0){
-            $model->subtotal = $model->descuento_comercial; 
-            $model->impuesto = 0;
-            $model->gran_total = 0;
-        }else{
-            $model->subtotal = $subtotal - $model->descuento_comercial;    
-            $model->impuesto = round(($model->subtotal  * $empresa->porcentaje_iva)/100);
-            $model->gran_total = round($model->subtotal + $model->impuesto);
-        }    
-        $model->save(false);
-        $cupo = $model->clientePedido->cupo_asignado;
-        if($cliente->formaPago->codigo_api == 4){
-            if($total > $cupo){
-                $cupo = '$'.number_format($cupo,0);
-                Yii::$app->getSession()->setFlash('error', 'El cupo asignado para este cliente es: ('. $cupo. '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.'); 
-            }
-        }    
-    }
+  
     
     
     //PROCESO QUE AUTORIZADO O DESAUTORIZA
@@ -1713,7 +1678,8 @@ class PedidosController extends Controller
             }   
         }    
     }
-    //CREAR EL CONSECUTIVO DEL PEDIDO
+   
+   //CREAR EL CONSECUTIVO DEL PEDIDO
     public function actionCrear_pedido_cliente($id, $tokenAcceso, $token, $pedido_virtual, $tipo_pedido) {
         //proceso de generar consecutivo
         $consecutivo = \app\models\Consecutivos::findOne(5);
@@ -1926,6 +1892,49 @@ class PedidosController extends Controller
         }
     }
     
+      protected function ActualizarTotalesPedidoAgrupado($id) {
+        $subtotal = 0; $impuesto = 0; $total = 0; $cantidad = 0; $cantidad2 = 0;
+        $cupo = 0; $descuento_comercial = 0;
+        $subtotal_descontable = 0; $impuesto_descontable = 0;
+        $model = $this->findModel($id);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        $detalle = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id])->all();
+        $cliente = Clientes::find()->where(['=','id_cliente', $model->id_cliente])->one();
+        foreach ( $detalle as $detalles):
+            if($detalles->venta_condicionado !== 'B'){ //ENTRA SI NOS SON BONIFICABLES
+                $subtotal += $detalles->subtotal;    
+                $impuesto += $detalles->impuesto;
+                $total += $detalles->total_linea;
+                $cantidad += $detalles->cantidad;
+            }else{ ///SUMA LOS VALORES DE BONIFICABLE
+                $cantidad2 += $detalles->cantidad;
+                $subtotal_descontable += $detalles->subtotal;
+                $impuesto_descontable += $detalles->impuesto;
+            }
+        endforeach;
+        //totaliza
+        $model->cantidad = $cantidad + $cantidad2;
+        $model->valor_bruto = $subtotal + $subtotal_descontable;
+        if($model->valor_bruto <= 0){
+            $model->subtotal = $model->descuento_comercial; 
+            $model->impuesto = 0;
+            $model->gran_total = 0;
+        }else{
+            $model->subtotal = $model->valor_bruto - $model->descuento_comercial;    
+            $model->impuesto = $impuesto;
+            $model->gran_total = round($model->subtotal + $model->impuesto);
+        }    
+        $model->save(false);
+        $cupo = $model->clientePedido->cupo_asignado;
+        if($cliente->formaPago->codigo_api == 4){
+            if($total > $cupo){
+                $cupo = '$'.number_format($cupo,0);
+                Yii::$app->getSession()->setFlash('error', 'El cupo asignado para este cliente es: ('. $cupo. '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.'); 
+            }
+        }    
+    }
+    
+    //PERMITE CREAR LAS OBSERVACIONES DE PEDIDO
     public function actionCrear_observacion($id, $token, $tokenAcceso, $pedido_virtual, $tipo_pedido) {
          $model = new FormModeloBuscar();
          $pedido = Pedidos::findOne($id);
