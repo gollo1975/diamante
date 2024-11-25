@@ -24,6 +24,7 @@ use Codeception\Lib\HelperModule;
 //models
 use app\models\PackingPedido;
 use app\models\PackingPedidoSearch;
+use app\models\PackingPedidoDetalle;
 use app\models\UsuarioDetalle;
 
 
@@ -179,7 +180,7 @@ class PackingPedidoController extends Controller
     
     //CERRAR EL EL PACKING
     public function actionCerrar_packing_pedido($id) {
-         $model = $this->findModel($id);
+        $model = $this->findModel($id);
         $detalle = \app\models\PackingPedidoDetalle::find()->where(['=','id_packing', $id])->orderBy('numero_caja DESC')->all();
         $sw = 0;
         foreach ($detalle as $key => $detalles) {
@@ -192,9 +193,9 @@ class PackingPedidoController extends Controller
              $dato = \app\models\Consecutivos::findOne(24);
              $codigo = $dato->numero_inicial + 1;
              $model->numero_packing = $codigo;
-             $model->save();
-             $model->cerrar_proceso = 1;
+             $model->cerrado_proceso = 1;
              $model->estado_packing = 1;
+             $model->save();
              $dato->numero_inicial = $codigo;
              $dato->save();
              return $this->redirect(['packing-pedido/view','id' => $id]);
@@ -250,6 +251,60 @@ class PackingPedidoController extends Controller
                     'model' => $model,
                     
                 ]);
+    }
+    
+    //PERMITE SUBIR LA GUIA DEL PROVEEDOR AL PACKING
+    public function actionSubir_guia_proveedor($id) {
+        $model = new \app\models\ModeloDocumento(); 
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["subir_guia"])) {
+                    if($model->numero_guia !== ''){
+                        $table = \app\models\PackingPedidoDetalle::find()->where(['=','id_packing', $id])->all() ;
+                        foreach ($table as $key => $val) {
+                            $val->numero_guia = $model->numero_guia;
+                            $val->save();
+                        }
+                         return $this->redirect(['packing-pedido/view', 'id' => $id]);
+                    }else{
+                        Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacion, Favor ingresar al menos un caracter.');
+                        return $this->redirect(['packing-pedido/view', 'id' => $id]);
+                    }    
+                }
+            }else{
+              $model->getErrors();  
+            }
+        }
+        return $this->renderAjax('/packing-pedido/form_subir_guia_provider', [
+                    'model' => $model]);
+    }
+    
+     //PERMITE SUBIR LA GUIA DEL PROVEEDOR AL PACKING
+    public function actionSubir_guia_proveedor_individual($id, $id_detalle) {
+        $model = new \app\models\ModeloDocumento(); 
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["subir_guia"])) {
+                    if($model->numero_guia !== ''){
+                        $table = \app\models\PackingPedidoDetalle::findOne($id_detalle) ;
+                        $table->numero_guia = strtoupper($model->numero_guia);
+                        $table->save();
+                        return $this->redirect(['packing-pedido/view', 'id' => $id]);
+                    }else{
+                        Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacion, Favor ingresar al menos un caracter.');
+                        return $this->redirect(['packing-pedido/view', 'id' => $id]);
+                    }    
+                }
+            }else{
+              $model->getErrors();  
+            }
+        }
+         $table = \app\models\PackingPedidoDetalle::findOne($id_detalle);
+         if (Yii::$app->request->get()) {
+            $model->numero_guia = $table->numero_guia;
+         }    
+        return $this->renderAjax('/packing-pedido/form_subir_guia_provider', [
+                    'model' => $model]);
     }
     
     /**

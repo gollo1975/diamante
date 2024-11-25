@@ -40,6 +40,7 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             [['fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 30],
             [['user_name'], 'string', 'max' => 15],
+            [['codigo_interface'], 'string', 'max' => 3],
             [['porcentaje_retencion','porcentaje_mora'], 'number'],
             [['base_retencion','aplica_interes_mora'], 'integer'],
             
@@ -60,6 +61,7 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             'base_retencion' => 'Base retencion',
             'porcentaje_mora' => 'Porcentaje de mora',
             'aplica_interes_mora' => 'Aplica interes mora',
+            'codigo_interface' => 'Codigo interface',
         ];
     }
     

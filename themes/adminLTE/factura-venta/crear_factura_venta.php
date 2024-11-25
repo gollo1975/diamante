@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
 
-$this->title = 'PEDIDO PARA FACTURAR';
+$this->title = 'Pedidos para facturar';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -50,7 +50,7 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
         Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
     </div>
 	
-    <div class="panel-body" id="filtro" style="display:none">
+    <div class="panel-body" id="filtro" style="display:block">
         <div class="row" >
             <?= $formulario->field($form, "documento")->input("search") ?>
             <?= $formulario->field($form, 'cliente')->widget(Select2::classname(), [
@@ -108,12 +108,13 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 90%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>No pedido</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de pedido">Tipo pedido</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de cliente">T.C.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Fecha pedido</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F. pedido</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F.entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total pedido</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
@@ -124,12 +125,13 @@ $form = ActiveForm::begin([
             <tr style ='font-size: 90%;'>                
               
                 <td><?= $val->numero_pedido?></td>
+                <td><?= $val->tipoPedido->concepto?></td>
                 <td><?= $val->documento?></td>
                 <td><?= $val->clientePedido->nombre_completo?></td>
+                <td><?= $val->clientePedido->tipoCliente->abreviatura?></td>
                 <td><?= $val->agentePedido->nombre_completo?></td>
                 <td><?= $val->fecha_proceso?></td>
-                <td style="text-align: right"><?= ''.number_format($val->subtotal,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
+                <td><?= $val->fecha_entrega?></td>
                 <td style="text-align: right"><?= ''.number_format($val->gran_total,0)?></td>
                 <td style= 'width: 25px; height: 25px;'>
                     <?= Html::a('<span class="glyphicon glyphicon-plus"></span>', ['importar_pedido_factura', 'id_pedido' => $val->id_pedido], [

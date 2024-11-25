@@ -92,52 +92,72 @@ class PDF extends FPDF {
         $this->SetXY(10, 40);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Nit:"), 0, 0, 'L', 0);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->nit_cedula.'-'.$factura->dv), 0, 0, 'L',0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(48, 5, utf8_decode($factura->nit_cedula.'-'.$factura->dv), 0, 0, 'L',0);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Cliente:"), 0, 0, 'c', 0);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->cliente), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode($factura->cliente), 0, 0, 'c', 0);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(17, 5, utf8_decode("No pedido:"), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode($factura->pedido->numero_pedido), 0, 0, 'c', 0);
         //FIN
         $this->SetXY(10, 44);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Dirección:"), 0, 0, 'L', 0);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->direccion), 0, 0, 'L',0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(48, 5, utf8_decode($factura->direccion), 0, 0, 'L',0);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Telefono:"), 0, 0, 'c', 0);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->telefono_cliente), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode($factura->telefono_cliente), 0, 0, 'c', 0);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(17, 5, utf8_decode("Vendedor:"), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode(substr($factura->agenteFactura->nombre_completo,0,18)), 0, 0, 'c', 0);
         //FIN
          $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Departamento:"), 0, 0, 'l', 0);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->clienteFactura->codigoDepartamento->departamento), 0, 0, 'L',0);
+        $this->Cell(48, 5, utf8_decode($factura->clienteFactura->codigoDepartamento->departamento), 0, 0, 'L',0);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Municipio:"), 0, 0, 'l', 0);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->clienteFactura->codigoMunicipio->municipio), 0, 0, 'L', 0);
+        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->codigoMunicipio->municipio), 0, 0, 'L', 0);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(17, 5, utf8_decode("Zona:"), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->zona->nombre_zona), 0, 0, 'c', 0);
         //FIN
         $this->SetXY(10, 52);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Fecha expedición:"), 0, 0, 'l', 0);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->fecha_inicio), 0, 0, 'L',0);
+        $this->Cell(48, 5, utf8_decode($factura->fecha_inicio), 0, 0, 'L',0);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Fecha vcto:"), 0, 0, 'l', 0);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->fecha_vencimiento), 0, 0, 'L', 0);
+        $this->Cell(55, 5, utf8_decode($factura->fecha_vencimiento), 0, 0, 'L', 0);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(17, 5, utf8_decode("Fecha dian:"), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode($factura->fecha_recepcion_dian), 0, 0, 'c', 0);
         //FIN
         $this->SetXY(10, 56);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Email.:"), 0, 0, 'L', 0);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($factura->clienteFactura->email_cliente), 0, 0, 'l', 0);
+        $this->Cell(48, 5, utf8_decode($factura->clienteFactura->email_cliente), 0, 0, 'l', 0);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Forma pago:"), 0, 0, 'J', 0);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(67, 5, utf8_decode($factura->formaPago->concepto.' ('.$factura->plazo_pago.')  Dias'), 0, 0, 'L', 0);
+        $this->Cell(55, 5, utf8_decode($factura->formaPago->concepto.' ('.$factura->plazo_pago.')  Dias'), 0, 0, 'L', 0);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(17, 5, utf8_decode("T. cliente:"), 0, 0, 'c', 0);
+        $this->SetFont('Arial', '', 7);
+        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->tipoCliente->abreviatura), 0, 0, 'c', 0);
         //FIN
          //Lineas del encabezado
         $this->Line(10,67,10,188); //la primera con la tercera es para la la raya iguales, la segunda es el lago o corto y la tercera es la tamaño de largo
@@ -208,12 +228,12 @@ class PDF extends FPDF {
             $pdf->Cell(74, 4, $detalle->inventario->nombre_producto , 0, 0, 'L');
             $pdf->Cell(7,  4, $detalle->inventario->presentacion->medidaProducto->codigo_enlace, 0, 0, 'L');
             $pdf->Cell(12, 4, $detalle->cantidad, 0, 0, 'R');
-            $pdf->Cell(19, 4, number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
+            $pdf->Cell(19, 4, '$'.number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
             $pdf->Cell(13, 4, $detalle->porcentaje_iva, 0, 0, 'R');
             $pdf->Cell(20, 4, $detalle->numero_lote, 0, 0, 'L');
-            $pdf->Cell(25, 4, number_format($detalle->subtotal, 0, '.', ','), 0, 0, 'R');            
+            $pdf->Cell(25, 4, '$'.number_format($detalle->subtotal, 0, '.', ','), 0, 0, 'R');            
             $pdf->Ln();
-            $pdf->SetAutoPageBreak(true, 20);
+            $pdf->SetAutoPageBreak(true, 17);
             $cant += $detalle->cantidad;
         }
         $this->SetFillColor(200, 200, 200);
@@ -224,7 +244,7 @@ class PDF extends FPDF {
         $pdf->SetXY(157, 188);
         $pdf->MultiCell(20, 5, 'Total Bruto',1,'L');
         $pdf->SetXY(177, 188);
-        $pdf->MultiCell(25, 5, number_format($model->valor_bruto, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->valor_bruto, 0, '.', ','),1,'R');
        //FIN
         $pdf->SetXY(10, 193);
         $this->SetFont('Arial', 'B', 8);
@@ -232,33 +252,33 @@ class PDF extends FPDF {
         $pdf->SetXY(157, 193);
         $pdf->MultiCell(20, 5, 'D. Efectivo',1,'L');
         $pdf->SetXY(177, 193);
-        $pdf->MultiCell(25, 5, number_format($model->descuento, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->descuento, 0, '.', ','),1,'R');
          //FIN
         $pdf->SetXY(157, 198);
         $pdf->MultiCell(20, 5, 'D. Comercial',1,'L');
         $pdf->SetXY(177, 198);
-        $pdf->MultiCell(25, 5, number_format($model->descuento_comercial, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->descuento_comercial, 0, '.', ','),1,'R');
         ///fin
         //FIN
         $pdf->SetXY(157, 203);
         $pdf->MultiCell(20, 5, 'Subtotal',1,'L');
         $pdf->SetXY(177, 203);
-        $pdf->MultiCell(25, 5, number_format($model->subtotal_factura, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->subtotal_factura, 0, '.', ','),1,'R');
         ///fin
         $pdf->SetXY(157, 208);
         $pdf->MultiCell(20, 5, 'Impuesto:',1,'L');
         $pdf->SetXY(177, 208);
-        $pdf->MultiCell(25, 5, number_format($model->impuesto, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->impuesto, 0, '.', ','),1,'R');
         //fin
         $pdf->SetXY(157, 213);
         $pdf->MultiCell(20, 5, 'Rete fuente:',1,'L');
         $pdf->SetXY(177, 213);
-        $pdf->MultiCell(25, 5, number_format($model->valor_retencion, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->valor_retencion, 0, '.', ','),1,'R');
         //fin
         $pdf->SetXY(157, 218);
         $pdf->MultiCell(20, 5, 'Rete Iva:',1,'');
         $pdf->SetXY(177, 218);
-        $pdf->MultiCell(25, 5, number_format($model->valor_reteiva, 0, '.', ','),1,'R');
+        $pdf->MultiCell(25, 5, '$'.number_format($model->valor_reteiva, 0, '.', ','),1,'R');
         //fin
         $pdf->SetXY(10, 223);
         $pdf->MultiCell(109, 8, '',1,'R',1);
@@ -267,13 +287,26 @@ class PDF extends FPDF {
         $pdf->SetXY(157, 223);           
         $pdf->MultiCell(20, 8, 'Total Pagar:',1,'L',1);
         $pdf->SetXY(177, 223);
-        $pdf->MultiCell(25, 8, number_format($model->total_factura, 0, '.', ','),1,'R',1);
-        
+        $pdf->MultiCell(25, 8, '$'.number_format($model->total_factura, 0, '.', ','),1,'R',1);
+        //nota de dscuentos pronto pago
+        $this->SetFont('Arial', '', 8);
+        $pdf->SetXY(10, 233);//nit,fecha,fecha,firma  
+        $pdf->MultiCell(192, 4, utf8_decode($model->nota1),0,'J');
+        $pdf->SetXY(10, 237);//nit,fecha,fecha,firma  
+        $pdf->MultiCell(192, 4, utf8_decode($model->nota2),0,'J');
+        //fin nota
         $this->SetFont('Arial', '', 7);
         $pdf->SetXY(10, 245);//nit,fecha,fecha,firma  
         $pdf->MultiCell(192, 4, utf8_decode($config->presentacion),1,'J');
         $pdf->SetXY(10, 263);//tipo cuenta
-        $pdf->MultiCell(192, 4, utf8_decode($config->declaracion),1,'J');          
+        $pdf->MultiCell(192, 4, utf8_decode($config->declaracion),1,'J');  
+        ///cufe
+        $this->SetFont('Arial', '', 7);
+         $pdf->SetXY(10, 275);//tipo cuenta
+        $pdf->MultiCell(192, 5, utf8_decode('Cufe: '.$model->cufe),0,'J');
+         
+       //fin
+        
        /* $pdf->SetXY(10, 255);//firma trabajador
         $this->SetFont('', 'B', 9);
         $pdf->Cell(35, 5, 'FIRMA CLIENTE: ____________________________________________________', 0, 0, 'L',0);

@@ -30,10 +30,23 @@ $this->params['breadcrumbs'][] = $model->id_packing;
              echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']);
         }else{
             if($model->autorizado == 1 && $model->numero_packing == 0){
-               echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Desautorizar', ['autorizado', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']); 
-               echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar packing', ['cerrar_packing_pedido', 'id' => $model->id_packing],['class' => 'btn btn-success btn-xs',
-                     'data' => ['confirm' => 'Esta seguro de cerrar el PACKING del cliente  '. $model->cliente.'.', 'method' => 'post']]);
-            }else{
+               echo  Html::a('<span class="glyphicon glyphicon-ok"></span> Desautorizar', ['autorizado', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']);?> 
+              <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar packing', ['cerrar_packing_pedido', 'id' => $model->id_packing],['class' => 'btn btn-success btn-xs',
+                     'data' => ['confirm' => 'Esta seguro de cerrar el PACKING del cliente  '. $model->cliente.'. Debe de subir la guia del proveedor para el despacho.', 'method' => 'post']]);?>
+               <?= Html::a('<span class="glyphicon glyphicon-list"></span> Subir guia masivo',
+                                 ['packing-pedido/subir_guia_proveedor', 'id' => $model->id_packing],
+                                   ['title' => 'Permite subir la guia del proveedor al PACKING',
+                                    'data-toggle'=>'modal',
+                                    'data-target'=>'#modalsubirguiaproveedor',
+                                    'class' => 'btn btn-info btn-xs'
+                                   ])    
+                ?> 
+                <div class="modal remote fade" id="modalsubirguiaproveedor">
+                    <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                        <div class="modal-content"></div>
+                    </div>
+                </div>
+            <?php }else{
                  echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_packing', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']);            
             }
         } ?> 
@@ -82,10 +95,11 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                                     <tr style="font-size: 85%;">
                                         <th scope="col" style='background-color:#B9D5CE;'>Nro de caja</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Referencia</th>
-                                        <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
-                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha packing</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Presentacion del producto</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Fecha y hora packing</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Numero de guia</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'></th>
                                         <th scope="col" style='background-color:#B9D5CE;'></th>
                                         <th scope="col" style='background-color:#B9D5CE;'></th>
                                     </tr>
@@ -97,7 +111,7 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                                             <td><?= $val->numero_caja?></td>
                                             <td><?= $val->codigo_producto?></td>
                                             <td><?= $val->nombre_producto?></td>
-                                            <td><?= $val->fecha_packing?></td>
+                                            <td><?= $val->fecha_cracion_packing?></td>
                                             <td><?= $val->cantidad_despachada?></td>
                                             <td><?= $val->numero_guia?></td>
                                             <?php if($model->autorizado == 0){?>
@@ -118,6 +132,7 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                                                   </div>
                                                 </td>
                                                 <?php if($val->cantidad_despachada <= 0){?>
+                                                <td style= 'width: 20px; height: 20px;'></td>
                                                     <td style= 'width: 20px; height: 20px;'>
                                                          <?= Html::a('<span class="glyphicon glyphicon-trash"></span>', ['eliminar_caja', 'id_detalle' => $val->id_detalle,'id' => $model->id_packing], [
                                                                 'class' => '',
@@ -129,11 +144,32 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                                                                 ])?>
                                                     </td>
                                                 <?php }else{?>
+                                                    <td style= 'width: 20px; height: 20px;'>
                                                     <td style= 'width: 20px; height: 20px;'></td>
                                                 <?php } ?>    
                                             <?php }else{?>
                                                 <td style="width: 25px; height: 25px;"></td>
+                                                <?php if($model->cerrado_proceso == 0){?>
+                                                    <td style= 'width: 20px; height: 20px;'>
+                                                            <?= Html::a('<span class="glyphicon glyphicon-list"></span>',
+                                                                               ['packing-pedido/subir_guia_proveedor_individual', 'id' => $model->id_packing, 'id_detalle' => $val->id_detalle],
+                                                                                 ['title' => 'Permite subir la guia del proveedor al PACKING',
+                                                                                  'data-toggle'=>'modal',
+                                                                                  'data-target'=>'#modalsubirguiaproveedorindividual',
+                                                                                  'class' => ''
+                                                                                 ])    
+                                                              ?> 
+                                                              <div class="modal remote fade" id="modalsubirguiaproveedorindividual">
+                                                                  <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                                                                      <div class="modal-content"></div>
+                                                                  </div>
+                                                              </div>
+                                                   </td> 
+                                                <?php }else{ ?>
+                                                   <td style="width: 25px; height: 25px;"></td>
+                                                <?php }?>   
                                                 <td style="width: 25px; height: 25px;"></td>
+                                                
                                             <?php }?>    
                                         </tr>
                                     <?php } ?>

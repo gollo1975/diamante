@@ -853,16 +853,17 @@ class FacturaVentaController extends Controller
             $table->desde = $resolucion->desde;
             $table->hasta = $resolucion->hasta;
             $table->fecha_inicio = $fecha_actual;
-            $dias = $pedido->clientePedido->plazo;
+            $dias = $pedido->clientePedido->plazo -1;
             $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
             $table->fecha_generada = $fecha_actual;
             $table->porcentaje_iva = $iva->valor_iva;
+            $table->descuento_comercial = $pedido->descuento_comercial;
             if($pedido->clientePedido->autoretenedor == 1){
                 $table->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
             }else{
                 $table->porcentaje_rete_iva = 0;
             }
-            if($empresa->sugiere_retencion == 0){
+            if($empresa->sugiere_retencion == 1){
                if($pedido->clientePedido->tipo_regimen == 1){
                     $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
                 }else{
@@ -871,6 +872,7 @@ class FacturaVentaController extends Controller
             }else{
                 $table->porcentaje_rete_fuente = 0; 
             }
+            
             $table->id_forma_pago = $pedido->clientePedido->id_forma_pago;        
             $table->plazo_pago = $pedido->clientePedido->plazo;
             $table->user_name = Yii::$app->user->identity->username;
@@ -888,6 +890,7 @@ class FacturaVentaController extends Controller
   //PROCESO QUE QUE TOTALIZA SALDOS
     protected function CrearDetalleFactura($id_pedido, $id) {
         $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->all();
+        $pedido = Pedidos::findOne($id_pedido);
         foreach ($detalle_pedido as $detalle):
             $base = new FacturaVentaDetalle();
             $base->id_factura = $id;
@@ -896,11 +899,16 @@ class FacturaVentaController extends Controller
             $base->producto = $detalle->inventario->nombre_producto;
             $base->cantidad = $detalle->cantidad;
             $base->valor_unitario = $detalle->valor_unitario;
-            $base->porcentaje_iva = $detalle->inventario->porcentaje_iva;
+            if($pedido->tipoPedido->codigo_interface == 'PI'){
+                $base->porcentaje_iva = 0;
+                $base->impuesto = 0;
+            }else{
+                $base->porcentaje_iva = $detalle->inventario->porcentaje_iva;
+                $base->impuesto = $detalle->impuesto;
+            }
             $base->subtotal = $detalle->subtotal;
-            $base->impuesto = $detalle->impuesto;
             $base->total_linea = $detalle->total_linea;
-            $base->tipo_venta = $detalle->ventaCondicionado;
+            $base->tipo_venta = $detalle->venta_condicionado;
             $base->fecha_venta = date('Y-m-d');
             $base->numero_lote = $detalle->numero_lote;
             $base->save(false);
@@ -910,26 +918,29 @@ class FacturaVentaController extends Controller
     protected function ActualizarSaldosTotales($id) {
         $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
         $factura = FacturaVenta::findOne($id);
-        $subtotal = 0; $impuesto = 0; $total = 0; $descuento = 0;
+        $subtotal = 0; $impuesto = 0; $total = 0; $descuento = 0; $otro_iva = 0;
         foreach ($detalle_factura as $detalle):
             $subtotal += $detalle->subtotal;
             $impuesto += $detalle->impuesto;
             $total += $detalle->total_linea;
             $descuento += $detalle->valor_descuento;
+            if($detalle->tipo_venta == 'B'){
+                $otro_iva += $detalle->impuesto;
+            }
         endforeach;
         $factura->valor_bruto = $subtotal;
-        $factura->subtotal_factura = $subtotal- $factura->descuento_comercial;
+        $factura->subtotal_factura = $factura->valor_bruto - $descuento - $factura->descuento_comercial;
         if($factura->subtotal_factura <= 0){
-            $factura-> impuesto= $impuesto;
-            $factura->total_factura = $total;
-            $factura->saldo_factura = $total;
+            $factura-> impuesto= $impuesto - $otro_iva;
+            $factura->total_factura = 0;
+            $factura->saldo_factura = 0;
             $factura->valor_retencion = 0;
             $factura->valor_reteiva = 0;
             $factura->descuento = $descuento;
         }else{
-            $factura-> impuesto= $impuesto;
-            $factura->total_factura = $total;
-            $factura->saldo_factura = $total;
+            $factura-> impuesto= $impuesto - $otro_iva;
+            $factura->total_factura = 0;
+            $factura->saldo_factura = 0;
             $factura->valor_retencion = 0;
             $factura->valor_reteiva = 0;
             $factura->descuento = $descuento;
@@ -940,18 +951,28 @@ class FacturaVentaController extends Controller
     //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS
     protected function ActualizarConceptosTributarios($id) {
         $factura = FacturaVenta::findOne($id);
+        $cliente = Clientes::findOne($factura->id_cliente);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
         if($factura->id_tipo_factura == 4){
-            $tipo_factura = \app\models\TipoFacturaVenta::findOne(4);
+            $tipo_factura = \app\models\TipoFacturaVenta::find(4);
         }else{
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
         }
         $reteiva = 0; $retecion = 0;
-        $reteiva = round($factura->impuesto * $factura->porcentaje_rete_iva)/100; 
-        if($factura->subtotal_factura > $tipo_factura->base_retencion){
-           $retecion = round($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100;     
+        if($cliente->autoretenedor == 1){
+            $reteiva = round(($factura->impuesto * $factura->porcentaje_rete_iva)/100); 
         }else{
-           $retecion = 0; 
-        }
+            $reteiva = 0;
+        }    
+        if($empresa->sugiere_retencion == 1){
+            if($factura->subtotal_factura > $tipo_factura->base_retencion){
+               $retecion = round(($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100);     
+            }else{
+               $retecion = 0; 
+            }
+        }else{
+             $retecion = 0; 
+        }    
         $factura->valor_retencion = $retecion;
         $factura->valor_reteiva = $reteiva;
         $factura->total_factura = round(($factura->subtotal_factura + $factura->impuesto) - ($factura->valor_retencion + $factura->valor_reteiva + $factura->descuento));
@@ -965,22 +986,59 @@ class FacturaVentaController extends Controller
         $this->ActualizarConceptosTributarios($id);
         $this->redirect(["view", 'id' => $id,'token' => $token]);
     }
+    
+    
     //PROCESO QUE AUTORIZADO O DESAUTORIZA
     public function actionAutorizado($id, $token) {
+        echo 'dasdasdasd';
         $factura = FacturaVenta::findOne($id);
+        $Cliente = Clientes::findOne($factura->id_cliente);
+        $tipoCliente = \app\models\TipoCliente::findOne($Cliente->id_tipo_cliente);
+        if($tipoCliente->aplica_descuento_comercial == 0){
             if($factura->autorizado == 0){
                 $factura->autorizado = 1;
             }else{
                 $factura->autorizado = 0;
             }
-            $factura->save();
+            $factura->save(false);
             if($token == 0){
                $this->redirect(["view", 'id' => $id,'token' => $token]);    
             }else{
-                $this->redirect(["view_factura_venta", 'id_factura_punto' => $id]);
+                 $this->redirect(["view_factura_venta", 'id_factura_punto' => $id]);
             }
+        }else{
+            if($tipoCliente->abreviatura == 'D' || $tipoCliente->abreviatura == 'M' ){ ///para clientes que son distribuidores
+                //primer descuento
+              
+                $nueva_fecha_uno =  date("Y-m-d",strtotime($factura->fecha_inicio."+".$tipoCliente->dias_descuento_uno."days")); 
+                $valor_descuento_uno = round(($factura->subtotal_factura * $tipoCliente->porcentaje_descuento_uno)/100);
+                $valor_pagar_uno = $factura->total_factura - $valor_descuento_uno;
+                $factura->valor_pago_descuento_uno = $valor_pagar_uno;
+                $factura->nota1 = 'Si paga antes del '.$nueva_fecha_uno.' obtendrá un descuento pronto pago del '.$tipoCliente->porcentaje_descuento_uno.'%. Nuevo valor a cancelar: $'.number_format($valor_pagar_uno,0).'. ';
+                 //segundo descueto
+                $nueva_fecha_dos =  date("Y-m-d",strtotime($factura->fecha_inicio."+".$tipoCliente->dias_descuento_dos."days")); 
+                $valor_descuento_dos = round(($factura->subtotal_factura * $tipoCliente->porcentaje_descuento_dos)/100);
+                $valor_pagar_dos = $factura->total_factura - $valor_descuento_dos;
+                $factura->valor_pago_descuento_dos = $valor_pagar_dos;
+                $factura->nota2 = 'Si paga antes del '.$nueva_fecha_dos.' obtendrá un descuento pronto pago del '.$tipoCliente->porcentaje_descuento_dos.'%. Nuevo valor a cancelar: $'.number_format($valor_pagar_dos,0).'. ';
+                if($factura->autorizado == 0){
+                     $factura->autorizado = 1;
+                }else{
+                     $factura->autorizado = 0;
+                }
+                $factura->save(false);
+                if($token == 0){
+                    return $this->redirect(["view", 'id' => $id,'token' => $token]);    
+                }else{
+                    return $this->redirect(["view_factura_venta", 'id_factura_punto' => $id]);
+                }
+            }    
+        }    
+        
             
     }
+   
+    
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA
      public function actionGenerar_factura($id, $id_pedido, $token) {
         //proceso de generar consecutivo
@@ -1228,6 +1286,13 @@ class FacturaVentaController extends Controller
             $objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('AC')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AD')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AE')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AF')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AG')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AH')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AI')->setAutoSize(true);
+            
 
             $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('A1', 'ID')
@@ -1239,26 +1304,32 @@ class FacturaVentaController extends Controller
                         ->setCellValue('G1', 'No PEDIDO')
                         ->setCellValue('H1', 'FECHA INICIO')
                         ->setCellValue('I1', 'FECHA VENCIMIENTO')
-                        ->setCellValue('J1', 'F. ENVIADA DIAN')    
-                        ->setCellValue('K1', 'FORMA PAGO')
-                        ->setCellValue('L1', 'PLAZO')
-                        ->setCellValue('M1', 'VR. BRUTO')
-                        ->setCellValue('N1', 'DESCUENTO')
-                        ->setCellValue('O1', 'SUBTOTAL')
-                        ->setCellValue('P1', 'IVA')
-                        ->setCellValue('Q1', 'RETENCION')
-                        ->setCellValue('R1', 'RETE IVA')
-                        ->setCellValue('S1', 'TOTAL PAGAR')
-                        ->setCellValue('T1', 'SALDO FACTURA')
-                        ->setCellValue('U1', '% IVA')
-                        ->setCellValue('V1', '% RETENCION')
-                        ->setCellValue('W1', '% RETE IVA')
-                        ->setCellValue('X1', '% DESCUENTO')
-                        ->setCellValue('Y1', 'USER CREADOR')
-                        ->setCellValue('Z1', 'USER EDITADO')
-                        ->setCellValue('AA1', 'F. EDITADO')
-                        ->setCellValue('AB1', 'AUTORIZADO')
-                        ->setCellValue('AC1', 'OBSERVACION');
+                        ->setCellValue('J1', 'F. ENVIADA API')  
+                        ->setCellValue('K1', 'F. ENVIADA DIAN')  
+                        ->setCellValue('L1', 'FORMA PAGO')
+                        ->setCellValue('M1', 'PLAZO')
+                        ->setCellValue('N1', 'VR. BRUTO')
+                        ->setCellValue('O1', 'DESCUENTO')
+                        ->setCellValue('P1', 'SUBTOTAL')
+                        ->setCellValue('Q1', 'IVA')
+                        ->setCellValue('R1', 'RETENCION')
+                        ->setCellValue('S1', 'RETE IVA')
+                        ->setCellValue('T1', 'TOTAL PAGAR')
+                        ->setCellValue('U1', 'SALDO FACTURA')
+                        ->setCellValue('V1', '% IVA')
+                        ->setCellValue('W1', '% RETENCION')
+                        ->setCellValue('X1', '% RETE IVA')
+                        ->setCellValue('Y1', '% DESCUENTO')
+                        ->setCellValue('Z1', 'USER CREADOR')
+                        ->setCellValue('AA1', 'USER EDITADO')
+                        ->setCellValue('AB1', 'F. EDITADO')
+                        ->setCellValue('AC1', 'AUTORIZADO')
+                        ->setCellValue('AD1', 'OBSERVACION')
+                        ->setCellValue('AE1', 'DESCTO PAGO UNO')
+                        ->setCellValue('AF1', 'DESCTO PAGO DOS')
+                        ->setCellValue('AG1', 'CUFE')
+                        ->setCellValue('AH1', 'NOTA 1')
+                        ->setCellValue('AI1', 'NOTA 2');
             $i = 2;
 
             foreach ($tableexcel as $val) {
@@ -1280,26 +1351,33 @@ class FacturaVentaController extends Controller
                         $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('H' . $i, $val->fecha_inicio)
                         ->setCellValue('I' . $i, $val->fecha_vencimiento)
-                        ->setCellValue('J' . $i, $val->fecha_enviada)
-                        ->setCellValue('K' . $i, $val->formaPago)
-                        ->setCellValue('L' . $i, $val->plazo_pago)
-                        ->setCellValue('M' . $i, $val->valor_bruto)
-                        ->setCellValue('N' . $i, $val->descuento)
-                        ->setCellValue('O' . $i, $val->subtotal_factura)
-                        ->setCellValue('P' . $i, $val->impuesto)
-                        ->setCellValue('Q' . $i, $val->valor_retencion)
-                        ->setCellValue('R' . $i, $val->valor_reteiva)
-                        ->setCellValue('S' . $i, $val->total_factura)
-                        ->setCellValue('T' . $i, $val->saldo_factura)
-                        ->setCellValue('U' . $i, $val->porcentaje_iva)
-                        ->setCellValue('V' . $i, $val->porcentaje_rete_fuente)
-                        ->setCellValue('W' . $i, $val->porcentaje_rete_iva)
-                        ->setCellValue('X' . $i, $val->porcentaje_descuento)
-                        ->setCellValue('Y' . $i, $val->user_name)
-                        ->setCellValue('Z' . $i, $val->user_name_editado)
-                        ->setCellValue('AA' . $i, $val->fecha_editada)
-                        ->setCellValue('AB' . $i, $val->autorizadofactura)
-                        ->setCellValue('AC' . $i, $val->observacion);
+                        ->setCellValue('J' . $i, $val->fecha_enviada_api)
+                        ->setCellValue('K' . $i, $val->fecha_recepcion_dian)        
+                        ->setCellValue('L' . $i, $val->formaPago->concepto)
+                        ->setCellValue('M' . $i, $val->plazo_pago)
+                        ->setCellValue('N' . $i, $val->valor_bruto)
+                        ->setCellValue('O' . $i, $val->descuento)
+                        ->setCellValue('P' . $i, $val->subtotal_factura)
+                        ->setCellValue('Q' . $i, $val->impuesto)
+                        ->setCellValue('R' . $i, $val->valor_retencion)
+                        ->setCellValue('S' . $i, $val->valor_reteiva)
+                        ->setCellValue('T' . $i, $val->total_factura)
+                        ->setCellValue('U' . $i, $val->saldo_factura)
+                        ->setCellValue('V' . $i, $val->porcentaje_iva)
+                        ->setCellValue('W' . $i, $val->porcentaje_rete_fuente)
+                        ->setCellValue('X' . $i, $val->porcentaje_rete_iva)
+                        ->setCellValue('Y' . $i, $val->porcentaje_descuento)
+                        ->setCellValue('Z' . $i, $val->user_name)
+                        ->setCellValue('AA' . $i, $val->user_name_editado)
+                        ->setCellValue('AB' . $i, $val->fecha_editada)
+                        ->setCellValue('AC' . $i, $val->autorizadofactura)
+                        ->setCellValue('AD' . $i, $val->observacion)
+                        ->setCellValue('AE' . $i, $val->valor_pago_descuento_uno)
+                        ->setCellValue('AF' . $i, $val->valor_pago_descuento_dos)
+                        ->setCellValue('AG' . $i, $val->cufe)
+                        ->setCellValue('AH' . $i, $val->nota1) 
+                        ->setCellValue('AI' . $i, $val->nota2);
+                            
                 $i++;
             }
 
@@ -1368,6 +1446,7 @@ class FacturaVentaController extends Controller
             $objPHPExcel->getActiveSheet()->getColumnDimension('AF')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('AG')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('AH')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('AI')->setAutoSize(true);
 
             $objPHPExcel->setActiveSheetIndex(0)
                         ->setCellValue('A1', 'ID')
@@ -1379,31 +1458,32 @@ class FacturaVentaController extends Controller
                         ->setCellValue('G1', 'No PEDIDO')
                         ->setCellValue('H1', 'FECHA INICIO')
                         ->setCellValue('I1', 'FECHA VENCIMIENTO')
-                        ->setCellValue('J1', 'F. ENVIADA DIAN')    
-                        ->setCellValue('K1', 'FORMA PAGO')
-                        ->setCellValue('L1', 'PLAZO')
-                        ->setCellValue('M1', 'VR. BRUTO')
-                        ->setCellValue('N1', 'DESCUENTO')
-                        ->setCellValue('O1', 'SUBTOTAL')
-                        ->setCellValue('P1', 'IVA')
-                        ->setCellValue('Q1', 'RETENCION')
-                        ->setCellValue('R1', 'RETE IVA')
-                        ->setCellValue('S1', 'TOTAL PAGAR')
-                        ->setCellValue('T1', 'SALDO FACTURA')
-                        ->setCellValue('U1', '% IVA')
-                        ->setCellValue('V1', '% RETENCION')
-                        ->setCellValue('W1', '% RETE IVA')
-                        ->setCellValue('X1', '% DESCUENTO')
-                        ->setCellValue('Y1', 'DIAS MORA')
-                        ->setCellValue('Z1', 'VR. INTERESES')
-                        ->setCellValue('AA1', 'IVA MORA')
-                        ->setCellValue('AB1', 'TOTAL MORA')
-                        ->setCellValue('AC1', '% MORA')
-                        ->setCellValue('AD1', 'USER CREADOR')
-                        ->setCellValue('AE1', 'USER EDITADO')
-                        ->setCellValue('AF1', 'F. EDITADO')
-                        ->setCellValue('AG1', 'AUTORIZADO')
-                        ->setCellValue('AH1', 'OBSERVACION');
+                        ->setCellValue('J1', 'F. ENVIADA API')
+                        ->setCellValue('K1', 'F. RECEPCION DIAN')
+                        ->setCellValue('L1', 'FORMA PAGO')
+                        ->setCellValue('M1', 'PLAZO')
+                        ->setCellValue('N1', 'VR. BRUTO')
+                        ->setCellValue('O1', 'DESCUENTO')
+                        ->setCellValue('P1', 'SUBTOTAL')
+                        ->setCellValue('Q1', 'IVA')
+                        ->setCellValue('R1', 'RETENCION')
+                        ->setCellValue('S1', 'RETE IVA')
+                        ->setCellValue('T1', 'TOTAL PAGAR')
+                        ->setCellValue('U1', 'SALDO FACTURA')
+                        ->setCellValue('V1', '% IVA')
+                        ->setCellValue('W1', '% RETENCION')
+                        ->setCellValue('X1', '% RETE IVA')
+                        ->setCellValue('Y1', '% DESCUENTO')
+                        ->setCellValue('Z1', 'DIAS MORA')
+                        ->setCellValue('AA1', 'VR. INTERESES')
+                        ->setCellValue('AB1', 'IVA MORA')
+                        ->setCellValue('AC1', 'TOTAL MORA')
+                        ->setCellValue('AD1', '% MORA')
+                        ->setCellValue('AE1', 'USER CREADOR')
+                        ->setCellValue('AF1', 'USER EDITADO')
+                        ->setCellValue('AG1', 'F. EDITADO')
+                        ->setCellValue('AH1', 'AUTORIZADO')
+                        ->setCellValue('AI1', 'OBSERVACION');
             $i = 2;
 
             foreach ($tableexcel as $val) {
@@ -1423,34 +1503,34 @@ class FacturaVentaController extends Controller
                             ->setCellValue('G' . $i, $val->pedido->numero_pedido);
                         }   
                         $objPHPExcel->setActiveSheetIndex(0)
-                        ->setCellValue('G' . $i, $val->pedido->numero_pedido)
                         ->setCellValue('H' . $i, $val->fecha_inicio)
                         ->setCellValue('I' . $i, $val->fecha_vencimiento)
-                        ->setCellValue('J' . $i, $val->fecha_enviada)
-                        ->setCellValue('K' . $i, $val->formaPago)
-                        ->setCellValue('L' . $i, $val->plazo_pago)
-                        ->setCellValue('M' . $i, $val->valor_bruto)
-                        ->setCellValue('N' . $i, $val->descuento)
-                        ->setCellValue('O' . $i, $val->subtotal_factura)
-                        ->setCellValue('P' . $i, $val->impuesto)
-                        ->setCellValue('Q' . $i, $val->valor_retencion)
-                        ->setCellValue('R' . $i, $val->valor_reteiva)
-                        ->setCellValue('S' . $i, $val->total_factura)
-                        ->setCellValue('T' . $i, $val->saldo_factura)
-                        ->setCellValue('U' . $i, $val->porcentaje_iva)
-                        ->setCellValue('V' . $i, $val->porcentaje_rete_fuente)
-                        ->setCellValue('W' . $i, $val->porcentaje_rete_iva)
-                        ->setCellValue('X' . $i, $val->porcentaje_descuento)
-                        ->setCellValue('Y' . $i, $val->dias_mora)
-                        ->setCellValue('Z' . $i, $val->valor_intereses_mora)
-                        ->setCellValue('AA' . $i, $val->iva_intereses_mora)
-                        ->setCellValue('AB' . $i, $val->subtotal_interes_masiva)
-                        ->setCellValue('AC' . $i, $val->porcentaje_mora)
-                        ->setCellValue('AD' . $i, $val->user_name)
-                        ->setCellValue('AE' . $i, $val->user_name_editado)
-                        ->setCellValue('AF' . $i, $val->fecha_editada)
-                        ->setCellValue('AG' . $i, $val->autorizadofactura)
-                        ->setCellValue('AH' . $i, $val->observacion);
+                        ->setCellValue('J' . $i, $val->fecha_enviada_api)
+                        ->setCellValue('K' . $i, $val->fecha_recepcion_dian)
+                        ->setCellValue('L' . $i, $val->formaPago)
+                        ->setCellValue('M' . $i, $val->plazo_pago)
+                        ->setCellValue('N' . $i, $val->valor_bruto)
+                        ->setCellValue('O' . $i, $val->descuento)
+                        ->setCellValue('P' . $i, $val->subtotal_factura)
+                        ->setCellValue('Q' . $i, $val->impuesto)
+                        ->setCellValue('R' . $i, $val->valor_retencion)
+                        ->setCellValue('S' . $i, $val->valor_reteiva)
+                        ->setCellValue('T' . $i, $val->total_factura)
+                        ->setCellValue('U' . $i, $val->saldo_factura)
+                        ->setCellValue('V' . $i, $val->porcentaje_iva)
+                        ->setCellValue('W' . $i, $val->porcentaje_rete_fuente)
+                        ->setCellValue('X' . $i, $val->porcentaje_rete_iva)
+                        ->setCellValue('Y' . $i, $val->porcentaje_descuento)
+                        ->setCellValue('Z' . $i, $val->dias_mora)
+                        ->setCellValue('AA' . $i, $val->valor_intereses_mora)
+                        ->setCellValue('AB' . $i, $val->iva_intereses_mora)
+                        ->setCellValue('AC' . $i, $val->subtotal_interes_masiva)
+                        ->setCellValue('AD' . $i, $val->porcentaje_mora)
+                        ->setCellValue('AE' . $i, $val->user_name)
+                        ->setCellValue('AF' . $i, $val->user_name_editado)
+                        ->setCellValue('AG' . $i, $val->fecha_editada)
+                        ->setCellValue('AH' . $i, $val->autorizadofactura)
+                        ->setCellValue('AI' . $i, $val->observacion);
                 $i++;
             }
 

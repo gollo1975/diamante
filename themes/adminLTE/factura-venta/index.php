@@ -106,10 +106,11 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                     <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de cliente">T.C.</span></div></th>
                     <th scope="col" style='background-color:#B9D5CE;'>Vendedor</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
@@ -128,10 +129,11 @@ $form = ActiveForm::begin([
                 foreach ($model as $val):
                     $dato = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $val->id_factura])->all();
                     ?>
-                    <tr style ='font-size: 90%;'>                
+                    <tr style ='font-size: 85%;'>                
                         <td><?= $val->numero_factura?></td>
                         <td><?= $val->nit_cedula?></td>
                         <td><?= $val->clienteFactura->nombre_completo?></td>
+                        <td><?= $val->clienteFactura->tipoCliente->abreviatura?></td>
                         <td><?= $val->agenteFactura->nombre_completo?></td>
                         <td><?= $val->fecha_inicio?></td>
                         <td><?= $val->fecha_vencimiento?></td>
@@ -183,7 +185,7 @@ $form = ActiveForm::begin([
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-default btn-sm']); ?>                
-           <a href="<?= Url::toRoute(["factura-venta/create",'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Factura produccion</a>  
+           <a href="<?= Url::toRoute(["factura-venta/create",'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Crear factura</a>  
           
         </div>
      </div>

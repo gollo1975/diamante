@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
             <div class="panel-heading" onclick="mostrarfiltro()">
                 Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
             </div>
-            <div class="panel-body" id="filtro" style="display:none">
+            <div class="panel-body" id="filtro" style="display:block">
                 <div class="row" >
                     <?= $formulario->field($form, "q")->input("search") ?>
                     <?= $formulario->field($form, "nombre")->input("search") ?>

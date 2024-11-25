@@ -42,7 +42,7 @@ $view = 'factura-venta';
         <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { ?>
             <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Modificar factura', ['update', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-success btn-xs']) ?>
             <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar factura', ['regenerar_factura', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-info btn-xs']) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['factura-venta/autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
         } else {
             if ($model->autorizado == 1 && $model->numero_factura == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
@@ -63,7 +63,7 @@ $view = 'factura-venta';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_factura") ?></th>
                     <td><?= Html::encode($model->id_factura) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nit_cedula') ?></th>
@@ -137,7 +137,7 @@ $view = 'factura-venta';
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                             <th scope="col"  style='background-color:#B9D5CE;'>Descripcion producto</th>     
                                             <th scope="col"  style='background-color:#B9D5CE;'>TV</th>
@@ -150,7 +150,7 @@ $view = 'factura-venta';
                                     <body>
                                          <?php
                                          foreach ($detalle_factura as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->producto ?></td>
                                                 <td><?= $val->tipo_venta ?></td>

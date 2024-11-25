@@ -116,6 +116,7 @@ $empresa = app\models\MatriculaEmpresa::findOne(1);
                                         <tr style="font-size: 90%;">
                                             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'>TV</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Cant. vendida</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Cant. despachada</th>
                                              <th scope="col" style='background-color:#B9D5CE;'>Regenerar</th>
@@ -138,6 +139,7 @@ $empresa = app\models\MatriculaEmpresa::findOne(1);
                                         <tr style="font-size: 90%;">
                                             <td><?= $pedido->inventario->codigo_producto ?></td>
                                             <td><?= $pedido->inventario->nombre_producto ?></td>
+                                            <td><?= $pedido->venta_condicionado ?></td>
                                             <td style="text-align: right"><?= ''.number_format($pedido->cantidad,0) ?></td>
                                             <td style="text-align: right"><?= ''.number_format($pedido->cantidad_despachada,0) ?></td>
                                             <?php if($pedido->regenerar_linea == 0){?>

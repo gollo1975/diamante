@@ -105,8 +105,9 @@ $form = ActiveForm::begin([
             <thead>
                 <tr style ='font-size: 85%;'>         
                     <th scope="col" style='background-color:#B9D5CE;'>No pedido</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de pedido">T.P.</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Tipo cliente</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de cliente">T.C.</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. pedido</th>
@@ -125,8 +126,9 @@ $form = ActiveForm::begin([
                 foreach ($model as $val):?>
                     <tr style ='font-size: 85%;'>                
                         <td><?= $val->numero_pedido ?></td>
+                        <td><?= $val->tipoPedido->codigo_interface?></td>
                         <td><?= $val->cliente ?></td>
-                         <td><?= $val->clientePedido->tipoCliente->concepto ?></td>
+                         <td><?= $val->clientePedido->tipoCliente->abreviatura ?></td>
                         <td><?= $val->clientePedido->codigoDepartamento->departamento ?></td>
                         <td><?= $val->clientePedido->codigoMunicipio->municipio ?></td>
                         <td><?= $val->fecha_proceso ?></td>

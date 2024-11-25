@@ -29,7 +29,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
     }else{
         if($model->autorizado == 1  && $model->numero_pedido == 0){?>
               <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'id_cliente' => $model->id_cliente, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido], ['class' => 'btn btn-default btn-xs']);?>
-               <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
+             <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Generar consecutivo', ['crear_pedido_cliente', 'id' => $model->id_pedido, 'token'=> $token,'tokenAcceso' => $tokenAcceso, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],['class' => 'btn btn-success btn-sm',
+                     'data' => ['confirm' => 'Esta seguro de cerrar el pedido del cliente  '. $model->cliente.'.', 'method' => 'post']]);  ?>
+              <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Nota',
                                         ['/pedidos/crear_observacion', 'id' => $model->id_pedido, 'tokenAcceso' => $tokenAcceso, 'token' => $token, 'pedido_virtual' => $model->pedido_virtual, 'tipo_pedido' => $tipo_pedido],
                                           ['title' => 'Crear observaciones al pedido',
                                            'data-toggle'=>'modal',
@@ -103,7 +105,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                 <div class="panel-heading" onclick="mostrarfiltro()">
                     Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
                 </div>
-                <div class="panel-body" id="filtro" style="display:none">
+                <div class="panel-body" id="filtro" style="display:block">
                     <div class="row" >
                         <?= $formulario->field($form, "q")->input("search") ?>
                         <?= $formulario->field($form, "nombre")->input("search") ?>

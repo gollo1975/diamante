@@ -29,7 +29,8 @@ class TipoCliente extends \yii\db\ActiveRecord
             [['concepto'], 'required'],
             [['concepto'], 'string', 'max' => 30],
             [['abreviatura'], 'string', 'max' => 1],
-            [['codigo_interface','aplica_descuento_comercial'], 'integer'],
+            [['codigo_interface','aplica_descuento_comercial','dias_descuento_uno','dias_descuento_dos'], 'integer'],
+            [['porcentaje_descuento_uno','porcentaje_descuento_dos'], 'number'],
         ];
     }
 
@@ -44,6 +45,10 @@ class TipoCliente extends \yii\db\ActiveRecord
             'codigo_interface' => 'codigo_interface',
             'abreviatura' => 'abreviatura',
             'aplica_descuento_comercial' => 'aplica_descuento_comercial',
+            'dias_descuento_dos' => 'dias_descuento_dos',
+            'dias_descuento_uno' => 'dias_descuento_uno',
+            'porcentaje_descuento_uno' => 'porcentaje_descuento_uno',
+            'porcentaje_descuento_dos' => 'porcentaje_descuento_dos',
             
         ];
     }
