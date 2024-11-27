@@ -53,6 +53,8 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             [['nombre_sistema', 'pagina_web'], 'string', 'max' => 30],
             [['id_empresa'], 'unique'],
             [['declaracion'], 'string'],
+            [['mensaje_normativo1','mensaje_normativo2'], 'string', 'max' => 70],
+             [['mensaje_normativo3','email_respuesta'], 'string', 'max' => 85],
             [['porcentaje_reteiva', 'porcentaje_iva'],'number'],
             [['presentacion'], 'string'],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
@@ -106,6 +108,10 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
             'inventario_enlinea' => 'Inventario en linea:',
             'agrupar_pedido' => 'agrupar_pedido',
             'porcentaje_iva' => 'Porcentaje de iva:',
+            'mensaje_normativo1' => 'Mensaje ica:',
+            'mensaje_normativo2' => 'Pago tributo:',
+            'mensaje_normativo3' => 'Resolucion:',
+            'email_respuesta' => 'Email factura:'
             
             
         ];

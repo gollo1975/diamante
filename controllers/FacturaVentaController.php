@@ -990,7 +990,7 @@ class FacturaVentaController extends Controller
     
     //PROCESO QUE AUTORIZADO O DESAUTORIZA
     public function actionAutorizado($id, $token) {
-        echo 'dasdasdasd';
+       
         $factura = FacturaVenta::findOne($id);
         $Cliente = Clientes::findOne($factura->id_cliente);
         $tipoCliente = \app\models\TipoCliente::findOne($Cliente->id_tipo_cliente);
@@ -1009,18 +1009,21 @@ class FacturaVentaController extends Controller
         }else{
             if($tipoCliente->abreviatura == 'D' || $tipoCliente->abreviatura == 'M' ){ ///para clientes que son distribuidores
                 //primer descuento
-              
-                $nueva_fecha_uno =  date("Y-m-d",strtotime($factura->fecha_inicio."+".$tipoCliente->dias_descuento_uno."days")); 
+                $dias_primer_descuento = $tipoCliente->dias_descuento_uno - 1;
+                $nueva_fecha_uno =  date("Y-m-d",strtotime($factura->fecha_inicio."+".$dias_primer_descuento."days")); 
                 $valor_descuento_uno = round(($factura->subtotal_factura * $tipoCliente->porcentaje_descuento_uno)/100);
                 $valor_pagar_uno = $factura->total_factura - $valor_descuento_uno;
                 $factura->valor_pago_descuento_uno = $valor_pagar_uno;
                 $factura->nota1 = 'Si paga antes del '.$nueva_fecha_uno.' obtendrá un descuento pronto pago del '.$tipoCliente->porcentaje_descuento_uno.'%. Nuevo valor a cancelar: $'.number_format($valor_pagar_uno,0).'. ';
                  //segundo descueto
-                $nueva_fecha_dos =  date("Y-m-d",strtotime($factura->fecha_inicio."+".$tipoCliente->dias_descuento_dos."days")); 
+                $dias_segundo_descuento =  $tipoCliente->dias_descuento_dos - 1;
+                $nueva_fecha_dos =  date("Y-m-d",strtotime($factura->fecha_inicio."+".$dias_segundo_descuento."days")); 
                 $valor_descuento_dos = round(($factura->subtotal_factura * $tipoCliente->porcentaje_descuento_dos)/100);
                 $valor_pagar_dos = $factura->total_factura - $valor_descuento_dos;
                 $factura->valor_pago_descuento_dos = $valor_pagar_dos;
                 $factura->nota2 = 'Si paga antes del '.$nueva_fecha_dos.' obtendrá un descuento pronto pago del '.$tipoCliente->porcentaje_descuento_dos.'%. Nuevo valor a cancelar: $'.number_format($valor_pagar_dos,0).'. ';
+                $factura->fecha_primer_descuento = $nueva_fecha_uno;
+                $factura->fecha_segundo_descuento = $nueva_fecha_dos;
                 if($factura->autorizado == 0){
                      $factura->autorizado = 1;
                 }else{
@@ -1045,13 +1048,18 @@ class FacturaVentaController extends Controller
         $pedido = Pedidos::findOne($id_pedido);
         $consecutivo = \app\models\Consecutivos::findOne(6);
         $factura = FacturaVenta::findOne($id);
-        $factura->numero_factura = $consecutivo->numero_inicial + 1;
-        $factura->save(false);
-        $consecutivo->numero_inicial = $factura->numero_factura;
-        $consecutivo->save(false);
-        $pedido->facturado = 1;
-        $pedido->save(false);
-        $this->redirect(["view", 'id' => $id, 'token' => $token]);  
+        if($factura->id_medio_pago <> ''){
+            $factura->numero_factura = $consecutivo->numero_inicial + 1;
+            $factura->save(false);
+            $consecutivo->numero_inicial = $factura->numero_factura;
+            $consecutivo->save(false);
+            $pedido->facturado = 1;
+            $pedido->save(false);
+            $this->redirect(["view", 'id' => $id, 'token' => $token]); 
+        }else{
+             Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar el medio de pago para la factura.');
+             $this->redirect(["view", 'id' => $id, 'token' => $token]); 
+        }    
     }
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA PUNTO DE VENTA
      public function actionGenerar_factura_punto($id) {
@@ -1129,8 +1137,25 @@ class FacturaVentaController extends Controller
         $id =  $id_factura_punto;
         $this->ActualizarSaldosTotales($id);
         $this->ActualizarConceptosTributarios($id);
-        $this->redirect(["view_factura_venta",'id_factura_punto' => $id_factura_punto]);        
+        return $this->redirect(["view_factura_venta",'id_factura_punto' => $id_factura_punto]);        
     } 
+    
+    //MEDIO DE PAGO
+    public function actionSubir_medio_pago($id, $token)
+    {
+        $model = new \app\models\ModeloEntradaProducto();
+        if ($model->load(Yii::$app->request->post())){
+            if (isset($_POST["medio_pago_factura"])){
+                $factura = FacturaVenta::findOne($id);
+                $factura->id_medio_pago = $model->medio_pago;
+                $factura->save(false);
+                return $this->redirect(["view",'id' => $id,'token' => $token]);   
+            }  
+        }
+        return $this->renderAjax('form_subir_medio_pago', [
+            'model' => $model,
+        ]);
+    }   
       
     /**
      * Finds the FacturaVenta model based on its primary key value.

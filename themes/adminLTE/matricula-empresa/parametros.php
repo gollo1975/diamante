@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
        
     <div class="panel panel-success">
         <div class="panel-heading">
-            Configuracion de diamante
+            Configuracion del modulo
         </div>
         <div class="panel-body">
             <div class="checkbox checkbox-success" align ="left">
@@ -46,6 +46,27 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="checkbox checkbox-success" align ="left">
                     <?= $form->field($model, 'inventario_enlinea')->checkBox(['label' => 'Procesar inventario sin existencia','1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'inventario_enlinea']) ?>
                    
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-success">
+        <div class="panel-heading">
+           Impuestos tributarios
+        </div>
+        <div class="panel-body">
+            <div class="row">          
+                <?= $form->field($model, 'porcentaje_reteiva')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'mensaje_normativo1')->textInput(['maxlength' => true, 'size' => 70]) ?>
+                
+            </div> 
+             <div class="row">          
+                <?= $form->field($model, 'mensaje_normativo2')->textInput(['maxlength' => true, 'size' => 70]) ?>
+                <?= $form->field($model, 'mensaje_normativo3', ['template' => '{label}<div class="col-sm-3  form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'size'=> 85]) ?>
+                
+            </div>
+            <div class="row">          
+              <?= $form->field($model, 'email_respuesta', ['template' => '{label}<div class="col-sm-3  form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'size'=> 80]) ?>
+                
             </div>
         </div>
     </div>   

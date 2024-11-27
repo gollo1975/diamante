@@ -63,8 +63,8 @@ class FacturaVenta extends \yii\db\ActiveRecord
             [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
                 'valor_reteiva', 'saldo_factura', 'id_forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente','estado_factura','dias_mora','valor_intereses_mora',
                 'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario','id_punto','descuento_comercial','id_resolucion',
-                'valor_pago_descuento_dos','valor_pago_descuento_uno'], 'integer'],
-            [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada_api','fecha_editada','fecha_enviada_dian'], 'safe'],
+                'valor_pago_descuento_dos','valor_pago_descuento_uno','id_medio_pago'], 'integer'],
+            [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada_api','fecha_editada','fecha_enviada_dian','fecha_primer_descuento','fecha_segundo_descuento'], 'safe'],
             [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento','porcentaje_mora'], 'number'],
             [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
             [['cliente','direccion','nota1', 'nota2'], 'string', 'max' => 50],
@@ -81,6 +81,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             [['id_punto'], 'exist', 'skipOnError' => true, 'targetClass' => PuntoVenta::className(), 'targetAttribute' => ['id_punto' => 'id_punto']],
             [['id_resolucion'], 'exist', 'skipOnError' => true, 'targetClass' => ResolucionDian::className(), 'targetAttribute' => ['id_resolucion' => 'id_resolucion']],
             [['id_forma_pago'], 'exist', 'skipOnError' => true, 'targetClass' => FormaPago::className(), 'targetAttribute' => ['id_forma_pago' => 'id_forma_pago']],
+            [['id_medio_pago'], 'exist', 'skipOnError' => true, 'targetClass' => MedioPago::className(), 'targetAttribute' => ['id_medio_pago' => 'id_medio_pago']],
  
             ];
     }
@@ -199,6 +200,14 @@ class FacturaVenta extends \yii\db\ActiveRecord
     public function getPuntoVenta()
     {
         return $this->hasOne(PuntoVenta::className(), ['id_punto' => 'id_punto']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMedioPago()
+    {
+        return $this->hasOne(MedioPago::className(), ['id_medio_pago' => 'id_medio_pago']);
     }
     
     public function getAutorizadofactura() {

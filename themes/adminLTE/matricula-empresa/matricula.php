@@ -86,12 +86,8 @@ $tipoR = ArrayHelper::map(\app\models\TipoRegimen::find()->all(), 'id_tipo_regim
              <?= $form->field($model, 'id_tipo_regimen')->dropDownList($tipoR, ['prompt' => 'Seleccione...']) ?>
         </div>  
         <div class="row">   
-             <?= $form->field($model, 'codigo_banco')->dropDownList($banco, ['prompt' => 'Seleccione una resolucion...']) ?>
-            <?= $form->field($model, 'porcentaje_reteiva')->textInput(['maxlength' => true]) ?>
-        </div> 
-        <div class="row">
+            <?= $form->field($model, 'codigo_banco')->dropDownList($banco, ['prompt' => 'Seleccione una resolucion...']) ?>
             <?= $form->field($model, 'calificacion_proveedor')->textInput(['maxlength' => true]) ?>
-            <?= $form->field($model, 'aplica_inventario_incompleto')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">           
             <?= $form->field($model, 'declaracion', ['template' => '{label}<div class="col-sm-10  form-group">{input}{error}</div>'])->textarea(['rows' => 3]) ?>

@@ -15,50 +15,72 @@ class PDF extends FPDF {
         $departamento = Departamentos::findOne($config->codigo_departamento);
         //Logo
         $this->SetXY(43, 10);
-        $this->Image('dist/images/logos/logoempresa.png', 10, 10, 30, 30);
+        $this->Image('dist/images/logos/logoempresa.png', 10, 7, 30, 30);
         //Encabezado
         $this->SetFillColor(220, 220, 220);
-        $this->SetXY(53, 9);
+        $this->SetXY(53, 7);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("Empresa:"), 0, 0, 'l', 0);
-        $this->SetFont('Arial', '', 8);
+        $this->SetFont('Arial', '', 7);
         $this->Cell(50, 5, utf8_decode($config->razon_social_completa), 0, 0, 'L', 0);
         $this->SetXY(30, 5);
         //FIN
-        $this->SetXY(53, 13);
-        $this->SetFont('Arial', 'B', 8);
+        $this->SetXY(53, 10);
+        $this->SetFont('Arial', 'B', 7);
         $this->Cell(20, 5, utf8_decode("Nit:"), 0, 0, 'l', 0);
          $this->SetFont('Arial', '', 8);
         $this->Cell(50, 5, utf8_decode($config->nit_empresa." - ".$config->dv), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 17);
+        $this->SetXY(53, 13);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("Dirección:"), 0, 0, 'l', 0);
-         $this->SetFont('Arial', '', 8);
+         $this->SetFont('Arial', '', 7);
         $this->Cell(50, 5, utf8_decode($config->direccion), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 21);
+        $this->SetXY(53, 16);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("Telefono:"), 0, 0, 'l', 0);
-         $this->SetFont('Arial', '', 8);
+         $this->SetFont('Arial', '', 7);
         $this->Cell(50, 5, utf8_decode($config->telefono), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 25);
+        $this->SetXY(53, 19);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("Municipio:"), 0, 0, 'l', 0);
-         $this->SetFont('Arial', '', 8);
+         $this->SetFont('Arial', '', 7);
         $this->Cell(50, 5, utf8_decode($config->codigoMunicipio->municipio." - ".$config->codigoDepartamento->departamento), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
         //FIN
-        $this->SetXY(53, 29);
+        $this->SetXY(53, 22);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(20, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 0);
-         $this->SetFont('Arial', '', 8);
+         $this->SetFont('Arial', '', 7);
         $this->Cell(50, 5, utf8_decode($config->tipoRegimen->regimen), 0, 0, 'L', 0);
         $this->SetXY(40, 5);
+        //fin
+         //fin
+        $this->SetXY(43, 25);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(100, 5, utf8_decode($config->email_respuesta), 0, 0, 'L','0');
+        $this->SetXY(40, 5);
+        //fin
+        $this->SetXY(43, 30);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(100, 3, utf8_decode($config->mensaje_normativo1), 0, 0, 'L','0');
+        $this->SetXY(40, 3);
+        //fin
+        $this->SetXY(49, 33);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(100, 3, utf8_decode($config->mensaje_normativo2), 0, 0, 'L','0');
+        $this->SetXY(40, 3);
+        //fin
+        $this->SetXY(27, 36);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(100, 3, utf8_decode($config->mensaje_normativo3), 0, 0, 'L','0');
+        $this->SetXY(40, 3);
+        //fin
         //DATOS DE LA FACTURA
           $this->SetXY(135, 7);
         $this->SetFont('Arial', 'B', 10);
@@ -82,10 +104,10 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 9);
         $this->Cell(20, 7, utf8_decode('Vigencia: '.$config->resolucion->vigencia.' Meses'), 0, 0, 'l', 0);
         //linea
-        $this->SetXY(10, 32);
-        $this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
-         $this->SetXY(10, 32.5);
-        $this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
+        //$this->SetXY(10, 32);
+       // $this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
+         //$this->SetXY(10, 32.5);
+        //$this->Cell(190, 7, utf8_decode("_________________________________________________________________________________________________________________________________________"), 0, 0, 'C', 0);
         //comienza datos del cliente
          //FIN
         $this->SetFillColor(200, 200, 200);
@@ -113,9 +135,9 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 7);
         $this->Cell(55, 5, utf8_decode($factura->telefono_cliente), 0, 0, 'c', 0);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Vendedor:"), 0, 0, 'c', 0);
+        $this->Cell(17, 5, utf8_decode("Localidad:"), 0, 0, 'c', 0);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(55, 5, utf8_decode(substr($factura->agenteFactura->nombre_completo,0,18)), 0, 0, 'c', 0);
+        $this->Cell(55, 5, utf8_decode(substr($factura->clienteFactura->zona->nombre_zona,0,18)), 0, 0, 'c', 0);
         //FIN
          $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 8);
@@ -127,9 +149,9 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 8);
         $this->Cell(55, 5, utf8_decode($factura->clienteFactura->codigoMunicipio->municipio), 0, 0, 'L', 0);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Zona:"), 0, 0, 'c', 0);
+        $this->Cell(17, 5, utf8_decode("Vendedor:"), 0, 0, 'c', 0);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->zona->nombre_zona), 0, 0, 'c', 0);
+        $this->Cell(55, 5, utf8_decode(substr($factura->agenteFactura->nombre_completo,0, 18)), 0, 0, 'c', 0);
         //FIN
         $this->SetXY(10, 52);
         $this->SetFont('Arial', 'B', 8);
@@ -147,7 +169,7 @@ class PDF extends FPDF {
         //FIN
         $this->SetXY(10, 56);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("Email.:"), 0, 0, 'L', 0);
+        $this->Cell(26, 5, utf8_decode("Email:"), 0, 0, 'L', 0);
         $this->SetFont('Arial', '', 8);
         $this->Cell(48, 5, utf8_decode($factura->clienteFactura->email_cliente), 0, 0, 'l', 0);
         $this->SetFont('Arial', 'B', 8);
@@ -155,9 +177,9 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 8);
         $this->Cell(55, 5, utf8_decode($factura->formaPago->concepto.' ('.$factura->plazo_pago.')  Dias'), 0, 0, 'L', 0);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("T. cliente:"), 0, 0, 'c', 0);
+        $this->Cell(17, 5, utf8_decode("Medio pago:"), 0, 0, 'c', 0);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(55, 5, utf8_decode($factura->clienteFactura->tipoCliente->concepto), 0, 0, 'c', 0);
+        $this->Cell(55, 5, utf8_decode($factura->medioPago->concepto), 0, 0, 'c', 0);
         //FIN
          //Lineas del encabezado
         $this->Line(10,67,10,188); //la primera con la tercera es para la la raya iguales, la segunda es el lago o corto y la tercera es la tamaño de largo

@@ -46,10 +46,25 @@ $view = 'factura-venta';
         } else {
             if ($model->autorizado == 1 && $model->numero_factura == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
-                  echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
+                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura, 'token' => $token], ['class' => 'btn btn-default btn-xs']);            
-            }else{
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura, 'token' => $token], ['class' => 'btn btn-default btn-xs']);?>            
+                <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Medio de pago',
+                                 ['factura-venta/subir_medio_pago', 'id' => $model->id_factura, 'token' => $token],
+                                   ['title' => 'Permite subir el medio de pago',
+                                    'data-toggle'=>'modal',
+                                    'data-target'=>'#modalsubirmediopago',
+                                    'class' => 'btn btn-default btn-xs',
+                                    'data-backdrop' => 'static',
+                                    'data-keyboard' => 'false'
+                                   ])    
+            ?> 
+            <div class="modal remote fade" id="modalsubirmediopago">
+                         <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                             <div class="modal-content"></div>
+                         </div>
+            </div>
+           <?php }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
                echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
                 echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs',
