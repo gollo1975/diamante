@@ -38,7 +38,7 @@ class MedidaProductoTerminado extends \yii\db\ActiveRecord
         return [
             [['descripcion','codigo_enlace'], 'required'],
             [['descripcion'], 'string', 'max' => 15],
-            [['codigo_enlace'], 'string', 'max' => 3],
+            [['codigo_enlace','unidad_medida'], 'string', 'max' => 3],
         ];
     }
 
@@ -51,6 +51,7 @@ class MedidaProductoTerminado extends \yii\db\ActiveRecord
             'id_medida_producto' => 'Código',
             'descripcion' => 'Descripcion',
             'codigo_enlace' => 'Unida de medida',
+            'unidad_medida' => 'Unidad medida',
         ];
     }
 }

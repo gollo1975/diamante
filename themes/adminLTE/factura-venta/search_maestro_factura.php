@@ -16,9 +16,10 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 use app\models\AgentesComerciales;
 
-$this->title = 'MAESTRO FACTURA DE VENTA';
+$this->title = 'FACTURA DE VENTA';
 $this->params['breadcrumbs'][] = $this->title;
 $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$tipoFactura = ArrayHelper::map(\app\models\TipoFacturaVenta::find()->all(), 'id_tipo_factura', 'descripcion');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -71,12 +72,19 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
+             <?= $formulario->field($form, 'tipo_factura')->widget(Select2::classname(), [
+                'data' => $tipoFactura,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]);?>
              <?= $formulario->field($form, "documento")->input("search") ?>
             <?= $formulario->field($form, "cliente")->input("search") ?>
         </div>
         <div class="panel-footer text-right">
-            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute(["factura-venta/search_maestro_factura",'token' => $token]) ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-xs",]) ?>
+            <a align="right" href="<?= Url::toRoute(["factura-venta/search_maestro_factura",'token' => $token]) ?>" class="btn btn-primary btn-xs"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -145,7 +153,7 @@ $form = ActiveForm::begin([
             </tbody>        
         </table>
      <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-success btn-xs']); ?>                
                    <?php $form->end() ?>
         </div>
     </div>

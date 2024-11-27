@@ -53,7 +53,12 @@ $this->params['breadcrumbs'][] = $model->id_resolucion;
                     <td><?= Html::encode($model->vigencia) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_documento') ?>:</th>
                     <td><?= Html::encode($model->documentosElectronicos->concepto) ?></td>              
-                </tr>       
+                </tr>  
+                 <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_aviso_vencimiento') ?>:</th>
+                    <td colspan="8"><?= Html::encode($model->fecha_aviso_vencimiento) ?></td>    
+                       
+                </tr>   
             </table>
         </div>
     </div>

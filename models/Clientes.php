@@ -61,6 +61,7 @@ class Clientes extends \yii\db\ActiveRecord
         $this->segundo_apellido = strtoupper($this->segundo_apellido);
         $this->direccion = strtoupper($this->direccion);
         $this->email_cliente = strtolower($this->email_cliente);
+        $this->barrio_localidad = strtoupper($this->barrio_localidad);
         return true;
     }
 
@@ -74,7 +75,7 @@ class Clientes extends \yii\db\ActiveRecord
             [['id_tipo_documento', 'dv', 'tipo_regimen', 'id_forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'id_posicion',
                 'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente','predeterminado','id_zona'], 'integer'],
             [['fecha_creacion', 'fecha_editado'], 'safe'],
-            [['observacion'], 'string'],
+            [['observacion','barrio_localidad'], 'string'],
             ['email_cliente', 'email'],
             [['nit_cedula', 'telefono', 'celular', 'user_name', 'user_name_editar'], 'string', 'max' => 15],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 15],
@@ -102,7 +103,7 @@ class Clientes extends \yii\db\ActiveRecord
             'id_tipo_documento' => 'Tipo documento:',
             'nit_cedula' => 'Nit/Cedula:',
             'dv' => 'Dv:',
-            'id_zona' => 'Zona cliente',
+            'id_zona' => 'Zona del cliente:',
             'primer_nombre' => 'Primer Nombre',
             'segundo_nombre' => 'Segundo Nombre',
             'primer_apellido' => 'Primer Apellido',
@@ -135,6 +136,7 @@ class Clientes extends \yii\db\ActiveRecord
             'gasto_presupuesto_comercial' => 'Gasto presupuesto:',
             'id_tipo_cliente' => 'Tipo cliente:',
             'predeterminado' => 'predeterminado',
+            'barrio_localidad' => 'Barrio/localidad:',
         ];
     }
 

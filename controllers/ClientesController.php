@@ -68,19 +68,21 @@ class ClientesController extends Controller
                 $vendedor = null;
                 $tipo_cliente = null;
                 $model = null;
-                $pages = null;
+                $pages = null;$zona = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $nitcedula = Html::encode($form->nitcedula);
                         $nombre_completo = Html::encode($form->nombre_completo);
                         $vendedor = Html::encode($form->vendedor);
                         $activo = Html::encode($form->activo);
+                        $zona = Html::encode($form->zona);
                         $tipo_cliente = Html::encode($form->tipo_cliente);
                         $table = Clientes::find()
                                 ->andFilterWhere(['like', 'nit_cedula', $nitcedula])
                                 ->andFilterWhere(['=', 'estado_cliente', $activo])
                                 ->andFilterWhere(['=', 'id_agente', $vendedor])
                                 ->andFilterWhere(['=', 'id_tipo_cliente', $tipo_cliente])
+                                ->andFilterWhere(['=', 'id_zona', $zona])
                                 ->andFilterWhere(['like', 'nombre_completo', $nombre_completo]);
                         $table = $table->orderBy('id_cliente DESC');
                         $tableexcel = $table->all();
@@ -512,7 +514,8 @@ class ClientesController extends Controller
         $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
-          $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('X')->setAutoSize(true);  
                                
         $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A1', 'ID')
@@ -537,7 +540,8 @@ class ClientesController extends Controller
                     ->setCellValue('T1', 'FECHA CREACION')
                     ->setCellValue('U1', 'ACTIVO')
                     ->setCellValue('V1', 'CUPO ASIGNADO')
-                     ->setCellValue('W1', 'AGENTE COMERCIAL');
+                    ->setCellValue('W1', 'AGENTE COMERCIAL')
+                    ->setCellValue('X1', 'ZONA');
                
         $i = 2;
         
@@ -566,7 +570,8 @@ class ClientesController extends Controller
                     ->setCellValue('T' . $i, $val->fecha_creacion)
                     ->setCellValue('U' . $i, $val->estadoCliente)
                     ->setCellValue('V' . $i, $val->cupo_asignado)
-                    ->setCellValue('W' . $i, $val->agenteComercial->nombre_completo);
+                    ->setCellValue('W' . $i, $val->agenteComercial->nombre_completo)
+                    ->setCellValue('X' . $i, $val->zona->nombre_zona);
             $i++;
         }
 

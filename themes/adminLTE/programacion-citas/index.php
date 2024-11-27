@@ -127,11 +127,13 @@ $form = ActiveForm::begin([
                             <?php if(count($contador) > 0){?>
                             <?php }else{?>    
                                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                       ['/programacion-citas/editar_cita', 'id' => $val->id_programacion, 'agente' => $agente],
+                                       ['/programacion-citas/editar_cita', 'id' => $val->id_programacion, 'agente' => $agente, 'sw' =>0],
                                        [
                                            'title' => 'Permite editar las fechas de la programacion',
                                            'data-toggle'=>'modal',
                                            'data-target'=>'#modaleditarcitas'.$val->id_programacion,
+                                           'data-backdrop' => 'static',
+                                           'data-keyboard' => 'false'
                                        ])    
                                   ?>
                                <div class="modal remote fade" id="modaleditarcitas<?= $val->id_programacion ?>">

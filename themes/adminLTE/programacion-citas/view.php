@@ -123,20 +123,7 @@ $view = 'programacion-citas';
                                                 <?php }else{?>  
                                                     <td style= 'width: 25px; height: 25px;'></td>   
                                                     <td style= 'width: 25px; height: 25px;'></td>
-                                                    <td style= 'width: 25px; height: 25px;'>
-                                                        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',
-                                                           ['/programacion-citas/editar_cita_cliente', 'id' => $model->id_programacion, 'detalle' => $val->id_visita, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso],
-                                                             ['title' => 'Editar la cita para cliente',
-                                                              'data-toggle'=>'modal',
-                                                              'data-target'=>'#modaleditarcitacliente',
-                                                             ])    
-                                                       ?>
-                                                       <div class="modal remote fade" id="modaleditarcitacliente">
-                                                            <div class="modal-dialog modal-lg" style ="width: 450px;">    
-                                                                <div class="modal-content"></div>
-                                                            </div>
-                                                       </div>
-                                                    </td>    
+                                                    <td style= 'width: 25px; height: 25px;'></td>    
                                                     <td><input type="checkbox" name="listado_citas[]" value="<?= $val->id_visita ?>"></td>    
                                                 <?php }?>    
                                             </tr>
@@ -151,7 +138,9 @@ $view = 'programacion-citas';
                                       ['title' => 'Crear nueva cita para el cliente',
                                        'data-toggle'=>'modal',
                                        'data-target'=>'#modalcrearnuevacita',
-                                       'class' => 'btn btn-info btn-xs'
+                                       'class' => 'btn btn-info btn-xs',
+                                       'data-backdrop' => 'static',
+                                       'data-keyboard' => 'false'
                                       ])    
                                     ?>
                                     <div class="modal remote fade" id="modalcrearnuevacita">

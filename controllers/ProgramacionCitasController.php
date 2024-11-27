@@ -400,16 +400,18 @@ class ProgramacionCitasController extends Controller {
                             $table->id_cliente = $model->cliente;
                             $table->id_tipo_visita = $model->tipo_visita;
                             $table->hora_visita = $model->hora_visita;
+                            $table->hora_visita_historial = $model->hora_visita;
                             $table->nota = $model->nota;
                             $table->desde = $programacion->fecha_inicio;
                             $table->hasta = $programacion->fecha_final;
                             $table->fecha_cita_comercial = $model->fecha_cita;
+                            $table->fecha_cita_comercial_historial = $model->fecha_cita; 
                             $table->save(false);
                             $this->SumarCitasCliente($id);
-                            $this->redirect(["programacion-citas/view", 'id' => $id, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso]);
+                            return $this->redirect(["programacion-citas/view", 'id' => $id, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso]);
                         } else {
                             Yii::$app->getSession()->setFlash('warning', 'Lo siento, hay una cita a la misma hora. Intente cambiar la hora de la cita.  ');
-                            $this->redirect(["programacion-citas/view", 'id' => $id, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso]);
+                            return $this->redirect(["programacion-citas/view", 'id' => $id, 'agenteToken' => $agenteToken, 'tokenAcceso' => $tokenAcceso]);
                         }
                     }    
                 }
@@ -530,7 +532,7 @@ class ProgramacionCitasController extends Controller {
     }
 
     //proceso que edita la programacion de cistas
-    public function actionEditar_cita($agente, $id) {
+    public function actionEditar_cita($agente, $id,$sw) {
         $model = new \app\models\FormModeloCrearCita();
         $table = ProgramacionCitas::findOne($id);
         if ($model->load(Yii::$app->request->post())) {
@@ -539,10 +541,10 @@ class ProgramacionCitasController extends Controller {
                     $table->fecha_inicio = $model->desde;
                     $table->fecha_final = $model->hasta;
                     $table->save(false);
-                    $this->redirect(["programacion-citas/index"]);
+                    return $this->redirect(["programacion-citas/index"]);
                 } else {
                     Yii::$app->getSession()->setFlash('warning', 'Debe de digitar las fechas de inicio para la programacion de clientes. Ingrese nuevamente.');
-                    $this->redirect(["programacion-citas/index"]);
+                    return $this->redirect(["programacion-citas/index"]);
                 }
             }
         }
@@ -553,6 +555,7 @@ class ProgramacionCitasController extends Controller {
         return $this->renderAjax('crear_cita', [
                     'model' => $model,
                     'agente' => $agente,
+                    'sw' => $sw,
         ]);
     }
     
@@ -799,6 +802,9 @@ class ProgramacionCitasController extends Controller {
         $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        
         $objPHPExcel->setActiveSheetIndex(0)
                 ->setCellValue('A1', 'No PROGRAMACION')
                 ->setCellValue('B1', 'DOCUMENTO')
@@ -806,13 +812,15 @@ class ProgramacionCitasController extends Controller {
                 ->setCellValue('D1', 'MUNICIPIO')
                 ->setCellValue('E1', 'TIPO VISITA')
                 ->setCellValue('F1', 'HORA VISITA')
-                ->setCellValue('G1', 'FECHA PROGRAMADA')
-                ->setCellValue('H1', 'MOTIVO')
-                ->setCellValue('I1', 'USER NAME')
-                ->setCellValue('J1', 'CITA CUMPLIDA')
-                ->setCellValue('K1', 'FECHA INFORME')
-                ->setCellValue('L1', 'OBSERVACIONES')
-                ->setCellValue('M1', 'AGENTE COMERCIAL');
+                ->setCellValue('G1', 'HORA VISITA HISTORIAL')
+                ->setCellValue('H1', 'FECHA PROGRAMADA') 
+                ->setCellValue('I1', 'FECHA PROGRAMADA HISTORIAL')
+                ->setCellValue('J1', 'MOTIVO')
+                ->setCellValue('K1', 'USER NAME')
+                ->setCellValue('L1', 'CITA CUMPLIDA')
+                ->setCellValue('M1', 'FECHA INFORME')
+                ->setCellValue('N1', 'OBSERVACIONES')
+                ->setCellValue('O1', 'AGENTE COMERCIAL');
         $i = 2;
 
         foreach ($detalle as $val) {
@@ -824,13 +832,15 @@ class ProgramacionCitasController extends Controller {
                     ->setCellValue('D' . $i, $val->cliente->codigoMunicipio->municipio)
                     ->setCellValue('E' . $i, $val->tipoVisita->nombre_visita)
                     ->setCellValue('F' . $i, $val->hora_visita)
-                    ->setCellValue('G' . $i, $val->fecha_cita_comercial)
-                    ->setCellValue('H' . $i, $val->nota)
-                    ->setCellValue('I' . $i, $val->programacion->user_name)
-                    ->setCellValue('J' . $i, $val->citaCumplida)
-                    ->setCellValue('K' . $i, $val->fecha_informe)
-                    ->setCellValue('L' . $i, $val->descripcion_gestion)
-                    ->setCellValue('M' . $i, $val->programacion->agente->nombre_completo);
+                    ->setCellValue('G' . $i, $val->hora_visita_historial)
+                    ->setCellValue('H' . $i, $val->fecha_cita_comercial)
+                    ->setCellValue('I' . $i, $val->fecha_cita_comercial_historial)
+                    ->setCellValue('J' . $i, $val->nota)
+                    ->setCellValue('K' . $i, $val->programacion->user_name)
+                    ->setCellValue('L' . $i, $val->citaCumplida)
+                    ->setCellValue('M' . $i, $val->fecha_informe)
+                    ->setCellValue('N' . $i, $val->descripcion_gestion)
+                    ->setCellValue('O' . $i, $val->programacion->agente->nombre_completo);
             $i++;
         }
 

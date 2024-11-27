@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ]);
 $vendedor = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->all(), 'id_tipo_cliente', 'concepto');
+$tipoZona = ArrayHelper::map(\app\models\ZonaClientes::find()->all(), 'id_zona', 'nombre_zona');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -65,6 +66,13 @@ $tipoCliente = ArrayHelper::map(TipoCliente::find()->orderBy('concepto ASC')->al
             ]); ?> 
              <?= $formulario->field($form, 'tipo_cliente')->widget(Select2::classname(), [
                 'data' => $tipoCliente,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+             <?= $formulario->field($form, 'zona')->widget(Select2::classname(), [
+                'data' => $tipoZona,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true

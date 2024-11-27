@@ -41,6 +41,7 @@ $posicion = ArrayHelper::map(PosicionPrecio::find()->all(), 'id_posicion', 'posi
 $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza', 'naturaleza');
 $tipoCliente = ArrayHelper::map(TipoCliente::find()->all(), 'id_tipo_cliente', 'concepto');
 $formaPago = ArrayHelper::map(app\models\FormaPago::find()->all(), 'id_forma_pago', 'concepto');
+$tipoZona = ArrayHelper::map(app\models\ZonaClientes::find()->all(), 'id_zona', 'nombre_zona');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -79,40 +80,51 @@ $formaPago = ArrayHelper::map(app\models\FormaPago::find()->all(), 'id_forma_pag
            <?= $form->field($model, 'codigo_municipio')->dropDownList($municipio, ['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">
-            <?= $form->field($model, 'id_forma_pago')->dropdownList($formaPago, ['prompt' => 'Seleccione...']) ?>
-            <?= $form->field($model, 'plazo')->input("text",['id' => 'plazo']) ?>
+             <?= $form->field($model, 'barrio_localidad')->input("text") ?>
+             <?= $form->field($model, 'id_forma_pago')->dropdownList($formaPago, ['prompt' => 'Seleccione...']) ?>
         </div>    
         <div class="row">
-            <?= $form->field($model, 'tipo_regimen')->dropdownList(['0' => 'SIMPLIFICADO', '1' => 'COMUN'], ['prompt' => 'Seleccione...']) ?>
-            <?= $form->field($model, 'id_naturaleza')->widget(Select2::classname(), [
+           <?= $form->field($model, 'plazo')->input("text",['id' => 'plazo']) ?>
+           <?= $form->field($model, 'tipo_regimen')->dropdownList(['0' => 'SIMPLIFICADO', '1' => 'COMUN'], ['prompt' => 'Seleccione...']) ?>
+        </div>
+        <div class="row">
+               <?= $form->field($model, 'id_naturaleza')->widget(Select2::classname(), [
                    'data' => $naturaleza,
                    'options' => ['prompt' => 'Seleccione...'],
                    'pluginOptions' => [
                        'allowClear' => true
                    ],
                ]); ?> 
-        </div>
-        <div class="row">
-               <?= $form->field($model, 'tipo_sociedad')->dropdownList(['0' => 'NATURAL', '1' => 'JURIDICA'], ['prompt' => 'Seleccione...']) ?>
-                 <?= $form->field($model, 'id_posicion')->widget(Select2::classname(), [
+            <?= $form->field($model, 'tipo_sociedad')->dropdownList(['0' => 'NATURAL', '1' => 'JURIDICA'], ['prompt' => 'Seleccione...']) ?>
+               
+        </div> 
+        <div class="row" >
+                  <?= $form->field($model, 'id_posicion')->widget(Select2::classname(), [
                    'data' => $posicion,
                    'options' => ['prompt' => 'Seleccione...'],
                    'pluginOptions' => [
                        'allowClear' => true
                    ],
                ]); ?> 
-               
-        </div> 
-        <div class="row" >
-                <?= $form->field($model, 'id_agente')->widget(Select2::classname(), [
+            <?= $form->field($model, 'id_agente')->widget(Select2::classname(), [
                    'data' => $vendedor,
                    'options' => ['prompt' => 'Seleccione...'],
                    'pluginOptions' => [
                        'allowClear' => true
                    ],
-               ]); ?> 
+               ]); ?>
+        </div>
+        <div class="row">
+               
                  <?= $form->field($model, 'id_tipo_cliente')->widget(Select2::classname(), [
                    'data' => $tipoCliente,
+                   'options' => ['prompt' => 'Seleccione...'],
+                   'pluginOptions' => [
+                       'allowClear' => true
+                   ],
+               ]); ?> 
+            <?= $form->field($model, 'id_zona')->widget(Select2::classname(), [
+                   'data' => $tipoZona,
                    'options' => ['prompt' => 'Seleccione...'],
                    'pluginOptions' => [
                        'allowClear' => true

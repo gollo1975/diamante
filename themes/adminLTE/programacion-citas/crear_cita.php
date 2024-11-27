@@ -38,7 +38,7 @@ $convendedor = ArrayHelper::map(\app\models\AgentesComerciales::find()->where(['
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                  NUEVA FECHA
+                 Nueva fecha de programacion
                 </div>
                 <div class="panel-body">
                     <div class="row">

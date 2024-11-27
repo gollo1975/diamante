@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="panel panel-success">
         <div class="panel-heading">
-           Impuestos tributarios
+           Impuestos tributarios y emails
         </div>
         <div class="panel-body">
             <div class="row">          
@@ -65,7 +65,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 
             </div>
             <div class="row">          
-              <?= $form->field($model, 'email_respuesta', ['template' => '{label}<div class="col-sm-3  form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'size'=> 80]) ?>
+               <?= $form->field($model, 'email_respuesta1')->textInput(['maxlength' => true, 'size' => 40]) ?>
+               <?= $form->field($model, 'email_respuesta2')->textInput(['maxlength' => true, 'size' => 40]) ?>
                 
             </div>
         </div>

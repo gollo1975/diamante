@@ -36,7 +36,7 @@ $medioPago = ArrayHelper::map(\app\models\MedioPago::find()->all(), 'id_medio_pa
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <?= $form->field($model, 'medio_pago')->dropDownList($medioPago, ['prompt' => 'Seleccione...','required' => 'true']) ?>
+                        <?= $form->field($model, 'medio_pago')->dropDownList($medioPago, ['prompt' => 'Seleccione...','required' => true]) ?>
                     </div>
                 </div>  
                     <div class="panel-footer text-right">

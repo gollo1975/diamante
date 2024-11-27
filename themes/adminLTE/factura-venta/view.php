@@ -37,7 +37,7 @@ $view = 'factura-venta';
 <div class="factura-venta-view">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
-    <p>
+    <div class="btn-group" role="group" aria-label="...">
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
         <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { ?>
             <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Modificar factura', ['update', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-success btn-xs']) ?>
@@ -48,30 +48,73 @@ $view = 'factura-venta';
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
                 echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
                            'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura, 'token' => $token], ['class' => 'btn btn-default btn-xs']);?>            
-                <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Medio de pago',
-                                 ['factura-venta/subir_medio_pago', 'id' => $model->id_factura, 'token' => $token],
-                                   ['title' => 'Permite subir el medio de pago',
-                                    'data-toggle'=>'modal',
-                                    'data-target'=>'#modalsubirmediopago',
-                                    'class' => 'btn btn-default btn-xs',
-                                    'data-backdrop' => 'static',
-                                    'data-keyboard' => 'false'
-                                   ])    
-            ?> 
-            <div class="modal remote fade" id="modalsubirmediopago">
-                         <div class="modal-dialog modal-lg" style ="width: 500px;">    
-                             <div class="modal-content"></div>
-                         </div>
-            </div>
-           <?php }else{
+                if($model->id_medio_pago == ''){?>
+                     <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Medio de pago',
+                                     ['factura-venta/subir_medio_pago', 'id' => $model->id_factura, 'token' => $token],
+                                       ['title' => 'Permite subir el medio de pago',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalsubirmediopago',
+                                        'class' => 'btn btn-default btn-xs',
+                                        'data-backdrop' => 'static',
+                                        'data-keyboard' => 'false'
+                                       ]);?> 
+                    <div class="modal remote fade" id="modalsubirmediopago">
+                                 <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                                     <div class="modal-content"></div>
+                                 </div>
+                    </div>
+                <?php }else{    
+                     echo Html::a('<span class="glyphicon glyphicon-print"></span> Visualidar PDF', ['imprimir_factura_venta', 'id' => $model->id_factura, 'token' => $token], ['class' => 'btn btn-default btn-xs']);?>
+                     <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Medio de pago',
+                                     ['factura-venta/subir_medio_pago', 'id' => $model->id_factura, 'token' => $token],
+                                       ['title' => 'Permite subir el medio de pago',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalsubirmediopago',
+                                        'class' => 'btn btn-default btn-xs',
+                                        'data-backdrop' => 'static',
+                                        'data-keyboard' => 'false'
+                                       ]);?> 
+                    <div class="modal remote fade" id="modalsubirmediopago">
+                                 <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                                     <div class="modal-content"></div>
+                                 </div>
+                    </div>
+                    <?php if($model->id_tipo_factura == 5){?>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Condiciones exportacion
+                              <span class="caret"></span>
+                            </button>
+                              <ul class="dropdown-menu">
+                                   <?= Html::a('<span class="glyphicon glyphicon-list"></span> Termimos',
+                                     ['factura-venta/subir_medio_pago', 'id' => $model->id_factura, 'token' => $token],
+                                       ['title' => 'Permite subir el medio de pago',
+                                        'data-toggle'=>'modal',
+                                        'data-target'=>'#modalsubirmediopago',
+                                        'class' => '',
+                                        'data-backdrop' => 'static',
+                                        'data-keyboard' => 'false'
+                                       ]);?> 
+                                    <div class="modal remote fade" id="modalsubirmediopago">
+                                                 <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                                                     <div class="modal-content"></div>
+                                                 </div>
+                                    </div> 
+                              </ul>     
+                        </div>
+                    <?php } 
+                }    
+               
+            }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
-               echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
+                echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
                 echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs',
                            'data' => ['confirm' => 'Esta seguro de enviar la factura de venta a la Dian.', 'method' => 'post']]);
             }
         }?>        
-    </p>  
+    </div>  
+    <br>
+    <br>
     <div class="panel panel-success">
         <div class="panel-heading">
            FACTURA DE VENTA
@@ -122,8 +165,8 @@ $view = 'factura-venta';
                 <tr style="font-size: 90%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Estado') ?>:</th>
                     <td><?= Html::encode($model->estadoFactura) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_venta') ?></th>
-                    <td><?= Html::encode($model->tipoVenta->concepto) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura') ?></th>
+                    <td><?= Html::encode($model->tipoFactura->abreviatura) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="6"><?= Html::encode($model->observacion) ?></td>
                 </tr>

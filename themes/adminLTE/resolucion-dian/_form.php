@@ -78,6 +78,15 @@ $documentos = ArrayHelper::map(app\models\DocumentoElectronico::find()->all(), '
          <div class="row">
             <?= $form->field($model, 'codigo_interface')->textInput(['maxlength' => true]) ?>    
         </div>
+         <div class="row">
+            <?=  $form->field($model, 'fecha_aviso_vencimiento')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                           'value' => date('Y-m-d', strtotime('+2 days')),
+                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                           'pluginOptions' => [
+                               'format' => 'yyyy-m-d',
+                               'todayHighlight' => true]])
+            ?> 					
+        </div>  
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("resolucion-dian/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

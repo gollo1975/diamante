@@ -43,7 +43,7 @@ class ResolucionDian extends \yii\db\ActiveRecord
     {
         return [
             [['numero_resolucion', 'desde', 'hasta', 'fecha_vence','id_documento'], 'required'],
-            [['desde', 'hasta', 'fecha_vence', 'fecha_registro'], 'safe'],
+            [['desde', 'hasta', 'fecha_vence', 'fecha_registro','fecha_aviso_vencimiento'], 'safe'],
             [['estado_resolucion','rango_inicio','rango_final','vigencia','codigo_interface','id_documento'], 'integer'],
             [['numero_resolucion'], 'string', 'max' => 30],
             [['consecutivo'], 'string', 'max' => 3],
@@ -72,6 +72,7 @@ class ResolucionDian extends \yii\db\ActiveRecord
             'vigencia' => 'Vigencia',
             'id_documento' => 'Tipo documento',
             'codigo_interface' => 'Codigo interface',
+            'fecha_aviso_vencimiento' => 'Fecha aviso vencimiento',
           
         ];
     }

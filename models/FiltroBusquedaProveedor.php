@@ -16,12 +16,14 @@ class FiltroBusquedaProveedor extends Model
     public $activo;
     public $vendedor;
     public $tipo_cliente;
-    
+    public $zona;
+
+
     public function rules()
     {
         return [  
           
-            [['vendedor','activo','tipo_cliente'], 'integer'],
+            [['vendedor','activo','tipo_cliente','zona'], 'integer'],
             [['nitcedula','nombre_completo'], 'string'],
         ];
     }
@@ -34,6 +36,7 @@ class FiltroBusquedaProveedor extends Model
             'activo' => 'Activo:',
             'vendedor' => 'Agente comercial:',
             'tipo_cliente' => 'Tipo cliente:',
+            'zona' => 'Zona del cliente:',
 
         ];
     }

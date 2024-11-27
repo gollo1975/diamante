@@ -37,8 +37,8 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
         return [
             [['id_programacion', 'id_cliente', 'id_tipo_visita','cumplida','tipo_visita'], 'integer'],
             [['id_cliente', 'id_tipo_visita', 'hora_visita'], 'required'],
-            [['hora_visita'], 'time'],
-            [['fecha_registro','fecha_informe','fecha_cita_comercial'], 'safe'],
+            [['hora_visita','hora_visita_historial'], 'time'],
+            [['fecha_registro','fecha_informe','fecha_cita_comercial','fecha_cita_comercial_historial'], 'safe'],
             [['nota'], 'string', 'max' => 100],
             [['descripcion_gestion'], 'string'],
             [['desde', 'hasta'], 'safe'],
@@ -59,6 +59,7 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
             'id_cliente' => 'Id Cliente',
             'id_tipo_visita' => 'Id Tipo Visita',
             'hora_visita' => 'Hora Visita',
+            'hora_visita_historial' => 'hora_visita_historial',
             'nota' => 'Nota',
             'fecha_registro' => 'Fecha Registro',
             'desde' => 'Desde',
@@ -68,6 +69,7 @@ class ProgramacionCitaDetalles extends \yii\db\ActiveRecord
             'descripcion_gestion' => 'Gestion visita:',
             'tipo_visita' => 'Tipo visita:',
             'fecha_cita_comercial' => 'fecha_cita_comercial',
+            'fecha_cita_comercial_historial' => 'fecha_cita_comercial_historial',
         ];
     }
 

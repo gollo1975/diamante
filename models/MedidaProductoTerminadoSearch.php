@@ -18,7 +18,7 @@ class MedidaProductoTerminadoSearch extends MedidaProductoTerminado
     {
         return [
             [['id_medida_producto'], 'integer'],
-            [['descripcion','codigo_enlace'], 'safe'],
+            [['descripcion','codigo_enlace','unidad_medida'], 'safe'],
         ];
     }
 
@@ -60,6 +60,7 @@ class MedidaProductoTerminadoSearch extends MedidaProductoTerminado
         $query->andFilterWhere([
             'id_medida_producto' => $this->id_medida_producto,
             'codigo_enlace' => $this->codigo_enlace,
+            'unidad_medida' => $his->unidad_medida,
         ]);
 
         $query->andFilterWhere(['like', 'descripcion', $this->descripcion]);

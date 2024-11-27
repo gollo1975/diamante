@@ -118,6 +118,7 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de factura">T.F.</span></div></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -140,10 +141,12 @@ $form = ActiveForm::begin([
                         <td style="text-align: right"><?= ''.number_format($val->subtotal_factura,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
+                        
                         <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
                             $total = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento );
                             $total = round($total / 86400);
                             ?>  
+                            <td><?= $val->tipoFactura->abreviatura?></td>
                             <td style="text-align: right; background-color:#F5B7B1;"><?= ''.number_format($val->saldo_factura,0)?></td>
                             <td style="color: #E74C3C"><b><?= $total?></b></td>
                         <?php }else{
@@ -153,6 +156,7 @@ $form = ActiveForm::begin([
                             $differenceFormat = '%a';
                             ?>
                             <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
+                            <td><?= $val->tipoFactura->abreviatura?></td>
                             <?php  if($val->saldo_factura <> 0 ){?>
                                 <td><?= $contador->format($differenceFormat) * -1?></td>
                             <?php }else{?>
