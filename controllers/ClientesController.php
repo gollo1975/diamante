@@ -214,6 +214,7 @@ class ClientesController extends Controller
         $cupo = \app\models\ClienteCupoComercial::find()->where(['=','id_cliente', $id])->orderBy('id_cupo DESC')->all();
         $anotacion = ClienteAnotaciones::find()->where(['=','id_cliente', $id])->orderBy('id_anotacion DESC')->all();
         $Concontacto = ClientesContactos::find()->where(['=','id_cliente', $id])->all();
+        $searchMonedas = \app\models\ClienteMoneda::find()->where(['=','id_cliente', $id])->all();
         if(isset($_POST["actualizarcupo"])){
             if(isset($_POST["listado_cupo"])){
                 $intIndice = 0;
@@ -237,6 +238,21 @@ class ClientesController extends Controller
                 endforeach;
                 return $this->redirect(['view','id' =>$id, 'token' => $token]);
             }
+        }  
+        //tasa de negociacion
+        if(isset($_POST["actualizar_tasa_cambio"])){
+            if(isset($_POST["listado_monedas"])){
+                $intIndice = 0;
+                foreach ($_POST["listado_monedas"] as $intCodigo):
+                    $table = \app\models\ClienteMoneda::find()->where(['=','id', $intCodigo])->one();
+                    if($table){
+                        $table->tasa_negociacion = $_POST["tasa_negociada"][$intIndice];
+                        $table->save(false);
+                    }    
+                    $intIndice++;
+                endforeach;
+                return $this->redirect(['view','id' =>$id, 'token' => $token]);
+            }
         }    
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -244,6 +260,7 @@ class ClientesController extends Controller
             'cupo' => $cupo,
             'anotacion' => $anotacion,
             'Concontacto' => $Concontacto,
+            'searchMonedas' => $searchMonedas,
         ]);
     }
 
@@ -427,6 +444,41 @@ class ClientesController extends Controller
                     'token' => $token,
         ]);
     }
+    
+    //PERMITE CREAR LA NUEVA MONEDA DE NEGOCIACION
+      //CREA UN NUEVO CONTACTO DEL CLIENTE
+    public function actionNegociacion_moneda($id, $token) {
+
+        $model = new \app\models\FormModeloContactoCliente();
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                if (isset($_POST["nuevo_moneda"])) {
+                    $Buscar = \app\models\Moneda::findOne($model->moneda);
+                    if($Buscar){
+                        $table = new \app\models\ClienteMoneda();
+                        $table->id_cliente = $id;
+                        $table->id_moneda = $model->moneda;
+                        $table->nombre_moneda = strtoupper($Buscar->descripcion);
+                        $table->sigla = $Buscar->abreviatura;
+                        $table->user_name = Yii::$app->user->identity->username;
+                        $table->save(false);
+                        return $this->redirect(["clientes/view", 'id' => $id,'token' => $token]);
+                    }else{
+                        Yii::$app->getSession()->getFlash('error', 'No existe en la base de datos la moneda seleccionada.');
+                        return $this->redirect(["clientes/view", 'id' => $id,'token' => $token]);
+                    }   
+                }
+            } else {
+                $model->getErrors();
+            }
+        }
+        return $this->renderAjax('form_nueva_moneda', [
+                    'model' => $model,
+                    'id' => $id,
+                    'token' => $token,
+        ]);
+    }
+    
     //EDITAR CONTACTO
     public function actionEditar_contacto($id, $token, $detalle) {
         

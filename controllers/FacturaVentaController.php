@@ -730,7 +730,7 @@ class FacturaVentaController extends Controller
     }
 
     //actualiza la fecha de la factura
-    public function actionUpdate($id, $token)
+    public function actionUpdate($id, $token, $id_pedido)
     {
         $model = $this->findModel($id);
          if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
@@ -738,12 +738,21 @@ class FacturaVentaController extends Controller
             return ActiveForm::validate($model);
         }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $pedido = Pedidos::findOne($id_pedido);
             $model->user_name_editado = Yii::$app->user->identity->username;
             $model->fecha_editada = date('Y-m-d');
             $model->save(false);
-            $this->DescuentoFactura($id);
-            $this->ActualizarConceptosTributarios($id);
-            return $this->redirect(['view', 'id' => $model->id_factura, 'token'=> $token]);
+            if($pedido->tipo_pedido == 2){
+                $this->DescuentoFacturaNacional($id);
+                $this->DescuentoFacturaInternacional($id);
+                $this->ActualizarConceptosTributariosInternacional($id);
+            }else{
+                $this->DescuentoFacturaNacional($id);
+                $this->ActualizarConceptosTributariosNacional($id);
+            }
+            
+          
+           return $this->redirect(['view', 'id' => $model->id_factura, 'token'=> $token]);
         }
 
         return $this->render('update', [
@@ -752,6 +761,47 @@ class FacturaVentaController extends Controller
             'token' => $token,
         ]);
     }
+    
+    //PROCESO QUE PERMITE PONER EL DECUENTO A LA FACTURA  INTERNACIONAL
+    protected function DescuentoFacturaInternacional($id) {
+        $factura = FacturaVenta::findOne($id);
+        $dato = 0;
+        if($factura->porcentaje_descuento > 0){
+              $dato = ($factura->valor_bruto_internacional * $factura->porcentaje_descuento)/100; 
+              $factura->subtotal_factura_internacional = $factura->valor_bruto_internacional - $dato - $factura->descuento_comercial_internacional;
+              $factura->descuento_internacional = $dato;
+              $factura->total_factura_internacional = $factura->subtotal_factura_internacional +  $factura->impuesto_internacional;
+              $factura->saldo_factura_internacional = $factura->total_factura_internacional;
+              $factura->save(false);
+        }else{
+            $factura->subtotal_factura_internacional = $factura->valor_bruto_internacional - $factura->descuento_comercial_internacional;
+            $factura->descuento_internacional = 0;
+            $factura->total_factura_internacional = $factura->subtotal_factura_internacional + $factura->impuesto_internacional;
+            $factura->saldo_factura_internacional  = $factura->total_factura_internacional;
+            $factura->save(false);
+        }      
+    }
+    
+    //PROCESO QUE PERMITE PONER EL DECUENTO A LA FACTURA NACIONAL
+    protected function DescuentoFacturaNacional($id) {
+        $factura = FacturaVenta::findOne($id);
+        $dato = 0;
+        if($factura->porcentaje_descuento > 0){
+              $dato = ($factura->valor_bruto * $factura->porcentaje_descuento)/100; 
+              $factura->subtotal_factura = $factura->valor_bruto - $dato - $factura->descuento_comercial;
+              $factura->descuento = $dato;
+              $factura->total_factura = $factura->subtotal_factura +  $factura->impuesto;
+              $factura->saldo_factura = $factura->total_factura;
+              $factura->save(false);
+        }else{
+            $factura->subtotal_factura = $factura->valor_bruto - $factura->descuento_comercial;
+            $factura->descuento = 0;
+            $factura->total_factura = $factura->subtotal_factura + $factura->impuesto;
+            $factura->saldo_factura  = $factura->total_factura;
+            $factura->save(false);
+        }      
+    }
+    
     ///ACTUALIZAR LA FACTURA
     public function actionUpdate_factura_venta($id_factura_punto){
         
@@ -800,29 +850,7 @@ class FacturaVentaController extends Controller
         ]);  
     }
     
-    //PROCESO QUE PERMITE PONER EL DECUENTO A LA FACTURA
     
-    protected function DescuentoFactura($id) {
-        $factura = FacturaVenta::findOne($id);
-        $dato = 0;
-        if($factura->porcentaje_descuento > 0){
-              $dato = round($factura->valor_bruto * $factura->porcentaje_descuento)/100; 
-              $factura->subtotal_factura = $factura->valor_bruto - $dato;
-              $factura->descuento = $dato;
-              $factura->impuesto = round($factura->subtotal_factura * $factura->porcentaje_iva)/100;
-              $factura->total_factura = $factura->subtotal_factura +  $factura->impuesto;
-              $factura->saldo_factura = $factura->total_factura;
-              $factura->save(false);
-        }else{
-            $dato = 0;
-            $factura->subtotal_factura = $factura->valor_bruto;
-            $factura->descuento = $dato;
-            $factura->impuesto = $factura->impuesto;
-            $factura->total_factura = $factura->total_factura ;
-            $factura->saldo_factura = $factura->total_factura;
-            $factura->save(false);
-        }      
-    }
    
     //CREAR FACTURA DESDE PEDIDO
     public function actionImportar_pedido_factura($id_pedido, $token = 0) {
@@ -831,12 +859,13 @@ class FacturaVentaController extends Controller
             return $this->redirect(["factura-venta/crear_factura"]);
         }else{
             $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
-            if($pedido->tipo_pedido == 2){
+            if($pedido->tipo_pedido == 2){ //internacion
                  $tipo_factura = \app\models\TipoFacturaVenta::findOne(5);
+                 $documento = \app\models\DocumentoElectronico::find()->where(['=','sigla', 'FEE'])->one();
             }else{
                  $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
+                 $documento = \app\models\DocumentoElectronico::find()->where(['=','sigla', 'FE'])->one();
             }
-            $documento = \app\models\DocumentoElectronico::find()->where(['=','sigla', 'FE'])->one();
             $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','id_documento', $documento->id_documento])->one();
             $iva = \app\models\ConfiguracionIva::findOne(1);
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
@@ -890,9 +919,19 @@ class FacturaVentaController extends Controller
                 $table->save();
                 $model = FacturaVenta::find()->orderBy('id_factura DESC')->one();
                 $id = $model->id_factura;
-                $this->CrearDetalleFactura($id_pedido, $id);
-                $this->ActualizarSaldosTotales($id);
-                $this->ActualizarConceptosTributarios($id);
+                if($pedido->tipo_pedido == 2){ //internacion
+                    $this->CrearDetalleFactura($id_pedido, $id);
+                    $this->ConvertirMonedaExtrajera($id_pedido, $id);
+                    $this->ActualizarSaldosTotalesNacional($id);
+                    $this->ActualizarSaldosTotalesInternacional($id, $id_pedido);
+                    $this->ActualizarConceptosTributariosNacional($id);
+                    $this->ActualizarConceptosTributariosInternacional($id);
+                }else{
+                    $this->CrearDetalleFactura($id_pedido, $id);
+                    $this->ActualizarSaldosTotalesNacional($id);
+                    $this->ActualizarConceptosTributariosNacional($id);
+                }
+                
                 return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
             }else{
                 Yii::$app->getSession()->setFlash('error', 'La resolucion de facturacion electronica No ('. $resolucion->numero_resolucion.') emitida por la DIAN se vencio el dia ('.$resolucion->fecha_vence.'). Favor solicitar nueva resolucion.');
@@ -902,8 +941,9 @@ class FacturaVentaController extends Controller
                 
                 
     }
-  //PROCESO QUE QUE TOTALIZA SALDOS
-    protected function CrearDetalleFactura($id_pedido, $id) {
+    //PROCESO QUE CARGA EL DETALLE DEL PEDIDO 
+    protected function CrearDetalleFactura($id_pedido, $id)
+    {
         $detalle_pedido = \app\models\PedidoDetalles::find()->where(['=','id_pedido', $id_pedido])->all();
         $pedido = Pedidos::findOne($id_pedido);
         foreach ($detalle_pedido as $detalle):
@@ -929,8 +969,32 @@ class FacturaVentaController extends Controller
             $base->save(false);
         endforeach;
     }
-    ///PROCESO QUE SUMA LOS TOTALES
-    protected function ActualizarSaldosTotales($id) {
+    
+    //CONVIERTE VALORES A MONEDA INTERNACION
+    protected function ConvertirMonedaExtrajera($id_pedido, $id)
+    {
+        $pedido = Pedidos::findOne($id_pedido);
+        $buscarMoneda = \app\models\ClienteMoneda::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
+        $valor_moneda = $buscarMoneda->tasa_negociacion;
+        $detalle_pedido = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
+        //variables
+        $valor_unitario = 0;$subtotal = 0; $descuento = 0; $total = 0;
+        foreach ($detalle_pedido as $key => $detalle):
+            $valor_unitario = $detalle->valor_unitario;
+            $subtotal = $detalle->subtotal;
+            $descuento = $detalle->valor_descuento;
+            $total = $detalle->total_linea;
+            $detalle->valor_unitario_internacional = $valor_unitario / $valor_moneda;
+            $detalle->subtotal_internacional = $subtotal / $valor_moneda;
+            $detalle->valor_descuento_internacional / $valor_moneda;
+            $detalle->total_linea_internacional = $total / $valor_moneda;
+            $detalle->save();
+        endforeach;
+    }
+    
+    ///PROCESO QUE SUMA LOS TOTALES DE NACIONALES
+    protected function ActualizarSaldosTotalesNacional($id)
+    {
         $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
         $factura = FacturaVenta::findOne($id);
         $subtotal = 0; $impuesto = 0; $total = 0; $descuento = 0; $otro_iva = 0;
@@ -953,18 +1017,41 @@ class FacturaVentaController extends Controller
             $factura->valor_reteiva = 0;
             $factura->descuento = $descuento;
         }else{
-            $factura-> impuesto= $impuesto - $otro_iva;
+            $factura->impuesto= $impuesto - $otro_iva;
             $factura->total_factura = 0;
             $factura->saldo_factura = 0;
             $factura->valor_retencion = 0;
             $factura->valor_reteiva = 0;
             $factura->descuento = $descuento;
         }
-        
         $factura->save(false);
     }
-    //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS
-    protected function ActualizarConceptosTributarios($id) {
+    
+    //PROCESO QUE SUMA TOTALES DE INTERNACIONALES
+     protected function ActualizarSaldosTotalesInternacional($id, $id_pedido)
+     {
+        $pedido = Pedidos::findOne($id_pedido);
+        $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
+        $factura = FacturaVenta::findOne($id);
+        $buscarMoneda = \app\models\ClienteMoneda::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
+        $valor_moneda = $buscarMoneda->tasa_negociacion;
+        //proceso de ingreso
+        $descuento_comercial = 0; $subtotal_internacional = 0; $valor_bruto =0; 
+        //asigacion variables;
+        $valor_bruto = $factura->valor_bruto / $valor_moneda;
+        $descuento_comercial = $factura->descuento_comercial / $valor_moneda;
+        $subtotal_internacional = $factura->subtotal_factura / $valor_moneda;
+       
+        //declaracion
+        $factura->valor_bruto_internacional = $valor_bruto;
+        $factura->descuento_comercial_internacional = $descuento_comercial;
+        $factura->subtotal_factura_internacional = $subtotal_internacional;
+        $factura->save(false);
+    }
+    
+    //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS NACIONALES
+     protected function ActualizarConceptosTributariosNacional($id)
+     {
         $factura = FacturaVenta::findOne($id);
         $cliente = Clientes::findOne($factura->id_cliente);
         $empresa = \app\models\MatriculaEmpresa::findOne(1);
@@ -995,10 +1082,45 @@ class FacturaVentaController extends Controller
         $factura->save(false);
     }
     
-    //REGERAR FACTURA
-    public function actionRegenerar_factura($id, $token) {
-        $this->ActualizarSaldosTotales($id);
-        $this->ActualizarConceptosTributarios($id);
+     //PROCESO QUE TOTALIZA LOS CONCEPTOS TRIBUTARIOS NACIONALES
+     protected function ActualizarConceptosTributariosInternacional($id) {
+        $factura = FacturaVenta::findOne($id);
+        $cliente = Clientes::findOne($factura->id_cliente);
+        $moneda = \app\models\ClienteMoneda::find()->where(['=','id_cliente', $cliente->id_cliente])->one();
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        $tipo_factura = \app\models\TipoFacturaVenta::findOne(5);
+        $reteiva = 0; $retecion = 0;
+        if($cliente->autoretenedor == 1){
+            $reteiva = $factura->valor_reteiva / $moneda->tasa_negociada; 
+        }else{
+            $reteiva = 0;
+        }    
+        if($empresa->sugiere_retencion == 1){
+            if($factura->subtotal_factura > $tipo_factura->base_retencion){
+               $retecion = $factura->valor_retencion / $moneda->tasa_negociada;     
+            }else{
+               $retecion = 0; 
+            }
+        }else{
+             $retecion = 0; 
+        }    
+        $factura->valor_retencion_internacional = $retecion;
+        $factura->valor_reteiva_internacional = $reteiva;
+        $factura->total_factura_internacional = (($factura->subtotal_factura_internacional + $factura->impuesto_internacional) - ($factura->valor_retencion_internacional + $factura->valor_reteiva_internacional + $factura->descuento_internacional));
+        $factura->saldo_factura_internacional = $factura->total_factura_internacional;
+        $factura->save(false);
+    }
+    
+    //REGENERA LA FACTURA
+    public function actionRegenerar_factura($id, $token, $id_pedido) {
+        $pedido = Pedidos::findOne($id_pedido);
+        if($pedido->tipo_pedido == 2){
+            $this->ActualizarSaldosTotalesInternacional($id, $id_pedido);
+            $this->ActualizarConceptosTributariosInternacional($id);
+        }else{
+            $this->ActualizarSaldosTotalesNacional($id);
+            $this->ActualizarConceptosTributariosNacional($id);
+        }
         $this->redirect(["view", 'id' => $id,'token' => $token]);
     }
     
@@ -1173,6 +1295,45 @@ class FacturaVentaController extends Controller
             }  
         }
         return $this->renderAjax('form_subir_medio_pago', [
+            'model' => $model,
+        ]);
+    }   
+    
+    //CONDICIONES Y TERMINOS DE LA FACTURA DE EXPORTACION
+    public function actionTerminos_factura_exportacion($id, $token)
+    {
+        $model = new \app\models\ModeloTerminosFactura();
+        if ($model->load(Yii::$app->request->post())){
+            if (isset($_POST["crear_terminos_factura"])){
+                if($model->validate()){
+                    $table = new \app\models\TerminosFacturaExportacion();
+                    $table->id_inconterm = $model->id_inconterm;
+                    $table->medio_transporte = $model->medio_transporte;
+                    $table->ciudad_origen = $model->ciudad_origen;
+                    $table->ciudad_destino = strtoupper($model->ciudad_destino);
+                    $table->peso_bruto = $model->peso_bruto;
+                    $table->peso_neto = $model->peso_neto;
+                    $table->id_medida_producto = $model->id_medida_producto;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->id_factura = $id;
+                    $table->save(false);
+                    return $this->redirect(["view",'id' => $id,'token' => $token]); 
+                }else{
+                   $model->getErrors();
+                }    
+            }  
+        }
+        $table = \app\models\TerminosFacturaExportacion::find()->where(['=','id_factura', $id])->one();
+        if (Yii::$app->request->get()) {
+            $model->id_inconterm = $table->id_inconterm;
+            $model->medio_transporte =$table->medio_transporte;
+            $model->ciudad_origen = $table->ciudad_origen;
+            $model->ciudad_destino = $table->ciudad_destino;
+            $model->peso_bruto = $table->peso_bruto;
+            $model->peso_neto = $table->peso_neto;
+            $model->id_medida_producto = $table->id_medida_producto;
+        }
+        return $this->renderAjax('terminos_factura_exportacion', [
             'model' => $model,
         ]);
     }   

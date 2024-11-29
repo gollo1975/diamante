@@ -60,12 +60,18 @@ class FacturaVenta extends \yii\db\ActiveRecord
     {
         return [
           
-            [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv', 'subtotal_factura', 'descuento', 'impuesto', 'total_factura', 'valor_retencion', 
-                'valor_reteiva', 'saldo_factura', 'id_forma_pago', 'plazo_pago', 'autorizado','valor_bruto','id_agente','estado_factura','dias_mora','valor_intereses_mora',
+            [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv','id_forma_pago', 'plazo_pago', 'autorizado','id_agente','estado_factura','dias_mora','valor_intereses_mora',
                 'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario','id_punto','descuento_comercial','id_resolucion',
                 'valor_pago_descuento_dos','valor_pago_descuento_uno','id_medio_pago'], 'integer'],
+            
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada_api','fecha_editada','fecha_enviada_dian','fecha_primer_descuento','fecha_segundo_descuento'], 'safe'],
-            [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento','porcentaje_mora'], 'number'],
+            //campos float nacional
+            [['porcentaje_iva', 'porcentaje_rete_iva', 'porcentaje_rete_fuente', 'porcentaje_descuento','porcentaje_mora',
+             'subtotal_factura','descuento','impuesto','total_factura','valor_retencion','valor_bruto','valor_reteiva','saldo_factura'], 'number'],
+            //campos float internacional
+            [['valor_bruto_internacional','descuento_internacional','descuento_comercial_internacional','subtotal_factura_internacional','impuesto_internacional',
+              'total_factura_internacional','valor_retencion_internacional','valor_reteiva_internacional','saldo_factura_internacional','valor_moneda'],'number'],
+            //campos string
             [['nit_cedula', 'user_name','telefono_cliente','user_name_editado'], 'string', 'max' => 15],
             [['cliente','direccion','nota1', 'nota2'], 'string', 'max' => 50],
             [['nota1', 'nota2'], 'string', 'max' => 150],
@@ -144,6 +150,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'cufe' => 'cufe',
             'valor_pago_descuento_uno' => 'valor_pago_descuento_uno',
             'valor_pago_descuento_dos' => 'valor_pago_descuento_dos',
+            'valor_moneda' => 'Tasa de cambio:',
             
         ];
     }

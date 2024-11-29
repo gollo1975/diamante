@@ -17,13 +17,14 @@ class FormModeloContactoCliente extends Model
     public $email;
     public $cargo;
     public $fecha_nacimiento;
+    public $moneda;
 
     public function rules()
     {
         return [
 
-           [['cargo'], 'required', 'message' => 'Campo requerido'], 
-           [['cargo'], 'integer'],
+            
+           [['cargo','moneda'], 'integer'],
            [['nombres','apellidos','celular'], 'string'],
            ['email', 'email'],
            ['fecha_nacimiento', 'safe'], 
@@ -39,6 +40,7 @@ class FormModeloContactoCliente extends Model
             'celular' => 'Celular:',
             'email' => 'Email:',
             'fecha_nacimiento' => 'Fecha nacimiento:',
+            'moneda' => 'Tipo de moneda:',
             
 
         ];

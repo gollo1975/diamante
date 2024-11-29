@@ -107,6 +107,7 @@ $tipoZona = ArrayHelper::map(\app\models\ZonaClientes::find()->all(), 'id_zona',
                 <th scope="col" style='background-color:#B9D5CE;'>Celular</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Departamento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de cliente">T.C.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Estado actual del cliente">Act.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>  
                 <th scope="col" style='background-color:#B9D5CE;'></th> 
@@ -126,6 +127,7 @@ $tipoZona = ArrayHelper::map(\app\models\ZonaClientes::find()->all(), 'id_zona',
                 <td><?= $val->celular ?></td>
                 <td><?= $val->codigoDepartamento->departamento ?></td>
                 <td><?= $val->codigoMunicipio->municipio ?></td>
+                 <td><?= $val->tipoCliente->abreviatura ?></td>
                 <?php if($val->estado_cliente == 0){?>
                     <td style='background-color:#F7EDEA;'><?= $val->estadoCliente ?></td>
                 <?php }else{?>

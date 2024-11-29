@@ -143,6 +143,7 @@ $view = 'clientes';
             <li role="presentation" class="active"><a href="#asignacioncupo" aria-controls="asignacioncupo" role="tab" data-toggle="tab">Asignacion de cupo  <span class="badge"><?= count($cupo) ?></span></a></li>
             <li role="presentation"><a href="#anotaciones" aria-controls="anotaciones" role="tab" data-toggle="tab">Anotaciones  <span class="badge"><?= count($anotacion) ?></span></a></li>
             <li role="presentation"><a href="#contactos" aria-controls="contactos" role="tab" data-toggle="tab">Contactos  <span class="badge"><?= count($Concontacto) ?></span></a></li>
+            <li role="presentation"><a href="#monedapago" aria-controls="monedapago" role="tab" data-toggle="tab">Moneda negociacion  <span class="badge"><?= 1 ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="asignacioncupo">
@@ -204,7 +205,9 @@ $view = 'clientes';
                                           'title' => 'Crear cupo para el cliente',
                                           'data-toggle'=>'modal',
                                           'data-target'=>'#modalnuevocupocliente'.$model->id_cliente,
-                                          'class' => 'btn btn-info btn-sm'
+                                          'class' => 'btn btn-info btn-xs',
+                                          'data-backdrop' => 'static',
+                                          'data-keyboard' => 'false'
                                       ])    
                                  ?>
                                 <div class="modal remote fade" id="modalnuevocupocliente<?= $model->id_cliente ?>">
@@ -212,7 +215,7 @@ $view = 'clientes';
                                          <div class="modal-content"></div>
                                     </div>
                                 </div> 
-                                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarcupo']);?>    
+                                <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-xs", 'name' => 'actualizarcupo']);?>    
                             </div>   
                         <?php }?>                        
                     </div>   
@@ -254,7 +257,9 @@ $view = 'clientes';
                                           'title' => 'Crea las anotaciones del cliente',
                                           'data-toggle'=>'modal',
                                           'data-target'=>'#modalanotacioncliente'.$model->id_cliente,
-                                          'class' => 'btn btn-info btn-sm'
+                                          'class' => 'btn btn-info btn-xs',
+                                          'data-backdrop' => 'static',
+                                          'data-keyboard' => 'false'
                                       ])    
                                  ?>
                                 <div class="modal remote fade" id="modalanotacioncliente<?= $model->id_cliente ?>">
@@ -303,6 +308,8 @@ $view = 'clientes';
                                                           'title' => 'Editar los contactos del cliente',
                                                           'data-toggle'=>'modal',
                                                           'data-target'=>'#modaleditarcontacto'.$model->id_cliente,
+                                                          'data-backdrop' => 'static',
+                                                             'data-keyboard' => 'false'
                                                       ])    
                                                  ?>
                                                 <div class="modal remote fade" id="modaleditarcontacto<?= $model->id_cliente ?>">
@@ -328,7 +335,9 @@ $view = 'clientes';
                                           'title' => 'Crea los contactos del cliente',
                                           'data-toggle'=>'modal',
                                           'data-target'=>'#modalcrearcontacto'.$model->id_cliente,
-                                          'class' => 'btn btn-success btn-sm'
+                                          'class' => 'btn btn-success btn-xs',
+                                          'data-backdrop' => 'static',
+                                          'data-keyboard' => 'false'
                                       ])    
                                  ?>
                                 <div class="modal remote fade" id="modalcrearcontacto<?= $model->id_cliente ?>">
@@ -342,6 +351,64 @@ $view = 'clientes';
                 </div>
             </div> 
             <!-- TERMINA TABS-->
+            <div role="tabpanel" class="tab-pane" id="monedapago">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style='font-size:90%;'>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Id</th>                        
+                                        <th scope="col" style='background-color:#B9D5CE;'>Descripcion  moneda</th>                        
+                                        <th scope="col" style='background-color:#B9D5CE;'>Sigla</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>User name</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Tasa de negociacion</th> 
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php 
+                                    foreach ($searchMonedas as $val):?>
+                                    <tr style='font-size:85%;'>
+                                        <td> <?= $val->id?></td>
+                                        <td> <?= $val->nombre_moneda?></td>
+                                        <td> <?= $val->sigla?></td>
+                                        <td> <?= $val->user_name?></td>
+                                        <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="tasa_negociada[]" value="<?= $val->tasa_negociacion ?>" style="text-align: right" size="9" required="true"> </td> 
+                                        <input type="hidden" name="listado_monedas[]" value="<?= $val->id ?>">  
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>      
+                            </table>
+                        </div>
+                        <?php if($token == 0 && $model->tipoCliente->codigo_interface == 4){?>
+                            <div class="panel-footer text-right" >  
+                                <!-- Inicio Nuevo Detalle proceso -->
+                                  <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Crear moneda',
+                                      ['/clientes/negociacion_moneda','id' => $model->id_cliente, 'token' =>$token],
+                                      [
+                                          'title' => 'Crear la tasa de cambio para la factura',
+                                          'data-toggle'=>'modal',
+                                          'data-target'=>'#modalnuevatasacambio'.$model->id_cliente,
+                                          'class' => 'btn btn-success btn-xs',
+                                          'data-backdrop' => 'static',
+                                          'data-keyboard' => 'false'
+                                      ])    
+                                 ?>
+                                <div class="modal remote fade" id="modalnuevatasacambio<?= $model->id_cliente ?>">
+                                    <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                         <div class="modal-content"></div>
+                                    </div>
+                                </div> 
+                                <?php if (count($searchMonedas) > 0){?>
+                                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-info btn-xs", 'name' => 'actualizar_tasa_cambio']);?>        
+                                <?php }?>  
+                            </div>   
+                        <?php }?>                        
+                    </div>   
+                </div>
+            </div>
+            <!--TERMINAS TABS DE MONEDA-->
         </div>
     </div> 
     <?php ActiveForm::end(); ?>  
