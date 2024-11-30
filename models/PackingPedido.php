@@ -39,13 +39,15 @@ class PackingPedido extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_pedido', 'id_cliente', 'nit_cedula_cliente', 'total_unidades_packing', 'numero_pedido','numero_packing','total_cajas','estado_packing','cerrado_proceso'], 'integer'],
+            [['id_pedido', 'id_cliente', 'nit_cedula_cliente', 'total_unidades_packing', 'numero_pedido','numero_packing','total_cajas','estado_packing',
+                'cerrado_proceso','id_transportadora'], 'integer'],
             [['fecha_creacion', 'fecha_packing'], 'safe'],
             [['cliente'], 'string', 'max' => 50],
             [['numero_guia'], 'string', 'max' => 20],
             [['user_name'], 'string', 'max' => 15],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
+            [['id_transportadora'], 'exist', 'skipOnError' => true, 'targetClass' => Transportadora::className(), 'targetAttribute' => ['id_transportadora' => 'id_transportadora']],
         ];
     }
 
@@ -70,6 +72,7 @@ class PackingPedido extends \yii\db\ActiveRecord
             'total_cajas' => 'Total cajas:',
             'estado_packing' => 'Activo:',
             'cerrado_proceso' => 'Cerrado:',
+            'id_transportadora' => 'Transportadora:',
         ];
     }
 
@@ -80,11 +83,18 @@ class PackingPedido extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Pedidos::className(), ['id_pedido' => 'id_pedido']);
     }
-
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTransportadora()
+    {
+        return $this->hasOne(Transportadora::className(), ['id_transportadora' => 'id_transportadora']);
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCliente0()
+    public function getClientePacking()
     {
         return $this->hasOne(Clientes::className(), ['id_cliente' => 'id_cliente']);
     }

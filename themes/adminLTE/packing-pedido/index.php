@@ -39,9 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$tipo_rack = ArrayHelper::map(app\models\TipoRack::find()->all(), 'id_rack', 'descripcion');
-$conPosicion = ArrayHelper::map(app\models\Posiciones::find()->all(), 'id_posicion', 'posicion');
-$conPiso = ArrayHelper::map(app\models\Pisos::find()->all(), 'id_piso', 'descripcion');
+
+$Contras = ArrayHelper::map(app\models\Transportadora::find()->orderBy('razon_social ASC')->all(), 'id_transportadora', 'razon_social');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -68,6 +67,13 @@ $conPiso = ArrayHelper::map(app\models\Pisos::find()->all(), 'id_piso', 'descrip
                     'todayHighlight' => true]])
             ?>
              <?= $formulario->field($form, "cliente")->input("search") ?>
+             <?= $formulario->field($form, 'transportadora')->widget(Select2::classname(), [
+                'data' => $Contras,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -94,6 +100,7 @@ $form = ActiveForm::begin([
             <tr style ='font-size: 85%;'>         
             <th scope="col" style='background-color:#B9D5CE;'>Numero de packing</th>
             <th scope="col" style='background-color:#B9D5CE;'>Numero de pedido</th>
+             <th scope="col" style='background-color:#B9D5CE;'>Transportadora</th> 
             <th scope="col" style='background-color:#B9D5CE;'>Cliente</th> 
             <th scope="col" style='background-color:#B9D5CE;'>Fecha packing</th>
             <th scope="col" style='background-color:#B9D5CE;'>Total unidades</th>
@@ -110,6 +117,11 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 85%;'>                
                     <td><?= $val->numero_packing?></td>
                     <td><?= $val->numero_pedido?></td>
+                    <?php if($val->id_transportadora != ''){?>
+                         <td><?= $val->transportadora->razon_social?></td>
+                    <?php }else{?>
+                        <td><?= 'NO FOUND'?></td>
+                    <?php }?>
                     <td><?= $val->cliente?></td>
                     <td><?= $val->fecha_packing?></td>
                     <td><?= $val->total_unidades_packing?></td>

@@ -16,12 +16,13 @@ class FiltroBusquedaPacking extends Model
     public $fecha_inicio;
     public $fecha_corte;
     public $cliente;
+    public $transportadora;
 
 
     public function rules()
     {
         return [  
-           [['numero_pedido', 'numero_packing'], 'integer'],
+           [['numero_pedido', 'numero_packing','transportadora'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
             [['cliente'], 'string'],
         ];
@@ -35,6 +36,7 @@ class FiltroBusquedaPacking extends Model
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
             'cliente' => 'Nombre del cliente:',
+            'transportadora' => 'Transportadora:',
         ];
     }
     

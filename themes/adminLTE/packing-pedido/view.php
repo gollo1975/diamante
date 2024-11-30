@@ -47,7 +47,23 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                     </div>
                 </div>
             <?php }else{
-                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_packing', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']);            
+                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_packing', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']);
+                if($model->pedido->pedido_liberado == 0){?>
+                    <?= Html::a('<span class="glyphicon glyphicon-list"></span> Transportadora',
+                                 ['packing-pedido/adicionar_transportadora', 'id' => $model->id_packing],
+                                   ['title' => 'Permite subir la transportadora al packing',
+                                    'data-toggle'=>'modal',
+                                    'data-target'=>'#modaladicionartransportadora',
+                                    'class' => 'btn btn-info btn-xs',
+                                    'data-backdrop' => 'static',
+                                    'data-keyboard' => 'false'
+                                   ]);?> 
+                    <div class="modal remote fade" id="modaladicionartransportadora">
+                        <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                            <div class="modal-content"></div>
+                        </div>
+                    </div> 
+                <?php } 
             }
         } ?> 
     </p>
@@ -62,12 +78,20 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                     <td><?= Html::encode($model->id_packing) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "numero_packing") ?></th>
                     <td><?= Html::encode($model->numero_packing) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?></th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?>:</th>
                     <td><?= Html::encode($model->cliente) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "total_cajas") ?></th>
                     <td><?= Html::encode($model->total_cajas) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_unidades_packing') ?></th>
-                    <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_unidades_packing,0)) ?></td>
+                </tr>
+                 <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_packing') ?>:</th>
+                    <td><?= Html::encode($model->fecha_packing) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "Numero_pedido") ?>:</th>
+                    <td><?= Html::encode($model->pedido->numero_pedido) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_transportadora') ?></th>
+                    <td><?= Html::encode($model->transportadora->razon_social) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "total_cajas") ?></th>
+                    <td><?= Html::encode($model->total_cajas) ?></td>
                 </tr>
             </table>
         </div>

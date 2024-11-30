@@ -60,7 +60,7 @@ class PackingPedidoController extends Controller
                 $numero_packing = null;
                 $fecha_inicio = null;
                 $fecha_corte = null;
-                $cliente =null;
+                $cliente =null; $transportadora = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $cliente = Html::encode($form->cliente);
@@ -68,10 +68,12 @@ class PackingPedidoController extends Controller
                         $numero_packing = Html::encode($form->numero_packing);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
+                        $transportadora = Html::encode($form->transportadora);
                         $table = PackingPedido::find()
                                     ->andFilterWhere(['between', 'fecha_packing', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'numero_pedido', $numero_pedido])
                                     ->andFilterWhere(['=', 'numero_packing', $numero_packing])
+                                    ->andFilterWhere(['=', 'id_transportadora', $transportadora])
                                     ->andFilterWhere(['like', 'cliente', $cliente]);
                         $table = $table->orderBy('id_packing DESC');
                         $tableexcel = $table->all();
@@ -177,6 +179,28 @@ class PackingPedidoController extends Controller
         $model->save();
     }
     
+    //SUBIR TRANSPORTADORA
+    //MEDIO DE PAGO
+    public function actionAdicionar_transportadora($id)
+    {
+        $model = new \app\models\ModeloDocumento();
+        if ($model->load(Yii::$app->request->post())){
+            if (isset($_POST["adicionar_transportadora"])){
+                if($model->transportadora !== ''){
+                    $table = PackingPedido::findOne($id);
+                    $table->id_transportadora = $model->transportadora;
+                    $table->save(false);
+                    return $this->redirect(["view",'id' => $id]); 
+                }else{
+                    Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar una transportadora de la lista.');
+                   return $this->redirect(["view",'id' => $id]);  
+                }    
+            }  
+        }
+        return $this->renderAjax('form_adicionar_transportadora', [
+            'model' => $model,
+        ]);
+    }   
     
     //CERRAR EL EL PACKING
     public function actionCerrar_packing_pedido($id) {
@@ -345,5 +369,16 @@ class PackingPedidoController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+    //impresiones
+    //IMPRESIONES
+    public function actionImprimir_packing($id) {
+        $model = PackingPedido::findOne($id);
+            return $this->render('../formatos/reporte_packing_pedido', [
+                'model' => $model,
+            ]);
+        
+            
     }
 }

@@ -17,12 +17,13 @@ class ModeloDocumento extends Model
     public $numero_guia;
     public $posicion;
     public $codigo_caja;
+    public $transportadora;
 
     public function rules()
     {
         return [
 
-           [['documento','cantidad_vendida','cantidad_despachada','posicion','codigo_caja'], 'integer'],
+           [['documento','cantidad_vendida','cantidad_despachada','posicion','codigo_caja','transportadora'], 'integer'],
             [['numero_guia'], 'string'],
         ];
     }
@@ -36,6 +37,7 @@ class ModeloDocumento extends Model
             'posicion' => 'Posiciones:',
             'codigo_caja' => 'codigo_caja',
             'numero_guia' => 'Numero de guia:',
+            'transportadora' => 'Transportadora:',
            
 
         ];
