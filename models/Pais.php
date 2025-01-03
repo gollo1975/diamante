@@ -59,4 +59,12 @@ class Pais extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Departamentos::className(), ['codigo_pais' => 'codigo_pais']);
     }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPais()
+    {
+        return $this->hasMany(Municipios::className(), ['codigo_pais' => 'codigo_pais']);
+    }
 }

@@ -69,6 +69,10 @@ $this->params['breadcrumbs'][] = $this->title;
                <?= $form->field($model, 'email_respuesta2')->textInput(['maxlength' => true, 'size' => 40]) ?>
                 
             </div>
+            <div class="row">          
+               <?= $form->field($model, 'email_factura_exportacion')->textInput(['maxlength' => true, 'size' => 40]) ?>
+                
+            </div>
         </div>
     </div>   
     <div class="panel-footer text-right">			

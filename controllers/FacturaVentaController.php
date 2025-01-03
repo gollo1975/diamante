@@ -861,10 +861,10 @@ class FacturaVentaController extends Controller
             $pedido = Pedidos::find()->where(['=','id_pedido', $id_pedido])->one();
             if($pedido->tipo_pedido == 2){ //internacion
                  $tipo_factura = \app\models\TipoFacturaVenta::findOne(5);
-                 $documento = \app\models\DocumentoElectronico::find()->where(['=','sigla', 'FEE'])->one();
+                 $documento = \app\models\DocumentoElectronico::find()->where(['=','id_documento', 5])->one();
             }else{
                  $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
-                 $documento = \app\models\DocumentoElectronico::find()->where(['=','sigla', 'FE'])->one();
+                 $documento = \app\models\DocumentoElectronico::find()->where(['=','id_documento', 1])->one();
             }
             $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','id_documento', $documento->id_documento])->one();
             $iva = \app\models\ConfiguracionIva::findOne(1);
@@ -1061,19 +1061,28 @@ class FacturaVentaController extends Controller
             $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
         }
         $reteiva = 0; $retecion = 0;
-        if($cliente->autoretenedor == 1){
-            $reteiva = round(($factura->impuesto * $factura->porcentaje_rete_iva)/100); 
-        }else{
+        if($factura->id_tipo_factura == 5){
             $reteiva = 0;
-        }    
-        if($empresa->sugiere_retencion == 1){
-            if($factura->subtotal_factura > $tipo_factura->base_retencion){
-               $retecion = round(($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100);     
-            }else{
-               $retecion = 0; 
-            }
         }else{
+            if($cliente->autoretenedor == 1){
+                $reteiva = round(($factura->impuesto * $factura->porcentaje_rete_iva)/100); 
+            }else{
+                $reteiva = 0;
+            } 
+        }    
+        if($factura->id_tipo_factura == 5){
              $retecion = 0; 
+        }else{
+            
+            if($empresa->sugiere_retencion == 1){
+                if($factura->subtotal_factura > $tipo_factura->base_retencion){
+                   $retecion = round(($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100);     
+                }else{
+                   $retecion = 0; 
+                }
+            }else{
+                 $retecion = 0; 
+            }  
         }    
         $factura->valor_retencion = $retecion;
         $factura->valor_reteiva = $reteiva;
@@ -1097,7 +1106,7 @@ class FacturaVentaController extends Controller
         }    
         if($empresa->sugiere_retencion == 1){
             if($factura->subtotal_factura > $tipo_factura->base_retencion){
-               $retecion = $factura->valor_retencion / $moneda->tasa_negociada;     
+               $retecion = 0;     
             }else{
                $retecion = 0; 
             }
@@ -1183,21 +1192,42 @@ class FacturaVentaController extends Controller
      public function actionGenerar_factura($id, $id_pedido, $token) {
         //proceso de generar consecutivo
         $pedido = Pedidos::findOne($id_pedido);
-        $consecutivo = \app\models\Consecutivos::findOne(6);
         $factura = FacturaVenta::findOne($id);
+        $terminos = \app\models\TerminosFacturaExportacion::find()->where(['=','id_factura', $id])->one();
+        if($factura->id_tipo_factura == 5){
+            $consecutivo = \app\models\Consecutivos::findOne(25); 
+        }else{
+           $consecutivo = \app\models\Consecutivos::findOne(6);  
+        }
         if($factura->id_medio_pago <> ''){
-            $factura->numero_factura = $consecutivo->numero_inicial + 1;
-            $factura->save(false);
-            $consecutivo->numero_inicial = $factura->numero_factura;
-            $consecutivo->save(false);
-            $pedido->facturado = 1;
-            $pedido->save(false);
-            $this->redirect(["view", 'id' => $id, 'token' => $token]); 
+            if($factura->id_tipo_factura <> 5){
+                $factura->numero_factura = $consecutivo->numero_inicial + 1;
+                $factura->save(false);
+                $consecutivo->numero_inicial = $factura->numero_factura;
+                $consecutivo->save(false);
+                $pedido->facturado = 1;
+                $pedido->save(false);
+                $this->redirect(["view", 'id' => $id, 'token' => $token]); 
+            }else{
+                if($terminos){
+                    $factura->numero_factura = $consecutivo->numero_inicial + 1;
+                    $factura->save(false);
+                    $consecutivo->numero_inicial = $factura->numero_factura;
+                    $consecutivo->save(false);
+                    $pedido->facturado = 1;
+                    $pedido->save(false);
+                    $this->redirect(["view", 'id' => $id, 'token' => $token]);
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'Esta factura es INTERNACIONAL debe de llenar los terminos de exportación..');
+                    $this->redirect(["view", 'id' => $id, 'token' => $token]); 
+                }
+            }    
         }else{
              Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar el medio de pago para la factura.');
              $this->redirect(["view", 'id' => $id, 'token' => $token]); 
         }    
     }
+    
     //CREAR EL CONSECUTIVO DEL FACTURA DE VENTA PUNTO DE VENTA
      public function actionGenerar_factura_punto($id) {
         //proceso de generar consecutivo
@@ -1306,33 +1336,54 @@ class FacturaVentaController extends Controller
         if ($model->load(Yii::$app->request->post())){
             if (isset($_POST["crear_terminos_factura"])){
                 if($model->validate()){
-                    $table = new \app\models\TerminosFacturaExportacion();
-                    $table->id_inconterm = $model->id_inconterm;
-                    $table->medio_transporte = $model->medio_transporte;
-                    $table->ciudad_origen = $model->ciudad_origen;
-                    $table->ciudad_destino = strtoupper($model->ciudad_destino);
-                    $table->peso_bruto = $model->peso_bruto;
-                    $table->peso_neto = $model->peso_neto;
-                    $table->id_medida_producto = $model->id_medida_producto;
-                    $table->user_name = Yii::$app->user->identity->username;
-                    $table->id_factura = $id;
-                    $table->save(false);
-                    return $this->redirect(["view",'id' => $id,'token' => $token]); 
+                    $consulta = \app\models\TerminosFacturaExportacion::find()->where(['=','id_factura', $id])->one();
+                    if($consulta){
+                        $consulta->id_inconterm = $model->id_inconterm;
+                        $consulta->medio_transporte = $model->medio_transporte;
+                        $consulta->ciudad_origen = $model->ciudad_origen;
+                        $consulta->ciudad_destino = strtoupper($model->ciudad_destino);
+                        $consulta->peso_bruto = $model->peso_bruto;
+                        $consulta->peso_neto = $model->peso_neto;
+                        $consulta->id_medida_producto = $model->id_medida_producto;
+                        $consulta->user_name = Yii::$app->user->identity->username;
+                        $consulta->id_factura = $id;
+                        $consulta->codigo_pais = $model->id_pais;
+                        $consulta->save(false);
+                        return $this->redirect(["view",'id' => $id,'token' => $token]); 
+                    }else{
+                        $table = new \app\models\TerminosFacturaExportacion();
+                        $table->id_inconterm = $model->id_inconterm;
+                        $table->medio_transporte = $model->medio_transporte;
+                        $table->ciudad_origen = $model->ciudad_origen;
+                        $table->ciudad_destino = strtoupper($model->ciudad_destino);
+                        $table->peso_bruto = $model->peso_bruto;
+                        $table->peso_neto = $model->peso_neto;
+                        $table->id_medida_producto = $model->id_medida_producto;
+                        $table->user_name = Yii::$app->user->identity->username;
+                        $table->id_factura = $id;
+                        $table->codigo_pais = $model->id_pais;
+                        $table->save(false);
+                        return $this->redirect(["view",'id' => $id,'token' => $token]); 
+                    }
+                    
                 }else{
                    $model->getErrors();
                 }    
             }  
         }
         $table = \app\models\TerminosFacturaExportacion::find()->where(['=','id_factura', $id])->one();
-        if (Yii::$app->request->get()) {
-            $model->id_inconterm = $table->id_inconterm;
-            $model->medio_transporte =$table->medio_transporte;
-            $model->ciudad_origen = $table->ciudad_origen;
-            $model->ciudad_destino = $table->ciudad_destino;
-            $model->peso_bruto = $table->peso_bruto;
-            $model->peso_neto = $table->peso_neto;
-            $model->id_medida_producto = $table->id_medida_producto;
-        }
+        if($table){
+            if (Yii::$app->request->get()) {
+                $model->id_inconterm = $table->id_inconterm;
+                $model->medio_transporte =$table->medio_transporte;
+                $model->ciudad_origen = $table->ciudad_origen;
+                $model->ciudad_destino = $table->ciudad_destino;
+                $model->peso_bruto = $table->peso_bruto;
+                $model->peso_neto = $table->peso_neto;
+                $model->id_medida_producto = $table->id_medida_producto;
+                $model->id_pais =  $table->codigo_pais;
+            }
+        }    
         return $this->renderAjax('terminos_factura_exportacion', [
             'model' => $model,
         ]);

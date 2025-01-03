@@ -18,13 +18,16 @@ class ModeloTerminosFactura extends Model
     public $peso_neto;
     public $peso_bruto;
     public $id_medida_producto;
-    
-   
+    public $id_pais;
+
+
+
+
     public function rules()
     {
         return [  
-           [['id_inconterm','id_medida_producto','medio_transporte','ciudad_destino','ciudad_origen','peso_neto','peso_bruto'], 'required'],
-           [['peso_neto','peso_bruto'], 'number'],
+           [['id_inconterm','id_medida_producto','medio_transporte','ciudad_destino','ciudad_origen','peso_neto','peso_bruto','id_pais'], 'required'],
+           [['peso_neto','peso_bruto','id_pais'], 'number'],
            [['ciudad_destino','ciudad_origen'], 'string'],
            [['id_inconterm','id_medida_producto','medio_transporte'], 'integer'],
            [['peso_neto','peso_bruto'], 'number'],
@@ -41,7 +44,8 @@ class ModeloTerminosFactura extends Model
             'peso_neto' => 'Peso neto:',
             'peso_bruto' => 'Peso bruto',
             'ciudad_destino' => 'Ciudad destino:',
-            'ciudad_origen' => 'Ciudad origen:',                    
+            'ciudad_origen' => 'Ciudad origen:', 
+            'id_pais' => 'Pais de origen:',
         ];
     }
     

@@ -62,14 +62,14 @@ class InventarioProductos extends \yii\db\ActiveRecord
     {
         return [
             [['codigo_producto','fecha_proceso','id_grupo','id_presentacion'], 'required'],
-            [['codigo_producto', 'costo_unitario', 'unidades_entradas', 'stock_unidades', 'id_grupo', 'id_detalle', 'aplica_iva', 'inventario_inicial', 'aplica_inventario',
-                'subtotal', 'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 'codigo_ean',
+            [['costo_unitario', 'unidades_entradas', 'stock_unidades', 'id_grupo', 'id_detalle', 'aplica_iva', 'inventario_inicial', 'aplica_inventario',
+                'subtotal', 'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 
                 'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial','activar_producto_venta','aplica_descuento','aplica_descuento_distribuidor','id_producto'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_vencimiento', 'fecha_creacion', 'fecha_proceso'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
             [['descripcion_producto'], 'string', 'max' => 100],
-            [['user_name'], 'string', 'max' => 15],
+            [['user_name','codigo_producto','codigo_ean'], 'string', 'max' => 15],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccionProductos::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
             [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => PresentacionProducto::className(), 'targetAttribute' => ['id_presentacion' => 'id_presentacion']],

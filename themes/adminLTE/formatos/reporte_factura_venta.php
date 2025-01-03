@@ -13,6 +13,7 @@ class PDF extends FPDF {
         $config = MatriculaEmpresa::findOne(1);
         $municipio = Municipios::findOne($config->codigo_municipio);
         $departamento = Departamentos::findOne($config->codigo_departamento);
+        
         //Logo
         $this->SetXY(43, 10);
         $this->Image('dist/images/logos/logoempresa.png', 10, 7, 30, 30);

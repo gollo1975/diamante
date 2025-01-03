@@ -39,7 +39,7 @@ class TerminosFacturaExportacion extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_inconterm', 'medio_transporte', 'id_medida_producto', 'id_factura'], 'integer'],
+            [['id_inconterm', 'medio_transporte', 'id_medida_producto', 'id_factura','codigo_pais'], 'integer'],
             [['peso_neto', 'peso_bruto'], 'number'],
             [['ciudad_origen'], 'string', 'max' => 10],
             [['ciudad_destino'], 'string', 'max' => 30],
@@ -48,6 +48,7 @@ class TerminosFacturaExportacion extends \yii\db\ActiveRecord
             [['ciudad_origen'], 'exist', 'skipOnError' => true, 'targetClass' => Municipios::className(), 'targetAttribute' => ['ciudad_origen' => 'codigo_municipio']],
             [['id_medida_producto'], 'exist', 'skipOnError' => true, 'targetClass' => MedidaProductoTerminado::className(), 'targetAttribute' => ['id_medida_producto' => 'id_medida_producto']],
             [['id_factura'], 'exist', 'skipOnError' => true, 'targetClass' => FacturaVenta::className(), 'targetAttribute' => ['id_factura' => 'id_factura']],
+            [['codigo_pais'], 'exist', 'skipOnError' => true, 'targetClass' => Pais::className(), 'targetAttribute' => ['codigo_pais' => 'codigo_pais']],
         ];
     }
 
@@ -67,6 +68,7 @@ class TerminosFacturaExportacion extends \yii\db\ActiveRecord
             'id_medida_producto' => 'Id Medida Producto',
             'user_name' => 'User Name',
             'id_factura' => 'Id Factura',
+            'codigo_pais' => 'Nombre del pais',
         ];
     }
 
@@ -84,6 +86,13 @@ class TerminosFacturaExportacion extends \yii\db\ActiveRecord
     public function getCiudadOrigen()
     {
         return $this->hasOne(Municipios::className(), ['codigo_municipio' => 'ciudad_origen']);
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPais()
+    {
+        return $this->hasOne(Pais::className(), ['codigo_pais' => 'codigo_pais']);
     }
 
     /**

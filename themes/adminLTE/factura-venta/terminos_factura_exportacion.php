@@ -5,7 +5,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
 $terminos = ArrayHelper::map(\app\models\IncotermFactura::find()->all(), 'id_inconterm', 'concepto');
-$municipio = ArrayHelper::map(app\models\Municipios::find()->orderBy('codigo_municipio ASC')->all(), 'codigo_municipio', 'municipio');
+$paises = ArrayHelper::map(\app\models\Pais::find()->all(), 'codigo_pais', 'pais');
+$municipio = ArrayHelper::map(app\models\Municipios::find()->orderBy('municipio ASC')->all(), 'codigo_municipio', 'municipio');
 $medida = ArrayHelper::map(app\models\MedidaProductoTerminado::find()->orderBy('descripcion ASC')->all(), 'id_medida_producto', 'descripcion');
 ?>
 
@@ -45,12 +46,13 @@ $form = ActiveForm::begin([
                          <?= $form->field($model, 'ciudad_destino')->input("text", ["maxlength" => 30]) ?>
                     </div>
                     <div class="row">
-                          <?= $form->field($model, 'peso_bruto')->input("text", ["maxlength" => 11]) ?>
+                        <?= $form->field($model, 'peso_bruto')->input("text", ["maxlength" => 11]) ?>
                         <?= $form->field($model, 'peso_neto')->input("text", ["maxlength" => 11]) ?>
                       
                     </div>
                     <div class="row">
                         <?= $form->field($model, 'id_medida_producto')->dropdownList($medida, ['prompt' => 'Seleccione...']) ?>
+                         <?= $form->field($model, 'id_pais')->dropdownList($paises, ['prompt' => 'Seleccione...']) ?>
                     </div>
                     <div class="panel-footer text-right">			
                          <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'crear_terminos_factura']) ?>                    

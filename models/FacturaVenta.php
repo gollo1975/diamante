@@ -151,6 +151,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'valor_pago_descuento_uno' => 'valor_pago_descuento_uno',
             'valor_pago_descuento_dos' => 'valor_pago_descuento_dos',
             'valor_moneda' => 'Tasa de cambio:',
+            'id_medio_pago' => 'Medio de pago:'
             
         ];
     }

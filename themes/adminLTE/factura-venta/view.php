@@ -46,8 +46,8 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
         } else {
             if ($model->autorizado == 1 && $model->numero_factura == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
-                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar factura', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
-                           'data' => ['confirm' => 'Esta seguro de generar la factura de venta al cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
+                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar consecutivo', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
+                           'data' => ['confirm' => 'Esta seguro de generar el consecutivo a la factura de venta del cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
                 if($model->id_medio_pago == ''){?>
                      <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Medio de pago',
                                      ['factura-venta/subir_medio_pago', 'id' => $model->id_factura, 'token' => $token],
@@ -81,7 +81,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                     </div>
                     <?php if($model->id_tipo_factura == 5){?>
                     
-                            <?= Html::a('<span class="glyphicon glyphicon-list"></span> Termimos facturacion',
+                            <?= Html::a('<span class="glyphicon glyphicon-list"></span> Termimos de facturacion',
                               ['factura-venta/terminos_factura_exportacion', 'id' => $model->id_factura, 'token' => $token],
                                 ['title' => 'Permite subir el medio de pago',
                                  'data-toggle'=>'modal',
@@ -98,7 +98,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                     <?php } 
                 }    
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
                 echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
                 echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs',
                            'data' => ['confirm' => 'Esta seguro de enviar la factura de venta a la Dian.', 'method' => 'post']]);
@@ -123,7 +123,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'direccion') ?></th>
                      <td><?= Html::encode($model->direccion) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_factura') ?></th>
                     <td><?= Html::encode($model->numero_factura) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_pedido')?></th>
@@ -133,7 +133,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Municipio') ?></th>
                     <td><?= Html::encode($model->clienteFactura->codigoDepartamento->departamento)?> - <?= Html::encode($model->clienteFactura->codigoMunicipio->municipio)?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                    
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_inicio') ?></th>
                     <td><?= Html::encode($model->fecha_inicio) ?></td>
@@ -144,17 +144,22 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_forma_pago') ?></th>
                     <td><?= Html::encode($model->formaPago->concepto) ?></td>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'plazo_pago')?></th>
                     <td><?= Html::encode($model->plazo_pago) ?> Dias</td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura')?></th>
                     <td><?= Html::encode($model->tipoFactura->descripcion) ?></td>
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
-                    <td><?= Html::encode($model->autorizadoFactura) ?></td>
+                    <?php if($model->id_medio_pago <> ''){?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_medio_pago') ?></th>
+                        <td><?= Html::encode($model->medioPago->concepto) ?></td>
+                    <?php }else{?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_medio_pago') ?></th>
+                        <td style='background-color:#fae1dd;'><?= Html::encode('No found') ?></td>
+                    <?php }?>    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="8"><?= Html::encode($model->observacion) ?></td>
                 </tr>
@@ -248,13 +253,13 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Dscto Comercial:</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Comercial:</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_comercial_internacional?></b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Dscto Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_internacional?></b></td>
                                         <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
                                     </tr>
