@@ -105,7 +105,11 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("Transportadora:"), 0, 0, 'J', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(69, 5, utf8_decode($packing->transportadora->razon_social), 0, 0, 'L', 1);
+        if($packing->id_transportadora <> ''){
+            $this->Cell(69, 5, utf8_decode($packing->transportadora->razon_social), 0, 0, 'L', 1);
+        }else{
+           $this->Cell(69, 5, utf8_decode('NO FOUND'), 0, 0, 'L', 1); 
+        }    
         //FIN
         //Lineas del encabezado
         $this->Line(10, 64, 10, 248);

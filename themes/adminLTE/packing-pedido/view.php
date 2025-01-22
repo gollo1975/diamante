@@ -89,7 +89,11 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "Numero_pedido") ?>:</th>
                     <td><?= Html::encode($model->pedido->numero_pedido) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_transportadora') ?></th>
-                    <td><?= Html::encode($model->transportadora->razon_social) ?></td>
+                    <?php if($model->id_transportadora <> ''){?>
+                        <td><?= Html::encode($model->transportadora->razon_social) ?></td>
+                    <?php }else{?>
+                        <td><?= Html::encode('NO FOUND') ?></td>
+                    <?php }?>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "total_cajas") ?></th>
                     <td><?= Html::encode($model->total_cajas) ?></td>
                 </tr>
