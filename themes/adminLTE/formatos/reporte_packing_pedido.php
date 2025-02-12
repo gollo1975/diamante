@@ -71,44 +71,44 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Nit:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(80, 5, utf8_decode($packing->nit_cedula_cliente . '-' . $packing->clientePacking->dv), 0, 0, 'L', 1);
+        $this->Cell(70, 5, utf8_decode($packing->nit_cedula_cliente . '-' . $packing->clientePacking->dv), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Cliente:"), 0, 0, 'c', 1);
+        $this->Cell(21, 5, utf8_decode("Cliente:"), 0, 0, 'c', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(69, 5, utf8_decode($packing->cliente), 0, 0, 'c', 1);
+        $this->Cell(75, 5, utf8_decode($packing->cliente), 0, 0, 'c', 1);
         //FIN
         $this->SetXY(10, 47);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Departamento:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(80, 5, utf8_decode($packing->clientePacking->codigoDepartamento->departamento), 0, 0, 'L', 1);
+        $this->Cell(70, 5, utf8_decode($packing->clientePacking->codigoDepartamento->departamento), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
+        $this->Cell(21, 5, utf8_decode("Municipio:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(69, 5, utf8_decode($packing->clientePacking->codigoMunicipio->municipio), 0, 0, 'L', 1);
+        $this->Cell(75, 5, utf8_decode($packing->clientePacking->codigoMunicipio->municipio), 0, 0, 'L', 1);
         //FIN
         $this->SetXY(10, 51);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Fecha packing:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(80, 5, utf8_decode($packing->fecha_creacion), 0, 0, 'L', 1);
+        $this->Cell(70, 5, utf8_decode($packing->fecha_creacion), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Unidades:"), 0, 0, 'l', 1);
+        $this->Cell(21, 5, utf8_decode("Unidades:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(69, 5, utf8_decode($packing->total_unidades_packing), 0, 0, 'L', 1);
+        $this->Cell(75, 5, utf8_decode($packing->total_unidades_packing), 0, 0, 'L', 1);
         // FIN
         $this->SetXY(10, 55);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Total cajas:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 8);
-        $this->Cell(80, 5, utf8_decode($packing->total_cajas), 0, 0, 'l', 1);
+        $this->Cell(70, 5, utf8_decode($packing->total_cajas), 0, 0, 'l', 1);
         $this->SetFont('Arial', 'B', 8);
-        $this->Cell(17, 5, utf8_decode("Transportadora:"), 0, 0, 'J', 1);
+        $this->Cell(21, 5, utf8_decode("Transportador:"), 0, 0, 'J', 1);
         $this->SetFont('Arial', '', 8);
         if($packing->id_transportadora <> ''){
-            $this->Cell(69, 5, utf8_decode($packing->transportadora->razon_social), 0, 0, 'L', 1);
+            $this->Cell(75, 5, utf8_decode($packing->transportadora->razon_social), 0, 0, 'L', 1);
         }else{
-           $this->Cell(69, 5, utf8_decode('NO FOUND'), 0, 0, 'L', 1); 
+           $this->Cell(75, 5, utf8_decode('NO FOUND'), 0, 0, 'L', 1); 
         }    
         //FIN
         //Lineas del encabezado

@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                 </div>
             <?php }else{
                  echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_packing', 'id' => $model->id_packing], ['class' => 'btn btn-default btn-xs']);
-                if($model->pedido->pedido_liberado == 0){?>
+                if($model->pedido->pedido_validado == 0){?>
                     <?= Html::a('<span class="glyphicon glyphicon-list"></span> Transportadora',
                                  ['packing-pedido/adicionar_transportadora', 'id' => $model->id_packing],
                                    ['title' => 'Permite subir la transportadora al packing',

@@ -47,6 +47,7 @@ $cantidad_caja = \app\models\PackingPedidoDetalle::find()->where(['=','id_packin
                         <th scope="col" style='background-color:#B9D5CE;'>Nro de caja</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Referencia</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Unidades x caja</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad despachada</th>
                         <th scope="col" style='background-color:#B9D5CE'></th>
                         <th scope="col" style='background-color:#B9D5CE'></th>
@@ -59,6 +60,7 @@ $cantidad_caja = \app\models\PackingPedidoDetalle::find()->where(['=','id_packin
                             <td><?= $caja->numero_caja?></td>
                             <td><?= $caja->codigo_producto?></td>
                             <td><?= $caja->nombre_producto?></td>
+                            <td scope="col" style='background-color:#fae1dd;'><?= $caja->cantidad_porcaja?></td>
                             <td><?= $caja->cantidad_despachada?></td>
                             <?php if($caja->cantidad_despachada <= 0){?>
                                 <td style="width: 25px; height: 25px;">

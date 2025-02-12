@@ -1193,6 +1193,7 @@ class FacturaVentaController extends Controller
         //proceso de generar consecutivo
         $pedido = Pedidos::findOne($id_pedido);
         $factura = FacturaVenta::findOne($id);
+        $resolucion = ResolucionDian::findOne($factura->id_resolucion);
         $terminos = \app\models\TerminosFacturaExportacion::find()->where(['=','id_factura', $id])->one();
         if($factura->id_tipo_factura == 5){
             $consecutivo = \app\models\Consecutivos::findOne(25); 
@@ -1202,21 +1203,32 @@ class FacturaVentaController extends Controller
         if($factura->id_medio_pago <> ''){
             if($factura->id_tipo_factura <> 5){
                 $factura->numero_factura = $consecutivo->numero_inicial + 1;
-                $factura->save(false);
-                $consecutivo->numero_inicial = $factura->numero_factura;
-                $consecutivo->save(false);
-                $pedido->facturado = 1;
-                $pedido->save(false);
-                $this->redirect(["view", 'id' => $id, 'token' => $token]); 
-            }else{
-                if($terminos){
-                    $factura->numero_factura = $consecutivo->numero_inicial + 1;
+                if($factura->numero_factura <= $resolucion->rango_final){
                     $factura->save(false);
                     $consecutivo->numero_inicial = $factura->numero_factura;
                     $consecutivo->save(false);
                     $pedido->facturado = 1;
                     $pedido->save(false);
+                    $this->redirect(["view", 'id' => $id, 'token' => $token]);  
+                }else {
+                    Yii::$app->getSession()->setFlash('error', 'Los consecutivos para esta resolucion se agotaron. Favor solictar otra resolucion en la DIAN.'); 
                     $this->redirect(["view", 'id' => $id, 'token' => $token]);
+                }
+               
+            }else{
+                if($terminos){
+                    $factura->numero_factura = $consecutivo->numero_inicial + 1;
+                    if($factura->numero_factura <= $resolucion->rango_final){
+                        $factura->save(false);
+                        $consecutivo->numero_inicial = $factura->numero_factura;
+                        $consecutivo->save(false);
+                        $pedido->facturado = 1;
+                        $pedido->save(false);
+                        $this->redirect(["view", 'id' => $id, 'token' => $token]);
+                    }else{
+                       Yii::$app->getSession()->setFlash('error', 'Los consecutivos para esta resolucion se agotaron. Favor solictar otra resolucion en la DIAN.'); 
+                       $this->redirect(["view", 'id' => $id, 'token' => $token]); 
+                    }    
                 }else{
                     Yii::$app->getSession()->setFlash('error', 'Esta factura es INTERNACIONAL debe de llenar los terminos de exportación..');
                     $this->redirect(["view", 'id' => $id, 'token' => $token]); 

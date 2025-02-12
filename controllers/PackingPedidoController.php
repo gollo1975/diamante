@@ -60,7 +60,7 @@ class PackingPedidoController extends Controller
                 $numero_packing = null;
                 $fecha_inicio = null;
                 $fecha_corte = null;
-                $cliente =null; $transportadora = null;
+                $cliente =null; $transportadora = null; $numero_guia = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $cliente = Html::encode($form->cliente);
@@ -69,10 +69,12 @@ class PackingPedidoController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $transportadora = Html::encode($form->transportadora);
+                        $numero_guia = Html::encode($form->numero_guia);
                         $table = PackingPedido::find()
                                     ->andFilterWhere(['between', 'fecha_packing', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'numero_pedido', $numero_pedido])
                                     ->andFilterWhere(['=', 'numero_packing', $numero_packing])
+                                    ->andFilterWhere(['=', 'numero_guia', $numero_guia])
                                     ->andFilterWhere(['=', 'id_transportadora', $transportadora])
                                     ->andFilterWhere(['like', 'cliente', $cliente]);
                         $table = $table->orderBy('id_packing DESC');
@@ -206,13 +208,16 @@ class PackingPedidoController extends Controller
     public function actionCerrar_packing_pedido($id) {
         $model = $this->findModel($id);
         $detalle = \app\models\PackingPedidoDetalle::find()->where(['=','id_packing', $id])->orderBy('numero_caja DESC')->all();
-        $sw = 0;
+        $sw = 0; $aux = 0;
         foreach ($detalle as $key => $detalles) {
             if($detalles->cantidad_despachada <= 0){
                 $sw = 1;
             }
+            if($detalles->numero_guia == ''){
+                $aux = 1;
+            }
         }
-        if($sw == 0){    
+        if($sw == 0 && $aux == 0){    
             //generar consecutivo
              $dato = \app\models\Consecutivos::findOne(24);
              $codigo = $dato->numero_inicial + 1;
@@ -224,8 +229,13 @@ class PackingPedidoController extends Controller
              $dato->save();
              return $this->redirect(['packing-pedido/view','id' => $id]);
         }else{
-            Yii::$app->getSession()->setFlash('error', 'Hay cajas vacias en el PACKING, favor eliminarlas o llenarlas.');
-            return $this->redirect(['packing-pedido/view','id' => $id]);
+            if($sw == 1){
+                Yii::$app->getSession()->setFlash('error', 'Hay cajas vacias en el PACKING, favor eliminarlas o llenarlas.');
+                return $this->redirect(['packing-pedido/view','id' => $id]);
+            }else{
+                 Yii::$app->getSession()->setFlash('error', 'Debe de subir el numero de la guia a cada caja para el packing.');
+                return $this->redirect(['packing-pedido/view','id' => $id]);
+            }    
         }     
          
     }
@@ -284,11 +294,14 @@ class PackingPedidoController extends Controller
             if ($model->validate()) {
                 if (isset($_POST["subir_guia"])) {
                     if($model->numero_guia !== ''){
+                        $packin = PackingPedido::findOne($id);
                         $table = \app\models\PackingPedidoDetalle::find()->where(['=','id_packing', $id])->all() ;
                         foreach ($table as $key => $val) {
                             $val->numero_guia = $model->numero_guia;
                             $val->save();
                         }
+                        $packin->numero_guia = $model->numero_guia;
+                        $packin->save();
                          return $this->redirect(['packing-pedido/view', 'id' => $id]);
                     }else{
                         Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacion, Favor ingresar al menos un caracter.');
@@ -380,5 +393,78 @@ class PackingPedidoController extends Controller
             ]);
         
             
+    }
+    
+    public function actionExcelPacking($tableexcel) {
+      $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+       
+
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'No PEDIDO')
+                    ->setCellValue('C1', 'No PACKIN')
+                    ->setCellValue('D1', 'CLIENTE')
+                    ->setCellValue('E1', 'F. CREACION')
+                    ->setCellValue('F1', 'F. PACKIN')
+                    ->setCellValue('G1', 'UNIDADES')
+                    ->setCellValue('H1', 'T. CAJAS')
+                    ->setCellValue('I1', 'No GUIA')
+                    ->setCellValue('J1', 'TRANSPORTADORA');
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A' . $i, $val->id_packing)
+                ->setCellValue('B' . $i, $val->numero_pedido)
+                ->setCellValue('C' . $i, $val->numero_packing)
+                ->setCellValue('D' . $i, $val->cliente)
+                ->setCellValue('E' . $i, $val->fecha_creacion)
+                ->setCellValue('F' . $i, $val->fecha_packing)
+                ->setCellValue('G' . $i, $val->total_unidades_packing)
+                ->setCellValue('H' . $i, $val->total_cajas)
+                ->setCellValue('I' . $i, $val->numero_guia)
+                ->setCellValue('J' . $i, $val->transportadora->razon_social);
+              
+        $i++;
+             
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Packing');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Packing.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit; 
     }
 }

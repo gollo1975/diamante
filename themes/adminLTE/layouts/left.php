@@ -298,6 +298,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                        ['label' => 'Posiciones', 'icon' => 'plus-square-o', 'url' => ['/posiciones/index']],  
                                                        ['label' => 'Pisos', 'icon' => 'plus-square-o', 'url' => ['/pisos/index']],
                                                        ['label' => 'Tipo de racks ', 'icon' => 'plus-square-o', 'url' => ['/tipo-rack/index']], 
+                                                       ['label' => 'Transportadora', 'icon' => 'plus-square-o', 'url' => ['/transportadora/index']], 
 
                                                     ],
                                                 ],

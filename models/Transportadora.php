@@ -37,6 +37,19 @@ class Transportadora extends \yii\db\ActiveRecord
     {
         return 'transportadora';
     }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->razon_social = strtoupper($this->razon_social); 
+        $this->email_transportadora = strtolower($this->email_transportadora); 
+        $this->direccion = strtoupper($this->direccion);
+        $this->contacto = strtoupper($this->contacto);
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -63,21 +76,21 @@ class Transportadora extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_transportadora' => 'Id Transportadora',
-            'tipo_documento' => 'Tipo Documento',
-            'nit_cedula' => 'Nit Cedula',
-            'dv' => 'Dv',
-            'razon_social' => 'Razon Social',
-            'direccion' => 'Direccion',
-            'email_transportadora' => 'Email Transportadora',
-            'telefono' => 'Telefono',
-            'celular' => 'Celular',
-            'codigo_departamento' => 'Codigo Departamento',
-            'codigo_municipio' => 'Codigo Municipio',
-            'contacto' => 'Contacto',
-            'celular_contacto' => 'Celular Contacto',
-            'user_name' => 'User Name',
-            'fecha_registro' => 'Fecha Registro',
+            'id_transportadora' => 'Id',
+            'tipo_documento' => 'Tipo documento:',
+            'nit_cedula' => 'Nit/Cedula:',
+            'dv' => 'Dv:',
+            'razon_social' => 'Razon social:',
+            'direccion' => 'Direccion:',
+            'email_transportadora' => 'Email:',
+            'telefono' => 'Telefono:',
+            'celular' => 'Celular:',
+            'codigo_departamento' => 'Departamento:',
+            'codigo_municipio' => 'Municipio:',
+            'contacto' => 'Contacto:',
+            'celular_contacto' => 'Celular contacto:',
+            'user_name' => 'User Name:',
+            'fecha_registro' => 'Fecha Registro:',
         ];
     }
 

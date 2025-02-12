@@ -40,8 +40,6 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
     <div class="btn-group" role="group" aria-label="...">
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
         <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { ?>
-            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Modificar factura', ['update', 'id' => $model->id_factura, 'token' =>$token,'id_pedido' => $model->id_pedido], ['class' => 'btn btn-success btn-xs']) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar factura', ['regenerar_factura', 'id' => $model->id_factura, 'token' =>$token,'id_pedido' => $model->id_pedido], ['class' => 'btn btn-info btn-xs']) ?>
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['factura-venta/autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
         } else {
             if ($model->autorizado == 1 && $model->numero_factura == 0){
@@ -100,7 +98,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
             }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
                 echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
-                echo Html::a('<span class="glyphicon glyphicon-list"></span> Enviar a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs',
+                echo Html::a('<span class="glyphicon glyphicon-send"></span> Enviar documento a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs','id' => 'my_button', 'onclick' => '$("#my_button").attr("disabled", "disabled")',
                            'data' => ['confirm' => 'Esta seguro de enviar la factura de venta a la Dian.', 'method' => 'post']]);
             }
         }?>        
@@ -190,13 +188,13 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                     <thead>
                                         <?php if($model->id_tipo_factura <> 5){?>
                                             <tr style="font-size: 85%; text-align: center">
-                                                <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                                <th scope="col"  style='background-color:#B9D5CE;'>Descripcion producto</th>     
-                                                <th scope="col"  style='background-color:#B9D5CE;'>TV</th>
-                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Cantidad</th>       
-                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Vr. unitario</th> 
-                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>% Iva</th>  
-                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Subtotal</th>                        
+                                                <th scope="col"  style='background-color:#B9D5CE;text-align: center'><b>Codigo</b></th>                        
+                                                <th scope="col"  style='background-color:#B9D5CE;text-align: center'>Descripcion producto</th>     
+                                                <th scope="col"  style='background-color:#B9D5CE;text-align: center'>TV</th>
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>Cantidad</th>       
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>Vr. unitario</th> 
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>% Iva</th>  
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>Subtotal</th>                        
                                             </tr>
                                         <?php }else{ ?>
                                             <tr style="font-size: 85%;">
@@ -240,58 +238,94 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                          endforeach;?>          
                                     </body>
                                     <tr style="font-size: 90%; background-color:#B9D5CE">
-                                        <td colspan="6"></td>
-                                        <td style="text-align: right;"><b><?= $moneda->sigla?></b></td>
-                                        <td style="text-align: right;"><b><?= 'COP'?></b></td>
-                                      
+                                        <td colspan="6"; style="text-align: right"><b>Moneda:</b></td>
+                                        <?php if($moneda){?>
+                                            <td style="text-align: right;"><b><?= $moneda->sigla?></b></td>
+                                            <td style="text-align: right;"><b><?= 'COP'?></b></td>
+                                        <?php }else{?>
+                                           
+                                            <td style="text-align: right;"><b><?= 'COP'?></b></td>
+                                        <?php }?>                                         
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right;  background-color:#F0F3EF;"><b>Valor Bruto:</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_bruto_internacional; ?></b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_bruto_internacional; ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <?php }else{ ?>    
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Comercial:</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_comercial_internacional?></b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_comercial_internacional?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
+                                        <?php }else{?> 
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
+                                        <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_internacional?></b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_internacional?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <?php }else{?>
+                                             <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <?php }?>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Subtotal:</b></td>
-                                        <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->subtotal_factura_internacional?></b></td>
-                                        <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->subtotal_factura_internacional?></b></td>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
+                                        <?php }else{?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
+                                        <?php  }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Impuesto:</b></td>
-                                         <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->impuesto_internacional; ?></b></td>
-                                        <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->impuesto_internacional; ?></b></td>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                        <?php }else{?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                        <?php }?>     
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Retencion (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_retencion_internacional; ?></b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_retencion_internacional; ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
+                                        <?php }else{?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
+                                        <?php }?>     
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Rete Iva (<?= $model->porcentaje_rete_iva?> %) :</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_reteiva_internacional ?></b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_reteiva_internacional ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
+                                        <?php }else{?>    
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
+                                        <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
                                         <td style="text-align: right; background-color:#F0F3EF"><b>Total Pagar:</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= $model->total_factura_internacional ?></b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->total_factura_internacional ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
+                                        <?php }else{?>    
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
+                                        <?php }?>    
                                     </tr>
                                 </table>
                                

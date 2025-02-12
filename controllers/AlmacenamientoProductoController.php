@@ -866,7 +866,7 @@ class AlmacenamientoProductoController extends Controller
                     if($model->cantidad_despachada > 0){
                         $linea_pedido = PedidoDetalles::findOne($id_detalle);
                         $table = \app\models\PackingPedidoDetalle::findOne($id_caja) ;
-                        
+                        if($model->cantidad_despachada <= $table->cantidad_porcaja){
                             $table->codigo_producto = $linea_pedido->inventario->codigo_producto;
                             $table->nombre_producto = $linea_pedido->inventario->nombre_producto;
                             $table->fecha_packing = date('Y-m-d');
@@ -874,9 +874,13 @@ class AlmacenamientoProductoController extends Controller
                             $table->numero_caja = $table->numero_caja;
                             $table->id_inventario = $linea_pedido->id_inventario;
                             $table->save(false);
-                        return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+                            return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+                        }else{
+                            Yii::$app->getSession()->setFlash('error', 'La cantidad ingresada es MAYOR que la cantidad que debe de llevar la caja. Valide al informacion.');
+                            return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+                        }    
                     }else{
-                        Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacion, debe de ingreso al menos 1 unidad.');
+                        Yii::$app->getSession()->setFlash('error', 'Este campo (Cantidad despachada)no puede ser vacio, debe de ingreso al menos 1 unidad.');
                         return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
                     }    
                 }
@@ -896,11 +900,12 @@ class AlmacenamientoProductoController extends Controller
     
     //DUPLICAR CAJA PARA PACKING
     public function actionDuplicar_caja_packing($id, $id_pedido, $id_detalle,$sw, $numero_caja) {
-        
+        $model = \app\models\PackingPedido::findOne($id);
         $table = new \app\models\PackingPedidoDetalle();
         $table->id_packing = $id;
         $table->linea_duplicada = 1;
         $table->numero_caja = $numero_caja;
+        $table->cantidad_porcaja = $model->unidades_caja;
         $table->save();
         return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
     }
@@ -1670,6 +1675,7 @@ class AlmacenamientoProductoController extends Controller
                             $table->cliente = $pedido->cliente;
                             $table->fecha_packing = date('Y-m-d');
                             $table->numero_pedido = $pedido->numero_pedido;
+                            $table->unidades_caja = $model->unidades_porcaja;
                             $table->user_name = Yii::$app->user->identity->username;
                             $table->save();
                             //proceso que cargas las lineas
@@ -1678,6 +1684,7 @@ class AlmacenamientoProductoController extends Controller
                                 $detalle = new \app\models\PackingPedidoDetalle();
                                 $detalle->id_packing = $codigo->id_packing;
                                 $detalle->numero_caja = $i;
+                                $detalle->cantidad_porcaja = $model->unidades_porcaja;
                                 $detalle->save(false);
                                 if (!$detalle->save()) {
                                     throw new \Exception('Error al guardar el detalle');

@@ -35,7 +35,7 @@ class PackingPedidoDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['codigo_producto', 'cantidad_despachada', 'id_packing', 'id_inventario','numero_caja','linea_duplicada'], 'integer'],
+            [['codigo_producto', 'cantidad_despachada', 'id_packing', 'id_inventario','numero_caja','linea_duplicada','cantidad_porcaja'], 'integer'],
             [['fecha_packing', 'fecha_cracion_packing'], 'safe'],
             [['nombre_producto','numero_guia'], 'string', 'max' => 50],
             [['id_packing'], 'exist', 'skipOnError' => true, 'targetClass' => PackingPedido::className(), 'targetAttribute' => ['id_packing' => 'id_packing']],
@@ -60,6 +60,7 @@ class PackingPedidoDetalle extends \yii\db\ActiveRecord
             'numero_caja' => 'numero_caja',
             'numero_guia' => 'numero_guia',
             'linea_duplicada' => 'linea_duplicada',
+            'cantidad_porcaja' => 'cantidad_porcaja',
         ];
     }
 

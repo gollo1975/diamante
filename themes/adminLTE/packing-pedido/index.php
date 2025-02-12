@@ -74,6 +74,7 @@ $Contras = ArrayHelper::map(app\models\Transportadora::find()->orderBy('razon_so
                     'allowClear' => true
                 ],
             ]); ?>
+             <?= $formulario->field($form, "numero_guia")->input("search") ?>
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>

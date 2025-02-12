@@ -40,7 +40,7 @@ class PackingPedido extends \yii\db\ActiveRecord
     {
         return [
             [['id_pedido', 'id_cliente', 'nit_cedula_cliente', 'total_unidades_packing', 'numero_pedido','numero_packing','total_cajas','estado_packing',
-                'cerrado_proceso','id_transportadora'], 'integer'],
+                'cerrado_proceso','id_transportadora','unidades_caja'], 'integer'],
             [['fecha_creacion', 'fecha_packing'], 'safe'],
             [['cliente'], 'string', 'max' => 50],
             [['numero_guia'], 'string', 'max' => 20],
@@ -73,6 +73,7 @@ class PackingPedido extends \yii\db\ActiveRecord
             'estado_packing' => 'Activo:',
             'cerrado_proceso' => 'Cerrado:',
             'id_transportadora' => 'Transportadora:',
+            'unidades_caja' => 'unidades_caja',
         ];
     }
 
