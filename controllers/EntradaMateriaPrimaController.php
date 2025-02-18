@@ -293,12 +293,12 @@ class EntradaMateriaPrimaController extends Controller
      public function actionOrdencompra($id){
         $rows = \app\models\OrdenCompra::find()->where(['=','id_proveedor', $id])
                                                ->andWhere(['=','importado', 0])
-                                               ->andWhere(['=','abreviatura', 'MP'])->orderBy('descripcion desc')->all();
+                                               ->andWhere(['=','auditada', 1])->orderBy('descripcion desc')->all();
 
         echo "<option value='' required>Seleccione una orden...</option>";
         if(count($rows)>0){
             foreach($rows as $row){
-                echo "<option value='$row->id_orden_compra' required>$row->descripcion</option>";
+                echo "<option value='$row->id_orden_compra' required>Tipo orden: $row->descripcion  Nro orden: $row->id_orden_compra</option>";
             }
         }
     }
@@ -326,8 +326,8 @@ class EntradaMateriaPrimaController extends Controller
             $table = EntradaMateriaPrima::findOne($id);
             $orden_compra = \app\models\OrdenCompra::find()->where(['=','id_proveedor', $table->id_proveedor])
                                                ->andWhere(['=','importado', 0])
-                                               ->andWhere(['=','abreviatura', 'MP'])->orderBy('descripcion desc')->all();
-            $orden_compra = ArrayHelper::map($orden_compra, "id_orden_compra", "descripcion");
+                                               ->andWhere(['=','auditada', 1])->orderBy('descripcion desc')->all();
+            $orden_compra = ArrayHelper::map($orden_compra, "id_orden_compra", "OrdenCompraCompleto");
             $model->id_proveedor = $table->id_proveedor;
             $model->id_orden_compra = $table->id_orden_compra;
             $model->fecha_proceso = $table->fecha_proceso;
@@ -387,15 +387,26 @@ class EntradaMateriaPrimaController extends Controller
 
      public function actionAutorizado($id, $token) {
         $model = $this->findModel($id);
-        if ($model->autorizado == 0) {                        
-                $model->autorizado = 1;            
-               $model->update();
-               $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
+        $detalle = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->all();
+        $sw = 0;
+        foreach ($detalle as $val){
+            if($val->id_materia_prima == ''){
+                $sw = 1;
+                Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar el codigo de la materia prima para asociarlo a la entrada y luego presiona el boton actualizar.');
+                return $this->redirect(["view",'id' => $id, 'token' => $token]); 
+            }
+        }
+        if($sw == 0){
+            if ($model->autorizado == 0) {                        
+                    $model->autorizado = 1;            
+                   $model->update();
+                   $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
 
-        } else{
-                $model->autorizado = 0;
-                $model->update();
-                $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
+            } else{
+                    $model->autorizado = 0;
+                    $model->update();
+                    $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
+            } 
         }    
     }
     

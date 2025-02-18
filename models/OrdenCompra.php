@@ -100,6 +100,12 @@ class OrdenCompra extends \yii\db\ActiveRecord
         return $this->hasMany(OrdenCompraDetalle::className(), ['id_orden_compra' => 'id_orden_compra']);
     }
     
+     //proceso que agrupa varios campos
+    public function getOrdenCompraCompleto()
+    {
+        return " Numero orden: {$this->id_orden_compra} - Tipo compra: {$this->descripcion}";
+    }
+    
     public function getAutorizadoCompra() {
         if($this->autorizado == 0){
             $autorizadocompra = 'NO';

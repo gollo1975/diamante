@@ -120,7 +120,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Insumos</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Editar precio</th>  
@@ -138,7 +138,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                     <body>
                                          <?php
                                          foreach ($detalle_entrada as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 
                                                 <?php  if($model->autorizado == 0){
                                                     if($val->id_materia_prima === (NULL)){?>

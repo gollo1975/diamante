@@ -116,7 +116,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
                             <td style="text-align: right"><?= '$'.number_format($suma,0)?></td>
                             <td style= 'width: 25px; right: 25px;'>
                                <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span>',
-                                    ['/recibo-caja/crear_nuevo_recibo','id_cliente' =>$val->id_cliente, 'tokenAcceso' => $tokenAcceso],
+                                    ['/recibo-caja/crear_nuevo_recibo','id_cliente' =>$val->id_cliente, 'tokenAcceso' => $tokenAcceso, 'token' => $token],
                                       ['title' => 'Crear recibo de caja al clinte',
                                        'data-toggle'=>'modal',
                                        'data-target'=>'#modalcrearrecibocaja',

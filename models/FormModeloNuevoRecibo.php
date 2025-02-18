@@ -30,10 +30,11 @@ class FormModeloNuevoRecibo extends Model
     public function attributeLabels()
     {
         return [
-            'tipo_recibo' => 'Tipo recibo:',
+            'tipo_recibo' => 'T. recibo:',
             'tipo_visita' => 'Banco:',
             'hora_visita' => 'Fecha pago:',
             'observacion' => 'Nota',
+            'fecha_pago' => 'F. de pago:'
             
 
         ];

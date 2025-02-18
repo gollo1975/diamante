@@ -67,7 +67,7 @@ $view = 'solicitud-compra';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_solicitud_compra") ?></th>
                     <td><?= Html::encode($model->id_solicitud_compra) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?></th>
@@ -77,7 +77,7 @@ $view = 'solicitud-compra';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'documento_soporte') ?></th>
                     <td><?= Html::encode($model->documento_soporte) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_entrega') ?></th>
@@ -87,7 +87,7 @@ $view = 'solicitud-compra';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_impuesto') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_impuesto,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_solicitud')?></th>
                     <td><?= Html::encode($model->numero_solicitud) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
@@ -97,7 +97,7 @@ $view = 'solicitud-compra';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total') ?></th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->total,0)) ?></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td  colspan="8"><?= Html::encode($model->observacion) ?></td>
                 </tr>
@@ -126,10 +126,10 @@ $view = 'solicitud-compra';
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Insumos</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>       
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Medida</th>       
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
@@ -141,10 +141,10 @@ $view = 'solicitud-compra';
                                     <body>
                                          <?php
                                          foreach ($detalle_compras as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $val->items->codigo ?></td>
                                                 <td><?= $val->items->descripcion ?></td>
-                                                <td><?= $val->porcentaje_iva ?></td>
+                                                <td><?= $val->items->medida->descripcion ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style="padding-right: 1;padding-right: 0;"><input type="text" name="cantidad[]" value="<?= $val->cantidad ?>" size="9" required="true"> </td> 
                                                     <td style="padding-right: 1;padding-right: 0;"><input type="text" name="valor[]" value="<?= $val->valor ?>" size="9"> </td> 
