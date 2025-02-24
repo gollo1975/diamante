@@ -1170,46 +1170,104 @@ class ProgramacionNominaController extends Controller
     //INICIA PROCESO DEL TERCER BOTON APLICAR PAGOS
     public function actionAplicar_pagos_nomina($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
     {
-        if($tipo_nomina == 1){
+        if($tipo_nomina == 1){ //PROCESO DE NOMINA
+            /*PROCESO DE SALDOS DE CREDITOS*/
+            $grupo_pago = \app\models\GrupoPago::findOne($id_grupo_pago);
+            $periodo = PeriodoPagoNomina::findOne($id);
             $detalleNomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_periodo_pago_nomina', $id])
                                                                          ->andWhere(['<>','id_credito', ''])->all();
-            foreach ($detalleNomina as $key => $detalle) {
-                $credito = \app\models\Credito::findOne($detalle->id_credito);
-                if($credito){
-                    $nro_cuotas = $credito->numero_cuotas;
-                    $table = new \app\models\AbonoCredito();
-                    $table->id_credito = $detalle->id_credito;
-                    if($credito->id_tipo_pago == 1){
-                        $table->observacion = 'Deduccion por nomina';
-                        $table->id_tipo_pago = 1;
-                    }else{
-                        if($credito->id_tipo_pago == 2){
-                            $table->observacion = 'Deduccion por pago de primas';
-                            $table->id_tipo_pago = 2;
-                        }else{
-                            $table->observacion = 'Deduccion por pago de cesantias';
-                            $table->id_tipo_pago = 3;
-                        }  
-                    }    
-                   echo $table->valor_abono = $detalle->vlr_deduccion;
-                    $table->saldo = $credito->saldo_credito - $detalle->vlr_deduccion;
-                    $table->valor_abono = $detalle->vlr_deduccion;
-                    $table->fecha_abono = date('Y-m-d'); 
-                    $table->cuota_pendiente = (($nro_cuotas) - ($credito->numero_cuota_actual + 1));
-                    $table->user_name = Yii::$app->user->identity->username;
-                    $table->save(false);
-                    $credito->saldo_credito = $table->saldo;
-                    $credito->numero_cuota_actual += 1;
-                    if($credito->saldo_credito <= 0){
-                        $credito->estado_credito = 1;
-                        $credito->estado_periodo = 1;
-                    }
-                    $credito->save(false);
+            if(count($detalleNomina) > 0){
+                foreach ($detalleNomina as $detalles) {
+                    $id_credito = $detalles->id_credito;
+                    $this->ActualizaSaldosCreditos($detalles, $id_credito);
+                }//termina el foreach
+            } 
+            //FIN PROCESO DE CREDITO
+            
+            /*CICLO QUE RECOGE LAS ACTUALIZACIONES PRESTACIONALES*/
+            $Nomina = \app\models\ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+            foreach ($Nomina as $key => $nominas) {
+                $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])->all();
+                $prestacional = 0; $no_prestacional = 0;
+                $devengados = 0; $auxilio_transporte = 0; $deduccion = 0;
+                foreach ($detalle_nomina as $detalle) {
+                    if($detalle->codigoSalario->devengado_deduccion == 1){
+                       if($detalle->codigoSalario->ingreso_base_prestacional == 1){
+                           $prestacional += $detalle->vlr_devengado + $detalle->vlr_licencia;
+                       }else{
+                           $no_prestacional += $detalle->vlr_devengado_no_prestacional;
+                       }
+                       $devengados += $detalle->vlr_devengado + $detalle->auxilio_transporte;
+                       $auxilio_transporte = $detalle->auxilio_transporte;
+                    } else {
+                       $deduccion += $detalle->vlr_deduccion;
+                    }   
                 }
-            }//termina el foreach
-        }else{
-            ////PROCESO DE PRIMAS
+                $nominas->ibc_prestacional = $prestacional;
+                $nominas->ibc_no_prestacional = $no_prestacional;
+                $nominas->total_auxilio_transporte = $auxilio_transporte;
+                $nominas->total_devengado = $devengados;
+                $nominas->total_deduccion = $deduccion;
+                $nominas->total_pagar = $devengados - $deduccion;
+                $nominas->estado_cerrado = 1;
+                $nominas->save(false);
+                
+                //ACTUALIZA EL CONTRATO
+                $contrato = \app\models\Contratos::findOne($nominas->id_contrato);
+                $contrato->ultimo_pago_nomina = $fecha_hasta;
+                $contrato->save();
+                
+                //ACTUALIZA EL GRUPO
+                $grupo_pago->ultimo_pago_nomina = $fecha_hasta;
+                $grupo_pago->estado = 1;
+                $grupo_pago->save();
+                
+                //CIERRA EL PERIODO
+                $periodo->estado_periodo = 1;
+                $periodo->save();
+                
+            }
+            
+        }else{////PROCESO DE PRIMAS PARA DESARROLLAR
+            
         }
+       return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+    }
+    
+    //PROCESO QUE ACTUALIZA SALDOS DE CREDITOS
+    protected function ActualizaSaldosCreditos($detalles, $id_credito) {
+        $credito = \app\models\Credito::findOne($id_credito);
+        if($credito){
+            $nro_cuotas = $credito->numero_cuotas;
+            $table = new \app\models\AbonoCredito();
+            $table->id_credito = $id_credito;
+            if($credito->id_tipo_pago == 1){
+                $table->observacion = 'Deduccion por nomina';
+                $table->id_tipo_pago = 1;
+            }else{
+                if($credito->id_tipo_pago == 2){
+                    $table->observacion = 'Deduccion por pago de primas';
+                    $table->id_tipo_pago = 2;
+                }else{
+                    $table->observacion = 'Deduccion por pago de cesantias';
+                    $table->id_tipo_pago = 3;
+                }  
+            }    
+            $table->valor_abono = $detalles->vlr_deduccion;
+            $table->saldo = $credito->saldo_credito - $detalles->vlr_deduccion;
+            $table->valor_abono = $detalles->vlr_deduccion;
+            $table->fecha_abono = date('Y-m-d'); 
+            $table->cuota_pendiente = (($nro_cuotas) - ($credito->numero_cuota_actual + 1));
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save(false);
+            $credito->saldo_credito = $table->saldo;
+            $credito->numero_cuota_actual += 1;
+            if($credito->saldo_credito <= 0){
+                $credito->estado_credito = 1;
+                $credito->estado_periodo = 1;
+            }
+            $credito->save(false);
+        }//fin ciclo
     }
     /**
      * Deletes an existing ProgramacionNomina model.
@@ -1315,6 +1373,93 @@ class ProgramacionNominaController extends Controller
                ]);
     }
         
+    //PROCESO QUE PERMITE EDITAR LA COLILLA
+    public function actionView_colilla_pagonomina($id, $id_programacion) {
+        $detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])->all();
+        $model = ProgramacionNomina::findOne($id_programacion);
+       
+        return $this->render('form_editar_colilla_pago', [
+            'id_programacion' => $id_programacion,
+            'detalle' => $detalle,
+            'model' => $model,
+            'id' => $id,
+            ]);
+        
+    }
+    //EDITAR COLILLA
+    public function actionEditar_colilla_pagonomina($id_detalle, $id_programacion, $id) {
+        $model = new \app\models\ModeloEditarColilla();
+        $table = \app\models\ProgramacionNominaDetalle::findOne($id_detalle);
+        if ($model->load(Yii::$app->request->post())){
+            if (isset($_POST["actualizar_conceptos"])) {
+                if($table->codigoSalario->auxilio_transporte == 1){
+                    $table->auxilio_transporte = $model->devengado;
+                }else{
+                    $table->vlr_devengado = $model->devengado;
+                }
+                $table->vlr_deduccion = $model->deduccion;
+                
+                $table->save(false);
+                return $this->redirect(["programacion-nomina/view_colilla_pagonomina",'id' => $id, 'id_programacion' => $id_programacion]); 
+            }
+            
+        }
+       return $this->renderAjax('editar_colilla', [
+            'model' => $model,  
+            'table' => $table,
+      
+        ]);      
+    }
+    
+    //ACTUALIZAR LA COLILLA
+    public function actionActualizar_colilla($id, $id_programacion) {
+        $nomina = ProgramacionNomina::findOne($id_programacion);
+        $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])->all();
+        $devengados = 0; $deduccion = 0; $prestacional = 0; $no_prestacional = 0; $auxilio_transporte = 0;
+        foreach ($detalle_nomina as $detalle) {
+            if($detalle->codigoSalario->devengado_deduccion == 1){
+                if($detalle->codigoSalario->ingreso_base_prestacional == 1){
+                    $prestacional += $detalle->vlr_devengado + $detalle->vlr_licencia;
+                }else{
+                    $no_prestacional += $detalle->vlr_devengado_no_prestacional;
+                }
+                $devengados += $detalle->vlr_devengado + $detalle->auxilio_transporte;
+                $auxilio_transporte = $detalle->auxilio_transporte;
+            } else {
+                $deduccion += $detalle->vlr_deduccion;
+            }
+        }
+        $nomina->ibc_prestacional = $prestacional;
+        $nomina->ibc_no_prestacional = $no_prestacional;
+        $nomina->total_deduccion = $deduccion;
+        $nomina->total_devengado = $devengados;
+        $nomina->total_auxilio_transporte = $auxilio_transporte;
+        $nomina->total_pagar = $devengados - $deduccion;
+        $nomina->save();
+        return $this->redirect(['view_colilla_pagonomina', 
+            'id' => $id,
+            'id_programacion' => $id_programacion,
+        ]);
+        
+    }
+    
+    //ELIMINAR CONCEPTOS DE SALARIOA
+    public function actionEliminar_concepto_salario($id, $id_programacion, $id_detalle)
+    {
+        $detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_detalle', $id_detalle])->one();
+            try {
+                $detalle->delete();
+                Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+                $this->redirect(["programacion-nomina/view_colilla_pagonomina", 'id' => $id, 'id_programacion' => $id_programacion]);
+            } catch (IntegrityException $e) {
+                Yii::$app->getSession()->setFlash('error', 'Error al eliminar la programacion de nomina, tiene registros asociados en otros procesos de la nómina');
+            } catch (\Exception $e) {
+                Yii::$app->getSession()->setFlash('error', 'Error al eliminar la programacion de nomina, tiene registros asociados en otros procesos');
+            }
+            
+            return $this->redirect(['programacion-nomina/view_colilla_pagonomina', 'id' => $id, 'id_programacion' => $id_programacion]);
+    }    
+    
     /**
      * Finds the ProgramacionNomina model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -1413,7 +1558,7 @@ class ProgramacionNominaController extends Controller
     } 
     
     public function actionExceldetallepago($id) {
-         $detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion DESC')->all();
+         $detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion DESC , codigo_salario ASC')->all();
          $objPHPExcel = new \PHPExcel();
          $objPHPExcel->getProperties()->setCreator("EMPRESA")
             ->setLastModifiedBy("EMPRESA")

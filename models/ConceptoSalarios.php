@@ -54,7 +54,8 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
     {
         return [
             [['codigo_salario', 'nombre_concepto'], 'required'],
-            [['codigo_salario', 'compone_salario', 'inicio_nomina', 'aplica_porcentaje', 'prestacional', 'ingreso_base_prestacional', 'ingreso_base_cotizacion', 'debito_credito', 'adicion', 'auxilio_transporte', 'concepto_incapacidad', 'concepto_pension', 'concepto_salud', 'concepto_vacacion', 'provisiona_vacacion', 'provisiona_indemnizacion', 'tipo_adicion', 'recargo_nocturno', 'hora_extra', 'concepto_comision', 'concepto_licencia', 'fsp', 'concepto_prima', 'concepto_cesantias', 'intereses'], 'integer'],
+            [['codigo_salario', 'compone_salario', 'inicio_nomina', 'aplica_porcentaje', 'prestacional', 'ingreso_base_prestacional', 'ingreso_base_cotizacion', 'debito_credito', 'adicion', 'auxilio_transporte', 'concepto_incapacidad', 'concepto_pension', 'concepto_salud', 'concepto_vacacion', 'provisiona_vacacion', 'provisiona_indemnizacion', 'tipo_adicion', 'recargo_nocturno', 'hora_extra',
+                'concepto_comision', 'concepto_licencia', 'fsp', 'concepto_prima', 'concepto_cesantias', 'intereses','devengado_deduccion'], 'integer'],
             [['porcentaje', 'porcentaje_tiempo_extra'], 'number'],
             [['fecha_creacion'], 'safe'],
             [['nombre_concepto'], 'string', 'max' => 150],
@@ -97,6 +98,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
             'concepto_cesantias' => 'Concepto Cesantias',
             'intereses' => 'Intereses',
             'fecha_creacion' => 'Fecha Creacion',
+            'devengado_deduccion' => 'Devengado / Deduccion',
         ];
     }
     /**

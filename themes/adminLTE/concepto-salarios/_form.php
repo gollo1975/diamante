@@ -38,6 +38,10 @@ $form = ActiveForm::begin([
                     <?= $form->field($model, 'debito_credito')->dropDownList(['1'=> 'SUMA', '2'=>'RESTA', '0'=>'NEUTRO'], ['prompt' => 'Seleccione una opcion...']) ?>
                     <?= $form->field($model, 'tipo_adicion')->dropDownList(['1'=> 'BONIFICACION', '2'=>'DESCUENTO', '0'=>'NO APLICA'], ['prompt' => 'Seleccione una opcion...']) ?>
                 </div>
+                 <div class="row">
+                    <?= $form->field($model, 'devengado_deduccion')->dropDownList(['1'=> 'DEVENGADO', '2'=>'DEDUCCION'], ['prompt' => 'Seleccione una opcion...']) ?>
+                    
+                </div>
                 <div class="panel panel-success">
                     <div class="panel-heading">
                         Seleccione la opción..

@@ -162,9 +162,6 @@ $form = ActiveForm::begin([
                     </table>
                 </div>    
             </div> 
-            <div class="modal-footer">
-		<?= Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['programacion-nomina/imprimircolilla', 'id' => $model->id_programacion], ['class' => 'btn btn-default btn-sm']); ?>
-	    </div>
         </div>
     </div>  
 </div>  
