@@ -1462,7 +1462,11 @@ class OrdenProduccionController extends Controller
     protected function ActualizarCostoMateriaPrima($materia, $valor) {
         $iva = 0; $subtotal = 0;
         if($valor == 1){
-            $subtotal = round($materia->stock * $materia->valor_unidad);
+            if($materia->valor_unidad > 0){
+                $subtotal = round($materia->stock * $materia->valor_unidad);
+            }else{
+               $subtotal = 0; 
+            }    
             if($materia->aplica_iva == 1){
                 $iva = round(($subtotal * $materia->porcentaje_iva)/100);
             }else{

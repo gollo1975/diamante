@@ -210,6 +210,10 @@ class ProgramacionNominaController extends Controller
                     if ($val->contrato_activo == 1) {
                         $table->fecha_final_contrato = $val->fecha_final;
                     } 
+                    
+                    if($val->id_tipo_contrato == 2 && $val->fecha_final >= $fecha_desde && $val->fecha_final <= $fecha_hasta){
+                      echo $table->fecha_final_contrato = $val->fecha_final;     
+                    }
                     if($tipo_nomina == 1 ){
                        /* $vacacion = \app\models\Vacaciones::find()->where(['=','documento', $val->nit_cedula])
                                                                   ->andWhere(['>=','fecha_desde_disfrute', $fecha_desde])
@@ -246,7 +250,7 @@ class ProgramacionNominaController extends Controller
                     $model->cantidad_empleado = $cont;
 
                 }
-            }        $model->save(false);
+            }       $model->save(false);
         }    
        if ($registros == 0) {
             $this->redirect(["programacion-nomina/view", 'id' => $id,
@@ -958,6 +962,7 @@ class ProgramacionNominaController extends Controller
                         $sumar += $detalle->vlr_devengado + $detalle->vlr_licencia;
                     }
                 endforeach;
+                $nominas->horas_pago = round($nominas->dia_real_pagado * $nominas->factor_dia); 
                 $nominas->ibc_prestacional = $sumar;
                 $nominas->save();
                 
@@ -1144,10 +1149,10 @@ class ProgramacionNominaController extends Controller
            $detalleTransporte->dias_transporte = $detalleTransporte->dias_reales; 
            $detalleTransporte->auxilio_transporte = round($detalleTransporte->dias_transporte * $detalleTransporte->vlr_dia);
            $detalleTransporte->aplico_dias_incapacidad = 1;
-           $detalleTransporte->save();
+           $detalleTransporte->save(false);
            $nomina->dia_real_pagado = $detalleTransporte->dias_reales;
            $nomina->horas_pago = round($nomina->dia_real_pagado * $nomina->factor_dia);
-           $nomina->save();
+           $nomina->save(false);
         }
         $detalleSalario = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $id_programacion])
                                                                        ->andWhere(['=','codigo_salario', 1])->andWhere(['=','aplico_dias_incapacidad', 0])->one();
@@ -1161,7 +1166,7 @@ class ProgramacionNominaController extends Controller
             $detalleSalario->save();
             $nomina->dia_real_pagado = $detalleSalario->dias_reales;
             $nomina->horas_pago = round($nomina->dia_real_pagado * $nomina->factor_dia); 
-            $nomina->save();
+            $nomina->save(false);
         }
       
     }
@@ -1193,7 +1198,11 @@ class ProgramacionNominaController extends Controller
                 foreach ($detalle_nomina as $detalle) {
                     if($detalle->codigoSalario->devengado_deduccion == 1){
                        if($detalle->codigoSalario->ingreso_base_prestacional == 1){
-                           $prestacional += $detalle->vlr_devengado + $detalle->vlr_licencia;
+                           if($detalle->vlr_devengado <> ''){
+                                $prestacional += $detalle->vlr_devengado;
+                           }else{
+                                $prestacional += $detalle->vlr_devengado + $detalle->vlr_licencia;
+                           }      
                        }else{
                            $no_prestacional += $detalle->vlr_devengado_no_prestacional;
                        }
@@ -1226,12 +1235,25 @@ class ProgramacionNominaController extends Controller
                 $periodo->estado_periodo = 1;
                 $periodo->save();
                 
+                //GENERA EL CONSECUTIVO
+                $this->GenerarConsecutivoNomina($nominas);
+                
             }
             
         }else{////PROCESO DE PRIMAS PARA DESARROLLAR
             
         }
        return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+    }
+    
+    //GENERA EL CONSECUTIVO
+    protected function GenerarConsecutivoNomina($nominas) {
+        $codigo = \app\models\Consecutivos::findOne(23);
+        $consecutivo = $codigo->numero_inicial + 1;
+        $nominas->nro_pago = $consecutivo;
+        $nominas->save();
+        $codigo->numero_inicial = $consecutivo;
+        $codigo->save();
     }
     
     //PROCESO QUE ACTUALIZA SALDOS DE CREDITOS

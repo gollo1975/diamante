@@ -743,6 +743,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'items' => [
                                                                  ['label' => 'Creditos', 'icon' => 'plus-square-o', 'url' => ['credito/index']],
                                                                  ['label' => 'Pago adicional x fecha', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-fecha/index']],
+                                                                 ['label' => 'Adicional permanente', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-permanente/index']],
                                                             ],
                                                         ],
                                                     ],

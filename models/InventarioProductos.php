@@ -86,7 +86,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
         return [
             'id_inventario' => 'Id',
             'codigo_producto' => 'Codigo:',
-            'nombre_producto' => 'Producto:',
+            'nombre_producto' => 'Presentacion del producto:',
             'descripcion_producto' => 'Descripcion:',
             'costo_unitario' => 'Costo:',
             'unidades_entradas' => 'Cantidad:',
@@ -115,7 +115,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'id_proveedor' => 'Proveedor:',
             'aplica_descuento' => 'Aplica descuento:',
             'aplica_descuento_distribuidor' => 'aplica_descuento_distribuidor',
-            'id_producto' => 'Producto:',
+            'id_producto' => 'Nombre del producto:',
            
          ];
     }

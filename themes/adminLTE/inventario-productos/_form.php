@@ -34,7 +34,7 @@ $form = ActiveForm::begin([
 
 <?php
 $presentacion = ArrayHelper::map(app\models\PresentacionProducto::find()->where(['=','id_grupo', $model->id_grupo])->orderBy ('descripcion ASC')->all(), 'id_presentacion', 'descripcion');
-$grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
 $porcentaje = ArrayHelper::map(ConfiguracionIva::find()->orderBy ('valor_iva DESC')->all(), 'valor_iva', 'valor_iva');
 $provedor = ArrayHelper::map(Proveedor::find()->orderBy('nombre_completo ASC')->all(), 'id_proveedor', 'nombre_completo');
 ?>
@@ -67,11 +67,11 @@ $provedor = ArrayHelper::map(Proveedor::find()->orderBy('nombre_completo ASC')->
         
         <div class="row">
             <?php if ($IdToken == 0){?>
-                <?= $form->field($model, 'id_grupo')->dropDownList($grupo,['prompt'=>'Seleccione el grupo...', 'onchange'=>' $.get( "'.Url::toRoute('inventario-productos/presentacion').'", { id: $(this).val() } ) .done(function( data ) {
+                <?= $form->field($model, 'id_producto')->dropDownList($producto,['prompt'=>'Seleccione el producto...', 'onchange'=>' $.get( "'.Url::toRoute('inventario-productos/presentacion').'", { id: $(this).val() } ) .done(function( data ) {
                 $( "#'.Html::getInputId($model, 'id_presentacion',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
                  <?= $form->field($model, 'id_presentacion')->dropDownList(['prompt' => 'Seleccione...']) ?>
             <?php }else{ ?>
-                   <?= $form->field($model, 'id_grupo')->dropDownList($grupo,['prompt'=>'Seleccione el grupo...', 'onchange'=>' $.get( "'.Url::toRoute('inventario-productos/presentacion').'", { id: $(this).val() } ) .done(function( data ) {
+                   <?= $form->field($model, 'id_producto')->dropDownList($producto,['prompt'=>'Seleccione el producto...', 'onchange'=>' $.get( "'.Url::toRoute('inventario-productos/presentacion').'", { id: $(this).val() } ) .done(function( data ) {
                  $( "#'.Html::getInputId($model, 'id_presentacion',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
                   <?= $form->field($model, 'id_presentacion')->dropDownList($presentacion, ['prompt' => 'Seleccione...']) ?>
             <?php }?>

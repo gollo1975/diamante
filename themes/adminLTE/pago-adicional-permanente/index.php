@@ -1,50 +1,204 @@
 <?php
 
 use yii\helpers\Html;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
+use yii\widgets\LinkPager;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use kartik\date\DatePicker;
+use kartik\select2\Select2;
+use yii\data\Pagination;
+use kartik\depdrop\DepDrop;
 use yii\grid\GridView;
-
+//Modelos...
+use app\models\Empleados;
+use app\models\GrupoPago;
+use app\models\ConceptoSalarios;
+use app\models\Contratos;
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\PagoAdicionalPermanenteSearch */
+/* @var $searchModel app\models\LicenciaSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Pago Adicional Permanentes';
+$this->title = 'Adicional permanente';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="pago-adicional-permanente-index">
+<script language="JavaScript">
+    function mostrarfiltro() {
+        divC = document.getElementById("filtro");
+        if (divC.style.display == "none"){divC.style.display = "block";}else{divC.style.display = "none";}
+    }
+</script>
+<?php $formulario = ActiveForm::begin([
+    "method" => "get",
+    "action" => Url::toRoute("pago-adicional-permanente/index"),
+    "enableClientValidation" => true,
+    'options' => ['class' => 'form-horizontal'],
+    'fieldConfig' => [
+                    'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
+                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                    'options' => []
+                ],
 
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Create Pago Adicional Permanente', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id_pago_permanente',
-            'id_empleado',
-            'codigo_salario',
-            'id_contrato',
-            'id_grupo_pago',
-            //'id_pago_fecha',
-            //'fecha_corte',
-            //'tipo_adicion',
-            //'valor_adicion',
-            //'permanente',
-            //'aplicar_dia_laborado',
-            //'aplicar_prima',
-            //'aplicar_cesantias',
-            //'estado_registro',
-            //'estado_periodo',
-            //'detalle',
-            //'fecha_creacion',
-            //'user_name',
-
-            ['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+]);
+$grupopago = ArrayHelper::map(GrupoPago::find()->orderBy('grupo_pago ASC')->all(), 'id_grupo_pago', 'grupo_pago');
+$empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->all(), 'id_empleado','nombre_completo');
+$conceptosalario = ArrayHelper::map(ConceptoSalarios::find()->where(['tipo_adicion'=> 1])->orWhere(['tipo_adicion'=> 2])->all(), 'codigo_salario', 'nombre_concepto');
+?>
+<div class="panel panel-success panel-filters">
+    <div class="panel-heading" onclick="mostrarfiltro()">
+        Filtros de busqueda <i class="glyphicon glyphicon-filter"></i>
+    </div>
+	
+    <div class="panel-body" id="filtro" style="display:none">
+        <div class="row" >
+          
+           <?= $formulario->field($form, 'id_empleado')->widget(Select2::classname(), [
+                'data' => $empleado,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+         
+             <?= $formulario->field($form, 'id_grupo_pago')->widget(Select2::classname(), [
+                'data' => $grupopago,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+      
+            <?= $formulario->field($form, 'codigo_salario')->widget(Select2::classname(), [
+                'data' => $conceptosalario,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]);?>
+              <?= $formulario->field($form, 'tipo_adicion')->dropDownList(["1" => 'SUMA', "2" => 'RESTA'],['prompt' => 'Seleccione una opcion ...']) ?>
+            
+        </div> 
+        <div class="panel-footer text-right">
+            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
+            <a align="right" href="<?= Url::toRoute("pago-adicional-permanente/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+        </div>
+    </div>
 </div>
+<?php $formulario->end() ?>
+<?php
+$form = ActiveForm::begin([
+                "method" => "post",                            
+            ]);
+    ?>
+<div class="table-responsive">
+<div class="panel panel-success ">
+    <div class="panel-heading">
+       Registros:<span class="badge"><?= $pagination->totalCount ?></span>
+       
+    </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr style="font-size: 85%">      
+                <th scope="col" style='background-color:#B9D5CE;'>Id</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Concepto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Empleado</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Grupo_pago</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Vlr_pago</th>
+                <th scope="col" style='background-color:#B9D5CE;'> <SPAN title="Aplica a dia Laborado">Adl.</SPAN></th>
+                <th scope="col" style='background-color:#B9D5CE;'><SPAN title="Activo">Act.</SPAN></th>
+                <th scope="col" style='background-color:#B9D5CE;'><SPAN title="Activo periodo">Ap</SPAN></th>
+                <th scope="col" style='background-color:#B9D5CE;'><SPAN title="Debito / Credito">D/C</span></th>
+                <th scope="col"style='background-color:#B9D5CE;'><SPAN title="Numero de contrato">Nro_Cont</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th score="col" style='background-color:#B9D5CE;'></th>                              
+                <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($model as $val):
+                 $contrato_activo = Contratos::find()->where(['=', 'id_contrato', $val->id_contrato])->one();
+                ?>
+            <tr style="font-size: 85%;">                
+                <td><?= $val->id_pago_permanente?></td>
+                <td><?= $val->codigoSalario->nombre_concepto ?></td>
+                <td><?= $val->empleado->nit_cedula?></td>
+                <td><?= $val->empleado->nombre_completo?></td>
+                <td><?= $val->grupoPago->grupo_pago?></td>
+                <td><?= '$'.number_format($val->valor_adicion,0)?></td>
+                <td><?= $val->aplicardialaborado?></td>
+                <td><?= $val->estadoregistro?></td>
+                <td><?= $val->estadoPeriodo?></td>
+                <td><?= $val->debitoCredito?></td>
+                <td><?= $val->contrato->id_contrato?></td>
+                <?php
+                    if($contrato_activo->contrato_activo == 1){?>
+                        <td colspan="3"><p style="color:red;">Closed</p></td>
+                    <?php }else{?>      
+                        <td style="width: 20px; height: 20px">
+                            <a href="<?= Url::toRoute(["pago-adicional-permanente/view", "id" => $val->id_pago_permanente, "tipoadicion"=>$val->tipo_adicion]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                         </td>
+                         <td style="width: 25px;">
+                             <a href="<?= Url::toRoute(["pago-adicional-permanente/update", "id" => $val->id_pago_permanente, "tipoadicion"=>$val->tipo_adicion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                        </td>
+                       <td style="width: 20px; height: 20px">
+                            <?= Html::a('', ['eliminar_valor_permanente', 'id' => $val->id_pago_permanente], [
+                                'class' => 'glyphicon glyphicon-trash',
+                                'data' => [
+                                    'confirm' => 'Esta seguro de eliminar el registro?',
+                                    'method' => 'post',
+                                ],
+                            ]) ?>
+                        </td>
+                     <?php } ?>  
+                        <td style="width: 25px;"><input type="checkbox" name="id_pago_permanente[]" value="<?= $val->id_pago_permanente ?>"></td>
+            </tr>            
+            </tbody>            
+            <?php endforeach; ?>
+        </table> 
+        <div class="panel-footer text-right" >     
+            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm ']); ?>                
+            <a align="right" href="<?= Url::toRoute("pago-adicional-permanente/crearadicion")?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span></a>
+            <a align="right" href="<?= Url::toRoute("pago-adicional-permanente/creardescuento")?>" class="btn btn-info btn-sm"><span class='glyphicon glyphicon-minus-sign'></span></a>
+            <div class="btn-group">
+                  <button type="button" class="btn btn-warning dropdown-toggle btn-sm"
+                          data-toggle="dropdown">
+                      <span class="glyphicon glyphicon-check"></span>Activar 
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Registro",['name' => 'activar_periodo_registro', 'class' => 'btn btn-warning btn-sm']);?>  </li>
+                    <li><?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Periodo", ['name' => 'activar_periodo', "class" => "btn btn-info btn-sm"]) ?>  </li>
+                  </ul>
+           </div> 
+               <div class="btn-group">
+                  <button type="button" class="btn btn-default dropdown-toggle btn-sm"
+                          data-toggle="dropdown">
+                      <span class="glyphicon glyphicon-unchecked"></span>Desactivar 
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><?= Html::submitButton("<span class='glyphicon glyphicon-unchecked'></span> Registro", ["class" => "btn btn-warning btn-sm", 'name' => 'desactivar_periodo_registro']) ?>  </li>
+                    <li><?= Html::submitButton("<span class='glyphicon glyphicon-unchecked'></span> Periodo.", ["class" => "btn btn-info btn-sm", 'name' => 'desactivar_periodo']) ?>  </li>
+                  </ul>
+           </div>    
+       </div>     
+        <?php $form->end() ?>
+        
+     </div>
+</div>
+<?= LinkPager::widget(['pagination' => $pagination]) ?>
+
+<script type="text/javascript">
+	function marcar(source) 
+	{
+		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
+		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
+		{
+			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
+			{
+				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
+			}
+		}
+	}
+</script>

@@ -3,11 +3,27 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\PagoAdicionalPermanente;
-use app\models\PagoAdicionalPermanenteSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\db\ActiveQuery;
+use yii\base\Model;
+use yii\web\Response;
+use yii\web\Session;
+use yii\data\Pagination;
+use yii\filters\AccessControl;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\web\UploadedFile;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use Codeception\Lib\HelperModule;
+//models
+use app\models\PagoAdicionalPermanente;
+use app\models\PagoAdicionalPermanenteSearch;
+use app\models\UsuarioDetalle;
+use app\models\Contratos;
 
 /**
  * PagoAdicionalPermanenteController implements the CRUD actions for PagoAdicionalPermanente model.
@@ -33,16 +49,158 @@ class PagoAdicionalPermanenteController extends Controller
      * Lists all PagoAdicionalPermanente models.
      * @return mixed
      */
-    public function actionIndex()
-    {
-        $searchModel = new PagoAdicionalPermanenteSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+    public function actionIndex() {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',148])->all()){
+               // $pagoadicional = PagoAdicionalPermanente::find()->all();
+                $form = new \app\models\FormFiltroConsultaAdicionPermanente();
+                $id_grupo_pago = null;
+                $id_empleado = null; 
+                $codigo_salario = null;
+                $tipoadicion = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {                        
+                        $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $codigo_salario = Html::encode($form->codigo_salario);
+                        $tipoadicion = Html::encode($form->tipo_adicion);
+                        $table = PagoAdicionalPermanente::find()
+                                ->andFilterWhere(['=','id_empleado',$id_empleado])
+                                ->andFilterWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                                ->andFilterWhere(['=', 'tipo_adicion', $tipoadicion])
+                                ->andFilterWhere(['=', 'codigo_salario', $codigo_salario])
+                                ->andwhere(['=','permanente', 1])
+                                ->orderBy('id_pago_permanente desc');
+                        $table = $table->orderBy('id_pago_permanente DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                            if(isset($_POST['excel'])){                            
+                                $check = isset($_REQUEST['id_pago_permanente DESC']);
+                                $this->actionExcelconsulta($tableexcel);
+                            }
+                } else {
+                        $form->getErrors();
+                }                    
+            } else {
+                $table = PagoAdicionalPermanente::find()
+                        ->where(['=','permanente', 1])
+                        ->orderBy('id_pago_permanente DESC');
+                $tableexcel = $table->all();
+                $count = clone $table;
+                $pages = new Pagination([
+                    'pageSize' => 20,
+                    'totalCount' => $count->count(),
+                ]);
+                $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                if(isset($_POST['excel'])){
+                    //$table = $table->all();
+                    $this->actionExcelconsulta($tableexcel);
+                }
+                if(isset($_POST['activar_periodo_registro'])){                            
+                    if(isset($_REQUEST['id_pago_permanente'])){                            
+                        $intIndice = 0;
+                        foreach ($_POST["id_pago_permanente"] as $intCodigo) {
+                            if ($_POST["id_pago_permanente"][$intIndice]) {                                
+                                $id_pago_permanente = $_POST["id_pago_permanente"][$intIndice];
+                                $this->ActivarPeriodoRegistro($id_pago_permanente);
+                            }
+                            $intIndice++;
+                        }
+                    }
+                    $this->redirect(["pago-adicional-permanente/index"]);
+                }
+                if(isset($_POST['desactivar_periodo_registro'])){                            
+                    if(isset($_REQUEST['id_pago_permanente'])){                            
+                        $intIndice = 0;
+                        foreach ($_POST["id_pago_permanente"] as $intCodigo) {
+                            if ($_POST["id_pago_permanente"][$intIndice]) {                                
+                                $id_pago_permanente = $_POST["id_pago_permanente"][$intIndice];
+                                $this->DesactivarPeriodoRegistro($id_pago_permanente);
+                            }
+                            $intIndice++;
+                        }
+                    }
+                    $this->redirect(["pago-adicional-permanente/index"]);
+                }
+                if(isset($_POST['activar_periodo'])){                            
+                    if(isset($_REQUEST['id_pago_permanente'])){                            
+                        $intIndice = 0;
+                        foreach ($_POST["id_pago_permanente"] as $intCodigo) {
+                            if ($_POST["id_pago_permanente"][$intIndice]) {                                
+                               echo $id_pago_permanente = $_POST["id_pago_permanente"][$intIndice];
+                                $this->ActivarPeriodo($id_pago_permanente);
+                            }
+                            $intIndice++;
+                        }
+                    }
+                    $this->redirect(["pago-adicional-permanente/index"]);
+                }
+                if(isset($_POST['desactivar_periodo'])){                            
+                    if(isset($_REQUEST['id_pago_permanente'])){                            
+                        $intIndice = 0;
+                        foreach ($_POST["id_pago_permanente"] as $intCodigo) {
+                            if ($_POST["id_pago_permanente"][$intIndice]) {                                
+                                $id_pago_permanente = $_POST["id_pago_permanente"][$intIndice];
+                                $this->DesactivarPeriodo($id_pago_permanente);
+                            }
+                            $intIndice++;
+                        }
+                    }
+                    $this->redirect(["pago-adicional-permanente/index"]);
+                }
+            }
+            $to = $count->count();
+            return $this->render('index', [
+                        'model' => $model,
+                        'form' => $form,
+                        'pagination' => $pages,
+            ]);
+            
+        }else{
+             return $this->redirect(['site/sinpermiso']);
+        }     
+        }else{
+           return $this->redirect(['site/login']);
+        }
+   }
+   
+   //PROCESOS DE ACTIVACION Y DESACTIVACION
+    protected function ActivarPeriodoRegistro($id_pago_permanente) {        
+        $adicionalPago = PagoAdicionalPermanente::findOne($id_pago_permanente);
+        $adicionalPago->estado_registro = 0;
+        $adicionalPago->save(false);
     }
+    
+    protected function ActivarPeriodo($id_pago_permanente) {        
+        $adicionalPago = PagoAdicionalPermanente::findOne($id_pago_permanente);
+        $adicionalPago->estado_periodo = 0;
+        $adicionalPago->save(false);
+    }
+    
+    protected function DesactivarPeriodo($id_pago_permanente) {        
+        $adicionalPago = PagoAdicionalPermanente::findOne($id_pago_permanente);
+        $adicionalPago->estado_periodo = 1;
+        $adicionalPago->save(false);
+    }
+    
+    protected function DesactivarPeriodoRegistro($id_pago_permanente) {        
+        $adicionalPago = PagoAdicionalPermanente::findOne($id_pago_permanente);
+        $adicionalPago->estado_registro = 1;
+        $adicionalPago->save(false);
+    }
+
 
     /**
      * Displays a single PagoAdicionalPermanente model.

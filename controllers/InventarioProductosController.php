@@ -465,36 +465,44 @@ class InventarioProductosController extends Controller
      */
     public function actionCreate($IdToken = 0)
     {
-        $model = new InventarioProductos();
-        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
-        }
-        if ($model->load(Yii::$app->request->post())){
-            $buscar = InventarioProductos::find()->where(['=','codigo_producto', $model->codigo_producto])->one();
-            if(!$buscar){
-                if($model->save()){
-                    $presentacion = \app\models\PresentacionProducto::findOne($model->id_presentacion);
-                    if($presentacion){
-                        $model->user_name = Yii::$app->user->identity->username;
-                        $model->codigo_ean = $model->codigo_producto;
-                        $model->nombre_producto = $presentacion->descripcion;
-                        $model->stock_unidades = $model->unidades_entradas;
-                        $model->save();
-                        $id = $model->id_inventario;
-                        $this->ActualizarTotalesProducto($id);
-                    }    
-                    return $this->redirect(['index']);
-                }   
-            }else{
-                Yii::$app->getSession()->setFlash('error', 'El CODIGO ('.$model->codigo_producto.') ya esta ingresado con otra referencia en el sistema. Validar la informacion.');
-            }    
-        }
+        
+        $configuracion = \app\models\MatriculaEmpresa::findOne(1);
+        if($configuracion->permite_subir_inventario_manual == 1){
+            $model = new InventarioProductos();
+            if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ActiveForm::validate($model);
+            }
+            if ($model->load(Yii::$app->request->post())){
+                $presentacion = \app\models\PresentacionProducto::findOne($model->id_presentacion);
+                $buscar = InventarioProductos::find()->where(['=','codigo_producto', $model->codigo_producto])->one();
+                if(!$buscar){
+                    if($model->save(false)){
+                        if($presentacion){
+                            $model->user_name = Yii::$app->user->identity->username;
+                            $model->codigo_ean = $model->codigo_producto;
+                            $model->nombre_producto = $presentacion->descripcion;
+                            $model->stock_unidades = $model->unidades_entradas;
+                            $model->id_grupo = $presentacion->id_grupo;
+                            $model->save();
+                            $id = $model->id_inventario;
+                            $this->ActualizarTotalesProducto($id);
+                        }    
+                        return $this->redirect(['index']);
+                    }   
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'El CODIGO ('.$model->codigo_producto.') ya esta ingresado con otra referencia en el sistema. Validar la informacion.');
+                }    
+            }
 
-        return $this->render('create', [
-            'model' => $model,
-            'IdToken' => $IdToken,
-        ]);
+            return $this->render('create', [
+                'model' => $model,
+                'IdToken' => $IdToken,
+            ]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No esta autorizada para subir INVENTARIO sin ordenes de produccion. Validar la informacion con el administrador.');
+            return $this->redirect(['index']);
+        }    
     }
    //PROCESO QUE ACTUALIZA LOS PRECIOS DEL PRODUCTO
    protected function ActualizarTotalesProducto($id) {
@@ -548,7 +556,7 @@ class InventarioProductosController extends Controller
 
     //PROCESO QUE BUSCA LAS PRESENTACIONES DEL PRODUCTO
      public function actionPresentacion($id){
-        $rows = \app\models\PresentacionProducto::find()->where(['=','id_grupo', $id])->orderBy('descripcion desc')->all();
+        $rows = \app\models\PresentacionProducto::find()->where(['=','id_producto', $id])->orderBy('descripcion desc')->all();
 
         echo "<option value='' required>Seleccione...</option>";
         if(count($rows)>0){
