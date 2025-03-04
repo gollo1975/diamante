@@ -87,14 +87,15 @@ class PDF extends FPDF {
        
         //Lineas del encabezado
         $this->Line(10,74,10,125);
-        $this->Line(100,74,100,125);
-        $this->Line(151,74,151,125);
+        $this->Line(70,74,70,125);
+        $this->Line(130,74,130,125);
+        $this->Line(166,74,166,125);
         $this->Line(202,74,202,125);
         $this->Line(10,125,202,125);//linea horizontal inferior  
     }
     function EncabezadoDetalles() {
         $this->Ln(10);
-        $header = array('NOMBRE DEL MATERIAl', ('UNIDADES REQUERIDAS'),('UNIDADES SOLICITADAS'));
+        $header = array('NOMBRE DEL MATERIAl', 'PRESENTACION',('U. REQUERIDAS'),('U. SOLICITADAS'));
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
         $this->SetDrawColor(0, 0, 0);
@@ -102,7 +103,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 8);
 
         //creamos la cabecera de la tabla.
-        $w = array(90, 51, 51);
+        $w = array(60, 60 ,36, 36);
         for ($i = 0; $i < count($header); $i++){
             if ($i == 0 || $i == 1){
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -120,11 +121,12 @@ class PDF extends FPDF {
       
         $detalles = app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $model->codigo])->all();		
         $pdf->SetX(10);
-        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetFont('Arial', '', 7);
 	foreach ($detalles as $detalle) {                                                           
-            $pdf->Cell(90, 4, utf8_decode($detalle->materiales), 0, 0, 'L');
-            $pdf->Cell(51, 4, utf8_decode(''.number_format($detalle->unidades_lote,0)), 0, 0, 'R');
-            $pdf->Cell(51, 4, utf8_decode(''.number_format($detalle->unidades_requeridas,0)), 0, 0, 'R');
+            $pdf->Cell(60, 4, utf8_decode($detalle->materiales), 0, 0, 'L');
+             $pdf->Cell(60, 4, utf8_decode($detalle->ordenPresentacion->descripcion), 0, 0, 'L');
+            $pdf->Cell(36, 4, utf8_decode(''.number_format($detalle->unidades_lote,0)), 0, 0, 'R');
+            $pdf->Cell(36, 4, utf8_decode(''.number_format($detalle->unidades_requeridas,0)), 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }
@@ -185,6 +187,6 @@ $pdf->AddPage();
 $pdf->Body($pdf,$model);
 $pdf->AliasNbPages();
 $pdf->SetFont('Times', '', 10);
-$pdf->Output("SolicitudMaterials$model->codigo.pdf", 'D');
+$pdf->Output("SolicitudMateriales$model->codigo.pdf", 'D');
 
 exit;

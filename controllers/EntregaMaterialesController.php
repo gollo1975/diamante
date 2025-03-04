@@ -132,12 +132,17 @@ class EntregaMaterialesController extends Controller
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_cantidad"])){
                 if(isset($_POST["listado_materiales"])){
-                    $intIndice = 0;
+                    $intIndice = 0; $cantidad = 0;
                     foreach ($_POST["listado_materiales"] as $intCodigo):
-                        $table = \app\models\EntregaMaterialesDetalle::findOne($intCodigo);
-                        $table->unidades_despachadas = $_POST["unidades_despachadas"][$intIndice];
-                        $table->save();
-                        $intIndice++;
+                         $table = \app\models\EntregaMaterialesDetalle::findOne($intCodigo);
+                        $cantidad = $_POST["unidades_despachadas"][$intIndice];
+                        if($cantidad <= $table->unidades_solicitadas){
+                            $table->unidades_despachadas = $_POST["unidades_despachadas"][$intIndice];
+                            $table->save();
+                            $intIndice++;
+                        }else{
+                            Yii::$app->getSession()->setFlash('warning', 'La cantidad entrega NO puede ser mayo que la cantidad solicitada. Valide la informacion.');
+                        }    
                     endforeach;
                     return $this->redirect(['view','id' =>$id, 'token' => $token]);
                 }
@@ -153,6 +158,13 @@ class EntregaMaterialesController extends Controller
       //SE AUTORIZA O DESAUTORIZA EL PRODUCTO
     public function actionAutorizado($id, $token) {
         $model = $this->findModel($id);
+        $entrega = \app\models\EntregaMaterialesDetalle::find()->where(['=','id_entrega', $model->id_entrega])->all();
+        foreach ($entrega as $valor) {
+            if ($valor->unidades_despachadas <= 0) {
+               Yii::$app->getSession()->setFlash('error', 'El campo de UNIDADES DESPACHADAS no puede ser vacio o igual a 0');
+               return $this->redirect(["entrega-materiales/view", 'id' => $id, 'token' => $token]);
+            }
+        }
         if ($model->autorizado == 0){  
             $model->autorizado = 1;
             $model->update();

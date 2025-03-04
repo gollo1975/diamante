@@ -25,7 +25,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'ENTREGA DE MATERIALES (Detalle)';
+$this->title = 'ENTREGA DE MATERIALES';
 $this->params['breadcrumbs'][] = ['label' => 'Entrega de materiales', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_entrega;
 $view = 'entrega-materiales';
@@ -69,21 +69,21 @@ $view = 'entrega-materiales';
     </p>  
     <div class="panel panel-success">
         <div class="panel-heading">
-            <h4>ENTREGA DE MATERIALES</h4>
+            <h4>Informacion de la entrega</h4>
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_entrega") ?></th>
                     <td><?= Html::encode($model->id_entrega) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Grupo') ?></th>
-                    <td><?= Html::encode($model->solicitud->grupo->nombre_grupo) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Producto') ?>:</th>
+                    <td><?= Html::encode($model->solicitud->ordenProduccion->producto->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_entrega') ?></th>
                     <td><?= Html::encode($model->numero_entrega) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades_solicitadas') ?></th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->unidades_solicitadas,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_despacho') ?></th>
@@ -93,7 +93,7 @@ $view = 'entrega-materiales';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Numero_lote') ?></th>
                     <td style="text-align: right;"><?= Html::encode($model->solicitud->ordenProduccion->numero_lote) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado')?></th>
                     <td><?= Html::encode($model->autorizadoSolicitud) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cerrar_solicitud') ?></th>
@@ -103,7 +103,7 @@ $view = 'entrega-materiales';
                     <th style='background-color:#F0F3EF;'></th>
                     <td></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td  colspan="8"><?= Html::encode($model->observacion) ?></td>
                 </tr>
@@ -123,7 +123,7 @@ $view = 'entrega-materiales';
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#detallesolicitud" aria-controls="detallesolicitud" role="tab" data-toggle="tab">Detalle solicitud <span class="badge"><?= count($detalle_solicitud) ?></span></a></li>
+            <li role="presentation" class="active"><a href="#detallesolicitud" aria-controls="detallesolicitud" role="tab" data-toggle="tab">Listado de materiales <span class="badge"><?= count($detalle_solicitud) ?></span></a></li>
         </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane  active" id="detalleorden">
@@ -132,10 +132,11 @@ $view = 'entrega-materiales';
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código del material</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del material</th> 
+                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentación</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades solicitadas</th>  
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades despachadas</th>
                                         </tr>
@@ -143,10 +144,11 @@ $view = 'entrega-materiales';
                                     <body>
                                          <?php
                                          foreach ($detalle_solicitud as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $val->id ?></td>
                                                 <td><?= $val->codigo_materia ?></td>
                                                 <td><?= $val->materiales ?></td>
+                                                  <td><?= $val->ordenProductos->descripcion ?></td>
                                                 <td style="text-align: right"><?= $val->unidades_solicitadas ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_despachadas[]" style ="text-align: right" value="<?= $val->unidades_despachadas ?>" size ="12" required="true"> </td> 

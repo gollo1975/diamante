@@ -110,10 +110,10 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>No orden</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>OP</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
@@ -123,9 +123,9 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
-                <tr style ='font-size: 90%;'>                
+                <tr style ='font-size: 85%;'>                
                     <td><?= $val->numero_orden_ensamble?></td>
-                    <td><?= $val->grupo->nombre_grupo?></td>
+                    <td><?= $val->ordenProduccion->producto->nombre_producto?></td>
                     <td><?= $val->ordenProduccion->numero_orden?></td>
                     <td><?= $val->etapa->concepto?></td>
                     <td><?= $val->fecha_proceso?></td>

@@ -34,11 +34,12 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['codigo', 'id_materia_prima', 'unidades_lote', 'unidades_requeridas'], 'integer'],
+            [['codigo', 'id_materia_prima', 'unidades_lote', 'unidades_requeridas','id_detalle'], 'integer'],
             [['codigo_materia'], 'string', 'max' => 15],
             [['materiales'], 'string', 'max' => 30],
             [['codigo'], 'exist', 'skipOnError' => true, 'targetClass' => SolicitudMateriales::className(), 'targetAttribute' => ['codigo' => 'codigo']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
+            [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccionProductos::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
         ];
     }
 
@@ -55,13 +56,14 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
             'materiales' => 'Materiales',
             'unidades_lote' => 'Unidades Lote',
             'unidades_requeridas' => 'Unidades Requeridas',
+            'id_detalle' => 'id_detalle,'
         ];
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCodigo0()
+    public function getCodigo()
     {
         return $this->hasOne(SolicitudMateriales::className(), ['codigo' => 'codigo']);
     }
@@ -72,5 +74,13 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
     public function getMateriaPrima()
     {
         return $this->hasOne(MateriaPrimas::className(), ['id_materia_prima' => 'id_materia_prima']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrdenPresentacion()
+    {
+        return $this->hasOne(OrdenProduccionProductos::className(), ['id_detalle' => 'id_detalle']);
     }
 }

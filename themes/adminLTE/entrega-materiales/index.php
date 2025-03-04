@@ -99,11 +99,12 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Id</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Numero de entrega</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Numero de solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. despacho</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
@@ -116,10 +117,11 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
-                <tr style ='font-size: 90%;'>                
+                <tr style ='font-size: 85%;'>                
                     <td><?= $val->id_entrega?></td>
-                     <td><?= $val->numero_entrega?></td>
-                    <td><?= $val->solicitud->grupo->nombre_grupo?></td>
+                    <td><?= $val->numero_entrega?></td>
+                    <td><?= $val->solicitud->numero_solicitud?></td>
+                    <td><?= $val->solicitud->ordenProduccion->producto->nombre_producto?></td>
                     <td><?= $val->solicitud->ordenProduccion->numero_lote?></td>
                     <td><?= $val->fecha_despacho?></td>
                     <td><?= $val->fecha_hora_registro?></td>

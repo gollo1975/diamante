@@ -59,7 +59,7 @@ $view = 'solicitud-materiales';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "codigo") ?></th>
                     <td><?= Html::encode($model->codigo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
@@ -69,7 +69,7 @@ $view = 'solicitud-materiales';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_solicitud') ?></th>
                     <td><?= Html::encode($model->numero_solicitud) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_cierre') ?></th>
@@ -79,7 +79,7 @@ $view = 'solicitud-materiales';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_lote') ?></th>
                     <td style="text-align: right;"><?= Html::encode($model->numero_lote) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_produccion')?></th>
                     <td><?= Html::encode($model->ordenProduccion->numero_orden) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
@@ -89,7 +89,7 @@ $view = 'solicitud-materiales';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td  colspan="8"><?= Html::encode($model->observacion) ?></td>
                 </tr>
@@ -104,36 +104,80 @@ $view = 'solicitud-materiales';
         'labelOptions' => ['class' => 'col-sm-3 control-label'],
         'options' => []
     ],
-    ]);?>
+    ]);
+     ?>
     <!-- comienza los tabs -->
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#detallesolicitud" aria-controls="detallesolicitud" role="tab" data-toggle="tab">Detalle solicitud <span class="badge"><?= count($detalle_solicitud) ?></span></a></li>
+            <li role="presentation" class="active"><a href="#presentacion" aria-controls="presentacion" role="tab" data-toggle="tab">Presentacion de producto <span class="badge"><?= count($presentacion) ?></span></a></li>
+            <li role="presentation"><a href="#detallesolicitud" aria-controls="detallesolicitud" role="tab" data-toggle="tab">Materia de empaque <span class="badge"><?= count($detalle_solicitud) ?></span></a></li>
         </ul>
             <div class="tab-content">
-                <div role="tabpanel" class="tab-pane  active" id="detalleorden">
+                 <div role="tabpanel" class="tab-pane  active" id="presentacion">
                     <div class="table-responsive">
                         <div class="panel panel-success">
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
+                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>   
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Presentacion</b></th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th> 
+                                            <th scope="col" style='background-color:#B9D5CE;'></th> 
+                                        </tr>
+                                    </thead>
+                                    <body>
+                                         <?php
+                                         foreach ($presentacion as $val):?>
+                                            <tr style="font-size: 85%;">
+                                                <td><?= $val->id_detalle ?></td>
+                                                <td><?= $val->codigo_producto ?></td>
+                                                <td><?= $val->descripcion ?></td>
+                                                <td style="text-align: right"><?= $val->cantidad_real ?></td>
+                                                <?php if($model->autorizado == 0){?>
+                                                    <td style= 'width: 25px; height: 25px;'>
+                                                        <a href="<?= Url::toRoute(["solicitud-materiales/buscar_material_empaque", 'id' => $model->codigo, 'token' => $token, 'id_solicitud' => $model->id_solicitud,'id_detalle' => $val->id_detalle])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
+                                                    </td>    
+                                                <?php }else{?>
+                                                    <td style="width: 25px; height: 25px;"></td>
+                                                <?php }   ?>      
+                                                   
+                                            </tr>
+                                         <?php endforeach;?>          
+                                    </body>
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>    
+                <!-- TERMINA TABS -->
+                <div role="tabpanel" class="tab-pane" id="detallesolicitud">
+                    <div class="table-responsive">
+                        <div class="panel panel-success">
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código del material</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del material</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion producto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades del lote</th>  
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades solicitadas</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
-                                                                                   </tr>
+                                        </tr>
                                     </thead>
                                     <body>
                                          <?php
                                          foreach ($detalle_solicitud as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $val->id ?></td>
                                                 <td><?= $val->codigo_materia ?></td>
                                                 <td><?= $val->materiales ?></td>
+                                                <td><?= $val->ordenPresentacion->descripcion ?></td>
                                                 <td style="text-align: right"><?= $val->unidades_lote ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_requeridas[]" style ="text-align: right" value="<?= $val->unidades_requeridas ?>" size ="12" required="true"> </td> 

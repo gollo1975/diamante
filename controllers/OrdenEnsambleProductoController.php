@@ -954,7 +954,7 @@ class OrdenEnsambleProductoController extends Controller
                         $materia->stock -= $detalles->unidades_utilizadas;
                         $materia->save(false);
                         $detalles->importado = 1;
-                        $detalles->save();
+                        $detalles->save(false);
                         $this->ActualizarCostoMaterialEmpaque($materia);
                         $con += 1;
                     }

@@ -34,11 +34,12 @@ class EntregaMaterialesDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_entrega', 'id_materia_prima', 'unidades_solicitadas', 'unidades_despachadas'], 'integer'],
+            [['id_entrega', 'id_materia_prima', 'unidades_solicitadas', 'unidades_despachadas','id_detalle'], 'integer'],
             [['codigo_materia'], 'string', 'max' => 15],
             [['materiales'], 'string', 'max' => 30],
             [['id_entrega'], 'exist', 'skipOnError' => true, 'targetClass' => EntregaMateriales::className(), 'targetAttribute' => ['id_entrega' => 'id_entrega']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
+            [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccionProductos::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
         ];
     }
 
@@ -55,6 +56,7 @@ class EntregaMaterialesDetalle extends \yii\db\ActiveRecord
             'materiales' => 'Materiales',
             'unidades_solicitadas' => 'Unidades Solicitadas',
             'unidades_despachadas' => 'Unidades Despachadas',
+            'id_detalle' => 'id_detalle',
         ];
     }
 
@@ -72,5 +74,13 @@ class EntregaMaterialesDetalle extends \yii\db\ActiveRecord
     public function getMateriaPrima()
     {
         return $this->hasOne(MateriaPrimas::className(), ['id_materia_prima' => 'id_materia_prima']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrdenProductos()
+    {
+        return $this->hasOne(OrdenProduccionProductos::className(), ['id_detalle' => 'id_detalle']);
     }
 }
