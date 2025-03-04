@@ -1463,7 +1463,7 @@ class OrdenProduccionController extends Controller
         $iva = 0; $subtotal = 0;
         if($valor == 1){
             if($materia->valor_unidad > 0){
-                if ($materia->stock === null){
+                if ($materia->stock == null){
                    $subtotal = 0; 
                 }else{
                     $subtotal = round($materia->stock * $materia->valor_unidad);
