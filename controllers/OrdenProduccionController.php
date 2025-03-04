@@ -1441,9 +1441,9 @@ class OrdenProduccionController extends Controller
                             $variable = round($materia->stock_gramos /1000);
                             $materia->stock = ''.number_format($variable, 2);
                             $materia->save(false);
+                            $this->ActualizarCostoMateriaPrima($materia, $valor);
                             $detalles->importado = 1;
                             $detalles->save();
-                            $this->ActualizarCostoMateriaPrima($materia, $valor);
                         }    
                     }
                 }
@@ -1463,7 +1463,7 @@ class OrdenProduccionController extends Controller
         $iva = 0; $subtotal = 0;
         if($valor == 1){
             if($materia->valor_unidad > 0){
-                if ($materia->stock == null){
+                if ($materia->stock <= 0){
                    $subtotal = 0; 
                 }else{
                     $subtotal = round($materia->stock * $materia->valor_unidad);
