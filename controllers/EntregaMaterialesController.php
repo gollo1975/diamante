@@ -141,7 +141,7 @@ class EntregaMaterialesController extends Controller
                             $table->save();
                             $intIndice++;
                         }else{
-                            Yii::$app->getSession()->setFlash('warning', 'La cantidad entrega NO puede ser mayo que la cantidad solicitada. Valide la informacion.');
+                            Yii::$app->getSession()->setFlash('warning', 'La cantidad a entregar NO puede ser mayor que la cantidad solicitada. Valide la informacion!');
                         }    
                     endforeach;
                     return $this->redirect(['view','id' =>$id, 'token' => $token]);

@@ -210,8 +210,7 @@ $view = 'solicitud-materiales';
                                     if(count($detalle_solicitud) > 0){ ?>
                                          <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Agregar material', ['solicitud-materiales/buscar_materia_prima', 'id' => $model->codigo, 'id_solicitud' => $model->id_solicitud, 'token' => $token],[ 'class' => 'btn btn-warning btn-sm']) ?>   
                                         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_cantidad']) ?>
-                                    <?php }else{?>
-                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Agregar material', ['solicitud-materiales/buscar_materia_prima', 'id' => $model->codigo, 'id_solicitud' => $model->id_solicitud, 'token' => $token],[ 'class' => 'btn btn-warning btn-sm']) ?>   
+                                            
                                     <?php }
                                 } ?>
                             </div>   

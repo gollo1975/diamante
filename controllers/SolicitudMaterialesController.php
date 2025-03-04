@@ -154,7 +154,7 @@ class SolicitudMaterialesController extends Controller
                             $table->save();
                             $intIndice++;
                         }else{
-                             Yii::$app->getSession()->setFlash('warning', 'La cantidad a despachar es mayor que la cantidad de la presentacion del producto.'); 
+                             Yii::$app->getSession()->setFlash('warning', 'La cantidad a despachar es mayor que la cantidad fabricada en la presentacion del producto.'); 
                         }    
                     endforeach;
                     return $this->redirect(['view','id' =>$id, 'token' => $token]);

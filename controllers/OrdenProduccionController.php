@@ -1694,7 +1694,7 @@ class OrdenProduccionController extends Controller
             $table->save(false);
             $nuevo_registro = \app\models\SolicitudMateriales::find()->orderBy('codigo DESC')->one();
             $id = $nuevo_registro->codigo;
-            return $this->redirect(['solicitud-materiales/view', 'id' => $id, 'token' => $token]);
+            $this->redirect(['solicitud-materiales/view', 'id' => $id, 'token' => $token]);
         }    
 
     }

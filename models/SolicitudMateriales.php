@@ -39,7 +39,7 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
         return [
             [['id_orden_produccion', 'id_solicitud'], 'required'],
             [['id_orden_produccion', 'id_solicitud', 'unidades',  'numero_orden_produccion','id_grupo','numero_solicitud','autorizado',
-                'cerrar_solicitud'], 'integer'],
+            'cerrar_solicitud'], 'integer'],
             [['observacion'], 'string', 'max' => 100],
             [['fecha_cierre', 'fecha_hora_registro'], 'safe'],
             [['user_name','numero_lote'], 'string', 'max' => 15],
