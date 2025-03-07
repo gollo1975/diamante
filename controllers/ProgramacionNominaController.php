@@ -174,16 +174,16 @@ class ProgramacionNominaController extends Controller
                 $registros = \app\models\Contratos::find()
                         ->where(['=', 'id_grupo_pago', $model->id_grupo_pago])
                         ->andWhere(['<=', 'fecha_inicio', $model->fecha_hasta])
-                        ->andWhere(['=', 'contrato_activo', 1])
-                        ->andWhere(['<','ultima_prima', $model->fecha_hasta])
+                        ->andWhere(['=', 'contrato_activo', 0])
+                        ->andWhere(['<','ultima_pago_prima', $model->fecha_hasta])
                         ->all();
             }else{
                 if($tipo_nomina == 3){
                     $registros = \app\models\Contratos::find()
                         ->where(['=', 'id_grupo_pago', $model->id_grupo_pago])
                         ->andWhere(['<=', 'fecha_inicio', $model->fecha_hasta])
-                        ->andWhere(['=', 'contrato_activo', 1])
-                        ->andWhere(['<','ultima_cesantia', $model->fecha_hasta])
+                        ->andWhere(['=', 'contrato_activo', 0])
+                        ->andWhere(['<','ultima_pago_cesantia', $model->fecha_hasta])
                         ->all();
                 }
             }
@@ -362,7 +362,8 @@ class ProgramacionNominaController extends Controller
 //* SEGUNDO PROCESO DEL BOTON GENERAR DESCUENTOS*/
     public function actionGenerar_devengados($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
     {
-        if($tipo_nomina == 1){ //PROCESA REGISTROS DE NOMINA
+        if($tipo_nomina == 1)
+        { //PROCESA REGISTROS DE NOMINA
             $listado_nomina = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->all();
             $salarios = \app\models\ConceptoSalarios::find()->where(['=', 'inicio_nomina', 1])->one();
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
@@ -454,12 +455,183 @@ class ProgramacionNominaController extends Controller
                     $valores->save();
                 endforeach;
 
-        }else{
-            //PROCESO PARA PRIMAS
+        }
+        else{ //COMIENZA EL PROCESO DE PRIMAS SEMESTRALES
+            $listado_nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+            $periodo = PeriodoPagoNomina::findOne($id);
+            $configuracion_prima = \app\models\ConfiguracionPrestaciones::findOne(1);
+            $year = 0;
+            $year = ($year==NULL)? date('Y'):$year;
+            if (($year%4 == 0 && $year%100 != 0) || $year%400 == 0 ){ //PROCESO QUE VALIDE SI EL AÑO ES VISCIESTO
+                   $ano = 1;
+            }else{
+                   $ano = 2;
+            }  
+            
+            foreach ($listado_nomina as $key => $prima) {
+                
+               //inicializar el contrato
+                $ibc_anterior = 0; $dias_promedio = 0; $auxilio = 0; $salario_promedio = 0; $pago_prima = 0; $adicion_salario = 0;
+                $contrato = \app\models\Contratos::findOne($prima->id_contrato);
+                $total_dias = $this->CrearPrimaSemestral($prima, $ano);
+                
+                //DIAS FALTANTES
+                $dias_faltante = 0;
+                $hasta = strtotime($fecha_hasta);
+                $fecha_corte_nomina = strtotime($contrato->ultimo_pago_nomina);
+                $diferencia_segundos = $hasta - $fecha_corte_nomina;
+                $dias_faltante = $diferencia_segundos / 86400;
+                
+                //BUSCAR EL ACUMULADO DE PRESTACIONES
+                $vector_nomina = ProgramacionNomina::find()->where(['=','id_empleado', $prima->id_empleado])
+                                                           ->andWhere(['>=','fecha_desde', $prima->fecha_desde])
+                                                           ->andWhere(['=','id_tipo_nomina', 1])->all();
+                $total_ibc = 0;
+                foreach ($vector_nomina as $val) {
+                    $total_ibc = $total_ibc + $val->ibc_prestacional; 
+                }
+                
+                //se adiciona segun la fecha de corte de prima
+                $adicion_salario = ($contrato->salario / 30) * $dias_faltante;
+               
+                //trae acumulados
+                if ($contrato->ibp_prima_inicial > 0){
+                    $salario_promedio = round(($total_ibc + $contrato->ibp_prima_inicial + $adicion_salario) / $total_dias) * 30;
+                }else{
+                  $salario_promedio = round((($total_ibc + $adicion_salario ) / $total_dias) * 30);
+                }
+                                
+                // valide si tiene aplica auxilio de transporte
+                $vecto_auxilio = \app\models\ConfiguracionSalario::find()->where(['=','estado', 1])->one();
+                if($contrato->aplica_auxilio_transporte == 1){
+                    if($contrato->id_tipo_salario == 1){
+                        $pago_prima = round((($contrato->salario + $vecto_auxilio->auxilio_transporte_actual) * $total_dias)/360);
+                    }else {
+                       echo $pago_prima = round((($salario_promedio + $vecto_auxilio->auxilio_transporte_actual) * $total_dias)/360),'</br>'; 
+                    }
+                 
+                }else{
+                    if($contrato->id_tipo_salario == 1){
+                        $pago_prima = round((($contrato->salario) * $total_dias)/360);
+                    }else {
+                       $pago_prima = round((($salario_promedio) * $total_dias)/360); 
+                    }
+                }
+                //creacion del registro
+                $concepto_salario = \app\models\ConceptoSalarios::find()->where(['=','concepto_prima', 1])->one();
+                $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $prima->id_programacion])
+                                                                         ->andWhere(['=', 'codigo_salario', $concepto_salario->codigo_salario])
+                                                                         ->all();
+                if(!$detalle_nomina){
+                    $table = new \app\models\ProgramacionNominaDetalle();
+                    $table->id_programacion = $prima->id_programacion;
+                    $table->codigo_salario = $concepto_salario->codigo_salario;
+                    $table->dias_reales = $total_dias;
+                    $table->fecha_desde = $fecha_desde;
+                    $table->fecha_hasta = $fecha_hasta;
+                    $table->vlr_devengado = $pago_prima;
+                    $table->id_periodo_pago_nomina = $id;
+                    $table->id_grupo_pago = $prima->id_grupo_pago;
+                    $table->save(false);
+                    // actualiza la tabla de programacion de nomina
+                    $prima->dias_pago = $periodo->dias_periodo;
+                    $prima->dia_real_pagado = $total_dias;
+                    $prima->total_devengado = $pago_prima;
+                    $prima->salario_promedio = $salario_promedio;
+                    $prima->dias_ausentes = 0;
+                    $prima->estado_generado = 1;
+                    $prima->save(false);
+                }
+                 
+            }
         }
         return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
         
     }
+    
+    //PROCEESO QUE GENERA LOS DIAS DE PRIMAS
+     protected function CrearPrimaSemestral($prima, $ano)
+    {
+        $mesInicio = 0;
+        $anioTerminacion = 0;
+        $mesTerminacion = 0;
+        $anioInicio = 0;
+        $diaTerminacion = 0;
+        $diaInicio = 0;
+        if($prima->fecha_inicio_contrato <= $prima->fecha_ultima_prima){
+            $fecha = date($prima->fecha_desde);
+        }else{
+           $fecha = date($prima->fecha_inicio_contrato);
+        } 
+       
+        $fecha_inicio_dias = strtotime('0 day', strtotime($fecha));
+        $fecha_inicio_dias = date('Y-m-d', $fecha_inicio_dias);
+        //codigo de fechas
+        $fecha_inicio = $fecha_inicio_dias;
+        $fecha_termino = $prima->fecha_hasta;
+        $diaTerminacion = substr($fecha_termino, 8, 8);
+        $mesTerminacion = substr($fecha_termino, 5, 2);
+        $anioTerminacion = substr($fecha_termino, 0, 4);
+        $diaInicio = substr($fecha_inicio, 8, 8);
+        $mesInicio = substr($fecha_inicio, 5, 2);
+        $anioInicio = substr($fecha_inicio, 0, 4);
+        
+        $febrero = 0;
+        $mes = $mesInicio-1;
+        if($mes == 2){
+            if($ano == 1){
+              $febrero = 29;
+            }else{
+              $febrero = 28;
+            }
+        }else if($mes <= 7){
+            if($mes==0){
+             $febrero = 31;
+            }else if($mes%2==0){
+                 $febrero = 30;
+                }else{
+                   $febrero = 31;
+                }
+        }else if($mes > 7){
+              if($mes%2==0){
+                  $febrero = 31;
+              }else{
+                  $febrero = 30;
+              }
+        }
+        if(($anioInicio > $anioTerminacion) || ($anioInicio == $anioTerminacion && $mesInicio > $mesTerminacion) || 
+            ($anioInicio == $anioTerminacion && $mesInicio == $mesTerminacion && $diaInicio > $diaTerminacion)){
+                //mensaje
+        }else{
+            if($mesInicio <= $mesTerminacion){
+                $anios = $anioTerminacion - $anioInicio;
+                if($diaInicio <= $diaTerminacion){
+                    $meses = $mesTerminacion - $mesInicio;
+                    $dies = $diaTerminacion - $diaInicio;
+                }else{
+                    if($mesTerminacion == $mesInicio){
+                       $anios = $anios - 1;
+                    }
+                    $meses = ($mesTerminacion - $mesInicio - 1 + 12) % 12;
+                    $dies = $febrero-($diaInicio - $diaTerminacion);
+                }
+            }else{
+                $anios = $anioTerminacion - $anioInicio - 1;
+                if($diaInicio > $diaTerminacion){
+                    $meses = $mesTerminacion - $mesInicio -1 +12;
+                    $dies = $febrero - ($diaInicio-$diaTerminacion);
+                }else{
+                    $meses = $mesTerminacion - $mesInicio + 12;
+                    $dies = $diaTerminacion - $diaInicio;
+                }
+            }
+           $total_dias = (($anios * 360) + ($meses * 30)+ ($dies +1));
+        }
+         return ($total_dias);
+       
+    }
+    
+    
     //PROCES QUE GENERA EL SALARIO BASICO
     protected function salario($val, $codigo_salario, $id_grupo_pago, $jornada) {
         $prognomdetalle = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $val->id_programacion])->andWhere(['=', 'codigo_salario', $codigo_salario])->one();
@@ -908,7 +1080,7 @@ class ProgramacionNominaController extends Controller
     public function actionGenerar_descuentos($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina) {
        if($tipo_nomina == 1){
            
-            //PROCESO QUE BUSCAR LAS LICENCIAS PARA DESCONTAR DIAS
+       //PROCESO QUE BUSCAR LAS LICENCIAS PARA DESCONTAR DIAS
             $buscarLicencia = \app\models\ProgramacionNominaDetalle::find()->where(['<>','id_licencia', ''])
                                                                           ->andWhere(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion ASC')->all();
             if(count($buscarLicencia) > 0){
@@ -1104,9 +1276,103 @@ class ProgramacionNominaController extends Controller
             }
             
        }else{
-           ///proceso para primas
+            if($tipo_nomina == 2){ ///PROCESO QUE APLICA DESCUENTOS AL PAGO DE PRIMAS
+                 $nomina_prima = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                foreach ($nomina_prima as $key => $nominas) {
+                     //BUSCAR EN EL MODULO DE CREDITO
+                    $creditos = \app\models\Credito::find()->where(['=','id_empleado', $nominas->id_empleado])->andWhere(['>','saldo_credito', 0])
+                                                           ->andWhere(['=','estado_periodo', 0])->andWhere(['=','aplicar_prima', 1])->all();
+                    if(count($creditos)> 0){
+                        foreach ($creditos as $credito) {
+                            $buscar = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                       ->andWhere(['=','codigo_salario', $credito->codigoCredito->codigo_salario])->one();
+                            if(!$buscar){
+                                $saldo = 0; $cuotas = 0; $tcuota = 0;
+                                $cuotas = $credito->numero_cuota_actual + 1;
+                                $tcuota = $credito->numero_cuotas - $cuotas;
+                                $saldo =  $credito->saldo_credito - $credito->valor_aplicar;      
+                                $table = new \app\models\ProgramacionNominaDetalle();
+                                $table->id_programacion = $nominas->id_programacion;
+                                $table->codigo_salario = $credito->codigoCredito->codigo_salario;
+                                $table->fecha_desde = $fecha_desde;
+                                $table->fecha_hasta = $fecha_hasta;
+                                $table->vlr_deduccion = $credito->valor_aplicar;
+                                $table->deduccion = $credito->valor_aplicar;
+                                $table->id_credito = $credito->id_credito;
+                                $table->id_periodo_pago_nomina = $id;
+                                $table->id_grupo_pago = $credito->id_grupo_pago;
+                                $table->save();
+                                //INSETAR EL ABONO
+                                $table2 = new \app\models\AbonoCredito();
+                                $table2->id_credito = $credito->id_credito;
+                                $table2->id_tipo_pago = 2;
+                                $table2->valor_abono = $credito->valor_aplicar;
+                                $table2->saldo = $saldo;
+                                $table2->cuota_pendiente = $tcuota;
+                                $table2->fecha_abono = date('Y-m-d');
+                                $table2->observacion = 'Deduccion por primas';
+                                $table2->user_name = Yii::$app->user->identity->username;
+                                $table2->save(false);
+                                //actualizar saldos
+                                $credito->numero_cuota_actual = $cuotas;
+                                $credito->saldo_credito = $saldo;
+                                $credito->save(false);
+                            }
+                        }
+                    }
+                    
+                    //PROCESO QUE ADICIONA  O DESCUENTA CONCEPTOS POR FECHA EN LA PRIMA
+                    $adicion_fecha = \app\models\PagoAdicionalPermanente::find()->where(['=', 'fecha_corte', $fecha_hasta])
+                            ->andWhere(['=', 'estado_registro', 0])
+                            ->andWhere(['=', 'estado_periodo', 0])
+                            ->andWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                            ->andWhere(['=','aplicar_prima', 1])->andWhere(['=','id_empleado', $nominas->id_empleado])
+                            ->all();
+                    if (count($adicion_fecha) > 0) {
+                        foreach ($adicion_fecha as $adicionfecha) {
+                            $buscar = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                       ->andWhere(['=','codigo_salario', $adicionfecha->codigo_salario])->one();
+                            if (!$buscar) {
+                                $table = new \app\models\ProgramacionNominaDetalle();
+                                $table->id_programacion = $nominas->id_programacion;
+                                $table->codigo_salario = $adicionfecha->codigo_salario;
+                                $table->id_periodo_pago_nomina = $id;
+                                $table->fecha_desde = $fecha_desde;
+                                $table->fecha_hasta = $fecha_hasta;
+                                $table->id_grupo_pago = $id_grupo_pago;
+                                if ($adicionfecha->tipo_adicion == 1) {
+                                    if ($adicionfecha->codigoSalario->prestacional == 1) {
+                                        $table->vlr_devengado = $adicionfecha->valor_adicion;
+                                    } else {
+                                        $table->vlr_devengado_no_prestacional = $adicionfecha->valor_adicion;
+                                        $table->vlr_devengado = $adicionfecha->valor_adicion;
+                                    }
+                                } else {
+                                    $table->vlr_deduccion = $adicionfecha->valor_adicion;
+                                    $table->deduccion = $adicionfecha->valor_adicion;
+                                }
+                                $table->save(false);
+                            }
+                        }
+                    }
+                    
+                    //PROCESO QUE ACTUALIZA LOS SALDOS
+                    $detalleNomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])->all();
+                    $deduccion = 0; $devengado = 0;
+                    foreach ($detalleNomina as $detalle) {
+                        $deduccion += $detalle->vlr_deduccion;
+                        $devengado += $detalle->vlr_devengado;
+                    }
+                    $nominas->total_devengado = $devengado;
+                    $nominas->total_deduccion = $deduccion;
+                    $nominas->total_pagar = $devengado - $deduccion;
+                    $nominas->estado_liquidado = 1;
+                    $nominas->save();
+                }//TERMINA EL VECTOR DE PROGRAMACION DE PRIMAS
+            }
+                
        } 
-       return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+      // return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
     }
     
     //PROCESO QUE PERMITE DESCONTAR LICENCIAS
@@ -1175,7 +1441,9 @@ class ProgramacionNominaController extends Controller
     //INICIA PROCESO DEL TERCER BOTON APLICAR PAGOS
     public function actionAplicar_pagos_nomina($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
     {
-        if($tipo_nomina == 1){ //PROCESO DE NOMINA
+        if($tipo_nomina == 1)
+        
+            { //PROCESO DE NOMINA
             /*PROCESO DE SALDOS DE CREDITOS*/
             $grupo_pago = \app\models\GrupoPago::findOne($id_grupo_pago);
             $periodo = PeriodoPagoNomina::findOne($id);
@@ -1240,18 +1508,45 @@ class ProgramacionNominaController extends Controller
                 
             }
             
-        }else{////PROCESO DE PRIMAS PARA DESARROLLAR
-            
+        } else {
+             if($tipo_nomina == 2){ ///PROCESO DE PRIMAS 
+                 $pagoPrima = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                 foreach ($pagoPrima as $key => $prima) {
+                     //actualiza contratos
+                    $contrato = \app\models\Contratos::findOne($prima->id_contrato);
+                    $contrato->ultima_pago_prima = $fecha_hasta;
+                    $contrato->save();
+                    //actualiza consecutivo
+                    $this->GenerarConsecutivoPrima($prima);
+                    //CIERRE EL PROCESO DE PRIMAS
+                    $prima->estado_cerrado = 1;
+                    $prima->save();
+                    
+                 }
+                $grupoPago = \app\models\GrupoPago::findOne($id_grupo_pago);
+                $grupoPago->ultimo_pago_prima = $fecha_hasta;
+                $grupoPago->save();
+                 
+             }
         }
        return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
     }
     
-    //GENERA EL CONSECUTIVO
+    //GENERA EL CONSECUTIVO NOMINAS
     protected function GenerarConsecutivoNomina($nominas) {
         $codigo = \app\models\Consecutivos::findOne(23);
         $consecutivo = $codigo->numero_inicial + 1;
         $nominas->nro_pago = $consecutivo;
         $nominas->save();
+        $codigo->numero_inicial = $consecutivo;
+        $codigo->save();
+    }
+    //GENERA EL CONSECUTIVO PRIMAS
+    protected function GenerarConsecutivoPrima($prima) {
+        $codigo = \app\models\Consecutivos::findOne(26);
+        $consecutivo = $codigo->numero_inicial + 1;
+        $prima->nro_pago = $consecutivo;
+        $prima->save();
         $codigo->numero_inicial = $consecutivo;
         $codigo->save();
     }
@@ -1429,6 +1724,47 @@ class ProgramacionNominaController extends Controller
        return $this->renderAjax('editar_colilla', [
             'model' => $model,  
             'table' => $table,
+      
+        ]);      
+    }
+    
+    //AGREGAR ITEMS A LA COLILLA DE PAGO
+     //EDITAR COLILLA
+    public function actionAgregar_item_colilla($id_programacion, $id, $fecha_desde, $fecha_hasta) {
+        $model = new \app\models\ModeloEditarColilla();
+        
+        if ($model->load(Yii::$app->request->post())){
+            if (isset($_POST["agregar_conceptos"])) {
+                if($model->codigo_salario <> ''){
+                    $nomina = ProgramacionNomina::findOne($id_programacion);
+                    $salario = \app\models\ConceptoSalarios::findOne($model->codigo_salario);
+                    $table = new \app\models\ProgramacionNominaDetalle();
+                    $table->id_programacion = $id_programacion;
+                    $table->codigo_salario = $model->codigo_salario;
+                    $table->fecha_desde = $fecha_hasta;
+                    $table->fecha_hasta = $fecha_hasta;
+                    $table->id_periodo_pago_nomina = $id;
+                    $table->id_grupo_pago = $nomina->id_grupo_pago;
+                    if($salario->debito_credito == 1){
+                       $table->vlr_devengado = $model->devengado;   
+                       if($salario->prestacional == 0){
+                           $table->valor_devengado_no_prestacional = $model->devengado;
+                       }
+                    }else{
+                       $table->vlr_deduccion = $model->deduccion;
+                    }
+                    $table->save(false);
+                    return $this->redirect(["programacion-nomina/view_colilla_pagonomina",'id' => $id, 'id_programacion' => $id_programacion]);
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar un concepto de salario para agrega la informacion.');
+                    return $this->redirect(["programacion-nomina/view_colilla_pagonomina",'id' => $id, 'id_programacion' => $id_programacion]);
+                }
+            }
+            
+        }
+       return $this->renderAjax('agregar_items_colilla', [
+            'model' => $model,  
+            'id' => $id,
       
         ]);      
     }

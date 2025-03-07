@@ -209,7 +209,23 @@ $tipo_pago = app\models\TipoNomina::findOne($periodo_pago->id_tipo_nomina);
                         </tbody>
                     </table>
                 </div>    
-                
+                <div class="panel-footer text-right" >
+                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Agregar items',            
+                        ['programacion-nomina/agregar_item_colilla', 'id' => $id,'id_programacion'=>$val->id_programacion, 'id' => $id, 'fecha_desde'=> $model->fecha_desde, 'fecha_hasta' => $model->fecha_hasta],
+                            [
+                                'title' => 'Agregar concepto a la colilla',
+                                'data-toggle'=>'modal',
+                                'data-target'=>'#modalagregarconceptocolilla'.$id_programacion,
+                                'class' => 'btn btn-primary btn-sm',
+                            ]
+                        );
+                    ?>
+                    <div class="modal remote fade" id="modalagregarconceptocolilla<?= $id_programacion ?>">
+                       <div class="modal-dialog modal-lg" style ="width: 600px;">
+                           <div class="modal-content"></div>
+                       </div>
+                    </div>
+                </div> 
             </div> 
         </div>
     </div>  

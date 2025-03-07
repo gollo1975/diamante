@@ -12,11 +12,12 @@ class ModeloEditarColilla extends Model
 {
     public $deduccion;   
     public $devengado;
+    public $codigo_salario;
         
     public function rules()
     {
         return [
-            [['deduccion','devengado'], 'integer'],
+            [['deduccion','devengado','codigo_salario'], 'integer'],
             
         ];
     }
@@ -26,6 +27,7 @@ class ModeloEditarColilla extends Model
         return [
             'deduccion' => 'Valor deduccion:',  
             'devengado' =>'Valor devengado:',
+            'codigo_salario' => 'Concepto de salario:',
         ];
     }
 }
