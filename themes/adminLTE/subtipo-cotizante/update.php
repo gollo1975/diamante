@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\SubtipoCotizante */
 
-$this->title = 'ACTUALIZAR: ' . $model->descripcion;
+$this->title = 'ACTUALIZAR: ' . $model->subtipo;
 $this->params['breadcrumbs'][] = ['label' => 'Subtipos Cotizantes', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id_subtipo_cotizante, 'url' => ['update', 'id' => $model->id_subtipo_cotizante]];
 $this->params['breadcrumbs'][] = 'Editar';

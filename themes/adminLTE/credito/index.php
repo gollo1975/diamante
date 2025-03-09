@@ -20,6 +20,10 @@ use kartik\depdrop\DepDrop;
 $this->title = 'Créditos';
 $this->params['breadcrumbs'][] = $this->title;
 
+
+$empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->all(), 'id_empleado', 'nombre_completo');
+$tipopagocredito = ArrayHelper::map(TipoPagoCredito::find()->orderBy('descripcion ASC')->all(), 'id_tipo_pago', 'descripcion');
+$codigocredito = ArrayHelper::map(\app\models\ConfiguracionCredito::find()->orderBy('nombre_credito ASC')->all(),'codigo_credito' , 'nombre_credito');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -29,22 +33,34 @@ $this->params['breadcrumbs'][] = $this->title;
 </script>
 
 <!--<h1>Lista Facturas</h1>-->
-<?php $formulario = ActiveForm::begin([
-    "method" => "get",
-    "action" => Url::toRoute("credito/index"),
-    "enableClientValidation" => true,
-    'options' => ['class' => 'form-horizontal'],
-    'fieldConfig' => [
-                    'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
-                    'labelOptions' => ['class' => 'col-sm-2 control-label'],
-                    'options' => []
-                ],
+<?php 
+if($token == 0){
+    $formulario = ActiveForm::begin([
+        "method" => "get",
+        "action" => Url::toRoute(["credito/index",'token' => $token]),
+        "enableClientValidation" => true,
+        'options' => ['class' => 'form-horizontal'],
+        'fieldConfig' => [
+                        'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
+                        'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                        'options' => []
+                    ],
 
-]);
+    ]);
+}else{
+    $formulario = ActiveForm::begin([
+        "method" => "get",
+        "action" => Url::toRoute(["credito/search_creditos",'token' => $token]),
+        "enableClientValidation" => true,
+        'options' => ['class' => 'form-horizontal'],
+        'fieldConfig' => [
+                        'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
+                        'labelOptions' => ['class' => 'col-sm-2 control-label'],
+                        'options' => []
+                    ],
 
-$empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->all(), 'id_empleado', 'nombre_completo');
-$tipopagocredito = ArrayHelper::map(TipoPagoCredito::find()->orderBy('descripcion ASC')->all(), 'id_tipo_pago', 'descripcion');
-$codigocredito = ArrayHelper::map(\app\models\ConfiguracionCredito::find()->orderBy('nombre_credito ASC')->all(),'codigo_credito' , 'nombre_credito');
+    ]);
+}    
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -77,11 +93,17 @@ $codigocredito = ArrayHelper::map(\app\models\ConfiguracionCredito::find()->orde
             ]); ?>
           <?= $formulario->field($form, 'saldo')->dropDownList(['1' => 'SI'],['prompt' => 'Seleccione una opcion ...']) ?>
         </div>
-        
-        <div class="panel-footer text-right">
-            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("credito/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
-        </div>
+        <?php if($token == 0){?>
+            <div class="panel-footer text-right">
+                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
+                <a align="right" href="<?= Url::toRoute(["credito/index",'token' => $token]) ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            </div>
+        <?php }else{?>
+            <div class="panel-footer text-right">
+                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
+                <a align="right" href="<?= Url::toRoute(["credito/search_creditos",'token' => $token]) ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            </div>
+        <?php }?>
     </div>
 </div>
 
@@ -136,69 +158,80 @@ $codigocredito = ArrayHelper::map(\app\models\ConfiguracionCredito::find()->orde
                
                 <?php if($val->saldo_credito <= 0){?>   
                     <td style='width: 25px;'>
-                        <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>                   
+                        <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>                   
                     </td>
                     <td>
                     </td>   
                     <td>
-                    </td>
-                    <td>
                     </td>  
                 <?php }else{ 
-                    if($detalle_nomina){ ?>   
-                        <td style='width: 25px;'>
-                             <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                        </td>
-                        <td style='width: 25px;'></td>
-                        <td style='width: 25px;'></td>     
-                    <?php }else{?>
-                        <td style='width: 25px;'>
-                             <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                        </td>
-                         <td style='width: 25px;'>
-                             <a href="<?= Url::toRoute(["credito/update", "id" => $val->id_credito]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
-                         </td>
-                         <td style='width: 25px;'>
-                           <?= Html::a('', ['eliminar', 'id' => $val->id_credito], [
-                             'class' => 'glyphicon glyphicon-trash',
-                             'data' => [
-                                 'confirm' => 'Esta seguro de eliminar el registro?',
-                                 'method' => 'post',
-                             ],
-                           ]) ?>
-                         </td>
-                    <?php }     
+                    if($token == 0){
+                        if($detalle_nomina){ ?>   
+                            <td style='width: 25px;'>
+                                 <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            </td>
+                            <td style='width: 25px;'></td>
+                            <td style='width: 25px;'></td>     
+                        <?php }else{?>
+                            <td style='width: 25px;'>
+                                 <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            </td>
+                             <td style='width: 25px;'>
+                                 <a href="<?= Url::toRoute(["credito/update", "id" => $val->id_credito]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                             </td>
+                             <td style='width: 25px;'>
+                               <?= Html::a('', ['eliminar', 'id' => $val->id_credito], [
+                                 'class' => 'glyphicon glyphicon-trash',
+                                 'data' => [
+                                     'confirm' => 'Esta seguro de eliminar el registro?',
+                                     'method' => 'post',
+                                 ],
+                               ]) ?>
+                             </td>
+                        <?php }    
+                    }else{?>
+                       <td style='width: 25px;'>
+                                 <a href="<?= Url::toRoute(["credito/view", "id" => $val->id_credito, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            </td>
+                            <td style='width: 25px;'></td>
+                            <td style='width: 25px;'></td>   
+                    <?php }    
                 }?>   
                 <td><input type="checkbox" name="id_credito[]" value="<?= $val->id_credito ?>"></td>
             </tr>            
             </tbody>            
             <?php endforeach; ?>
         </table> 
-        <div class="panel-footer text-right" >     
-             <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-                <a align="right" href="<?= Url::toRoute("credito/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
-            <div class="btn-group">
-                  <button type="button" class="btn btn-warning dropdown-toggle btn-sm"
-                          data-toggle="dropdown">
-                      <span class="glyphicon glyphicon-check"></span>Activar 
-                  </button>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Credito",['name' => 'activar_periodo_registro', 'class' => 'btn btn-warning btn-sm']);?>  </li>
-                    <li><?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Registro", ['name' => 'activar_periodo', "class" => "btn btn-info btn-sm"]) ?>  </li>
-                  </ul>
-            </div> 
-            <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle btn-sm"
-                            data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-unchecked"></span>Desactivar 
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                      <li><?= Html::submitButton("<span class='glyphicon glyphicon-unchecked'></span> Credito", ["class" => "btn btn-warning btn-sm", 'name' => 'desactivar_periodo_registro']) ?>  </li>
-                      <li><?= Html::submitButton("<span class='glyphicon glyphicon-unchecked'></span> Registro", ["class" => "btn btn-info btn-sm", 'name' => 'desactivar_periodo']) ?>  </li>
-                    </ul>
-            </div>   
-        </div>        
-        <?php $form->end() ?>
+        <?php if($token == 0){?>
+            <div class="panel-footer text-right" >     
+                 <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
+                    <a align="right" href="<?= Url::toRoute("credito/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+                <div class="btn-group">
+                      <button type="button" class="btn btn-warning dropdown-toggle btn-sm"
+                              data-toggle="dropdown">
+                          <span class="glyphicon glyphicon-check"></span>Activar 
+                      </button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Credito",['name' => 'activar_periodo_registro', 'class' => 'btn btn-warning btn-sm']);?>  </li>
+                        <li><?= Html::submitButton("<span class='glyphicon glyphicon-check'></span> Registro", ['name' => 'activar_periodo', "class" => "btn btn-info btn-sm"]) ?>  </li>
+                      </ul>
+                </div> 
+                <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle btn-sm"
+                                data-toggle="dropdown">
+                            <span class="glyphicon glyphicon-unchecked"></span>Desactivar 
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                          <li><?= Html::submitButton("<span class='glyphicon glyphicon-unchecked'></span> Credito", ["class" => "btn btn-warning btn-sm", 'name' => 'desactivar_periodo_registro']) ?>  </li>
+                          <li><?= Html::submitButton("<span class='glyphicon glyphicon-unchecked'></span> Registro", ["class" => "btn btn-info btn-sm", 'name' => 'desactivar_periodo']) ?>  </li>
+                        </ul>
+                </div>   
+            </div>       
+        <?php }else {?>
+            <div class="panel-footer text-right" >   
+            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']);?> 
+        <?php }    
+        $form->end() ?>
        
      </div>
 </div>

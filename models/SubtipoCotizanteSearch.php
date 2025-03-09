@@ -18,7 +18,7 @@ class SubtipoCotizanteSearch extends SubtipoCotizante
     {
         return [
             [['id_subtipo_cotizante'], 'integer'],
-            [['descripcion', 'codigo_interfaz', 'user_name'], 'safe'],
+            [['subtipo', 'codigo_api_nomina'], 'safe'],
         ];
     }
 
@@ -61,10 +61,9 @@ class SubtipoCotizanteSearch extends SubtipoCotizante
             'id_subtipo_cotizante' => $this->id_subtipo_cotizante,
         ]);
 
-        $query->andFilterWhere(['like', 'descripcion', $this->descripcion])
-            ->andFilterWhere(['like', 'codigo_interfaz', $this->codigo_interfaz])
-            ->andFilterWhere(['like', 'user_name', $this->user_name]);
-
+        $query->andFilterWhere(['like', 'subtipo', $this->subtipo])
+            ->andFilterWhere(['=', 'codigo_api_nomina', $this->codigo_api_nomina]);
+         
         return $dataProvider;
     }
 }

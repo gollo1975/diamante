@@ -121,6 +121,162 @@ class ProgramacionNominaController extends Controller
         }
     }
 
+    //COMPROBANTES DE NOMINAS
+    public function actionSearch_comprobante_nomina() {
+        if (Yii::$app->user->identity) {
+            if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 150])->all()) {
+                $form = new \app\models\FormFiltroComprobantePagoNomina();
+                $id_grupo_pago = null;
+                $id_tipo_nomina = null;
+                $id_empleado = null;
+                $cedula_empleado = null;
+                $fecha_desde = null;
+                $fecha_hasta = null;
+                $anio = null;
+          
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                        $id_tipo_nomina = Html::encode($form->id_tipo_nomina);
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $cedula_empleado = Html::encode($form->cedula_empleado);
+                        $fecha_desde = Html::encode($form->fecha_desde);
+                        $fecha_hasta = Html::encode($form->fecha_hasta);
+                        $anio = Html::encode($form->anio);
+                        $table = ProgramacionNomina::find()
+                                ->andFilterWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                                ->andFilterWhere(['=', 'id_tipo_nomina', $id_tipo_nomina])
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])
+                                ->andFilterWhere(['=', 'cedula_empleado', $cedula_empleado])
+                                ->andFilterWhere(['=', 'anio', $anio])
+                                ->andFilterWhere(['between', 'fecha_desde', $fecha_desde, $fecha_hasta]);
+                        $table = $table->orderBy('id_programacion DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $modelo = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_programacion DESC']);
+                            $this->actionExcelconsultaPago($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = ProgramacionNomina::find()
+                             ->orderBy('id_programacion DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                 
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $modelo = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        //$table = $table->all();
+                        $this->actionExcelconsultaPago($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_pago_nomina', [
+                            'modelo' => $modelo,
+                            'form' => $form,
+                            'pagination' => $pages, 'nombre_empleado' => $id_empleado, 
+                            'fecha_inicio' => $fecha_desde, 'fecha_corte' => $fecha_hasta,
+                            'grupo_pago' => $id_grupo_pago,'tipo_nomina' => $id_tipo_nomina,
+                ]);
+            } else {
+                return $this->redirect(['site/sinpermiso']);
+            }
+        } else {
+            return $this->redirect(['site/login']);
+        }
+    }
+    
+    //COMPROBANTES DE NOMINAS
+    public function actionSearch_comprobante_cesantias() {
+        if (Yii::$app->user->identity) {
+            if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 151])->all()) {
+                $form = new \app\models\FormFiltroComprobantePagoNomina();
+                $id_grupo_pago = null;
+                $id_empleado = null;
+                $cedula_empleado = null;
+                $anio = null;
+          
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $cedula_empleado = Html::encode($form->cedula_empleado);
+                        $anio = Html::encode($form->anio);
+                        $table = \app\models\InteresesCesantia::find()
+                                ->andFilterWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])
+                                ->andFilterWhere(['=', 'documento', $cedula_empleado])
+                                ->andFilterWhere(['=', 'anio', $anio]);
+                        $table = $table->orderBy('id_interes DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $modelo = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id_interes DESC']);
+                            $this->actionExcelconsultaPagoIntereses($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = \app\models\InteresesCesantia::find()
+                             ->orderBy('id_interes DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                 
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $modelo = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        //$table = $table->all();
+                        $this->actionExcelconsultaPagoIntereses($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('search_pago_cesantias', [
+                            'modelo' => $modelo,
+                            'form' => $form,
+                            'pagination' => $pages,  
+                ]);
+            } else {
+                return $this->redirect(['site/sinpermiso']);
+            }
+        } else {
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     /**
      * Displays a single ProgramacionNomina model.
      * @param integer $id
@@ -129,7 +285,7 @@ class ProgramacionNominaController extends Controller
      */
     public function actionView($id, $id_grupo_pago, $fecha_desde, $fecha_hasta) {
         $model = PeriodoPagoNomina::findOne($id);
-       // $intereses = InteresesCesantia::find()->where(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion ASC')->all();
+        $intereses = \app\models\InteresesCesantia::find()->where(['=','id_periodo_pago_nomina', $id])->orderBy('id_programacion ASC')->all();
         $detalles = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->orderBy('id_programacion ASC')->all();
         $incapacidad = \app\models\Incapacidad::find()->where(['=', 'id_grupo_pago', $id_grupo_pago])
                         ->andWhere(['<=', 'fecha_inicio', $fecha_hasta])
@@ -153,8 +309,18 @@ class ProgramacionNominaController extends Controller
                     'licencia' => $licencia,
                     'novedad_tiempo' => $novedad_tiempo,
                     'credito_empleado' => $credito_empleado,
-                  //  'intereses' => $intereses,
+                    'intereses' => $intereses,
         ]);
+    }
+    
+    //VISUALIZA EL DETALLE DE LA COLILLA
+    public function actionDetallepagonomina($id_programacion)
+    {
+        $model = ProgramacionNomina::findOne($id_programacion);
+        return $this->render('detalle_pago_nomina', [
+                    'id_programacion' => $id_programacion,
+                    'model' => $model,        
+        ]); 
     }
     
     //PERMITE CARGAR LOS EMPLEADOS PARA NOMINA, PRIMAS Y CESANTIAS
@@ -188,13 +354,15 @@ class ProgramacionNominaController extends Controller
                 }
             }
         }    
-     //   $registroscargados = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->all();
+        $registroscargados = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->all();
         $cont = 0;
         if($registros == 0){
             Yii::$app->getSession()->setFlash('warning', 'Este grupo de pago a la fecha no tiene empleados con contratos activos!');
         }else{
             foreach ($registros as $val) {
                 if (!ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->andWhere(['=', 'id_contrato', $val->id_contrato])->one()) {
+                    $anioCesantia = date('Y', strtotime($model->fecha_hasta));
+                    
                     $table = new ProgramacionNomina();
                     $table->id_grupo_pago = $model->id_grupo_pago;
                     $table->id_periodo_pago_nomina = $id;
@@ -204,6 +372,7 @@ class ProgramacionNominaController extends Controller
                     $table->cedula_empleado = $val->empleado->nit_cedula;
                     $table->salario_contrato = $val->salario;
                     $table->fecha_inicio_contrato = $val->fecha_inicio;
+                    $table->anio = $anioCesantia;
                     if($val->tiempo->abreviatura == 'MT'){
                         $table->salario_medio_tiempo = $val->salario;
                     }
@@ -212,7 +381,7 @@ class ProgramacionNominaController extends Controller
                     } 
                     
                     if($val->id_tipo_contrato == 2 && $val->fecha_final >= $fecha_desde && $val->fecha_final <= $fecha_hasta){
-                      echo $table->fecha_final_contrato = $val->fecha_final;     
+                      $table->fecha_final_contrato = $val->fecha_final;     
                     }
                     if($tipo_nomina == 1 ){
                        /* $vacacion = \app\models\Vacaciones::find()->where(['=','documento', $val->nit_cedula])
@@ -362,8 +531,8 @@ class ProgramacionNominaController extends Controller
 //* SEGUNDO PROCESO DEL BOTON GENERAR DESCUENTOS*/
     public function actionGenerar_devengados($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
     {
-        if($tipo_nomina == 1)
-        { //PROCESA REGISTROS DE NOMINA
+        if($tipo_nomina == 1)//PROCESA REGISTROS DE NOMINA
+        { 
             $listado_nomina = ProgramacionNomina::find()->where(['=', 'id_periodo_pago_nomina', $id])->all();
             $salarios = \app\models\ConceptoSalarios::find()->where(['=', 'inicio_nomina', 1])->one();
             $empresa = \app\models\MatriculaEmpresa::findOne(1);
@@ -455,101 +624,242 @@ class ProgramacionNominaController extends Controller
                     $valores->save();
                 endforeach;
 
-        }
-        else{ //COMIENZA EL PROCESO DE PRIMAS SEMESTRALES
-            $listado_nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
-            $periodo = PeriodoPagoNomina::findOne($id);
-            $configuracion_prima = \app\models\ConfiguracionPrestaciones::findOne(1);
-            $year = 0;
-            $year = ($year==NULL)? date('Y'):$year;
-            if (($year%4 == 0 && $year%100 != 0) || $year%400 == 0 ){ //PROCESO QUE VALIDE SI EL AÑO ES VISCIESTO
-                   $ano = 1;
-            }else{
-                   $ano = 2;
-            }  
-            
-            foreach ($listado_nomina as $key => $prima) {
-                
-               //inicializar el contrato
-                $ibc_anterior = 0; $dias_promedio = 0; $auxilio = 0; $salario_promedio = 0; $pago_prima = 0; $adicion_salario = 0;
-                $contrato = \app\models\Contratos::findOne($prima->id_contrato);
-                $total_dias = $this->CrearPrimaSemestral($prima, $ano);
-                
-                //DIAS FALTANTES
-                $dias_faltante = 0;
-                $hasta = strtotime($fecha_hasta);
-                $fecha_corte_nomina = strtotime($contrato->ultimo_pago_nomina);
-                $diferencia_segundos = $hasta - $fecha_corte_nomina;
-                $dias_faltante = $diferencia_segundos / 86400;
-                
-                //BUSCAR EL ACUMULADO DE PRESTACIONES
-                $vector_nomina = ProgramacionNomina::find()->where(['=','id_empleado', $prima->id_empleado])
-                                                           ->andWhere(['>=','fecha_desde', $prima->fecha_desde])
-                                                           ->andWhere(['=','id_tipo_nomina', 1])->all();
-                $total_ibc = 0;
-                foreach ($vector_nomina as $val) {
-                    $total_ibc = $total_ibc + $val->ibc_prestacional; 
-                }
-                
-                //se adiciona segun la fecha de corte de prima
-                $adicion_salario = ($contrato->salario / 30) * $dias_faltante;
-               
-                //trae acumulados
-                if ($contrato->ibp_prima_inicial > 0){
-                    $salario_promedio = round(($total_ibc + $contrato->ibp_prima_inicial + $adicion_salario) / $total_dias) * 30;
+        }else{ 
+            if($tipo_nomina == 2){ //COMIENZA EL PROCESO DE PRIMAS SEMESTRALES
+                $listado_nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                $periodo = PeriodoPagoNomina::findOne($id);
+                $configuracion_prima = \app\models\ConfiguracionPrestaciones::findOne(1);
+                $year = 0;
+                $year = ($year==NULL)? date('Y'):$year;
+                if (($year%4 == 0 && $year%100 != 0) || $year%400 == 0 ){ //PROCESO QUE VALIDE SI EL AÑO ES VISCIESTO
+                       $ano = 1;
                 }else{
-                  $salario_promedio = round((($total_ibc + $adicion_salario ) / $total_dias) * 30);
-                }
-                                
-                // valide si tiene aplica auxilio de transporte
-                $vecto_auxilio = \app\models\ConfiguracionSalario::find()->where(['=','estado', 1])->one();
-                if($contrato->aplica_auxilio_transporte == 1){
-                    if($contrato->id_tipo_salario == 1){
-                        $pago_prima = round((($contrato->salario + $vecto_auxilio->auxilio_transporte_actual) * $total_dias)/360);
-                    }else {
-                       echo $pago_prima = round((($salario_promedio + $vecto_auxilio->auxilio_transporte_actual) * $total_dias)/360),'</br>'; 
+                       $ano = 2;
+                }  
+
+                foreach ($listado_nomina as $key => $prima) {
+
+                   //inicializar el contrato
+                    $ibc_anterior = 0; $dias_promedio = 0; $auxilio = 0; $salario_promedio = 0; $pago_prima = 0; $adicion_salario = 0;
+                    $contrato = \app\models\Contratos::findOne($prima->id_contrato);
+                    $total_dias = $this->CrearPrimaSemestral($prima, $ano);
+
+                    //DIAS FALTANTES
+                    $dias_faltante = 0;
+                    $hasta = strtotime($fecha_hasta);
+                    $fecha_corte_nomina = strtotime($contrato->ultimo_pago_nomina);
+                    $diferencia_segundos = $hasta - $fecha_corte_nomina;
+                    $dias_faltante = $diferencia_segundos / 86400;
+
+                    //BUSCAR EL ACUMULADO DE PRESTACIONES
+                    $vector_nomina = ProgramacionNomina::find()->where(['=','id_empleado', $prima->id_empleado])
+                                                               ->andWhere(['>=','fecha_desde', $prima->fecha_desde])
+                                                               ->andWhere(['=','id_tipo_nomina', 1])->all();
+                    $total_ibc = 0;
+                    foreach ($vector_nomina as $val) {
+                        $total_ibc = $total_ibc + $val->ibc_prestacional; 
                     }
-                 
+
+                    //se adiciona segun la fecha de corte de prima
+                    $adicion_salario = ($contrato->salario / 30) * $dias_faltante;
+
+                    //trae acumulados
+                    if ($contrato->ibp_prima_inicial > 0){
+                        
+                        $salario_promedio = round(($total_ibc + $contrato->ibp_prima_inicial + $contrato->ibp_recargo_nocturno + $adicion_salario) / $total_dias) * 30;
+                    }else{
+                      $salario_promedio = round((($total_ibc + $adicion_salario ) / $total_dias) * 30);
+                    }
+
+                    // valide si tiene aplica auxilio de transporte
+                    $vecto_auxilio = \app\models\ConfiguracionSalario::find()->where(['=','estado', 1])->one();
+                    if($contrato->aplica_auxilio_transporte == 1){
+                        if($contrato->id_tipo_salario == 1){
+                            $pago_prima = round((($contrato->salario + $vecto_auxilio->auxilio_transporte_actual) * $total_dias)/360);
+                        }else {
+                            $pago_prima = round((($salario_promedio + $vecto_auxilio->auxilio_transporte_actual) * $total_dias)/360); 
+                        }
+
+                    }else{
+                        if($contrato->id_tipo_salario == 1){
+                            $pago_prima = round((($contrato->salario) * $total_dias)/360);
+                        }else {
+                           $pago_prima = round((($salario_promedio) * $total_dias)/360); 
+                        }
+                    }
+                    //creacion del registro
+                    $concepto_salario = \app\models\ConceptoSalarios::find()->where(['=','concepto_prima', 1])->one();
+                    $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $prima->id_programacion])
+                                                                             ->andWhere(['=', 'codigo_salario', $concepto_salario->codigo_salario])
+                                                                             ->all();
+                    if(!$detalle_nomina){
+                        $table = new \app\models\ProgramacionNominaDetalle();
+                        $table->id_programacion = $prima->id_programacion;
+                        $table->codigo_salario = $concepto_salario->codigo_salario;
+                        $table->dias_reales = $total_dias;
+                        $table->fecha_desde = $fecha_desde;
+                        $table->fecha_hasta = $fecha_hasta;
+                        $table->vlr_devengado = $pago_prima;
+                        $table->id_periodo_pago_nomina = $id;
+                        $table->id_grupo_pago = $prima->id_grupo_pago;
+                        $table->save(false);
+                        // actualiza la tabla de programacion de nomina
+                        $prima->dias_pago = $periodo->dias_periodo;
+                        $prima->dia_real_pagado = $total_dias;
+                        $prima->total_devengado = $pago_prima;
+                        $prima->salario_promedio = $salario_promedio;
+                        $prima->dias_ausentes = 0;
+                        $prima->estado_generado = 1;
+                        $prima->save(false);
+                        //actualizar tabla contrato
+                        $contrato->ibp_prima_inicial = 0;
+                        $contrato->save();
+                    }
+
+                }
+            }else{   //COMIENZA EL PROCESO DE CESANTIAS  
+                $listado_nomina = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                $periodo = PeriodoPagoNomina::findOne($id);
+                $configuracion_prima = \app\models\ConfiguracionPrestaciones::findOne(2);
+                $year = 0;
+                $year = ($year==NULL)? date('Y'):$year;
+                if (($year%4 == 0 && $year%100 != 0) || $year%400 == 0 ){ //PROCESO QUE VALIDE SI EL AÑO ES VISCIESTO
+                       $ano = 1;
                 }else{
-                    if($contrato->id_tipo_salario == 1){
-                        $pago_prima = round((($contrato->salario) * $total_dias)/360);
-                    }else {
-                       $pago_prima = round((($salario_promedio) * $total_dias)/360); 
+                       $ano = 2;
+                }  
+
+                foreach ($listado_nomina as $key => $cesantias) {
+
+                   //inicializar el contrato
+                    $ibc_anterior = 0; $dias_reales = 0; $auxilio = 0; $salario_promedio = 0; $pago_cesantia = 0; $total_dia_ausente = 0;
+                    $contrato = \app\models\Contratos::findOne($cesantias->id_contrato);
+                    $total_dias = $this->CrearCesantias($cesantias, $ano);
+
+                    //BUSCAR EL ACUMULADO DE PRESTACIONES
+                    $vector_nomina = ProgramacionNomina::find()->where(['=','id_empleado', $cesantias->id_empleado])
+                                                               ->andWhere(['>=','fecha_desde', $cesantias->fecha_desde])
+                                                               ->andWhere(['=','id_tipo_nomina', 1])->all();
+                    
+                    //BUSCA LOS DIAS DE AUSENCIA
+                    $dias_ausentes = \app\models\Licencia::find()->where(['=','id_empleado', $cesantias->id_empleado])->andWhere(['>=','fecha_desde', $fecha_desde])->all();
+                                                                
+                    foreach ($dias_ausentes as $key => $val) {
+                        if($val->codigo_licencia == 1){
+                            $total_dia_ausente += $val->dias_licencia;
+                        }else{
+                            if($val->codigo_licencia == 2){
+                               $total_dia_ausente += $val->dias_licencia; 
+                            }
+                        }
+                        
                     }
-                }
-                //creacion del registro
-                $concepto_salario = \app\models\ConceptoSalarios::find()->where(['=','concepto_prima', 1])->one();
-                $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $prima->id_programacion])
-                                                                         ->andWhere(['=', 'codigo_salario', $concepto_salario->codigo_salario])
-                                                                         ->all();
-                if(!$detalle_nomina){
-                    $table = new \app\models\ProgramacionNominaDetalle();
-                    $table->id_programacion = $prima->id_programacion;
-                    $table->codigo_salario = $concepto_salario->codigo_salario;
-                    $table->dias_reales = $total_dias;
-                    $table->fecha_desde = $fecha_desde;
-                    $table->fecha_hasta = $fecha_hasta;
-                    $table->vlr_devengado = $pago_prima;
-                    $table->id_periodo_pago_nomina = $id;
-                    $table->id_grupo_pago = $prima->id_grupo_pago;
-                    $table->save(false);
-                    // actualiza la tabla de programacion de nomina
-                    $prima->dias_pago = $periodo->dias_periodo;
-                    $prima->dia_real_pagado = $total_dias;
-                    $prima->total_devengado = $pago_prima;
-                    $prima->salario_promedio = $salario_promedio;
-                    $prima->dias_ausentes = 0;
-                    $prima->estado_generado = 1;
-                    $prima->save(false);
-                }
-                 
+                    
+                    //INICIALIZA EL PAGO DE CESANTIAS
+                    $total_ibc = 0;
+                    foreach ($vector_nomina as $valores) {
+                        
+                        $total_ibc += $valores->ibc_prestacional;
+                    }
+                    //VALIDAR SE APLICA DIAS DE AUSENCIA EN LAS CESANTIAS
+                    $aplica_ausencia = \app\models\ConfiguracionPrestaciones::findOne(2);
+                    if($aplica_ausencia->aplicar_ausentismo == 1){
+                        $dias_reales = $total_dias - $total_dia_ausente;
+                    }else{
+                        $dias_reales = $total_dias;
+                    }
+                    
+                    
+                    ///BUSCA ACUMULADO DE CESANTIAS ANTERIORES
+                    if ($contrato->ibp_cesantia_inicial > 0){
+                        $salario_promedio = round((($total_ibc + $contrato->ibp_cesantia_inicial + $contrato->ibp_recargo_nocturno) / $total_dias) * 30);
+                    }else{
+                       $salario_promedio = round(($total_ibc / $total_dias) * 30);
+                    }
+                    
+                    // valide si aplica auxilio de transporte
+                    $vecto_auxilio = \app\models\ConfiguracionSalario::find()->where(['=','estado', 1])->one();
+                    if($contrato->aplica_auxilio_transporte == 1){
+                        if($contrato->id_tipo_salario == 1){
+                            $pago_cesantia = round((($contrato->salario + $vecto_auxilio->auxilio_transporte_actual) * $dias_reales)/360);
+                        }else {
+                            $pago_cesantia = round((($salario_promedio + $vecto_auxilio->auxilio_transporte_actual) * $dias_reales)/360); 
+                        }
+
+                    }else{
+                        if($contrato->id_tipo_salario == 1){
+                            $pago_cesantia = round((($contrato->salario) * $dias_reales)/360);
+                        }else {
+                           $pago_cesantia = round((($salario_promedio) * $dias_reales)/360); 
+                        }
+                    }
+                    
+                    //GRABA LA INFORMACION DE LAS CESANTIAS
+                    $concepto_salario = \app\models\ConceptoSalarios::find()->where(['=','concepto_cesantias', 1])->one();
+                    $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=', 'id_programacion', $cesantias->id_programacion])
+                                                                             ->andWhere(['=', 'codigo_salario', $concepto_salario->codigo_salario])
+                                                                             ->all();
+                    if(!$detalle_nomina){
+                        $table = new \app\models\ProgramacionNominaDetalle();
+                        $table->id_programacion = $cesantias->id_programacion;
+                        $table->codigo_salario = $concepto_salario->codigo_salario;
+                        $table->dias_reales = $dias_reales;
+                        $table->dias = $total_dias;
+                        $table->fecha_desde = $fecha_desde;
+                        $table->fecha_hasta = $fecha_hasta;
+                        $table->vlr_devengado = $pago_cesantia;
+                        $table->id_periodo_pago_nomina = $id;
+                        $table->id_grupo_pago = $cesantias->id_grupo_pago;
+                        $table->save(false);
+                        // actualiza la tabla de programacion de nomina
+                        $cesantias->dias_pago = $total_dias;
+                        $cesantias->dia_real_pagado = $dias_reales;
+                        $cesantias->total_devengado = $pago_cesantia;
+                        $cesantias->salario_promedio = $salario_promedio;
+                        $cesantias->dias_ausentes = $total_dia_ausente;
+                        $cesantias->estado_generado = 1;
+                        $cesantias->save(false);
+                        //actualizar tabla contrato
+                        $contrato->ibp_cesantia_inicial = 0;
+                        $contrato->ibp_recargo_nocturno = 0;
+                        $contrato->save();
+                        $this->GenerarIntereses($cesantias, $salario_promedio, $pago_cesantia, $fecha_desde, $fecha_hasta, $dias_reales);
+                    }
+                    
+                }//termina el para de cesantias    
             }
         }
         return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
         
     }
+    protected function GenerarIntereses($cesantias, $salario_promedio, $pago_cesantia, $fecha_desde, $fecha_hasta, $dias_reales) {
+        $concepto_salario = \app\models\ConceptoSalarios::find()->where(['=','intereses', 1])->one();
+        $porcentaje = 0;
+        $porcentaje = ($dias_reales * 12) / 360;
+        $anioIntereses = date('Y', strtotime($fecha_hasta));
+        $table = new \app\models\InteresesCesantia();
+        $table->id_programacion = $cesantias->id_programacion;
+        $table->id_grupo_pago = $cesantias->id_grupo_pago;
+        $table->id_periodo_pago_nomina = $cesantias->id_periodo_pago_nomina;
+        $table->id_tipo_nomina = 6;
+        $table->id_contrato = $cesantias->id_contrato;
+        $table->id_empleado = $cesantias->id_empleado;
+        $table->documento = $cesantias->cedula_empleado;
+        $table->inicio_contrato = $cesantias->fecha_inicio_contrato;
+        $table->salario_promedio = $salario_promedio;
+        $table->valor_cesantias = $pago_cesantia;
+        $table->fecha_inicio = $fecha_desde;
+        $table->fecha_corte = $fecha_hasta;
+        $table->anio = $anioIntereses;
+        $table->dias_generados = $dias_reales;
+        $table->valor_intereses = round(($pago_cesantia * $porcentaje)/100);
+        $table->porcentaje = $porcentaje;
+        $table->codigo_salario = $concepto_salario->codigo_salario;
+        $table->user_name = Yii::$app->user->identity->username;
+        $table->save(false);
+    }
     
-    //PROCEESO QUE GENERA LOS DIAS DE PRIMAS
+    //PROCEESO QUE GENERA LOS DIAS DE LAS CESANTIS
      protected function CrearPrimaSemestral($prima, $ano)
     {
         $mesInicio = 0;
@@ -569,6 +879,88 @@ class ProgramacionNominaController extends Controller
         //codigo de fechas
         $fecha_inicio = $fecha_inicio_dias;
         $fecha_termino = $prima->fecha_hasta;
+        $diaTerminacion = substr($fecha_termino, 8, 8);
+        $mesTerminacion = substr($fecha_termino, 5, 2);
+        $anioTerminacion = substr($fecha_termino, 0, 4);
+        $diaInicio = substr($fecha_inicio, 8, 8);
+        $mesInicio = substr($fecha_inicio, 5, 2);
+        $anioInicio = substr($fecha_inicio, 0, 4);
+        
+        $febrero = 0;
+        $mes = $mesInicio-1;
+        if($mes == 2){
+            if($ano == 1){
+              $febrero = 29;
+            }else{
+              $febrero = 28;
+            }
+        }else if($mes <= 7){
+            if($mes==0){
+             $febrero = 31;
+            }else if($mes%2==0){
+                 $febrero = 30;
+                }else{
+                   $febrero = 31;
+                }
+        }else if($mes > 7){
+              if($mes%2==0){
+                  $febrero = 31;
+              }else{
+                  $febrero = 30;
+              }
+        }
+        if(($anioInicio > $anioTerminacion) || ($anioInicio == $anioTerminacion && $mesInicio > $mesTerminacion) || 
+            ($anioInicio == $anioTerminacion && $mesInicio == $mesTerminacion && $diaInicio > $diaTerminacion)){
+                //mensaje
+        }else{
+            if($mesInicio <= $mesTerminacion){
+                $anios = $anioTerminacion - $anioInicio;
+                if($diaInicio <= $diaTerminacion){
+                    $meses = $mesTerminacion - $mesInicio;
+                    $dies = $diaTerminacion - $diaInicio;
+                }else{
+                    if($mesTerminacion == $mesInicio){
+                       $anios = $anios - 1;
+                    }
+                    $meses = ($mesTerminacion - $mesInicio - 1 + 12) % 12;
+                    $dies = $febrero-($diaInicio - $diaTerminacion);
+                }
+            }else{
+                $anios = $anioTerminacion - $anioInicio - 1;
+                if($diaInicio > $diaTerminacion){
+                    $meses = $mesTerminacion - $mesInicio -1 +12;
+                    $dies = $febrero - ($diaInicio-$diaTerminacion);
+                }else{
+                    $meses = $mesTerminacion - $mesInicio + 12;
+                    $dies = $diaTerminacion - $diaInicio;
+                }
+            }
+           $total_dias = (($anios * 360) + ($meses * 30)+ ($dies +1));
+        }
+         return ($total_dias);
+       
+    }
+    
+    //PROCEESO QUE GENERA LOS DIAS DE PRIMAS
+     protected function CrearCesantias($cesantias, $ano)
+    {
+        $mesInicio = 0;
+        $anioTerminacion = 0;
+        $mesTerminacion = 0;
+        $anioInicio = 0;
+        $diaTerminacion = 0;
+        $diaInicio = 0;
+        if($cesantias->fecha_inicio_contrato <= $cesantias->fecha_ultima_cesantia){
+            $fecha = date($cesantias->fecha_desde);
+        }else{
+           $fecha = date($cesantias->fecha_inicio_contrato);
+        } 
+       
+        $fecha_inicio_dias = strtotime('0 day', strtotime($fecha));
+        $fecha_inicio_dias = date('Y-m-d', $fecha_inicio_dias);
+        //codigo de fechas
+        $fecha_inicio = $fecha_inicio_dias;
+        $fecha_termino = $cesantias->fecha_hasta;
         $diaTerminacion = substr($fecha_termino, 8, 8);
         $mesTerminacion = substr($fecha_termino, 5, 2);
         $anioTerminacion = substr($fecha_termino, 0, 4);
@@ -1277,7 +1669,7 @@ class ProgramacionNominaController extends Controller
             
        }else{
             if($tipo_nomina == 2){ ///PROCESO QUE APLICA DESCUENTOS AL PAGO DE PRIMAS
-                 $nomina_prima = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                $nomina_prima = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
                 foreach ($nomina_prima as $key => $nominas) {
                      //BUSCAR EN EL MODULO DE CREDITO
                     $creditos = \app\models\Credito::find()->where(['=','id_empleado', $nominas->id_empleado])->andWhere(['>','saldo_credito', 0])
@@ -1369,10 +1761,62 @@ class ProgramacionNominaController extends Controller
                     $nominas->estado_liquidado = 1;
                     $nominas->save();
                 }//TERMINA EL VECTOR DE PROGRAMACION DE PRIMAS
-            }
                 
+            }else{ //COMIENZA EL PROCESO DE CESANTIAS
+                $nomina_cesantia = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                foreach ($nomina_cesantia as $key => $nominas) {
+                    
+                    //PROCESO QUE ADICIONA  O DESCUENTA CONCEPTOS POR FECHA EN LA CESANTIA
+                    $adicion_fecha = \app\models\PagoAdicionalPermanente::find()->where(['=', 'fecha_corte', $fecha_hasta])
+                            ->andWhere(['=', 'estado_registro', 0])
+                            ->andWhere(['=', 'estado_periodo', 0])
+                            ->andWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                            ->andWhere(['=','aplicar_cesantias', 1])->andWhere(['=','id_empleado', $nominas->id_empleado])
+                            ->all();
+                    if (count($adicion_fecha) > 0) {
+                        foreach ($adicion_fecha as $adicionfecha) {
+                            $buscar = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])
+                                                       ->andWhere(['=','codigo_salario', $adicionfecha->codigo_salario])->one();
+                            if (!$buscar) {
+                                $table = new \app\models\ProgramacionNominaDetalle();
+                                $table->id_programacion = $nominas->id_programacion;
+                                $table->codigo_salario = $adicionfecha->codigo_salario;
+                                $table->id_periodo_pago_nomina = $id;
+                                $table->fecha_desde = $fecha_desde;
+                                $table->fecha_hasta = $fecha_hasta;
+                                $table->id_grupo_pago = $id_grupo_pago;
+                                if ($adicionfecha->tipo_adicion == 1) {
+                                    if ($adicionfecha->codigoSalario->prestacional == 1) {
+                                        $table->vlr_devengado = $adicionfecha->valor_adicion;
+                                    } else {
+                                        $table->vlr_devengado_no_prestacional = $adicionfecha->valor_adicion;
+                                        $table->vlr_devengado = $adicionfecha->valor_adicion;
+                                    }
+                                } else {
+                                    $table->vlr_deduccion = $adicionfecha->valor_adicion;
+                                    $table->deduccion = $adicionfecha->valor_adicion;
+                                }
+                                $table->save(false);
+                            }
+                        }
+                    }
+                    
+                    //PROCESO QUE ACTUALIZA LOS SALDOS
+                    $detalleNomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $nominas->id_programacion])->all();
+                    $deduccion = 0; $devengado = 0;
+                    foreach ($detalleNomina as $detalle) {
+                        $deduccion += $detalle->vlr_deduccion;
+                        $devengado += $detalle->vlr_devengado;
+                    }
+                    $nominas->total_devengado = $devengado;
+                    $nominas->total_deduccion = $deduccion;
+                    $nominas->total_pagar = $devengado - $deduccion;
+                    $nominas->estado_liquidado = 1;
+                    $nominas->save();
+                }
+            } //TERMINA EL PROCESO DE CESANTIAS   
        } 
-      // return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
+       return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
     }
     
     //PROCESO QUE PERMITE DESCONTAR LICENCIAS
@@ -1441,9 +1885,8 @@ class ProgramacionNominaController extends Controller
     //INICIA PROCESO DEL TERCER BOTON APLICAR PAGOS
     public function actionAplicar_pagos_nomina($id, $id_grupo_pago, $fecha_desde, $fecha_hasta, $tipo_nomina)
     {
-        if($tipo_nomina == 1)
-        
-            { //PROCESO DE NOMINA
+        if($tipo_nomina == 1){ //PROCESO DE NOMINA
+            
             /*PROCESO DE SALDOS DE CREDITOS*/
             $grupo_pago = \app\models\GrupoPago::findOne($id_grupo_pago);
             $periodo = PeriodoPagoNomina::findOne($id);
@@ -1509,7 +1952,7 @@ class ProgramacionNominaController extends Controller
             }
             
         } else {
-             if($tipo_nomina == 2){ ///PROCESO DE PRIMAS 
+            if($tipo_nomina == 2){ ///PROCESO DE PRIMAS 
                  $pagoPrima = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
                  foreach ($pagoPrima as $key => $prima) {
                      //actualiza contratos
@@ -1523,11 +1966,38 @@ class ProgramacionNominaController extends Controller
                     $prima->save();
                     
                  }
+                 //se actualiza el grupo
                 $grupoPago = \app\models\GrupoPago::findOne($id_grupo_pago);
                 $grupoPago->ultimo_pago_prima = $fecha_hasta;
                 $grupoPago->save();
+                //se actualiza el periodo
+                $periodo = PeriodoPagoNomina::findOne($id);
+                $periodo->estado_periodo = 1;
+                $periodo->save();
                  
-             }
+            }else{ //CIERRA EL PROCESO DE CESANTIAS Y LOS INTERESES
+                $pagoPrima = ProgramacionNomina::find()->where(['=','id_periodo_pago_nomina', $id])->all();
+                foreach ($pagoPrima as $key => $cesantias) {
+                     //actualiza contratos
+                    $contrato = \app\models\Contratos::findOne($cesantias->id_contrato);
+                    $contrato->ultima_pago_cesantia = $fecha_hasta;
+                    $contrato->save();
+                    //actualiza consecutivo
+                    $this->GenerarConsecutivoCesantias($cesantias);
+                    //CIERRE EL PROCESO DE PRIMAS
+                    $cesantias->estado_cerrado = 1;
+                    $cesantias->save();
+                    
+                }
+                 //se actualiza el grupo
+                $grupoPago = \app\models\GrupoPago::findOne($id_grupo_pago);
+                $grupoPago->ultimo_pago_cesantia = $fecha_hasta;
+                $grupoPago->save();
+                //se actualiza el periodo
+                $periodo = PeriodoPagoNomina::findOne($id);
+                $periodo->estado_periodo = 1;
+                $periodo->save();
+            }
         }
        return $this->redirect(['programacion-nomina/view', 'id' => $id , 'id_grupo_pago' => $id_grupo_pago, 'fecha_desde' => $fecha_desde, 'fecha_hasta' => $fecha_hasta ]);
     }
@@ -1541,8 +2011,19 @@ class ProgramacionNominaController extends Controller
         $codigo->numero_inicial = $consecutivo;
         $codigo->save();
     }
+    
     //GENERA EL CONSECUTIVO PRIMAS
-    protected function GenerarConsecutivoPrima($prima) {
+    protected function GenerarConsecutivoCesantias($cesantias) {
+        $codigo = \app\models\Consecutivos::findOne(27);
+        $consecutivo = $codigo->numero_inicial + 1;
+        $cesantias->nro_pago = $consecutivo;
+        $cesantias->save();
+        $codigo->numero_inicial = $consecutivo;
+        $codigo->save();
+    }
+    
+    //GENERA EL CONSECUTIVO PRIMAS
+    protected function GenerarConsecutivoCesartias($prima) {
         $codigo = \app\models\Consecutivos::findOne(26);
         $consecutivo = $codigo->numero_inicial + 1;
         $prima->nro_pago = $consecutivo;
@@ -1817,6 +2298,14 @@ class ProgramacionNominaController extends Controller
             
             return $this->redirect(['programacion-nomina/view_colilla_pagonomina', 'id' => $id, 'id_programacion' => $id_programacion]);
     }    
+     
+     //IMPRIMIR DOCUMENTOS
+    public function actionImprimir_colilla_pago($id) {
+        $model = ProgramacionNomina::findOne($id);
+        return $this->render('../formatos/nomina/colilla_pago', [
+            'model' => $model,
+        ]);
+    }
     
     /**
      * Finds the ProgramacionNomina model based on its primary key value.
@@ -1901,7 +2390,7 @@ class ProgramacionNominaController extends Controller
 
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Nomina general.xlsx"');
+        header('Content-Disposition: attachment;filename="Nomina_general.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');
@@ -1996,12 +2485,295 @@ class ProgramacionNominaController extends Controller
         }
         $k = $i + 1;
                
-        $objPHPExcel->getActiveSheet()->setTitle('Detalle nomina');
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
         $objPHPExcel->setActiveSheetIndex(0);
 
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Nomina detalle.xlsx"');
+        header('Content-Disposition: attachment;filename="Nomina_detalle.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
+    
+    //CONSULA LOS DETALLES DE NOMINA
+    public function actionDetalle_nomina($empleado, $fecha_inicio, $fecha_corte, $grupo_pago, $tipo_nomina){
+       if($empleado && $fecha_inicio && $fecha_corte && $tipo_nomina){ //busca los detalles del empleado con un rango de fechas
+           $vector = ProgramacionNomina::find()->where(['=','id_empleado', $empleado])->andWhere(['between','fecha_desde', $fecha_inicio, $fecha_corte])
+                                               ->andWhere(['=','id_tipo_nomina', $tipo_nomina])->orderBy('id_programacion DESC')->all();
+       }elseif ($grupo_pago && $fecha_inicio && $fecha_corte && $tipo_nomina) { //busca los detalles por meido del grupo de pago
+            $vector = ProgramacionNomina::find()->where(['=','id_grupo_pago', $grupo_pago])->andWhere(['between','fecha_desde', $fecha_inicio, $fecha_corte])
+                                               ->andWhere(['=','id_tipo_nomina', $tipo_nomina])->orderBy('id_programacion DESC')->all();
+       }elseif ($empleado && $fecha_inicio && $fecha_corte && $tipo_nomina){
+            $vector = ProgramacionNomina::find()->where(['=','id_empleado', $empleado])->andWhere(['between','fecha_desde', $fecha_inicio, $fecha_corte])
+                                               ->andWhere(['=','id_tipo_nomina', $tipo_nomina])->orderBy('id_programacion DESC')->all();
+       }elseif ($grupo_pago && $fecha_inicio && $fecha_corte && $tipo_nomina){
+            $vector = ProgramacionNomina::find()->where(['=','id_grupo_pago', $grupo_pago])->andWhere(['between','fecha_desde', $fecha_inicio, $fecha_corte])
+                                              ->andWhere(['=','id_tipo_nomina', $tipo_nomina])->orderBy('id_programacion DESC')->all();
+       }elseif ($empleado && $fecha_inicio && $fecha_corte){
+            $vector = ProgramacionNomina::find()->where(['=','id_empleado', $empleado])->andWhere(['between','fecha_desde', $fecha_inicio, $fecha_corte])
+                                              ->orderBy('id_programacion DESC')->all();
+       }elseif ($grupo_pago && $fecha_inicio && $fecha_corte){
+            $vector = ProgramacionNomina::find()->where(['=','id_grupo_pago', $grupo_pago])->andWhere(['between','fecha_desde', $fecha_inicio, $fecha_corte])
+                                               ->orderBy('id_programacion DESC')->all();
+       }elseif ($empleado){
+            $vector = ProgramacionNomina::find()->where(['=','id_empleado', $empleado])->orderBy('id_programacion DESC')->all();
+       }elseif ($grupo_pago){
+            $vector = ProgramacionNomina::find()->where(['=','id_grupo_pago', $grupo_pago])->orderBy('id_programacion DESC')->all();
+       }elseif ($tipo_nomina){
+           $vector = ProgramacionNomina::find()->where(['=','id_tipo_nomina', $tipo_nomina])->orderBy('id_programacion DESC')->all();
+       }
+       $objPHPExcel = new \PHPExcel();
+         $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
+        
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NRO PAGO')
+                    ->setCellValue('C1', 'PERIODO PAGO')
+                    ->setCellValue('D1', 'TIPO PAGO')
+                    ->setCellValue('E1', 'GRUPO PAGO')
+                    ->setCellValue('F1', 'NRO CONTRATO')
+                    ->setCellValue('G1', 'DOCUMENTO')
+                    ->setCellValue('H1', 'EMPLEADO')   
+                    ->setCellValue('I1', 'FECHA INICIO')
+                    ->setCellValue('J1', 'FECHA CORTE')
+                    ->setCellValue('K1', 'SALARIO')
+                    ->setCellValue('L1', 'CODIDO SALARIO')
+                    ->setCellValue('M1', 'CONCEPTO DE SALARIO')
+                    ->setCellValue('N1', 'DIAS DE PAGO')
+                    ->setCellValue('O1', 'DEVENGADO')
+                    ->setCellValue('P1', 'DEDUCCION');
+                  
+        
+        $i = 2;
+        
+        foreach ($vector as $val) {
+            $vector_detalle = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $val->id_programacion])->all();
+            foreach ($vector_detalle as $key => $detalle) {
+                $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $val->id_programacion)
+                        ->setCellValue('B' . $i, $val->nro_pago)
+                        ->setCellValue('C' . $i, $val->id_periodo_pago_nomina)
+                        ->setCellValue('D' . $i, $val->tipoNomina->tipo_pago)
+                        ->setCellValue('E' . $i, $val->grupoPago->grupo_pago)
+                        ->setCellValue('F' . $i, $val->id_contrato)                    
+                        ->setCellValue('G' . $i, $val->cedula_empleado)
+                        ->setCellValue('H' . $i, $val->empleado->nombre_completo)
+                        ->setCellValue('I' . $i, $val->fecha_desde)
+                        ->setCellValue('J' . $i, $val->fecha_hasta)
+                        ->setCellValue('K' . $i, $val->salario_contrato)
+                        ->setCellValue('L' . $i, $detalle->codigo_salario)
+                        ->setCellValue('M' . $i, $detalle->codigoSalario->nombre_concepto)
+                        ->setCellValue('N' . $i, $detalle->dias_reales);
+                        if($detalle->codigo_salario == 20){
+                            $objPHPExcel->setActiveSheetIndex(0)
+                            ->setCellValue('O' . $i, $detalle->auxilio_transporte)
+                            ->setCellValue('P' . $i, $detalle->vlr_deduccion);
+                        }else{
+                            $objPHPExcel->setActiveSheetIndex(0)
+                           ->setCellValue('O' . $i, $detalle->vlr_devengado) 
+                             ->setCellValue('P' . $i, $detalle->vlr_deduccion);
+                        }    
+                       
+
+                $i++;
+            } 
+            $i = $i;
+        }
+        
+               
+        $objPHPExcel->getActiveSheet()->setTitle('Listados');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Detalle_nomina.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+    
+    public function actionExcelconsultapago($tableexcel) {
+         $objPHPExcel = new \PHPExcel();
+         $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+         $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+                            
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NRO PAGO')
+                    ->setCellValue('C1', 'PERIODO PAGO')
+                    ->setCellValue('D1', 'TIPO PAGO')
+                    ->setCellValue('E1', 'GRUPO PAGO')
+                    ->setCellValue('F1', 'NRO CONTRATO')
+                    ->setCellValue('G1', 'DOCUMENTO')
+                    ->setCellValue('H1', 'EMPLEADO')   
+                    ->setCellValue('I1', 'FECHA INICIO')
+                    ->setCellValue('J1', 'FECHA CORTE')
+                    ->setCellValue('K1', 'SALARIO')
+                    ->setCellValue('L1', 'TOTAL DEVENGADO')
+                    ->setCellValue('M1', 'TOTAL DEDUCCION')
+                    ->setCellValue('N1', 'NETO PAGAR')
+                    ->setCellValue('O1', 'IBP');
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_programacion)
+                    ->setCellValue('B' . $i, $val->nro_pago)
+                    ->setCellValue('C' . $i, $val->id_periodo_pago_nomina)
+                    ->setCellValue('D' . $i, $val->tipoNomina->tipo_pago)
+                    ->setCellValue('E' . $i, $val->grupoPago->grupo_pago)
+                    ->setCellValue('F' . $i, $val->id_contrato)                    
+                    ->setCellValue('G' . $i, $val->cedula_empleado)
+                    ->setCellValue('H' . $i, $val->empleado->nombre_completo)
+                    ->setCellValue('I' . $i, $val->fecha_desde)
+                    ->setCellValue('J' . $i, $val->fecha_hasta)
+                    ->setCellValue('K' . $i, round($val->salario_contrato,0))
+                    ->setCellValue('L' . $i, round($val->total_devengado,0))
+                    ->setCellValue('M' . $i, round($val->total_deduccion,0))
+                    ->setCellValue('N' . $i, round($val->total_pagar,0))
+                    ->setCellValue('O' . $i, round($val->ibc_prestacional,0));
+                   
+            $i++;
+        }
+        $j = $i + 1;
+               
+        $objPHPExcel->getActiveSheet()->setTitle('Nominas_pagadas');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Nomina general.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
+    
+    //pago de intereses
+     public function actionExcelconsultaPagoIntereses($tableexcel) {
+        
+         $objPHPExcel = new \PHPExcel();
+         $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+                            
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'NRO')
+                    ->setCellValue('B1', 'GRUPO PAGO')
+                    ->setCellValue('C1', 'DOCUMENTO')
+                    ->setCellValue('D1', 'EMPLEADO')   
+                    ->setCellValue('E1', 'FECHA INICIO')
+                    ->setCellValue('F1', 'FECHA CORTE')
+                    ->setCellValue('G1', 'TOTAL CESANTIAS')
+                    ->setCellValue('H1', 'TOTAL INTERESES')
+                    ->setCellValue('I1', '% PAGO');
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_interes)
+                    ->setCellValue('B' . $i, $val->grupoPago->grupo_pago)
+                    ->setCellValue('C' . $i, $val->documento)                    
+                    ->setCellValue('D' . $i, $val->empleado->nombre_completo)
+                    ->setCellValue('E' . $i, $val->fecha_inicio)
+                    ->setCellValue('F' . $i, $val->fecha_corte)
+                    ->setCellValue('G' . $i, $val->valor_cesantias)
+                    ->setCellValue('H' . $i, $val->valor_intereses)
+                    ->setCellValue('I' . $i, $val->porcentaje);
+            $i++;
+        }
+                       
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Intereses.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');

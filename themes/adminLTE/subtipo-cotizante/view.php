@@ -29,10 +29,10 @@ $this->params['breadcrumbs'][] = $model->id_subtipo_cotizante;
                 <tr>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_subtipo_cotizante') ?>:</th>
                     <td><?= Html::encode($model->id_subtipo_cotizante) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion') ?>:</th>
-                    <td><?= Html::encode($model->descripcion) ?></td>  
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_interfaz') ?>:</th>
-                    <td><?= Html::encode($model->codigo_interfaz) ?></td>  
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtipo') ?>:</th>
+                    <td><?= Html::encode($model->subtipo) ?></td>  
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_api_nomina') ?>:</th>
+                    <td><?= Html::encode($model->codigo_api_nomina) ?></td>  
                 </tr>                
             </table>
         </div>

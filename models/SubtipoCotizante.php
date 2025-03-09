@@ -28,10 +28,9 @@ class SubtipoCotizante extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['descripcion'], 'required'],
-            [['descripcion'], 'string', 'max' => 100],
-            [['codigo_interfaz'], 'string', 'max' => 10],
-            [['user_name'], 'string', 'max' => 15],
+            [['subtipo'], 'required'],
+            [['subtipo'], 'string', 'max' => 100],
+            [['codigo_api_nomina'], 'string', 'max' => 10],
         ];
     }
 
@@ -42,9 +41,8 @@ class SubtipoCotizante extends \yii\db\ActiveRecord
     {
         return [
             'id_subtipo_cotizante' => 'Id',
-            'descripcion' => 'Descripcion',
-            'codigo_interfaz' => 'Codigo Interfaz',
-            'user_name' => 'User Name',
+            'subtipo' => 'Descripcion',
+            'codigo_api_nomina' => 'Codigo API',
         ];
     }
 }

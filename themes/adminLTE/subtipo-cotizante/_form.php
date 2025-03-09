@@ -29,10 +29,10 @@ $form = ActiveForm::begin([
     </div>
     <div class="panel-body">        														   		
         <div class="row">
-            <?= $form->field($model, 'descripcion')->textInput(['maxlength' => true]) ?>    
+            <?= $form->field($model, 'subtipo')->textInput(['maxlength' => true]) ?>    
         </div>  
         <div class="row">
-            <?= $form->field($model, 'codigo_interfaz')->textInput(['maxlength' => true]) ?>    
+            <?= $form->field($model, 'codigo_api_nomina')->textInput(['maxlength' => true]) ?>    
         </div> 
         <div class="panel-footer text-right">                
             <a href="<?= Url::toRoute("subtipo-cotizante/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>

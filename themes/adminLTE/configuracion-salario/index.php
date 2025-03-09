@@ -28,19 +28,31 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'salario_minimo_actual',
+                'value' => function ($model) {
+                    return ' ' . number_format($model->salario_minimo_actual, 0, ',', '.'); 
+                },
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
            
             [
                 'attribute' => 'auxilio_transporte_actual',
+                'value' => function ($model) {
+                    return ' ' . number_format($model->auxilio_transporte_actual, 0, ',', '.'); 
+                },
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [
                 'attribute' => 'auxilio_transporte_anterior',
+                'value' => function ($model) {
+                    return ' ' . number_format($model->auxilio_transporte_anterior, 0, ',', '.'); 
+                },
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [
                 'attribute' => 'salario_incapacidad',
+                'value' => function ($model) {
+                    return ' ' . number_format($model->salario_incapacidad, 0, ',', '.'); 
+                },
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [

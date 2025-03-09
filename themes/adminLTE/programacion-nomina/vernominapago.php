@@ -27,7 +27,7 @@ $form = ActiveForm::begin([
             'options' => []
         ],
         ]);
-
+echo $model->salario_promedio;
 ?>
 <div class="programacion-nomina-view">
 
@@ -45,7 +45,7 @@ $form = ActiveForm::begin([
             <div class="panel-body">
                 <table class="table table-bordered table-striped table-hover" WIDTH="80%">
                     <tr style ='font-size:85%;'>
-                        <th><?= Html::activeLabel($model, 'id_programacion') ?></th>
+                        <th><?= Html::activeLabel($model, 'Código') ?></th>
                         <td><?= Html::encode($model->id_programacion) ?></td>
                         <th><?= Html::activeLabel($model, 'nro_pago') ?></th>
                         <td><?= Html::encode($model->nro_pago) ?></td>
@@ -62,10 +62,10 @@ $form = ActiveForm::begin([
                         <td><?= Html::encode($model->cedula_empleado) ?></td>
                         <th><?= Html::activeLabel($model, 'id_empleado') ?></th>
                         <td colspan="3"><?= Html::encode($empleado->nombre_completo) ?></td>
-                        <th><?= Html::activeLabel($model, 'id_contrato') ?></th>
+                        <th><?= Html::activeLabel($model, 'Nro_contrato') ?></th>
                         <td><?= Html::encode($model->id_contrato) ?></td>
                          <th><?= Html::activeLabel($model, 'Promedio') ?></th>
-                        <td><?= Html::encode('$'. number_format($model->promedio,0)) ?></td>
+                        <td><?= Html::encode('$'. number_format($model->salario_promedio,0)) ?></td>
 
                     </tr>   
                     <tr style ='font-size:85%;'>

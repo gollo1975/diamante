@@ -9,7 +9,7 @@ use kartik\select2\Select2;
 use kartik\date\DatePicker;
 
 $this->title = 'Refinanciar credito';
-$this->params['breadcrumbs'][] = ['label' => 'Refinanciar creditos', 'url' => ['view','id' => $credito->id_credito]];
+$this->params['breadcrumbs'][] = ['label' => 'Refinanciar creditos', 'url' => ['view','id' => $credito->id_credito, 'token' =>$token]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <?php $form = ActiveForm::begin([
@@ -55,7 +55,7 @@ $tipopagocredito = ArrayHelper::map(TipoPagoCredito::find()->where(['=','estado'
                 </div>
                
                 <div class="panel-footer text-right">			
-                    <a href="<?= Url::toRoute(['credito/view' , 'id' => $credito->id_credito]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+                    <a href="<?= Url::toRoute(['credito/view' , 'id' => $credito->id_credito, 'token' =>$token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>
                 </div>
             </div>

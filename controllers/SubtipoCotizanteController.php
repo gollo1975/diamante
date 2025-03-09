@@ -80,8 +80,6 @@ class SubtipoCotizanteController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->user_name = Yii::$app->user->identity->username;
-            $model->save();
             return $this->redirect(['index']);
         }
 

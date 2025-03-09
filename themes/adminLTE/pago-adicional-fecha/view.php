@@ -49,7 +49,7 @@ $conceptosalario = ArrayHelper::map(ConceptoSalarios::find()->where(['tipo_adici
    
         <a href="<?= Url::toRoute(["pago-adicional-fecha/index"]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>  
         <?php if($fechacorte->estado_registro == 0){?>   
-            <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar intereses', ['pago-adicional-fecha/importinteres', 'id' => $id, 'fecha_corte' => $fecha_corte], ['class' => 'btn btn-info btn-sm'])?>
+            <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar intereses', ['pago-adicional-fecha/importar_intereses', 'id' => $id, 'fecha_corte' => $fecha_corte], ['class' => 'btn btn-info btn-sm'])?>
 
            <div class="btn-group" role="group">
                 <button type="button" class="btn btn-warning  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -57,8 +57,8 @@ $conceptosalario = ArrayHelper::map(ConceptoSalarios::find()->where(['tipo_adici
                   <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                   <li><?= Html::a('<span class="glyphicon "></span> Importar primas', ['pago-adicional-fecha/importarpagoprimas', 'id' => $id, 'fecha_corte' => $fecha_corte],['class' => 'btn btn-default btn-xs']) ?></li>
-                   <li><?= Html::a('<span class="glyphicon "></span> Aplicar pago', ['pago-adicional-fecha/aplicarpagoprimas', 'id' => $id, 'fecha_corte' => $fecha_corte],['class' => 'btn btn-info btn-xs']) ?></li>
+                   <li><?= Html::a('<span class="glyphicon glyphicon-send"></span> Importar primas', ['pago-adicional-fecha/importar_primas', 'id' => $id, 'fecha_corte' => $fecha_corte],['class' => 'btn btn-default btn-xs']) ?></li>
+                   <li><?= Html::a('<span class="glyphicon glyphicon-import"></span> Aplicar pago', ['pago-adicional-fecha/aplicar_pago_primas', 'id' => $id, 'fecha_corte' => $fecha_corte],['class' => 'btn btn-info btn-xs']) ?></li>
                 </ul>
            </div> 
 

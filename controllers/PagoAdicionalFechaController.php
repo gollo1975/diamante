@@ -555,6 +555,175 @@ class PagoAdicionalFechaController extends Controller
         }
     }
     
+    ///IMPORTAR PRIMAS A PAGO ADICIONAL FECHAS
+     public function actionImportar_primas($id, $fecha_corte) {
+        $primas = \app\models\ProgramacionNomina::find()->where(['=','importar_prima', 0])
+                                                        ->andWhere(['=','id_tipo_nomina', 2])->orderBy('cedula_empleado')->all();
+        $form = new \app\models\FormBuscarPrimas();
+        $documento = null;
+        $id_grupo_pago = null;
+       if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $documento = Html::encode($form->documento); 
+                $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                $nominas = \app\models\ProgramacionNomina::find()
+                            ->andFilterWhere(['=','cedula_empleado', $documento])
+                            ->andFilterWhere(['=','id_grupo_pago', $id_grupo_pago])
+                            ->andWhere(['=','id_tipo_nomina', 2])
+                            ->orderBy('cedula_empleado DESC')
+                           ->all();
+            } else {
+                $form->getErrors();
+            }                    
+        } else {
+           $nominas = \app\models\ProgramacionNomina::find()->where(['=','importar_prima', 0])
+                                                            ->andWhere(['=','id_tipo_nomina', 2])->orderBy('cedula_empleado DESC')->all();
+        }
+        if (isset($_POST["id_programacion"])) {
+            $intIndice = 0;
+            $fecha_corte = Html::encode($_POST["fecha_corte"]);
+            $conceptoSalario = \app\models\ConceptoSalarios::find()->where(['=','concepto_prima', 1])->one();
+            foreach ($_POST["id_programacion"] as $intCodigo) {
+                $nomina = \app\models\ProgramacionNomina::find()->where(['id_programacion' => $intCodigo])->one();
+                $table = new \app\models\PagoAdicionalPermanente();
+                $table->id_empleado = $nomina->id_empleado;
+                $table->codigo_salario = $conceptoSalario->codigo_salario;
+                $table->id_contrato = $nomina->id_contrato;
+                $table->id_grupo_pago = $nomina->id_grupo_pago;
+                $table->id_pago_fecha = $id;
+                $table->fecha_corte = $fecha_corte;
+                $table->tipo_adicion = 1;
+                $table->valor_adicion = $nomina->total_pagar;
+                $table->permanente = 2;
+                $table->aplicar_dia_laborado = 0;
+                $table->aplicar_prima = 0;
+                $table->aplicar_cesantias = 0;
+                $table->estado_registro = 0;
+                $table->estado_periodo = 0;
+                $table->detalle = 'Primas semestrales';
+                $table->user_name = Yii::$app->user->identity->username;
+                $table->insert();
+            }
+            return $this->redirect(["pago-adicional-fecha/view", 'id' => $id, 'fecha_corte' => $fecha_corte]);
+        }
+            
+        return $this->render('_form_importar_primas', [
+            'nominas' => $nominas,            
+            'id' => $id,
+            'form' => $form,
+            'fecha_corte' => $fecha_corte,
+
+        ]);
+   }
+   
+    //PROCESO QUE APLICA LOS PAGOS DE PRIMAS
+    public function actionAplicar_pago_primas($id, $fecha_corte) {
+        $nominas = \app\models\ProgramacionNomina::find()->where(['=','importar_prima', 0])
+                                                        ->andWhere(['=','id_tipo_nomina', 2])->all();
+        if(count($nominas) > 0){
+            foreach ($nominas as $primas):
+                 $primas->importar_prima = 1;
+                 $primas->documento_generado = 1;
+                 $primas->documento_detalle_generado = 1;
+                 $primas->save(false);
+            endforeach;
+             return $this->redirect(["pago-adicional-fecha/view", 'id'=>$id, 'fecha_corte' => $fecha_corte]);
+        }else{
+              Yii::$app->getSession()->setFlash('warning', 'No hay registros de primas semestrales para aplicar.');
+              return $this->redirect(["pago-adicional-fecha/view", 'id'=>$id, 'fecha_corte' => $fecha_corte]);
+        }
+        
+   }
+   
+    //IMPORTAR INTERES A LA CESANTIAS
+   public function actionImportar_intereses($id, $fecha_corte)
+    {
+        $intereses = \app\models\InteresesCesantia::find()->where(['=','importado', 0])->orderBy('id_interes DESC')->all();
+        $form = new \app\models\FormBuscarPrimas();
+        $documento = null;
+        $id_grupo_pago = null;
+        if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $documento = Html::encode($form->documento); 
+                $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                $intereses = \app\models\InteresesCesantia::find()
+                            ->andFilterWhere(['=','documento', $documento])
+                            ->andFilterWhere(['=','id_grupo_pago', $id_grupo_pago])
+                            ->andWhere(['=','importado', 0])
+                            ->orderBy('id_interes DESC')
+                            ->all();
+            } else {
+                $form->getErrors();
+            }                    
+        } else {
+           $intereses = \app\models\InteresesCesantia::find()->where(['=','importado', 0])->orderBy('id_interes DESC')->all();
+        }
+        if(isset($_POST["enviardatos"])){
+            if (isset($_POST["id_interes"])) {
+                $intIndice = 0;
+                $con = 0;
+                $salario = \app\models\ConceptoSalarios::find()->where(['=','intereses', 1])->one();
+                $fecha_corte = Html::encode($_POST["fecha_corte"]);
+                foreach ($_POST["id_interes"] as $intCodigo) {
+                    $interes = \app\models\InteresesCesantia::find()->where(['id_interes' => $intCodigo])->one();
+                    $pagos = \app\models\PagoAdicionalPermanente::find()
+                        ->where(['=', 'id_contrato', $interes->id_contrato])
+                        ->andWhere(['=', 'fecha_corte', $fecha_corte])->andWhere(['=','id_pago_fecha', $id])
+                        ->all();
+                    $reg = count($pagos);
+                    if ($reg == 0) {
+                        $table = new \app\models\PagoAdicionalPermanente();
+                        $table->id_empleado = $interes->id_empleado;
+                        $table->codigo_salario = $salario->codigo_salario;
+                        $table->id_contrato = $interes->id_contrato;
+                        $table->id_grupo_pago = $interes->id_grupo_pago;
+                        $table->id_pago_fecha = $id;
+                        $table->fecha_corte = $fecha_corte;
+                        $table->tipo_adicion = 1;
+                        $table->valor_adicion = $interes->valor_intereses;
+                        $table->permanente = 0;
+                        $table->aplicar_dia_laborado = 0;
+                        $table->aplicar_prima = 0;
+                        $table->aplicar_cesantias = 0;
+                        $table->estado_registro = 0;
+                        $table->estado_periodo = 0;
+                        $table->detalle = 'Pago de intereses';
+                        $table->user_name = Yii::$app->user->identity->username;
+                        $table->save(false); 
+                        $interes->enviado = 1;
+                        $interes->save(false);
+                        $con++;
+                    }
+                }
+                Yii::$app->getSession()->setFlash('success', 'Se inportaron ('. $con.') regisgtro de pago de interes a las cesantias.');
+                return $this->redirect(["pago-adicional-fecha/view", 'id' => $id, 'fecha_corte' => $fecha_corte]);
+            }
+        } 
+        //proceso que cierra el proceso de exportado
+        if(isset($_POST["enviarexportado"])){
+            if (isset($_POST["id_interes"])) { 
+                $con = 0;
+                foreach ($_POST["id_interes"] as $intCodigo) {
+                    $interes = \app\models\InteresesCesantia::findOne($intCodigo);
+                    if($interes){
+                        $interes->importado = 1;
+                        $interes->save(false);
+                        $con++;
+                    }
+                }
+                Yii::$app->getSession()->setFlash('success', 'Se cerraron ('. $con.') regisgtro de pago de interes a las cesantias.');
+                return $this->redirect(["pago-adicional-fecha/view", 'id' => $id, 'fecha_corte' => $fecha_corte]);
+            }
+        }    
+        return $this->render('_form_importar_intereses', [
+            'intereses' => $intereses,            
+            'id' => $id,
+            'form' => $form,
+            'fecha_corte' => $fecha_corte,
+
+        ]);
+    }
+    
     /**
      * Finds the PagoAdicionalFecha model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

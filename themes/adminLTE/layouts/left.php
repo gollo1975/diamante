@@ -674,7 +674,6 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 'items' => [
                                                                     ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['configuracion-incapacidad/index']],  
                                                                     ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['configuracion-licencia/index']],
-                                                                    ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['configuracion-licencia/index']],
                                                                     ]
                                                                 ],
                                                             ],
@@ -744,6 +743,17 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                  ['label' => 'Creditos', 'icon' => 'plus-square-o', 'url' => ['credito/index']],
                                                                  ['label' => 'Pago adicional x fecha', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-fecha/index']],
                                                                  ['label' => 'Adicional permanente', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-permanente/index']],
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE PROCESOS
+                                                        [
+                                                            'label' => 'Consulta',
+                                                            'icon' => 'search',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                ['label' => 'Creditos', 'icon' => 'plus-square-o', 'url' => ['credito/search_creditos']],
+                                                                ['label' => 'Soporte de nomina', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/search_comprobante_nomina']],
+                                                                ['label' => 'Soporte de intereses', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/search_comprobante_cesantias']],
                                                             ],
                                                         ],
                                                     ],

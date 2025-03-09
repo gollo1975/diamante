@@ -17,7 +17,12 @@ $this->params['breadcrumbs'][] = $model->id_credito;
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <p>
-       <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['credito/index'], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?php if($token == 0){
+             echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['credito/index'], ['class' => 'btn btn-primary btn-sm']);
+        }else{
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['credito/search_creditos'], ['class' => 'btn btn-primary btn-sm']);
+        }?>
+      
      </p>
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -137,10 +142,11 @@ $this->params['breadcrumbs'][] = $model->id_credito;
                         </div>            
                         <div class="panel-footer text-right">  
                             <?php 
-                            if($model->saldo_credito > 0){?>
-
-                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Nuevo abono', ['credito/nuevoabono', 'id_credito' => $model->id_credito], ['class' => 'btn btn-info btn-sm']) ?>                    
-                            <?php }?>
+                            if($token == 0){
+                                if($model->saldo_credito > 0){?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Nuevo abono', ['credito/nuevoabono', 'id_credito' => $model->id_credito, 'token' =>$token], ['class' => 'btn btn-info btn-sm']) ?>                    
+                                <?php }
+                            }?>
                         </div>   
                     </div>            
                 </div>
@@ -179,9 +185,11 @@ $this->params['breadcrumbs'][] = $model->id_credito;
                         </div>    
                         <div class="panel-footer text-right">  
                             <?php 
-                            if($model->saldo_credito > 0){?>
-                                <?= Html::a('<span class="glyphicon glyphicon-list"></span> Refinaciar', ['credito/refinanciar_credito', 'id_credito' => $model->id_credito], ['class' => 'btn btn-primary btn-sm']) ?>                    
-                            <?php }?>
+                            if($token == 0){
+                                if($model->saldo_credito > 0){?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-list"></span> Refinaciar', ['credito/refinanciar_credito', 'id_credito' => $model->id_credito,'token' => $token], ['class' => 'btn btn-primary btn-sm']) ?>                    
+                                <?php }
+                            }    ?>
                         </div>   
                     </div>            
                 </div>            

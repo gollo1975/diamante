@@ -53,7 +53,7 @@ class CreditoController extends Controller
      * Lists all Credito models.
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex($token = 0) {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',137])->all()){
                 $form = new FormConsultaCredito();
@@ -168,6 +168,82 @@ class CreditoController extends Controller
                         'model' => $model,
                         'form' => $form,
                         'pagination' => $pages,
+                        'token' => $token,
+            ]);
+        }else{
+             return $this->redirect(['site/sinpermiso']);
+        }     
+        }else{
+           return $this->redirect(['site/login']);
+        }
+   }
+   
+    //CONSULTA DE CREDITOS
+   public function actionSearch_creditos($token = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',149])->all()){
+                $form = new FormConsultaCredito();
+                $id_empleado = null;
+                $id_tipo_pago = null;
+                $codigo_credito = null;
+                $saldo = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {                        
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $id_tipo_pago = Html::encode($form->id_tipo_pago);
+                        $codigo_credito = Html::encode($form->codigo_credito);
+                        $saldo = Html::encode($form->saldo);
+                        $table = Credito::find()
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])                                                                                              
+                                ->andFilterWhere(['=', 'id_tipo_pago', $id_tipo_pago])
+                                ->andFilterWhere(['=','codigo_credito', $codigo_credito]);
+                        if ($saldo == 1){
+                            $table = $table->andFilterWhere(['>', 'saldo_credito', $saldo]);
+                        }    
+                        $table = $table->orderBy('id_credito DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                            if(isset($_POST['excel'])){                            
+                                $check = isset($_REQUEST['id_credito DESC']);
+                                $this->actionExcelconsultaCreditos($tableexcel);
+                            }
+                } else {
+                        $form->getErrors();
+                }                    
+            } else {
+                $table = Credito::find()
+                        ->orderBy('id_credito DESC');
+                $tableexcel = $table->all();
+                $count = clone $table;
+                $pages = new Pagination([
+                    'pageSize' => 20,
+                    'totalCount' => $count->count(),
+                ]);
+                $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                if(isset($_POST['excel'])){
+                    //$table = $table->all();
+                    $this->actionExcelconsultaCreditos($tableexcel);
+                }
+                
+            }
+            $to = $count->count();
+            return $this->render('index', [
+                        'model' => $model,
+                        'form' => $form,
+                        'pagination' => $pages,
+                        'token' => $token,
             ]);
         }else{
              return $this->redirect(['site/sinpermiso']);
@@ -259,7 +335,7 @@ class CreditoController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id ,$token)
     {
       $abonos = \app\models\AbonoCredito::find()->where(['=','id_credito',$id])->orderBy('id_abono DESC')->all();
       $refinanciacion = \app\models\RefinanciarCredito::find()->where(['=','id_credito', $id])->all();
@@ -269,12 +345,13 @@ class CreditoController extends Controller
             'abonos' => $abonos, 
             'refinanciacion'=> $refinanciacion,
             'id'=>$id,
+            'token' => $token,
             
         ]);
     }
     
      ///REFINANCIAR CREDITO
-    public function actionRefinanciar_credito($id_credito)
+    public function actionRefinanciar_credito($id_credito, $token)
     { 
         $model = new \app\models\RefinanciarCredito();
         $credito = Credito::find()->where(['=','id_credito', $id_credito])->one();
@@ -302,7 +379,7 @@ class CreditoController extends Controller
                     $credito->numero_cuota_actual = $model->numero_cuota_actual;
                     $credito->valor_cuota = round($total);
                     $credito->save();
-                    $this->redirect(["credito/view", 'id' => $id_credito]);                    
+                    $this->redirect(["credito/view", 'id' => $id_credito, 'token' =>$token]);                    
                     
                 }else{                
                     Yii::$app->getSession()->setFlash('error', 'El Número del credito no existe!');
@@ -314,6 +391,7 @@ class CreditoController extends Controller
         return $this->render('refinanciar_credito_empleado', [
             'model' => $model,
             'credito' => $credito,
+            'token' =>$token,
         ]);
     }
 
@@ -443,7 +521,7 @@ class CreditoController extends Controller
     }
 
     //CREAR LOS ABONOS A LOS CREDITOS
-     public function actionNuevoabono($id_credito)
+     public function actionNuevoabono($id_credito, $token)
     { 
         $model = new \app\models\FormAbonoCredito();
         $credito = Credito::find()->where(['=','id_credito', $id_credito])->one();
@@ -474,7 +552,7 @@ class CreditoController extends Controller
                         $credito_total->saldo_credito = $saldoC;
                         $credito_total->numero_cuota_actual = ($credito_total->numero_cuota_actual + 1);
                         $credito_total->update();
-                        $this->redirect(["credito/view", 'id' => $id_credito]);                    
+                        $this->redirect(["credito/view", 'id' => $id_credito, 'token' =>$token]);                    
                     }
                 }else{                
                     Yii::$app->getSession()->setFlash('error', 'El Número del credito no existe!');
@@ -487,6 +565,7 @@ class CreditoController extends Controller
             'model' => $model,
             'credito' => $credito,
             'id_credito' =>$id_credito,
+            'token' => $token,
         ]);
     }
     

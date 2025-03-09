@@ -29,11 +29,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
             [
-                'attribute' => 'descripcion',
+                'attribute' => 'subtipo',
                 'contentOptions' => ['class' => 'col-lg-3'],
             ],            
             [
-                'attribute' => 'codigo_interfaz',
+                'attribute' => 'codigo_api_nomina',
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],   
             [

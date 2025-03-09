@@ -53,9 +53,13 @@ class ConfiguracionSalarioController extends Controller
      */
     public function actionView($id)
     {
+     
         return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+           'model' => $this->findModel($id),
+       ]);  
+        
+            
+       
     }
 
     /**
@@ -141,10 +145,19 @@ class ConfiguracionSalarioController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_salario]);
+        if(ConfiguracionSalario::find()->where(['=','id_salario', $id])->andwhere(['=','estado', 0])->one()){
+             Yii::$app->getSession()->setFlash('error', 'Este registro esta INACTIVO, ya no se puede modificar. Valide la informacion.');
+              return $this->redirect(['index']);
+        }else{
+             if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                return $this->redirect(['index']);
+             }
+             return $this->render('update', [
+                'model' => $model,
+             ]);
         }
+
+       
 
         return $this->render('update', [
             'model' => $model,

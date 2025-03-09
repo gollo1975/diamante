@@ -46,7 +46,8 @@ class ConfiguracionSalarioSearch extends ConfiguracionSalario
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+             'query' => $query,
+             'sort'=> ['defaultOrder' => ['id_salario' => SORT_DESC]] // Agregar esta linea para agregar el orden por defecto
         ]);
 
         $this->load($params);
