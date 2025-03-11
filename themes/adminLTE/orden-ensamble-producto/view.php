@@ -77,7 +77,7 @@ if($sw == 0){
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-               <tr style ='font-size:90%;'>
+               <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_ensamble') ?></th>
                     <td><?= Html::encode($model->id_ensamble) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_orden_ensamble') ?></th>
@@ -87,17 +87,17 @@ if($sw == 0){
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
               </tr>
-               <tr style ='font-size:90%;'>
+               <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_lote') ?></th>
                     <td><?= Html::encode($model->numero_lote) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_produccion') ?></th>
                     <td><?= Html::encode($model->id_orden_produccion) ?></td>   
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Unidad_producidas') ?></th>
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Unidad_lote') ?></th>
                       <td style="text-align: right"><?= Html::encode(''.number_format($model->total_unidades,0)) ?></td>
               </tr>
-              <tr style ='font-size:90%;'>
+              <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td> 
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'peso_neto') ?></th>
@@ -107,7 +107,7 @@ if($sw == 0){
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'responsable') ?></th>
                     <td><?= Html::encode($model->responsable) ?></td>
               </tr>
-              <tr style ='font-size:90%;'>
+              <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="8"><?= Html::encode($model->observacion) ?></td>
                      
@@ -143,7 +143,7 @@ if($sw == 0){
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style='font-size:90%;'>
+                                        <tr style='font-size:85%;'>
                                             <th scope="col" style='background-color:#B9D5CE; '>Codigo</th>                        
                                             <th scope="col" style='background-color:#B9D5CE; '>Presentacion del producto</th> 
                                             <th scope="col" style='background-color:#B9D5CE; '>Cantidad proyectada</th> 
@@ -159,7 +159,7 @@ if($sw == 0){
                                         foreach ($conPresentacion as $val):
                                             $empacada = app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_presentacion', $val->id])->one();
                                             ?>
-                                            <tr style='font-size:90%;'>
+                                            <tr style='font-size:85%;'>
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
                                                 <td style="text-align: right;"><?= ''. number_format($val->cantidad_proyectada,0)?></td>
