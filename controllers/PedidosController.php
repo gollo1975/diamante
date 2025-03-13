@@ -128,25 +128,19 @@ class PedidosController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                   
                     if($tokenAcceso == 3){
                         $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])
                                                ->andWhere(['=','pedido_liberado', 0])
                                                ->andWhere(['=','pedido_anulado', 0])
                                                ->orderBy('id_pedido DESC');
                     }
-                    if($tokenAcceso == 1){
-                        $table = Pedidos::find()->Where(['=','id_agente', $vendedor->id_agente])
-                                                 ->andWhere(['=','pedido_anulado', 0])
-                                                ->andWhere(['=','pedido_liberado', 0])
-                                                ->orderBy('id_pedido DESC');
-                    }
-                    if($tokenAcceso == 2){
+                    
+                    if($tokenAcceso == 2 || $tokenAcceso == 1){
                        $table = Pedidos::find()->Where(['=','facturado', 0])
                                                 ->andWhere(['=','pedido_anulado', 0])->andWhere(['=','pedido_liberado', 0])
                                                 ->orderBy('id_pedido DESC');
                     }
-                   
+                    
                     $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 15,

@@ -41,22 +41,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
+
 if($tokenAcceso == 3){
     $agente = AgentesComerciales::find()->where(['=','nit_cedula', $tokenAgente])->one();
     $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
                                                 ->andWhere(['=','id_agente', $agente->id_agente])
                                                 ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
 }else{
-    if($tokenAcceso == 1){
-        $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
-                                                  ->andWhere(['=','id_tipo_cliente', 2])
-                                                  ->orWhere(['=','id_tipo_cliente', 3])
-                                                ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
-    }else{
+    
         $cliente = ArrayHelper::map(Clientes::find()->where(['=','estado_cliente', 0])
                                                     ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
         $vendedores = ArrayHelper::map(AgentesComerciales::find()->where(['=','estado', 0])->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-    }    
+     
 }
 ?>
 
@@ -124,7 +120,7 @@ $form = ActiveForm::begin([
             Registros <span class="badge"><?= $pagination->totalCount ?></span>
         <?php } ?>    
     </div>
-    <?php if($tokenAcceso == 3 || $tokenAcceso == 1){
+    <?php if($tokenAcceso == 3){
          ?>
         <table class="table table-responsive">
             <thead>
