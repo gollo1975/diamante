@@ -73,13 +73,13 @@ class Clientes extends \yii\db\ActiveRecord
         return [
             [['id_tipo_documento', 'nit_cedula', 'celular', 'email_cliente', 'codigo_departamento','direccion', 'codigo_municipio', 'id_naturaleza', 'id_posicion','id_agente','id_tipo_cliente'], 'required'],
             [['id_tipo_documento', 'dv', 'tipo_regimen', 'id_forma_pago', 'plazo', 'autoretenedor', 'id_naturaleza', 'tipo_sociedad', 'id_posicion',
-                'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente','predeterminado','id_zona'], 'integer'],
+                'estado_cliente','cupo_asignado','id_agente','aplicar_venta_mora','presupuesto_comercial','gasto_presupuesto_comercial','id_tipo_cliente','predeterminado','id_zona','aplica_retencion_fuente'], 'integer'],
             [['fecha_creacion', 'fecha_editado'], 'safe'],
             [['observacion','barrio_localidad'], 'string'],
-            ['email_cliente', 'email'],
+            [['email_cliente','email_envio_factura'], 'email'],
             [['nit_cedula', 'telefono', 'celular', 'user_name', 'user_name_editar'], 'string', 'max' => 15],
             [['primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'], 'string', 'max' => 15],
-            [['direccion', 'email_cliente','nombre_completo','razon_social'], 'string', 'max' => 60],
+            [['direccion', 'email_cliente','nombre_completo','razon_social','email_envio_factura'], 'string', 'max' => 60],
             [['codigo_departamento', 'codigo_municipio'], 'string', 'max' => 10],
             [['id_tipo_documento'], 'exist', 'skipOnError' => true, 'targetClass' => TipoDocumento::className(), 'targetAttribute' => ['id_tipo_documento' => 'id_tipo_documento']],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
@@ -137,6 +137,8 @@ class Clientes extends \yii\db\ActiveRecord
             'id_tipo_cliente' => 'Tipo cliente:',
             'predeterminado' => 'predeterminado',
             'barrio_localidad' => 'Barrio/localidad:',
+            'email_envio_factura' => 'Email envio factura:',
+            'aplica_retencion_fuente' => 'Aplica retencion fuente'
         ];
     }
 

@@ -38,13 +38,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <div class="btn-group" role="group" aria-label="...">
+        <p>
         <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-xs']) ?>
         <?php if ($model->autorizado == 0 && $model->numero_factura == 0) { ?>
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['factura-venta/autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
         } else {
             if ($model->autorizado == 1 && $model->numero_factura == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_factura, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
-                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar consecutivo', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-default btn-xs',
+                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar consecutivo', ['generar_factura', 'id' => $model->id_factura, 'token' =>$token, 'id_pedido' => $model->id_pedido],['class' => 'btn btn-info btn-xs',
                            'data' => ['confirm' => 'Esta seguro de generar el consecutivo a la factura de venta del cliente '.$model->cliente.' para ser enviada a la Dian.', 'method' => 'post']]);
                 if($model->id_medio_pago == ''){?>
                      <?= Html::a('<span class="glyphicon glyphicon-usd"></span> Medio de pago',
@@ -52,7 +53,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                        ['title' => 'Permite subir el medio de pago',
                                         'data-toggle'=>'modal',
                                         'data-target'=>'#modalsubirmediopago',
-                                        'class' => 'btn btn-default btn-xs',
+                                        'class' => 'btn btn-success btn-xs',
                                         'data-backdrop' => 'static',
                                         'data-keyboard' => 'false'
                                        ]);?> 
@@ -68,7 +69,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                        ['title' => 'Permite subir el medio de pago',
                                         'data-toggle'=>'modal',
                                         'data-target'=>'#modalsubirmediopago',
-                                        'class' => 'btn btn-default btn-xs',
+                                        'class' => 'btn btn-success btn-xs',
                                         'data-backdrop' => 'static',
                                         'data-keyboard' => 'false'
                                        ]);?> 
@@ -96,14 +97,24 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                     <?php } 
                 }    
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);            
-                echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
-                echo Html::a('<span class="glyphicon glyphicon-send"></span> Enviar documento a la Dian', ['enviar_factura_dian', 'id' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs','id' => 'my_button', 'onclick' => '$("#my_button").attr("disabled", "disabled")',
-                           'data' => ['confirm' => 'Esta seguro de enviar la factura de venta a la Dian.', 'method' => 'post']]);
+                if($model->fecha_enviada_api == ''){?>
+                    <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar documento a la Dian', ['enviar_factura_dian', 'id_factura' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs','id' => 'my_button', 'onclick' => '$("#my_button").attr("disabled", "disabled")',
+                               'data' => ['confirm' => 'Esta seguro de enviar la factura de venta electronica No ('.$model->numero_factura.' ) a la Dian. Tener presente que este proceso es definitivo.', 'method' => 'post']]);?>
+                    <?= Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);?>            
+                    <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
+                }else{
+                    $disabled = $model->fecha_enviada_api !== '' ? true : false;?>
+                    <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar factura a la Dian', ['desactivado','id_factura' => $model->id_factura, 'token' => $token],['class' => 'btn btn-success btn-xs disabled', 'id' => 'my_button']);?>
+                    <?= Html::a('<span class="glyphicon glyphicon-send"></span>  Reenviar factura a la dian', ['reenviar_documento_dian', 'id_factura' => $model->id_factura, 'token' => $token],['class' => 'btn btn-warning btn-xs', 'id' => 'my_button', 'onclick' => '$("#my_button").attr("disabled", "disabled")',
+                        'data' => ['confirm' => 'Esta seguro de REENVIAR la Factura de venta No  '. $model->numero_factura. ' a la DIAN y al CLIENTE.', 'method' => 'post']]);?>
+                    <?= Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_factura_venta', 'id' => $model->id_factura,'token' => $token], ['class' => 'btn btn-default btn-xs']);?>            
+                    <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 12, 'codigo' => $model->id_factura,'view' => $view, 'token' =>$token], ['class' => 'btn btn-default btn-xs']);
+                }
             }
-        }?>        
+        }?>   
+    </p>
     </div>  
-    <br>
+  
     <br>
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -124,8 +135,13 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_factura') ?></th>
                     <td><?= Html::encode($model->numero_factura) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_pedido')?></th>
-                    <td><?= Html::encode($model->pedido->numero_pedido) ?></td>
+                    <?php if($model->id_pedido <> null ){?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_pedido')?></th>
+                        <td><?= Html::encode($model->pedido->numero_pedido) ?></td>
+                    <?php }else{ ?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_pedido')?></th>
+                        <td><?= Html::encode('No found') ?></td>
+                    <?php } ?>    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'telefono_cliente') ?></th>
                     <td><?= Html::encode($model->telefono_cliente) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Municipio') ?></th>
@@ -148,7 +164,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'plazo_pago')?></th>
                     <td><?= Html::encode($model->plazo_pago) ?> Dias</td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura')?></th>
-                    <td><?= Html::encode($model->tipoFactura->descripcion) ?></td>
+                    <td style='background-color:#cbf3f0;'><?= Html::encode($model->tipoFactura->descripcion) ?></td>
                     <?php if($model->id_medio_pago <> ''){?>
                         <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_medio_pago') ?></th>
                         <td><?= Html::encode($model->medioPago->concepto) ?></td>
@@ -160,6 +176,10 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="8"><?= Html::encode($model->observacion) ?></td>
+                </tr>
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cufe') ?></th>
+                    <td colspan="8"><?= Html::encode($model->cufe) ?></td>
                 </tr>
               
             </table>

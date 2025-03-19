@@ -133,22 +133,22 @@ $tipoZona = ArrayHelper::map(app\models\ZonaClientes::find()->all(), 'id_zona', 
         </div>
         <div class="row">
             <div class="field-tblproveedor-observaciones_proveedor has-success">
+                <?= $form->field($model, 'email_envio_factura')->textInput(['maxlength' => true, 'required' => true]) ?>  
                     <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
             </div>
         </div> 	
         <div class="panel panel-success">
-                    <div class="panel-heading">
-                        Parametros
-                    </div>
-                    <div class="panel-body">
-                        <div class="checkbox checkbox-success" align ="left">
-                                <?= $form->field($model, 'autoretenedor')->checkBox(['label' => 'Autorretenedor','1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'autoretenedor']) ?>
-                                <?= $form->field($model, 'estado_cliente')->checkBox(['label' => 'Inactivo',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'estado_cliente']) ?>
-                                <?= $form->field($model, 'aplicar_venta_mora')->checkBox(['label' => 'Vender en mora',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'aplicar_venta_mora']) ?>
-                        </div>
-                        
-                        </div>
-                     </div>
+            <div class="panel-heading">
+                Parametros del cliente
+            </div>
+            <div class="panel-body">
+                <div class="checkbox checkbox-success" align ="left">
+                        <?= $form->field($model, 'autoretenedor')->checkBox(['label' => 'Autorretenedor','1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'autoretenedor']) ?>
+                        <?= $form->field($model, 'estado_cliente')->checkBox(['label' => 'Inactivo',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'estado_cliente']) ?>
+                        <?= $form->field($model, 'aplicar_venta_mora')->checkBox(['label' => 'Vender en mora',''=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'aplicar_venta_mora']) ?>
+                        <?= $form->field($model, 'aplica_retencion_fuente')->checkBox(['label' => 'Aplica retencion','1'=>'small', 'class'=>'bs_switch','style'=>'margin-bottom:5px;', 'id'=>'aplica_retencion_fuente']) ?>
+                </div>
+            </div>
         </div>  
     </div>    
     <div class="panel-footer text-right">

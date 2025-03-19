@@ -22,6 +22,8 @@ use Codeception\Lib\HelperModule;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\db\Command;
+use DateTime;
+use DateInterval;
 //models
 use app\models\FacturaVenta;
 use app\models\FacturaVentaSearch;
@@ -448,6 +450,7 @@ class FacturaVentaController extends Controller
     public function actionView($id, $token)
     {
         $detalle_factura = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
+        
         return $this->render('view', [
             'model' => $this->findModel($id),
             'detalle_factura' => $detalle_factura,
@@ -728,6 +731,62 @@ class FacturaVentaController extends Controller
             }    
                
     }
+    
+    //FACTURA LIBRE
+    public function actionNueva_factura_libre() {
+        $model = new FacturaVenta();
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())){
+            if($model->id_cliente <> null){
+                $cliente = Clientes::findOne($model->id_cliente);
+                $iva = \app\models\ConfiguracionIva::findOne(1);
+                $empresa = \app\models\MatriculaEmpresa::findOne(1);
+                $tipo_factura = \app\models\TipoFacturaVenta::findOne(1);
+                $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])
+                                                               ->andWhere(['=','id_documento', 1])->one();
+                
+                $model->id_tipo_factura = 1;
+                $model->id_agente = $cliente->id_agente;
+                $model->nit_cedula = $cliente->nit_cedula;
+                $model->dv = $cliente->dv;
+                $model->cliente = $cliente->nombre_completo;
+                $model->direccion = $cliente->direccion;
+                $model->telefono_cliente = $cliente->telefono;
+                $model->numero_resolucion = $resolucion->numero_resolucion;
+                $model->desde = $resolucion->desde;
+                $model->hasta = $resolucion->hasta;
+                $model->consecutivo = $resolucion->consecutivo;
+                $fecha_actual = new DateTime();
+                $model->fecha_inicio = $fecha_actual->format('Y-m-d');
+                $dias = $cliente->plazo;
+                if (is_numeric($dias)) {
+                    $fecha_vencimiento = clone $fecha_actual;
+                    $fecha_vencimiento->add(new DateInterval('P' . $dias . 'D'));
+                    $model->fecha_vencimiento = $fecha_vencimiento->format('Y-m-d');
+                } else {
+                    Yii::$app->getSession()->setFlash('error', 'El plazo del cliente No es valido el formato.');
+                }
+                $model->fecha_generada = date('Y-m-d');
+                $model->id_tipo_venta = 1;
+                $model->id_resolucion = $resolucion->id_resolucion;
+                $model->porcentaje_iva = $iva->valor_iva;
+                $model->id_forma_pago = $cliente->id_forma_pago;
+                $model->plazo_pago = $cliente->plazo;
+                $model->user_name = Yii::$app->user->identity->username;
+                $model->factura_libre = 1;
+                $model->save();
+                $codigo = FacturaVenta::find()->orderBy('id_factura DESC')->one();
+                return $this->redirect(['view','id' => $codigo->id_factura, 'token' => 0]);
+            }else{
+                Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar un cliente de la lista.');
+            }    
+        }
+         return $this->render('/factura-venta/_form_crear_factura_libre', ['model' => $model]);
+       
+    }
 
     //actualiza la fecha de la factura
     public function actionUpdate($id, $token, $id_pedido)
@@ -904,7 +963,7 @@ class FacturaVentaController extends Controller
                     $table->porcentaje_rete_iva = 0;
                 }
                 if($empresa->sugiere_retencion == 1){
-                   if($pedido->clientePedido->tipo_regimen == 1){
+                    if($pedido->clientePedido->aplica_retencion_fuente == 1){
                         $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
                     }else{
                         $table->porcentaje_rete_fuente = 0; 
@@ -1075,11 +1134,15 @@ class FacturaVentaController extends Controller
         }else{
             
             if($empresa->sugiere_retencion == 1){
-                if($factura->subtotal_factura > $tipo_factura->base_retencion){
-                   $retecion = round(($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100);     
+                if($cliente->aplica_retencion_fuente == 1) {
+                    if($factura->subtotal_factura > $tipo_factura->base_retencion){
+                       $retecion = round(($factura->subtotal_factura * $factura->porcentaje_rete_fuente)/100);     
+                    }else{
+                       $retecion = 0; 
+                    }
                 }else{
-                   $retecion = 0; 
-                }
+                    $retecion = 0; 
+                }    
             }else{
                  $retecion = 0; 
             }  
@@ -1105,11 +1168,15 @@ class FacturaVentaController extends Controller
             $reteiva = 0;
         }    
         if($empresa->sugiere_retencion == 1){
-            if($factura->subtotal_factura > $tipo_factura->base_retencion){
-               $retecion = 0;     
+            if($cliente->aplica_retencion_fuente == 1){
+                if($factura->subtotal_factura > $tipo_factura->base_retencion){
+                   $retecion = 0;     
+                }else{
+                   $retecion = 0; 
+                }
             }else{
-               $retecion = 0; 
-            }
+                $retecion = 0; 
+            }    
         }else{
              $retecion = 0; 
         }    
@@ -1429,6 +1496,82 @@ class FacturaVentaController extends Controller
             ]);
         }    
     }
+    
+    //PROCESO PARA EMITIR FACTURA ELECTRONICA A LA DIAN
+    public function actionEnviar_factura_dian($id_factura, $token) {
+        //models
+        $factura = FacturaVenta::findOne($id_factura);
+        $clientes = Clientes::findOne($factura->id_cliente);
+        $detalle = FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura])->all();
+        //asignar variables
+        $documentocliente = $factura->nit_cedula;
+        $tipodocumento = $clientes->tipoDocumento->codigo_api;
+        $nombre_completo = $factura->cliente; 
+        $nombre_cliente = '.'; 
+        $apellido_cliente = '.';
+        $direccioncliente = $factura->direccion;
+        $telefono = $factura->telefono_cliente;
+        if($clientes->email_envio_factura){
+            $emailcliente = $clientes->email_envio_factura;
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Falta en nombre del EMAIL del cliente para enviar el documento .');
+            return $this->redirect(["view",'id' => $id_factura,'token' => $token]); 
+        }    
+        $ciudad = $clientes->codigoMunicipio->municipio;
+        if($factura->resolucionDian->codigo_interface){
+            $resolucion = $factura->resolucionDian->codigo_interface;
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'El codigo de la resolucion no esta habilitado.');
+            return $this->redirect(["view",'id' => $id_factura,'token' => $token]);  
+        }
+        
+        $consecutivo = $factura->numero_factura;
+        $formapago = $factura->formaPago->codigo_api; 
+        $fechainicio = $factura->fecha_inicio;
+        $observacion = $factura->observacion;
+        if($clientes->autoretenedor == 1){
+            $rete_iva = true;
+        }else{
+            $rete_iva = false; 
+        }
+        if($clientes->aplica_retencion_fuente == 1){
+            $rete_fuente = true;
+        }else{
+            $rete_fuente = false;
+        }
+       // $codigoconcepto = $detalle->inventario->codigo_producto;
+        //$concepto = $detalle->inventario->nombre_producto;
+       // $cantidad = $detalle->cantidad;
+       // $valor_unitario = $detalle->valor_unitario;
+       // $subtotal = $detalle->subtotal;
+        
+        $curl = curl_init();
+        //$API_KEY = Yii::$app->params['API_KEY_PRODUCCION']; //api_key de produccion
+      //  $API_KEY = Yii::$app->params['API_KEY_DESARROLLO']; //api_key de desarrollo
+        $dataHead = json_encode([
+            "client" => [
+            "document" => "$documentocliente",
+            "document_type" => "$tipodocumento",
+            "first_name" => "$nombre_completo",
+            "last_name_one" => "$nombre_cliente",
+            "last_name_two" => "$apellido_cliente",
+            "address" => "$direccioncliente",
+            "phone" => "$telefono",
+            "email" => "$emailcliente",
+            "city" => "$ciudad"
+        ],
+            "observacion" => "$observacion",
+            "rete_iva" => "$rete_iva",
+            "rete_fuente" => "$rete_fuente",
+            "resolucion" => "$resolucion",
+            "consecutivo" => "$consecutivo",
+            "forma_pago" => "$formapago",
+            "date" => "$fechainicio"
+        ]);  
+       
+        // return $this->redirect(['view','id' => $id_factura,'token' => $token]);   
+    }
+    
     //proceso de excel
     //PERMITE EXPORTAR A EXCEL EL PRESUPUESTO DE CADA PEDIDO 
     public function actionExcelconsultaPedidos($tableexcel) {                

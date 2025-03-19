@@ -2299,7 +2299,423 @@ class ProgramacionNominaController extends Controller
             return $this->redirect(['programacion-nomina/view_colilla_pagonomina', 'id' => $id, 'id_programacion' => $id_programacion]);
     }    
      
-     //IMPRIMIR DOCUMENTOS
+    //PROCESO DE NOMINA ELECTRONICA
+     //PROCESO QUE CARGA EL LISTADO DE NOMINA ELECTRONICA
+    public function actionDocumento_electronico($token = 0) {
+        if (Yii::$app->user->identity) {
+            if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 152])->all()) {
+                $form = new \app\models\FormFiltroBuscarNomina();
+                $desde = null;
+                $hasta = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        $table = \app\models\PeriodoNominaElectronica::find()
+                                ->andFilterWhere(['between', 'fecha_inicio_periodo', $desde, $hasta]);
+                        $table = $table->orderBy('id_periodo_electronico DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = \app\models\PeriodoNominaElectronica::find()->orderBy('id_periodo_electronico DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }
+                //$to = $count->count();
+                return $this->render('crear_periodo_nomina_electronica', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            } else {
+                return $this->redirect(['site/sinpermiso']);
+            }
+        } else {
+            return $this->redirect(['site/login']);
+        }
+    }
+    
+    //PERMITE CREAR EL PERIODO DE PAGO
+    public function actionCrear_nuevo_documento() {
+        $model = new \app\models\FormCostoGastoEmpresa();
+         if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()){
+                if (isset($_POST["crear_periodo"])) {
+                    if($model->tipo_nomina <> ''){
+                        $table = new \app\models\PeriodoNominaElectronica();
+                        $table->fecha_inicio_periodo = $model->fecha_inicio;
+                        $table->fecha_corte_periodo = $model->fecha_corte;
+                        $table->user_name = Yii::$app->user->identity->username;
+                        $table->type_document_id = $model->tipo_nomina;
+                        $table->nota = 'Nomina del ' . $model->fecha_inicio . ' al ' . $model->fecha_corte . '.';
+                        $table->save();
+                        return $this->redirect(["documento_electronico"]); 
+                    }else{
+                        Yii::$app->getSession()->setFlash('error','Debe de seleccionar el tipo de nomina a crear. ');
+                        return $this->redirect(['documento_electronico']);
+                    }    
+                }
+            } 
+         }
+        return $this->renderAjax('crear_nuevo_periodo', [
+            'model' => $model,       
+        ]);    
+    }
+    
+    //CARGAR EMPLEADOS PARA NOMINA
+    public function actionCargar_empleados_nomina($id_periodo, $fecha_inicio, $fecha_corte)
+    {
+        $nomina = ProgramacionNomina::find()->where(['=','documento_generado', 0])->orderBy('id_empleado ASC')->all();
+        $periodo = \app\models\PeriodoNominaElectronica::findOne($id_periodo);
+        $auxiliar = 0;
+        $contador = 0;
+        if(count($nomina) > 0){
+            foreach ($nomina as $key => $items) {
+                if($items->id_empleado <> $auxiliar){
+                    $contador += 1;
+                    $totales = ProgramacionNomina::find()->where(['=','id_empleado', $items->id_empleado])->andWhere(['=','documento_generado', 0])->all();
+                    $tDevengado = 0; $tDeduccion = 0; $tPagar = 0;
+                    foreach ($totales as $key => $total) {
+                        $total->documento_generado = 1;
+                        $total->save();
+                    }
+                    $table = new \app\models\NominaElectronica();
+                    $table->id_periodo_pago = $items->periodoPagoNomina->periodoPago->id_periodo_pago;
+                    $table->id_tipo_nomina = $items->id_tipo_nomina;
+                    $table->id_contrato = $items->id_contrato;
+                    $table->id_empleado = $items->id_empleado;
+                    $table->codigo_documento = $items->empleado->tipoDocumento->codigo_interface_nomina;
+                    $table->id_periodo_electronico = $id_periodo;
+                    $table->id_grupo_pago = $items->id_grupo_pago;
+                    $table->documento_empleado = $items->cedula_empleado;
+                    $table->primer_nombre = $items->empleado->nombre1;
+                    $table->segundo_nombre = $items->empleado->nombre2;
+                    $table->primer_apellido = $items->empleado->apellido1;
+                    $table->segundo_apellido = $items->empleado->apellido2;
+                    $table->nombre_completo = $items->empleado->nombre_completo;
+                    $table->email_empleado = $items->empleado->email_empleado;
+                    $table->salario_contrato = $items->salario_contrato;
+                    $table->type_worker_id = $items->contrato->tipoCotizante->codigo_api_nomina;
+                    $table->sub_type_worker_id = $items->contrato->subtipoCotizante->codigo_api_nomina;
+                    $table->codigo_municipio = $items->empleado->codigoMunicipioResidencia->codigo_municipio;
+                    $table->direccion_empleado = $items->empleado->direccion;
+                    $table->codigo_forma_pago = $items->empleado->formaPago->codigo_api_nomina;
+                    $table->nombre_banco = $items->empleado->banco->entidad;
+                    if($items->empleado->tipo_cuenta == 'S'){
+                         $table->nombre_cuenta = 'Ahorro';
+                    }else{
+                        $table->nombre_cuenta = 'Corriente';
+                    }
+                    $table->numero_cuenta = $items->empleado->numero_cuenta;
+                    $table->fecha_inicio_nomina = $fecha_inicio;
+                    $table->fecha_final_nomina = $fecha_corte;
+                    $table->fecha_inicio_contrato = $items->fecha_inicio_contrato;
+                    $table->fecha_terminacion_contrato = $items->fecha_final_contrato;
+                    $table->fecha_envio_nomina = date('Y-m-d');
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save(false);
+                    $auxiliar =  $items->id_empleado;
+                    $periodo->cantidad_empleados = $contador;
+                    $periodo->save();
+                }else{
+                   $auxiliar =  $items->id_empleado;
+                }    
+            
+            }
+            return $this->redirect(["documento_electronico"]); 
+        }else{
+            Yii::$app->getSession()->setFlash('info','No existen empleado con nominas pendientes para procesar.');
+             return $this->redirect(["documento_electronico"]); 
+        }    
+        
+    }
+    
+    //VISTA DE EMPLEADOS CON DOCUMENTOS ELECTRONICOS PARA GENERAR EL DETALLE
+    public function actionVista_empleados($id_periodo, $token) {
+        $form = new \app\models\FormFiltroDocumentoElectronico();
+        $documento = null;
+        $empleado = null;
+        if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $documento = Html::encode($form->documento);
+                $empleado = Html::encode($form->empleado);
+                $table = \app\models\NominaElectronica::find()
+                         ->andFilterWhere(['=','documento_empleado', $documento])
+                         ->andFilterWhere(['like','nombre_completo', $empleado])
+                        ->andWhere(['=','id_periodo_electronico', $id_periodo]);
+                $table = $table->orderBy('id_nomina_electronica ASC');
+                $tableexcel = $table->all();
+                $count = clone $table;
+                $to = $count->count();
+                $pages = new Pagination([
+                    'pageSize' => 40,
+                    'totalCount' => $count->count()
+                ]);
+                $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                if(isset($_POST['excel'])){
+                    //$table = $table->all();
+                   $this->actionExcelconsultaDocumentos($tableexcel);
+                }
+            }
+        }else{
+           $table = \app\models\NominaElectronica::find()->where(['=','id_periodo_electronico', $id_periodo])->orderBy('id_nomina_electronica ASC');
+                $tableexcel = $table->all();
+                $count = clone $table;
+                $pages = new Pagination([
+                    'pageSize' => 40,
+                    'totalCount' => $count->count(),
+                ]);
+                $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                if(isset($_POST['excel'])){
+                    //$table = $table->all();
+                    $this->actionExcelconsultaDocumentos($tableexcel);
+                }  
+        }
+        if (isset($_POST["crear_documento_electronico"])) { ////entra al ciclo cuando presiona el boton crear documentos
+            if (isset($_POST["documento_electronico"])) {
+                $intIndice = 0;
+                $contador = 0;
+                foreach ($_POST["documento_electronico"] as $intCodigo) { //vector que cargar cada items
+                    $contador += 1;
+                    $conRegistro = \app\models\NominaElectronica::find()->where(['=','id_nomina_electronica', $intCodigo])->andWhere(['=','generado_detalle', 0])->one();//array que busca el empleado
+                    if($conRegistro){
+                        $buscarNomina = ProgramacionNomina::find()->where(['=','id_empleado', $conRegistro->id_empleado])->andWhere(['=','documento_detalle_generado', 0])->all();
+                        foreach ($buscarNomina as $key => $datos) {
+
+                            $detalle_nomina = ProgramacionNominaDetalle::find()->where(['=','id_programacion', $datos->id_programacion])->all();
+                            foreach ($detalle_nomina as $key => $detalle) {
+                                $buscar = \app\models\NominaElectronicaDetalle::find()->where(['=','codigo_salario', $detalle->codigo_salario])->andWhere(['=','id_periodo_electronico', $id_periodo])
+                                                                                      ->andWhere(['=','id_empleado', $conRegistro->id_empleado])->one();
+                                
+                                if(!$buscar){
+                                    $table = new \app\models\NominaElectronicaDetalle();
+                                    $table->id_nomina_electronica = $intCodigo;
+                                    $table->codigo_salario = $detalle->codigo_salario;
+                                    $table->id_empleado = $conRegistro->id_empleado;
+                                    $table->descripcion = $detalle->codigoSalario->nombre_concepto;
+                                    $table->devengado_deduccion = $detalle->codigoSalario->devengado_deduccion;
+                                    $table->fecha_inicio = $conRegistro->fecha_inicio_nomina;
+                                    $table->fecha_final = $conRegistro->fecha_final_nomina;
+                                    if($table->devengado_deduccion == 1){ //ingresos del empleado
+                                        if ($detalle->codigoSalario->id_agrupado == 1){ //salario basico
+                                            $conRegistro->dias_trabajados = $detalle->dias_reales;
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            $table->total_dias = $detalle->dias_reales;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 2){ //auxilio de transporte
+                                          $table->total_dias = $detalle->dias_reales;
+                                          $table->auxilio_transporte = $detalle->auxilio_transporte; 
+                                          $table->devengado = $detalle->auxilio_transporte; 
+                                          
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 3){ //horas extras diurnas ordinaria
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            $table->porcentaje = $detalle->codigoSalario->porcentaje_tiempo_extra;
+                                            $table->total_dias =$detalle->nro_horas; 
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 9){ //incapacidades
+                                            $codigo_incapacidad = Incapacidad::findOne($detalle->id_incapacidad);
+                                            $table->valor_pago_incapacidad = $detalle->vlr_devengado;
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            $table->dias_incapacidad = $detalle->dias_reales;
+                                            $table->total_dias = $detalle->dias_reales;
+                                            $table->inicio_incapacidad = $detalle->fecha_desde;
+                                            $table->final_incapacidad = $detalle->fecha_hasta;
+                                            $table->codigo_incapacidad = $codigo_incapacidad->codigo_incapacidad;
+                                            $table->porcentaje = $detalle->porcentaje;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 10 || $detalle->codigoSalario->id_agrupado == 8){ //licencias remuneradas y maternidad
+                                            $table->valor_pago_licencia = $detalle->vlr_devengado;
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            $table->dias_licencia = $detalle->dias_reales;
+                                             $table->total_dias = $detalle->dias_reales;
+                                            $table->inicio_licencia = $detalle->fecha_desde;
+                                            $table->final_licencia = $detalle->fecha_hasta;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 11){ //primas
+                                            $table->valor_pago_prima = $detalle->vlr_devengado;
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            $table->dias_prima = $detalle->dias_reales;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 12){ //cesantias
+                                            $table->valor_pago_cesantias = $detalle->vlr_devengado;
+                                            $table->dias_cesantias = $detalle->dias_reales;
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 13){ //cesantias
+                                            $table->valor_pago_intereses = $detalle->vlr_devengado;
+                                            $table->devengado = $detalle->vlr_devengado;  
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 16 || $detalle->codigoSalario->id_agrupado == 15 || $detalle->codigoSalario->id_agrupado == 18){ //bonificacion no salaria y comisiones y reintegro
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 19){ //REINTEGRO EMPLEADO
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 20){ //VACACIONES
+                                            $table->devengado = $detalle->vlr_devengado;
+                                            $table->total_dias = $detalle->dias_reales;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 21){ //licencias NO remuneradas
+                                            $table->total_dias = $detalle->dias_reales;
+                                            $table->dias_licencia_noremuneradas = $detalle->dias_reales;
+                                            $table->inicio_licencia = $detalle->fecha_desde;
+                                            $table->final_licencia = $detalle->fecha_hasta;
+                                        }
+                                    }else{// DEDUCCIONES DEL EMPLEADO
+                                        if($detalle->codigoSalario->id_agrupado == 4){ //FONDO DE PENSION
+                                            $table->porcentaje = $detalle->codigoSalario->porcentaje; 
+                                            $table->deduccion_pension = $detalle->vlr_deduccion;
+                                            $table->deduccion = $detalle->vlr_deduccion;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 5){ //FONDO DE EPS
+                                            $table->porcentaje = $detalle->codigoSalario->porcentaje; 
+                                            $table->deduccion_eps = $detalle->vlr_deduccion;
+                                            $table->deduccion = $detalle->vlr_deduccion;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 6){ //FONDO solidarida
+                                                    $table->porcentaje = $detalle->porcentaje; 
+                                                    $table->deduccion_fondo_solidaridad = $detalle->vlr_deduccion;
+                                                    
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 7 || $detalle->codigoSalario->id_agrupado == 17) { //otras deducciones del empleado y prestamos empresa
+                                            $table->deduccion= $detalle->vlr_deduccion;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 14) { //libranzas y bancos
+                                            $table->deduccion= $detalle->vlr_deduccion; 
+                                        }
+
+                                    }
+                                    $table->id_agrupado = $detalle->codigoSalario->id_agrupado;
+                                    $table->id_periodo_electronico = $id_periodo;
+                                    $table->save(false);
+                                    $conRegistro->save(false);
+                               }else{// Acumula informacion si el registro esta en la base de datos
+                                    if($buscar->devengado_deduccion == 1){ //DEVENGADO DEL TRABAJADO
+                                        if ($detalle->codigoSalario->id_agrupado == 1){ //salario basico
+                                            $buscar->devengado += $detalle->vlr_devengado;
+                                            $buscar->total_dias += $detalle->dias_reales;
+                                            $conRegistro->dias_trabajados += $detalle->dias_reales;
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 2){ //auxilio de transporte
+                                          $buscar->total_dias += $detalle->dias_reales;
+                                          $buscar->auxilio_transporte += $detalle->auxilio_transporte; 
+                                          $buscar->devengado += $detalle->auxilio_transporte; 
+                                       
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 9){ //incapacidades
+                                            $table = new \app\models\NominaElectronicaDetalle();
+                                            $codigo_incapacidad = Incapacidad::findOne($detalle->id_incapacidad);
+                                            $table->valor_pago_incapacidad = $detalle->vlr_devengado;
+                                            $table->dias_incapacidad = $detalle->dias_reales;
+                                            $table->total_dias = $detalle->dias_reales;
+                                            $table->inicio_incapacidad = $detalle->fecha_desde;
+                                            $table->final_incapacidad = $detalle->fecha_hasta;
+                                            $table->id_incapacidad = $detalle->id_incapacidad;
+                                            $table->codigo_incapacidad = $codigo_incapacidad->codigo_incapacidad;
+                                            $table->porcentaje = $detalle->porcentaje;
+                                            $table->save(false);
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 10 || $detalle->codigoSalario->id_agrupado == 8){ //licencias remuneradas
+                                            $table = new \app\models\NominaElectronicaDetalle();
+                                            $table->valor_pago_licencia = $detalle->vlr_devengado;
+                                            $table->dias_licencia = $detalle->dias_reales;
+                                            $table->total_dias = $detalle->dias_reales;
+                                            $table->inicio_licencia = $detalle->fecha_desde;
+                                            $table->final_licencia = $detalle->fecha_hasta;
+                                            $table->save(false);
+                                        
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 16 || $detalle->codigoSalario->id_agrupado == 15 || $detalle->codigoSalario->id_agrupado == 18 || $detalle->codigoSalario->id_agrupado == 19){ //bonificaciones y comisiones
+                                            $buscar->devengado += $detalle->vlr_devengado;
+                                            $buscar->total_dias += $detalle->dias_reales;
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 20 ){
+                                            $buscar->devengado += $detalle->vlr_devengado;
+                                                
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 21){ //licencias NO remuneradas
+                                            $table = new \app\models\NominaElectronicaDetalle();
+                                            $table->dias_licencia_noremuneradas = $detalle->dias_reales;
+                                            $table->total_dias = $detalle->dias_reales;
+                                            $table->inicio_licencia = $detalle->fecha_desde;
+                                            $table->final_licencia = $detalle->fecha_hasta;
+                                            $table->save(false);
+                                        }    
+                                    }else{ // acumulado de deducciones
+                                        if($detalle->codigoSalario->id_agrupado == 4){ //FONDO DE PENSION
+                                            $buscar->deduccion_pension += $detalle->vlr_deduccion;  
+                                            $buscar->deduccion += $detalle->vlr_deduccion;
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 5){ //FONDO DE EPS
+                                            $buscar->deduccion_eps += $detalle->vlr_deduccion;  
+                                            $buscar->deduccion += $detalle->vlr_deduccion;
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 6){ //FONDO solidarida
+                                            $buscar->deduccion_fondo_solidaridad += $detalle->vlr_deduccion;
+                                            $buscar->deduccion += $detalle->vlr_deduccion;
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 14){ //descuentos y libranzas
+                                            $buscar->deduccion += $detalle->vlr_deduccion; 
+                                            
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 7 || $detalle->codigoSalario->id_agrupado == 17){ //otras deducciones del empleado y prestamos empresa
+                                            $buscar->deduccion += $detalle->vlr_deduccion; 
+                                         
+                                        }elseif ($detalle->codigoSalario->id_agrupado == 14) { //libranzas y bancos
+                                            $table->deduccion += $detalle->vlr_deduccion; 
+                                        }
+                                    }
+                                    $buscar->save(false);
+                                    $conRegistro->save(false);
+                               }
+                            }
+                        //cierre en programacion turnos
+                        $datos->documento_detalle_generado = 1;
+                        $datos->save();    
+                        }
+                        //cierra en nomina electronica
+                        $conRegistro->generado_detalle = 1;
+                        $conRegistro->save();
+                        
+                    }else{
+                        $conRegistro = \app\models\NominaElectronica::findOne($intCodigo);
+                        Yii::$app->getSession()->setFlash('info','El empleado ('.$conRegistro->nombre_completo.'), ya se le genero el detalle de la Nomina para enviarlo a la DIAN.');
+                        return $this->redirect(['vista_empleados','id_periodo' => $id_periodo, 'token' => $token]); 
+                    }    
+                }
+                Yii::$app->getSession()->setFlash('success','Se procesaron ('.$contador.') registros para el documento electrónica de nomina.');
+                return $this->redirect(['vista_empleados','id_periodo' => $id_periodo ,'token' => $token]);
+            }else{
+                Yii::$app->getSession()->setFlash('error','Debe de seleccionar al menos un registro. ');
+            }
+        }    
+        return $this->render('importar_detalle_nomina', [
+            'model' => $model, 
+            'id_periodo' => $id_periodo,
+            'form' => $form,
+            'pagination' => $pages,
+            'token' => $token,
+        ]);    
+    }
+    
+   //IMPRIMIR DOCUMENTOS
     public function actionImprimir_colilla_pago($id) {
         $model = ProgramacionNomina::findOne($id);
         return $this->render('../formatos/nomina/colilla_pago', [

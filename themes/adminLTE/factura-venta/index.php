@@ -117,8 +117,8 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
-                    <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de factura">T.F.</span></div></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Factura libre">FL</span></th>
+                    <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de factura">T.F.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
                     <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -146,8 +146,9 @@ $form = ActiveForm::begin([
                             $total = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento );
                             $total = round($total / 86400);
                             ?>  
+                            
+                            <td><?= $val->facturaLibre?></td>
                             <td><?= $val->tipoFactura->abreviatura?></td>
-                            <td style="text-align: right; background-color:#F5B7B1;"><?= ''.number_format($val->saldo_factura,0)?></td>
                             <td style="color: #E74C3C"><b><?= $total?></b></td>
                         <?php }else{
                             $f_vcto = date_create($val->fecha_vencimiento);
@@ -155,7 +156,7 @@ $form = ActiveForm::begin([
                             $contador = date_diff($f_vcto, $fecha_final);
                             $differenceFormat = '%a';
                             ?>
-                            <td style="text-align: right;"><?= ''.number_format($val->saldo_factura,0)?></td>
+                            <td><?= $val->facturaLibre?></td>
                             <td><?= $val->tipoFactura->abreviatura?></td>
                             <?php  if($val->saldo_factura <> 0 ){?>
                                 <td><?= $contador->format($differenceFormat) * -1?></td>
@@ -189,7 +190,7 @@ $form = ActiveForm::begin([
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-default btn-sm']); ?>                
-           <a href="<?= Url::toRoute(["factura-venta/create",'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Crear factura</a>  
+           <a href="<?= Url::toRoute(["factura-venta/nueva_factura_libre"]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Crear factura individual</a>  
           
         </div>
      </div>

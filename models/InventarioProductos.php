@@ -64,7 +64,8 @@ class InventarioProductos extends \yii\db\ActiveRecord
             [['codigo_producto','fecha_proceso','id_grupo','id_presentacion'], 'required'],
             [['costo_unitario', 'unidades_entradas', 'stock_unidades', 'id_grupo', 'id_detalle', 'aplica_iva', 'inventario_inicial', 'aplica_inventario',
                 'subtotal', 'valor_iva', 'total_inventario', 'precio_deptal', 'precio_mayorista', 
-                'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial','activar_producto_venta','aplica_descuento','aplica_descuento_distribuidor','id_producto'], 'integer'],
+                'venta_publico','id_presentacion','aplica_presupuesto','aplica_regla_comercial','activar_producto_venta','aplica_descuento',
+                'aplica_descuento_distribuidor','id_producto','codigo_api_factura'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_vencimiento', 'fecha_creacion', 'fecha_proceso'], 'safe'],
             [['nombre_producto'], 'string', 'max' => 40],
@@ -116,6 +117,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
             'aplica_descuento' => 'Aplica descuento:',
             'aplica_descuento_distribuidor' => 'aplica_descuento_distribuidor',
             'id_producto' => 'Nombre del producto:',
+            'codigo_api_factura' => 'Codigo interface:'
            
          ];
     }

@@ -44,6 +44,12 @@ use kartik\select2\Select2;
         <div class="row">
              <?= $form->field($model, 'codigo_interfaz')->textInput(['maxlength' => true]) ?>  					
         </div>  
+        <div class="row">
+             <?= $form->field($model, 'codigo_api')->textInput(['maxlength' => true]) ?>  					
+        </div> 
+        <div class="row">
+             <?= $form->field($model, 'codigo_interface_nomina')->textInput(['maxlength' => true]) ?>  					
+        </div> 
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("tipo-documento/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

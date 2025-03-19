@@ -731,7 +731,9 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'url' => '#',
                                                             'items' => [
                                                                  ['label' => 'Periodos de pago', 'icon' => 'plus-square-o', 'url' => ['periodo-pago-nomina/index_search']],
-                                                               // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
+                                                                 ['label' => 'Periodo de NE', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/documento_electronico']],
+                                                                 ['label' => 'Enviar DNE', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/listar_nomina_electronica']],
+                                                               
                                                             ],
                                                         ],
                                                         //COMIENZA MEDU DE PROCESOS

@@ -47,10 +47,10 @@ class TipoDocumento extends \yii\db\ActiveRecord
     {
         return [
             [['tipo_documento', 'documento'], 'required'],
-            [['proceso_nomina', 'proceso_cliente', 'proceso_proveedor'], 'integer'],
+            [['proceso_nomina', 'proceso_cliente', 'proceso_proveedor','codigo_api'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['tipo_documento', 'codigo_interfaz'], 'string', 'max' => 4],
-            [['documento'], 'string', 'max' => 40],
+            [['documento','codigo_interface_nomina'], 'string', 'max' => 20],
         ];
     }
 
@@ -66,8 +66,10 @@ class TipoDocumento extends \yii\db\ActiveRecord
             'proceso_nomina' => 'Proceso nomina',
             'proceso_cliente' => 'Proceso cliente',
             'proceso_proveedor' => 'Proceso proveedor',
-            'codigo_interfaz' => 'Codigo Interfaz',
+            'codigo_interfaz' => 'Codigo banco',
             'fecha_registro' => 'Fecha Registro',
+            'codigo_api' => 'Codigo_DS',
+            'codigo_interface_nomina' => 'Codigo api nomina',
         ];
     }
 

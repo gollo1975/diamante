@@ -94,7 +94,7 @@ class Empleados extends \yii\db\ActiveRecord
                 'barrio', 'estado_civil', 'fecha_expedicion_documento', 'codigo_municipio_expedicion', 'id_grupo', 'genero', 'fecha_nacimiento', 'codigo_municipio_nacimiento', 'padre_familia', 'cabeza_hogar',
                 'discapacitado', 'id_banco', 'tipo_cuenta', 'numero_cuenta', 'tipo_transacion', 'id_profesion'], 'required'],
             ['nit_cedula', 'match', 'pattern' => '/^[0-9\s]+$/i', 'message' => 'Sólo se aceptan números'],
-            [['tipo_empleado', 'id_tipo_documento', 'nit_cedula', 'dv', 'estado_civil', 'id_grupo', 'genero', 'padre_familia', 'cabeza_hogar', 'discapacitado', 'id_banco', 'tipo_transacion', 'id_profesion','estado'], 'integer'],
+            [['tipo_empleado', 'id_tipo_documento', 'nit_cedula', 'dv', 'estado_civil', 'id_grupo', 'genero', 'padre_familia', 'cabeza_hogar', 'discapacitado', 'id_banco', 'tipo_transacion', 'id_profesion','estado','id_forma_pago'], 'integer'],
             [['fecha_expedicion_documento', 'fecha_nacimiento', 'fecha_ingreso', 'fecha_retiro', 'fecha_hora_registro', 'fecha_hora_editado'], 'safe'],
             [['nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefono', 'celular', 'numero_cuenta', 'user_name', 'user_name_editado'], 'string', 'max' => 15],
             [['direccion', 'email_empleado'], 'string', 'max' => 50],
@@ -114,6 +114,7 @@ class Empleados extends \yii\db\ActiveRecord
             [['id_banco'], 'exist', 'skipOnError' => true, 'targetClass' => BancoEmpleado::className(), 'targetAttribute' => ['id_banco' => 'id_banco']],
             [['id_profesion'], 'exist', 'skipOnError' => true, 'targetClass' => Profesiones::className(), 'targetAttribute' => ['id_profesion' => 'id_profesion']],
             [['tipo_transacion'], 'exist', 'skipOnError' => true, 'targetClass' => Transaciones::className(), 'targetAttribute' => ['tipo_transacion' => 'tipo_transacion']],
+            [['id_forma_pago'], 'exist', 'skipOnError' => true, 'targetClass' => FormaPago::className(), 'targetAttribute' => ['id_forma_pago' => 'id_forma_pago']],
         ];
     }
 
@@ -166,6 +167,7 @@ class Empleados extends \yii\db\ActiveRecord
             'talla_pantalon' => 'Talla pantalon:',
             'talla_camisa' => 'Talla camisa:',
             'estado' => 'Activo:',
+            'id_forma_pago' => 'Forma de pago:',
         ];
     }
 
@@ -248,6 +250,14 @@ class Empleados extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Transaciones::className(), ['tipo_transacion' => 'tipo_transacion']);
     }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFormaPago()
+    {
+        return $this->hasOne(FormaPago::className(), ['id_forma_pago' => 'id_forma_pago']);
+    }
+    
     //PROCESOS
     public function getGeneroEmpleado() {
         if($this->genero == 1){

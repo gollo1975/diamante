@@ -8,6 +8,7 @@ use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 ?>
 <?php
+$agrupados = ArrayHelper::map(app\models\AgruparConceptoSalario::find()->orderBy('concepto ASC')->all(), 'id_agrupado', 'concepto');
 $form = ActiveForm::begin([
             "method" => "post",
             'id' => 'formulario',
@@ -40,6 +41,7 @@ $form = ActiveForm::begin([
                 </div>
                  <div class="row">
                     <?= $form->field($model, 'devengado_deduccion')->dropDownList(['1'=> 'DEVENGADO', '2'=>'DEDUCCION'], ['prompt' => 'Seleccione una opcion...']) ?>
+                    <?= $form->field($model, 'id_agrupado')->dropDownList($agrupados, ['prompt' => 'Seleccione una opcion...']) ?> 
                     
                 </div>
                 <div class="panel panel-success">

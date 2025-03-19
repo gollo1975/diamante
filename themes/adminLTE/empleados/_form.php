@@ -28,6 +28,7 @@ $transacion = ArrayHelper::map(Transaciones::find()->all(), 'tipo_transacion', '
 $grupoSanguineo = ArrayHelper::map(app\models\GrupoSanguineo::find()->all(), 'id_grupo', 'clasificacion');
 $bancoEmpleado = ArrayHelper::map(app\models\BancoEmpleado::find()->orderBy('entidad ASC')->all(), 'id_banco', 'entidad');
 $conProfesion = ArrayHelper::map(\app\models\Profesiones::find()->all(), 'id_profesion', 'profesion');
+$conFormaPago = ArrayHelper::map(\app\models\FormaPago::find()->where(['=','servicio_nomina', 1])->all(), 'id_forma_pago', 'concepto');
 ?>
 
 <!--<h1>Nuevo proveedor</h1>-->
@@ -166,6 +167,7 @@ $form = ActiveForm::begin([
                 ]); ?>
         </div>
         <div class="row">
+            <?= $form->field($model, 'id_forma_pago')->dropdownList($conFormaPago, ['prompt' => 'Seleccione...']) ?>
             <?= $form->field($model, 'id_profesion')->widget(Select2::classname(), [
                    'data' => $conProfesion,
                    'options' => ['prompt' => 'Seleccione...'],
@@ -173,14 +175,16 @@ $form = ActiveForm::begin([
                        'allowClear' => true
                    ],
                 ]); ?>
-            <?= $form->field($model, 'talla_zapato')->input("text", ["maxlength" => 10]) ?>
+            
         </div>
          <div class="row">
+            <?= $form->field($model, 'talla_zapato')->input("text", ["maxlength" => 10]) ?>
             <?= $form->field($model, 'talla_pantalon')->input("text", ["maxlength" => 10]) ?>
-            <?= $form->field($model, 'talla_camisa')->input("text", ["maxlength" => 10]) ?>
+            
         </div>
         <div class="row">
             <div class="field-tblproveedor-observaciones_proveedor has-success">
+                <?= $form->field($model, 'talla_camisa')->input("text", ["maxlength" => 10]) ?>
                 <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
             </div>    
         </div>
