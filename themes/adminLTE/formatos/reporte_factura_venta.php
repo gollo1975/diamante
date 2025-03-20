@@ -340,11 +340,11 @@ class PDF extends FPDF {
         ///representacion grafica
         $pdf->SetXY(138, 193);//recibido,aceptado 
         $this->SetFont('Arial', '', 8);
-        $qrstr = utf8_decode($model->qrstr);
-        $pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
-        QRcode::png($qrstr,"test.png");
-        $pdf->Image("test.png", 118, 194.6, 38, 28, "png");
-        unlink("test.png");
+       // $qrstr = utf8_decode($model->qrstr);
+        //$pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
+        //QRcode::png($qrstr,"test.png");
+        //$pdf->Image("test.png", 118, 194.6, 38, 28, "png");
+        //unlink("test.png");
         
         //nombre del software
         $pdf->SetXY(50, 218);

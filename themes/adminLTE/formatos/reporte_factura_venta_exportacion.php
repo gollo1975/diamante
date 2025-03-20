@@ -404,11 +404,11 @@ class PDF extends FPDF {
         ///representacion grafica
         $pdf->SetXY(138, 218);//recibido,aceptado 
         $this->SetFont('Arial', '', 8);
-        $qrstr = utf8_decode($model->qrstr);
+     /*   $qrstr = utf8_decode($model->qrstr);
         $pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
         QRcode::png($qrstr,"test.png");
         $pdf->Image("test.png", 102, 208, 38, 35, "png");
-        unlink("test.png");
+        unlink("test.png");*/
     
     }
     function Footer() {
