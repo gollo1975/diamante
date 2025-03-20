@@ -98,7 +98,7 @@ $tipoZona = ArrayHelper::map(\app\models\ZonaClientes::find()->all(), 'id_zona',
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 90%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cedula/Nit</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
@@ -118,7 +118,7 @@ $tipoZona = ArrayHelper::map(\app\models\ZonaClientes::find()->all(), 'id_zona',
             <?php
             if($model){ 
                 foreach ($model as $val): ?>
-            <tr style="font-size: 90%;">                   
+            <tr style="font-size: 85%;">                   
                  <td><?= $val->tipoDocumento->tipo_documento ?></td>
                 <td><?= $val->nit_cedula ?></td>
                 <td><?= $val->nombre_completo ?></td>

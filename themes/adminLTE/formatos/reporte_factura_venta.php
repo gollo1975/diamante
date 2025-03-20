@@ -1,11 +1,15 @@
 <?php
-
+ob_start();
+include "../vendor/phpqrcode/qrlib.php";
 use inquid\pdf\FPDF;
 use app\models\FacturaVenta;
 use app\models\FacturaVentaDetalle;
 use app\models\MatriculaEmpresa;
 use app\models\Municipios;
 use app\models\Departamentos;
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 class PDF extends FPDF {
      function Header() {
         $id_factura = $GLOBALS['id_factura'];
@@ -91,9 +95,9 @@ class PDF extends FPDF {
           $this->SetXY(135, 7);
         $this->SetFont('Arial', 'B', 10);
         $this->Cell(162, 7, utf8_decode("FACTURA ELECTRONICA DE VENTA"), 0, 0, 'l', 0);
-        $this->SetXY(155, 12);
+        $this->SetXY(160, 12);
         $this->SetFont('Arial', 'B', 10);
-        $this->Cell(20, 7, utf8_decode('No '.$factura->consecutivo.' '.str_pad($factura->numero_factura, 6, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        $this->Cell(20, 7, utf8_decode('No '.$factura->consecutivo.' '. $factura->numero_factura), 0, 0, 'l', 0);
         $this->SetXY(140, 18);
         $this->SetFont('Arial', '', 9);
         $this->Cell(20, 4, utf8_decode('Resolución Dian No: '.$config->resolucion->numero_resolucion), 0, 0, 'l', 0);
@@ -329,17 +333,23 @@ class PDF extends FPDF {
         $pdf->SetXY(10, 263);//tipo cuenta
         $pdf->MultiCell(192, 4, utf8_decode($config->declaracion),1,'J');  
         ///cufe
-        $this->SetFont('Arial', '', 7);
+        $this->SetFont('Arial', '', 8);
          $pdf->SetXY(10, 275);//tipo cuenta
         $pdf->MultiCell(192, 5, utf8_decode('Cufe: '.$model->cufe),0,'J');
          
-       //fin
+        ///representacion grafica
+        $pdf->SetXY(138, 193);//recibido,aceptado 
+        $this->SetFont('Arial', '', 8);
+        $qrstr = utf8_decode($model->qrstr);
+        $pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
+        QRcode::png($qrstr,"test.png");
+        $pdf->Image("test.png", 118, 194.6, 38, 28, "png");
+        unlink("test.png");
         
-       /* $pdf->SetXY(10, 255);//firma trabajador
-        $this->SetFont('', 'B', 9);
-        $pdf->Cell(35, 5, 'FIRMA CLIENTE: ____________________________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(10, 260);
-        $pdf->Cell(35, 5, 'NIT/CC.:', 0, 0, 'L',0);*/
+        //nombre del software
+        $pdf->SetXY(50, 218);
+        $this->SetFont('Arial', 'B', 6);
+        $pdf->Cell(64, 5, utf8_decode($config->razon_social_completa.'-'.$config->nit_empresa.'-'.$config->dv. ' Software Propio '),0,'J',1);
     }
     function Footer() {
         $this->SetFont('Arial', '', 7);

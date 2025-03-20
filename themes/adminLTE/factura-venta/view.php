@@ -73,11 +73,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         'data-backdrop' => 'static',
                                         'data-keyboard' => 'false'
                                        ]);?> 
-                    <div class="modal remote fade" id="modalsubirmediopago">
-                                 <div class="modal-dialog modal-lg" style ="width: 500px;">    
-                                     <div class="modal-content"></div>
-                                 </div>
-                    </div>
+                   
                     <?php if($model->id_tipo_factura == 5){?>
                     
                             <?= Html::a('<span class="glyphicon glyphicon-list"></span> Termimos de facturacion',
@@ -85,7 +81,7 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                 ['title' => 'Permite subir el medio de pago',
                                  'data-toggle'=>'modal',
                                  'data-target'=>'#modalterminosfacturaexportacion',
-                                 'class' => 'btn btn-info btn-xs',
+                                 'class' => 'btn btn-warning btn-xs',
                                  'data-backdrop' => 'static',
                                  'data-keyboard' => 'false'
                                 ]);?> 
@@ -94,8 +90,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                     <div class="modal-content"></div>
                                 </div>
                             </div> 
-                    <?php } 
-                }    
+                    <?php }?>
+                    <div class="modal remote fade" id="modalsubirmediopago">
+                                 <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                                     <div class="modal-content"></div>
+                                 </div>
+                    </div>
+                    
+                <?php }    
             }else{
                 if($model->fecha_enviada_api == ''){?>
                     <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar documento a la Dian', ['enviar_factura_dian', 'id_factura' => $model->id_factura, 'token' =>$token],['class' => 'btn btn-success btn-xs','id' => 'my_button', 'onclick' => '$("#my_button").attr("disabled", "disabled")',

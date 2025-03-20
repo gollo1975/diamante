@@ -19,7 +19,7 @@ use app\models\AgentesComerciales;
 $this->title = 'FACTURA DE VENTA';
 $this->params['breadcrumbs'][] = $this->title;
 $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
-$tipoFactura = ArrayHelper::map(\app\models\TipoFacturaVenta::find()->all(), 'id_tipo_factura', 'descripcion');
+$tipoFactura = ArrayHelper::map(\app\models\TipoFacturaVenta::find()->where(['=','ver_registro_factura', 1])->all(), 'id_tipo_factura', 'descripcion');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {

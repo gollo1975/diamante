@@ -37,6 +37,20 @@ class MatriculaEmpresa extends \yii\db\ActiveRecord
         return 'matricula_empresa';
     }
 
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->razon_social = strtoupper($this->razon_social);
+        $this->primer_nombre = strtoupper($this->primer_nombre);
+        $this->segundo_nombre = strtoupper($this->segundo_nombre);
+        $this->primer_apellido = strtoupper($this->primer_apellido);
+        $this->segundo_apellido = strtoupper($this->segundo_apellido);
+        $this->direccion = strtoupper($this->direccion);
+        $this->email = strtolower($this->email);
+        return true;
+    }
     /**
      * {@inheritdoc}
      */

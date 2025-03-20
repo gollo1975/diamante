@@ -1580,96 +1580,89 @@ class PedidosController extends Controller
         $pedido = Pedidos::findOne($id);
         echo $only_presupuesto = $pedido->tipo_pedido;
         $cliente = Clientes::find()->where(['=','id_cliente', $pedido->id_cliente])->one();
-        $detalle = PedidoDetalles::find()->where(['=','id_pedido', $id])->one();
         if($only_presupuesto == 0 && $pedido->tipo_pedido == 1 || $pedido->tipo_pedido == 1){
-            if($detalle){
-                if($cliente->formaPago->codigo_api == 4){
-                    if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
-                        if($pedido->autorizado == 0){
-                            $pedido->autorizado = 1;
-                        }else{
-                            $pedido->autorizado = 0;
-                        }
-                        $pedido->save();
-                        if($tipo_pedido == 0){
-                            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }else{
-                            $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }
-                    }else{
-                       Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
-                       if($tipo_pedido == 0){
-                            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }else{
-                            $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }
-                    }    
-                }else{
-                   if($pedido->autorizado == 0){
-                            $pedido->autorizado = 1;
+            
+            if($cliente->formaPago->codigo_api == 4){
+                if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
+                    if($pedido->autorizado == 0){
+                        $pedido->autorizado = 1;
                     }else{
                         $pedido->autorizado = 0;
                     }
                     $pedido->save();
                     if($tipo_pedido == 0){
-                            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                     }else{
                         $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                     }
-                }  
-            }else{
-                Yii::$app->getSession()->setFlash('error', 'Este pedido NO se puede autorizar porque no tiene productos ingresados. Favor enviar al menos un producto al pedido.');  
-                if($tipo_pedido == 0){
-                    return $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                 }else{
-                    return $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                   Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
+                   if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }else{
+                        $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }
+                }    
+            }else{
+               if($pedido->autorizado == 0){
+                        $pedido->autorizado = 1;
+                }else{
+                    $pedido->autorizado = 0;
                 }
-            }   
+                $pedido->save();
+                if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }else{
+                    $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }
+            }  
+            if($tipo_pedido == 0){
+                return $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }else{
+                return $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }
+               
         }else{
-            $detalle2 = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->one();
-            if($detalle2){
-                if($cliente->formaPago->codigo_api == 4){
-                    if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
-                        if($pedido->autorizado == 0){
-                            $pedido->autorizado = 1;
-                        }else{
-                            $pedido->autorizado = 0;
-                        }
-                        $pedido->save();
-                        if($tipo_pedido == 0){
-                            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }else{
-                            $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }
-                    }else{
-                       Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
-                       if($tipo_pedido == 0){
-                            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }else{
-                            $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
-                        }
-                    }    
-                }else{
-                   if($pedido->autorizado == 0){
-                            $pedido->autorizado = 1;
+            
+            if($cliente->formaPago->codigo_api == 4){
+                if($pedido->clientePedido->cupo_asignado > $pedido->gran_total){
+                    if($pedido->autorizado == 0){
+                        $pedido->autorizado = 1;
                     }else{
                         $pedido->autorizado = 0;
                     }
                     $pedido->save();
                     if($tipo_pedido == 0){
-                            $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                     }else{
                         $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                     }
-                }  
-            }else{
-                Yii::$app->getSession()->setFlash('error', 'Este pedido NO se puede autorizar porque no tiene productos ingresados en el presupueto. Favor enviar al menos un producto.');  
-                if($tipo_pedido == 0){
-                    return $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
                 }else{
-                    return $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                   Yii::$app->getSession()->setFlash('warning', 'El cupo asignado para este cliente es: ('. ''.number_format($pedido->clientePedido->cupo_asignado,0). '), este no alcanza a cubrir la totalida del pedido. Revisar las cantidades a vender.');  
+                   if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }else{
+                        $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                    }
+                }    
+            }else{
+               if($pedido->autorizado == 0){
+                        $pedido->autorizado = 1;
+                }else{
+                    $pedido->autorizado = 0;
                 }
-            }   
+                $pedido->save();
+                if($tipo_pedido == 0){
+                        $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }else{
+                    $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+                }
+            }  
+            if($tipo_pedido == 0){
+                return $this->redirect(["adicionar_productos", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }else{
+                return $this->redirect(["adicionar_producto_pedido", 'id' => $id, 'tokenAcceso' =>$tokenAcceso, 'token' => $token, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' => $tipo_pedido]);
+            }
         }    
     }
    
@@ -2077,10 +2070,10 @@ class PedidosController extends Controller
     public function actionValidar_lineas_pedido($id)
     {
         $pedido= Pedidos::findOne($id);
-        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['<>','venta_condicionado', 'B'])->all();
+        $detalle_PM = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['<>','venta_condicionado', 'B'])->all();
         $sw = 0; $cantidad = 0;
-        if(count($detalle_pedido) > 0){
-            foreach ($detalle_pedido as $key => $detalle):
+        if(count($detalle_PM) > 0){
+            foreach ($detalle_PM as $key => $detalle):
                 $inventario = InventarioProductos::findOne ($detalle->id_inventario);
                 $cantidad =  $inventario->stock_unidades - $detalle->cantidad;
                 if($cantidad < 0){
@@ -2091,26 +2084,34 @@ class PedidosController extends Controller
                     $detalle->save();       
                }
             endforeach;
-            $sw = $this->CumplePedido($id, $sw);
-            if($sw == 0){
-                $pedido->liberado_inventario = 1;
-                $pedido->save();
-                Yii::$app->getSession()->setFlash('success', 'Se validaron todos las referencias del pre-pedido comercial No '. $pedido->numero_pedido .'. Puede descargara el inventario del modulo.');   
-            }else{
+        } 
+        $detalle_B = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['=','venta_condicionado', 'B'])->all(); 
+        if(count($detalle_PM) > 0){
+            foreach ($detalle_B as $key => $detalle):
+                $inventario = InventarioProductos::findOne ($detalle->id_inventario);
+                $cantidad =  $inventario->stock_unidades - $detalle->cantidad;
+                if($cantidad < 0){
+                    $detalle->cantidad_faltante = $cantidad;
+                    $detalle->save();
+               }else{
+                    $detalle->cantidad_faltante = 0;
+                    $detalle->save();       
+               }
+            endforeach;
+        }
+        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->all(); 
+        foreach ($detalle_pedido as $valores) {
+            if($valores->cantidad_faltante < 0){
                 Yii::$app->getSession()->setFlash('error', 'No se puede despachar el pedido No '. $pedido->numero_pedido .' porque NO hay existencias para cubrir la totalidad de las referencias.');   
-            }   
-            return $this->redirect(['pedidos/index']);
-      }else{
-        $detalle_pedido = PedidoDetalles::find()->where(['=','id_pedido', $pedido->id_pedido])->andWhere(['=','venta_condicionado', 'B'])->all();  
-        foreach ($detalle_pedido as $key => $detalle):
-                $detalle->cargar_existencias = 1;
-                $detalle->save();       
-        endforeach;
+                return $this->redirect(['pedidos/index']);
+            }
+        }
         $pedido->liberado_inventario = 1;
         $pedido->save();
-        Yii::$app->getSession()->setFlash('warning', 'Este proceso es validado por el presupuesto comercial. Seguir el proceso.');   
+        Yii::$app->getSession()->setFlash('success', 'Se validaron todos las referencias del pre-pedido comercial No '. $pedido->numero_pedido .'. Puede descargara el inventario del modulo.');   
         return $this->redirect(['pedidos/index']);
-      }
+        
+       
     }  
         
     

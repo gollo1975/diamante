@@ -42,6 +42,13 @@ class MatriculaEmpresaController extends Controller
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',3])->all()){
                 $model = $this->findModel($id);
                 if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                    if($model->razon_social == null){
+                       $model->razon_social_completa = strtoupper($model->primer_nombre. ' ' . $model->segundo_nombre .' ' .$model->primer_apellido .' ' .$model->segundo_apellido); 
+                    }else{
+                        $model->razon_social_completa = strtoupper($model->razon_social); 
+                    }
+                    $model->save(false);
+                    
                 }
                 return $this->render('matricula', [
                     'model' => $model,

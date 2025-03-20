@@ -65,14 +65,14 @@ class FacturaVentaController extends Controller
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',52])->all()){
                 $form = new FiltroBusquedaPedidos();
-                $documento = null; $fecha_inicio = null;
+                $tipo_factura = null; $fecha_inicio = null;
                 $cliente = null; $fecha_corte = null;
                 $vendedores = null; $saldo = null; $numero_factura = null;
                 $model = null;
                 $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
-                        $documento = Html::encode($form->documento);
+                        $tipo_factura = Html::encode($form->tipo_factura);
                         $cliente = Html::encode($form->cliente);
                         $vendedores = Html::encode($form->vendedor);
                         $fecha_corte = Html::encode($form->fecha_corte);
@@ -80,7 +80,7 @@ class FacturaVentaController extends Controller
                         $saldo = Html::encode($form->saldo);
                         $numero_factura = Html::encode($form->numero_factura);
                         $table = FacturaVenta::find()
-                            ->andFilterWhere(['=', 'nit_cedula', $documento])
+                            ->andFilterWhere(['=', 'id_tipo_factura', $tipo_factura])
                             ->andFilterWhere(['=', 'id_cliente', $cliente])
                             ->andFilterWhere(['between','fecha_inicio', $fecha_inicio, $fecha_corte])
                             ->andFilterWhere(['=','numero_factura', $numero_factura])
@@ -926,75 +926,80 @@ class FacturaVentaController extends Controller
                  $documento = \app\models\DocumentoElectronico::find()->where(['=','id_documento', 1])->one();
             }
             $resolucion = \app\models\ResolucionDian::find()->where(['=','estado_resolucion', 0])->andWhere(['=','id_documento', $documento->id_documento])->one();
-            $iva = \app\models\ConfiguracionIva::findOne(1);
-            $empresa = \app\models\MatriculaEmpresa::findOne(1);
-            $venta = \app\models\TipoVenta::findOne(1);
-            $fecha_actual = date('Y-m-d');
-            if($fecha_actual <= $resolucion->fecha_vence){
-                if($resolucion->fecha_aviso_vencimiento < $fecha_actual){
-                    Yii::$app->getSession()->setFlash('info', 'La resolucion de facturacion electronica No ('. $resolucion->numero_resolucion.') emitida por la DIAN se vence el ('.$resolucion->fecha_vence.')');
-                }
-                $table = new FacturaVenta();
-                $table->id_pedido = $id_pedido;
-                $table->id_cliente = $pedido->id_cliente;
-                $table->id_agente = $pedido->id_agente;
-                $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
-                $table->id_tipo_venta = $venta->id_tipo_venta;
-                $table->nit_cedula = $pedido->documento;
-                $table->dv = $pedido->dv;
-                $table->cliente = $pedido->cliente;
-                $table->direccion = $pedido->clientePedido->direccion;
-                $table->telefono_cliente = $pedido->clientePedido->celular;
-                $table->descuento_comercial = $pedido->descuento_comercial;
-                $table->id_resolucion = $resolucion->id_resolucion;
-                $table->numero_resolucion = $resolucion->numero_resolucion;
-                $table->consecutivo = $resolucion->consecutivo;
-                $table->desde = $resolucion->desde;
-                $table->hasta = $resolucion->hasta;
-                $table->fecha_inicio = $fecha_actual;
-                $dias = $pedido->clientePedido->plazo -1;
-                $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
-                $table->fecha_generada = $fecha_actual;
-                $table->porcentaje_iva = $iva->valor_iva;
-                $table->descuento_comercial = $pedido->descuento_comercial;
-                if($pedido->clientePedido->autoretenedor == 1){
-                    $table->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
-                }else{
-                    $table->porcentaje_rete_iva = 0;
-                }
-                if($empresa->sugiere_retencion == 1){
-                    if($pedido->clientePedido->aplica_retencion_fuente == 1){
-                        $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+            if($resolucion){
+                $iva = \app\models\ConfiguracionIva::findOne(1);
+                $empresa = \app\models\MatriculaEmpresa::findOne(1);
+                $venta = \app\models\TipoVenta::findOne(1);
+                $fecha_actual = date('Y-m-d');
+                if($fecha_actual <= $resolucion->fecha_vence){
+                    if($resolucion->fecha_aviso_vencimiento < $fecha_actual){
+                        Yii::$app->getSession()->setFlash('info', 'La resolucion de facturacion electronica No ('. $resolucion->numero_resolucion.') emitida por la DIAN se vence el ('.$resolucion->fecha_vence.')');
+                    }
+                    $table = new FacturaVenta();
+                    $table->id_pedido = $id_pedido;
+                    $table->id_cliente = $pedido->id_cliente;
+                    $table->id_agente = $pedido->id_agente;
+                    $table->id_tipo_factura = $tipo_factura->id_tipo_factura;
+                    $table->id_tipo_venta = $venta->id_tipo_venta;
+                    $table->nit_cedula = $pedido->documento;
+                    $table->dv = $pedido->dv;
+                    $table->cliente = $pedido->cliente;
+                    $table->direccion = $pedido->clientePedido->direccion;
+                    $table->telefono_cliente = $pedido->clientePedido->celular;
+                    $table->descuento_comercial = $pedido->descuento_comercial;
+                    $table->id_resolucion = $resolucion->id_resolucion;
+                    $table->numero_resolucion = $resolucion->numero_resolucion;
+                    $table->consecutivo = $resolucion->consecutivo;
+                    $table->desde = $resolucion->desde;
+                    $table->hasta = $resolucion->hasta;
+                    $table->fecha_inicio = $fecha_actual;
+                    $dias = $pedido->clientePedido->plazo -1;
+                    $table->fecha_vencimiento = date("Y-m-d",strtotime($fecha_actual."+".$dias."days")); 
+                    $table->fecha_generada = $fecha_actual;
+                    $table->porcentaje_iva = $iva->valor_iva;
+                    $table->descuento_comercial = $pedido->descuento_comercial;
+                    if($pedido->clientePedido->autoretenedor == 1){
+                        $table->porcentaje_rete_iva = $empresa->porcentaje_reteiva;
+                    }else{
+                        $table->porcentaje_rete_iva = 0;
+                    }
+                    if($empresa->sugiere_retencion == 1){
+                        if($pedido->clientePedido->aplica_retencion_fuente == 1){
+                            $table->porcentaje_rete_fuente = $tipo_factura->porcentaje_retencion; 
+                        }else{
+                            $table->porcentaje_rete_fuente = 0; 
+                        }
                     }else{
                         $table->porcentaje_rete_fuente = 0; 
                     }
-                }else{
-                    $table->porcentaje_rete_fuente = 0; 
-                }
 
-                $table->id_forma_pago = $pedido->clientePedido->id_forma_pago;        
-                $table->plazo_pago = $pedido->clientePedido->plazo;
-                $table->user_name = Yii::$app->user->identity->username;
-                $table->save();
-                $model = FacturaVenta::find()->orderBy('id_factura DESC')->one();
-                $id = $model->id_factura;
-                if($pedido->tipo_pedido == 2){ //internacion
-                    $this->CrearDetalleFactura($id_pedido, $id);
-                    $this->ConvertirMonedaExtrajera($id_pedido, $id);
-                    $this->ActualizarSaldosTotalesNacional($id);
-                    $this->ActualizarSaldosTotalesInternacional($id, $id_pedido);
-                    $this->ActualizarConceptosTributariosNacional($id);
-                    $this->ActualizarConceptosTributariosInternacional($id);
+                    $table->id_forma_pago = $pedido->clientePedido->id_forma_pago;        
+                    $table->plazo_pago = $pedido->clientePedido->plazo;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->save();
+                    $model = FacturaVenta::find()->orderBy('id_factura DESC')->one();
+                    $id = $model->id_factura;
+                    if($pedido->tipo_pedido == 2){ //internacion
+                        $this->CrearDetalleFactura($id_pedido, $id);
+                        $this->ConvertirMonedaExtrajera($id_pedido, $id);
+                        $this->ActualizarSaldosTotalesNacional($id);
+                        $this->ActualizarSaldosTotalesInternacional($id, $id_pedido);
+                        $this->ActualizarConceptosTributariosNacional($id);
+                        $this->ActualizarConceptosTributariosInternacional($id);
+                    }else{
+                        $this->CrearDetalleFactura($id_pedido, $id);
+                        $this->ActualizarSaldosTotalesNacional($id);
+                        $this->ActualizarConceptosTributariosNacional($id);
+                    }
+
+                    return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
                 }else{
-                    $this->CrearDetalleFactura($id_pedido, $id);
-                    $this->ActualizarSaldosTotalesNacional($id);
-                    $this->ActualizarConceptosTributariosNacional($id);
-                }
-                
-                return $this->redirect(["factura-venta/view", 'id' => $id,'token' => $token]);
+                    Yii::$app->getSession()->setFlash('error', 'La resolucion de facturacion electronica No ('. $resolucion->numero_resolucion.') emitida por la DIAN se vencio el dia ('.$resolucion->fecha_vence.'). Favor solicitar nueva resolucion.');
+                    return $this->redirect(["factura-venta/crear_factura"]);
+                }  
             }else{
-                Yii::$app->getSession()->setFlash('error', 'La resolucion de facturacion electronica No ('. $resolucion->numero_resolucion.') emitida por la DIAN se vencio el dia ('.$resolucion->fecha_vence.'). Favor solicitar nueva resolucion.');
-                return $this->redirect(["factura-venta/crear_factura"]);
+                Yii::$app->getSession()->setFlash('error', 'No existe la resolucion para dicho documento o se debe de crear en ADMINISTRACION->RESOLUCIONES.');
+                return $this->redirect(["factura-venta/crear_factura"]); 
             }    
         }
                 

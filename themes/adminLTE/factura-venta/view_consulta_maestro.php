@@ -28,6 +28,7 @@ $this->title = 'Detalle factura de venta';
 $this->params['breadcrumbs'][] = ['label' => 'Factura de venta', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_factura;
 $view = 'factura-venta';
+$moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_cliente])->one(); 
 ?>
 
 <?php
@@ -48,7 +49,7 @@ $view = 'factura-venta';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_factura") ?></th>
                     <td><?= Html::encode($model->id_factura) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nit_cedula') ?></th>
@@ -58,7 +59,7 @@ $view = 'factura-venta';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'direccion') ?></th>
                      <td><?= Html::encode($model->direccion) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_factura') ?></th>
                     <td><?= Html::encode($model->numero_factura) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_pedido')?></th>
@@ -68,7 +69,7 @@ $view = 'factura-venta';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Municipio') ?></th>
                     <td><?= Html::encode($model->clienteFactura->codigoDepartamento->departamento)?> - <?= Html::encode($model->clienteFactura->codigoMunicipio->municipio)?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                    
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_inicio') ?></th>
                     <td><?= Html::encode($model->fecha_inicio) ?></td>
@@ -79,9 +80,9 @@ $view = 'factura-venta';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'forma_pago') ?></th>
-                    <td><?= Html::encode($model->formaPago) ?></td>
+                    <td><?= Html::encode($model->formaPago->concepto) ?></td>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'plazo_pago')?></th>
                     <td><?= Html::encode($model->plazo_pago) ?> Dias</td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura')?></th>
@@ -89,7 +90,7 @@ $view = 'factura-venta';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Saldo') ?></th>
                     <td style="text-align: right"><?= Html::encode('$ '.number_format($model->saldo_factura,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Estado') ?>:</th>
                     <td><?= Html::encode($model->estadoFactura) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Dias_mora')?>:</th>
@@ -99,7 +100,7 @@ $view = 'factura-venta';
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Total_mora')?>:</th>
                     <td style="text-align: right"><?= Html::encode('$ '.number_format($model->subtotal_interes_masiva,0)) ?></td>
                 </tr>
-                 <tr style="font-size: 90%;">
+                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Porcentaje_mora') ?>:</th>
                     <td><?= Html::encode($model->porcentaje_mora) ?> %</td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_venta') ?></th>
@@ -134,69 +135,146 @@ $view = 'factura-venta';
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
-                                            <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
-                                            <th scope="col"  style='background-color:#B9D5CE;'>Descripcion producto</th>                        
-                                            <th scope="col"  style='background-color:#B9D5CE;'>Cantidad</th>       
-                                             <th scope="col"  style='background-color:#B9D5CE;'>Vr. unitario</th>  
-                                            <th scope="col"  style='background-color:#B9D5CE;'>Subtotal</th>                        
-                                            <th scope="col"  style='background-color:#B9D5CE; width: 12%'>Impuesto</th>  
-                                            <th scope="col" style='background-color:#B9D5CE; width: 12%'>Total linea</th> 
-                                        </tr>
+                                         <?php if($model->id_tipo_factura <> 5){?>
+                                            <tr style="font-size: 85%; text-align: center">
+                                                <th scope="col"  style='background-color:#B9D5CE;text-align: center'><b>Codigo</b></th>                        
+                                                <th scope="col"  style='background-color:#B9D5CE;text-align: center'>Descripcion producto</th>     
+                                                <th scope="col"  style='background-color:#B9D5CE;text-align: center'>TV</th>
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>Cantidad</th>       
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>Vr. unitario</th> 
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>% Iva</th>  
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: center'>Subtotal</th>                        
+                                            </tr>
+                                        <?php }else{ ?>
+                                            <tr style="font-size: 85%;">
+                                                <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
+                                                <th scope="col"  style='background-color:#B9D5CE;'>Descripcion producto</th>     
+                                                <th scope="col"  style='background-color:#B9D5CE;'>TV</th>
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Cant.</th>       
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Vr. unitario (<?= 'COL'?>) </th> 
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Vr. unitario (<?= $moneda->sigla?>) </th> 
+                                                <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Subtotal (<?= $moneda->sigla?>)</th>
+                                                 <th scope="col"  style='background-color:#B9D5CE; text-align: left'>Subtotal (<?= 'COP'?>)</th> 
+                                            </tr>
+                                        <?php } ?>    
                                     </thead>
                                     <body>
-                                         <?php
-                                         foreach ($detalle_factura as $val):?>
-                                            <tr style="font-size: 90%;">
-                                                <td><?= $val->codigo_producto ?></td>
-                                                <td><?= $val->producto ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                                <td style="text-align: right"><?= '$'.number_format($val->total_linea,0) ?></td>
-                                           </tr>
-                                         <?php endforeach;?>          
+                                        <?php
+                                        foreach ($detalle_factura as $val):
+                                            if($model->id_tipo_factura <> 5){ ?>
+                                           
+                                                <tr style="font-size: 85%;">
+                                                    <td><?= $val->codigo_producto ?></td>
+                                                    <td><?= $val->producto ?></td>
+                                                    <td><?= $val->tipo_venta ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                    <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                               </tr>
+                                             <?php }else{?>
+                                               <tr style="font-size: 85%;">
+                                                    <td><?= $val->codigo_producto ?></td>
+                                                    <td><?= $val->producto ?></td>
+                                                    <td><?= $val->tipo_venta ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                    <td style="text-align: right; background-color: #c4ebf3"><?= $val->valor_unitario_internacional ?></td>
+                                                    <td style="text-align: right; background-color: #c4ebf3"><?= $val->subtotal_internacional ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                               </tr>
+                                             <?php }
+                                        endforeach;?>          
                                     </body>
                                     <tr style="font-size: 90%; background-color:#B9D5CE">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right;"><b></b></td>
-                                        <td></td>
+                                        <td colspan="6"; style="text-align: right"><b>Moneda:</b></td>
+                                        <?php if($moneda){?>
+                                            <td style="text-align: right;"><b><?= $moneda->sigla?></b></td>
+                                            <td style="text-align: right;"><b><?= 'COP'?></b></td>
+                                        <?php }else{?>
+                                           
+                                            <td style="text-align: right;"><b><?= 'COP'?></b></td>
+                                        <?php }?>                                         
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right;  background-color:#F0F3EF;"><b>VALOR BRUTO:</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <td style="text-align: right;  background-color:#F0F3EF;"><b>Valor Bruto:</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_bruto_internacional; ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <?php }else{ ?>    
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
+                                        <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>DESCTO (<?= $model->porcentaje_descuento?> %) :</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Comercial:</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_comercial_internacional?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
+                                        <?php }else{?> 
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
+                                        <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>SUBTOTAL:</b></td>
-                                        <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_internacional?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <?php }else{?>
+                                             <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
+                                        <?php }?>
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>IMPUESTO (<?= $model->porcentaje_iva?> %) :</b></td>
-                                        <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Subtotal:</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->subtotal_factura_internacional?></b></td>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
+                                        <?php }else{?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
+                                        <?php  }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>RETENCION (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Impuesto:</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->impuesto_internacional; ?></b></td>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                        <?php }else{?>
+                                            <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
+                                        <?php }?>     
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>RETE IVA (<?= $model->porcentaje_rete_iva?> %) :</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Retencion (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_retencion_internacional; ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
+                                        <?php }else{?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
+                                        <?php }?>     
                                     </tr>
                                     <tr style="font-size: 90%;">
                                         <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>TOTAL PAGAR:</b></td>
-                                        <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Rete Iva (<?= $model->porcentaje_rete_iva?> %) :</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_reteiva_internacional ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
+                                        <?php }else{?>    
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
+                                        <?php }?>    
+                                    </tr>
+                                    <tr style="font-size: 90%;">
+                                        <td colspan="5"></td>
+                                        <td style="text-align: right; background-color:#F0F3EF"><b>Total Pagar:</b></td>
+                                        <?php if($moneda){?>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= $model->total_factura_internacional ?></b></td>
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
+                                        <?php }else{?>    
+                                            <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
+                                        <?php }?>    
                                     </tr>
                                 </table>
                                

@@ -1,12 +1,15 @@
 <?php
-
+ob_start();
+include "../vendor/phpqrcode/qrlib.php";
 use inquid\pdf\FPDF;
 use app\models\FacturaVenta;
 use app\models\FacturaVentaDetalle;
 use app\models\MatriculaEmpresa;
 use app\models\Municipios;
 use app\models\Departamentos;
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 //clase
 class PDF extends FPDF {
     function Header() {
@@ -352,10 +355,10 @@ class PDF extends FPDF {
         
         //moneda negociada
         $this->SetFont('Arial', 'B', 8);
-        $pdf->SetXY(144, 244); 
+        $pdf->SetXY(144, 243); 
         $pdf->Cell(40, 4, utf8_decode('Moneda / Money:'),0,'L');
         $this->SetFont('Arial', '', 7);
-        $pdf->SetXY(180, 244);
+        $pdf->SetXY(180, 243);
         $pdf->MultiCell(40, 4, $moneda->sigla, 0, 'L');
         //fin
        
@@ -371,32 +374,42 @@ class PDF extends FPDF {
         //FIN
          //peso bruto
         $this->SetFont('Arial', 'B', 8);
-        $pdf->SetXY(144, 248); 
+        $pdf->SetXY(144, 247); 
         $pdf->Cell(40, 4, utf8_decode('Peso bruto / GrossWeight:'),0,'L');
         $this->SetFont('Arial', '', 7);
-        $pdf->SetXY(180, 248);
+        $pdf->SetXY(180, 247);
         if($terminos){
             $pdf->MultiCell(40, 4, $terminos->peso_bruto.' - '.$terminos->medidaProducto->descripcion, 0, 'L');
         }    
         //fin
           //peso neto
         $this->SetFont('Arial', 'B', 8);
-        $pdf->SetXY(144, 252); 
+        $pdf->SetXY(144, 251); 
         $pdf->Cell(40, 4, utf8_decode('Peso neto / NetWeight:'),0,'L');
         $this->SetFont('Arial', '', 7);
-        $pdf->SetXY(180, 252);
+        $pdf->SetXY(180, 251);
         if($terminos){
             $pdf->MultiCell(40, 4, $terminos->peso_neto.' - '.$terminos->medidaProducto->descripcion, 0, 'L');
         }    
         //fin
         ///cufe
-        $this->SetFont('Arial', '', 7.5);
+        $this->SetFont('Arial', '', 8);
         $pdf->SetXY(10, 255);//tipo cuenta
         $pdf->MultiCell(192, 5, utf8_decode('Cufe: '.$model->cufe),0,'L');
         //declaracion de norma de la factura
         $this->SetFont('Arial', '', 7);
         $pdf->SetXY(10, 263);//tipo cuenta
         $pdf->MultiCell(192, 4, utf8_decode($config->declaracion),1,'J');  
+       
+        ///representacion grafica
+        $pdf->SetXY(138, 218);//recibido,aceptado 
+        $this->SetFont('Arial', '', 8);
+        $qrstr = utf8_decode($model->qrstr);
+        $pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
+        QRcode::png($qrstr,"test.png");
+        $pdf->Image("test.png", 102, 208, 38, 35, "png");
+        unlink("test.png");
+    
     }
     function Footer() {
         $this->SetFont('Arial', '', 7);

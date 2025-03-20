@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
+$tipoFactura = ArrayHelper::map(app\models\TipoFacturaVenta::find()->where(['=','ver_registro_factura', 1])->all(), 'id_tipo_factura', 'descripcion');
 $vendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])
                                                  ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
@@ -52,7 +53,13 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
 	
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
-            <?= $formulario->field($form, "documento")->input("search") ?>
+            <?= $formulario->field($form, 'tipo_factura')->widget(Select2::classname(), [
+                'data' => $tipoFactura,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
             <?= $formulario->field($form, "numero_factura")->input("search") ?>
             <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),
@@ -107,7 +114,7 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
@@ -119,6 +126,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Estado factura">Est.</span></th>
+                 <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de factura">TF.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
             </tr>
@@ -127,7 +135,7 @@ $form = ActiveForm::begin([
             <?php
             if($model){
                 foreach ($model as $val):?>
-                    <tr style ='font-size: 90%;'>                
+                    <tr style ='font-size: 85%;'>                
                         <td><?= $val->numero_factura?></td>
                         <td><?= $val->nit_cedula?></td>
                         <td><?= $val->clienteFactura->nombre_completo?></td>
@@ -138,6 +146,7 @@ $form = ActiveForm::begin([
                         <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
                         <td><?= $val->estadoFactura?></td>
+                        <td><?= $val->tipoFactura->abreviatura?></td>
                         <td style= 'width: 25px; height: 25px;'>
                              <?= Html::a('<span class="glyphicon glyphicon-book"></span>', ['crear_nota_credito', 'id_factura' => $val->id_factura], [
                             'class' => '',

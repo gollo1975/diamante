@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
+$tipoFactura = ArrayHelper::map(\app\models\TipoFacturaVenta::find()->where(['=','ver_registro_factura', 1])->all(), 'id_tipo_factura', 'descripcion');
 $vendedor = ArrayHelper::map(app\models\AgentesComerciales::find()->where(['=','estado', 0])->orderBy ('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
 $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_cliente', 0])
                                                  ->orderBy ('nombre_completo ASC')->all(), 'id_cliente', 'nombre_completo');
@@ -52,7 +53,13 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
 	
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
-            <?= $formulario->field($form, "documento")->input("search") ?>
+           <?= $formulario->field($form, 'tipo_factura')->widget(Select2::classname(), [
+                'data' => $tipoFactura,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
             <?= $formulario->field($form, "numero_factura")->input("search") ?>
             <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),

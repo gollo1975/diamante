@@ -1,5 +1,6 @@
 <?php
-
+ob_start();
+include "../vendor/phpqrcode/qrlib.php";
 use inquid\pdf\FPDF;
 use app\models\NotaCredito;
 use app\models\NotaCreditoDetalle;
@@ -57,7 +58,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(30, 5, utf8_decode("Tipo regimen:"), 0, 0, 'l', 1);
          $this->SetFont('Arial', '', 8);
-        $this->Cell(40, 5, utf8_decode($config->tipoRegimen), 0, 0, 'L', 1);
+        $this->Cell(40, 5, utf8_decode($config->tipoRegimen->regimen), 0, 0, 'L', 1);
         $this->SetXY(40, 5);
         //DATOS DE LA FACTURA
           $this->SetXY(151, 7);
@@ -65,15 +66,15 @@ class PDF extends FPDF {
         $this->Cell(162, 7, utf8_decode("NOTA CREDITO"), 0, 0, 'l', 0);
         $this->SetXY(155, 12);
         $this->SetFont('Arial', 'B', 10);
-        $this->Cell(20, 7, utf8_decode('No '.str_pad($nota->numero_nota_credito, 6, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        $this->Cell(20, 7, utf8_decode('No '.$nota->numero_nota_credito), 0, 0, 'l', 0);
         //
         $this->SetXY(140, 18);
-        $this->SetFont('Arial', '', 9);
-        $this->Cell(20, 7, utf8_decode('Fecha nota crédito: '.$nota->fecha_nota_credito), 0, 0, 'l', 0);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(20, 7, utf8_decode('Fecha procesada:        '.$nota->fecha_hora_enviada), 0, 0, 'l', 0);
         //
         $this->SetXY(140, 22);
-        $this->SetFont('Arial', '', 9);
-        $this->Cell(20, 7, utf8_decode('Fecha enviada dian: '.$nota->fecha_enviada), 0, 0, 'l', 0);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(20, 7, utf8_decode('Fecha recepción dian: '.$nota->fecha_recepcion_dian), 0, 0, 'l', 0);
         //
         //linea
         $this->SetXY(10, 32);
@@ -93,17 +94,8 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 8);
         $this->Cell(63, 5, utf8_decode($nota->cliente), 0, 0, 'c', 1);
         //FIN
+      
         $this->SetXY(10, 44);
-        $this->SetFont('Arial', 'B', 8);
-        $this->Cell(26, 5, utf8_decode("Dirección:"), 0, 0, 'L', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($nota->clienteNota->direccion), 0, 0, 'L',1);
-        $this->SetFont('Arial', 'B', 8);
-        $this->Cell(21, 5, utf8_decode("Telefono:"), 0, 0, 'c', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(63, 5, utf8_decode($nota->clienteNota->telefono), 0, 0, 'c', 1);
-        //FIN
-         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Departamento:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
@@ -113,7 +105,7 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 8);
         $this->Cell(63, 5, utf8_decode($nota->clienteNota->codigoMunicipio->municipio), 0, 0, 'L', 1);
         //FIN
-        $this->SetXY(10, 52);
+        $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Numero factura:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
@@ -123,6 +115,25 @@ class PDF extends FPDF {
         $this->SetFont('Arial', '', 8);
         $this->Cell(63, 5, utf8_decode($nota->fecha_factura), 0, 0, 'L', 1);
         //FIN
+        //FIN
+        $this->SetXY(10, 52);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(26, 5, utf8_decode("Motivo:"), 0, 0, 'l', 1);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(82, 5, utf8_decode($nota->motivo->concepto), 0, 0, 'L',1);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(21, 5, utf8_decode("Fecha nota:"), 0, 0, 'l', 1);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(63, 5, utf8_decode($nota->fecha_nota_credito), 0, 0, 'L', 1);
+         //FIN
+        $this->SetXY(10, 57);
+        $this->SetFont('Arial', 'B', 8);
+        $this->Cell(26, 5, utf8_decode("Cufe factura:"), 0, 0, 'l', 1);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(166, 5, utf8_decode($nota->cufe_factura), 0, 0, 'L',1);
+       
+         //Lineas del encabezado
+
          //Lineas del encabezado
         $this->Line(10,64,10,188); //la primera con la tercera es para la la raya iguales, la segunda es el lago o corto y la tercera es la tamaño de largo
         $this->Line(25,64,25,188);
@@ -137,18 +148,13 @@ class PDF extends FPDF {
         $this->Line(10,170,10,178);//linea vertical
         $this->Line(10,196,157,196);//linea horizontal inferior
         //Linea de las observacines
-        $this->Line(10,178,10,228);//linea vertical
-        //lineas para los cuadros de nit/cc,fecha,firma   
-        $this->Line(10,218,10,245);//linea vertical x1,y1,x2,y2   
-        $this->Line(0,218,0,245);//linea vertical x1,y1,x2,y2
-        $this->Line(0,218,0,245);//linea vertical x1,y1,x2,y2
-        $this->Line(0,218,0,245);//linea vertical x1,y1,x2,y2
-        $this->Line(202,218,202,245);//linea vertical x1,y1,x2,y2       
+        $this->Line(10,178,10,240);//linea vertical
+       
         
         $this->EncabezadoDetalles();
      }
      function EncabezadoDetalles() {
-        $this->Ln(8);
+        $this->Ln(7);
         $header = array('CODIGO', 'NOMBRE PRODUCTO', 'CANTIDAD', 'VR UNITARIO','SUBTOTAL', 'IVA', 'TOTAL');
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
@@ -236,12 +242,28 @@ class PDF extends FPDF {
         $pdf->SetXY(177, 236);
         $pdf->MultiCell(25, 8, number_format($model->valor_total_devolucion, 2, '.', ','),1,'R',1);
         
+        //mostra del cude de la nota credito
+        $this->SetFillColor(200, 200, 200);
+        $pdf->SetXY(10, 245);
+        $this->SetFont('', 'B', 9);
+        $pdf->MultiCell(20, 5, 'Cude:',0,'L');
+        $pdf->SetXY(20, 245);
+        $this->SetFont('', '', 9);
+        $this->Cell(166, 4, utf8_decode($model->cude), 0, 0, 'J',0);
        
-       /* $pdf->SetXY(10, 245);//nit,fecha,fecha,firma  
-        $pdf->MultiCell(192, 4, utf8_decode($config->declaracion),1,'J');
-        $pdf->SetXY(10, 266);//tipo cuenta
-        $pdf->Cell(191, 5, '           Tipo de cuenta: '.$config->entidadBancaria->tipoCuenta.'     Numero de cuenta:   '.$config->entidadBancaria->producto.'    Entidad bancaria:   '.$config->entidadBancaria->entidad_bancaria,1,'C');
-        */
+        //muestra la representacion grafica
+        $pdf->SetXY(138, 210);//recibido,aceptado 
+        $this->SetFont('Arial', '', 8);
+        $qrstr = utf8_decode($model->qrstr);
+        $pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
+        QRcode::png($qrstr,"test.png");
+        $pdf->Image("test.png", 118.5, 198, 38, 35, "png");
+        
+        //muestra software propio
+        $pdf->SetXY(100, 231);
+        $this->SetFont('Arial', 'B', 6);
+        $pdf->Cell(64, 5, utf8_decode($config->razon_social_completa.'-'.$config->nit_empresa.'-'.$config->dv. ' Software Propio '),0,'J',1);
+        //
         $pdf->SetXY(10, 260);//firma trabajador
         $this->SetFont('', 'B', 9);
         $pdf->Cell(35, 5, 'FIRMA CLIENTE: ____________________________________________________', 0, 0, 'L',0);

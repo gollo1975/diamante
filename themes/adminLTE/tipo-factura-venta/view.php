@@ -45,8 +45,8 @@ $this->params['breadcrumbs'][] = $model->id_tipo_factura;
                     <td><?= Html::encode($model->porcentaje_mora) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_interes_mora') ?>:</th>
                     <td><?= Html::encode($model->aplicaInteres) ?></td>
-                    <th style='background-color:#F0F3EF;'></th>
-                    <td style="text-align: right"></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'ver_registro_factura') ?>:</th>
+                    <td><?= Html::encode($model->verRegistro) ?></td>
               </tr>
             </table>
         </div>

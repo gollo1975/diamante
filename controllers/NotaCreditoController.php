@@ -137,21 +137,21 @@ class NotaCreditoController extends Controller
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',57])->all()){
                 $form = new \app\models\FiltroBusquedaPedidos();
-                $documento = null; $fecha_inicio = null;
+                $tipo_factura = null; $fecha_inicio = null;
                 $cliente = null; $fecha_corte = null;
                 $vendedores = null; $numero_factura = null;
                 $model = null;
                 $pages = null;
                if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
-                        $documento = Html::encode($form->documento);
+                        $tipo_factura = Html::encode($form->tipo_factura);
                         $cliente = Html::encode($form->cliente);
                         $vendedores = Html::encode($form->vendedor);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $numero_factura = Html::encode($form->numero_factura);
                         $table = FacturaVenta::find()
-                            ->andFilterWhere(['=', 'nit_cedula', $documento])
+                            ->andFilterWhere(['=', 'id_tipo_factura', $tipo_factura])
                             ->andFilterWhere(['=', 'id_cliente', $cliente])
                             ->andFilterWhere(['between','fecha_inicio', $fecha_inicio, $fecha_corte])
                             ->andFilterWhere(['=','numero_factura', $numero_factura])
@@ -332,6 +332,7 @@ class NotaCreditoController extends Controller
             'pagination' => $pages,
             ]);
     }
+   
    //proceso que actualiza totales
    protected function ActualizarLineaDetalleNota($id, $id_factura) {
        $factura = FacturaVenta::findOne($id_factura);
@@ -357,8 +358,9 @@ class NotaCreditoController extends Controller
            Yii::$app->getSession()->setFlash('error', 'La nota credito tiene saldo en rojos. El valor de la nota credito es mayor que el saldo de la factura.');
        }
    }
+   
    //eliminar detalle de la nota credito
-     public function actionEliminar_detalle($id,$detalle, $id_factura)
+    public function actionEliminar_detalle($id,$detalle, $id_factura)
     {                                
         $detalle = NotaCreditoDetalle::findOne($detalle);
         $detalle->delete();

@@ -29,7 +29,7 @@ class FormModeloEditarCantidad extends Model
         return [
             'cantidad' => 'Nueva cantidad:',
             'motivo' => 'Motivo dian:',
-            'observacion' => 'Observaciones:',
+            'observacion' => 'Observacion:',
 
         ];
     }
