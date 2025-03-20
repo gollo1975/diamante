@@ -1400,6 +1400,7 @@ class FacturaVentaController extends Controller
                 if($model->medio_pago !== ''){
                     $factura = FacturaVenta::findOne($id);
                     $factura->id_medio_pago = $model->medio_pago;
+                    $factura->observacion = $model->observacion;
                     $factura->save(false);
                     return $this->redirect(["view",'id' => $id,'token' => $token]); 
                 }else{

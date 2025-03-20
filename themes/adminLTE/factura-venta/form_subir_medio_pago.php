@@ -38,6 +38,9 @@ $medioPago = ArrayHelper::map(\app\models\MedioPago::find()->all(), 'id_medio_pa
                     <div class="row">
                         <?= $form->field($model, 'medio_pago')->dropDownList($medioPago, ['prompt' => 'Seleccione...','required' => true]) ?>
                     </div>
+                    <div class="row">
+                       <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+                    </div>
                 </div>  
                     <div class="panel-footer text-right">
                        <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar", ["class" => "btn btn-primary", 'name' => 'medio_pago_factura']) ?>                    

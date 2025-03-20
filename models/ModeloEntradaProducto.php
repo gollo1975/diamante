@@ -15,12 +15,14 @@ class ModeloEntradaProducto extends Model
     public $cantidad;
     public $nombre_producto;
     public $medio_pago;
-   
+    public $observacion;
+
+
     public function rules()
     {
         return [  
            [['cantidad','medio_pago'], 'integer'],
-           [['codigo_producto','nombre_producto'], 'string'],
+           [['codigo_producto','nombre_producto','observacion'], 'string'],
         ];
     }
 
@@ -31,6 +33,7 @@ class ModeloEntradaProducto extends Model
             'codigo_producto' => 'Codigo del producto:',
             'nombre_producto' => 'Nombre del producto:',
             'medio_pago' => 'Medio de pago:',
+            'observacion' => 'Observacion:'
           
        
         ];
