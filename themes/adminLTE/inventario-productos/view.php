@@ -42,7 +42,7 @@ $view = 'inventario-productos';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Id') ?></th>
                     <td><?= Html::encode($model->id_inventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?></th>
@@ -52,7 +52,7 @@ $view = 'inventario-productos';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
@@ -62,7 +62,7 @@ $view = 'inventario-productos';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_iva') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_iva,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_iva') ?></th>
                     <td><?= Html::encode($model->aplicaIva) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_creacion') ?></th>
@@ -73,7 +73,7 @@ $view = 'inventario-productos';
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
                
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'inventario_inicial') ?></th>
                     <td><?= Html::encode($model->inventarioInicial) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
@@ -84,7 +84,7 @@ $view = 'inventario-productos';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_inventario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_inventario,0)) ?></td>
                 </tr>
-                 <tr style="font-size: 90%;">
+                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_ean') ?></th>
@@ -95,7 +95,7 @@ $view = 'inventario-productos';
                     <td style="text-align: right; background-color:#F5EEF8;"><?= Html::encode(''.number_format($model->stock_unidades,0)) ?></td>
                     
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_presupuesto') ?></th>
                     <td><?= Html::encode($model->aplicaPresupuesto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'activar_producto_venta') ?></th>
@@ -114,6 +114,7 @@ $view = 'inventario-productos';
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#ordenproduccion" aria-controls="ordenproduccion" role="tab" data-toggle="tab">Lotes de producción <span class="badge"><?= $pagination->totalCount ?></span></a></li>
             <li role="presentation" ><a href="#entrada_producto" aria-controls="entrada_producto" role="tab" data-toggle="tab">Entradas productos <span class="badge"><?= count($entradas) ?></span></a></li>
+            <li role="presentation" ><a href="#devolucion_producto" aria-controls="devolucion_producto" role="tab" data-toggle="tab">Devolucion de productos <span class="badge"><?= count($devoluciones) ?></span></a></li>
         </ul>
         
         <div class="tab-content">
@@ -138,7 +139,7 @@ $view = 'inventario-productos';
                                     <?php foreach ($detalle_entrada as $val):
                                         $detalle = app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $val->id_orden_produccion])->all();
                                         foreach ($detalle as $detalles): ?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $detalles->id_detalle ?></td>  
                                                 <td><?= $val->ordenProduccion->numero_orden ?></td>
                                                 <td><?= $detalles->codigo_producto ?></td>
@@ -185,7 +186,7 @@ $view = 'inventario-productos';
                                 </thead>
                                 <tbody>
                                     <?php foreach ($entradas as $val): ?>
-                                            <tr style ='font-size: 90%;'>                
+                                            <tr style ='font-size: 85%;'>                
                                                 <td><?= $val->id_entrada?></td>
                                                 <td><?= $val->entrada->tipoEntrada?></td>    
                                                 <td><?= $val->entrada->proveedor->nombre_completo?></td>
@@ -207,6 +208,42 @@ $view = 'inventario-productos';
                 </div>
             </div>
             <!-- FIN TABS-->
+            <div role="tabpanel" class="tab-pane " id="devolucion_producto">
+                <div class="table-responsive">
+                    <div class="panel panel-success">
+                        <div class="panel-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr style='font-size:85%;'>
+                                        <th scope="col" style='background-color:#B9D5CE;'>No devolución</th>
+                                         <th scope="col" style='background-color:#B9D5CE;'>Tipo devolución</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>F. devolución</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Nota credito</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>F. nota credito</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>T. Inventario</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>T. Averias</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($devoluciones as $val): ?>
+                                            <tr style ='font-size: 85%;'>                
+                                                <td><?= $val->devolucion->numero_devolucion?></td>
+                                                <td><?= $val->tipoDevolucion->concepto?></td>    
+                                                <td><?= $val->devolucion->fecha_devolucion?></td>
+                                                <td><?= $val->devolucion->nota->numero_nota_credito?></td>
+                                                <td><?= $val->devolucion->nota->fecha_nota_credito?></td>
+                                                <td><?= $val->devolucion->cliente->nombre_completo?></td>
+                                                <td style="text-align: right;"><?= ''.number_format($val->cantidad_devolver,0)?></td>
+                                                <td style="text-align: right;"><?= ''.number_format($val->cantidad_averias,0)?></td>
+                                            </tr>            
+                                        <?php endforeach;?>
+                                </tbody>      
+                            </table>
+                        </div>
+                    </div>   
+                </div>
+            </div>
         </div>
     </div>    
 </div>

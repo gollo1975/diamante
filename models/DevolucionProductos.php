@@ -80,6 +80,14 @@ class DevolucionProductos extends \yii\db\ActiveRecord
         return $this->hasOne(NotaCredito::className(), ['id_nota' => 'id_nota']);
     }
     
+    public function getProductoAlmacenado() {
+        if($this->almacenado == 0){
+            $productoalmacenado = 'NO';
+        }else{
+            $productoalmacenado = 'SI';
+        }
+        return $productoalmacenado;
+    }
     public function getAutorizadoProceso() {
         if($this->autorizado == 0){
             $autorizado = 'NO';

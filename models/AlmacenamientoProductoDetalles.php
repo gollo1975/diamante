@@ -38,7 +38,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_almacenamiento', 'id_rack', 'id_posicion', 'id_piso', 'cantidad', 'id_orden_produccion'], 'integer'],
+            [['id_almacenamiento', 'id_rack', 'id_posicion', 'id_piso', 'cantidad', 'id_orden_produccion','id_devolucion'], 'integer'],
             [['codigo_producto','numero_lote'], 'string', 'max' => 15],
             [['producto'], 'string', 'max' => 40],
             [['fecha_almacenamiento','fecha_proceso_lote','fecha_vencimiento'], 'safe'],
@@ -48,6 +48,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
             [['id_piso'], 'exist', 'skipOnError' => true, 'targetClass' => Pisos::className(), 'targetAttribute' => ['id_piso' => 'id_piso']],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
+            [['id_devolucion'], 'exist', 'skipOnError' => true, 'targetClass' => DevolucionProductos::className(), 'targetAttribute' => ['id_devolucion' => 'id_devolucion']],
         ];
     }
 
@@ -71,6 +72,7 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
             'id_inventario' => 'id_inventario',
             'fecha_proceso_lote' => 'Fecha proceso lote',
             'fecha_vencimiento' => 'fecha_vencimiento',
+            'id_devolucion' => 'id_devolucion',
         ];
     }
 
@@ -80,6 +82,11 @@ class AlmacenamientoProductoDetalles extends \yii\db\ActiveRecord
     public function getAlmacenamiento()
     {
         return $this->hasOne(AlmacenamientoProducto::className(), ['id_almacenamiento' => 'id_almacenamiento']);
+    }
+    
+     public function getDevolucionProducto()
+    {
+        return $this->hasOne(DevolucionProductos::className(), ['id_devolucion' => 'id_devolucion']);
     }
     
     public function getOrdenProduccion()

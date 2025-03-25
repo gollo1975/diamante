@@ -318,8 +318,6 @@ class InventarioProductosController extends Controller
                 $hasta = null;
                 $documento = null;
                 $factura = null;
-                $model = null;
-                $pages = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero = Html::encode($form->numero);
@@ -350,6 +348,20 @@ class InventarioProductosController extends Controller
                     } else {
                         $form->getErrors();
                     }
+                }else{
+                    $table = \app\models\NotaCredito::find()->Where(['=', 'cerrar_nota', 1])
+                                                            ->orderBy('id_nota DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                   
                 } 
                 return $this->render('cargar_nota_credito', [
                         'model' => $model,
@@ -372,6 +384,7 @@ class InventarioProductosController extends Controller
     public function actionView($id, $token)
     {
         $model =  $this->findModel($id);
+        $devoluciones = \app\models\DevolucionProductoDetalle::find()->where(['=','id_inventario', $id])->all();
         $table = OrdenProduccionProductos::find()->where(['=','id_inventario', $id]);
         $tableexcel = $table->all();
         $count = clone $table;
@@ -391,6 +404,7 @@ class InventarioProductosController extends Controller
             'detalle_entrada' => $detalle_entrada,
             'pagination' => $pages,
             'entradas' => $entradas,
+            'devoluciones' => $devoluciones,
         ]);
     }
     

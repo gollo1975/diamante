@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("devolucion-productos/index"),
+    "action" => Url::toRoute("almacenamiento-producto/search_producto_devolucion"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -78,7 +78,7 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->orderBy ('nombre_comple
         
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("devolucion-productos/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("almacenamiento-producto/search_producto_devolucion") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -106,14 +106,17 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha devolución</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cant. inventario</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cant. averias</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Autorizado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Producto almacenado">Alm.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
+                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
             </tr>
             </thead>
             <tbody>
             <?php
-            foreach ($model as $val):?>
+            foreach ($model as $val):
+                $almacenar = app\models\AlmacenamientoProducto::find()->where(['=','id_devolucion', $val->id_devolucion])->one();
+                ?>
                     <tr style ='font-size: 90%;'>                
                         <td><?= $val->numero_devolucion?></td>
                         <td><?= $val->cliente->nit_cedula?></td>
@@ -122,10 +125,31 @@ $form = ActiveForm::begin([
                         <td><?= $val->fecha_devolucion?></td>
                         <td style="text-align: right"><?= ''.number_format($val->cantidad_inventario,0)?></td>
                         <td style="text-align: right"><?= ''.number_format($val->cantidad_averias,0)?></td>
-                        <td><?= $val->autorizadoProceso?></td>
-                        <td style= 'width: 20px; height: 20px;'>
-                            <a href="<?= Url::toRoute(["devolucion-productos/view", "id" => $val->id_devolucion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
-                        </td> 
+                        <?php if($val->almacenado == 0){?>
+                        <td style="background-color: #aaeeee"><?= $val->productoAlmacenado?></td>
+                        <?php }else{?>
+                           <td style="background-color:#eae2b7"><?= $val->productoAlmacenado?></td>
+                        <?php } 
+                        if(!$almacenar){
+                            ?>    
+                            <td style= 'width: 20px; height: 20px;'>
+                                <?= Html::a('<span class="glyphicon glyphicon-list"></span>', ['enviar_lote_almacenar_devolucion', 'id_devolucion' => $val->id_devolucion], [
+                                           'class' => '',
+                                           'title' => 'Permite almacenar los lotes de la orden de produccion',
+                                           'data' => [
+                                               'confirm' => '¿Esta seguro que se desea ALMACENAR  las devoluciones de productos contenidas en la Orden No ( '.$val->numero_devolucion.') ?',
+                                               'method' => 'post',
+                                           ],
+                                           ])?>
+                                
+                            </td> 
+                            <td style= 'width: 20px; height: 20px;'></td>
+                        <?php }else{?>
+                            <td style= 'width: 20px; height: 20px;'></td>
+                            <td style= 'width: 20px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento_devolucion", "id_devolucion" => $val->id_devolucion, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                            </td>  
+                        <?php }?>    
                    </tr>            
             <?php endforeach;?>
             </tbody>    

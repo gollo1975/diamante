@@ -41,10 +41,10 @@ $tipo_devolucion = ArrayHelper::map(app\models\TipoDevolucionProductos::find()->
             if ($model->autorizado == 1 && $model->numero_devolucion == 0){?>
                 <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_devolucion, 'token' =>$token], ['class' => 'btn btn-default btn-sm']);?>
                 <?= Html::a('<span class="glyphicon glyphicon-book"></span> Generar devolucion', ['generar_devolucion_inventario', 'id' => $model->id_devolucion, 'token' =>$token],['class' => 'btn btn-default btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de generar la devolucion de estos productos al cliente  '.$model->cliente->nombre_completo.'.', 'method' => 'post']]);
-            }else{
-               echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_devolucion_producto', 'id' => $model->id_devolucion], ['class' => 'btn btn-default btn-sm']);             
-               echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 14, 'codigo' => $model->id_devolucion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);               
+                           'data' => ['confirm' => 'Esta seguro de generar la devolucion de estos productos del cliente  '.$model->cliente->nombre_completo.'. Este proceso envia automaticamente las unidades al modulo de inventario.', 'method' => 'post']]);
+            }else{ ?>
+                <?= Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir PDF', ['imprimir_devolucion_producto', 'id' => $model->id_devolucion], ['class' => 'btn btn-default btn-sm']); ?>            
+                <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 14, 'codigo' => $model->id_devolucion,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);               
             }      
         }?>
     </p>

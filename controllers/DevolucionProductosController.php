@@ -203,6 +203,7 @@ class DevolucionProductosController extends Controller
     public function actionView($id, $token)
     {
         $detalle_devolucion = \app\models\DevolucionProductoDetalle::find()->where(['=','id_devolucion', $id])->all(); 
+                        
         if(isset($_POST["actualizacantidades"])){
             if(isset($_POST["actualizar_cantidades"])){
                 $intIndice = 0; $cantDevolucion = 0; $cantAveria = 0; $total = 0;

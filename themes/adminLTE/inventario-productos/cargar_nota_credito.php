@@ -94,9 +94,7 @@ $form = ActiveForm::begin([
 <div class="table-responsive">
 <div class="panel panel-success ">
     <div class="panel-heading">
-        <?php if($model){?>
-             Registros <span class="badge"><?= count($model) ?></span>
-        <?php }?>     
+        Registros <span class="badge"><?= $pagination->totalCount ?></span>
     </div>
         <table class="table table-bordered table-hover">
             <thead>
@@ -114,8 +112,7 @@ $form = ActiveForm::begin([
             </tr>
             </thead>
             <tbody>
-            <?php
-            if($model){
+                <?php
                 foreach ($model as $val):?>
                     <tr style ='font-size: 90%;'>                
                         <td><?= $val->numero_nota_credito?></td>
@@ -140,14 +137,13 @@ $form = ActiveForm::begin([
                             ])?>
                        </td>
                    </tr>            
-                <?php endforeach;
-             }?>
+                <?php endforeach;?>
             </tbody>    
         </table> 
          <?php $form->end() ?>
        
      </div>
 </div>
-<?php if($model){?>
+
    <?= LinkPager::widget(['pagination' => $pagination]) ?>
-<?php }?>
+

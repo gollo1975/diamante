@@ -62,7 +62,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
           
             [['id_pedido', 'id_cliente', 'id_tipo_factura', 'numero_factura', 'dv','id_forma_pago', 'plazo_pago', 'autorizado','id_agente','estado_factura','dias_mora','valor_intereses_mora',
                 'iva_intereses_mora', 'subtotal_interes_masiva','id_tipo_venta','tipo_inventario','id_punto','descuento_comercial','id_resolucion',
-                'valor_pago_descuento_dos','valor_pago_descuento_uno','id_medio_pago','factura_libre'], 'integer'],
+                'valor_pago_descuento_dos','valor_pago_descuento_uno','id_medio_pago','factura_libre','reenviar_factura'], 'integer'],
             
             [['desde', 'hasta', 'fecha_inicio', 'fecha_vencimiento', 'fecha_generada', 'fecha_enviada_api','fecha_editada','fecha_enviada_dian','fecha_primer_descuento','fecha_segundo_descuento'], 'safe'],
             //campos float nacional
@@ -153,6 +153,7 @@ class FacturaVenta extends \yii\db\ActiveRecord
             'valor_moneda' => 'Tasa de cambio:',
             'id_medio_pago' => 'Medio de pago:',
             'factura_libre' => 'factura_libre',
+            'reenviar_factura'=> 'reenviar_factura',
             
         ];
     }

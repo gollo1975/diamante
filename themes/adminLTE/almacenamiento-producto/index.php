@@ -140,16 +140,26 @@ $form = ActiveForm::begin([
                     <td><?= $val->rack->descripcion?></td>
                     <td><?= $val->rack->capacidad_instalada?></td>
                     <td><?= $val->rack->capacidad_actual?></td>
-                     <td><?= $val->posicion->posicion?></td>
-                    <td><?= $val->ordenProduccion->numero_orden?></td>
+                    <td><?= $val->posicion->posicion?></td>
+                    <?php if($val->id_orden_produccion <> null){?>
+                        <td><?= $val->ordenProduccion->numero_orden?></td>
+                    <?php }else{?>     
+                        <td><?= $val->devolucionProducto->numero_devolucion?></td>    
+                    <?php }?>    
                     <td><?= $val->numero_lote?></td>
                     <td><?= $val->fecha_almacenamiento?></td>
                     <td><?= $val->codigo_producto?></td>
                     <td><?= $val->producto?></td>
                     <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
-                    <td style= 'width: 25px; height: 20px;'>
-                         <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                    </td>
+                    <?php if($val->id_orden_produccion <> null){?>
+                        <td style= 'width: 25px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        </td>
+                    <?php }else{?>    
+                        <td style= 'width: 25px; height: 20px;'>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento_devolucion", "id_devolucion" => $val->id_devolucion, 'token' => 1]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                        </td>
+                    <?php }?>        
                 </tr>            
             <?php endforeach; 
         }   ?>

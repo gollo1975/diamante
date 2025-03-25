@@ -22,20 +22,20 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'Detalle';
-$this->params['breadcrumbs'][] = ['label' => 'Orden produccion', 'url' => ['cargar_orden_produccion']];
-$this->params['breadcrumbs'][] = $id_orden;
+$this->title = 'ALMACENAMIENTO DEVOLUCIONES';
+$this->params['breadcrumbs'][] = ['label' => 'Orden produccion', 'url' => ['view_almacenamiento_devolucion','id_devolucion' => $id_devolucion]];
+$this->params['breadcrumbs'][] = $id_devolucion;
 ?>
 <div class="almacenamiento-producto-view_almacenamiento">
     <p>
-        <?php if($token == 0){?>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);?>
-        <?php }else{?>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['cargar_orden_produccion'], ['class' => 'btn btn-primary btn-sm']);?>
-        <?php }
-        if($model->producto_almacenado == 0){?>
-            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Cerrar orden produccion', ['cerrar_orden_produccion', 'id_orden' => $model->id_orden_produccion, 'token' =>$token],['class' => 'btn btn-success btn-sm',
-                               'data' => ['confirm' => 'Esta seguro de CERRAR la Orden de produccion No ('.$model->numero_orden.'). Tener presente que todas las unidades deben de estar almacendas.', 'method' => 'post']]);?>
+       <?php if($token == 0){?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_producto_devolucion'], ['class' => 'btn btn-primary btn-sm']);
+        }else{
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);
+        }
+         if($model->almacenado == 0){?>
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Cerrar orden devolucion', ['cerrar_orden_devolucion', 'id_devolucion' => $model->id_devolucion, 'token' => $token],['class' => 'btn btn-success btn-sm',
+                               'data' => ['confirm' => 'Esta seguro de CERRAR la Orden de devolucion No ('.$model->numero_devolucion.'). Tener presente que todas las unidades deben de estar almacendas.', 'method' => 'post']]);?>
         <?php }?>
     </p>  
     <div class="panel panel-success">
@@ -44,15 +44,15 @@ $this->params['breadcrumbs'][] = $id_orden;
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_orden_produccion") ?></th>
-                    <td><?= Html::encode($model->id_orden_produccion) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_orden') ?></th>
-                    <td><?= Html::encode($model->numero_orden) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
-                    <td><?= Html::encode($model->producto->nombre_producto) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
-                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_devolucion") ?></th>
+                    <td><?= Html::encode($model->id_devolucion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_devolucion') ?></th>
+                    <td><?= Html::encode($model->numero_devolucion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cliente') ?></th>
+                    <td><?= Html::encode($model->cliente->nombre_completo) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cantidad_inventario') ?></th>
+                     <td style="text-align: right"><?= Html::encode(''.number_format($model->cantidad_inventario,0)) ?></td>
                 </tr>
             </table>    
         </div>
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Presentación</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>U. Fabricadas</th> 
@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                         <th scope="col"  style='background-color:#B9D5CE;'>F. Vencimiento</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
                                         <th scope="col"  style='background-color:#B9D5CE;'></th> 
-                                        <th scope="col"  style='background-color:#B9D5CE;'></th>
+                                      
                                     </tr>
                                 </thead>
                                 <body>
@@ -111,23 +111,10 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <td><?= $val->numero_lote ?></td>
                                              <td><?= $val->fecha_vencimiento ?></td>
                                             <?php if($val->unidades_almacenadas <>  $val->unidades_producidas){?>
-                                                <td style= 'width: 20px; height: 20px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-floppy-disk"></span>',
-                                                       ['/almacenamiento-producto/subir_documento', 'id_orden' => $model->id_orden_produccion, 'id' => $val->id_almacenamiento, 'token' =>$token, 'sw' =>0],
-                                                         ['title' => 'Subir el documento del almacenamiento',
-                                                          'data-toggle'=>'modal',
-                                                          'data-target'=>'#modalsubirdocumento',
-                                                         ])    
-                                                   ?>
-                                                   <div class="modal remote fade" id="modalsubirdocumento">
-                                                        <div class="modal-dialog modal-lg" style ="width: 560px;">    
-                                                            <div class="modal-content"></div>
-                                                        </div>
-                                                   </div>
-                                                </td>   
+                                               
                                                 <td style= 'width: 20px; height: 20px;'>
                                                     <?= Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
-                                                       ['/almacenamiento-producto/crear_almacenamiento', 'id_orden' => $model->id_orden_produccion, 'id' => $val->id_almacenamiento,'token' =>$token],
+                                                       ['/almacenamiento-producto/crear_almacenamiento_devolucion', 'id_devolucion' => $model->id_devolucion, 'id' => $val->id_almacenamiento, 'token' => $token],
                                                          ['title' => 'Crear el almacenamiento de las unidades',
                                                           'data-toggle'=>'modal',
                                                           'data-target'=>'#modalcrearalmacenamiento',
@@ -141,11 +128,11 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                 </td>       
                                             <?php }else{?>
                                                     <td style= 'width: 20px; height: 20px;'></td>
-                                                    <td style= 'width: 20px; height: 20px;'></td>
+                                                   
                                             <?php }  
                                             if (!$conDato){?>    
                                                 <td style= 'width: 20px; height: 20px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_almacenamiento', 'id_orden' => $model->id_orden_produccion, 'detalle' => $val->id_almacenamiento, 'token' =>$token, 'sw' =>0], [
+                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_almacenamiento_devolucion', 'id_devolucion' => $model->id_devolucion, 'detalle' => $val->id_almacenamiento, 'token' => $token], [
                                                                  'class' => '',
                                                                  'data' => [
                                                                      'confirm' => 'Esta seguro de eliminar este producto del proceso de almacenamiento?',
@@ -197,9 +184,9 @@ $this->params['breadcrumbs'][] = $id_orden;
                                             <td><?= $dato->codigo_producto ?></td>
                                             <td><?= $dato->producto ?></td>
                                             <td style="text-align: right"><?= ''.number_format($dato->cantidad,0) ?></td>
-                                            <?php if($model->producto_almacenado == 0){?>
+                                            <?php if($model->almacenado == 0){?>
                                                 <td style= 'width: 20px; height: 20px;'>
-                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_items_rack', 'id_orden' => $model->id_orden_produccion, 'id_detalle' => $dato->id, 'token' =>$token, 'sw' => 0], [
+                                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_items_rack_devolucion', 'id_devolucion' => $model->id_devolucion, 'id_detalle' => $dato->id, 'token' => $token], [
                                                                  'class' => '',
                                                                  'data' => [
                                                                      'confirm' => 'Esta seguro de eliminar este producto del proceso de almacenamiento?',
