@@ -34,7 +34,7 @@ class ConfiguracionPrestaciones extends \yii\db\ActiveRecord
         return [
             [['concepto', 'codigo_salario'], 'required'],
             [['porcentaje_pago'], 'number'],
-            [['aplicar_ausentismo', 'codigo_salario'], 'integer'],
+            [['aplicar_ausentismo', 'codigo_salario','aplica_recargo_vacacion'], 'integer'],
             [['fecha_creacion'], 'safe'],
             [['concepto'], 'string', 'max' => 120],
             [['codigo_salario'], 'exist', 'skipOnError' => true, 'targetClass' => ConceptoSalarios::className(), 'targetAttribute' => ['codigo_salario' => 'codigo_salario']],
@@ -53,6 +53,7 @@ class ConfiguracionPrestaciones extends \yii\db\ActiveRecord
             'aplicar_ausentismo' => 'Aplicar Ausentismo',
             'codigo_salario' => 'Codigo Salario',
             'fecha_creacion' => 'Fecha Creacion',
+            'aplica_recargo_vacacion' => 'Aplica recargo vacacion',
         ];
     }
 

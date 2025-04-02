@@ -722,7 +722,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'url' => '#',
                                                             'items' => [
                                                                 ['label' => 'Generar nomina', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/index']],
-                                                               // ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['licencia/index']],
+                                                                ['label' => 'Prestaciones sociales', 'icon' => 'plus-square-o', 'url' => ['prestaciones-sociales/index']],
                                                             ],
                                                         ],
                                                         //COMIENZA MEDU DE UTILIDADES

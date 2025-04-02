@@ -61,6 +61,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
             [['fecha_creacion'], 'safe'],
             [['nombre_concepto'], 'string', 'max' => 150],
             [['codigo_salario'], 'unique'],
+            [['id_agrupado'], 'exist', 'skipOnError' => true, 'targetClass' => AgruparConceptoSalario::className(), 'targetAttribute' => ['id_agrupado' => 'id_agrupado']],
         ];
     }
 
@@ -185,7 +186,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $auxiliotransporte;
     }
-    public function getconceptoIncapacidad()
+    public function getConceptoIncapacidad()
     {
         if($this->concepto_incapacidad == 1){
             $conceptoincapacidad= "SI";
@@ -194,7 +195,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $conceptoincapacidad;
     }
-     public function getconceptoPension()
+     public function getConceptoPension()
     {
         if($this->concepto_pension == 1){
             $conceptopension= "SI";
@@ -203,7 +204,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $conceptopension;
     }
-      public function getconceptoSalud()
+      public function getConceptoSalud()
     {
         if($this->concepto_salud == 1){
             $conceptosalud= "SI";
@@ -212,7 +213,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $conceptosalud;
     }
-      public function getconceptoVacacion()
+      public function getConceptoVacacion()
     {
         if($this->concepto_vacacion == 1){
             $conceptovacacion= "SI";
@@ -221,7 +222,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $conceptovacacion;
     }
-     public function getprovisionaVacacion()
+     public function getProvisionaVacacion()
     {
         if($this->provisiona_vacacion == 1){
             $provisionavacacion= "SI";
@@ -230,7 +231,7 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $provisionavacacion;
     }
-     public function getprovisionaIndemnizacion()
+     public function getProvisionaIndemnizacion()
     {
         if($this->provisiona_indemnizacion == 1){
             $provisionaindemnizacion= "SI";
@@ -251,7 +252,8 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         
         return $tipoadicion;
     }
-     public function getrecargoNocturno()
+    
+     public function getRecargoNocturno()
     {
         if($this->recargo_nocturno == 1){
             $recargonocturno= "SI";
@@ -260,6 +262,18 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $recargonocturno;
     }
+    
+      public function getHoraExtra()
+    {
+        if($this->hora_extra == 1){
+            $horaextra= "SI";
+        }else{
+            $horaextra = "NO";
+        }
+        return $horaextra;
+    }
+    
+    
       public function getInicionomina()
     {
         if($this->inicio_nomina == 1){
@@ -296,4 +310,66 @@ class ConceptoSalarios extends \yii\db\ActiveRecord
         }
         return $fondosp;
     }
+    
+    public function getDevengadoDeduccion()
+    {
+        if($this->devengado_deduccion == 1){
+            $devengadodeduccion= "CREDITO";
+        }else{
+            $devengadodeduccion = "DEDITO";
+        }
+        return $devengadodeduccion;
+    }
+    
+    public function getDatoPrestacional()
+    {
+        if($this->prestacional == 0){
+            $datoprestacional= "NO";
+        }else{
+            $datoprestacional = "SI";
+        }
+        return $datoprestacional;
+    }
+    
+    public function getIbcCotizacion()
+    {
+        if($this->ingreso_base_prestacional == 0){
+            $ibccotizacion= "NO";
+        }else{
+            $ibccotizacion = "SI";
+        }
+        return $ibccotizacion;
+    }
+    
+    public function getConceptoPrima()
+    {
+        if($this->concepto_prima == 0){
+            $conceptoprima = "NO";
+        }else{
+            $conceptoprima = "SI";
+        }
+        return $conceptoprima;
+    }
+    
+      public function getConceptoCesantias()
+    {
+        if($this->concepto_cesantias == 0){
+            $conceptocesantias = "NO";
+        }else{
+            $conceptocesantias = "SI";
+        }
+        return $conceptocesantias;
+    }
+    
+       public function getConceptoIntereses()
+    {
+        if($this->intereses == 0){
+            $conceptointereses = "NO";
+        }else{
+            $conceptointereses = "SI";
+        }
+        return $conceptointereses;
+    }
+    
+    
 }

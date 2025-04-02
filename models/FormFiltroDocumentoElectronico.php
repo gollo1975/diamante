@@ -12,12 +12,13 @@ class FormFiltroDocumentoElectronico extends Model
 {
     public $documento;
     public $empleado;
+    public $grupo;
 
     public function rules()
     {
         return [
 
-            [['documento'], 'match', 'pattern' => '/^[0-9\s]+$/i', 'message' => 'Sólo se aceptan números'],
+            [['documento','grupo'], 'match', 'pattern' => '/^[0-9\s]+$/i', 'message' => 'Sólo se aceptan números'],
             [['empleado'],'string'],
            
         ];
@@ -28,6 +29,7 @@ class FormFiltroDocumentoElectronico extends Model
         return [
             'documento' => 'Documento empleado:',
             'empleado' => 'Nombre empleado:',
+            'grupo' => 'Grupo de pago:',
         ];
     }
 }

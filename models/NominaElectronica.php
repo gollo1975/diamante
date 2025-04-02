@@ -74,16 +74,18 @@ class NominaElectronica extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_periodo_pago', 'id_tipo_nomina', 'id_contrato', 'id_empleado', 'id_periodo_electronico', 'id_grupo_pago', 'documento_empleado', 'salario_contrato', 'type_worker_id', 'sub_type_worker_id', 'codigo_municipio', 'codigo_forma_pago', 'dias_trabajados', 'total_devengado', 'total_deduccion', 'total_pagar', 'generado_detalle', 'exportado_nomina', 'numero_nomina_electronica'], 'integer'],
-            [['fecha_inicio_nomina', 'fecha_final_nomina', 'fecha_inicio_contrato', 'fecha_terminacion_contrato', 'fecha_envio_nomina', 'fecha_recepcion_dian', 'fecha_envio_begranda'], 'safe'],
+            [['id_periodo_pago', 'id_tipo_nomina', 'id_contrato', 'id_empleado', 'id_periodo_electronico', 'id_grupo_pago', 'documento_empleado', 'salario_contrato', 'type_worker_id', 'sub_type_worker_id', 'codigo_municipio', 'codigo_forma_pago', 'dias_trabajados', 'total_devengado', 'total_deduccion',
+                'total_pagar', 'generado_detalle', 'exportado_nomina', 'numero_nomina_electronica','documento_activo'], 'integer'],
+            [['fecha_inicio_nomina', 'fecha_final_nomina', 'fecha_inicio_contrato', 'fecha_terminacion_contrato', 'fecha_envio_nomina', 'fecha_recepcion_dian', 'fecha_envio_begranda','fecha_hora_eliminacion'], 'safe'],
             [['codigo_documento', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'consecutivo'], 'string', 'max' => 10],
             [['nombre_completo', 'direccion_empleado'], 'string', 'max' => 50],
             [['email_empleado'], 'string', 'max' => 60],
             [['nombre_banco'], 'string', 'max' => 40],
             [['nombre_cuenta', 'numero_cuenta'], 'string', 'max' => 20],
-            [['cune'], 'string', 'max' => 350],
+            [['cune','nuevo_cune'], 'string', 'max' => 350],
             [['qrstr'], 'string', 'max' => 2000],
             [['user_name'], 'string', 'max' => 15],
+            [['nota'],'string'],
             [['id_contrato'], 'exist', 'skipOnError' => true, 'targetClass' => Contratos::className(), 'targetAttribute' => ['id_contrato' => 'id_contrato']],
             [['id_empleado'], 'exist', 'skipOnError' => true, 'targetClass' => Empleados::className(), 'targetAttribute' => ['id_empleado' => 'id_empleado']],
             [['id_periodo_electronico'], 'exist', 'skipOnError' => true, 'targetClass' => PeriodoNominaElectronica::className(), 'targetAttribute' => ['id_periodo_electronico' => 'id_periodo_electronico']],
@@ -124,9 +126,11 @@ class NominaElectronica extends \yii\db\ActiveRecord
             'nombre_cuenta' => 'Nombre Cuenta',
             'numero_cuenta' => 'Numero Cuenta',
             'cune' => 'Cune',
+            'nuevo_cune' => 'Nuevo cune',
             'qrstr' => 'Qrstr',
             'fecha_inicio_nomina' => 'Fecha Inicio Nomina',
             'fecha_final_nomina' => 'Fecha Final Nomina',
+            'fecha_hora_eliminacion' => 'Fecha hora liminacion',
             'fecha_inicio_contrato' => 'Fecha Inicio Contrato',
             'fecha_terminacion_contrato' => 'Fecha Terminacion Contrato',
             'dias_trabajados' => 'Dias Trabajados',
@@ -141,6 +145,7 @@ class NominaElectronica extends \yii\db\ActiveRecord
             'exportado_nomina' => 'Exportado Nomina',
             'numero_nomina_electronica' => 'Numero Nomina Electronica',
             'consecutivo' => 'Consecutivo',
+            'documento_activo' => 'Activo',
         ];
     }
 
@@ -198,5 +203,24 @@ class NominaElectronica extends \yii\db\ActiveRecord
     public function getNominaElectronicaDetalles()
     {
         return $this->hasMany(NominaElectronicaDetalle::className(), ['id_nomina_electronica' => 'id_nomina_electronica']);
+    }
+    
+    public function getDocumentoActivo() {
+        if($this->documento_activo == 0){
+            $documentoactivo = 'SI';
+        }else{
+            $documentoactivo = 'NO';
+        }
+        return $documentoactivo;
+    }
+    
+    public function getExportadoNomina() {
+        if($this->exportado_nomina == 0){
+            $exportadonomina = 'NO';
+        }else{
+                        
+            $exportadonomina = 'SI';
+        }
+        return $exportadonomina;
     }
 }

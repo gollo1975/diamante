@@ -693,8 +693,9 @@ class ContratosController extends Controller
             ]);
         
     }
-    //parameter del contrato, permite subir los devengados
-       public function actionAcumulado_devengado($id) {                
+    
+   //parameter del contrato, permite subir los devengados
+    public function actionAcumulado_devengado($id) {                
         $model = new \app\models\FormParametroContrato();
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -832,6 +833,81 @@ class ContratosController extends Controller
          
         ]);
     }
+    
+    //CERRAR CONTRATO Y GENERA PRESTACIONES
+    public function actionCerrar_contrato_trabajo($id, $token) {
+        $model = new \app\models\FormCerrarContrato();
+       
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {    
+           
+            if ($model->validate()) {
+                $contrato = Contratos::findOne($id);
+                if (isset($_POST["cerrar_contrato"])) {  
+                    $contrato->fecha_final = $model->fecha_final;
+                    $contrato->id_motivo_terminacion = $model->id_motivo_terminacion;
+                    $contrato->contrato_activo = 1;
+                    $contrato->observacion = $model->observacion;
+                    $contrato->generar_liquidacion = 1;
+                    $contrato->user_name_editado = Yii::$app->user->identity->username;
+                    $contrato->save(false);
+                    $empleado = \app\models\Empleados::findOne($contrato->id_empleado);
+                    $empleado->estado = 1;
+                    $empleado->fecha_retiro = $model->fecha_final;
+                    $empleado->save(false);
+                    if($model->generar_liquidacion == 1){
+                        $table = new \app\models\PrestacionesSociales();  
+                        $table->id_empleado = $contrato->id_empleado;
+                        $table->id_contrato = $id;
+                        $table->documento = $contrato->nit_cedula;
+                        $table->id_grupo_pago = $contrato->id_grupo_pago;
+                        $table->fecha_inicio_contrato = $contrato->fecha_inicio;
+                        $table->fecha_termino_contrato = $model->fecha_final;
+                        $table->ultimo_pago_prima = $contrato->ultima_pago_prima;
+                        $table->ultimo_pago_cesantias = $contrato->ultima_pago_cesantia;
+                        $table->ultimo_pago_vacaciones = $contrato->ultima_pago_vacacion;
+                        $table->observacion = $model->observacion;
+                        $table->salario = $contrato->salario;
+                        $table->usuariosistema = Yii::$app->user->identity->username;
+                        $table->insert(false);
+                    }
+                   return $this->redirect(["contratos/view", 'id' => $id, 'token' => $token]);                                                     
+                }
+            }
+        }
+        if (Yii::$app->request->get("id")) {
+            $table = Contratos::find()->where(['id_contrato' => $id])->one();            
+            if ($table) {                                
+                $model->id_contrato = $table->id_contrato;                
+            }
+        }
+        
+        return $this->renderAjax('closed_contrato_laboral', ['model' => $model, 'id' => $id, 'token' => $token]);
+    }
+    
+    //ACTIVAR NUEVAMENTE CONTRATO
+    public function actionAbrir_contrato_laboral($id, $token)
+    {
+      $prestacion = \app\models\PrestacionesSociales::find()->where(['=','id_contrato', $id])->one();
+      if($prestacion){
+         Yii::$app->getSession()->setFlash('error', 'Este contrato no se puede abrir porque tiene prestaciones sociales asociadas.!');  
+         return $this->redirect(["contratos/view",'id' => $id, 'token' => $token]); 
+      }else{
+          $contrato = Contratos::findOne($id);
+          $contrato->contrato_activo = 0;
+          $contrato->id_motivo_terminacion = 3;
+          $contrato->generar_liquidacion = 0;
+          $contrato->observacion = 'Se abrio el contrato nuavamente';
+          $contrato->save(false);
+          $empleado = \app\models\Empleados::findOne($contrato->id_empleado);
+          $empleado->estado = 0;
+          $empleado->save();
+          return $this->redirect(["contratos/view",'id' => $id, 'token' => $token]); 
+      }   
+    }        
     
     //IMPRESIONES
      public function actionImprimir_contrato_laboral($id)

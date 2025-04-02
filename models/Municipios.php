@@ -45,7 +45,7 @@ class Municipios extends \yii\db\ActiveRecord
             [['codigo_municipio', 'codigo_departamento', 'codigo_interfaz'], 'string', 'max' => 10],
             [['municipio','usuario_creador'], 'string', 'max' => 30],
             [['codigo_municipio'], 'unique'],
-            [['estado_registro'], 'integer'],
+            [['estado_registro','codigo_api_nomina'], 'integer'],
             [['fecha_creacion'], 'safe'],
             [['codigo_departamento'], 'exist', 'skipOnError' => true, 'targetClass' => Departamentos::className(), 'targetAttribute' => ['codigo_departamento' => 'codigo_departamento']],
         ];
@@ -64,6 +64,7 @@ class Municipios extends \yii\db\ActiveRecord
             'codigo_interfaz' => 'Codigo interfaz',
             'usuario_creador' => 'User name',
             'fecha_creacion' => 'Fecha creacion',
+            'codigo_api_nomina' => 'Codigo api nomina',
         ];
     }
 

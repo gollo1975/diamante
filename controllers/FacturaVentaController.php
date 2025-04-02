@@ -1602,6 +1602,7 @@ class FacturaVentaController extends Controller
        
         //   //ASIGNA A DATABOY EL VECTOR DE DETALLE DE FACTURAS 
         $dataBody = json_encode(["items" => $items]); // Codificamos el array de items a JSON
+        var_dump($dataHead);
         curl_setopt_array($curl, [
             CURLOPT_URL => "http://begranda.com/equilibrium2/public/api/bill?key=$API_KEY",
             CURLOPT_RETURNTRANSFER => true,

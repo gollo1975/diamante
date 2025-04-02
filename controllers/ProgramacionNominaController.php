@@ -2393,11 +2393,12 @@ class ProgramacionNominaController extends Controller
         if(count($nomina) > 0){
             foreach ($nomina as $key => $items) {
                 if($items->id_empleado <> $auxiliar){
-                    $contador += 1;
+                    $contador += 1; $total_dias = 0;
                     $totales = ProgramacionNomina::find()->where(['=','id_empleado', $items->id_empleado])->andWhere(['=','documento_generado', 0])->all();
                     $tDevengado = 0; $tDeduccion = 0; $tPagar = 0;
                     foreach ($totales as $key => $total) {
                         $total->documento_generado = 1;
+                        $total_dias += $total->dia_real_pagado;
                         $total->save();
                     }
                     $table = new \app\models\NominaElectronica();
@@ -2427,6 +2428,7 @@ class ProgramacionNominaController extends Controller
                     }else{
                         $table->nombre_cuenta = 'Corriente';
                     }
+                    $table->dias_trabajados = $total_dias;
                     $table->numero_cuenta = $items->empleado->numero_cuenta;
                     $table->fecha_inicio_nomina = $fecha_inicio;
                     $table->fecha_final_nomina = $fecha_corte;
@@ -2509,7 +2511,7 @@ class ProgramacionNominaController extends Controller
                         $buscarNomina = ProgramacionNomina::find()->where(['=','id_empleado', $conRegistro->id_empleado])->andWhere(['=','documento_detalle_generado', 0])->all();
                         foreach ($buscarNomina as $key => $datos) {
 
-                            $detalle_nomina = ProgramacionNominaDetalle::find()->where(['=','id_programacion', $datos->id_programacion])->all();
+                            $detalle_nomina = \app\models\ProgramacionNominaDetalle::find()->where(['=','id_programacion', $datos->id_programacion])->all();
                             foreach ($detalle_nomina as $key => $detalle) {
                                 $buscar = \app\models\NominaElectronicaDetalle::find()->where(['=','codigo_salario', $detalle->codigo_salario])->andWhere(['=','id_periodo_electronico', $id_periodo])
                                                                                       ->andWhere(['=','id_empleado', $conRegistro->id_empleado])->one();
@@ -2540,7 +2542,7 @@ class ProgramacionNominaController extends Controller
                                             $table->total_dias =$detalle->nro_horas; 
                                             
                                         }elseif ($detalle->codigoSalario->id_agrupado == 9){ //incapacidades
-                                            $codigo_incapacidad = Incapacidad::findOne($detalle->id_incapacidad);
+                                            $codigo_incapacidad = \app\models\Incapacidad::findOne($detalle->id_incapacidad);
                                             $table->valor_pago_incapacidad = $detalle->vlr_devengado;
                                             $table->devengado = $detalle->vlr_devengado;
                                             $table->dias_incapacidad = $detalle->dias_reales;
@@ -2681,6 +2683,7 @@ class ProgramacionNominaController extends Controller
                                         }elseif ($detalle->codigoSalario->id_agrupado == 14) { //libranzas y bancos
                                             $table->deduccion += $detalle->vlr_deduccion; 
                                         }
+                                        
                                     }
                                     $buscar->save(false);
                                     $conRegistro->save(false);
@@ -2688,11 +2691,11 @@ class ProgramacionNominaController extends Controller
                             }
                         //cierre en programacion turnos
                         $datos->documento_detalle_generado = 1;
-                        $datos->save();    
+                        $datos->save(false);    
                         }
                         //cierra en nomina electronica
                         $conRegistro->generado_detalle = 1;
-                        $conRegistro->save();
+                        $conRegistro->save(false);
                         
                     }else{
                         $conRegistro = \app\models\NominaElectronica::findOne($intCodigo);
@@ -2722,6 +2725,539 @@ class ProgramacionNominaController extends Controller
             'model' => $model,
         ]);
     }
+    
+    //VISTA DEL DETALLE DEL DOCUMENTO ELECTRONICO
+    public function actionDetalle_documento_electronico($id_nomina, $id_periodo, $token) 
+    {
+        $model = \app\models\NominaElectronica::findOne($id_nomina);
+        $detalle_documento = \app\models\NominaElectronicaDetalle::find()->where(['=','id_nomina_electronica', $id_nomina])->orderBy('devengado_deduccion ASC')->all();     
+        return $this->render('view_detalle_documento_electronico', [
+            'model' => $model, 
+            'id_nomina' => $id_nomina,
+            'id_periodo' => $id_periodo,
+            'detalle_documento' => $detalle_documento,
+            'token' => $token,
+        ]);    
+        
+    }
+    
+    //CERRAR PERIODO DE NOMINA ELECTRONICA
+    public function actionCerrar_periodo_nomina($id_periodo) {
+        $sw = 0;
+        $periodo = \app\models\PeriodoNominaElectronica::findOne($id_periodo);
+        $documentos = \app\models\NominaElectronica::find()->where(['=','id_periodo_electronico', $id_periodo])->all();
+        foreach ($documentos as $key => $validar) {
+            if($validar->generado_detalle == 0){
+               Yii::$app->getSession()->setFlash('error','El periodo no se puede cerrar porque hay nominas que no se han validado. Consulte con el administrador. ');
+               return $this->redirect(['documento_electronico']);
+            }
+        }
+        $this->AcumularTotalesNominaElectronica($id_periodo);
+        $this->GranTotalNominaElectronica($id_periodo);
+        $this->GenerarConsecutivos($id_periodo);
+        $periodo->cerrar_proceso = 1;
+        $periodo->save();
+        return $this->redirect(['documento_electronico']);
+    }
+    
+     //PROCESO DE ACUMULA LOS TOTALES 
+    protected function AcumularTotalesNominaElectronica($id_periodo) {
+        $documento = \app\models\NominaElectronica::find()->where(['=','id_periodo_electronico', $id_periodo])->all();
+        $devengado = 0; $deduccion = 0;
+        foreach ($documento as $key => $datos) {
+            $detalles = \app\models\NominaElectronicaDetalle::find()->where(['=','id_empleado', $datos->id_empleado])->andWhere(['=','id_periodo_electronico', $id_periodo])->all();
+            if(count($detalles) > 0){
+                foreach ($detalles as $key => $val) {
+                     if($val->devengado_deduccion == 1){
+                         $devengado += $val->devengado;
+                     }else{
+                         $deduccion += $val->deduccion;
+                     }
+                }
+                $datos->total_devengado = $devengado;
+                $datos->total_deduccion = $deduccion;
+                $datos->total_pagar = $devengado - $deduccion;
+                $datos->save();
+                $devengado = 0; $deduccion = 0;
+            }
+        }
+    }
+    
+    //PROCESO QUE TOLIZA EL VALOR DE LA NOMINA DEL MES
+    protected function GranTotalNominaElectronica($id_periodo)
+    {
+        $periodo = \app\models\PeriodoNominaElectronica::findOne($id_periodo);
+        $nomina = \app\models\NominaElectronica::find()->where(['=','id_periodo_electronico', $id_periodo])->all(); 
+        $total = 0; $devengado = 0; $deduccion = 0;
+        foreach ($nomina as $key => $val) {
+            $devengado += $val->total_devengado;
+            $deduccion += $val->total_deduccion;
+            $total += $val->total_pagar;
+        }
+        $periodo->total_nomina = $total;
+        $periodo->devengado_nomina = $devengado;
+        $periodo->deduccion_nomina = $deduccion;
+        $periodo->save();
+    }
+    
+    //GENERAR CONSECUTIVOS
+    protected function GenerarConsecutivos($id_periodo)
+    {
+       $nomina = \app\models\NominaElectronica::find()->where(['=','id_periodo_electronico', $id_periodo])->all();
+       $documento_electronico = \app\models\DocumentoElectronico::findOne(6);
+       $numero = \app\models\Consecutivos::findOne(28);
+       foreach ($nomina as $key => $validar)
+       {
+           $codigo = $numero->numero_inicial + 1;
+           $validar->numero_nomina_electronica = $codigo;
+           $validar->consecutivo = $documento_electronico->sigla;
+           $validar->save();
+           $numero->numero_inicial = $codigo;
+           $numero->save();
+           
+       }
+    }
+            
+      //PROCESO QUE CARGA EL LISTADO DE NOMINA ELECTRONICA
+    public function actionListar_nomina_electronica($token = 1) {
+        if (Yii::$app->user->identity) {
+            if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 151])->all()) {
+                $form = new \app\models\FormFiltroDocumentoElectronico();
+                $documento = null;
+                $empleado = null;
+                $grupo = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $empleado = Html::encode($form->empleado);
+                        $grupo = Html::encode($form->grupo);
+                        $table = \app\models\NominaElectronica::find()
+                                ->andFilterWhere(['like', 'nombre_completo', $empleado])
+                                ->andFilterWhere(['=', 'documento_empleado', $documento])
+                                ->andFilterWhere(['=', 'id_grupo_pago', $grupo])
+                                ->andWhere(['>', 'numero_nomina_electronica', 0])
+                                ->andWhere(['=', 'exportado_nomina', 0]);
+                        $table = $table->orderBy('numero_nomina_electronica ASC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 30,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = \app\models\NominaElectronica::find()->Where(['>', 'numero_nomina_electronica', 0])
+                                                                  ->andWhere(['=', 'exportado_nomina', 0])
+                                                                  ->orderBy('numero_nomina_electronica ASC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 30,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                }   
+                //PROCESO QUE ENVIA LA NOMINA ELECTRONICA
+                if (isset($_POST["enviar_documento_electronico"])) { ////entra al ciclo cuando presiona el boton crear documentos
+                    if (isset($_POST["documento_electronico_dian"])) {
+                        $intIndice = 0;
+                        $contador = 0;
+                        foreach ($_POST["documento_electronico_dian"] as $intCodigo) { //vector que cargar cada items
+                            $documento = \app\models\NominaElectronica::findOne($intCodigo);// vector del empleado
+                            if($documento)
+                            {
+                                $periodo = \app\models\PeriodoNominaElectronica::findOne($documento->id_periodo_electronico);
+                                $total_devengado = intval($documento->total_devengado, 0) . '.00';
+                                $total_deduccion = intval($documento->total_deduccion, 0) . '.00';
+                                $tipo_nomina_enviada = $periodo->type_document_id;
+                                $fecha_ingreso_empleado = $documento->fecha_inicio_contrato;
+                                $fecha_inicio_nomina = $documento->fecha_inicio_nomina;
+                                $fecha_corte_nomina = $documento->fecha_final_nomina;
+                                $dias_trabajados = $documento->dias_trabajados;
+                                $fecha_emision_nomina = date('Y-m-d');
+                                $fecha_retiro_empleado = $documento->fecha_terminacion_contrato;
+                                $codigo_empleado = $documento->id_empleado;
+                                $consecutivo = $documento->numero_nomina_electronica;
+                                $codigo_periodo_pago = $documento->periodoPago->codigo_api_nomina;// es el codigo del periodo de pago
+                                $nota = $periodo->nota;
+                                $type_worker_id = $documento->contrato->tipoCotizante->codigo_api_nomina;
+                                $sub_type_worker_id = $documento->contrato->subtipoCotizante->codigo_api_nomina;
+                                $tipo_documento_empleado = $documento->empleado->tipoDocumento->codigo_interface_nomina;
+                                $codigo_municipio = $documento->empleado->codigoMunicipioResidencia->codigo_api_nomina;
+                                $tipo_contrato_empleado = $documento->contrato->tipoContrato->codigo_api_enlace;
+                                $documento_empleado =  $documento->documento_empleado;
+                                $primer_apellido = $documento->primer_apellido;
+                                $segundo_apellido = $documento->segundo_apellido;
+                                $primer_nombre = $documento->primer_nombre;
+                                $segundo_nombre = $documento->segundo_nombre;
+                                $direccion_empleado = $documento->direccion_empleado;
+                                $salario_empleado = intval($documento->salario_contrato, 0) . '.00';
+                                $email_empleado = $documento->email_empleado;
+                                $forma_pago = $documento->empleado->formaPago->codigo_api_nomina;
+                                $nombre_banco = $documento->empleado->banco->entidad;
+                                $tipo = $documento->empleado->tipo_cuenta;
+                                $altoriesgo = $documento->contrato->id_configuracion_pension;
+                                $tipo_salario = $documento->contrato->tipoSalario->id_tipo_salario;
+                                $eps_type_law_deductions_id = $documento->contrato->configuracionEps->codigo_api_nomina;
+                                $pension_type_law_deductions_id = $documento->contrato->configuracionPension->codigo_api_nomina;
+                                if($tipo_salario === 3){
+                                    $salario_integral = true;
+                                }else{
+                                    $salario_integral = false;
+                                }
+                                if($altoriesgo == 3){
+                                    $alto_riesgo = true;
+                                }else{
+                                    $alto_riesgo = false;
+                                }
+                                if($tipo == 'S'){
+                                    $tipo_cuenta_bancaria = 'Ahorro';
+                                }else{
+                                    $tipo_cuenta_bancaria = 'Corriente';
+                                }
+                                $numero_cuenta_bancaria = $documento->empleado->numero_cuenta;
+                                // Configurar cURL
+                                $curl = curl_init();
+                                $API_KEY = Yii::$app->params['API_KEY_DESARROLLO']; //api_key de desarrollo
+                              //  $API_KEY = Yii::$app->params['API_KEY_PRODUCCION']; //api_key de produccion
+                                $dataBody = [
+                                    "novelty" => [
+                                        "novelty" => false,
+                                        "uuidnov" => ""  
+                                    ],
+
+                                    "period" => [
+                                        "admision_date" => "$fecha_ingreso_empleado",
+                                        "settlement_start_date" => "$fecha_inicio_nomina",
+                                        "settlement_end_date" => "$fecha_corte_nomina",
+                                        "worked_time" => "$dias_trabajados",
+                                        "retirement_date" => "$fecha_retiro_empleado",
+                                        "issue_date" => "$fecha_emision_nomina"
+                                    ],
+
+                                    "sendmail" => false,
+                                    "sendmailtome" => false,
+                                    "worker_code" => "$codigo_empleado",
+                                    "prefix" => "NI", // Siempre debe ser NI para nómina individual, NIAD para ajuste
+                                    "consecutive" => $consecutivo,
+                                    "type_document_id" => "$tipo_nomina_enviada",
+                                    "payroll_period_id" => $codigo_periodo_pago,
+                                    "notes" => "$nota",
+                                    "worker" => [
+                                        "type_worker_id" => $type_worker_id,
+                                        "sub_type_worker_id" => $sub_type_worker_id,
+                                        "payroll_type_document_identification_id" => $tipo_documento_empleado,
+                                        "municipality_id" => $codigo_municipio,
+                                        "type_contract_id" => $tipo_contrato_empleado,
+                                        "high_risk_pension" => $alto_riesgo, //false => si es bajo riesgo y true => si alto riesgo
+                                        "identification_number" => $documento_empleado,
+                                        "surname" => "$primer_apellido",
+                                        "second_surname" => "$segundo_apellido",
+                                        "first_name" => "$primer_nombre",
+                                        "middle_name" => "$segundo_nombre",
+                                        "address" => "$direccion_empleado",
+                                        "integral_salarary" => $salario_integral,//si esl TRUE->es verdadero, False => false
+                                        "salary" => $salario_empleado,
+                                        "email" => "$email_empleado"
+                                    ],
+
+                                    "payment" => [ //datos del banco
+                                        "payment_method_id" => "$forma_pago",
+                                        "bank_name" => "$nombre_banco",
+                                        "account_type" => "$tipo_cuenta_bancaria",
+                                        "account_number" => "$numero_cuenta_bancaria"
+                                    ],
+
+                                    "payment_dates" => [
+                                        [
+                                            "payment_date" => "$fecha_corte_nomina" // son las fechas de pagos 
+                                        ]
+
+                                    ],
+                                    "accrued" => [],   //se inicia el vector
+                                    "deductions" => [] //inicio el vector de deduccion
+                                    
+                                ]; 
+                               
+                               //CICLO QUE SUBE LOS DETALLES DE LA COLILLA
+                                $detallesPago = \app\models\NominaElectronicaDetalle::find()->where(['=','id_nomina_electronica', $documento->id_nomina_electronica])->orderBy('id_agrupado ASC')->all();
+                                foreach ($detallesPago as $key => $detalle) 
+                                {
+                                    $deduccion_pension = intval($detalle->deduccion_pension, 0) . '.00';
+                                    $deduccion_eps = intval($detalle->deduccion_eps, 0) . '.00';
+                                    $valor_pago_incapacidad = intval($detalle->valor_pago_incapacidad, 0) . '.00';
+                                    $valor_pago_licencia = intval($detalle->valor_pago_licencia, 0) . '.00';
+                                    $deduccion_fondo_solidaridad = intval($detalle->deduccion_fondo_solidaridad, 0) . '.00';
+                                    $devengado = intval($detalle->devengado, 0) . '.00';
+                                    $auxilio_transporte = intval($detalle->auxilio_transporte, 0) . '.00';
+                                    $valor_pago_prima = intval($detalle->valor_pago_prima, 0) . '.00';
+                                    $valor_pago_cesantias = intval($detalle->valor_pago_cesantias, 0) . '.00';
+                                    $deducciones = intval($detalle->deduccion, 0) . '.00';
+                                    $pago_intereses_cesantias = intval($detalle->valor_pago_intereses, 0) . '.00';
+                                    
+                                    if($detalle->codigo_incapacidad <> ''){
+                                        $tipo_incapacidad = $detalle->configuracionIncapacidad->codigo_api_nomina;
+                                    }else{
+                                        $tipo_incapacidad = 0;
+                                    }   
+                                    
+                                    //DEVENGADOS
+                                    if($detalle->id_agrupado == 1){ //salario basico
+                                        $dataBody["accrued"]["worked_days"] = $detalle->total_dias;
+                                        $dataBody["accrued"]["salary"] = $devengado;
+                                    }elseif ($detalle->id_agrupado == 2){ //auxilio de transporte
+			                $dataBody["accrued"]["transportation_allowance"] =  $auxilio_transporte;
+                                    }elseif ($detalle->id_agrupado == 3){ //horas extras diurnas
+                                        if(!isset($dataBody["accrued"]['HEDs'])){
+                                            $dataBody["accrued"]['HEDs'] = [];
+                                        }
+                                        $dataBody["accrued"]['HEDs'][] = [
+                                            "start_time" => "2024-12-16T10:00:00",
+                                            "start_date" => "2024-12-16T10:00:00",
+                                            "end_time" => "2024-12-16T10:00:00",
+                                            "end_date" => "2024-12-16T10:00:00",
+                                            "quantity" => "2",
+                                            "percentage" => 1,
+                                            "payment" => "27500"  
+                                        ]; 
+                                    }elseif ($detalle->id_agrupado == 9){ // incapacidades
+                                        if(!isset($dataBody["accrued"]['work_disabilities'])){
+                                              $dataBody["accrued"]['work_disabilities'] = [];
+                                        }
+                                        $dataBody["accrued"]['work_disabilities'][] = [ 
+                                            "start_date" => "$detalle->inicio_incapacidad",
+                                            "end_date" => "$detalle->final_incapacidad",
+                                            "quantity" => "$detalle->dias_incapacidad",
+                                            "type" => "$tipo_incapacidad",
+                                            "payment" => $valor_pago_incapacidad
+
+                                        ];
+                                            
+                                    }elseif($detalle->id_agrupado == 10){ //icencias de maternida
+                                        if(!isset($dataBody["accrued"]['maternity_leave'])){
+                                            $dataBody["accrued"]['maternity_leave'] = [];
+                                        }
+                                        $dataBody["accrued"]['maternity_leave'][] = [
+                                            "start_date" => "$detalle->inicio_licencia",
+                                            "end_date" => "$detalle->final_licencia",
+                                            "quantity" => "$detalle->dias_licencia",
+                                            "payment" => $valor_pago_licencia
+                                            
+                                        ];
+                                    }elseif ($detalle->id_agrupado == 8){ //LICENCIAS REMUNERADAS
+                                        if(!isset($dataBody["accrued"]['paid_leave'])){
+                                             $dataBody["accrued"]['paid_leave'] = [];
+                                        }
+                                        $dataBody["accrued"]['paid_leave'][] = [
+                                            "start_date" => "$detalle->inicio_licencia",
+                                            "end_date" => "$detalle->final_licencia",
+                                            "quantity" => "$detalle->dias_licencia",
+                                            "payment" => $valor_pago_licencia
+                                               
+                                        ];
+                                        
+                                    }elseif ($detalle->id_agrupado == 11){ //PRIMAS DE SERVICIO
+                                        $dataBody["accrued"]['service_bonus'] = [
+                                            [
+                                               "quantity" => "$detalle->dias_prima",
+                                               "payment" => $valor_pago_prima,
+                                               "paymentNS" => 0
+                                            ],
+                                        ];  
+                                    }elseif ($detalle->id_agrupado == 12){ //CESANTIAS
+                                        $dataBody["accrued"]['severance'] = [
+                                            [
+                                               "payment" => $valor_pago_cesantias,
+                                               "percentage" => 12,
+                                               "interest_payment" => 0
+                                            ],
+                                        ];
+                                    }elseif ($detalle->id_agrupado == 13){ //INTERESES A CESANTIAS
+                                        $dataBody["accrued"]['severance'] = [
+                                            [
+                                               "payment" => 0,
+                                               "percentage" => 0,
+                                               "interest_payment" => $pago_intereses_cesantias
+                                            ],
+                                        ];    
+                                    }elseif ($detalle->id_agrupado == 16){ //BONIFICACIONES
+                                       if(!isset($dataBody["accrued"]['bonuses'])){
+                                           $dataBody["accrued"]['bonuses'] = [];
+                                       }
+                                       $dataBody["accrued"]['bonuses'][] =  [
+                                             
+                                               "no_salary_bonus" => $devengado,
+                                        ];
+                                    }elseif ($detalle->id_agrupado == 19){ //BONIFICACIONES PRESTACIONES
+                                       if(!isset($dataBody["accrued"]['bonuses'])){
+                                           $dataBody["accrued"]['bonuses'] = [];
+                                       }
+                                       $dataBody["accrued"]['bonuses'][] =  [
+                                               "salary_bonus" => $devengado,
+                                               "no_salary_bonus" => 0,
+                                        ];   
+                                    }elseif ($detalle->id_agrupado == 15){ //comisiones  
+                                        $dataBody["accrued"]["commissions"] = [
+                                            [    
+                                                "commission" => $devengado,
+                                            ],
+                                        ]; 
+                                     
+                                    }elseif ($detalle->id_agrupado == 20){ //VACACIONES
+                                        if(!isset($dataBody["accrued"]['paid_vacation'])){ 
+                                            $dataBody["accrued"]['paid_vacation'] = [];
+                                        }
+                                        $dataBody["accrued"]['paid_vacation'][] = [
+                                            "quantity" => "$detalle->total_dias",
+                                            "payment" => "$detalle->devengado"
+                                        ];    
+                                        
+                                    }elseif ($detalle->id_agrupado == 21){ //LICENCIAS NO REMUNERADAS
+                                        if(!isset($dataBody["accrued"]['non_paid_leave'])){ //si no existes lo declaracion vacio
+                                            $dataBody["accrued"]['non_paid_leave'] = [];
+                                        }
+                                        $dataBody["accrued"]['non_paid_leave'][] = [
+                                            "start_date" => "$detalle->inicio_licencia",
+                                            "end_date" => "$detalle->final_licencia",
+                                            "quantity" => "$detalle->dias_licencia_noremuneradas"
+                                        ];
+
+                                    }elseif ($detalle->id_agrupado == 18){//REINTEGRO O REEMBOLSO
+                                        $dataBody["accrued"]["refund"] = $devengado;    
+                                    }   
+                                    
+                                    $dataBody["accrued"]['accrued_total'] = $total_devengado;
+                                    //FIN CONCEPTOS DEVENGADOS
+                                    
+                                    //INICIO DEDUCCIONES
+                                    if($detalle->id_agrupado == 4){ //pension
+                                        $dataBody["deductions"]["pension_type_law_deductions_id"] = $pension_type_law_deductions_id;
+                                        $dataBody["deductions"]["pension_deduction"] = $deduccion_pension;
+                                        
+                                    }elseif ($detalle->id_agrupado == 5){ //salud
+                                        $dataBody["deductions"]["eps_type_law_deductions_id"] = $eps_type_law_deductions_id;
+                                        $dataBody["deductions"]["eps_deduction"] = $deduccion_eps;
+                                        
+                                    }elseif ($detalle->id_agrupado == 6){ //fondo de solidarida
+                                        $dataBody["deductions"]["voluntary_pension"] = $deduccion_fondo_solidaridad; 
+                                    }elseif ($detalle->id_agrupado == 7){ // prestamos empresa y otras deducciones
+                                        if(!isset($dataBody["deductions"]['other_deductions'])){
+                                          $dataBody["deductions"]["other_deductions"] = [];  
+                                        }
+                                        $dataBody["deductions"]['other_deductions'][] = [
+                                            "other_deduction" => $deducciones, 
+                                        ];    
+                                        
+                                    }elseif ($detalle->id_agrupado == 14){ // Libranzas prestamo
+                                        if(!isset($dataBody["deductions"]['orders'])){
+                                          $dataBody["deductions"]["orders"] = [];  
+                                        }
+                                        $dataBody["deductions"]['orders'][] = [
+                                            "description" => "$detalle->descripcion", 
+                                            "deduction" => $deducciones 
+                                        ];
+                                        
+                                    }elseif ($detalle->id_agrupado == 17){//prestamo empresa
+                                        $dataBody["deductions"]["debt"] = $deducciones;
+                                    }
+                                    $dataBody["deductions"]['deductions_total'] = $total_deduccion;
+                                    
+                                    
+                                }//CIERRA EL PARA DEL DETALLE DEL PAGO 
+                                
+                                $dataBody = json_encode($dataBody);
+                                var_dump($dataBody);
+                                
+                              /*  //   //EJECUTA EL DATABODY 
+                                curl_setopt_array($curl, [
+                                    CURLOPT_URL => "https://begranda.com/equilibrium2/public/api-nomina/payroll?key=$API_KEY",
+                                    CURLOPT_RETURNTRANSFER => true,
+                                    CURLOPT_ENCODING => '',
+                                    CURLOPT_MAXREDIRS => 10,
+                                    CURLOPT_TIMEOUT => 0,
+                                    CURLOPT_FOLLOWLOCATION => true,
+                                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                    CURLOPT_CUSTOMREQUEST => 'POST',
+                                    CURLOPT_POSTFIELDS => $dataBody
+                                ]);
+                               
+                                $response = curl_exec($curl);
+                                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                                if (curl_errno($curl)) {
+                                   throw new Exception(curl_error($curl));
+                                }
+                                curl_close($curl);
+                                $data = json_decode($response, true);
+                                Yii::info("Respuesta completa de la API desde Begranda: $response", __METHOD__);
+                                // Verificar errores de conexión o códigos HTTP inesperados
+                                if ($response === false || $httpCode !== 200) {
+                                    $error = $response === false ? curl_error($curl) : "HTTP $httpCode";
+                                    Yii::$app->getSession()->setFlash('error', 'Hubo un problema al comunicarse con la DIAN. Intenta reenviar más tarde.');
+                                    Yii::error("Error en la solicitud CURL: $error", __METHOD__);
+                                    return $this->redirect(['programacion-nomina/listar_nomina_electronica']);
+                                }
+                                if(isset($data) && isset($data['add']['ResponseDian']) && $data['add']['ResponseDian']['Envelope']['Body']['SendNominaSyncResponse']['SendNominaSyncResult']['IsValid'] == "true"){
+                                    if (isset($data['add']['cune'])) {
+                                        $cune = $data['add']['cune'];
+                                        $documento->cune = $cune;
+                                        $documento->fecha_envio_begranda = date("Y-m-d H:i:s");
+                                        $documento->fecha_recepcion_dian = date("Y-m-d H:i:s");
+                                        $qrstr = $data['add']['QRStr'];
+                                        $documento->qrstr = $qrstr;
+                                        $documento->exportado_nomina = 1;
+                                        $documento->save(false);
+                                        $contador += 1;                               
+                                    }    
+                               }else{
+                                   $errors = [];
+					// Documento no procesado por la DIAN
+					if(isset($data["errors"])){ // Control Errores Begranda
+						$errors = $data["errors"];
+					}else if(isset($data['ResponseDian'])){ // Control de Errores DIAN
+						$errors = $data['ResponseDian']['Envelope']['Body']['SendNominaSyncResponse']['SendNominaSyncResult']['ErrorMessage'];
+					}else{
+                                            $errorMessage = isset($data['message']) ? $data['message'] : 'Error desconocido';
+                                            // Mostrar el mensaje específico de la API
+                                            Yii::$app->getSession()->setFlash('error', "No se pudo enviar el documento electronico. Error: $errorMessage.");
+                                            Yii::error("Error al reenviar documento de nomina No ($consecutivo): " . print_r($data, true), __METHOD__);
+                                          
+                                        }
+                               }*/
+                            } 
+                            //Cierre la confirmacion de chequeo de registro que se van a envir.
+                            
+                        }//CIERRA EL PROCESO PARA
+                        
+                        Yii::$app->getSession()->setFlash('success','Se enviaron ('.$contador.') registros a la DIAN para el proceso de nomina electronica.');
+                       // return $this->redirect(['programacion-nomina/listar_nomina_electronica']);
+                    }else{
+                        Yii::$app->getSession()->setFlash('error','Debe de seleccionar el registro para enviar a la DIAN. ');
+                    }
+                }    
+                return $this->render('listar_documentos_electronicos', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            } else {
+                return $this->redirect(['site/sinpermiso']);
+            }
+        } else {
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     
     /**
      * Finds the ProgramacionNomina model based on its primary key value.

@@ -25,7 +25,7 @@ $view = 'contratos';
             <!-- Inicio Cerrar contrato -->
             <?=
             Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar Contrato',
-                    ['/contrato/cerrarcontrato', 'id' => $model->id_contrato, 'token' => $token],
+                    ['/contratos/cerrar_contrato_trabajo', 'id' => $model->id_contrato, 'token' => $token],
                     [
                         'title' => 'Cerrar Contrato',
                         'data-toggle' => 'modal',
@@ -35,13 +35,13 @@ $view = 'contratos';
             );
             ?>
         <div class="modal remote fade" id="modalcerrarcontrato<?= $model->id_contrato ?>">
-            <div class="modal-dialog modal-md">
+            <div class="modal-dialog modal-lg_centered">
                 <div class="modal-content"></div>
             </div>
         </div>
     <?php } else { ?>
         <!-- Abrir contrato-->
-        <?= Html::a('<span class="glyphicon glyphicon-open"></span> Abrir contrato', ['abrircontrato', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-default btn-sm']); ?>
+        <?= Html::a('<span class="glyphicon glyphicon-open"></span> Abrir contrato', ['abrir_contrato_laboral', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-default btn-sm']); ?>
 <?php } ?>   
     <!-- Fin Cerrar contrato -->
 </p>
