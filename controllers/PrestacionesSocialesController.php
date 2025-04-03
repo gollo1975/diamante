@@ -46,18 +46,22 @@ class PrestacionesSocialesController extends Controller
                 $form = new \app\models\FormFiltroPrestaciones();
                 $documento = null;
                 $id_grupo_pago = null;
-                $id_empleado = null;
-                $pagina = 2;
+                $id_empleado = null; $desde = null;
+                $pagina = 2; $hasta = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
                         $id_grupo_pago = Html::encode($form->id_grupo_pago);
                         $id_empleado = Html::encode($form->id_empleado);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
                         $table = PrestacionesSociales::find()
                                 ->andFilterWhere(['like', 'documento', $documento])
                                 ->andFilterWhere(['=', 'id_grupo_pago', $id_grupo_pago])
-                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])
-                                ->orderBy('id_prestacion desc');
+                                ->andFilterWhere(['between', 'fecha_creacion', $desde, $hasta])
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado]);
+                        $table = $table->orderBy('id_prestacion DESC');
+                        $tableexcel = $table->all();
                         $count = clone $table;
                         $to = $count->count();
                         $pages = new Pagination([
@@ -77,6 +81,7 @@ class PrestacionesSocialesController extends Controller
                 } else {
                     $table = PrestacionesSociales::find()
                             ->orderBy('id_prestacion desc');
+                    $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 20,
@@ -104,6 +109,81 @@ class PrestacionesSocialesController extends Controller
             return $this->redirect(['site/login']);
         }    
     }
+    /**
+     * Lists all PrestacionesSociales models.
+     * @return mixed
+     */
+     public function actionSearch_prestaciones($pagina = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',155])->all()){
+                $form = new \app\models\FormFiltroPrestaciones();
+                $documento = null;
+                $id_grupo_pago = null;
+                $id_empleado = null; $desde = null;
+                $hasta = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $id_grupo_pago = Html::encode($form->id_grupo_pago);
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        $table = PrestacionesSociales::find()
+                                ->andFilterWhere(['like', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_grupo_pago', $id_grupo_pago])
+                                ->andFilterWhere(['between', 'fecha_creacion', $desde, $hasta])
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])
+                                ->andWhere(['=', 'estado_cerrado', 1]);
+                        $table = $table->orderBy('id_prestacion DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 20,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelPrestaciones($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = PrestacionesSociales::find()->Where(['=', 'estado_cerrado', 1])
+                            ->orderBy('id_prestacion desc');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                     if(isset($_POST['excel'])){                    
+                            $this->actionExcelPrestaciones($tableexcel);
+                        }
+                }
+                $to = $count->count();
+                return $this->render('search_prestaciones', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'pagina' => $pagina,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }    
+    }
+
 
     /**
      * Displays a single PrestacionesSociales model.
@@ -256,12 +336,24 @@ class PrestacionesSocialesController extends Controller
             foreach ($vector_nomina as $valores) {
                 $acumulado += $valores->ibc_prestacional;
             }
+            //valida el auxilio
+           
             
-            if ($contrato->id_tipo_salario == 1){
-                $salario_promedio = $contrato->salario;
+            if($acumulado > 0){
+                if($contrato->fecha_inicio <> $contrato->fecha_final){
+                    if ($contrato->id_tipo_salario == 1){
+                        $salario_promedio = $contrato->salario;
+                    }else{
+                        $salario_promedio = round($acumulado / $total_dias)*30;
+                    }
+                }else{
+                    $salario_promedio = $contrato->salario;
+                }
             }else{
-                $salario_promedio = round($acumulado / $total_dias)*30;
-            }
+                $salario_promedio = $contrato->salario;
+            }    
+                
+           
             //auxilio
            
             if($modelo->abreviatura == 'P'){ //primas
@@ -280,6 +372,8 @@ class PrestacionesSocialesController extends Controller
             $modelo->total_dias = $total_dias;
             $modelo->valor_pagar = $valor_pago;
             $modelo->save();
+            $model->valor_pago_primas = $valor_pago;
+            $model->save();
            
         }//fin para
         
@@ -298,12 +392,20 @@ class PrestacionesSocialesController extends Controller
             foreach ($vector_nomina as $valores) {
                 $acumulado += $valores->ibc_prestacional;
             }
-            
-            if ($contrato->id_tipo_salario == 1){
-                $salario_promedio = $contrato->salario;
+            if($acumulado > 0){
+                if($contrato->fecha_inicio <> $contrato->fecha_final){
+                    if ($contrato->id_tipo_salario == 1){
+                        $salario_promedio = $contrato->salario;
+                    }else{
+                        $salario_promedio = round($acumulado / $total_dias)*30;
+                    }
+                }else{
+                    $salario_promedio = $contrato->salario;
+                }
             }else{
-                $salario_promedio = round($acumulado / $total_dias)*30;
-            }
+                $salario_promedio = $contrato->salario;
+            } 
+           
             //auxilio
             $concepto = \app\models\ConfiguracionPrestaciones::findOne(2);
             $auxilio = \app\models\ConfiguracionSalario::find()->where(['=','estado', 1])->one();
@@ -334,6 +436,8 @@ class PrestacionesSocialesController extends Controller
             $modelo->total_dias = $total_dia_real;
             $modelo->valor_pagar = $valor_pago;
             $modelo->save();
+            $model->valor_pago_cesantias = $valor_pago;
+            $model->save();
             
             //datos de los intereses
             $porcentaje = 0; $interes = 0;
@@ -381,6 +485,8 @@ class PrestacionesSocialesController extends Controller
             $modelo->total_dias = $total_dias;
             $modelo->valor_pagar = $valor_pago;
             $modelo->save();
+            $model->valor_pago_vacaciones = $valor_pago;
+            $model->save();
            
         }//fin para
         
@@ -419,7 +525,7 @@ class PrestacionesSocialesController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionGenerar_conceptos($id, $year = NULL, $pagina)
+    public function actionGenerar_conceptos($id, $pagina)
     {
         //tablas de configuracion
         $model = PrestacionesSociales::find()->where(['=','id_prestacion', $id])->one();
@@ -441,7 +547,11 @@ class PrestacionesSocialesController extends Controller
                 $table = new \app\models\PrestacionesSocialesDetalle();
                 $table->id_prestacion = $id;
                 $table->codigo_salario = $concepto_prima->codigo_salario;
-                $table->fecha_inicio = $model->ultimo_pago_prima;
+                if($contrato_trabajo->fecha_inicio > $contrato_trabajo->ultima_pago_prima){
+                    $table->fecha_inicio = $contrato_trabajo->fecha_inicio; 
+                }else{
+                   $table->fecha_inicio = $model->ultimo_pago_prima;
+                }
                 $table->fecha_final = $model->fecha_termino_contrato;
                 $table->abreviatura = 'P';
                 $table->save(false);
@@ -458,14 +568,23 @@ class PrestacionesSocialesController extends Controller
                 $table = new \app\models\PrestacionesSocialesDetalle();
                 $table->id_prestacion = $id;
                 $table->codigo_salario = $concepto_cesantia->codigo_salario;
-                $table->fecha_inicio = $model->ultimo_pago_cesantias;
+                if($contrato_trabajo->fecha_inicio > $contrato_trabajo->ultima_pago_cesantia){
+                    $table->fecha_inicio = $contrato_trabajo->fecha_inicio; 
+                }else{
+                    $table->fecha_inicio = $model->ultimo_pago_cesantias;
+                }    
                 $table->fecha_final = $model->fecha_termino_contrato;
                 $table->abreviatura = 'C';
                 $table->save(false);
+                
                 $table2 = new \app\models\PrestacionesSocialesDetalle();
                 $table2->id_prestacion = $id;
                 $table2->codigo_salario = $intereses->codigo_salario;
-                $table2->fecha_inicio = $model->ultimo_pago_cesantias;
+                if($contrato_trabajo->fecha_inicio > $contrato_trabajo->ultima_pago_cesantia){
+                    $table2->fecha_inicio = $contrato_trabajo->fecha_inicio; 
+                }else{
+                    $table2->fecha_inicio = $model->ultimo_pago_cesantias;
+                }    
                 $table2->fecha_final = $model->fecha_termino_contrato;
                 $table2->abreviatura = 'I';
                 $table2->save(false);
@@ -482,7 +601,7 @@ class PrestacionesSocialesController extends Controller
                 $table = new \app\models\PrestacionesSocialesDetalle();
                 $table->id_prestacion = $id;
                 $table->codigo_salario = $concepto_vacacion->codigo_salario;
-                $table->fecha_inicio = $contrato->ultima_pago_vacacion;
+                $table->fecha_inicio = $contrato_trabajo->ultima_pago_vacacion; 
                 $table->fecha_final = $model->fecha_termino_contrato;
                 $table->abreviatura = 'V';
                 $table->save(false);
@@ -492,17 +611,12 @@ class PrestacionesSocialesController extends Controller
         $model->estado_generado = 1;
         $model->save(false);
          
-    $this->redirect(["prestaciones-sociales/view", 'id' => $id,
-          'model' => $model,
-           'pagina' => $pagina,
-          ]);
+        $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'model' => $model, 'pagina' => $pagina]);
        
        
     }
   
-    
-    
-   
+     
     
     /**
      * Updates an existing PrestacionesSociales model.
@@ -511,17 +625,136 @@ class PrestacionesSocialesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $id_adicion, $tipo_adicion, $pagina)
     {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_prestacion]);
+        $model = new \app\models\FormAdicionPrestaciones();
+        $table = \app\models\PrestacionesSocialesAdicion::find()->where(['id_adicion' => $id_adicion])->one(); 
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
         }
-
+        if ($model->load(Yii::$app->request->post())) {            
+            $table = \app\models\PrestacionesSocialesAdicion::find()->where(['id_adicion'=>$id_adicion])->one();
+            if ($table) {
+                $table->codigo_salario = $model->codigo_salario;
+                $table->valor_adicion = $model->valor_adicion;
+                $table->observacion = $model->observacion;
+                $table->save(false);
+               return $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+            }
+        }
+        if (Yii::$app->request->get("id_adicion")) {
+              
+                           
+                if ($table) {     
+                    $model->codigo_salario = $table->codigo_salario;
+                    $model->tipo_adicion = $table->tipo_adicion;
+                    $model->valor_adicion = $table->valor_adicion;
+                    $model->observacion =  $table->observacion;
+                }else{
+                     return $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina,]);
+                }
+        } else {
+                 return $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina,]); 
+        }
         return $this->render('update', [
-            'model' => $model,
+            'model' => $model, 'id' => $id, 'tipo_adicion'=>$tipo_adicion, 'pagina' => $pagina, 'table' => $table
         ]);
+    }
+    
+    //permite subir los descuento a las prestaciones sociales
+    public function actionDescuento($id, $pagina)
+    {
+        $model = new \app\models\FormAdicionPrestaciones();        
+        $tipo_adicion = 2;
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {            
+           if ($model->validate()) {
+                $table = new \app\models\PrestacionesSocialesAdicion();
+                $table->id_prestacion = $id;
+                $table->codigo_salario = $model->codigo_salario;
+                $table->tipo_adicion = $tipo_adicion;
+                $table->valor_adicion = $model->valor_adicion;
+                $table->observacion = $model->observacion;
+                $table->usuariosistema = Yii::$app->user->identity->username;
+                $table->insert();
+                $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+            } else {
+                $model->getErrors();
+            }
+        }
+        return $this->render('_form_adicion', ['model' => $model, 'id' => $id, 'tipo_adicion' => $tipo_adicion, 'pagina' => $pagina]);
+        
+    }
+    
+    //DESCUENTOS SI TIENE CREDITOS PARA SER DESCARGADO DE LAS PRESTACIONES
+     public function actionDescuentocredito($id_empleado, $id, $pagina)
+    {
+        $credito = Credito::find()->where(['=','id_empleado', $id_empleado])->andWhere(['>','saldo_credito', 0])->all();
+        
+        if (isset($_POST["idcredito"])) {
+                $intIndice = 0;
+                foreach ($_POST["idcredito"] as $intCodigo) {
+                    $table = new \app\models\PrestacionesSocialesCreditos();
+                    $credito_consulta = Credito::find()->where(['id_credito' => $intCodigo])->one();
+                    $detalle_credito = \app\models\PrestacionesSocialesCreditos::find()
+                        ->where(['=', 'id_prestacion', $id])
+                        ->andWhere(['=', 'id_credito', $credito_consulta->id_credito])
+                        ->all();
+                   
+                    if (!$detalle_credito) {
+                        $table->id_credito = $credito_consulta->id_credito;
+                        $table->id_prestacion = $id;
+                        $concepto = \app\models\ConfiguracionCredito::find()->where(['=','codigo_credito', $credito_consulta->codigo_credito])->one();
+                        $table->codigo_salario = $concepto->codigo_salario;
+                        $table->valor_credito = $credito_consulta->valor_credito;
+                        $table->saldo_credito = $credito_consulta->saldo_credito;
+                        $table->deduccion = $credito_consulta->saldo_credito;
+                        $table->estado_cerrado = 0;
+                        $table->fecha_inicio = $credito_consulta->fecha_inicio;
+                        $table->usuariosistema = Yii::$app->user->identity->username;
+                        $table->save();                                                
+                    }
+                }
+                $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+        }
+        return $this->render('_consultacredito', [
+            'credito' => $credito, 
+            'id_empleado' => $id_empleado,
+            'id' => $id,
+            'pagina' => $pagina,
+        ]);
+    }
+    
+    //PROCESO QUE EDITA EL CREDITO EN LAS PRESTACIONES
+    public function actionEditarcredito($id_credito, $id, $pagina)
+    {
+        $model = new \app\models\FormDeduccionCredito();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {            
+            if ($model->validate()) {
+                $credito = \app\models\PrestacionesSocialesCreditos::findOne($id_credito);
+                if (isset($_POST["actualizar"])) {  
+                        $credito->deduccion = $model->deduccion;
+                        $credito->save(false);
+                        $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);                                                     
+                }
+            }
+        }
+        if (Yii::$app->request->get("id")) {
+            $table = \app\models\PrestacionesSocialesCreditos::find()->where(['id' => $id_credito])->one();            
+            if ($table) {                                
+                $model->id_credito = $table->id_credito;                
+            }
+        }
+        
+        return $this->renderAjax('_editarcredito', ['model' => $model, 'id' => $id, 'pagina' => $pagina]);
     }
     
     public function actionDesgenerar($id, $pagina)
@@ -533,6 +766,83 @@ class PrestacionesSocialesController extends Controller
           'model' => $model,
           ]);
     }
+    
+    //PROCESO QUE DESGENERA EL APLCADO
+     public function actionDesgeneraraplicar($id, $pagina)
+    {
+      $model = PrestacionesSociales::find()->where(['=','id_prestacion', $id])->one();
+      $model->estado_aplicado = 0;
+      $model->save(false);
+     $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina,
+          'model' => $model,
+          ]);
+    }
+    
+     // contralador que aplica los pagos, saldos y netos a pagar
+     public function actionAplicarpagos($id, $pagina)
+     {
+        $model_prestacion = PrestacionesSociales::findOne($id);
+        $model = \app\models\PrestacionesSocialesDetalle::find()->where(['=','id_prestacion', $id])->orderBy('codigo_salario ASC')->all();
+        $model_credito = \app\models\PrestacionesSocialesCreditos::find()->where(['=','id_prestacion', $id])->all();
+        $model_adicion = \app\models\PrestacionesSocialesAdicion::find()->where(['=','id_prestacion', $id])->andWhere(['=','tipo_adicion', 1])->all();
+        $model_descuento = \app\models\PrestacionesSocialesAdicion::find()->where(['=','id_prestacion', $id])->andWhere(['=','tipo_adicion', 2])->all();
+        $total_prestacion = 0;
+        $total_deduccion_credito = 0;
+        $total_adicion = 0;
+        $deduccion_descuento = 0;
+        //codigo que actualiza los fechas
+        foreach ($model as $actualizar):
+            if($actualizar->abreviatura == 'P'){
+                $model_prestacion->dias_primas = $actualizar->total_dias;
+                $model_prestacion->ibp_prima = $actualizar->salario_promedio_prima;
+                $model_prestacion->dias_ausencia_prima = $actualizar->dias_ausentes;
+                $model_prestacion->save(false);
+            }
+            if($actualizar->abreviatura == 'C'){
+                $model_prestacion->dias_cesantias = $actualizar->total_dias;
+                $model_prestacion->ibp_cesantias = $actualizar->salario_promedio_prima;
+                $model_prestacion->dias_ausencia_cesantias = $actualizar->dias_ausentes;
+                $model_prestacion->save(false);
+            }
+            if($actualizar->abreviatura == 'I'){
+                $model_prestacion->interes_cesantia = $actualizar->valor_pagar;
+                $model_prestacion->save(false);
+            }
+            if($actualizar->abreviatura == 'V'){
+                $model_prestacion->dias_vacaciones = $actualizar->total_dias;
+                $model_prestacion->ibp_vacaciones = $actualizar->salario_promedio_prima;
+                $model_prestacion->dias_ausencia_vacaciones = $actualizar->dias_ausentes;
+                $model_prestacion->save(false);
+            }
+            
+        endforeach;
+        
+         //calcula todas la prestaciones
+        foreach ($model as $calcular):
+             $total_prestacion +=  $calcular->valor_pagar;
+        endforeach;
+        
+         //calculos los creditos
+        foreach ($model_credito as $calcular_credito):
+             $total_deduccion_credito +=  $calcular_credito->deduccion;
+        endforeach;
+        //calculos las adiciones
+        foreach ($model_adicion as $calcular_adicion):
+            $total_adicion +=  $calcular_adicion->valor_adicion;
+        endforeach;
+         //calculos descuentos
+        foreach ($model_descuento as $calcular_descuento):
+            $deduccion_descuento +=  $calcular_descuento->valor_adicion;
+        endforeach;
+        
+        //codigo que actualizada
+        $model_prestacion->total_devengado = $total_prestacion + $model_prestacion->total_indemnizacion + $total_adicion;
+        $model_prestacion->total_deduccion = $total_deduccion_credito + $deduccion_descuento;
+        $model_prestacion->total_pagar = $model_prestacion->total_devengado - $model_prestacion->total_deduccion;
+        $model_prestacion->estado_aplicado = 1;
+        $model_prestacion->save(false);
+        $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);  
+     }
 
     /**
      * Deletes an existing PrestacionesSociales model.
@@ -564,7 +874,244 @@ class PrestacionesSocialesController extends Controller
             return $this->redirect(["prestaciones-sociales/index"]);
         }
     }
+    
+    public function actionEliminar_detalle_prestacion($id_detalle,$id, $pagina) {
+        if (Yii::$app->request->post()) {
+            if ((int) $id_detalle) {
+                try {
+                    \app\models\PrestacionesSocialesDetalle::deleteAll("id=:id", [":id" => $id_detalle]);
+                    Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                    $this->ActualizacionTotalesPrestacion($id);
+                    return $this->redirect(["prestaciones-sociales/view",'id' => $id , 'pagina' => $pagina]);
+                } catch (IntegrityException $e) {
+                    
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, tiene registros asociados en otros procesos');
+                    return $this->redirect(["prestaciones-sociales/view",'id' => $id , 'pagina' => $pagina]);
+                } catch (\Exception $e) {
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, tiene registros asociados en otros procesos');
+                     return $this->redirect(["prestaciones-sociales/view",'id' => $id , 'pagina' => $pagina]);
+                }
+            } else {
+                echo "<meta http-equiv='refresh' content='3; " . Url::toRoute(["prestaciones-sociales/view",'id' => $id , 'pagina' => $pagina]) . "'>";
+            }
+        } else {
+            return $this->redirect(["prestaciones-sociales/view",'id' => $id , 'pagina' => $pagina]);
+        }
+    }
+    
+    protected function ActualizacionTotalesPrestacion($id) {
+        $model_prestacion = PrestacionesSociales::findOne($id);
+        $model = \app\models\PrestacionesSocialesDetalle::find()->where(['=','id_prestacion', $id])->orderBy('codigo_salario ASC')->all();
+        $model_credito = \app\models\PrestacionesSocialesCreditos::find()->where(['=','id_prestacion', $id])->all();
+        $model_adicion = \app\models\PrestacionesSocialesAdicion::find()->where(['=','id_prestacion', $id])->andWhere(['=','tipo_adicion', 1])->all();
+        $model_descuento = \app\models\PrestacionesSocialesAdicion::find()->where(['=','id_prestacion', $id])->andWhere(['=','tipo_adicion', 2])->all();
+        $total_prestacion = 0;
+        $total_deduccion_credito = 0;
+        $total_adicion = 0;
+        $deduccion_descuento = 0;
+        //codigo que actualiza los fechas
+        foreach ($model as $actualizar):
+            if($actualizar->abreviatura == 'P'){
+                $model_prestacion->dias_primas = $actualizar->total_dias;
+                $model_prestacion->ibp_prima = $actualizar->salario_promedio_prima;
+                $model_prestacion->dias_ausencia_prima = $actualizar->dias_ausentes;
+                $model_prestacion->save(false);
+            }
+            if($actualizar->abreviatura == 'C'){
+                $model_prestacion->dias_cesantias = $actualizar->total_dias;
+                $model_prestacion->ibp_cesantias = $actualizar->salario_promedio_prima;
+                $model_prestacion->dias_ausencia_cesantias = $actualizar->dias_ausentes;
+                $model_prestacion->save(false);
+            }
+            if($actualizar->abreviatura == 'I'){
+                $model_prestacion->interes_cesantia = $actualizar->valor_pagar;
+                $model_prestacion->save(false);
+            }
+            if($actualizar->abreviatura == 'V'){
+                $model_prestacion->dias_vacaciones = $actualizar->total_dias;
+                $model_prestacion->ibp_vacaciones = $actualizar->salario_promedio_prima;
+                $model_prestacion->dias_ausencia_vacaciones = $actualizar->dias_ausentes;
+                $model_prestacion->save(false);
+            }
+            
+        endforeach;
+        
+         //calcula todas la prestaciones
+        foreach ($model as $calcular):
+             $total_prestacion +=  $calcular->valor_pagar;
+        endforeach;
+        
+         //calculos los creditos
+        foreach ($model_credito as $calcular_credito):
+             $total_deduccion_credito +=  $calcular_credito->deduccion;
+        endforeach;
+        //calculos las adiciones
+        foreach ($model_adicion as $calcular_adicion):
+            $total_adicion +=  $calcular_adicion->valor_adicion;
+        endforeach;
+         //calculos descuentos
+        foreach ($model_descuento as $calcular_descuento):
+            $deduccion_descuento +=  $calcular_descuento->valor_adicion;
+        endforeach;
+        
+        //codigo que actualizada
+        $model_prestacion->total_devengado = $total_prestacion + $model_prestacion->total_indemnizacion + $total_adicion;
+        $model_prestacion->total_deduccion = $total_deduccion_credito + $deduccion_descuento;
+        $model_prestacion->total_pagar = $model_prestacion->total_devengado - $model_prestacion->total_deduccion;
+        $model_prestacion->save(false);
+        
+    }
+    
+    //PEMITE ELIMINAR EL REGISTRO DE LA ADICION
+    public function actionEliminaradicion($id, $id_adicion, $pagina) {
+        if (Yii::$app->request->post()) {
+            $adicion = \app\models\PrestacionesSocialesAdicion::findOne($id_adicion);
+            if ((int) $id_adicion) {
+                try {
+                    \app\models\PrestacionesSocialesAdicion::deleteAll("id_adicion=:id_adicion", [":id_adicion" => $id_adicion]);
+                    Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                    $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+                } catch (IntegrityException $e) {
+                    $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, esta asociado a otro proceso');
+                } catch (\Exception $e) {
 
+                   $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, esta asociado a otro proceso');
+                }
+            } else {
+                echo "<meta http-equiv='refresh' content='3; " . Url::toRoute(["prestaciones-sociales/view,'id' => $id, 'pagina' => $pagina"]) . "'>";
+            }
+        } else {
+            return $this->redirect(["prestaciones-sociales/view",'id'=>$id, 'pagina' => $pagina]);
+        }
+    }
+
+    //PERMITE CREAR CONSECUTIVO Y CERRAR LAS PRESTACIONES
+    public function actionCerrarprestacion($id, $pagina)
+    {
+        //este codigo salda los creditos y hace el abono
+        $credito = \app\models\PrestacionesSocialesCreditos::find()->where(['=','id_prestacion', $id])->andWhere(['=','estado_cerrado', 0])->all();
+        $total = count($credito);
+        if($total > 0){
+            foreach ($credito as $creditoprestacion){
+                $abono = new \app\models\AbonoCredito();
+                $abono->id_credito = $creditoprestacion->id_credito;
+                $abono->id_tipo_pago = 4;
+                $abono->valor_abono = $creditoprestacion->deduccion;
+                $abono->saldo = $creditoprestacion->saldo_credito - $abono->valor_abono;
+                $abono->cuota_pendiente = 0;
+                $abono->observacion = 'Deducción por prestaciones';
+                $abono->user_name = Yii::$app->user->identity->username;
+                $abono->insert(false);
+                $credito_actualizar = Credito::findOne($creditoprestacion->id_credito);
+                $credito_actualizar->saldo_credito = $abono->saldo;
+                $credito_actualizar->estado_credito = 0;
+                $credito_actualizar->observacion = 'Se cancelo por prestaciones';
+                $credito_actualizar->save(false);
+                $creditoprestacion->estado_cerrado = 1;
+                $creditoprestacion->save(false);
+            }
+        }
+        
+        // este codigo genera el consecutivo de las prestaciones.   
+        $modelo = PrestacionesSociales::findOne($id);
+        $consecutivo = \app\models\Consecutivos::findOne(29);
+        $consecutivo->numero_inicial++;
+        $consecutivo->save(false);
+        $modelo->nro_pago = $consecutivo->numero_inicial;
+        $modelo->estado_cerrado = 1;
+        $modelo->save(false);
+        
+        //codigo que actualiza el contrato
+        $contrato = \app\models\Contratos::find()->where(['=','id_contrato', $modelo->id_contrato])->one();
+        $contrato->ultima_pago_cesantia = $modelo->fecha_termino_contrato;
+        $contrato->ultima_pago_vacacion = $modelo->fecha_termino_contrato;
+        $contrato->ultima_pago_prima = $modelo->fecha_termino_contrato;
+        $contrato->ibp_cesantia_inicial = 0;
+        $contrato->ibp_prima_inicial = 0;
+        $contrato->ibp_recargo_nocturno = 0;
+        $contrato->save(false);
+        
+        $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);  
+    }    
+    
+    //EDITAR LINEAS DE PRESTACIONES
+    public function actionEditarconcepto($id, $id_adicion, $codigo, $pagina)
+    {
+        $model = new \app\models\FormParametroPrestaciones();
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post())) {            
+            $table = \app\models\PrestacionesSocialesDetalle::find()->where(['id_prestacion' =>$id])->andWhere(['=','codigo_salario', $codigo])->one();
+            if ($table) {
+                $valor_pagar = 0;
+                $interes = 0;
+                $sw = 0;
+                $prestacion = \app\models\ConfiguracionPrestaciones::find()->where(['=','codigo_salario', $codigo])->one();
+             
+                if($prestacion->id_prestacion == 1){
+                    $valor_pagar = round((($model->salario_promedio_prima + $model->auxilio_transporte)* $model->total_dias)/360);
+                }
+                if($prestacion->id_prestacion == 2){
+                    $valor_pagar = round((($model->salario_promedio_prima + $model->auxilio_transporte)* $model->total_dias)/360);
+                    $porcentaje = (12 * $model->nro_dias)/360;
+                    $interes = round(($valor_pagar * $porcentaje)/100);
+                    $sw = 1;
+                }
+               
+                if($prestacion->id_prestacion == 4){
+                   $valor_pagar = round(($model->salario_promedio_prima * $model->total_dias)/720);
+                }
+                $table->nro_dias = $model->nro_dias;
+                $table->dias_ausentes = $model->dias_ausentes;
+                $table->salario_promedio_prima = $model->salario_promedio_prima;
+                $table->total_dias = $model->total_dias;
+                $table->auxilio_transporte = $model->auxilio_transporte;
+                $table->valor_pagar = $valor_pagar;
+                $table->save(false);
+                if($sw == 1){
+                    $intereses = \app\models\PrestacionesSocialesDetalle::find()->where(['id_prestacion' =>$id])->andWhere(['=','abreviatura', 'I'])->one();
+                    $intereses->nro_dias = $model->nro_dias;
+                    $intereses->dias_ausentes = $model->dias_ausentes;
+                    $intereses->salario_promedio_prima = $valor_pagar;
+                    $intereses->total_dias = $model->total_dias;
+                    $intereses->auxilio_transporte = 0;
+                    $intereses->valor_pagar = $interes;
+                    $intereses->save(false);
+                }
+               
+                return $this->redirect(["prestaciones-sociales/view", 'id' => $id, 'pagina' => $pagina]);
+            }
+        }
+        if (Yii::$app->request->get("id_adicion")) {
+            $table = \app\models\PrestacionesSocialesDetalle::find()->where(['id' => $id_adicion])->one();            
+            if ($table) {     
+                $model->nro_dias = $table->nro_dias;
+                $model->dias_ausentes = $table->dias_ausentes;
+                $model->salario_promedio_prima = $table->salario_promedio_prima;
+                $model->total_dias =  $table->total_dias;
+                $model->auxilio_transporte =  $table->auxilio_transporte;
+            }
+        }
+       return $this->render('_editarprestaciones', [
+            'model' => $model, 'id' => $id, 'pagina' => $pagina,  
+        ]);
+    }
+    
+    //PROCESO DE IMPRESIONES
+        
+     public function actionImprimir($id)
+    {
+                                
+        return $this->render('../formatos/prestacionesSociales', [
+            'model' => $this->findModel($id),
+            
+        ]);
+    }
+    
     /**
      * Finds the PrestacionesSociales model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -580,4 +1127,118 @@ class PrestacionesSocialesController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    //EXCELES
+       public function actionExcelPrestaciones($tableexcel) {
+         $objPHPExcel = new \PHPExcel();
+         $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('W')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('X')->setAutoSize(true);
+                            
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'No PRESTACION')
+                    ->setCellValue('C1', 'CEDULA')
+                    ->setCellValue('D1', 'EMPLEADO')
+                    ->setCellValue('E1', 'CARGO')
+                    ->setCellValue('F1', 'GRUPO PAGO')
+                    ->setCellValue('G1', 'NRO CONTRATO')
+                    ->setCellValue('H1', 'F. INICIO')
+                    ->setCellValue('I1', 'F. RETIRO')   
+                    ->setCellValue('J1', 'F. CREACION')
+                    ->setCellValue('K1', 'ULT. PAGO PRIMA')
+                    ->setCellValue('L1', 'SALARIO')
+                    ->setCellValue('M1', 'INTERESES')
+                    ->setCellValue('N1', 'DIAS PRIMAS')
+                    ->setCellValue('O1', 'VL. PRIMAS')
+                    ->setCellValue('P1', 'DIAS CESANTIAS')
+                    ->setCellValue('Q1', 'VL. CESANTIAS')
+                    ->setCellValue('R1', 'DIAS VACACIONES')
+                    ->setCellValue('S1', 'VR. VACACIONES')
+                    ->setCellValue('T1', 'T. INDEMNIZACION')
+                    ->setCellValue('U1', 'T.DEVENGADO')
+                    ->setCellValue('V1', 'T. DEDUCCION')
+                    ->setCellValue('W1', 'T. PAGAR')
+                    ->setCellValue('X1', 'USER NAME');
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_prestacion)
+                    ->setCellValue('B' . $i, $val->nro_pago)
+                    ->setCellValue('C' . $i, $val->documento)
+                    ->setCellValue('D' . $i, $val->empleado->nombre_completo)
+                    ->setCellValue('E' . $i, $val->contrato->cargo->nombre_cargo)
+                    ->setCellValue('F' . $i, $val->grupoPago->grupo_pago)                    
+                    ->setCellValue('G' . $i, $val->id_contrato)
+                    ->setCellValue('H' . $i, $val->fecha_inicio_contrato)
+                    ->setCellValue('I' . $i, $val->fecha_termino_contrato)
+                    ->setCellValue('J' . $i, $val->fecha_creacion)
+                    ->setCellValue('K' . $i, $val->ultimo_pago_prima)
+                    ->setCellValue('L' . $i, round($val->salario,0))
+                    ->setCellValue('M' . $i, round($val->interes_cesantia,0))
+                    ->setCellValue('N' . $i, $val->dias_primas)
+                    ->setCellValue('O' . $i, round($val->valor_pago_primas,0))
+                    ->setCellValue('P' . $i, $val->dias_cesantias)
+                    ->setCellValue('Q' . $i, round($val->valor_pago_cesantias,0))
+                    ->setCellValue('R' . $i, $val->dias_vacaciones)
+                    ->setCellValue('S' . $i, round($val->valor_pago_vacaciones,0))
+                    ->setCellValue('T' . $i, round($val->total_indemnizacion,0))
+                    ->setCellValue('U' . $i, round($val->total_devengado,0))
+                    ->setCellValue('V' . $i, round($val->total_deduccion,0))
+                    ->setCellValue('W' . $i, round($val->total_pagar,0))
+                    ->setCellValue('X' . $i, $val->usuariosistema);
+                
+                   
+            $i++;
+        }
+        $j = $i + 1;
+               
+        $objPHPExcel->getActiveSheet()->setTitle('Listados');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Prestaciones.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    } 
 }

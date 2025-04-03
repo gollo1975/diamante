@@ -30,24 +30,24 @@ $view = 'prestaciones sociales';
            <p>
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
             <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Desgenerar', ['desgenerar', 'id' => $model->id_prestacion, 'pagina' => $pagina], ['class' => 'btn btn-default btn-xs']) ?>  
-            <?= Html::a('<span class="glyphicon glyphicon-send"></span> Generar prestaciones', ['generar_prestaciones', 'id' => $model->id_prestacion , 'pagina' => $pagina], ['class' => 'btn btn-success btn-xs']) ?>
-            <?php if($model->generar_pagos == 1){ ?>   
-                <?= Html::a('<span class="glyphicon glyphicon-import"></span> Aplicar pagos', ['aplicarpagos', 'id' => $model->id_prestacion , 'pagina' => $pagina], ['class' => 'btn btn-warning btn-xs']);   
-            }   
+            <?= Html::a('<span class="glyphicon glyphicon-import"></span> Aplicar pagos', ['aplicarpagos', 'id' => $model->id_prestacion , 'pagina' => $pagina], ['class' => 'btn btn-warning btn-xs']);   
+               
         }else{
             if($model->estado_cerrado == 0){
                 ?>
               <p>
-                 <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
-                 <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Desgenerar', ['desgeneraraplicar', 'id' => $model->id_prestacion, 'pagina' => $pagina], ['class' => 'btn btn-default btn-xs']) ?>  
-                 <?= Html::a('<span class="glyphicon glyphicon-remove-circle"></span> Cerrar prestación', ['cerrarprestacion', 'id' => $model->id_prestacion, 'pagina' => $pagina], ['class' => 'btn btn-default btn-xs']) ?>
-                 <?= Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir', 'id' => $model->id_prestacion, 'pagina' => $pagina], ['class' => 'btn btn-default btn-xs']) ?> 
+                <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+                <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Desgenerar', ['desgeneraraplicar', 'id' => $model->id_prestacion, 'pagina' => $pagina], ['class' => 'btn btn-default btn-xs']) ?>  
+                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Generar consecutivo', ['cerrarprestacion', 'id' => $model->id_prestacion, 'pagina' => $pagina],['class' => 'btn btn-info btn-sm',
+                      'data' => ['confirm' => 'Esta seguro de cerrar y crear el consecutivo a las prestaciones sociales del empleado ' . $model->empleado->nombre_completo. '. Tener presente que este proceso es definitivo.', 'method' => 'post']]) ?>
+                <?= Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir', 'id' => $model->id_prestacion, 'pagina' => $pagina], ['class' => 'btn btn-default btn-xs']) ?> 
               </p> 
               
             <?php } else
+               
                 if($pagina == 1){?>
                     <p>
-                      <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['comprobantepagoprestaciones'], ['class' => 'btn btn-primary btn-sm']) ?>
+                      <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['search_prestaciones'], ['class' => 'btn btn-primary btn-sm']) ?>
                       <?= Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir', 'id' => $model->id_prestacion], ['class' => 'btn btn-default btn-xs']) ?> 
                     </p>
                 <?php }else{?>
@@ -112,7 +112,7 @@ $view = 'prestaciones sociales';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cuenta') ?>:</th>
                     <td><?= Html::encode($model->empleado->numero_cuenta) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tipo_cuenta') ?>:</th>
-                    <td><?= Html::encode($model->empleado->tipo_cuenta) ?></td>  
+                    <td><?= Html::encode($model->empleado->tipoCuenta) ?></td>  
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'centro_trabajo') ?>:</th>
                     <td><?= Html::encode($model->contrato->centroTrabajo->centro_trabajo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_pagar') ?>:</th>
@@ -161,6 +161,7 @@ $view = 'prestaciones sociales';
                                         <th scope="col" style='background-color:#B9D5CE;'><b>A. Transporte</b></th>
                                         <th scope="col" style='background-color:#B9D5CE;'><b>Total pagar</b></th>
                                         <th scope="col" style='background-color:#B9D5CE;'></th>
+                                         <th scope="col" style='background-color:#B9D5CE;'></th>
                                         <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
 
                                     </tr>
@@ -180,15 +181,30 @@ $view = 'prestaciones sociales';
                                             <td align="right"><?= '$'.number_format($dato->auxilio_transporte,0) ?></td>
                                             <td align="right"><?= '$'.number_format($dato->valor_pagar,0) ?></td>
                                              <?php
-                                            if($model->estado_aplicado == 0){?>
-                                                <td style= 'width: 35px;'>
-                                                    <a href="<?= Url::toRoute(["prestaciones-sociales/editarconcepto", "id_adicion" => $dato->id, 'id' => $dato->id_prestacion, 'codigo' => $dato->codigo_salario, 'pagina' => $pagina]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                                            if($model->estado_aplicado == 0){
+                                                if($dato->abreviatura <> 'I'){?>
+                                                    <td style= 'width: 20px; height: 20px'>
+                                                        <a href="<?= Url::toRoute(["prestaciones-sociales/editarconcepto", "id_adicion" => $dato->id, 'id' => $dato->id_prestacion, 'codigo' => $dato->codigo_salario, 'pagina' => $pagina]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                                                    </td>
+                                                <?php }else{?>
+                                                    <td style= 'width: 20px; height: 20px'></td>
+                                                <?php }?>    
+                                                 <td style= 'width: 20px; height: 20px'>
+                                                    <?= Html::a('', ['eliminar_detalle_prestacion', 'id_detalle' => $dato->id, 'id' => $id, 'pagina' => $pagina], [
+                                                        'class' => 'glyphicon glyphicon-trash',
+                                                        'data' => [
+                                                            'confirm' => 'Esta seguro de eliminar el registro?',
+                                                            'method' => 'post',
+                                                        ],
+                                                    ]) ?>
                                                 </td>
+                                                <td style= 'width: 20px;'><input type="checkbox" name="id_detalle[]" value="<?= $dato->id ?>"></td>
                                             <?php }else{?>
                                                 <td style= 'width: 35px;'></td>
-                                             
+                                                <td style= 'width: 35px;'></td>
+                                                <td style= 'width: 35px;'></td>
                                             <?php }?>  
-                                             <td style= 'width: 35px;'><input type="checkbox" name="id_detalle[]" value="<?= $dato->id ?>"></td>
+                                             
                                         </tr>
                                    <?php endforeach; ?>    
                                 </tbody>      
@@ -257,7 +273,7 @@ $view = 'prestaciones sociales';
                                                    );
                                                    ?>
                                                     <div class="modal remote fade" id="modaleditarcredito<?= $dcto_credito->id ?>">
-                                                       <div class="modal-dialog modal-lg">
+                                                       <div class="modal-dialog modal-lg-centered" style ="width: 450px;">
                                                            <div class="modal-content"></div>
                                                        </div>
                                                     </div>
@@ -305,10 +321,10 @@ $view = 'prestaciones sociales';
                                             <td><?= $descuento->usuariosistema ?></td>
                                             <?php
                                             if($model->estado_aplicado == 0){?>
-                                                <td style= 'width: 35px;'>
+                                              <td style= 'width: 20px; height: 20px'>
                                                     <a href="<?= Url::toRoute(["prestaciones-sociales/update", "id_adicion" => $descuento->id_adicion, "tipo_adicion"=>$descuento->tipo_adicion, 'id' => $descuento->id_prestacion, 'pagina' => $pagina]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                                                 </td>
-                                                <td style= 'width: 35px;'>
+                                                <td style= 'width: 20px; height: 20px'>
                                                     <?= Html::a('', ['eliminaradicion', 'id_adicion' => $descuento->id_adicion, 'id' => $descuento->id_prestacion, 'pagina' => $pagina], [
                                                         'class' => 'glyphicon glyphicon-trash',
                                                         'data' => [
@@ -318,9 +334,9 @@ $view = 'prestaciones sociales';
                                                     ]) ?>
                                                 </td>
                                             <?php }else{?>
-                                                <td style= 'width: 35px;'>
+                                              <td style= 'width: 20px; height: 20px'>
                                                 </td>
-                                                <td style= 'width: 35px;'>
+                                              <td style= 'width: 20px; height: 20px'>
                                                 </td>
                                             <?php }?>    
                                         </tr>

@@ -66,8 +66,8 @@ class PrestacionesSociales extends \yii\db\ActiveRecord
         return [
             [['id_empleado', 'id_contrato', 'id_grupo_pago'], 'required'],
             [['id_empleado', 'id_contrato', 'documento', 'nro_pago', 'id_grupo_pago', 'salario', 'dias_primas', 'ibp_prima', 'dias_ausencia_prima', 'dias_cesantias', 'ibp_cesantias', 'dias_ausencia_cesantias', 'interes_cesantia', 'dias_vacaciones', 'ibp_vacaciones', 'dias_ausencia_vacaciones', 'total_indemnizacion', 'total_deduccion', 
-                'total_devengado', 'total_pagar', 'estado_generado', 'estado_aplicado', 'estado_cerrado','generar_pagos'], 'integer'],
-            [['fecha_inicio_contrato', 'fecha_termino_contrato', 'fecha_creacion', 'ultimo_pago_prima', 'ultimo_pago_cesantias', 'ultimo_pago_vacaciones'], 'safe'],
+                'total_devengado', 'total_pagar', 'estado_generado', 'estado_aplicado', 'estado_cerrado','generar_pagos','valor_pago_primas', 'valor_pago_cesantias','valor_pago_vacaciones'], 'integer'],
+            [['fecha_inicio_contrato', 'fecha_termino_contrato', 'fecha_creacion', 'ultimo_pago_prima', 'ultimo_pago_cesantias', 'ultimo_pago_vacaciones','fecha_hora_creacion'], 'safe'],
             [['porcentaje_interes'], 'number'],
             [['observacion'], 'string', 'max' => 100],
             [['usuariosistema'], 'string', 'max' => 15],
@@ -116,7 +116,8 @@ class PrestacionesSociales extends \yii\db\ActiveRecord
             'estado_aplicado' => 'Estado Aplicado',
             'estado_cerrado' => 'Estado Cerrado',
             'usuariosistema' => 'Usuariosistema',
-            'generar_pagos' => 'generar_pagos'
+            'generar_pagos' => 'generar_pagos',
+            'fecha_hora_creacion' => 'fecha_hora_creacion',
         ];
     }
 

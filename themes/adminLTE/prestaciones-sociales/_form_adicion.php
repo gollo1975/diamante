@@ -38,9 +38,9 @@ if($tipo_adicion == 1){
             <div class="panel-heading">
                <?php
                if($tipo_adicion == 1){?>
-                   Adición de pago.
+                   Datos de los registros.
                <?php }else{?>    
-                   Descuentos.
+                 Datos de los registros.
                <?php }?>    
             </div>
             <div class="panel-body">

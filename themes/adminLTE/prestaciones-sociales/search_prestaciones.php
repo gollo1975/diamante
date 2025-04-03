@@ -19,8 +19,6 @@ use kartik\depdrop\DepDrop;
 
 $this->title = 'Prestaciones sociales';
 $this->params['breadcrumbs'][] = $this->title;
-
-
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -32,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("prestaciones-sociales/index"),
+    "action" => Url::toRoute("prestaciones-sociales/search_prestaciones"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -87,7 +85,7 @@ $empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("prestaciones-sociales/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("prestaciones-sociales/search_prestaciones") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -120,7 +118,6 @@ $empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Estado aplicado" >Ea</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Estado cerrado" >Ec</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
-                <th scope="col" style='background-color:#B9D5CE;'></th>
                                             
             </tr>
             </thead>
@@ -143,17 +140,7 @@ $empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->
                 <td style= 'width: 35px;'>
                         <a href="<?= Url::toRoute(["prestaciones-sociales/view", "id" => $val->id_prestacion, "pagina" =>$pagina]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>
-                <td style= 'width: 35px;'>
-                        <?= Html::a('', ['eliminar', 'id' => $val->id_prestacion], [
-                            'class' => 'glyphicon glyphicon-trash',
-                            'data' => [
-                                'confirm' => 'Esta seguro de eliminar el registro?',
-                                'method' => 'post',
-                            ],
-                        ]) ?>
-                    </td>
                 
-            </tr>            
             </tbody>            
             <?php endforeach; ?>
         </table>    
@@ -167,16 +154,4 @@ $empleado = ArrayHelper::map(Empleados::find()->orderBy('nombre_completo ASC')->
 </div>
 <?= LinkPager::widget(['pagination' => $pagination]) ?>
 
-<script type="text/javascript">
-	function marcar(source) 
-	{
-		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
-		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
-		{
-			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
-			{
-				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
-			}
-		}
-	}
-</script>
+

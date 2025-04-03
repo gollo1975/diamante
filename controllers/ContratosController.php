@@ -871,6 +871,7 @@ class ContratosController extends Controller
                         $table->ultimo_pago_vacaciones = $contrato->ultima_pago_vacacion;
                         $table->observacion = $model->observacion;
                         $table->salario = $contrato->salario;
+                        $table->fecha_creacion = date('Y-m-d');
                         $table->usuariosistema = Yii::$app->user->identity->username;
                         $table->insert(false);
                     }

@@ -757,6 +757,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 ['label' => 'Creditos', 'icon' => 'plus-square-o', 'url' => ['credito/search_creditos']],
                                                                 ['label' => 'Soporte de nomina', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/search_comprobante_nomina']],
                                                                 ['label' => 'Soporte de intereses', 'icon' => 'plus-square-o', 'url' => ['programacion-nomina/search_comprobante_cesantias']],
+                                                                ['label' => 'Prestaciones sociales', 'icon' => 'plus-square-o', 'url' => ['prestaciones-sociales/search_prestaciones']],
                                                             ],
                                                         ],
                                                     ],
