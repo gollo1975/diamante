@@ -15,10 +15,10 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 
 if($sw == 0){
-    $this->title = 'GRUPOS / PRODUCTOS (CONFIGURACION DE FORMULA)';
+    $this->title = 'PRODUCTOS (CONFIGURACION DE FORMULA)';
     $this->params['breadcrumbs'][] = $this->title;
 }else{
-   $this->title = 'GRUPOS / PRODUCTOS (CONFIGURACION DE AUDITORIA)';
+   $this->title = 'PRODUCTOS (CONFIGURACION DE AUDITORIA)';
     $this->params['breadcrumbs'][] = $this->title; 
 }    
 
@@ -44,7 +44,7 @@ if($sw == 0){
                 ],
 
 ]);
-$grupo_producto = ArrayHelper::map(\app\models\GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$grupo = ArrayHelper::map(\app\models\GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
 
 ?>
 
@@ -57,7 +57,7 @@ $grupo_producto = ArrayHelper::map(\app\models\GrupoProducto::find()->orderBy ('
         <div class="row" >
             <?= $formulario->field($form, "nombre")->input("search") ?>
              <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
-                'data' => $grupo_producto,
+                'data' => $grupo,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -81,31 +81,29 @@ $grupo_producto = ArrayHelper::map(\app\models\GrupoProducto::find()->orderBy ('
         <table class="table table-bordered table-hover">
             <thead>
            <tr style="font-size: 90%;">    
-                <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Nombre del grupo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Clasificacion</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Ver registro</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>User name</th>
-                 <th scope="col" style='background-color:#B9D5CE;'></th>
-                 <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th scope="col" style='background-color:#B9D5CE;'>Nombre del producto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Marca</th>
+                <th scope="col" style='background-color:#B9D5CE;'>User name</th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
             <tr style="font-size: 90%;">                   
-                 <td><?= $val->id_grupo ?></td>
-                <td><?= $val->nombre_grupo ?></td>
-                <td><?= $val->clasificacionInventario->descripcion ?></td>
-                <td><?= $val->ventaPublico ?></td>
+                <td><?= $val->nombre_producto ?></td>
+                <td><?= $val->grupo->nombre_grupo ?></td>
+                <td><?= $val->marca->marca ?></td>
                 <td><?= $val->user_name ?></td>
                 <?php
                 if($sw == 0){?>
                     <td style= 'width: 25px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["grupo-producto/buscarmateriaprima", "id_grupo" => $val->id_grupo, 'sw' => $sw]) ?>" ><span class="glyphicon glyphicon-list" title="Permite cargar las materias primas al producto"></span></a>
+                        <a href="<?= Url::toRoute(["grupo-producto/buscarmateriaprima", "id_grupo" => $val->id_grupo, 'sw' => $sw, 'id_producto' => $val->id_producto]) ?>" ><span class="glyphicon glyphicon-list" title="Permite cargar las materias primas al producto"></span></a>
                     </td> 
                     <?php if(\app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $val->id_grupo])->one()){?>
                         <td style= 'width: 25px; height: 20px;'>
-                            <a href="<?= Url::toRoute(["grupo-producto/view_configuracion", "id_grupo" => $val->id_grupo,  'sw' => $sw]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de las materias primas"></span></a>
+                            <a href="<?= Url::toRoute(["grupo-producto/view_configuracion", "id_producto" => $val->id_producto,  'sw' => $sw]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de las materias primas"></span></a>
                         </td> 
                     <?php }else{?>
                         <td style= 'width: 25px; height: 20px;'>
@@ -114,11 +112,11 @@ $grupo_producto = ArrayHelper::map(\app\models\GrupoProducto::find()->orderBy ('
                     <?php } 
                 }else{?>
                     <td style= 'width: 25px; height: 20px;'>
-                        <a href="<?= Url::toRoute(["grupo-producto/buscar_concepto_analisis", "id_grupo" => $val->id_grupo, 'sw' => $sw]) ?>" ><span class="glyphicon glyphicon-level-up" title="Permite cargar los analisis para la auditoria del producto"></span></a>
+                        <a href="<?= Url::toRoute(["grupo-producto/buscar_concepto_analisis", "id_grupo" => $val->id_grupo, 'sw' => $sw, 'id_producto' => $val->id_producto]) ?>" ><span class="glyphicon glyphicon-level-up" title="Permite cargar los analisis para la auditoria del producto"></span></a>
                     </td>
-                    <?php if(\app\models\ConfiguracionProductoProceso::find()->where(['=','id_grupo', $val->id_grupo])->one()){?>
+                    <?php if(\app\models\ConfiguracionProductoProceso::find()->where(['=','id_producto', $val->id_producto])->one()){?>
                         <td style= 'width: 25px; height: 20px;'>
-                            <a href="<?= Url::toRoute(["grupo-producto/view_analisis", "id_grupo" => $val->id_grupo,  'sw' => $sw]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de los conceptos agregados"></span></a>
+                            <a href="<?= Url::toRoute(["grupo-producto/view_analisis", "id_grupo" => $val->id_grupo,  'sw' => $sw, 'id_producto' => $val->id_producto]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de los conceptos agregados"></span></a>
                         </td> 
                     <?php }else{?>
                         <td style= 'width: 25px; height: 20px;'>

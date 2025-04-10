@@ -42,7 +42,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     {
         return [
             [['id_orden_produccion', 'numero_orden_ensamble', 'id_grupo', 'id_etapa','autorizado','total_unidades','inventario_exportado',
-                'proceso_auditado','exportar_material_empaque'], 'integer'],
+                'proceso_auditado','exportar_material_empaque','id_producto'], 'integer'],
             [['fecha_proceso', 'fecha_hora_registro','fecha_hora_cierre'], 'safe'],
             [['user_name','peso_neto','numero_lote'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
@@ -50,6 +50,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -63,6 +64,7 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
             'id_orden_produccion' => 'Codigo produccion:',
             'numero_orden_ensamble' => 'Numero de ensamble:',
             'id_grupo' => 'Grupo:',
+            'id_producto' => 'Producto:',
             'numero_lote' => 'Numero lote:',
             'id_etapa' => 'Etapa:',
             'fecha_proceso' => 'Fecha proceso:',
@@ -87,6 +89,8 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrdenProduccion::className(), ['id_orden_produccion' => 'id_orden_produccion']);
     }
+    
+   
 
     /**
      * @return \yii\db\ActiveQuery
@@ -104,6 +108,14 @@ class OrdenEnsambleProducto extends \yii\db\ActiveRecord
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
     }
 
+      /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */

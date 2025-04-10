@@ -253,6 +253,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <table class="table table-responsive">
                                        <thead>
                                            <tr style="font-size: 85%;">
+                                                <th scope="col" style='background-color:#B9D5CE;'>Código</th>
                                                 <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                                                 <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                <th scope="col" style='background-color:#B9D5CE; text-align: right'>Cant.</th>
@@ -269,11 +270,12 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                                                                   ->andWhere(['=','estado_regla', 0])->one();
                                                 ?>
                                                  <tr style="font-size: 85%;">
+                                                      <td><?= $val->inventario->codigo_producto ?></td>
                                                      <td><?= $val->inventario->nombre_producto ?></td>
                                                      <td><?= $val->venta_condicionado ?></td>
                                                      <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                                     <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                     <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                     <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                     <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
 
                                                      <?php if($tokenAcceso == 3 && $model->numero_pedido == 0){?>
                                                           <td style= 'width: 25px; height: 25px;'>
@@ -306,37 +308,37 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                  </tr>
                                              <?php endforeach; ?>
                                     </tbody>
-                                    <tr>
+                                    <tr style="font-size: 85%;">
                                             <td colspan="8" style='background-color:#B9D5CE;'></td>
                                         </tr>
-                                       <tr>
-                                            <td colspan="3"></td>
+                                       <tr style="font-size: 85%;">
+                                            <td colspan="4"></td>
                                             <td style="text-align: right;"><b>Vr. bruto:</b></td>
-                                            <td align="right" ><b><?= '$'.number_format($model->valor_bruto,0); ?></b></td>
+                                            <td align="right" ><b><?= '$'.number_format($model->valor_bruto,2); ?></b></td>
                                             <td colspan="1"></td>
                                         </tr>
-                                        <tr>
-                                            <td colspan="3"></td>
+                                        <tr style="font-size: 85%;">
+                                            <td colspan="4"></td>
                                             <td style="text-align: right;"><b>Descuento:</b></td>
-                                            <td align="right" ><b><?= '$'.number_format($model->descuento_comercial,0); ?></b></td>
+                                            <td align="right" ><b><?= '$'.number_format($model->descuento_comercial,2); ?></b></td>
                                             <td colspan="1"></td>
                                         </tr>
-                                         <tr>
-                                            <td colspan="3"></td>
+                                         <tr style="font-size: 85%;">
+                                            <td colspan="4"></td>
                                             <td style="text-align: right;"><b>Subtotal:</b></td>
-                                            <td align="right" ><b><?= '$'.number_format($model->subtotal,0); ?></b></td>
+                                            <td align="right" ><b><?= '$'.number_format($model->subtotal,2); ?></b></td>
                                             <td colspan="1"></td>
                                         </tr>
-                                        <tr>
-                                            <td colspan="3"></td>
+                                        <tr style="font-size: 85%;">
+                                            <td colspan="4"></td>
                                             <td style="text-align: right;"><b>Iva:</b></td>
-                                            <td align="right" ><b><?= '$'.number_format($model->impuesto,0); ?></b></td>
+                                            <td align="right" ><b><?= '$'.number_format($model->impuesto,2); ?></b></td>
                                             <td colspan="1"></td>
                                         </tr>
-                                         <tr>
-                                            <td colspan="3"></td>
+                                         <tr style="font-size: 85%;">
+                                            <td colspan="4"></td>
                                             <td style="text-align: right;"><b>Total:</b></td>
-                                            <td align="right" ><b><?= '$'.number_format($model->gran_total,0); ?></b></td>
+                                            <td align="right" ><b><?= '$'.number_format($model->gran_total,2); ?></b></td>
                                             <td colspan="1"></td>
                                         </tr>
                                    </table>
@@ -354,7 +356,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                            <div class="panel-body">
                                <table class="table table-responsive">
                                    <thead>
-                                       <tr style="font-size: 90%;">
+                                       <tr style="font-size: 85%;">
                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>     
                                            <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                            <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Cant.</th>       
@@ -370,7 +372,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                            $subtotal += $val->subtotal;
                                            $impuesto += $val->impuesto;
                                            $total += $val->total_linea;?>
-                                           <tr style="font-size: 90%;">
+                                           <tr style="font-size: 85%;">
                                                <td><?= $val->inventario->nombre_producto ?></td>
                                                <td><?= $val->venta_condicionado?></td>
                                                <?php if($val->cantidad == 0){?>
@@ -378,8 +380,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                <?php }else{?>
                                                      <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                <?php }?>      
-                                               <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                               <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                               <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                               <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
                                                <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                <td style= 'width: 20px; height: 20px;'>
                                                    <?php if($model->autorizado == 0){?>
@@ -396,25 +398,25 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                            </tr>
                                         <?php endforeach;?>          
                                    </body>
-                                   <tr>
+                                   <tr style="font-size: 85%;">
                                        <td colspan="8" style='background-color:#B9D5CE;'></td>
                                    </tr>
-                                   <tr>
+                                   <tr style="font-size: 85%;">
                                        <td colspan="3"></td>
                                        <td style="text-align: right;"><b>Subtotal:</b></td>
-                                       <td align="right"><b><?= '$'.number_format($subtotal,0); ?></b></td>
+                                       <td align="right"><b><?= '$'.number_format($subtotal,2); ?></b></td>
                                        <td colspan="1"></td>
                                    </tr>
-                                   <tr>
+                                   <tr style="font-size: 85%;">
                                        <td colspan="3"></td>
                                        <td style="text-align: right;"><b>Iva:</b></td>
-                                       <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
+                                       <td align="right" ><b><?= '$'.number_format($impuesto,2); ?></b></td>
                                        <td colspan="1"></td>
                                    </tr>
-                                    <tr>
+                                    <tr style="font-size: 85%;">
                                        <td colspan="3"></td>
                                        <td style="text-align: right;"><b>Total:</b></td>
-                                       <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
+                                       <td align="right" ><b><?= '$'.number_format($total,2); ?></b></td>
                                        <td colspan="1"></td>
                                    </tr>
                                </table>
@@ -456,7 +458,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <div class="panel-body">
                                         <table class="table table-responsive">
                                             <thead>
-                                                <tr style="font-size: 90%;">
+                                                <tr style="font-size: 85%;">
                                                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>  
                                                     <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                     <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Cant.</th>       
@@ -472,7 +474,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                     $subtotal += $val->subtotal;
                                                     $impuesto += $val->impuesto;
                                                     $total += $val->total_linea;?>
-                                                    <tr style="font-size: 90%;">
+                                                    <tr style="font-size: 85%;">
                                                         <td><?= $val->inventario->nombre_producto ?></td>
                                                         <td><?= $val->venta_condicionado ?></td>
                                                         <?php if($val->cantidad == 0){?>
@@ -480,8 +482,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                         <?php }else{?>
                                                               <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                         <?php }?>      
-                                                        <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                        <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                        <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                        <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
                                                         <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                         <td style= 'width: 20px; height: 20px;'>
                                                             <?php if($model->autorizado == 0){?>
@@ -501,22 +503,22 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <tr>
                                                 <td colspan="8" style='background-color:#B9D5CE;'></td>
                                             </tr>
-                                            <tr>
+                                            <tr style="font-size: 85%;">
                                                 <td colspan="3"></td>
                                                 <td style="text-align: right;"><b>Subtotal:</b></td>
-                                                <td align="right"><b><?= '$'.number_format($subtotal,0); ?></b></td>
+                                                <td align="right"><b><?= '$'.number_format($subtotal,2); ?></b></td>
                                                 <td colspan="1"></td>
                                             </tr>
-                                            <tr>
+                                            <tr style="font-size: 85%;">
                                                 <td colspan="3"></td>
                                                 <td style="text-align: right;"><b>Iva:</b></td>
-                                                <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
+                                                <td align="right" ><b><?= '$'.number_format($impuesto,2); ?></b></td>
                                                 <td colspan="1"></td>
                                             </tr>
-                                             <tr>
+                                             <tr style="font-size: 85%;">
                                                 <td colspan="3"></td>
                                                 <td style="text-align: right;"><b>Total:</b></td>
-                                                <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
+                                                <td align="right" ><b><?= '$'.number_format($total,2); ?></b></td>
                                                 <td colspan="1"></td>
                                             </tr>
                                         </table>
@@ -578,8 +580,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                            <td><?= $val->inventario->nombre_producto ?></td>
                                                            <td><?= $val->venta_condicionado ?></td>
                                                            <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                                           <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                           <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                           <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                           <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
 
                                                            <?php if($tokenAcceso == 3 && $model->numero_pedido == 0){?>
                                                                 <td style= 'width: 25px; height: 25px;'>
@@ -615,34 +617,34 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                               <tr>
                                                       <td colspan="8" style='background-color:#B9D5CE;'></td>
                                                   </tr>
-                                                 <tr>
+                                                 <tr style="font-size: 85%;">
                                                       <td colspan="3"></td>
                                                       <td style="text-align: right;"><b>Vr. bruto:</b></td>
-                                                      <td align="right" ><b><?= '$'.number_format($model->valor_bruto,0); ?></b></td>
+                                                      <td align="right" ><b><?= '$'.number_format($model->valor_bruto,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
-                                                  <tr>
+                                                  <tr style="font-size: 85%;">
                                                       <td colspan="3"></td>
                                                       <td style="text-align: right;"><b>Descuento:</b></td>
-                                                      <td align="right" ><b><?= '$'.number_format($model->descuento_comercial,0); ?></b></td>
+                                                      <td align="right" ><b><?= '$'.number_format($model->descuento_comercial,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
-                                                  <tr>
+                                                  <tr style="font-size: 85%;">
                                                       <td colspan="3"></td>
                                                       <td style="text-align: right;"><b>Subtotal:</b></td>
-                                                      <td align="right" ><b><?= '$'.number_format($model->subtotal,0); ?></b></td>
+                                                      <td align="right" ><b><?= '$'.number_format($model->subtotal,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
-                                                  <tr>
+                                                  <tr style="font-size: 85%;">
                                                       <td colspan="3"></td>
                                                       <td style="text-align: right;"><b>Iva:</b></td>
-                                                      <td align="right" ><b><?= '$'.number_format($model->impuesto,0); ?></b></td>
+                                                      <td align="right" ><b><?= '$'.number_format($model->impuesto,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
-                                                   <tr>
+                                                   <tr style="font-size: 85%;">
                                                       <td colspan="3"></td>
                                                       <td style="text-align: right;"><b>Total:</b></td>
-                                                      <td align="right" ><b><?= '$'.number_format($model->gran_total,0); ?></b></td>
+                                                      <td align="right" ><b><?= '$'.number_format($model->gran_total,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
                                           </table>
@@ -660,7 +662,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                       <div class="panel-body">
                                           <table class="table table-responsive">
                                               <thead>
-                                                  <tr style="font-size: 90%;">
+                                                  <tr style="font-size: 85%;">
                                                       <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>   
                                                       <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                       <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Cant.</th>       
@@ -676,7 +678,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                       $subtotal += $val->subtotal;
                                                       $impuesto += $val->impuesto;
                                                       $total += $val->total_linea;?>
-                                                      <tr style="font-size: 90%;">
+                                                      <tr style="font-size: 85%;">
                                                           <td><?= $val->inventario->nombre_producto ?></td>
                                                           <td><?= $val->venta_condicionado ?></td>
                                                           <?php if($val->cantidad == 0){?>
@@ -684,8 +686,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                           <?php }else{?>
                                                                 <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                           <?php }?>      
-                                                          <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                          <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                          <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                          <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
                                                           <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                           <td style= 'width: 20px; height: 20px;'>
                                                               <?php if($model->autorizado == 0){?>
@@ -705,22 +707,22 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                               <tr>
                                                   <td colspan="8" style='background-color:#B9D5CE;'></td>
                                               </tr>
-                                              <tr>
+                                              <tr style="font-size: 85%;">
                                                   <td colspan="3"></td>
                                                   <td style="text-align: right;"><b>Subtotal:</b></td>
-                                                  <td align="right"><b><?= '$'.number_format($subtotal,0); ?></b></td>
+                                                  <td align="right"><b><?= '$'.number_format($subtotal,2); ?></b></td>
                                                   <td colspan="1"></td>
                                               </tr>
-                                              <tr>
+                                              <tr style="font-size: 85%;">
                                                   <td colspan="3"></td>
                                                   <td style="text-align: right;"><b>Iva:</b></td>
-                                                  <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
+                                                  <td align="right" ><b><?= '$'.number_format($impuesto,2); ?></b></td>
                                                   <td colspan="1"></td>
                                               </tr>
-                                               <tr>
+                                               <tr style="font-size: 85%;">
                                                   <td colspan="3"></td>
                                                   <td style="text-align: right;"><b>Total:</b></td>
-                                                  <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
+                                                  <td align="right" ><b><?= '$'.number_format($total,2); ?></b></td>
                                                   <td colspan="1"></td>
                                               </tr>
                                           </table>
@@ -761,7 +763,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                     <div class="panel-body">
                                         <table class="table table-responsive">
                                             <thead>
-                                                <tr style="font-size: 90%;">
+                                                <tr style="font-size: 85%;">
                                                     <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>  
                                                     <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                     <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Cant.</th>       
@@ -777,7 +779,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                     $subtotal += $val->subtotal;
                                                     $impuesto += $val->impuesto;
                                                     $total += $val->total_linea;?>
-                                                    <tr style="font-size: 90%;">
+                                                    <tr style="font-size: 85%;">
                                                         <td><?= $val->inventario->nombre_producto ?></td>
                                                         <td><?= $val->venta_condicionado ?></td>
                                                         <?php if($val->cantidad == 0){?>
@@ -785,8 +787,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                         <?php }else{?>
                                                               <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                         <?php }?>      
-                                                        <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                        <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                        <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                        <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
                                                         <input type="hidden" name="producto_presupuesto[]" value="<?= $val->id_detalle?>"> 
                                                         <td style= 'width: 20px; height: 20px;'>
                                                             <?php if($model->autorizado == 0){?>
@@ -806,22 +808,22 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             <tr>
                                                 <td colspan="8" style='background-color:#B9D5CE;'></td>
                                             </tr>
-                                            <tr>
+                                            <tr style="font-size: 85%;">
                                                 <td colspan="3"></td>
                                                 <td style="text-align: right;"><b>Subtotal:</b></td>
-                                                <td align="right"><b><?= '$'.number_format($subtotal,0); ?></b></td>
+                                                <td align="right"><b><?= '$'.number_format($subtotal,2); ?></b></td>
                                                 <td colspan="1"></td>
                                             </tr>
-                                            <tr>
+                                            <tr style="font-size: 85%;">
                                                 <td colspan="3"></td>
                                                 <td style="text-align: right;"><b>Iva:</b></td>
-                                                <td align="right" ><b><?= '$'.number_format($impuesto,0); ?></b></td>
+                                                <td align="right" ><b><?= '$'.number_format($impuesto,2); ?></b></td>
                                                 <td colspan="1"></td>
                                             </tr>
-                                             <tr>
+                                             <tr style="font-size: 85%;">
                                                 <td colspan="3"></td>
                                                 <td style="text-align: right;"><b>Total:</b></td>
-                                                <td align="right" ><b><?= '$'.number_format($total,0); ?></b></td>
+                                                <td align="right" ><b><?= '$'.number_format($total,2); ?></b></td>
                                                 <td colspan="1"></td>
                                             </tr>
                                         </table>

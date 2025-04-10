@@ -1736,6 +1736,7 @@ class PedidosController extends Controller
         }    
     }
     
+   
    //ELIMINAR DETALLES DEL PRESUPUESTO
       public function actionEliminar_detalle_presupuesto($id,$detalle, $token, $sw, $tokenAcceso, $pedido_virtual, $tipo_pedido) 
     {                                
@@ -1748,9 +1749,23 @@ class PedidosController extends Controller
         }else{
             $detalles->delete();
             $this->SumarPresupuesto($detalle, $id);
+            $this->SaldarCampoDescuento($id);
             $this->redirect(["adicionar_producto_pedido",'id' => $id, 'token' => $token, 'tokenAcceso'=> $tokenAcceso, 'pedido_virtual' => $pedido_virtual, 'tipo_pedido' =>$tipo_pedido]);        
         }    
     }
+    
+     protected function SaldarCampoDescuento($id) {
+        $presupuesto = PedidoPresupuestoComercial::find()->where(['=','id_pedido', $id])->all();
+        $pedido = Pedidos::findOne($id);
+        $total = 0;
+        foreach ($presupuesto as $valor) {
+            $total += $valor->subtotal;
+        }
+        $pedido->descuento_comercial = $total;
+        $pedido->save(false);
+    }
+    
+    
     protected function SumarPresupuesto($detalle, $id) {
         $suma = 0;
         $pedido = Pedidos::findOne($id);

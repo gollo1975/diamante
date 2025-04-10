@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ]);
 
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
-$almacen = ArrayHelper::map(Almacen::find()->orderBy ('almacen ASC')->all(), 'id_almacen', 'almacen');
+$productos = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
 $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy ('nombre_proceso ASC')->all(), 'id_proceso_produccion', 'nombre_proceso');
 
 ?>
@@ -81,8 +81,8 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
-             <?= $formulario->field($form, 'almacen')->widget(Select2::classname(), [
-                'data' => $almacen,
+             <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                'data' => $productos,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -118,7 +118,7 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Número</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Grupo/Producto</th>
@@ -136,7 +136,7 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
-            <tr style ='font-size: 90%;'>                
+            <tr style ='font-size: 85%;'>                
                 <td><?= $val->numero_orden?></td>
                 <td><?= $val->grupo->nombre_grupo?></td>
                 <td><?= $val->almacen->almacen?></td>
@@ -149,7 +149,7 @@ $form = ActiveForm::begin([
                 <td><?= $val->productoAprobado?></td>
                     <?php if($val->seguir_proceso_ensamble == 0){?>
                         <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['cargar_concepto_auditoria', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo, 'id_producto' =>$val->id_producto], [
                                            'class' => '',
                                            'title' => 'Proceso que permite crear la auditoria a PRODUCTO GRANEL.)', 
                                            'data' => [
@@ -161,7 +161,7 @@ $form = ActiveForm::begin([
                         <th scope="col" style='background-color:#B9D5CE;'></th>
                     <?php }else{ ?>
                          <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_orden_ensamble', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo], [
+                            <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_orden_ensamble', 'id' => $val->id_orden_produccion, 'id_grupo' => $val->id_grupo, 'id_producto' =>$val->id_producto], [
                                            'class' => '',
                                            'title' => 'Proceso que permite crear la ORDEN DE ENSAMBLE.', 
                                            'data' => [

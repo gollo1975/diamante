@@ -39,7 +39,7 @@ class ConfiguracionProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_grupo', 'id_materia_prima', 'id_fase', 'cantidad_gramos'], 'integer'],
+            [['id_grupo', 'id_materia_prima', 'id_fase', 'cantidad_gramos','id_producto'], 'integer'],
             [['porcentaje_aplicacion'], 'number'],
             [['fecha_registro'], 'safe'],
             [['codigo_materia', 'codigo_homologacion', 'user_name'], 'string', 'max' => 15],
@@ -47,6 +47,7 @@ class ConfiguracionProducto extends \yii\db\ActiveRecord
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
             [['id_fase'], 'exist', 'skipOnError' => true, 'targetClass' => TipoFases::className(), 'targetAttribute' => ['id_fase' => 'id_fase']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -67,6 +68,7 @@ class ConfiguracionProducto extends \yii\db\ActiveRecord
             'codigo_homologacion' => 'Codigo Homologacion',
             'user_name' => 'User Name',
             'fecha_registro' => 'Fecha Registro',
+            'id_producto' => 'Producto',
         ];
     }
 
@@ -76,6 +78,14 @@ class ConfiguracionProducto extends \yii\db\ActiveRecord
     public function getGrupo()
     {
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
 
     /**

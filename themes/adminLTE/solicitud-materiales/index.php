@@ -46,7 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 $tipoSolicitud = ArrayHelper::map(TipoSolicitud::find()->where(['=','aplica_materia_prima', 1])->orderBy ('descripcion ASC')->all(), 'id_solicitud', 'descripcion');
-$grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
+$grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
 $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->all();
 $ordenProduccion = ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'ordenEnsambleConsulta');
 
@@ -97,7 +98,13 @@ $ordenProduccion = ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'or
                     'allowClear' => true
                 ],
             ]); ?> 
-            
+             <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                'data' => $producto,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
@@ -119,10 +126,10 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
-                <th scope="col" style='background-color:#B9D5CE;'>Solicitud de materiales</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Orden produccion</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
@@ -139,9 +146,9 @@ $form = ActiveForm::begin([
             </thead>
             <tbody>
             <?php foreach ($model as $val): ?>
-                <tr style ='font-size: 90%;'>                
+                <tr style ='font-size: 85%;'>                
                     <td><?= $val->numero_solicitud?></td>
-                    <td><?= $val->grupo->nombre_grupo?></td>
+                    <td><?= $val->productos->nombre_producto?></td>
                     <td><?= $val->ordenProduccion->numero_orden?></td>
                      <td><?= $val->solicitud->descripcion?></td>
                     <td><?= $val->numero_lote?></td>
@@ -174,7 +181,7 @@ $form = ActiveForm::begin([
                             <td style= 'width: 25px; height: 10px;'>
                                 <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_despacho_material', 'id' => $val->codigo, 'token' => $token], [
                                                'class' => '',
-                                               'title' => 'Proceso que permite crear la orden de ensamble a la orden de produccion.', 
+                                               'title' => 'Proceso que permite crear el despacho de material de empaque.', 
                                                'data' => [
                                                    'confirm' => 'Esta seguro de crear el despacho a la solicitud  Nro:  ('.$val->numero_solicitud.').',
                                                    'method' => 'post',

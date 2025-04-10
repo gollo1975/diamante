@@ -60,10 +60,10 @@ $view = 'solicitud-materiales';
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
                 <tr style="font-size: 85%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "codigo") ?></th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id") ?></th>
                     <td><?= Html::encode($model->codigo) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
-                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
+                    <td><?= Html::encode($model->productos->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?></th>
                     <td><?= Html::encode($model->solicitud->descripcion) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>

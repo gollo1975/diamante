@@ -220,7 +220,7 @@ class OrdenProduccionController extends Controller
                 $lote = null;
                 $fecha_inicio = null;
                 $fecha_corte = null;
-                $almacen = null;
+                $producto = null;
                 $autorizado = null;
                 $grupo = null; $tipo_proceso = null;
                 if ($form->load(Yii::$app->request->get())) {
@@ -229,14 +229,14 @@ class OrdenProduccionController extends Controller
                         $lote = Html::encode($form->lote);
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
-                        $almacen = Html::encode($form->almacen);
+                        $producto = Html::encode($form->producto);
                         $grupo = Html::encode($form->grupo);
                         $tipo_proceso = Html::encode($form->tipo_proceso);
                         $autorizado = Html::encode($form->autorizado);
                         $table = OrdenProduccion::find()
                                     ->andFilterWhere(['=', 'numero_orden', $numero])
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['=', 'id_almacen', $almacen])
+                                    ->andFilterWhere(['=', 'id_producto', $producto])
                                     ->andFilterWhere(['=', 'numero_lote', $lote])
                                     ->andFilterWhere(['=', 'id_proceso_produccion', $tipo_proceso])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo])
@@ -662,8 +662,8 @@ class OrdenProduccionController extends Controller
      }
     
     //IMPORTAR FASE INICIAL
-    public function actionImportar_fase_inicial($id_grupo, $id, $token) {
-        $conFaseinicial = \app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $id_grupo])->all();
+    public function actionImportar_fase_inicial($id_grupo, $id, $token, $id_producto) {
+        $conFaseinicial = \app\models\ConfiguracionProducto::find()->where(['=','id_producto', $id_producto])->all();
         $model = OrdenProduccion::findOne($id);
         if(count($conFaseinicial) > 0){
             foreach ($conFaseinicial as $primerafase):
@@ -674,6 +674,7 @@ class OrdenProduccionController extends Controller
                     $table->id = $primerafase->id;
                     $table->id_materia_prima = $primerafase->id_materia_prima;
                     $table->id_grupo = $id_grupo;
+                    $table->id_producto = $id_producto;
                     $table->id_fase = $primerafase->id_fase;
                     $table->porcentaje_aplicacion = $primerafase->porcentaje_aplicacion;
                     $totales = ($model->tamano_lote * $primerafase->porcentaje_aplicacion)/100;
@@ -691,7 +692,7 @@ class OrdenProduccionController extends Controller
     }
     
     //CARGAR AUDITORIA A UNA ORDEN DE PRODUCCION YA LISTA EN EL PROCESO DE GRANEL O FABRICACION
-    public function actionCargar_concepto_auditoria($id, $id_grupo) {
+    public function actionCargar_concepto_auditoria($id, $id_grupo, $id_producto) {
         if(\app\models\OrdenProduccionAuditoriaFabricacion::find()->where(['=','id_orden_produccion', $id])->one()){ 
             Yii::$app->getSession()->setFlash('warning', 'Esta orden de produccion cuenta con un proceso de auditoria que no se ha cerrado. Validar la información'); 
             return $this->redirect(['orden-produccion/index_ordenes_produccion']);
@@ -703,13 +704,14 @@ class OrdenProduccionController extends Controller
             $table->numero_orden = $orden->numero_orden;
             $table->numero_lote = $orden->numero_lote;
             $table->id_grupo = $id_grupo;
+            $table->id_producto = $id_producto;
             $table->id_etapa = 1;
             $table->etapa =$etapa->concepto;
             $table->user_name = Yii::$app->user->identity->username;
             $table->save();
             $model = \app\models\OrdenProduccionAuditoriaFabricacion::find()->orderBy('id_auditoria DESC')->limit(1)->one();
             //proceso del detalle de la auditoria
-            $configuracion = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_etapa', 1])->andWhere(['=','id_grupo', $id_grupo])->all();
+            $configuracion = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_etapa', 1])->andWhere(['=','id_producto', $id_producto])->all();
             foreach ($configuracion as $resultado):
                 $grabar = new \app\models\OrdenProduccionAuditoriaFabricacionDetalle ();
                 $grabar->id_auditoria = $model->id_auditoria;
@@ -738,9 +740,9 @@ class OrdenProduccionController extends Controller
     }
     
     //PROCESO QUE REGENERA LA FORMULA DE PRODUCCION DEL PRODUCTO
-    public function actionRegenerar_formula($id, $token, $id_grupo){
+    public function actionRegenerar_formula($id, $token, $id_grupo, $id_producto){
         $orden = OrdenProduccion::findOne($id);
-        $formulaFase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_grupo', $id_grupo])->all();
+        $formulaFase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_producto', $id_producto])->all();
         $valor = 0;
         foreach ($formulaFase as $fase):
             $valor = round(($orden->tamano_lote * $fase->porcentaje_aplicacion)/100);
@@ -885,10 +887,10 @@ class OrdenProduccionController extends Controller
     }
     
     //generar orden produccion
-    public function actionGenerarorden($id, $token, $id_grupo) {
+    public function actionGenerarorden($id, $token, $id_grupo, $id_producto) {
         
         //proceso que busca si esta ok la fase inicia
-        $fase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_grupo', $id_grupo])->all();
+        $fase = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','id_producto', $id_producto])->all();
         $sw = 0;
         $producto = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
         $suma = 0;
@@ -991,11 +993,11 @@ class OrdenProduccionController extends Controller
     }
     
     //BUSCA TODOS LAS PRESENTACIONES DEL PRODUCTO PERO QUE NO ESTEN CREADOS EN EL INVENTARIO
-    public function actionCrearproducto($id, $grupo, $token) {
+    public function actionCrearproducto($id, $grupo, $token, $id_producto) {
         
         $model = new \app\models\PresentacionProducto();
         $orden = OrdenProduccion::findOne($id);
-        $presentacion = \app\models\PresentacionProducto::find()->where(['=','id_grupo', $grupo])->all() ;
+        $presentacion = \app\models\PresentacionProducto::find()->where(['=','id_producto', $id_producto])->all() ;
         if (Yii::$app->request->post()) {
             if (isset($_POST["listadopresentacion"])) {
                 $intIndice = 0;
@@ -1035,7 +1037,7 @@ class OrdenProduccionController extends Controller
             $valor = round($orden->subtotal / $orden->unidades);
             $contador = strlen($orden->numero_orden);
             $numero = $orden->numero_orden;
-            $longitud =4  ;
+            $longitud = 4;
             function formatear_numero($numero, $longitud) {
                 return str_pad($numero, $longitud, "0", STR_PAD_LEFT);
                 }
@@ -1070,7 +1072,7 @@ class OrdenProduccionController extends Controller
     
     
     //BUSCA PRODUCTO DEL INVENTARIO
-    public function actionBuscar_materia_prima($id, $token, $id_grupo, $id_solicitud){
+    public function actionBuscar_materia_prima($id, $token, $id_grupo, $id_solicitud, $id_producto){
         $operacion = MateriaPrimas::find()->where(['=','id_solicitud', $id_solicitud])->andWhere(['>','stock_gramos', 0])->orderBy('materia_prima DESC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
@@ -1120,6 +1122,7 @@ class OrdenProduccionController extends Controller
                         $table->id_orden_produccion = $id;
                         $table->id_materia_prima = $intCodigo;
                         $table->id_grupo = $id_grupo;
+                        $table->id_producto = $id_producto;
                         $table->id_fase = $id_solicitud;
                         $table->user_name = Yii::$app->user->identity->username;
                         $table->fecha_registro = date('Y-m-d');
@@ -1136,6 +1139,7 @@ class OrdenProduccionController extends Controller
             'form' => $form,
             'token' => $token,
             'id_grupo' => $id_grupo,
+            'id_producto' => $id_producto,
             'id_solicitud' => $id_solicitud
 
         ]);
@@ -1535,7 +1539,7 @@ class OrdenProduccionController extends Controller
     }
     
     //PROCESO QUE GENERA LA ORDEN DE ENSAMBLE 
-    public function actionGenerar_orden_ensamble($id, $id_grupo) {
+    public function actionGenerar_orden_ensamble($id, $id_grupo, $id_producto) {
         $orden_produccion = OrdenProduccion::findOne($id);
         $detalle = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->one();
         $sw = 0;
@@ -1549,6 +1553,7 @@ class OrdenProduccionController extends Controller
             $table = new \app\models\OrdenEnsambleProducto();
             $table->id_orden_produccion = $id;
             $table->id_grupo = $id_grupo;
+            $table->id_producto = $id_producto;
             $table->numero_lote = $orden_produccion->numero_lote;
             $table->id_etapa = 2;
             $table->fecha_proceso = date('Y-m-d');
@@ -1577,8 +1582,8 @@ class OrdenProduccionController extends Controller
     }
     
     //BUSCA PRODUCTO DEL INVENTARIO PARA REPROGRAMARLO
-    public function actionBuscar_producto_inventario($id, $token, $grupo){
-        $operacion = InventarioProductos::find()->where(['=','id_grupo', $grupo])->orderBy('nombre_producto DESC')->all();
+    public function actionBuscar_producto_inventario($id, $token, $grupo, $id_producto){
+        $operacion = InventarioProductos::find()->where(['=','id_producto', $id_producto])->orderBy('nombre_producto DESC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
         if ($form->load(Yii::$app->request->get())) {
@@ -1587,7 +1592,7 @@ class OrdenProduccionController extends Controller
                     $operacion = InventarioProductos::find()
                             ->where(['like','nombre_producto',$q])
                             ->orwhere(['=','codigo_producto',$q])
-                            ->andWhere(['=','id_grupo', $grupo]);
+                            ->andWhere(['=','id_producto', $id_producto]);
                     $operacion = $operacion->orderBy('nombre_producto DESC');                    
                     $count = clone $operacion;
                     $to = $count->count();
@@ -1603,7 +1608,7 @@ class OrdenProduccionController extends Controller
                 $form->getErrors();
             }                    
         }else{
-            $table = InventarioProductos::find()->where(['=','id_grupo', $grupo])->orderBy('nombre_producto DESC');
+            $table = InventarioProductos::find()->where(['=','id_producto', $id_producto])->orderBy('nombre_producto DESC');
             $tableexcel = $table->all();
             $count = clone $table;
             $pages = new Pagination([
@@ -1644,12 +1649,13 @@ class OrdenProduccionController extends Controller
             'form' => $form,
             'token' => $token,
             'grupo' => $grupo,
+            'id_producto' => $id_producto,
         ]);
     }
     
     ///SIMULADOR DE MATERIA PRIMA PARA LA ORDEN DE PRODUCCION
-    public function actionSimulador_materia_prima($id, $token, $grupo) {
-        $conFaseinicial = \app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $grupo])->orderBy('id_fase ASC')->all();
+    public function actionSimulador_materia_prima($id, $token, $grupo, $id_producto) {
+        $conFaseinicial = \app\models\ConfiguracionProducto::find()->where(['=','id_producto', $id_producto])->orderBy('id_fase ASC')->all();
         $orden = OrdenProduccion::findOne($id);
         return $this->render('simulador_inventario', [
             'id' => $id,
@@ -1687,6 +1693,7 @@ class OrdenProduccionController extends Controller
             $table->id_orden_produccion = $id_orden;
             $table->id_solicitud = $tipo->id_solicitud;
             $table->id_grupo = $orden->id_grupo;
+            $table->id_producto = $orden->id_producto;
             $table->unidades = $orden->unidades;
             $table->numero_lote = $orden->numero_lote;
             $table->numero_orden_produccion = $orden->numero_orden;

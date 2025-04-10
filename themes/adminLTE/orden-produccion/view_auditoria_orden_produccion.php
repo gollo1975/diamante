@@ -67,8 +67,8 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->ordenProduccion->numero_orden) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'etapa') ?></th>
                     <td><?= Html::encode($model->etapa) ?></td>   
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
-                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Producto') ?>:</th>
+                    <td><?= Html::encode($model->productos->nombre_producto) ?></td>
               </tr>
                <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>

@@ -42,8 +42,7 @@ class OrdenProduccionFaseInicial extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id', 'id_materia_prima', 'id_grupo', 'id_fase', 'cantidad_gramos', 'fecha_registro', 'importado','cantidad_faltante'], 'integer'],
-            [['id_grupo'], 'required'],
+            [['id_orden_produccion', 'id', 'id_materia_prima', 'id_grupo', 'id_fase', 'cantidad_gramos', 'fecha_registro', 'importado','cantidad_faltante','id_producto'], 'integer'],
             [['porcentaje_aplicacion'], 'number'],
             [['codigo_homologacion', 'user_name'], 'string', 'max' => 15],
             [['cumple_existencia'], 'string', 'max' => 5],
@@ -52,6 +51,7 @@ class OrdenProduccionFaseInicial extends \yii\db\ActiveRecord
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_fase'], 'exist', 'skipOnError' => true, 'targetClass' => TipoFases::className(), 'targetAttribute' => ['id_fase' => 'id_fase']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -66,6 +66,7 @@ class OrdenProduccionFaseInicial extends \yii\db\ActiveRecord
             'id' => 'ID',
             'id_materia_prima' => 'Id Materia Prima',
             'id_grupo' => 'Id Grupo',
+            'id_producto' => 'Productos',
             'id_fase' => 'Id Fase',
             'porcentaje_aplicacion' => 'Porcentaje Aplicacion',
             'cantidad_gramos' => 'Cantidad Gramos',
@@ -85,6 +86,15 @@ class OrdenProduccionFaseInicial extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrdenProduccion::className(), ['id_orden_produccion' => 'id_orden_produccion']);
     }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery

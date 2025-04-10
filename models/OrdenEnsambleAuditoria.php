@@ -45,7 +45,7 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['numero_auditoria', 'numero_orden', 'id_ensamble', 'id_etapa', 'id_grupo', 'id_forma', 'condiciones_analisis', 'cerrar_auditoria'], 'integer'],
+            [['numero_auditoria', 'numero_orden', 'id_ensamble', 'id_etapa', 'id_grupo', 'id_forma', 'condiciones_analisis', 'cerrar_auditoria','id_producto'], 'integer'],
             [['fecha_proceso','fecha_analisis'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
@@ -54,6 +54,7 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_forma'], 'exist', 'skipOnError' => true, 'targetClass' => FormaCosmetica::className(), 'targetAttribute' => ['id_forma' => 'id_forma']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -71,6 +72,7 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
             'id_etapa' => 'Id Etapa',
             'etapa' => 'Etapa:',
             'id_grupo' => 'Grupo:',
+            'id_producto' => 'Producto:',
             'id_forma' => 'Forma cosmetica:',
             'condiciones_analisis' => 'Condiciones de analisis:',
             'observacion' => 'Observacion:',
@@ -103,6 +105,14 @@ class OrdenEnsambleAuditoria extends \yii\db\ActiveRecord
     public function getGrupo()
     {
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
 
     /**

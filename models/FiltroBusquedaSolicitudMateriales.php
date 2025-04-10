@@ -16,6 +16,7 @@ class FiltroBusquedaSolicitudMateriales extends Model
     public $fecha_corte;
     public $orden;
     public $grupo;
+    public $producto;
     public $numero_lote;
     public $tipo;
     public $numero_entrega;
@@ -23,7 +24,7 @@ class FiltroBusquedaSolicitudMateriales extends Model
     public function rules()
     {
         return [  
-           [['numero_solicitud', 'grupo','orden','numero_lote','tipo','numero_entrega'], 'integer'],
+           [['numero_solicitud', 'grupo','orden','numero_lote','tipo','numero_entrega','producto'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -32,13 +33,14 @@ class FiltroBusquedaSolicitudMateriales extends Model
     {
         return [   
             'numero_solicitud' => 'Numero solictud:',
-            'grupo' => 'Grupo producto:',
+            'grupo' => 'Grupos:',
             'orden' => 'Orde produccion:',
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
             'numero_lote' => 'Número lote:',
             'tipo' => 'Tipo material:',
             'numero_entrega' => 'Numero entrega:',
+            'producto' => 'Productos:'
        
         ];
     }

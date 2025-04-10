@@ -9,18 +9,18 @@ use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 
 $this->title = 'CONCEPTOS DE ANALISIS';
-$this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw ]];
+$this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw ,'id_producto' => $id_producto]];
 $this->params['breadcrumbs'][] = $id_grupo;
 $conEtapas = ArrayHelper::map(app\models\EtapasAuditoria::find()->all(), 'id_etapa', 'concepto');
 ?>
     <div class="modal-body">
         <p>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw], ['class' => 'btn btn-primary btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_producto_configuracion', 'id_grupo' => $id_grupo, 'sw' => $sw, 'id_producto' => $id_producto], ['class' => 'btn btn-primary btn-sm']) ?>
         </p>
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["grupo-producto/buscar_concepto_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw]),
+            "action" => Url::toRoute(["grupo-producto/buscar_concepto_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw, 'id_producto' => $id_producto]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -50,7 +50,7 @@ $conEtapas = ArrayHelper::map(app\models\EtapasAuditoria::find()->all(), 'id_eta
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["grupo-producto/buscar_concepto_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["grupo-producto/buscar_concepto_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw, 'id_producto' => $id_producto]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>

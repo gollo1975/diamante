@@ -32,29 +32,29 @@ class PDF extends FPDF {
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(20, 5, utf8_decode("ETAPA:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(27, 5, utf8_decode($auditoria->etapa), 0, 0, 'L',1);
+        $this->Cell(31, 5, utf8_decode($auditoria->etapa), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(23, 5, utf8_decode("GRUPO:"), 0, 0, 'R', 1);
+        $this->Cell(19, 5, utf8_decode("GRUPO:"), 0, 0, 'R', 1);
         $this->SetFont('Arial', '', 7);
         $this->Cell(60, 5, utf8_decode($auditoria->grupo->nombre_grupo), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("NUMERO LOTE:"), 0, 0, 'L', 1);
+        $this->Cell(33, 5, utf8_decode("NUMERO LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(32, 5, $auditoria->numero_lote, 0, 0, 'R', 1);
+        $this->Cell(29, 5, $auditoria->numero_lote, 0, 0, 'L', 1);
         //FIN
         $this->SetXY(10, 52);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(20, 5, utf8_decode("F. COSMETICA:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(24, 5, utf8_decode($auditoria->forma->concepto), 0, 0, 'L',1);
+        $this->Cell(27, 5, utf8_decode($auditoria->forma->concepto), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(26, 5, utf8_decode("USER NAME:"), 0, 0, 'R', 1);
+        $this->Cell(23, 5, utf8_decode("USER NAME:"), 0, 0, 'R', 1);
         $this->SetFont('Arial', '', 7);
         $this->Cell(60, 5, utf8_decode($auditoria->user_name), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(30, 5, utf8_decode("ORDEN PRODUCCION:"), 0, 0, 'L', 1);
+        $this->Cell(33, 5, utf8_decode("ORDEN PRODUCCION:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(32, 5, $auditoria->numero_orden, 0, 0, 'R', 1);
+        $this->Cell(29, 5, $auditoria->numero_orden, 0, 0, 'L', 1);
         //FIN
         $this->SetXY(10, 56);
         $this->SetFont('Arial', 'B', 7);
@@ -127,7 +127,7 @@ class PDF extends FPDF {
       
         $detalles = OrdenEnsambleAuditoriaDetalle::find()->where(['=','id_auditoria', $model->id_auditoria])->all();		
         $pdf->SetX(10);
-        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetFont('Arial', '', 7.5);
 	foreach ($detalles as $detalle) {                                                           
             $pdf->Cell(64, 4, utf8_decode($detalle->analisis->concepto), 0, 0, 'L');
             $pdf->Cell(90, 4, utf8_decode($detalle->especificacion->concepto), 0, 0, 'L');

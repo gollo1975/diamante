@@ -9,7 +9,7 @@ use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 
 $this->title = 'PRESENTACION DEL PRODUCTO';
-$this->params['breadcrumbs'][] = ['label' => 'Presentacion del producto', 'url' => ['view', 'id' => $id, 'token' => $token, 'grupo' => $grupo]];
+$this->params['breadcrumbs'][] = ['label' => 'Presentacion del producto', 'url' => ['view', 'id' => $id, 'token' => $token]];
 $this->params['breadcrumbs'][] = $grupo;
 ?>
     <div class="modal-body">
@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $grupo;
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["orden-produccion/buscar_producto_inventario", 'id' => $id, 'token' => $token, 'grupo' => $grupo]),
+            "action" => Url::toRoute(["orden-produccion/buscar_producto_inventario", 'id' => $id, 'token' => $token, 'grupo' => $grupo, 'id_producto' => $id_producto]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $grupo;
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscar_producto_inventario", 'id' => $id, 'token' => $token, 'grupo' => $grupo]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscar_producto_inventario", 'id' => $id, 'token' => $token, 'grupo' => $grupo, 'id_producto' => $id_producto]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>

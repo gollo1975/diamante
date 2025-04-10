@@ -44,6 +44,7 @@ class ConfiguracionProductoProceso extends \yii\db\ActiveRecord
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_especificacion'], 'exist', 'skipOnError' => true, 'targetClass' => EspecificacionProducto::className(), 'targetAttribute' => ['id_especificacion' => 'id_especificacion']],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -56,6 +57,7 @@ class ConfiguracionProductoProceso extends \yii\db\ActiveRecord
             'id_proceso' => 'Id Proceso',
             'id_analisis' => 'Id Analisis',
             'id_grupo' => 'Id Grupo',
+            'id_producto' => 'Producto',
             'id_especificacion' => 'Id Especificacion',
             'resultado' => 'Resultado',
             'user_name' => 'User Name',
@@ -70,6 +72,14 @@ class ConfiguracionProductoProceso extends \yii\db\ActiveRecord
     public function getAnalisis()
     {
         return $this->hasOne(ConceptoAnalisis::className(), ['id_analisis' => 'id_analisis']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
 
     /**

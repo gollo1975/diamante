@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $id;
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["orden-produccion/buscar_materia_prima", 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud]),
+            "action" => Url::toRoute(["orden-produccion/buscar_materia_prima", 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud,'id_producto' => $id_producto]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $id;
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscar_materia_prima", 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                     <a align="right" href="<?= Url::toRoute(["orden-produccion/buscar_materia_prima", 'id' => $id, 'token' => $token, 'id_grupo' => $id_grupo, 'id_solicitud' => $id_solicitud, 'id_producto' => $id_producto]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>

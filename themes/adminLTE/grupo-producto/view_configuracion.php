@@ -20,7 +20,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 
-$this->title = 'DETALLE DEL PRODUCTO ';
+$this->title = 'FORMULA DEL PRODUCTO ';
 $this->params['breadcrumbs'][] = ['label' => 'Grupo de producto', 'url' => ['index_producto_configuracion', 'sw' => $sw]];
 $this->params['breadcrumbs'][] = $model->id_grupo;
 $conFases = ArrayHelper::map(app\models\TipoFases::find()->all(), 'id_fase', 'nombre_fase');
@@ -34,21 +34,16 @@ $conFases = ArrayHelper::map(app\models\TipoFases::find()->all(), 'id_fase', 'no
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
-            GRUPO DE PRODUCTOS
+            Detalles del producto
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-               <tr style ='font-size:90%;'>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?>:</th>
-                    <td><?= Html::encode($model->id_grupo) ?></td>                    
+               <tr style ='font-size:85%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nombre_producto') ?>:</th>
+                    <td><?= Html::encode($model->nombre_producto) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nombre_grupo') ?>:</th>
-                    <td><?= Html::encode($model->nombre_grupo) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'ver_registro') ?>:</th>
-                    <td><?= Html::encode($model->ventaPublico) ?></td>   
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?>:</th>
-                    <td><?= Html::encode($model->user_name) ?></td>
-              </tr>
-                           
+                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td> 
+               </tr>           
             </table>
         </div>
     </div>
@@ -84,7 +79,7 @@ $conFases = ArrayHelper::map(app\models\TipoFases::find()->all(), 'id_fase', 'no
                                 <tbody>
                                     <?php
                                     foreach ($configuracion as $val):?>
-                                        <tr style='font-size:90%;'>
+                                        <tr style='font-size:85%;'>
                                             <td><?= $val->codigo_materia?></td>
                                             <td><?= $val->nombre_materia_prima?></td>
                                             <?php if($val->id_fase == 1){?>
@@ -97,7 +92,7 @@ $conFases = ArrayHelper::map(app\models\TipoFases::find()->all(), 'id_fase', 'no
                                             <td><?= $val->user_name?></td>
                                             <input type="hidden" name="listado_materia[]" value="<?= $val->id?>"> 
                                             <td style= 'width: 25px; height: 25px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminarmateria', 'id_grupo' => $model->id_grupo, 'detalle' => $val->id, 'sw' => $sw], [
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminarmateria', 'detalle' => $val->id, 'sw' => $sw ,'id_producto' =>$model->id_producto], [
                                                               'class' => '',
                                                               'data' => [
                                                                   'confirm' => 'Esta seguro de eliminar el registro?',

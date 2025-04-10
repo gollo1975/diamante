@@ -15,13 +15,15 @@ class FiltroBusquedaOrdenEnsamble extends Model
     public $fecha_inicio;
     public $fecha_corte;
     public $orden;
-    public $grupo;
+    public $producto;
     public $numero_lote;
+    public $grupo;
+
 
     public function rules()
     {
         return [  
-           [['numero_ensamble', 'grupo','orden','numero_lote'], 'integer'],
+           [['numero_ensamble', 'producto','orden','numero_lote','grupo'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
         ];
     }
@@ -30,11 +32,12 @@ class FiltroBusquedaOrdenEnsamble extends Model
     {
         return [   
             'numero_ensamble' => 'Numero orden ensamble:',
-            'grupo' => 'Grupo producto:',
+            'producto' => 'Producto:',
             'orden' => 'Codigo orden:',
             'fecha_inicio' => 'Fecha inicio:',
             'fecha_corte' => 'Fecha corte:',
             'numero_lote' => 'Número lote:',
+            'grupo' => 'Grupo:'
        
         ];
     }

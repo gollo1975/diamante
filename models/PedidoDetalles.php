@@ -36,9 +36,10 @@ class PedidoDetalles extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_pedido', 'id_inventario', 'cantidad', 'valor_unitario', 'impuesto', 'total_linea','subtotal','registro_eliminado','cantidad_despachada',
-                'historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante'], 'integer'],
+            [['id_pedido', 'id_inventario', 'cantidad','registro_eliminado','cantidad_despachada',
+                'historico_cantidad_vendida','linea_validada','regenerar_linea','cargar_existencias','consultado','cantidad_faltante', 'subtotal','impuesto','total_linea'], 'integer'],
             [['fecha_registro','fecha_alistamiento'], 'safe'],
+            [['valor_unitario'],'number'],
             [['user_name','numero_lote','venta_condicionado'], 'string'],
             [['id_pedido'], 'exist', 'skipOnError' => true, 'targetClass' => Pedidos::className(), 'targetAttribute' => ['id_pedido' => 'id_pedido']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],

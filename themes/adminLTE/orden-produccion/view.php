@@ -51,7 +51,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
         } else {
             if ($model->autorizado == 1 && $model->numero_orden == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generarorden', 'id' => $model->id_orden_produccion, 'token'=> $token,'id_grupo' =>$model->id_grupo],['class' => 'btn btn-warning btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Generar orden', ['generarorden', 'id' => $model->id_orden_produccion, 'token'=> $token,'id_grupo' =>$model->id_grupo, 'id_producto' => $model->id_producto],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar el numero de la orden de producción. Antes de generar la ORDEN DE PRODUCCION, debe de actualizar las cantidades y la fecha de vencimiento por la vista de inicial.', 'method' => 'post']]);
             }else{
                 if($model->numero_orden > 0 && $model->numero_lote == ''){
@@ -165,7 +165,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código producto</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE; width: 25%'>Presentación producto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Proyectadas</th>  
@@ -182,7 +182,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                     <body>
                                          <?php
                                          foreach ($detalle_orden as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="descripcion[]" value="<?= $val->descripcion ?>" size ="45" maxlength="40" required="true"> </td> 
@@ -217,7 +217,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                        ?>
                                                      <td style= 'width: 25px; height: 25px;'>
                                                     <?php } else {
-                                                        if($model->autorizado == 1 && $model->cerrar_orden == 0){?>
+                                                        if($model->autorizado == 1 && $model->numero_orden == 0){?>
                                                             <td style="width: 25px; height: 25px;">
                                                                   <!-- Inicio Nuevo Detalle proceso -->
                                                                     <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
@@ -252,17 +252,17 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                     if($model->tipo_orden == 0){?>
                                         <?php
                                         if(count($detalle_orden) > 0){?>
-                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
-                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
+                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo, 'id_producto' => $model->id_producto],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
+                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo,'id_producto' => $model->id_producto],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto'])?>
                                         <?php }else{?>
-                                             <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
+                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Buscar presentacion', ['orden-produccion/buscar_producto_inventario', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo, 'id_producto' => $model->id_producto],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto'])?>
                                         <?php }?>
                                     <?php }else{ ?>   
                                         <!-- Inicio Nuevo Detalle proceso -->
                                         <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear producto',
-                                              ['/orden-produccion/crearproducto', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],
+                                              ['/orden-produccion/crearproducto', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo ,'id_producto' => $model->id_producto],
                                                 ['title' => 'Crear producto nuevos',
                                                  'data-toggle'=>'modal',
                                                  'data-target'=>'#modalcrearproducto',
@@ -275,8 +275,9 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                </div>
                                         </div>
                                         <?php if(count($detalle_orden) > 0){?>
-                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
+                                            
                                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
+                                        <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo,'id_producto' => $model->id_producto],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
                                            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>
                                         <?php }else{?>
                                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
@@ -295,7 +296,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                              <th scope="col" style='background-color:#B9D5CE;'></th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Materia prima</th> 
@@ -314,7 +315,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                     <body>
                                          <?php
                                          foreach ($fase_inicial as $val):?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <?php if($val->porcentaje_aplicacion == null || $val->cantidad_gramos == null){?>
                                                      <td style="width: 25px; height: 25px;">
                                                         <!-- editar el registro -->
@@ -376,7 +377,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                 <?php }?>   
                                                 <input type="hidden" name="listado_fase[]" value="<?= $val->id_detalle?>">  
                                                 <td style= 'width: 25px; height: 25px;'>
-                                                    <?php if($model->cerrar_orden == 0){?>
+                                                    <?php if($model->numero_orden == 0){?>
                                                         <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminarmateria', 'id' => $model->id_orden_produccion, 'detalle' => $val->id_detalle, 'token' => $token], [
                                                                     'class' => '',
                                                                     'data' => [
@@ -393,11 +394,11 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                     </body>
                                 </table>
                             </div>
-                            <?php if($model->cerrar_orden == 0){?>
+                            <?php if($model->numero_orden == 0){?>
                                 <div class="panel-footer text-right">  
-                                    <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar fase inicial', ['orden-produccion/importar_fase_inicial', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo],[ 'class' => 'btn btn-primary btn-sm']) ?>   
-                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Agregar material', ['orden-produccion/buscar_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo, 'id_solicitud' => 1],[ 'class' => 'btn btn-warning btn-sm']) ?>   
-                                    <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar formula', ['orden-produccion/regenerar_formula', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo],[ 'class' => 'btn btn-info btn-sm']) ?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar fase inicial', ['orden-produccion/importar_fase_inicial', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo ,'id_producto' => $model->id_producto],[ 'class' => 'btn btn-primary btn-sm']) ?>   
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Agregar material', ['orden-produccion/buscar_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo, 'id_solicitud' => 1, 'id_producto' => $model->id_producto],[ 'class' => 'btn btn-warning btn-sm']) ?>   
+                                    <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Regenerar formula', ['orden-produccion/regenerar_formula', 'id' => $model->id_orden_produccion, 'token' => $token, 'id_grupo' => $model->id_grupo, 'id_producto' => $model->id_producto],[ 'class' => 'btn btn-info btn-sm']) ?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizaregistro'])?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-trash'></span> Eliminar todo", ["class" => "btn btn-danger btn-sm", 'name' => 'eliminartodo']) ?>
                                 </div>   

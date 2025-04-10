@@ -25,8 +25,8 @@ class FiltroBusquedaGrupo extends Model
     public function attributeLabels()
     {
         return [   
-            'grupo' => 'Grupo/Producto:',
-            'nombre' => 'Nombre del grupo:',
+            'grupo' => 'Grupo:',
+            'nombre' => 'Nombre del producto:',
        
         ];
     }

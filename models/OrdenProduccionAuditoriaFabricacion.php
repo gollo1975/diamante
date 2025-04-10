@@ -37,7 +37,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','cerrar_auditoria','id_grupo'], 'integer'],
+            [['id_orden_produccion', 'id_etapa', 'continua', 'condicion_analisis','numero_auditoria','numero_orden','cerrar_auditoria','id_grupo','id_producto'], 'integer'],
             [['fecha_proceso','fecha_cierre'], 'safe'],
             [['etapa'], 'string', 'max' => 30],
             [['observacion'], 'string', 'max' => 100],
@@ -45,6 +45,7 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_etapa'], 'exist', 'skipOnError' => true, 'targetClass' => EtapasAuditoria::className(), 'targetAttribute' => ['id_etapa' => 'id_etapa']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -64,11 +65,12 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'fecha_proceso' => 'Fecha Proceso',
             'numero_auditoria' => 'Numero auditoria:',
-            'numero_orden' => 'Numero orden produccion:',
+            'numero_orden' => 'Numero OP:',
             'numero_lote' => 'Numero lote:',
             'fecha_cierre' => 'Fecha cierre:',
             'cerrar_auditoria' => 'Cerrado:',
             'id_grupo' => 'Nombre del grupo:',
+            'id_producto' => 'Producto:',
         ];
     }
 
@@ -102,6 +104,14 @@ class OrdenProduccionAuditoriaFabricacion extends \yii\db\ActiveRecord
     public function getGrupo()
     {
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
     
     public function getContinuaProceso() {

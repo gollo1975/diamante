@@ -1627,6 +1627,10 @@ class AlmacenamientoProductoController extends Controller
                 $dato = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $detalle->codigo_producto])->one();
                 $table = new AlmacenamientoProducto();
                 $table->id_orden_produccion = $id_orden;
+                if($dato->id_inventario == null){
+                    Yii::$app->getSession()->setFlash('error', 'El codigo del producto (' . $detalle->codigo_producto.') que se encuentra en la OP No ('.$id_orden .'), No se encuentra en el Modulo de inventario.');
+                    return $this->redirect(['almacenamiento-producto/cargar_orden_produccion']);
+                }
                 $table->id_inventario = $dato->id_inventario;
                 $table->codigo_producto = $detalle->codigo_producto;
                 $table->nombre_producto = $detalle->descripcion;

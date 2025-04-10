@@ -28,6 +28,7 @@ if($sw == 0){
 }else{
    // Yii::$app->getSession()->setFlash('info', 'Esta orden de produccion ya tiene una ORDENES DE ENSAMBLE creadas. Validar la informacion.'); 
 }
+
 ?>
 <div class="orden-ensamble-producto-view">
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
@@ -84,8 +85,8 @@ if($sw == 0){
                     <td><?= Html::encode($model->numero_orden_ensamble) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_etapa') ?></th>
                     <td><?= Html::encode($model->etapa->concepto) ?></td>   
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
-                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
+                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Producto') ?>:</th>
+                    <td><?= Html::encode($model->productos->nombre_producto) ?></td>
               </tr>
                <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>

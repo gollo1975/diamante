@@ -63,7 +63,7 @@ class SolicitudMaterialesController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $orden = null;
-                $grupo = null; $tipo = null;
+                $grupo = null; $tipo = null; $producto = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero_solicitud = Html::encode($form->numero_solicitud);
@@ -72,6 +72,7 @@ class SolicitudMaterialesController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $orden = Html::encode($form->orden);
                         $grupo = Html::encode($form->grupo);
+                        $producto = Html::encode($form->producto);
                         $tipo = Html::encode($form->tipo);
                         $table = SolicitudMateriales::find()
                                     ->andFilterWhere(['=', 'numero_solicitud', $numero_solicitud])
@@ -79,6 +80,7 @@ class SolicitudMaterialesController extends Controller
                                     ->andFilterWhere(['=', 'id_orden_produccion', $orden])
                                     ->andFilterWhere(['=', 'numero_lote', $numero_lote])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo])
+                                    ->andFilterWhere(['=', 'id_producto', $producto])
                                 ->andFilterWhere(['=', 'id_solicitud', $tipo]);
                         $table = $table->orderBy('codigo DESC');
                         $tableexcel = $table->all();
@@ -428,5 +430,11 @@ class SolicitudMaterialesController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+    
+    //exceles
+    public function actionExcelConsultaSolicitud($tableexcel) {
+          Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.'); 
     }
 }

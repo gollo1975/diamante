@@ -40,7 +40,7 @@ if(count($conFaseinicial) > 0){
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
                 <thead>
-                    <tr style="font-size: 90%;">
+                    <tr style="font-size: 85%;">
                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Materia prima</b></th>
                          <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Stock</b></th>
@@ -57,7 +57,7 @@ if(count($conFaseinicial) > 0){
                     foreach ($conFaseinicial as $materia):
                         $item = \app\models\MateriaPrimas::findOne($materia->id_materia_prima);
                         ?>
-                        <tr style="font-size: 90%;">
+                        <tr style="font-size: 85%;">
                             <td><?= $materia->codigo_materia?> </td>
                             <td ><?= $materia->nombre_materia_prima?> </td>
                             <td style="text-align: right"><?= $materia->materiaPrima->stock_gramos?> </td>

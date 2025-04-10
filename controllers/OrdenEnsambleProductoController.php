@@ -65,7 +65,7 @@ class OrdenEnsambleProductoController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $orden = null;
-                $grupo = null; $tipo_proceso = null;
+                $producto = null; $tipo_proceso = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero_ensamble = Html::encode($form->numero_ensamble);
@@ -73,13 +73,13 @@ class OrdenEnsambleProductoController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $orden = Html::encode($form->orden);
-                        $grupo = Html::encode($form->grupo);
+                        $producto = Html::encode($form->producto);
                         $table = OrdenEnsambleProducto::find()
                                     ->andFilterWhere(['=', 'numero_orden_ensamble', $numero_ensamble])
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'id_orden_produccion', $orden])
                                     ->andFilterWhere(['=', 'numero_lote', $numero_lote])
-                                    ->andFilterWhere(['=', 'id_grupo', $grupo]);
+                                    ->andFilterWhere(['=', 'id_producto', $producto]);
                         $table = $table->orderBy('id_ensamble DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -365,6 +365,7 @@ class OrdenEnsambleProductoController extends Controller
             'conMateriales' => $conMateriales,
             'sw' => $sw,
             'conTerminadas' => $conTerminadas,
+           
         ]);
     }
     
@@ -492,18 +493,25 @@ class OrdenEnsambleProductoController extends Controller
         $presentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', ''])->all();
         $empacadas = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->one();
         if(!$empacadas){
-           Yii::$app->getSession()->setFlash('error', 'No se puede autorizar el proceso porque NO hay unidades empacadas.'); 
+           Yii::$app->getSession()->setFlash('error', 'No se puede autorizar el proceso porque NO hay material del empaque seleccionado.'); 
             $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]); 
         }else{
             if(count($presentacion) > 0){
+                $total = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->all();
+                foreach ($total as $val) {
+                    if($val->importado == 0){
+                         Yii::$app->getSession()->setFlash('error', 'Debe de cerrar las lineas de empaque para autorizar el proceso.');
+                         return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);    
+                    }
+                }
                 if ($model->autorizado == 0){  
                     $model->autorizado = 1;            
                     $model->update();
-                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
+                    return$this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);  
                 }else{
                     $model->autorizado = 0;            
                     $model->update();
-                    $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
+                    return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);      
                 }    
             }else{
                 Yii::$app->getSession()->setFlash('warning', 'Falta completar el porcentaje de rendimiendo que esta en la vista numero 1.'); 
@@ -574,6 +582,7 @@ class OrdenEnsambleProductoController extends Controller
     
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
     public function actionBuscar_material_empaque($id, $token, $id_solicitud, $sw, $id_producto){
+        
         $operacion = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
@@ -733,7 +742,7 @@ class OrdenEnsambleProductoController extends Controller
     }
     //CARGA SEGUNDA AUDITORIA
     
-    public function actionSegunda_auditoria($id, $id_grupo) {
+    public function actionSegunda_auditoria($id, $id_grupo, $id_producto) {
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',95])->all()){
                 $conSearch = OrdenEnsambleAuditoria::find()->where(['=','id_ensamble', $id])->one();
@@ -750,11 +759,12 @@ class OrdenEnsambleProductoController extends Controller
                     $table->id_etapa = 2;
                     $table->etapa = $orden_ensamble->etapa->concepto;
                     $table->id_grupo = $id_grupo;
+                     $table->id_producto =  $id_producto;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->save();
                     //PROCESO PARA INSERTAR LOS DATOS DE LA AUDITORIA
                     $auditoria = \app\models\OrdenEnsambleAuditoria::find()->orderBy('id_auditoria DESC')->limit(1)->one(); //para conseguir el ID
-                    $concepto = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_etapa', $orden_ensamble->id_etapa])->andWhere(['=','id_grupo', $id_grupo])->all();
+                    $concepto = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_etapa', $orden_ensamble->id_etapa])->andWhere(['=','id_producto', $id_producto])->all();
                     foreach ($concepto as $detalle):
                         $registro = new \app\models\OrdenEnsambleAuditoriaDetalle();
                         $registro->id_auditoria = $auditoria->id_auditoria;

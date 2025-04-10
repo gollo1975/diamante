@@ -166,7 +166,7 @@ class PDF extends FPDF {
             $pdf->Cell(5, 4, utf8_decode($detalle->venta_condicionado), 0, 0, 'C');
             $pdf->Cell(17, 4, $detalle->numero_lote, 0, 0, 'R');
             $pdf->Cell(17, 4, $detalle->cantidad, 0, 0, 'R');
-            $pdf->Cell(28, 4, '$'.number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
+            $pdf->Cell(28, 4, '$'.number_format($detalle->valor_unitario, 2, '.', ','), 0, 0, 'R');
             $pdf->Cell(28, 4, '$'.number_format($detalle->subtotal, 0, '.', ','), 0, 0, 'R');
             $pdf->Ln();
             //$pdf->SetAutoPageBreak(true, 20);

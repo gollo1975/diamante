@@ -20,7 +20,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 
-$this->title = 'DETALLE DEL PRODUCTO ';
+$this->title = 'CONCEPTO DE ANALISIS ';
 $this->params['breadcrumbs'][] = ['label' => 'Grupo de producto', 'url' => ['index_producto_configuracion', 'sw' => $sw]];
 $this->params['breadcrumbs'][] = $model->id_grupo;
 $conEtapa = ArrayHelper::map(app\models\EtapasAuditoria::find()->all(), 'id_etapa', 'concepto');
@@ -35,19 +35,17 @@ $conEspecificacion = ArrayHelper::map(app\models\EspecificacionProducto::find()-
     </p>
     <div class="panel panel-success">
         <div class="panel-heading">
-            GRUPO DE PRODUCTOS
+            NOMBRE DE PRODUCTO
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-               <tr style ='font-size:90%;'>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?>:</th>
-                    <td><?= Html::encode($model->id_grupo) ?></td>                    
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nombre_grupo') ?>:</th>
-                    <td><?= Html::encode($model->nombre_grupo) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'ver_registro') ?>:</th>
-                    <td><?= Html::encode($model->ventaPublico) ?></td>   
-                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?>:</th>
-                    <td><?= Html::encode($model->user_name) ?></td>
+               <tr style ='font-size:85%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Id') ?>:</th>
+                    <td><?= Html::encode($model->id_producto) ?></td>                    
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Producto') ?>:</th>
+                    <td><?= Html::encode($model->nombre_producto) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Grupo') ?>:</th>
+                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>   
               </tr>
                            
             </table>
@@ -72,7 +70,7 @@ $conEspecificacion = ArrayHelper::map(app\models\EspecificacionProducto::find()-
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE; '>Id</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>Analisis</th>                        
                                         <th scope="col" style='background-color:#B9D5CE; '>Especificaciones</th> 
@@ -85,7 +83,7 @@ $conEspecificacion = ArrayHelper::map(app\models\EspecificacionProducto::find()-
                                 <tbody>
                                     <?php
                                     foreach ($analisis as $val):?>
-                                        <tr style='font-size:90%;'>
+                                        <tr style='font-size:85%;'>
                                             <td><?= $val->id_analisis?></td>
                                             <td><?= $val->analisis->concepto?></td>
                                             <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('especificaciones[]', $val->id_especificacion, $conEspecificacion, ['class' => 'col-sm-12', 'prompt' => 'Seleccione', 'required' => true]) ?></td>
@@ -98,7 +96,7 @@ $conEspecificacion = ArrayHelper::map(app\models\EspecificacionProducto::find()-
                                             <td><?= $val->user_name?></td>
                                             <input type="hidden" name="listado_analisis_cargados[]" value="<?= $val->id_proceso?>"> 
                                             <td style= 'width: 25px; height: 25px;'>
-                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_analisis', 'id_grupo' => $model->id_grupo, 'id_proceso' => $val->id_proceso,'sw'=> $sw], [
+                                                <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_analisis', 'id_grupo' => $model->id_grupo, 'id_proceso' => $val->id_proceso,'sw'=> $sw, 'id_producto' => $model->id_producto], [
                                                               'class' => '',
                                                               'data' => [
                                                                   'confirm' => 'Esta seguro de eliminar el registro?',

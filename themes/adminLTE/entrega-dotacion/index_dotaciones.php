@@ -15,11 +15,11 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
-$this->title = 'PRESENTACION DEL PRODUCTOS';
+$this->title = 'ENTREGA DE DOTACION';
 $this->params['breadcrumbs'][] = $this->title;
 
-$producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
-$grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$conEmpleado = ArrayHelper::map(app\models\Empleados::find()->orderBy ('nombre_completo ASC')->all(), 'id_empleado', 'nombre_completo');
+$TipoDotacion = ArrayHelper::map(app\models\TipoDotacion::find()->orderBy('descripcion')->all(), 'id_tipo_dotacion', 'descripcion');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -31,7 +31,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
 <!--<h1>Lista proveedor</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("presentacion-producto/index"),
+    "action" => Url::toRoute("entrega-dotacion/search_dotaciones"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -49,36 +49,35 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
 
     <div class="panel-body" id="filtrocliente" style="display:block">
         <div class="row" >
-            <?= $formulario->field($form, "presentacion")->input("search") ?>
-            <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
-            'data' => $producto,
+            <?= $formulario->field($form, "numero")->input("search") ?>
+            <?= $formulario->field($form, 'empleado')->widget(Select2::classname(), [
+            'data' => $conEmpleado,
             'options' => ['prompt' => 'Seleccione...'],
             'pluginOptions' => [
                 'allowClear' => true
                              ],
              ]); ?> 
-             <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
-            'data' => $grupo,
-            'options' => ['prompt' => 'Seleccione...'],
-            'pluginOptions' => [
-                'allowClear' => true
-                             ],
-             ]);?>
-            <?php 
-                    $ordenamiento = [
-                    'id_presentacion DESC' => 'Codigo',
-                    'id_producto ASC' => 'Producto',
-                    'id_grupo DESC' => 'Grupo',
-                    'descripcion ASC' => 'Presentacion',
-                    'id_medida_producto ASC' => 'Medida',
-                    // Agrega aquí cualquier otro criterio de ordenamiento que necesites
-                ]; ?>
-        <?= $formulario->field($form, 'orden')->dropDownList($ordenamiento,['prompt' => 'Seleccione'] ); ?>
+             <?= $formulario->field($form, 'desde')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todaHighlight' => true]])
+            ?>
+             <?= $formulario->field($form, 'hasta')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                'value' => date('d-M-Y', strtotime('+2 days')),
+                'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                'pluginOptions' => [
+                    'format' => 'yyyy-m-d',
+                    'todaHighlight' => true]])
+            ?>
+            
+        <?= $formulario->field($form, 'tipo_dotacion')->dropDownList($TipoDotacion,['prompt' => 'Seleccione'] ); ?>
 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("presentacion-producto/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("entrega-dotacion/search_dotaciones") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -93,30 +92,35 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style="font-size: 85%;">    
-                     <th scope="col" style='background-color:#B9D5CE;'>Presentacion producto</th>
-                     <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
-                     <th scope="col" style='background-color:#B9D5CE;'>Nombre grupo</th>
-                     <th scope="col" style='background-color:#B9D5CE;'>Medida</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Numero</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Empleado</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Tipo dotacion</th>
+                      <th scope="col" style='background-color:#B9D5CE;'>Tipo proceso</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Fecha entrega</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                     <th scope="col" style='background-color:#B9D5CE;'><span class="badge" title="Se descargo del inventario">Inv.</span></th>
                      <th scope="col" style='background-color:#B9D5CE;'></th>  
-                     <th scope="col" style='background-color:#B9D5CE;'></th>  
+                  
 
                  </tr>
             </thead>
             <tbody>
             <?php 
             foreach ($model as $val):
+                $detalle = app\models\EntregaDotacionDetalles::find()->where(['=','id_entrega', $val->id_entrega])->one();
                 ?>
                     <tr style="font-size: 85%;">                   
-                        <td><?= $val->descripcion ?></td>
-                        <td><?= $val->producto->nombre_producto ?></td>
-                        <td><?= $val->grupo->nombre_grupo ?></td>
-                          <td><?= $val->medidaProducto->descripcion ?></td>
+                        <td><?= $val->numero_entrega ?></td>
+                        <td><?= $val->empleado->nombre_completo ?></td>
+                        <td><?= $val->tipoDotacion->descripcion ?></td>
+                         <td><?= $val->tipoProceso ?></td>
+                        <td><?= $val->fecha_entrega ?></td>
+                        <td style="text-align: right"><?= $val->cantidad ?></td>
+                         <td><?= $val->descargoInventario ?></td>
                         <td style= 'width: 20px; right: 20px;'>
-                            <a href="<?= Url::toRoute(["presentacion-producto/view", "id" => $val->id_presentacion]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="<?= Url::toRoute(["entrega-dotacion/view", "id" => $val->id_entrega,'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
-                        <td style= 'width: 20px; right: 20px;'>
-                            <a href="<?= Url::toRoute(["presentacion-producto/update", "id" => $val->id_presentacion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
-                        </td>
+                        
                     </tr>
             <?php endforeach;?>
            </tbody>        
@@ -129,7 +133,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
                         ]);
                 ?> 
                 <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>
-                <a align="right" href="<?= Url::toRoute("presentacion-producto/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>   
+                
            
               <?php $form->end() ?>
             

@@ -23,7 +23,7 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(10, 36);
         $this->SetFont('Arial', 'B', 12);
-        $this->Cell(225, 7, utf8_decode("ORDEN DE ENSAMBLE - " .$orden->ordenProduccion->producto->nombre_producto), 0, 0, 'l', 0);
+        $this->Cell(225, 7, utf8_decode("ORDEN DE ENSAMBLE - " .$orden->productos->nombre_producto), 0, 0, 'l', 0);
         $this->Cell(40, 7, utf8_decode('N°. '.str_pad($orden->numero_orden_ensamble, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
         //fin
         $this->SetXY(10, 44); //FILA 1

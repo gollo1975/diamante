@@ -39,13 +39,14 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
         return [
             [['id_orden_produccion', 'id_solicitud'], 'required'],
             [['id_orden_produccion', 'id_solicitud', 'unidades',  'numero_orden_produccion','id_grupo','numero_solicitud','autorizado',
-            'cerrar_solicitud'], 'integer'],
+            'cerrar_solicitud','id_producto'], 'integer'],
             [['observacion'], 'string', 'max' => 100],
             [['fecha_cierre', 'fecha_hora_registro'], 'safe'],
             [['user_name','numero_lote'], 'string', 'max' => 15],
             [['id_orden_produccion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccion::className(), 'targetAttribute' => ['id_orden_produccion' => 'id_orden_produccion']],
             [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSolicitud::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
+            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
         ];
     }
 
@@ -69,6 +70,7 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
             'cerrar_solicitud' => 'Cerraro:',
             'autorizado' => 'Autorizado:',
             'observacion' => 'Observacion:',
+            'id_producto' => 'Producto:'
             
         ];
     }
@@ -87,6 +89,14 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
     public function getGrupo()
     {
         return $this->hasOne(GrupoProducto::className(), ['id_grupo' => 'id_grupo']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductos()
+    {
+        return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
     
     /**

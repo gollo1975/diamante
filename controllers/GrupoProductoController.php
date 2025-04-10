@@ -81,10 +81,10 @@ class GrupoProductoController extends Controller
                     if ($form->validate()) {
                         $grupo = Html::encode($form->grupo);
                         $nombre = Html::encode($form->nombre);
-                        $table = GrupoProducto::find()
+                        $table = \app\models\Productos::find()
                                     ->andFilterWhere(['=', 'id_grupo', $grupo])
-                                    ->andFilterWhere(['like', 'nombre_grupo', $nombre]);
-                        $table = $table->orderBy('id_grupo DESC');
+                                    ->andFilterWhere(['like', 'nombre_producto', $nombre]);
+                        $table = $table->orderBy('id_producto DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
                         $to = $count->count();
@@ -97,15 +97,15 @@ class GrupoProductoController extends Controller
                                 ->limit($pages->limit)
                                 ->all();
                         if (isset($_POST['excel'])) {
-                            $check = isset($_REQUEST['id_grupo  DESC']);
-                            $this->actionExcelConsultaGrupo($tableexcel);
+                            $check = isset($_REQUEST['id_producto  DESC']);
+                            $this->actionExcelConsultaProducto($tableexcel);
                         }
                     } else {
                         $form->getErrors();
                     }
                 } else {
-                    $table = GrupoProducto::find()
-                            ->orderBy('id_grupo desc');
+                    $table = \app\models\Productos::find()
+                            ->orderBy('id_producto desc');
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
@@ -117,7 +117,7 @@ class GrupoProductoController extends Controller
                             ->limit($pages->limit)
                             ->all();
                     if (isset($_POST['excel'])) {
-                        $this->actionExcelConsultaGrupo($tableexcel);
+                        $this->actionExcelConsultaProducto($tableexcel);
                     }
                 }
                 $to = $count->count();
@@ -149,9 +149,10 @@ class GrupoProductoController extends Controller
     }
     
     //VISTA QUE ENVIA LA INFORMACION PARA CONFIGURAR EL PRODUCTO
-    public function actionView_configuracion($id_grupo, $sw) 
+    public function actionView_configuracion($sw, $id_producto) 
     {
-        $configuracion = \app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $id_grupo])->orderBy('id_fase ASC')->all();
+        $configuracion = \app\models\ConfiguracionProducto::find()->where(['=','id_producto', $id_producto])->orderBy('id_fase ASC')->all();
+        $model = \app\models\Productos::findOne($id_producto);
         if(isset($_POST["actualizamateriaprima"])){
             if(isset($_POST["listado_materia"])){
                 $intIndice = 0;
@@ -163,20 +164,22 @@ class GrupoProductoController extends Controller
                     $table->save(false);
                     $intIndice++;
                 endforeach;
-                return $this->redirect(['view_configuracion','id_grupo' =>$id_grupo, 'sw' => $sw]);
+                return $this->redirect(['view_configuracion', 'sw' => $sw, 'id_producto' => $id_producto]);
             }
         }    
         return $this->render('view_configuracion', [
-            'model' => $this->findModel($id_grupo),
+            'model' => $model,
             'configuracion' => $configuracion,
-            'sw' => $sw,    
+            'sw' => $sw, 
+            'id_producto' => $id_producto,
         ]);
     }
     
      //VISTA QUE ENVIA LA INFORMACION PARA CONFIGURAR EK ANALISIS DE AUDITORIA
-    public function actionView_analisis($id_grupo, $sw) 
+    public function actionView_analisis($id_grupo, $sw, $id_producto) 
     {
-        $analisis = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_grupo', $id_grupo])->orderBy('id_analisis ASC')->all();
+        $analisis = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_producto', $id_producto])->orderBy('id_analisis ASC')->all();
+        $model = \app\models\Productos::findOne($id_producto);
         if(isset($_POST["actualizalineas"])){
             if(isset($_POST["listado_analisis_cargados"])){
                 $intIndice = 0;
@@ -188,49 +191,49 @@ class GrupoProductoController extends Controller
                     $table->save(false);
                     $intIndice++;
                 endforeach;
-                return $this->redirect(['view_analisis','id_grupo' =>$id_grupo, 'sw' => $sw]);
+                return $this->redirect(['view_analisis','id_grupo' =>$id_grupo, 'sw' => $sw, 'id_producto' =>$id_producto]);
             }
         }    
         return $this->render('view_analisis', [
-            'model' => $this->findModel($id_grupo),
+            'model' => $model,
             'analisis' => $analisis,
-            'sw' => $sw,    
+            'sw' => $sw,  
+            'id_producto' => $id_producto,
         ]);
     }
     
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
-     public function actionBuscarmateriaprima($id_grupo, $sw){
-        $operacion = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 1])->orderBy('materia_prima ASC')->all();
+     public function actionBuscarmateriaprima($id_grupo, $sw, $id_producto){
+        $operacion = \app\models\MateriaPrimas::find()->where(['=','id_solicitud', 1])->orderBy('materia_prima ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
-        $clasificacion = null;
+       
         if ($form->load(Yii::$app->request->get())) {
             if ($form->validate()) {
                 $q = Html::encode($form->q);    
-                $clasificacion = Html::encode($form->clasificacion); 
                 $operacion = \app\models\MateriaPrimas::find()
                         ->andFilterWhere(['like','materia_prima', $q])
-                        ->andFilterWhere(['=','codigo_materia_prima', $q])
-                        ->andFilterWhere(['=','id_solicitud',$clasificacion])
-                        ->andWhere(['>','stock', 0]) 
+                        ->orFilterWhere(['=','codigo_materia_prima', $q])
+                        ->andWhere(['=','id_solicitud', 1])
                         ->orderBy('materia_prima ASC')->all();                    
             } else {
                 $form->getErrors();
             }                    
         }else{
-            $table = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 1])->orderBy('materia_prima ASC')->all();
+            $operacion = \app\models\MateriaPrimas::find()->where(['=','id_solicitud', 1])->orderBy('materia_prima ASC')->all();
         }
         //PROCESO DE GUARDAR
          if (isset($_POST["guardarmateriaprima"])) {
             if(isset($_POST["nuevo_materia_prima"])){
                 foreach ($_POST["nuevo_materia_prima"] as $intCodigo) {
                     //consulta para no duplicar
-                    $registro = \app\models\ConfiguracionProducto::find()->where(['=','id_grupo', $id_grupo])
+                    $registro = \app\models\ConfiguracionProducto::find()->where(['=','id_producto', $id_producto])
                                                                    ->andWhere(['=','id_materia_prima', $intCodigo])->one();
                     if(!$registro){
                         $materia = \app\models\MateriaPrimas::findOne($intCodigo);
                         $table = new \app\models\ConfiguracionProducto();
                         $table->id_grupo = $id_grupo;
+                        $table->id_producto = $id_producto;
                         $table->id_materia_prima = $intCodigo;
                         $table->codigo_materia =  $materia->codigo_materia_prima;
                         $table->nombre_materia_prima = $materia->materia_prima;
@@ -239,7 +242,7 @@ class GrupoProductoController extends Controller
                         $table->save(false);
                     }    
                 }
-                return $this->redirect(['view_configuracion','id_grupo' => $id_grupo, 'sw' => $sw]);
+                return $this->redirect(['view_configuracion','id_producto' => $id_producto, 'sw' => $sw]);
             }
         }
         return $this->render('importar_materia_prima', [
@@ -247,11 +250,12 @@ class GrupoProductoController extends Controller
             'id_grupo' => $id_grupo,
             'form' => $form,
             'sw' => $sw,
+            'id_producto' => $id_producto,
         ]);
     }
 
     //BUSCAR CONCEPTOS DE ANALISIS PARA AGREGAR AL PROCESO
-     public function actionBuscar_concepto_analisis($id_grupo, $sw){
+     public function actionBuscar_concepto_analisis($id_grupo, $sw, $id_producto){
         $operacion = \app\models\ConceptoAnalisis::find()->orderBy('id_etapa ASC')->all();
         $form = new \app\models\FormModeloBuscar();
         $q = null;
@@ -264,7 +268,7 @@ class GrupoProductoController extends Controller
                             ->where(['like','concepto',$q])
                             ->orwhere(['=','id_analisis',$q])
                             ->andFilterWhere(['=','id_etapa',$etapa]);
-                    $operacion = $operacion->orderBy('concepto ASC');                    
+                    $operacion = $operacion->orderBy('id_etapa ASC');                    
                     $count = clone $operacion;
                     $to = $count->count();
                     $pages = new Pagination([
@@ -296,19 +300,20 @@ class GrupoProductoController extends Controller
             if(isset($_POST["nuevo_concepto"])){
                 foreach ($_POST["nuevo_concepto"] as $intCodigo) {
                     //consulta para no duplicar
-                    $registro = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_grupo', $id_grupo])
+                    $registro = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_producto', $id_producto])
                                                                    ->andWhere(['=','id_analisis', $intCodigo])->one();
                     if(!$registro){
                         $materia = \app\models\ConceptoAnalisis::findOne($intCodigo);
                         $table = new \app\models\ConfiguracionProductoProceso();
                         $table->id_grupo = $id_grupo;
                         $table->id_analisis = $intCodigo;
+                        $table->id_producto = $id_producto;
                         $table->id_etapa = $materia->id_etapa;
                         $table->user_name =  Yii::$app->user->identity->username;
                         $table->save(false);
                     }    
                 }
-                return $this->redirect(['view_analisis','id_grupo' => $id_grupo, 'sw' => $sw]);
+                return $this->redirect(['view_analisis','id_grupo' => $id_grupo, 'sw' => $sw,'id_producto' => $id_producto]);
             }
         }
         return $this->render('importar_concepto_analisis', [
@@ -317,6 +322,7 @@ class GrupoProductoController extends Controller
             'id_grupo' => $id_grupo,
             'form' => $form,
             'sw' => $sw,
+            'id_producto' => $id_producto,
         ]);
     }
 
@@ -383,19 +389,61 @@ class GrupoProductoController extends Controller
         }
     }
     
-    //eliminar detalle de materia prima
-     public function actionEliminarmateria($id_grupo,$detalle, $sw)
-    {                                
-        $detalles = \app\models\ConfiguracionProducto::findOne($detalle);
-        $detalles->delete();
-        $this->redirect(["view_configuracion",'id_grupo' => $id_grupo, 'sw' => $sw]);        
+    
+    //ELIMINAR ITEM DEL ANALISIS
+    public function actionEliminarmateria($detalle, $sw, $id_producto) {
+        
+        if (Yii::$app->request->post()) {
+          
+            if ((int) $detalle) {
+                try {
+                    \app\models\ConfiguracionProducto::deleteAll("id=:id", [":id" => $detalle]);
+                    Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                    return $this->redirect(["view_configuracion", 'sw' => $sw, 'id_producto' => $id_producto]);  
+                } catch (IntegrityException $e) {
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, esta asociado en otros procesos');
+                    return $this->redirect(["view_configuracion", 'sw' => $sw, 'id_producto' => $id_producto]);                    
+
+                } catch (\Exception $e) {
+
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, esta asociado en otros procesos');
+                    return $this->redirect(["view_configuracion", 'sw' => $sw, 'id_producto' => $id_producto]);                     
+
+                }
+            } else {
+                // echo "Ha ocurrido un error al eliminar el registros, redireccionando ...";
+                echo "<meta http-equiv='refresh' content='3; " . Url::toRoute("grupo-producto/view_configuracion") . "'>";
+            }
+        }
     }
+    
+    
     //PERMITE ELIMINAR LOS ITEMS DE ANALISIS
-     public function actionEliminar_analisis($id_grupo, $id_proceso, $sw)
-    {                                
-        $detalles = \app\models\ConfiguracionProductoProceso::findOne($id_proceso);
-        $detalles->delete();
-        $this->redirect(["view_analisis",'id_grupo' => $id_grupo, 'sw' => $sw]);        
+     //ELIMINAR ITEM DEL ANALISIS
+    public function actionEliminar_analisis($id_grupo, $id_proceso, $sw, $id_producto) {
+        
+        if (Yii::$app->request->post()) {
+          
+            if ((int) $id_proceso) {
+                try {
+                    \app\models\ConfiguracionProductoProceso::deleteAll("id_proceso=:id_proceso", [":id_proceso" => $id_proceso]);
+                    Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                    return $this->redirect(["view_analisis", 'sw' => $sw, 'id_grupo' => $id_grupo, 'id_producto' => $id_producto]);  
+                } catch (IntegrityException $e) {
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, esta asociado en otros procesos');
+                    return $this->redirect(["view_analisis", 'id_grupo' => $id_grupo, 'sw' => $sw, 'id_producto' => $id_producto]);                    
+
+                } catch (\Exception $e) {
+
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar este registro, esta asociado en otros procesos');
+                    return $this->redirect(["view_analisis", 'sw' => $sw, 'id_grupo' => $id_grupo, 'id_producto' => $id_producto]);                     
+
+                }
+            } else {
+                // echo "Ha ocurrido un error al eliminar el registros, redireccionando ...";
+                echo "<meta http-equiv='refresh' content='3; " . Url::toRoute("grupo-producto/view_analisis") . "'>";
+            }
+        } 
     }
     
     /**
@@ -412,5 +460,74 @@ class GrupoProductoController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+     //EXCEL QUE PERMITE ESPORTAR LOS CREDITOS
+    public function actionExcelConsultaProducto($tableexcel) {                
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+     
+         
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NOMBRE PRODUCTO')
+                    ->setCellValue('C1', 'NOMBRE DEL GRUPO')
+                    ->setCellValue('D1', 'MARCA')
+                    ->setCellValue('E1', 'ENTRADAS') 
+                    ->setCellValue('F1', 'SALIDA')
+                    ->setCellValue('G1', 'SALDOS')
+                    ->setCellValue('H1', 'USER NAME') ;                   
+                   
+        $i = 2  ;
+        
+        foreach ($tableexcel as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_producto)
+                    ->setCellValue('B' . $i, $val->nombre_producto)
+                    ->setCellValue('C' . $i, $val->grupo->nombre_grupo)
+                    ->setCellValue('D' . $i, $val->marca->marca)
+                    ->setCellValue('E' . $i, $val->entradas)
+                    ->setCellValue('F' . $i, $val->salidas)
+                    ->setCellValue('G' . $i, $val->saldo_unidades)                    
+                    ->setCellValue('H' . $i, $val->user_name);
+                  
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Productos.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }

@@ -1575,16 +1575,16 @@ class FacturaVentaController extends Controller
             "date" => "$fechainicio"
            // "items" => [] // Inicializamos el array de items
         ]); 
-        $detalleFactura = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura])->orderBy('codigo_producto ASC')->all();
+        $detalleFactura = \app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $id_factura])->all();
         $items = []; // Inicializamos el array de items
         foreach ($detalleFactura as $detalle) {
                  $items[] = [
-                    "product" => "$detalle->codigo_producto",
+                    "cod_product" => "$detalle->codigo_producto",
                     "warehouse" => 1,
                     "qty" => $detalle->cantidad,
                     "concept" => "$detalle->producto",
                     "average" => $detalle->valor_unitario,
-                    "total" => "$detalle->valor_unitario"
+                    "total" => "$detalle->subtotal"
                 ];
 
         }//TERMINA EL RECORRIDO DEL PARA
@@ -1620,7 +1620,7 @@ class FacturaVentaController extends Controller
             curl_close($curl);
 
             $data = json_decode($response, true);
-            var_dump($data);                   
+            var_dump($dataBody);                   
 
             if ($data === null) {
                 throw new Exception('Error al decodificar la respuesta JSON');

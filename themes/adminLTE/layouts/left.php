@@ -641,20 +641,33 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'icon' => 'database',
                                                             'url' => '#',
                                                             'items' => [
-                                                                ['label' => 'Incapacidades', 'icon' => 'plus-square-o', 'url' => ['/incapacidades/index']],  
-                                                                ['label' => 'Licencias', 'icon' => 'plus-square-o', 'url' => ['/licencias/index']],
-                                                                [
-                                                                'label' => 'Bancos',
-                                                                'icon' => 'connectdevelop',
-                                                                'url' => '#',
-                                                                'items' => [
-                                                                    ['label' => 'Empresariales', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index']],
-                                                                    ['label' => 'Empleados', 'icon' => 'plus-square-o', 'url' => ['/entidad-bancarias/index_banco_empleado']],
-                                                                    ]
-                                                                ],
+                                                                ['label' => 'Items disciplinario', 'icon' => 'plus-square-o', 'url' => ['/items-disciplinarios/index']],  
+                                                                ['label' => 'Motivos', 'icon' => 'plus-square-o', 'url' => ['/motivos/index']],
+                                                                
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE MOVIMIENTO
+                                                        [
+                                                            'label' => 'Movimiento',
+                                                            'icon' => 'book',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                ['label' => 'Procesos disciplinarios', 'icon' => 'plus-square-o', 'url' => ['proceso-disciplinario/index']],
+                                                                ['label' => 'Entrega dotacion', 'icon' => 'plus-square-o', 'url' => ['entrega-dotacion/index']],
+                                                            ],
+                                                        ],
+                                                        //COMIENZA MEDU DE CONSULTA
+                                                        [
+                                                            'label' => 'Consulta',
+                                                            'icon' => 'search',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                ['label' => 'Entrega de dotaciones', 'icon' => 'plus-square-o', 'url' => ['entrega-dotacion/search_dotaciones']],
+                                                                
                                                             ],
                                                         ],
                                                     ],
+                                                    
                                                 ],//TERMINA /MODULO
                                                 //INICIA MODULO DE SEGURIDAD EN EL TRABAJO
                                                 [

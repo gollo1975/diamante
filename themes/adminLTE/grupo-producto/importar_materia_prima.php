@@ -19,7 +19,7 @@ $clasificar = ArrayHelper::map(app\models\TipoSolicitud::find()->orderBy('descri
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["grupo-producto/buscarmateriaprima", 'id_grupo' => $id_grupo, 'sw' => $sw]),
+            "action" => Url::toRoute(["grupo-producto/buscarmateriaprima", 'id_grupo' => $id_grupo, 'sw' => $sw,'id_producto' => $id_producto]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -39,17 +39,11 @@ $clasificar = ArrayHelper::map(app\models\TipoSolicitud::find()->orderBy('descri
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
                     <?= $formulario->field($form, "q")->input("search") ?>
-                     <?= $formulario->field($form, 'clasificacion')->widget(Select2::classname(), [
-                     'data' => $clasificar,
-                     'options' => ['prompt' => 'Seleccione un registro ...'],
-                     'pluginOptions' => [
-                         'allowClear' => true
-                     ],
-                 ]); ?>
+                   
              </div>  
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["grupo-producto/buscarmateriaprima", 'id_grupo' => $id_grupo, 'sw' => $sw]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["grupo-producto/buscarmateriaprima", 'id_grupo' => $id_grupo, 'sw' => $sw, 'id_producto' => $id_producto]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>

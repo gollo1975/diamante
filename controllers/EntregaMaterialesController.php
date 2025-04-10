@@ -239,4 +239,9 @@ class EntregaMaterialesController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+     //exceles
+    public function actionExcelConsultaEntrega($tableexcel) {
+          Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.'); 
+    }
 }
