@@ -142,22 +142,25 @@ class SolicitudMaterialesController extends Controller
     public function actionView($id, $token)
     {
         $solicitd = $this->findModel($id);
-        $detalle_solicitud = \app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->all();
+        $detalle_solicitud = \app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->orderBy('linea_cerrada ASC')->all();
         $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->all();
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_cantidad"])){
                 if(isset($_POST["listado_materiales"])){
                     $intIndice = 0; $cantidad = 0;
                     foreach ($_POST["listado_materiales"] as $intCodigo):
-                        $cantidad = $_POST["unidades_requeridas"][$intIndice];
-                        $table = \app\models\SolicitudMaterialesDetalle::findOne($intCodigo);
-                        if($cantidad <= $table->unidades_lote){
-                            $table->unidades_requeridas = $_POST["unidades_requeridas"][$intIndice];
-                            $table->save();
+                        $table = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id', $intCodigo])->andwhere(['=','linea_cerrada', 0])->one();
+                        if($table){
+                            echo 'dasdas';
+                            if (isset($_POST["unidades_requeridas"][$intIndice])) {
+                                $cantidad = $_POST["unidades_requeridas"][$intIndice];
+                                $table->unidades_requeridas = $cantidad;
+                                $table->save();
+                            }
                             $intIndice++;
                         }else{
-                             Yii::$app->getSession()->setFlash('warning', 'La cantidad a despachar es mayor que la cantidad fabricada en la presentacion del producto.'); 
-                        }    
+                            $intIndice++;
+                        }
                     endforeach;
                     return $this->redirect(['view','id' =>$id, 'token' => $token]);
                 }
@@ -183,20 +186,23 @@ class SolicitudMaterialesController extends Controller
                 $model = new SolicitudMateriales();
                 $tipoSolicitud = TipoSolicitud::find()->where(['=','aplica_materia_prima', 1])->orderBy ('descripcion ASC')->all();
                 $grupo = GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all();
-                $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->where(['=','exportar_material_empaque', 0])->orderBy('id_orden_produccion DESC')->all();
+                $ordenProduccion = \app\models\OrdenProduccion::find()->where(['=','orden_cerrada_ensamble', 0])->all();
                 if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
                     return ActiveForm::validate($model);
                 }
-                if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                if ($model->load(Yii::$app->request->post())) {
                     $orden = \app\models\OrdenProduccion::findOne($model->id_orden_produccion);
                     $model->id_grupo = $orden->id_grupo;
+                    $model->id_orden_produccion = $model->id_orden_produccion;
+                    $model->id_solicitud = 2;
+                    $model->id_producto = $orden->id_producto;
                     $model->numero_lote = $orden->numero_lote;
                     $model->numero_orden_produccion = $orden->numero_orden;
                     $model->unidades = $orden->unidades;
                     $model->user_name = Yii::$app->user->identity->username;
                     $model->observacion = $model->observacion;
-                    $model->save();
+                    $model->save(false);
                     return $this->redirect(['view', 'id' => $model->codigo, 'token' =>0]);
                 }
 
@@ -205,6 +211,7 @@ class SolicitudMaterialesController extends Controller
                     'tipoSolicitud' => ArrayHelper::map($tipoSolicitud, 'id_solicitud', 'descripcion'),
                     'ordenProduccion' => ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'OrdenEnsambleConsulta'),
                     'grupo' => ArrayHelper::map($grupo, 'id_grupo', 'nombre_grupo'),
+                    'sw' => 0,
                 ]);
             }else{
                 return $this->redirect(['site/sinpermiso']); 
@@ -225,13 +232,14 @@ class SolicitudMaterialesController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $sw = 1;
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
         $tipoSolicitud = TipoSolicitud::find()->where(['=','aplica_materia_prima', 1])->orderBy ('descripcion ASC')->all();
         $grupo = GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all();
-        $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->all();
+        $ordenProduccion = \app\models\OrdenProduccion::find()->where(['=','orden_cerrada_ensamble', 0])->all();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index']);
@@ -242,80 +250,32 @@ class SolicitudMaterialesController extends Controller
             'tipoSolicitud' => ArrayHelper::map($tipoSolicitud, 'id_solicitud', 'descripcion'),
             'ordenProduccion' => ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'OrdenEnsambleConsulta'),
             'grupo' => ArrayHelper::map($grupo, 'id_grupo', 'nombre_grupo'),
+            'sw' =>  $sw,
         ]);
     }
      //BUSCAR MATERIA PRIMAS
-    public function actionBuscar_material_empaque($id, $token, $id_solicitud, $id_detalle){
-        $operacion = MateriaPrimas::find()->where(['=','id_solicitud', $id_solicitud])->orderBy('materia_prima DESC')->all();
-        $form = new \app\models\FormModeloBuscar();
-        $q = null;
-        if ($form->load(Yii::$app->request->get())) {
-            if ($form->validate()) {
-                $q = Html::encode($form->q);                                
-                    $operacion = MateriaPrimas::find()
-                            ->where(['like','materia_prima',$q])
-                            ->orwhere(['=','codigo_materia_prima',$q])
-                            ->andWhere(['=','id_solicitud', $id_solicitud]);
-                    $operacion = $operacion->orderBy('materia_prima DESC');                    
-                    $count = clone $operacion;
-                    $to = $count->count();
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count()
-                    ]);
-                    $operacion = $operacion
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();         
-            } else {
-                $form->getErrors();
-            }                    
-        }else{
-            $table = MateriaPrimas::find()->where(['=','id_solicitud', $id_solicitud])->orderBy('materia_prima DESC');
-            $tableexcel = $table->all();
-            $count = clone $table;
-            $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count(),
-            ]);
-             $operacion = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-        }
-        //PROCESO DE GUARDAR
-         if (isset($_POST["guardarmateriaprima"])) {
-            if(isset($_POST["nuevo_materia_prima"])){
-                $intIndice = 0;
-                foreach ($_POST["nuevo_materia_prima"] as $intCodigo) {
-                    $registro = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_materia_prima', $intCodigo])->andWhere(['=','codigo', $id])->one();
-                    if(!$registro){
-                        $presentacion = \app\models\OrdenProduccionProductos::findOne($id_detalle);
-                        $item = MateriaPrimas::findOne($intCodigo);
-                        $ordenSolicitud = SolicitudMateriales::findOne($id); 
-                        $table = new \app\models\SolicitudMaterialesDetalle();
-                        $table->codigo = $id;
-                        $table->id_materia_prima = $intCodigo;
-                        $table->codigo_materia = $item->codigo_materia_prima;
-                        $table->materiales = $item->materia_prima;
-                        $table->unidades_lote = $presentacion->cantidad_real;
-                        $table->id_detalle = $id_detalle;
-                        $table->save();
-                    }    
+    public function actionBuscar_material_empaque($id, $token, $id_detalle){
+        $producto = \app\models\OrdenProduccionProductos::findOne($id_detalle);
+        $registro = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $producto->id_presentacion])->all();
+        if(count($registro) > 0){
+            foreach ($registro as $val) {
+                if(!\app\models\SolicitudMaterialesDetalle::find()->where(['=','id_materia_prima', $val->id_materia_prima])
+                                                                  ->andWhere(['=','codigo', $id])->andWhere(['=','id_detalle', $producto->id_detalle])->one()){
+                    $table = new \app\models\SolicitudMaterialesDetalle();
+                    $table->codigo = $id;
+                    $table->id_materia_prima = $val->id_materia_prima;
+                    $table->codigo_materia = $val->codigo_material;
+                    $table->materiales = $val->materiaPrima->materia_prima;
+                    $table->unidades_lote = $producto->cantidad_real;
+                    $table->id_detalle = $id_detalle;
+                    $table->save();
                 }
-                return $this->redirect(['view','id' => $id, 'token' => $token]);
             }
+             return $this->redirect(['view','id' => $id, 'token' => $token]); 
+        }else{
+            Yii::$app->getSession()->setFlash('info', 'No existe material de empaque configurado para esta presentacion de producto. Valide la informacion.!');
+            return $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' => $token]);
         }
-        return $this->render('search_materia_prima', [
-            'operacion' => $operacion,            
-            'pagination' => $pages,
-            'id' => $id,
-            'form' => $form,
-            'token' => $token,
-            'id_solicitud' => $id_solicitud,
-            'id_detalle' => $id_detalle,    
-
-        ]);
     }
 
     /**
@@ -337,13 +297,17 @@ class SolicitudMaterialesController extends Controller
         $model = $this->findModel($id);
         if(\app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->one()){
             $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $model->id_orden_produccion])->all();
-            foreach ($producto as $valor) {
-                $unidades = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle', $valor->id_detalle])->one();
-                if ($unidades === null) {
-                    Yii::$app->getSession()->setFlash('error', 'Faltan PRESENTACIONES para solicitar el material de empaque.');
-                    return $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' => $token]);
+            if($model->aplica_todo == 1){
+                foreach ($producto as $valor) {
+
+                        $unidades = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle', $valor->id_detalle])->one();
+                        if ($unidades === null) {
+                            Yii::$app->getSession()->setFlash('error', 'Faltan PRESENTACIONES para solicitar el material de empaque.');
+                            return $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' => $token]);
+                        }
+
                 }
-            }
+            }    
             if ($model->autorizado == 0){  
                 $model->autorizado = 1;
                 $model->update();
@@ -410,10 +374,24 @@ class SolicitudMaterialesController extends Controller
             $modelo->materiales = $val->materiales;
             $modelo->unidades_solicitadas = $val->unidades_requeridas;
             $modelo->id_detalle = $val->id_detalle;
+            $modelo->id_orden_produccion = $solicitud->id_orden_produccion;
             $modelo->save();       
         endforeach;
         return $this->redirect(["entrega-materiales/view", 'id' => $entrega->id_entrega, 'token' =>$token]); 
            
+    }
+    
+    //PROCESO QUE CIERRA LA LINEA
+    public function actionCerrar_presentacion($id, $token, $id_detalle) {
+        $producto = \app\models\OrdenProduccionProductos::findOne($id_detalle);
+        $detalle = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle', $id_detalle])->all();
+        foreach ($detalle as $val) {
+            $val->linea_cerrada = 1;
+            $val->save();
+        }
+        $producto->solicitud_empaque = 1;
+        $producto->save();
+        return  $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' =>$token]);
     }
     
     /**

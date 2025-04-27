@@ -45,15 +45,35 @@ $conProcesoProduccion = ArrayHelper::map(TipoProcesoProduccion::find()->orderBy 
     <div class="panel-body">
         <?php if($sw == 0){?>
             <div class="row">
-                <?= $form->field($model, 'id_grupo')->dropDownList($grupo,['prompt'=>'Seleccione...', 'onchange'=>' $.get( "'.Url::toRoute('orden-produccion/cargarproducto').'", { id: $(this).val() } ) .done(function( data ) {
-                $( "#'.Html::getInputId($model, 'id_producto',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
+                <?= $form->field($model, 'id_grupo')->widget(Select2::classname(), [
+                    'data' => $grupo,
+                    'options' => ['placeholder' => 'Seleccione un cliente...'],
+                    'pluginOptions' => ['allowClear' => true],
+                    'pluginEvents' => [
+                        "change" => 'function() { $.get( "' . Url::toRoute('orden-produccion/cargarproducto') . '", { id: $(this).val() } )
+                                .done(function( data ) {
+                                    $( "#' . Html::getInputId($model, 'id_producto') . '" ).html( data );
+                                });
+                        }',
+                    ],
+                    ]); ?>
                 <?= $form->field($model, 'id_producto')->dropDownList(['prompt' => 'Seleccione...']) ?>
             </div> 
         <?php }else{?>
             <div class="row">
-                <?= $form->field($model, 'id_grupo')->dropDownList($grupo,['prompt'=>'Seleccione...', 'onchange'=>' $.get( "'.Url::toRoute('orden-produccion/cargarproducto').'", { id: $(this).val() } ) .done(function( data ) {
-                       $( "#'.Html::getInputId($model, 'id_producto',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
-                        <?= $form->field($model, 'id_producto')->dropDownList($ConProducto, ['prompt' => 'Seleccione...']) ?>
+               <?= $form->field($model, 'id_grupo')->widget(Select2::classname(), [
+                    'data' => $grupo,
+                    'options' => ['placeholder' => 'Seleccione un cliente...'],
+                    'pluginOptions' => ['allowClear' => true],
+                    'pluginEvents' => [
+                        "change" => 'function() { $.get( "' . Url::toRoute('orden-produccion/cargarproducto') . '", { id: $(this).val() } )
+                                .done(function( data ) {
+                                    $( "#' . Html::getInputId($model, 'id_producto') . '" ).html( data );
+                                });
+                        }',
+                    ],
+                ]); ?>
+                <?= $form->field($model, 'id_producto')->dropDownList($ConProducto, ['prompt' => 'Seleccione...']) ?>
             </div>   
         <?php } ?>          
 

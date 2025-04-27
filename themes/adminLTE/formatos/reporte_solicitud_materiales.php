@@ -23,8 +23,8 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
-        $this->Cell(162, 7, utf8_decode("SOLICITUD DE MATERIALES"), 0, 0, 'l', 0);
-        $this->Cell(30, 7, utf8_decode('N°. '.str_pad($solicitud->numero_solicitud, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        $this->Cell(162, 7, utf8_decode("SOLICITUD DE MATERIALES (OP)"), 0, 0, 'l', 0);
+        $this->Cell(30, 7, utf8_decode('N°. '.str_pad($solicitud->numero_orden_produccion, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 7);
@@ -42,15 +42,15 @@ class PDF extends FPDF {
         //FIN
         $this->SetXY(10, 52);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(25, 5, utf8_decode("O PRODUCCION:"), 0, 0, 'L', 1);
+        $this->Cell(25, 5, utf8_decode("No SOLICITUD:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(32, 5, utf8_decode($solicitud->numero_orden_produccion), 0, 0, 'L',1);
+        $this->Cell(32, 5, utf8_decode($solicitud->numero_solicitud), 0, 0, 'L',1);
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(23, 5, utf8_decode("USER NAME:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
         $this->Cell(60, 5, utf8_decode($solicitud->user_name), 0, 0, 'L', 1);
         $this->SetFont('Arial', 'B', 7);
-        $this->Cell(25, 5, utf8_decode("UNIDADES:"), 0, 0, 'L', 1);
+        $this->Cell(25, 5, utf8_decode("UNIDADES LOTE:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
         $this->Cell(27, 5, $solicitud->unidades, 0, 0, 'R', 1);
         //FIN
@@ -86,16 +86,16 @@ class PDF extends FPDF {
         $this->Line(10,30,202,30);//linea inferior horizontal
        
         //Lineas del encabezado
-        $this->Line(10,74,10,125);
-        $this->Line(70,74,70,125);
-        $this->Line(130,74,130,125);
-        $this->Line(166,74,166,125);
-        $this->Line(202,74,202,125);
-        $this->Line(10,125,202,125);//linea horizontal inferior  
+        $this->Line(10,74,10,140);
+        $this->Line(80,74,80,140);
+        $this->Line(150,74,150,140);
+        $this->Line(176,74,176,140);
+        $this->Line(202,74,202,140);
+        $this->Line(10,140,202,140);//linea horizontal inferior  
     }
     function EncabezadoDetalles() {
         $this->Ln(10);
-        $header = array('NOMBRE DEL MATERIAl', 'PRESENTACION',('U. REQUERIDAS'),('U. SOLICITADAS'));
+        $header = array('NOMBRE DEL MATERIAL', 'PRESENTACION',('U. REQUERIDAS'),('U. SOLICITADAS'));
         $this->SetFillColor(200, 200, 200);
         $this->SetTextColor(0);
         $this->SetDrawColor(0, 0, 0);
@@ -103,7 +103,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 8);
 
         //creamos la cabecera de la tabla.
-        $w = array(60, 60 ,36, 36);
+        $w = array(70, 70 ,26, 26);
         for ($i = 0; $i < count($header); $i++){
             if ($i == 0 || $i == 1){
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -123,31 +123,31 @@ class PDF extends FPDF {
         $pdf->SetX(10);
         $pdf->SetFont('Arial', '', 7);
 	foreach ($detalles as $detalle) {                                                           
-            $pdf->Cell(60, 4, utf8_decode($detalle->materiales), 0, 0, 'L');
-             $pdf->Cell(60, 4, utf8_decode($detalle->ordenPresentacion->descripcion), 0, 0, 'L');
-            $pdf->Cell(36, 4, utf8_decode(''.number_format($detalle->unidades_lote,0)), 0, 0, 'R');
-            $pdf->Cell(36, 4, utf8_decode(''.number_format($detalle->unidades_requeridas,0)), 0, 0, 'R');
+            $pdf->Cell(70, 4, utf8_decode(substr($detalle->materiales, 0, 45)), 0, 0, 'L');
+             $pdf->Cell(70, 4, utf8_decode(substr($detalle->ordenPresentacion->descripcion, 0, 45)), 0, 0, 'L');
+            $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_lote,0)), 0, 0, 'R');
+            $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_requeridas,0)), 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }
-	$pdf->SetXY(10, 135);
+	$pdf->SetXY(10, 150);
         $this->SetFont('Arial', 'B', 8);
         $pdf->MultiCell(146, 4, utf8_decode('OBSERVACION: '.$model->observacion),0,'J');
 	//firma trabajador
-        $pdf->SetXY(10, 160);
+        $pdf->SetXY(10, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(35, 5, '________________________________', 0, 0, 'L',0);
-         $pdf->SetXY(10, 165);
+         $pdf->SetXY(10, 180);
         $pdf->Cell(35, 5, 'OPERARIO DE PRODUCCION', 0, 0, 'L',0);
-        $pdf->SetXY(10, 170);
+        $pdf->SetXY(10, 185);
         $pdf->Cell(35, 5, utf8_decode('Recibe'), 0, 0, 'L',0);
         // SEGUNDA FIRMA
-        $pdf->SetXY(120, 160);
+        $pdf->SetXY(120, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(120, 5, '________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(120, 165);
+        $pdf->SetXY(120, 180);
         $pdf->Cell(120, 5, 'OPERARIO DE PRODUCCION', 0, 0, 'L',0);
-        $pdf->SetXY(120, 170);
+        $pdf->SetXY(120, 185);
         $pdf->Cell(120, 5, utf8_decode('Solicita'), 0, 0, 'L',0);
         //liena
         //linea

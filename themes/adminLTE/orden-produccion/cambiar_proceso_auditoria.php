@@ -39,14 +39,18 @@ $form = ActiveForm::begin([
                              <?= $form->field($model, 'estado')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
                          </div>
                          <div class="row">
-                         <?= $form->field($model, 'fecha')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                         <?= $form->field($model, 'fecha_proceso')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                              'value' => date('Y-m-d', strtotime('+2 days')),
                              'options' => ['placeholder' => 'Fecha...'],
                              'pluginOptions' => [
                                  'format' => 'yyyy-m-d',
                                  'todayHighlight' => true]])
                          ?>
-                     </div>
+                    </div>
+                    <div class = "row">
+                        
+                       <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>'])->textarea(['rows' => 2, 'maxlength' => true, 'size' => '100']) ?>
+                    </div>     
                        
                 </div>  
                     <div class="panel-footer text-right">

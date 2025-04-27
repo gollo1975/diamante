@@ -117,6 +117,7 @@ $view = 'materia-primas';
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha entrada</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha vcto</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Soporte</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>No Lote</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th> 
                                          <th scope="col" style='background-color:#B9D5CE;'>% Iva</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>                        
@@ -135,6 +136,7 @@ $view = 'materia-primas';
                                         <td><?= $val->entrada->fecha_proceso ?></td>
                                         <td><?= $val->fecha_vencimiento ?></td>
                                         <td><?= $val->entrada->numero_soporte ?></td>
+                                        <td><?= $val->numero_lote ?></td>
                                         <td><?= $val->entrada->ordenCompra->tipoOrden->descripcion_orden ?></td>
                                         <td style="text-align: right"><?= $val->porcentaje_iva ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>

@@ -37,10 +37,11 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['descripcion_orden','tipo_modulo'], 'required'],
+            [['descripcion_orden','tipo_modulo','id_solicitud'], 'required'],
             [['descripcion_orden'], 'string', 'max' => 30],
              [['abreviatura'], 'string', 'max' => 3],
-            ['tipo_modulo', 'integer'],
+            [['tipo_modulo','id_solicitud'], 'integer'],
+             [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSolicitud::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
         ];
     }
 
@@ -54,7 +55,16 @@ class TipoOrdenCompra extends \yii\db\ActiveRecord
             'descripcion_orden' => 'Descripción',
             'abreviatura' => 'Abreviatura',
             'tipo_modulo' => 'Tipo de modulo:',
+            'id_solicitud' => 'Solicitud',
         ];
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSolicitud()
+    {
+        return $this->hasOne(TipoSolicitud::className(), ['id_solicitud' => 'id_solicitud']);
     }
     
     public function getTipoModulo() {

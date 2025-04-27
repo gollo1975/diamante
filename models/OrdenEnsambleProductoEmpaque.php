@@ -40,12 +40,12 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     {
         return [
             [['id_ensamble', 'id_materia_prima', 'unidades_solicitadas', 'unidades_devolucion', 'unidades_averias', 'unidades_utilizadas', 'unidades_sala_tecnica',
-                'unidades_muestra_retencion', 'unidades_reales','stock','importado','id_presentacion'], 'integer'],
+                'unidades_muestra_retencion', 'unidades_reales','stock','importado','id_presentacion','linea_exportada_inventario'], 'integer'],
             [['fecha_hora_carga'], 'safe'],
             [['user_name','alerta'], 'string', 'max' => 15],
             [['id_ensamble'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProducto::className(), 'targetAttribute' => ['id_ensamble' => 'id_ensamble']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
-            [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenEnsambleProductoDetalle::className(), 'targetAttribute' => ['id_presentacion' => 'id']],
+            [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => PresentacionProducto::className(), 'targetAttribute' => ['id_presentacion' => 'id_presentacion']],
         ];
     }
 
@@ -70,6 +70,8 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
             'stock' => 'stock',
             'alerta' => 'alerta',
             'importado' => 'Importado',
+            'id_presentacion' => 'id_presentacion',
+            'linea_exportada_inventario' => 'linea_exportada_inventario',
         ];
     }
 
@@ -84,9 +86,9 @@ class OrdenEnsambleProductoEmpaque extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProductoEmpaque()
+    public function getPresentacion()
     {
-        return $this->hasOne(OrdenEnsambleProductoDetalle::className(), ['id' => 'id_presentacion']);
+        return $this->hasOne(PresentacionProducto::className(), ['id_presentacion' => 'id_presentacion']);
     }
 
     /**

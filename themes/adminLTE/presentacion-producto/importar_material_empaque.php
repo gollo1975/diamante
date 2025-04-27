@@ -1,24 +1,24 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use app\models\Ordenproduccion;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
 
-$this->title = 'Inventario material del empaque';
-$this->params['breadcrumbs'][] = ['label' => 'Inventario material de empaque', 'url' => ['/orden-ensamble-producto/view', 'id' => $id, 'token' => $token, 'sw'=> $sw]];
+$this->title = 'Inventario material de empaque';
+$this->params['breadcrumbs'][] = ['label' => 'Inventario materia prima', 'url' => ['view','id' => $id]];
 $this->params['breadcrumbs'][] = $id;
 ?>
     <div class="modal-body">
         <p>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['/orden-ensamble-producto/view', 'id' => $id, 'token' => $token,  'sw'=> $sw], ['class' => 'btn btn-primary btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['view', 'id' => $id], ['class' => 'btn btn-primary btn-sm']) ?>
         </p>
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $id, 'token' => $token, 'id_solicitud' => $id_solicitud,  'sw'=> $sw, 'id_producto' => $id_producto]),
+            "action" => Url::toRoute(["presentacion-producto/buscar_material_empaque", 'id' => $id]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -37,11 +37,12 @@ $this->params['breadcrumbs'][] = $id;
 
             <div class="panel-body" id="filtrocliente">
                 <div class="row" >
-                    <?= $formulario->field($form, "q", ['inputOptions' =>['autofocus' => 'autofocus', 'class' => 'form-control']]) ?>
-                </div>
+                    <?= $formulario->field($form, "q")->input("search") ?>
+                   
+             </div>  
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $id, 'token' => $token, 'id_solicitud' => $id_solicitud,  'sw'=> $sw, 'id_producto' => $id_producto]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["presentacion-producto/buscar_material_empaque", 'id' => $id]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
@@ -60,18 +61,16 @@ $this->params['breadcrumbs'][] = $id;
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading">
-                    Materiales <span class="badge"><?= $pagination->totalCount ?></span>
+                    Materiales <span class="badge"><?= count($operacion)?></span>
                 </div>
                 <div class="panel-body">
                      <table class="table table-bordered table-hover">
                         <thead>
                         <tr>
-                            <th scope="col" style='background-color:#B9D5CE;'>Codigo empaque</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Material de empaque</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Codigo material</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Nombre del material</th>
                             <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Aplica iva</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Porcentaje Iva</th>
-                            <th scope="col" style='background-color:#B9D5CE;'>Clasificacion</th>
+                            <th scope="col" style='background-color:#B9D5CE;'>Medida</th>
                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                         </tr>
                         </thead>
@@ -80,21 +79,18 @@ $this->params['breadcrumbs'][] = $id;
                         <tr style="font-size: 85%;">
                             <td><?= $val->codigo_materia_prima ?></td>
                             <td><?= $val->materia_prima ?></td>
-                            <td style="text-align: right"><?= ''. number_format($val->stock,0) ?></td>
-                            <td><?= $val->aplicaIva ?></td>
-                            <td><?= $val->porcentaje_iva ?>%</td>
-                            <td><?= $val->tipoSolicitud->descripcion ?></td>
-                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_material_empaque[]" value="<?= $val->id_materia_prima ?>"></td> 
+                            <td><?= $val->stock ?></td>
+                            <td><?= $val->medida->descripcion ?></td>
+                            <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="nuevo_materia_prima[]" value="<?= $val->id_materia_prima ?>"></td> 
                         </tr>
                         </tbody>
                         <?php endforeach; ?>
                     </table>
                 </div>
                 <div class="panel-footer text-right">
-                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardar_material_empaque']) ?>
+                    <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Enviar datos", ["class" => "btn btn-success btn-sm", 'name' => 'guardarmateriaprima']) ?>
                 </div>
             </div>
-            <?= LinkPager::widget(['pagination' => $pagination]) ?>
         </div>
         
     </div>

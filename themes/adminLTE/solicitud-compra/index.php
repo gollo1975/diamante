@@ -153,7 +153,7 @@ $form = ActiveForm::begin([
                 <?php }else{
                     if($val->importado == 0){?>
                         <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['orden-compra/create'], [
+                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['orden-compra/create','id_solicitud' => $val->id_solicitud_compra], [
                                            'class' => '',
                                            'title' => 'Proceso que permite crear LA ORDEN DE COMPRA AL PROVEEDOR)', 
                                            'data' => [

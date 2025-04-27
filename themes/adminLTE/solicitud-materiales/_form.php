@@ -23,7 +23,7 @@ $form = ActiveForm::begin([
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
             'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
-            'labelOptions' => ['class' => 'col-sm-2 control-label'],
+            'labelOptions' => ['class' => 'col-sm-4 control-label'],
             'options' => []
         ],
         ]);
@@ -38,22 +38,20 @@ $form = ActiveForm::begin([
     </div>
     
     <div class="panel-body">
+        <?php if($sw == 0){?>
+            <div class="row">
+                 <?= $form->field($model, 'id_orden_produccion')->widget(Select2::classname(), [
+                    'data' => $ordenProduccion,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?> 
+            </div>
+        <?php }?>
         <div class="row">
-             <?= $form->field($model, 'id_orden_produccion')->widget(Select2::classname(), [
-                'data' => $ordenProduccion,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-             <?= $form->field($model, 'id_solicitud')->widget(Select2::classname(), [
-                'data' => $tipoSolicitud,
-                'options' => ['prompt' => 'Seleccione...'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]); ?> 
-        </div>        
+                <?= $form->field($model, 'aplica_todo')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+            </div>
         <div class="row">
             <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div>    

@@ -299,7 +299,7 @@ class OrdenCompraController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($id_solicitud)
     {
         $model = new OrdenCompra();
         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
@@ -307,18 +307,25 @@ class OrdenCompraController extends Controller
             return ActiveForm::validate($model);
         }
         $token = 0;
+        $solicitud = \app\models\SolicitudCompra::findOne($id_solicitud);
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            
             $model->user_name = Yii::$app->user->identity->username;
             $orden = \app\models\TipoOrdenCompra::findOne($model->id_tipo_orden);
             $model->descripcion = $orden->descripcion_orden;
             $model->abreviatura = $orden->abreviatura;
-            $model->update();
+            $model->numero_solicitud = $solicitud->numero_solicitud;
+            $model->id_solicitud_compra = $id_solicitud;
+            $model->save(false);
             return $this->redirect(['view', 'id' => $model->id_orden_compra, 'token' => $token]);
         }
+        $model->numero_solicitud = $solicitud->numero_solicitud;
         $model->fecha_creacion = date('Y-m-d');
         return $this->render('create', [
+            
             'model' => $model,
             'token' => $token,
+            'solicitud' => $solicitud,
         ]);
     }
 
@@ -342,7 +349,7 @@ class OrdenCompraController extends Controller
             $model->descripcion = $orden->descripcion_orden;
             $model->abreviatura = $orden->abreviatura;
             $model->update();
-            return $this->redirect(['index']);
+            return $this->redirect(['view','id' => $id, 'token' => 0]);
         }
 
         return $this->render('update', [
@@ -350,76 +357,83 @@ class OrdenCompraController extends Controller
         ]);
     }
 // proceso de importar
-    public function actionImportarsolicitud($id, $token)
+    public function actionImportarsolicitud($id, $token, $id_solicitud)
+    
     {
-        $solicitud = \app\models\SolicitudCompra::find()->where(['=','importado', 0])->orderBy('id_solicitud ASC')->all();
-        $form = new FormModeloBuscar();
-        $q = null;
-        if ($form->load(Yii::$app->request->get())) {
-            if ($form->validate()) {
-                $q = Html::encode($form->q);                                
-                    $solicitud = \app\models\SolicitudCompra::find()
-                            ->where(['=','id_solicitud', $q])
-                            ->andwhere(['=','importado', 0]);
-                    $solicitud = $solicitud->orderBy('id_solicitud_compra ASC');                    
-                    $count = clone $solicitud;
-                    $to = $count->count();
-                    $pages = new Pagination([
-                        'pageSize' => 10,
-                        'totalCount' => $count->count()
-                    ]);
-                    $operacion = $solicitud
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();         
-            } else {
-                $form->getErrors();
-            }                    
-        }else{
-            $table = \app\models\SolicitudCompra::find()->where(['=','importado', 0])->orderBy('id_solicitud ASC');
-            $tableexcel = $table->all();
-            $count = clone $table;
-            $pages = new Pagination([
-                        'pageSize' => 10,
-                        'totalCount' => $count->count(),
-            ]);
-             $operacion = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
-        }
-        //PROCESO DE GUARDAR
-         if (isset($_POST["enviarsolicitudcompras"])) {
-            if(isset($_POST["solicitud_compras"])){
-                $intIndice = 0;
-                foreach ($_POST["solicitud_compras"] as $intCodigo) {
-                    $listado = \app\models\SolicitudCompraDetalles::find()->where(['=','id_solicitud_compra', $intCodigo])->all();
-                    foreach ($listado as $listados){
-                        $table = new OrdenCompraDetalle();
-                        $table->id_items = $listados->id_items;
-                        $table->id_orden_compra = $id;
-                        $table->id_solicitud_compra = $intCodigo;
-                        $table->porcentaje = $listados->porcentaje_iva;
-                        $table->cantidad = $listados->cantidad;
-                        $table->valor = $listados->valor;
-                        $table->valor_iva = $listados->valor_iva;
-                        $table->subtotal = $listados->subtotal;
-                        $table->total_orden = $listados->total_solicitud;        
-                        $table->save(false);
-                    }
-                }
-                $this->ActualizarLineas($id);
-                return $this->redirect(['view','id' => $id, 'token' => $token]);
+        if($registro = \app\models\SolicitudCompra::find()->where(['=','id_solicitud', $id_solicitud])->andWhere(['=','importado', 0])->one()){
+            $solicitud = \app\models\SolicitudCompra::find()->where(['=','importado', 0])->andWhere(['=','id_solicitud', $id_solicitud])->orderBy('id_solicitud ASC')->all();
+            $form = new FormModeloBuscar();
+            $q = null;
+            if ($form->load(Yii::$app->request->get())) {
+                if ($form->validate()) {
+                    $q = Html::encode($form->q);                                
+                        $solicitud = \app\models\SolicitudCompra::find()
+                                ->where(['=','id_solicitud', $q])
+                                ->andwhere(['=','importado', 0]);
+                        $solicitud = $solicitud->orderBy('id_solicitud_compra ASC');                    
+                        $count = clone $solicitud;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count()
+                        ]);
+                        $operacion = $solicitud
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();         
+                } else {
+                    $form->getErrors();
+                }                    
+            }else{
+                $table = \app\models\SolicitudCompra::find()->where(['=','importado', 0])->andWhere(['=','id_solicitud', $id_solicitud])->orderBy('id_solicitud ASC');
+                $tableexcel = $table->all();
+                $count = clone $table;
+                $pages = new Pagination([
+                            'pageSize' => 10,
+                            'totalCount' => $count->count(),
+                ]);
+                 $operacion = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
             }
-        }
-        return $this->render('importar_solicitud_compras', [
-            'operacion' => $operacion,            
-            'pagination' => $pages,
-            'id' => $id,
-            'form' => $form,
-            'token' => $token,
+            //PROCESO DE GUARDAR
+             if (isset($_POST["enviarsolicitudcompras"])) {
+                if(isset($_POST["solicitud_compras"])){
+                    $intIndice = 0;
+                    foreach ($_POST["solicitud_compras"] as $intCodigo) {
+                        $listado = \app\models\SolicitudCompraDetalles::find()->where(['=','id_solicitud_compra', $intCodigo])->all();
+                        foreach ($listado as $listados){
+                            $table = new OrdenCompraDetalle();
+                            $table->id_items = $listados->id_items;
+                            $table->id_orden_compra = $id;
+                            $table->id_solicitud_compra = $intCodigo;
+                            $table->porcentaje = $listados->porcentaje_iva;
+                            $table->cantidad = $listados->cantidad;
+                            $table->valor = $listados->valor;
+                            $table->valor_iva = $listados->valor_iva;
+                            $table->subtotal = $listados->subtotal;
+                            $table->total_orden = $listados->total_solicitud;        
+                            $table->save(false);
+                        }
+                    }
+                    $this->ActualizarLineas($id);
+                    return $this->redirect(['view','id' => $id, 'token' => $token]);
+                }
+            }
+            return $this->render('importar_solicitud_compras', [
+                'operacion' => $operacion,            
+                'pagination' => $pages,
+                'id' => $id,
+                'form' => $form,
+                'token' => $token,
+                'id_solicitud' => $id_solicitud,
 
-        ]);
+            ]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'El tipo de orden que selecciono NO tiene solicitudes de compras programadas.  ');
+            return $this->redirect(["orden-compra/view", 'id' => $id, 'token' => $token]);
+        }   
     }
     //subproceso que actualiza
      protected function ActualizarLineas($id){

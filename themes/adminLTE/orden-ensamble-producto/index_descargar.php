@@ -20,7 +20,7 @@ use app\models\OrdenProduccion;
 
 
 
-$this->title = 'ORDENES DE ENSAMBLE';
+$this->title = 'Descargar (PRODUCTO / MATERIAS PRIMAS)';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("orden-ensamble-producto/index"),
+    "action" => Url::toRoute("orden-ensamble-producto/index_descargar_inventario"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ]);
 
-$grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
 $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->all();
 $ordenProduccion = ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'OrdenEnsambleConsulta');
 
@@ -60,8 +60,8 @@ $ordenProduccion = ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'Or
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
             <?= $formulario->field($form, "numero_ensamble")->input("search") ?>
-             <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
-                'data' => $grupo,
+             <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                'data' => $producto,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -92,7 +92,7 @@ $ordenProduccion = ArrayHelper::map($ordenProduccion, 'id_orden_produccion', 'Or
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("orden-ensamble-producto/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("orden-ensamble-producto/index_descargar_inventario") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -135,16 +135,14 @@ $form = ActiveForm::begin([
                                        'data' => ['confirm' => 'Esta seguro de exportar los productos que se encuentra en la OE al modulo de inventarios de productos!.', 'method' => 'post']]);?>
                         </td>
                         <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-arrow-down"></span> Descargar ME', ['/orden-ensamble-producto/exportar_material_empaque', 'id' => $val->id_ensamble, 'id_orden_produccion' => $val->id_orden_produccion],['class' => 'btn btn-success btn-sm',
-                                           'data' => ['confirm' => 'Esta seguro de ENVIAR este material de empaque al modulo de MATERIAS PRIMAS para ser descargado.!.', 'method' => 'post']]);?>
-                       </div>
+                             <a href="<?= Url::toRoute(["orden-ensamble-producto/view_lineas_empaque", "id_ensamble" => $val->id_ensamble ]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                        </td>     
                     <?php }else{
                             if($val->inventario_exportado == 1 && $val->exportar_material_empaque == 0){?>  
                                 <td style= 'width: 25px; height: 10px;'></td>
                                 <td style= 'width: 25px; height: 10px;'>
-                                    <?= Html::a('<span class="glyphicon glyphicon-arrow-down"></span> Descargar ME', ['/orden-ensamble-producto/exportar_material_empaque', 'id' => $val->id_ensamble, 'id_orden_produccion' => $val->id_orden_produccion],['class' => 'btn btn-success btn-sm',
-                                           'data' => ['confirm' => 'Esta seguro de ENVIAR este material de empaque al modulo de MATERIAS PRIMAS para ser descargado.!.', 'method' => 'post']]);?>
-                                  </div>
+                                     <a href="<?= Url::toRoute(["orden-ensamble-producto/view_lineas_empaque", "id_ensamble" => $val->id_ensamble ]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                                </td> 
                             <?php }else{
                                 if($val->inventario_exportado == 0 && $val->exportar_material_empaque == 1){?>
                                     <td style= 'width: 25px; height: 10px;'>

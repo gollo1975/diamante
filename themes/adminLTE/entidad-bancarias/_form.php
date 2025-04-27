@@ -28,7 +28,7 @@ $form = ActiveForm::begin([
 ?>
 
 <?php
-$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
+$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
 $tipo = ArrayHelper::map(TipoDocumento::find()->where(['=','id_tipo_documento', 3])->all(), 'id_tipo_documento', 'documento');
 ?>
@@ -63,8 +63,19 @@ $tipo = ArrayHelper::map(TipoDocumento::find()->where(['=','id_tipo_documento', 
              <?= $form->field($model, 'codigo_interfaz')->input("text", ["maxlength" => 4]) ?>
         </div>
         <div class="row">
-            <?= $form->field($model, 'codigo_departamento')->dropDownList($departamento, [ 'prompt' => 'Seleccione...', 'onchange' => ' $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } ) .done(function( data ) {
-                $( "#' . Html::getInputId($model, 'codigo_municipio', ['required', 'class' => 'select-2']) . '" ).html( data ); });']); ?>
+            <?= $form->field($model, 'codigo_departamento')->widget(Select2::classname(), [
+                'data' => $departamento,
+                'options' => ['placeholder' => 'Seleccione un departamento'],
+                'pluginOptions' => ['allowClear' => true],
+                'pluginEvents' => [
+                    "change" => 'function() { $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } )
+                            .done(function( data ) {
+                                $( "#' . Html::getInputId($model, 'codigo_municipio') . '" ).html( data );
+                        });
+                    }',
+                    ],
+                ]);
+            ?>
             <?= $form->field($model, 'codigo_municipio')->dropDownList(['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">

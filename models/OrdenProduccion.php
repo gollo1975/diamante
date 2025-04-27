@@ -138,6 +138,11 @@ class OrdenProduccion extends \yii\db\ActiveRecord
         return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
     }
     
+     public function getOrdenEnsambleConsulta()
+    {
+        return " Numero orden: {$this->numero_orden} - Id: {$this->id_orden_produccion}";
+    }
+    
     public function getAutorizadoOrden() {
         if($this->autorizado == 0 ){
             $autorizadoorden = 'NO';

@@ -87,12 +87,17 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <td><?= Html::encode($model->condicionAnalisis) ?></td> 
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_cierre') ?></th>
                     <td><?= Html::encode($model->fecha_cierre) ?></td>  
-                     <th style='background-color:#F0F3EF;'></th>
-                    <td></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_autorizada') ?></th>
+                    <td><?= Html::encode($model->fecha_autorizada) ?></td>
               </tr>
                <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="10"><?= Html::encode($model->observacion) ?></td>
+                     
+              </tr>
+              <tr style ='font-size:90%;'>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nota') ?></th>
+                    <td colspan="10"><?= Html::encode($model->nota) ?></td>
                      
               </tr>
                            

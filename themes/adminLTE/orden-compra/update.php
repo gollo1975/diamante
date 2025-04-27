@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrdenCompra */
 
-$this->title = 'Actualizar: ' . $model->tipoOrden->descripcion_orden;
+$this->title = 'ORDEN DE COMPRA';
 $this->params['breadcrumbs'][] = ['label' => 'Orden Compras', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id_orden_compra, 'url' => ['update', 'id' => $model->id_orden_compra]];
 $this->params['breadcrumbs'][] = 'Actualizar';

@@ -8,7 +8,9 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 /* @var $form yii\widgets\ActiveForm */
+
 ?>
+
 
     <?php $form = ActiveForm::begin([
 		'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
@@ -19,6 +21,7 @@ use kartik\select2\Select2;
                 ],
 	]); ?>
 <?php
+$tipoSolicitud = ArrayHelper::map(app\models\TipoSolicitud::find()->all(), 'id_solicitud', 'descripcion');
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
@@ -33,6 +36,15 @@ use kartik\select2\Select2;
         </div>
         <div class="row">
              <?= $form->field($model, 'tipo_modulo')->dropdownList(['1' => 'PRODUCCION', '2' => 'INVENTARIOS'], ['prompt' => 'Seleccione...']) ?>
+        </div>
+        <div class="row">
+             <?= $form->field($model, 'id_solicitud')->widget(Select2::classname(), [
+                'data' => $tipoSolicitud,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
         </div>
 
         <div class="panel-footer text-right">            

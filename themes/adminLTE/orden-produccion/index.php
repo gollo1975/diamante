@@ -169,7 +169,7 @@ $form = ActiveForm::begin([
                     </td>
                     <td style= 'width: 25px; height: 10px;'>
                         <?php if($val->autorizado == 0){?>
-                            <a href="<?= Url::toRoute(["orden-produccion/update", "id" => $val->id_orden_produccion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                            <a href="<?= Url::toRoute(["orden-produccion/update", "id" => $val->id_orden_produccion, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
                        <?php }else{?>
                                 <?php if($val->seguir_proceso_ensamble == 1 ){?>
                                     <td style= 'width: 25px; height: 10px;'></td>

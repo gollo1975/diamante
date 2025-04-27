@@ -25,7 +25,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'Detalle';
+$this->title = 'ORDEN DE PRODUCCION';
 $this->params['breadcrumbs'][] = ['label' => 'Orden de produccion', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_orden_produccion;
 $view = 'orden-produccion';
@@ -79,11 +79,11 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
     </p>  
     <div class="panel panel-success">
         <div class="panel-heading">
-            <h4>ORDEN DE PRODUCCION</h4>
+            <h4>Detalle del registro</h4>
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_orden_produccion") ?></th>
                     <td><?= Html::encode($model->id_orden_produccion) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
@@ -93,7 +93,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_orden') ?></th>
                     <td><?= Html::encode($model->numero_orden) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
@@ -103,7 +103,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'iva') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->iva,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_lote')?></th>
                     <td><?= Html::encode($model->numero_lote) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
@@ -113,7 +113,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_orden') ?></th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->total_orden,0)) ?></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cerrar_orden') ?></th>
                     <td><?= Html::encode($model->cerrarOrden) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tipo_orden') ?></th>
@@ -123,7 +123,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
                      <td style="text-align: right"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'responsable') ?></th>
@@ -133,7 +133,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tamano_lote') ?></th>
                      <td style="text-align: right"><?= Html::encode(number_format($model->tamano_lote, 0)) ?> Gramos</td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td  colspan="8"><?= Html::encode($model->observacion) ?></td>
                 </tr>
@@ -141,7 +141,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
             </table>
         </div>
     </div>
-     <?php $form = ActiveForm::begin([
+    <?php $form = ActiveForm::begin([
     'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
     'fieldConfig' => [
         'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
@@ -156,6 +156,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
             <li role="presentation" class="active"><a href="#detalleorden" aria-controls="detalleorden" role="tab" data-toggle="tab">Presentacion producto <span class="badge"><?= count($detalle_orden) ?></span></a></li>
             <?php if($model->autorizado <> 0){?>
                 <li role="presentation" ><a href="#primera_fase" aria-controls="primera_fase" role="tab" data-toggle="tab">Fases del proceso <span class="badge"><?= count($fase_inicial) ?></span></a></li>
+                <li role="presentation" ><a href="#listadomateriales" aria-controls="listadomateriales" role="tab" data-toggle="tab">Listado de materiales <span class="badge"></span></a></li>
             <?php }?>
         </ul>
             <div class="tab-content">
@@ -169,7 +170,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código producto</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE; width: 25%'>Presentación producto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Proyectadas</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad real</th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>U. en produccion</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo medida</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>F. Vcto</th> 
@@ -270,17 +271,17 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                 ])    
                                         ?>
                                         <div class="modal remote fade" id="modalcrearproducto">
-                                               <div class="modal-dialog modal-lg" style ="width: 500px;">    
+                                               <div class="modal-dialog modal-lg" style ="width: 600px;">    
                                                    <div class="modal-content"></div>
                                                </div>
                                         </div>
                                         <?php if(count($detalle_orden) > 0){?>
                                             
                                             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
-                                        <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo,'id_producto' => $model->id_producto],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
+                                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Simular materia prima', ['orden-produccion/simulador_materia_prima', 'id' => $model->id_orden_produccion, 'token' => $token, 'grupo' => $model->id_grupo,'id_producto' => $model->id_producto],[ 'class' => 'btn btn-warning btn-sm']) ?>                                            
                                            <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>
                                         <?php }else{?>
-                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear codigos', ['crearcodigoproducto', 'id' => $model->id_orden_produccion, 'token' => $token], ['class' => 'btn btn-primary btn-sm'])?>
+                                            
                                             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_detalle_producto']) ?>
                                         <?php }    
                                     }   
@@ -407,6 +408,46 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                     </div>
                 </div>  
                 <!--TERMINA TABS MATERIAS-->
+                <div role="tabpanel" class="tab-pane" id="listadomateriales">
+                    <div class="table-responsive">
+                        <div class="panel panel-success">
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr style="font-size: 85%;">
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código</b></th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del material</th> 
+                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Medida</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th> 
+                                        </tr>
+                                    </thead>
+                                    <body>
+                                        <?php 
+                                        $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $model->id_orden_produccion])->all();
+                                        foreach ($presentacion as $valores) {
+                                            $material = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $valores->id_presentacion])->all();
+                                            if(count($material) > 0){
+                                                foreach ($material as $detalle) { ?>
+                                                    <tr style="font-size: 85%;">
+                                                        <td><?= $detalle->codigo_material?></td>
+                                                        <td><?= $detalle->materiaPrima->materia_prima?></td>
+                                                        <td style="text-align:right"><?= $valores->cantidad?></td>
+                                                        <td><?= $detalle->materiaPrima->medida->descripcion?></td>
+                                                        <td><?= $valores->presentacionProducto->descripcion?></td>
+                                                    </tr> 
+                                                <?php } ?>
+                                                    <td colspan="8" style="background-color: #B9D5CE"></td>
+                                            <?php }
+                                        }
+                                        ?>
+                                    </body>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+                <!--TERMINA TABS DE MATERIALES-->
             </div>  
     </div>
   <?php ActiveForm::end(); ?>  

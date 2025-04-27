@@ -455,16 +455,17 @@ class ProveedorController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
     
+    
     public function actionMunicipio($id) {
-        $rows = Municipios::find()->where(['codigo_departamento' => $id])->all();
-
-        echo "<option required>Seleccione...</option>";
-        if (count($rows) > 0) {
-            foreach ($rows as $row) {
-                echo "<option value='$row->codigo_municipio' required>$row->municipio</option>";
-            }
+        $municipios = Municipios::find()->where(['codigo_departamento' => $id])->orderBy('municipio ASC')->all();
+        $options = '<option value="">Seleccione...</option>';
+        foreach ($municipios as $municipio) {
+            $options .= '<option value=' . $municipio->codigo_municipio . '>' . Html::encode($municipio->municipio) . '</option>';
         }
+        echo $options;
     }
+    
+    
     
     //PROCESO DE EXCEL
     

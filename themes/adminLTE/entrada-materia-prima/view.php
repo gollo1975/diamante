@@ -128,9 +128,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>       
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Impuesto</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Subtotal</th> 
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Total</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th>  
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                             
                                         </tr>
@@ -159,9 +157,8 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                     <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('porcentaje_iva[]', $val->porcentaje_iva, $configuracionIva, ['class' => 'col-sm-10', 'prompt' => 'Seleccione', 'required' => true]) ?></td>
                                                     <td style="padding-right: 1;padding-right: 0; "><input type="text" name="cantidad[]" value="<?= $val->cantidad ?>" size="7" required="true" style="text-align: right"> </td> 
                                                     <td style="padding-right: 1;padding-right: 0;"><input type="text" name="valor_unitario[]" value="<?= $val->valor_unitario ?>" size="7" style="text-align: right"> </td> 
-                                                    <td style="text-align: right"><?= ''.number_format($val->total_iva,0) ?></td>
-                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                    <td style="text-align: right"><?= ''.number_format($val->total_entrada,0) ?></td>
+                                                    <td style="padding-right: 1;padding-right: 0;"><input type="text" name="numero_lote[]" value="<?= $val->numero_lote ?>" size="20" style="text-align: right"> </td> 
+                                                    
                                                 <?php }else{?>
                                                   <td><?= $val->materiaPrima->codigo_materia_prima ?></td>    
                                                   <td><?= $val->materiaPrima->materia_prima ?></td>  
@@ -170,9 +167,8 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                   <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>  
                                                   <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                   <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                  <td style="text-align: right"><?= ''.number_format($val->total_iva,0) ?></td>
-                                                  <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                  <td style="text-align: right"><?= ''.number_format($val->total_entrada,0) ?></td>
+                                                  <td style="text-align: right"><?= $val->numero_lote ?></td>
+                                                
                                                 <?php }?>   
                                                 
                                             <input type="hidden" name="detalle_entrada[]" value="<?= $val->id_detalle ?>">

@@ -180,7 +180,7 @@ if($sw == 0){
                                                     </td> 
                                                     <?php if(!$empacada){?>
                                                         <td style= 'width: 25px; height: 20px;'>
-                                                           <a href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2, 'sw' => $sw, 'id_producto' => $val->id])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
+                                                           <a href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $model->id_ensamble, 'token' => $token, 'id_detalle' => $val->id_detalle, 'sw' => $sw])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
                                                        </td>
                                                     <?php }else{
                                                         ?>
@@ -294,7 +294,7 @@ if($sw == 0){
                                                         </td>
                                                     <?php if(!$empacada){?>
                                                         <td style= 'width: 25px; height: 20px;'>
-                                                           <a href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $model->id_ensamble, 'token' => $token, 'id_solicitud' => 2, 'sw' => $sw, 'id_producto' => $val->id])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
+                                                           <a href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $model->id_ensamble, 'token' => $token, 'id_detalle' => $val->id_detalle, 'sw' => $sw])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
                                                        </td>
                                                     <?php }else{
                                                         ?>
@@ -377,7 +377,7 @@ if($sw == 0){
                                        foreach ($conMateriales as $val):
                                            ?>
                                            <tr style='font-size:85%;'>
-                                                <td><?= $val->productoEmpaque->nombre_producto?></td>
+                                                <td><?= $val->presentacion->descripcion?></td>
                                                 <?php if($val->alerta == 'FALTA'){?>
                                                    <td style='background-color:#F1F3E3'><?= $val->materiaPrima->materia_prima?></td>
                                                 <?php } else { ?>

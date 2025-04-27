@@ -87,12 +87,12 @@ class PDF extends FPDF {
         $this->Line(10,30,202,30);//linea inferior horizontal
        
         //Lineas del encabezado
-        $this->Line(10,74,10,125);
-        $this->Line(70,74,70,125);
-        $this->Line(130,74,130,125);
-        $this->Line(166,74,166,125);
-        $this->Line(202,74,202,125);
-        $this->Line(10,125,202,125);//linea horizontal inferior  
+        $this->Line(10,74,10,140);
+        $this->Line(80,74,80,140);
+        $this->Line(150,74,150,140);
+        $this->Line(176,74,176,140);
+        $this->Line(202,74,202,140);
+        $this->Line(10,140,202,140);//linea horizontal inferior  
     }
     function EncabezadoDetalles() {
         $this->Ln(10);
@@ -104,7 +104,7 @@ class PDF extends FPDF {
         $this->SetFont('', 'B', 8);
 
         //creamos la cabecera de la tabla.
-        $w = array(60, 60, 36, 36);
+        $w = array(70, 70, 26, 26);
         for ($i = 0; $i < count($header); $i++){
             if ($i == 0 || $i == 1){
                 $this->Cell($w[$i], 4, $header[$i], 1, 0, 'C', 1);
@@ -124,31 +124,31 @@ class PDF extends FPDF {
         $pdf->SetX(10);
         $pdf->SetFont('Arial', '', 7);
 	foreach ($detalles as $detalle) {                                                           
-            $pdf->Cell(60, 4, utf8_decode($detalle->materiales), 0, 0, 'L');
-            $pdf->Cell(60, 4, utf8_decode($detalle->ordenProductos->descripcion), 0, 0, 'L');
-            $pdf->Cell(36, 4, utf8_decode(''.number_format($detalle->unidades_solicitadas,0)), 0, 0, 'R');
-            $pdf->Cell(36, 4, utf8_decode(''.number_format($detalle->unidades_despachadas,0)), 0, 0, 'R');
+            $pdf->Cell(70, 4, utf8_decode(substr($detalle->materiales,0, 45)), 0, 0, 'L');
+            $pdf->Cell(70, 4, utf8_decode(substr($detalle->ordenProductos->descripcion, 0, 45)), 0, 0, 'L');
+            $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_solicitadas,0)), 0, 0, 'R');
+            $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_despachadas,0)), 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }
-	$pdf->SetXY(10, 135);
+	$pdf->SetXY(10, 150);
         $this->SetFont('Arial', 'B', 8);
         $pdf->MultiCell(146, 4, utf8_decode('OBSERVACION: '.$model->observacion),0,'J');
 	//firma trabajador
-        $pdf->SetXY(10, 160);
+        $pdf->SetXY(10, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(35, 5, '________________________________', 0, 0, 'L',0);
-         $pdf->SetXY(10, 165);
+         $pdf->SetXY(10, 180);
         $pdf->Cell(35, 5, 'OPERARIO DE PRODUCCION', 0, 0, 'L',0);
-        $pdf->SetXY(10, 170);
+        $pdf->SetXY(10, 185);
         $pdf->Cell(35, 5, utf8_decode('Despacha'), 0, 0, 'L',0);
         // SEGUNDA FIRMA
-        $pdf->SetXY(120, 160);
+        $pdf->SetXY(120, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(120, 5, '________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(120, 165);
+        $pdf->SetXY(120, 180);
         $pdf->Cell(120, 5, 'OPERARIO DE PRODUCCION', 0, 0, 'L',0);
-        $pdf->SetXY(120, 170);
+        $pdf->SetXY(120, 185);
         $pdf->Cell(120, 5, utf8_decode('Recibe'), 0, 0, 'L',0);
         //liena
         //linea

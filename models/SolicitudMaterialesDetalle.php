@@ -34,7 +34,7 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['codigo', 'id_materia_prima', 'unidades_lote', 'unidades_requeridas','id_detalle'], 'integer'],
+            [['codigo', 'id_materia_prima', 'unidades_lote', 'unidades_requeridas','id_detalle','linea_cerrada'], 'integer'],
             [['codigo_materia'], 'string', 'max' => 15],
             [['materiales'], 'string', 'max' => 30],
             [['codigo'], 'exist', 'skipOnError' => true, 'targetClass' => SolicitudMateriales::className(), 'targetAttribute' => ['codigo' => 'codigo']],
@@ -56,7 +56,8 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
             'materiales' => 'Materiales',
             'unidades_lote' => 'Unidades Lote',
             'unidades_requeridas' => 'Unidades Requeridas',
-            'id_detalle' => 'id_detalle,'
+            'id_detalle' => 'id_detalle,',
+            'linea_cerrada' => 'linea_cerrada',
         ];
     }
 

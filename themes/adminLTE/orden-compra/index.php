@@ -166,7 +166,7 @@ $form = ActiveForm::begin([
         </table> 
         <div class="panel-footer text-right" >            
            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-            <a align="right" href="<?= Url::toRoute("orden-compra/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+           
         <?php $form->end() ?>
         </div>
      </div>

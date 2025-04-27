@@ -12,6 +12,7 @@ class FormModeloCambiarCantidad extends Model
 {
     public $cantidades;  
     public $fecha;
+    public $fecha_proceso;
     public $tipo_precio;
     public $nuevo_precio;
     public $cliente;
@@ -25,6 +26,7 @@ class FormModeloCambiarCantidad extends Model
     public $minimo;
     public $aplicar;
     public $tipopedido;
+    public $observacion;
 
 
     public function rules()
@@ -33,8 +35,9 @@ class FormModeloCambiarCantidad extends Model
 
            [['cantidades','nuevo_precio','cliente', 'tipo_precio', 'pedido_virtual','descuento','cantidad_real','tamano_lote','estado',
            'nueva_cantidad','minimo','aplicar','tipopedido'], 'integer'],
-           [['fecha'], 'safe'], 
+           [['fecha','fecha_proceso'], 'safe'], 
            ['porcentaje_aplicacion', 'number'], 
+           [['observacion'], 'string', 'max' => 100], 
         ];
     }
 
@@ -44,6 +47,7 @@ class FormModeloCambiarCantidad extends Model
             'cantidades' => 'Proyectada:', 
             'cantidad_real' => 'Cantidad real:',
             'fecha' => 'F. Vencimiento:',
+            'fecha_proceso' => 'Fecha proceso:',
             'nuevo_precio' => 'Nuevo precio:',
             'cliente' => 'Cliente:',
             'pedido_virtual' => 'Pedido virtual:',
@@ -56,6 +60,7 @@ class FormModeloCambiarCantidad extends Model
             'minimo' => 'Stock minimo:',
             'aplicar' => 'Aplicar a todos:',
             'tipopedido' => 'Tipo de pedido:',
+            'observacion' => 'Observacion:',
 
         ];
     }

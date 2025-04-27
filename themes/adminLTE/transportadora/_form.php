@@ -66,8 +66,19 @@ $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_pro
             </div>
             
             <div class="row">
-                <?= $form->field($model, 'codigo_departamento')->dropDownList($departamento, ['prompt' => 'Seleccione...', 'onchange' => ' $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } ) .done(function( data ) {
-               $( "#' . Html::getInputId($model, 'codigo_municipio', ['required']) . '" ).html( data ); });']); ?>
+               <?= $form->field($model, 'codigo_departamento')->widget(Select2::classname(), [
+                'data' => $departamento,
+                'options' => ['placeholder' => 'Seleccione un departamento'],
+                'pluginOptions' => ['allowClear' => true],
+                'pluginEvents' => [
+                    "change" => 'function() { $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } )
+                            .done(function( data ) {
+                                $( "#' . Html::getInputId($model, 'codigo_municipio') . '" ).html( data );
+                        });
+                    }',
+                    ],
+                ]);
+            ?>
             </div>
             <div class="row">
                <?= $form->field($model, 'codigo_municipio')->dropDownList(['prompt' => 'Seleccione...']) ?>

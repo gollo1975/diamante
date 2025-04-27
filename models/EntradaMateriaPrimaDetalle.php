@@ -39,6 +39,7 @@ class EntradaMateriaPrimaDetalle extends \yii\db\ActiveRecord
             [['id_entrada', 'id_materia_prima', 'cantidad', 'total_iva', 'subtotal', 'total_entrada','valor_unitario','actualizar_precio'], 'integer'],
             [['porcentaje_iva'], 'number'],
             [['fecha_vencimiento'], 'safe'],
+            ['numero_lote','string'],
             [['id_entrada'], 'exist', 'skipOnError' => true, 'targetClass' => EntradaMateriaPrima::className(), 'targetAttribute' => ['id_entrada' => 'id_entrada']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
         ];
@@ -61,6 +62,7 @@ class EntradaMateriaPrimaDetalle extends \yii\db\ActiveRecord
             'total_entrada' => 'Total Entrada',
             'actualizar_precio' => 'Actualizar precio',
             'fecha_vencimiento' => 'Fecha vcto:',
+            'numero_lote' => 'numero_lote',
         ];
     }
 

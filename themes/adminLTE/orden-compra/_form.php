@@ -37,7 +37,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->where(['=','requisito_validado'
 ?>
 <div class="panel panel-success">
     <div class="panel-heading">
-        <h4>ORDENES DE COMPRAS</h4>
+        <h4>Detalle del registro</h4>
         
     </div>
     
@@ -70,7 +70,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->where(['=','requisito_validado'
         </div>
         
         <div class="row">
-            <?= $form->field($model, 'numero_solicitud')->textInput(['maxlength' => true, 'size' => '15']) ?>
+            <?= $form->field($model, 'numero_solicitud')->textInput(['maxlength' => true, 'size' => '15', 'readonly' => true]) ?>
             <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
         </div>    
         <div class="panel-footer text-right">			

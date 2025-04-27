@@ -215,7 +215,7 @@ class OrdenEnsambleProductoController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $orden = null;
-                $grupo = null; $tipo_proceso = null;
+                $producto = null; $tipo_proceso = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $numero_ensamble = Html::encode($form->numero_ensamble);
@@ -223,13 +223,13 @@ class OrdenEnsambleProductoController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $orden = Html::encode($form->orden);
-                        $grupo = Html::encode($form->grupo);
+                        $producto = Html::encode($form->producto);
                         $table = OrdenEnsambleProducto::find()
                                     ->andFilterWhere(['=', 'numero_orden_ensamble', $numero_ensamble])
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'id_orden_produccion', $orden])
                                     ->andFilterWhere(['=', 'numero_lote', $numero_lote])
-                                    ->andFilterWhere(['=', 'id_grupo', $grupo])
+                                    ->andFilterWhere(['=', 'id_producto', $producto])
                                     ->andWhere(['=', 'proceso_auditado', 1]);
                                     $table = $table->orderBy('id_ensamble DESC');
                         $tableexcel = $table->all();
@@ -367,6 +367,46 @@ class OrdenEnsambleProductoController extends Controller
             'conTerminadas' => $conTerminadas,
            
         ]);
+    }
+    
+    
+    //vista que muestra el materail de empaque
+    public function actionView_lineas_empaque($id_ensamble) {
+        $conMateriales = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id_ensamble])->orderBy('linea_exportada_inventario ASC')->all();
+        if (Yii::$app->request->post()) {
+            if(isset($_POST["descargar_material_empaque"])){
+                if(isset($_POST["listado_unidades"])){
+                    $cantidad = 0; $intIndice = 0; $con = 0; $total = 0;
+                    foreach ($_POST["listado_unidades"] as $intCodigo):
+                        $item = OrdenEnsambleProductoEmpaque::findOne($intCodigo);
+                        if($materia = \app\models\MateriaPrimas::findOne($item->id_materia_prima)){
+                           $cantidad = $item->unidades_averias + $item->unidades_utilizadas;   
+                           $total = $materia->stock - $cantidad;
+                            if($total >= 0 ){
+                                $materia->stock = $total;
+                                $materia->save();
+                                $item->linea_exportada_inventario = 1;
+                                $item->save();
+                                $this->ActualizarCostoMaterialEmpaque($materia);
+                                $intIndice++;
+                                $con++;
+                           }else{
+                              Yii::$app->getSession()->setFlash('error', 'El material de empaque (' . $materia->materia_prima .') tiene saldo negativo en el Inventario. Valide la informacion.');
+                           }    
+                        }else{
+                            $intIndice++;
+                        }
+                    endforeach;
+                    $conMateriales = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id_ensamble])->orderBy('linea_exportada_inventario ASC')->all();
+                    Yii::$app->getSession()->setFlash('success', 'Se exportaron (' . $con .') registros al modulo de inventario de material de empaque con exito.');
+                    return $this->redirect(['view_lineas_empaque', 'id_ensamble' => $id_ensamble]);
+                }
+            }
+        }    
+      return $this->render('view_detalle_empaque', [
+            'model' => $this->findModel($id_ensamble),
+            'conMateriales' => $conMateriales,
+        ]);   
     }
     
     //CERRAR LIENA DE EMPAQUE
@@ -576,94 +616,46 @@ class OrdenEnsambleProductoController extends Controller
         
         $orden->cerrar_proceso = 1;
         $orden->save();
-        $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
+       return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' =>$token, 'sw' => $sw]);
            
     }
     
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
-    public function actionBuscar_material_empaque($id, $token, $id_solicitud, $sw, $id_producto){
-        
-        $operacion = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
-        $form = new \app\models\FormModeloBuscar();
-        $q = null;
-        if ($form->load(Yii::$app->request->get())) {
-            if ($form->validate()) {
-                $q = Html::encode($form->q);                                
-                    $operacion = \app\models\MateriaPrimas::find()
-                            ->where(['like','materia_prima',$q])
-                            ->orwhere(['=','codigo_materia_prima',$q])
-                            ->andWhere(['>','stock', 0])
-                            ->andWhere(['=','id_solicitud', 2]);
-                    $operacion = $operacion->orderBy('materia_prima ASC');                    
-                    $count = clone $operacion;
-                    $to = $count->count();
-                    $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count()
-                    ]);
-                    $operacion = $operacion
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();         
-            } else {
-                $form->getErrors();
-            }                    
+    public function actionBuscar_material_empaque($id, $token, $sw, $id_detalle){
+             
+        $orden = OrdenEnsambleProducto::findOne($id);
+        $buscarP = \app\models\OrdenProduccionProductos::findOne($id_detalle);
+        $registro = \app\models\EntregaMaterialesDetalle::find()->where(['=','id_detalle',$buscarP->id_detalle])
+                                                                ->andWhere(['=','id_orden_produccion', $buscarP->id_orden_produccion])->all();
+        if(count($registro) > 0){
+            foreach ($registro as $val) {
+                if(!\app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_materia_prima', $val->id_materia_prima])
+                                                                  ->andWhere(['=','id_ensamble', $id])->andWhere(['=','id_presentacion', $buscarP->id_presentacion])->one()){
+                    $table = new \app\models\OrdenEnsambleProductoEmpaque();
+                    $table->id_ensamble = $id;
+                    $table->id_presentacion = $buscarP->id_presentacion;
+                    $table->id_materia_prima = $val->id_materia_prima;
+                    $table->unidades_solicitadas =  $buscarP->cantidad;
+                    $table->unidades_utilizadas =  $buscarP->cantidad;
+                    $table->unidades_reales =  $buscarP->cantidad;
+                    $table->user_name =  Yii::$app->user->identity->username;
+                    $materia = \app\models\MateriaPrimas::findOne($val->id_materia_prima);
+                    if($orden->total_unidades <= $materia->stock){
+                        $table->alerta = 'OK';
+                    }else{
+                      $table->alerta = 'FALTA';
+                      $suma = 0;
+                      $suma = $orden->total_unidades - $materia->stock;
+                      $table->stock = $suma;
+                    }
+                     $table->save(false);
+                }                               
+            }//fin para
+            return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
         }else{
-            $table = \app\models\MateriaPrimas::find()->where(['>','stock', 0])->andWhere(['=','id_solicitud', 2])->orderBy('materia_prima ASC');
-            $tableexcel = $table->all();
-            $count = clone $table;
-            $pages = new Pagination([
-                        'pageSize' => 15,
-                        'totalCount' => $count->count(),
-            ]);
-             $operacion = $table
-                            ->offset($pages->offset)
-                            ->limit($pages->limit)
-                            ->all();
+            Yii::$app->getSession()->setFlash('info', 'No existe material de empaque solicitado para esta presentacion de producto. Valide la informacion.!');
+            return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
         }
-        //PROCESO DE GUARDAR
-         if (isset($_POST["guardar_material_empaque"])) {
-            if(isset($_POST["nuevo_material_empaque"])){
-                foreach ($_POST["nuevo_material_empaque"] as $intCodigo) {
-                    //consulta para no duplicar
-                    $registro = \app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])
-                                                                   ->andWhere(['=','id_materia_prima', $intCodigo])->one();
-                    if(!$registro){
-                        $orden = OrdenEnsambleProducto::findOne($id);
-                        $materia = \app\models\MateriaPrimas::findOne($intCodigo);
-                        $presentacion = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id', $id_producto])->one();
-                        $table = new \app\models\OrdenEnsambleProductoEmpaque();
-                        $table->id_ensamble = $id;
-                        $table->id_presentacion = $id_producto;
-                        $table->id_materia_prima = $intCodigo;
-                        $table->unidades_solicitadas =  $presentacion->cantidad_real;
-                        $table->unidades_utilizadas =  $presentacion->cantidad_real;
-                        $table->unidades_reales =  $presentacion->cantidad_real;
-                        $table->user_name =  Yii::$app->user->identity->username;
-                        if($orden->total_unidades <= $materia->stock){
-                            $table->alerta = 'OK';
-                        }else{
-                          $table->alerta = 'FALTA';
-                          $suma = 0;
-                          $suma = $orden->total_unidades - $materia->stock;
-                          $table->stock = $suma;
-                        }
-                         $table->save(false);
-                    }    
-                }
-                return $this->redirect(['view','id' => $id, 'token' => $token,'sw' =>$sw,]);
-            }
-        }
-        return $this->render('importar_material_empaque', [
-            'operacion' => $operacion,            
-            'pagination' => $pages,
-            'id' => $id,
-            'form' => $form,
-            'token' => $token,
-            'id_solicitud' => $id_solicitud,
-            'sw' =>$sw,
-            'id_producto' => $id_producto,
-        ]);
     }
     
     //SUBIR RESPONASBLE AL PROCESO
@@ -995,6 +987,22 @@ class OrdenEnsambleProductoController extends Controller
         $materia->subtotal = $subtotal;
         $materia->total_materia_prima = $subtotal + $iva;
         $materia->save(false);
+    }
+    
+    //CERRAR ORDEN DE ENSAMBLE UNA VEZ DESCARGADO EL MATERIAL DE EMPAQUE
+    public function actionCerrar_orden_ensamlbe($id) {
+        $detalle = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->andwhere(['=','linea_exportada_inventario', 0])->all();
+        if(count($detalle) > 0){
+          Yii::$app->getSession()->setFlash('error', 'Falta lineas de empaque para enviar al modulo de materias primas. Revise la informacion.'); 
+          return $this->redirect(["orden-ensamble-producto/view_lineas_empaque",'id_ensamble' => $id]);
+        }else{
+            $orden = OrdenEnsambleProducto::findOne($id);
+            $orden->exportar_material_empaque = 1;
+            $orden->save();
+            return $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
+        }
+        
+        
     }
     
     //REPORTES

@@ -37,7 +37,7 @@ $form = ActiveForm::begin([
 ?>
 
 <?php
-$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento DESC')->all(), 'codigo_departamento', 'departamento');
+$departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->all(), 'codigo_departamento', 'departamento');
 $municipio = ArrayHelper::map(Municipios::find()->orderBy('municipio DESC')->all(), 'codigo_municipio', 'municipio');
 $tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_proveedor', 1])->all(), 'id_tipo_documento', 'documento');
 $banco = ArrayHelper::map(EntidadBancarias::find()->where(['=','convenio_proveedor', 1])->all(), 'codigo_banco', 'entidad_bancaria');
@@ -73,8 +73,19 @@ $naturaleza = ArrayHelper::map(NaturalezaSociedad::find()->all(), 'id_naturaleza
             <?= $form->field($model, 'celular')->input("text") ?>
         </div>
         <div class="row">
-            <?= $form->field($model, 'codigo_departamento')->dropDownList($departamento, [ 'prompt' => 'Seleccione...', 'onchange' => ' $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } ) .done(function( data ) {
-                $( "#' . Html::getInputId($model, 'codigo_municipio', ['required', 'class' => 'select-2']) . '" ).html( data ); });']); ?>
+           <?= $form->field($model, 'codigo_departamento')->widget(Select2::classname(), [
+                'data' => $departamento,
+                'options' => ['placeholder' => 'Seleccione un departamento'],
+                'pluginOptions' => ['allowClear' => true],
+                'pluginEvents' => [
+                    "change" => 'function() { $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } )
+                            .done(function( data ) {
+                                $( "#' . Html::getInputId($model, 'codigo_municipio') . '" ).html( data );
+                        });
+                    }',
+                    ],
+                ]);
+            ?>
             <?= $form->field($model, 'codigo_municipio')->dropDownList(['prompt' => 'Seleccione...']) ?>
         </div>
         <div class="row">

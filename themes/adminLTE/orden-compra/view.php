@@ -180,7 +180,7 @@ $view = 'orden-compra';
                             <div class="panel-footer text-right">  
                                 <?php 
                                 if($model->autorizado == 0){?>
-                                     <?= Html::a('<span class="glyphicon glyphicon-export"></span> Importar solicitud', ['orden-compra/importarsolicitud', 'id' => $model->id_orden_compra, 'token' => $token],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
+                                     <?= Html::a('<span class="glyphicon glyphicon-export"></span> Importar solicitud', ['orden-compra/importarsolicitud', 'id' => $model->id_orden_compra, 'token' => $token,'id_solicitud' => $model->id_tipo_orden],[ 'class' => 'btn btn-primary btn-sm']) ?>                                            
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizaregistro']) ?>
                                 <?php }?>
                             </div>   

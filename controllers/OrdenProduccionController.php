@@ -165,7 +165,7 @@ class OrdenProduccionController extends Controller
                         $count = clone $table;
                         $to = $count->count();
                         $pages = new Pagination([
-                            'pageSize' => 10,
+                            'pageSize' => 15,
                             'totalCount' => $count->count()
                         ]);
                         $model = $table
@@ -185,7 +185,7 @@ class OrdenProduccionController extends Controller
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
-                        'pageSize' => 10,
+                        'pageSize' => 15,
                         'totalCount' => $count->count(),
                     ]);
                     $model = $table
@@ -531,6 +531,7 @@ class OrdenProduccionController extends Controller
     {
         $detalle_orden = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
         $fase_inicial = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->orderBy('id_fase ASC')->all();
+        
         if (Yii::$app->request->post()) {
             if (isset($_POST["eliminartodo"])) {
                 if (isset($_POST["listado_eliminar"])) {
@@ -811,12 +812,14 @@ class OrdenProduccionController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $model->user_name = Yii::$app->user->identity->username;
             $model->save();
-            return $this->redirect(['index']);
+            $dato = OrdenProduccion::find()->orderBy('id_orden_produccion DESC')->one();
+            return $this->redirect(['view','id' => $dato->id_orden_produccion, 'token' => $token]);
         }
         $model->responsable = Yii::$app->user->identity->nombrecompleto;
         return $this->render('create', [
             'model' => $model,
             'sw' => 0,
+            
         ]);
     }
 
@@ -827,7 +830,7 @@ class OrdenProduccionController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $token)
     {
         $model = $this->findModel($id);
         $ConProducto = \app\models\Productos::find()->Where(['=','id_grupo', $model->id_grupo])->orderBy('nombre_producto ASC')->all(); 
@@ -837,12 +840,13 @@ class OrdenProduccionController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
+            return $this->redirect(['view','id' => $id ,'token' => $token]);
         }
 
         return $this->render('update', [
             'model' => $model,
             'sw' => 1,
+            'token' => $token,
             'ConProducto' => ArrayHelper::map($ConProducto, "id_producto", "nombre_producto"),
         ]);
     }
@@ -997,6 +1001,7 @@ class OrdenProduccionController extends Controller
         
         $model = new \app\models\PresentacionProducto();
         $orden = OrdenProduccion::findOne($id);
+        $sw = 0;
         $presentacion = \app\models\PresentacionProducto::find()->where(['=','id_producto', $id_producto])->all() ;
         if (Yii::$app->request->post()) {
             if (isset($_POST["listadopresentacion"])) {
@@ -1005,15 +1010,22 @@ class OrdenProduccionController extends Controller
                     foreach ($_POST["listado"] as $intCodigo):
                        $conIva = \app\models\ConfiguracionIva::findOne(1);
                        $detalle = \app\models\PresentacionProducto::find()->where(['=','id_presentacion', $intCodigo])->one();
-                       $table = new OrdenProduccionProductos();
-                       $table->id_orden_produccion = $id;
-                       $table->id_presentacion = $detalle->id_presentacion;
-                       $table->descripcion = $detalle->descripcion;
-                       $table->id_medida_producto = $detalle->id_medida_producto;
-                       $table->porcentaje_iva = $conIva->valor_iva;
-                       $table->user_name = Yii::$app->user->identity->username;
-                       $table->save(false);
-                       $intIndice++;
+                       $auxiliar = $detalle->id_presentacion;
+                       $sw = $this->ValidarMaterialEmpaque($auxiliar);
+                       if($sw == 0){
+                            $table = new OrdenProduccionProductos();
+                            $table->id_orden_produccion = $id;
+                            $table->id_presentacion = $detalle->id_presentacion;
+                            $table->descripcion = $detalle->descripcion;
+                            $table->id_medida_producto = $detalle->id_medida_producto;
+                            $table->porcentaje_iva = $conIva->valor_iva;
+                            $table->user_name = Yii::$app->user->identity->username;
+                            $table->save(false);
+                            $intIndice++;
+                       } else {
+                            Yii::$app->getSession()->setFlash('error', 'Esta presentacion de producto (' .$detalle->descripcion .') No tiene configurado en Material de empaque.');  
+                            return $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
+                       }     
                     endforeach;
                     return $this->redirect(['view','id' => $id, 'token' => $token]);
                 }
@@ -1026,6 +1038,15 @@ class OrdenProduccionController extends Controller
              'presentacion' => $presentacion,
         ]);      
     }
+    
+    //VALIDAR SI LA PRESENTACION TIENE MATERIAL DE EMPAQUE
+    protected function ValidarMaterialEmpaque($auxiliar) {
+        $material = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $auxiliar])->one();
+        if(!$material){
+            return $sw = 1;
+        }
+    }
+    
     // CODIGO QUE GENERA EL LOTE
     public function actionGenerarlote($id, $token, $fecha_actual) {
         $mes = substr($fecha_actual, 5, 2);
@@ -1065,8 +1086,9 @@ class OrdenProduccionController extends Controller
             endforeach;
             return $this->redirect(['view','id' => $id, 'token' => $token]);
         }else{
-            $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
+            
             Yii::$app->getSession()->setFlash('warning', 'El numero de lote para esta orden de produccion ya esta creado.');  
+            return $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);
         }
     }
     
@@ -1238,17 +1260,20 @@ class OrdenProduccionController extends Controller
         $orden = OrdenProduccion::findOne($id);
        
         if ($model->load(Yii::$app->request->post())) {
-            if (isset($_POST["actualizar_cambio"])) { 
+            if (isset($_POST["actualizar_cambio"])) {
+                
                 $orden->seguir_proceso_ensamble = $model->estado;
-                $orden->fecha_cambio = $model->fecha;
+                $orden->fecha_cambio = $model->fecha_proceso;
                 $orden->save(false);
+                $auditoria = \app\models\OrdenProduccionAuditoriaFabricacion::find()->where(['=','id_orden_produccion', $id])->one();
+                $auditoria->nota = $model->observacion;
+                $auditoria->fecha_autorizada = $model->fecha_proceso;
+                $auditoria->continua = 1;
+                $auditoria->save();
                 $this->redirect(["orden-produccion/index"]);
             }    
         }
-         if (Yii::$app->request->get()) {
-            $model->estado = $orden->seguir_proceso_ensamble; 
-            $model->fecha = $orden->fecha_cambio;
-        }
+       
         return $this->renderAjax('cambiar_proceso_auditoria', [
             'model' => $model,
             'id' => $id,

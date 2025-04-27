@@ -136,8 +136,11 @@ class TransportadoraController extends Controller
     public function actionCreate()
     {
         $model = new Transportadora();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->save(false)) {
             return $this->redirect(['view', 'id' => $model->id_transportadora]);
         }
 

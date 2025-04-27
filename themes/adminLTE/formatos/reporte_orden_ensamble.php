@@ -85,16 +85,16 @@ class PDF extends FPDF {
         $this->Line(267, 65, 267, 80); //x1,y1,x2,y2
         $this->Line(10, 80, 267, 80); //linea horizontal inferior x1,y1,x2,y2
          //Líneas MATERIAL DE EMPAQUE
-        $this->Line(10,90,10,130);
-        $this->Line(70,90,70,130);
-        $this->Line(97,90,97,130);
-        $this->Line(124,90,124,130);
-        $this->Line(149,90,149,130);
-        $this->Line(176,90,176,130);
-        $this->Line(206,90,206,130);
-        $this->Line(246,90,246,130);
-        $this->Line(268,90,268,130);
-        $this->Line(10,130,268,130);//linea horizontal inferior
+        $this->Line(10,90,10,145);
+        $this->Line(70,90,70,145);
+        $this->Line(97,90,97,145);
+        $this->Line(124,90,124,145);
+        $this->Line(149,90,149,145);
+        $this->Line(176,90,176,145);
+        $this->Line(206,90,206,145);
+        $this->Line(246,90,246,145);
+        $this->Line(268,90,268,145);
+        $this->Line(10,145,268,145);//linea horizontal inferior
         //Detalle factura
         $this->EncabezadoDetalles();
     }
@@ -129,15 +129,15 @@ class PDF extends FPDF {
         $materiales = app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $model->id_ensamble])->all();
         $hola = (count($materiales));
         $pdf->SetX(10);
-        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetFont('Arial', '', 7);
         $i = 0;
         foreach ($detalles as $detalle) {
             $i = $i + 1;
-            $pdf->Cell(30, 5, $detalle->codigo_producto, 0, 0, 'L');
-            $pdf->Cell(103, 5, $detalle->nombre_producto, 0, 0, 'L');
-            $pdf->Cell(41, 5, $detalle->cantidad_proyectada, 0, 0, 'R');
-            $pdf->Cell(42, 5, $detalle->cantidad_real, 0, 0, 'R');
-            $pdf->Cell(41, 5, $detalle->porcentaje_rendimiento, 0, 0, 'R');
+            $pdf->Cell(30, 4, $detalle->codigo_producto, 0, 0, 'L');
+            $pdf->Cell(103, 4, $detalle->nombre_producto, 0, 0, 'L');
+            $pdf->Cell(41, 4, $detalle->cantidad_proyectada, 0, 0, 'R');
+            $pdf->Cell(42, 4, $detalle->cantidad_real, 0, 0, 'R');
+            $pdf->Cell(41, 4, $detalle->porcentaje_rendimiento, 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 10);
         }
@@ -159,9 +159,9 @@ class PDF extends FPDF {
         $pdf->Cell(40, 4, utf8_decode('U. MUESTRAS RETENCION'), 1, 0, 'C',1);
         $pdf->Cell(22, 4, utf8_decode('U. REALES'), 1, 0, 'C',1);
         $pdf->SetXY(10, 94);
-        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetFont('Arial', '', 7);
         foreach ($materiales as $empaque) {                                    
-            $pdf->Cell(60, 4, $empaque->materiaPrima->materia_prima, 0, 0, 'L');            
+            $pdf->Cell(60, 4, utf8_decode(substr($empaque->materiaPrima->materia_prima, 0, 30)), 0, 0, 'L');            
             $pdf->Cell(27, 4, ''. number_format($empaque->unidades_solicitadas,0), 0, 0, 'R');
             $pdf->Cell(27, 4, ''.number_format($empaque->unidades_devolucion, 0), 0, 0, 'R');
             $pdf->Cell(25, 4, ''.number_format($empaque->unidades_averias, 0), 0, 0, 'R');
@@ -172,32 +172,32 @@ class PDF extends FPDF {
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
         }
-        $pdf->SetXY(10, 140);
+        $pdf->SetXY(10, 155);
         $this->SetFont('Arial', 'B', 8);
         $pdf->MultiCell(146, 4, utf8_decode('OBSERVACION: '.$model->observacion),0,'J');  
         //firmas
-        $pdf->SetXY(10, 160);
+        $pdf->SetXY(10, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(100, 5, '__________________________', 0, 0, 'L',0);
-        $pdf->SetXY(10, 165);
+        $pdf->SetXY(10, 180);
         $pdf->Cell(120, 5, 'Lider de produccion', 0, 0, 'L',0);
         //
-        $pdf->SetXY(68, 160);
+        $pdf->SetXY(68, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(100, 5, '__________________________', 0, 0, 'L',0);
-        $pdf->SetXY(68, 165);
+        $pdf->SetXY(68, 180);
         $pdf->Cell(120, 5, 'Operario de produccion', 0, 0, 'L',0);
          //
-        $pdf->SetXY(136, 160);
+        $pdf->SetXY(136, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(100, 5, '__________________________', 0, 0, 'L',0);
-        $pdf->SetXY(136, 165);
+        $pdf->SetXY(136, 180);
         $pdf->Cell(120, 5, 'Operario de logistica', 0, 0, 'L',0);
          //
-        $pdf->SetXY(203, 160);
+        $pdf->SetXY(203, 175);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(100, 5, '__________________________', 0, 0, 'L',0);
-        $pdf->SetXY(203, 165);
+        $pdf->SetXY(203, 180);
         $pdf->Cell(120, 5, 'Calidad', 0, 0, 'L',0);
         //LINEAS QUE LLENA EL FORMATO DE ISO 
         $pdf->SetXY(110, 10);

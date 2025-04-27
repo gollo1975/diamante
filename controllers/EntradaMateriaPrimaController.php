@@ -223,6 +223,7 @@ class EntradaMateriaPrimaController extends Controller
                     $table->porcentaje_iva = $_POST["porcentaje_iva"]["$intIndice"];
                     $table->fecha_vencimiento = $_POST["fecha_vcto"]["$intIndice"];
                     $table->valor_unitario = $_POST["valor_unitario"]["$intIndice"];
+                    $table->numero_lote = strtoupper($_POST["numero_lote"]["$intIndice"]);
                     $auxiliar =  $table->cantidad * $table->valor_unitario;
                     $iva = round(($auxiliar * $table->porcentaje_iva)/100);
                     $table->total_iva = $iva;
@@ -359,13 +360,20 @@ class EntradaMateriaPrimaController extends Controller
         if($orden_compra){
             $detalle_compra = OrdenCompraDetalle::find()->where(['=','id_orden_compra', $orden_compra->id_orden_compra])->all();
             foreach ( $detalle_compra as $detalle_compras):
-                    $table = new EntradaMateriaPrimaDetalle();
-                    $table->id_entrada = $id;
-                    $table->fecha_vencimiento = date('Y-m-d');
-                    $table->porcentaje_iva = $detalle_compras->porcentaje;
-                    $table->cantidad = $detalle_compras->cantidad;
-                    $table->valor_unitario = $detalle_compras->valor;
-                    $table->insert();
+                    $materiaPrima = MateriaPrimas::find()->where(['=','codigo_materia_prima', $detalle_compras->items->codigo])->one();
+                    if($materiaPrima){
+                        $table = new EntradaMateriaPrimaDetalle();
+                        $table->id_entrada = $id;
+                       $table->id_materia_prima = $materiaPrima->id_materia_prima;
+                        $table->fecha_vencimiento = date('Y-m-d');
+                        $table->porcentaje_iva = $detalle_compras->porcentaje;
+                        $table->cantidad = $detalle_compras->cantidad;
+                        $table->valor_unitario = $detalle_compras->valor;
+                        $table->save(); 
+                    }else{
+                       Yii::$app->getSession()->setFlash('warning', 'El CODIGO No ' .$detalle_compras->items->codigo. ' que se quiere enviar al inventario No esta codificado en MATERIAS PRIMAS.'); 
+                    }
+                    
             endforeach;
             $sw = 1;
             $this->redirect(["view",'id' => $id, 'token' => $token, 'sw' => $sw,]);  

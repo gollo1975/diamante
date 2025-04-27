@@ -19,6 +19,7 @@ $this->params['breadcrumbs'][] = 'Actualizar';
         'tipoSolicitud' => $tipoSolicitud,
         'ordenProduccion' => $ordenProduccion,
         'grupo' => $grupo,
+         'sw' =>  $sw,
     ]) ?>
 
 </div>

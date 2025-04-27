@@ -116,8 +116,10 @@ class PresentacionProductoController extends Controller
      */
     public function actionView($id)
     {
+        $listadoEmpaque = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $id])->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'listadoEmpaque' => $listadoEmpaque,
         ]);
     }
 
@@ -185,6 +187,73 @@ class PresentacionProductoController extends Controller
             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociado en otros procesos');
             $this->redirect(["presentacion-producto/index"]);
         }
+    }
+    
+    //eliminando detalles
+     public function actionEliminar_detalles($id, $id_detalle)
+    {
+        try {
+            $dato = \app\models\ConfiguracionMaterialEmpaque::findOne($id_detalle);
+            $dato->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["presentacion-producto/view",'id' => $id]);
+        } catch (IntegrityException $e) {
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+            $this->redirect(["presentacion-producto/view",'id' => $id]);
+            
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociado en otros procesos');
+           $this->redirect(["presentacion-producto/view",'id' => $id]);
+        }
+    }
+    
+    //IMPORTAR MATERIAL DE EMPAQUE
+    //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
+     public function actionBuscar_material_empaque($id){
+       
+        $operacion = \app\models\MateriaPrimas::find()->where(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
+        $form = new \app\models\FormModeloBuscar();
+        $q = null;
+       
+        if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $q = Html::encode($form->q);    
+                $operacion = \app\models\MateriaPrimas::find()
+                        ->andFilterWhere(['like','materia_prima', $q])
+                        ->orFilterWhere(['=','codigo_materia_prima', $q])
+                        ->andWhere(['=','id_solicitud', 2])
+                        ->orderBy('materia_prima ASC')->all();                    
+            } else {
+                $form->getErrors();
+            }                    
+        }else{
+            $operacion = \app\models\MateriaPrimas::find()->where(['=','id_solicitud', 2])->orderBy('materia_prima ASC')->all();
+        }
+        //PROCESO DE GUARDAR
+         if (isset($_POST["guardarmateriaprima"])) {
+            if(isset($_POST["nuevo_materia_prima"])){
+                foreach ($_POST["nuevo_materia_prima"] as $intCodigo) {
+                    //consulta para no duplicar
+                    $registro = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $id])
+                                                                   ->andWhere(['=','id_materia_prima', $intCodigo])->one();
+                    if(!$registro){
+                        $materia = \app\models\MateriaPrimas::findOne($intCodigo);
+                        $table = new \app\models\ConfiguracionMaterialEmpaque();
+                        $table->id_materia_prima = $intCodigo;
+                        $table->codigo_material =  $materia->codigo_materia_prima;
+                        $table->id_presentacion = $id;
+                        $table->user_name =  Yii::$app->user->identity->username;
+                        $table->save(false);
+                    }    
+                }
+                return $this->redirect(['view','id' => $id]);
+            }
+        }
+        return $this->render('importar_material_empaque', [
+            'operacion' => $operacion,            
+            'form' => $form,
+            'id' => $id,
+        ]);
     }
 
     /**

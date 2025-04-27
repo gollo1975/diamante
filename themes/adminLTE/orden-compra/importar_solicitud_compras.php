@@ -22,7 +22,7 @@ $area = ArrayHelper::map(AreaEmpresa::find()->orderBy ('descripcion ASC')->all()
         
         <?php $formulario = ActiveForm::begin([
             "method" => "get",
-            "action" => Url::toRoute(["orden-compra/importarsolicitud", 'id' => $id, 'token' => $token]),
+            "action" => Url::toRoute(["orden-compra/importarsolicitud", 'id' => $id, 'token' => $token,'id_solicitud' => $id_solicitud]),
             "enableClientValidation" => true,
             'options' => ['class' => 'form-horizontal'],
             'fieldConfig' => [
@@ -51,7 +51,7 @@ $area = ArrayHelper::map(AreaEmpresa::find()->orderBy ('descripcion ASC')->all()
                 </div>
                 <div class="panel-footer text-right">
                     <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-                    <a align="right" href="<?= Url::toRoute(["orden-compra/importarsolicitud", 'id' => $id, 'token' => $token]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                    <a align="right" href="<?= Url::toRoute(["orden-compra/importarsolicitud", 'id' => $id, 'token' => $token, 'id_solicitud' => $id_solicitud]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
                 </div>
             </div>
         </div>
