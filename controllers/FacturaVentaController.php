@@ -1587,22 +1587,11 @@ class FacturaVentaController extends Controller
                     "total" => "$detalle->subtotal"
                 ];
 
-        }//TERMINA EL RECORRIDO DEL PARA
-       /* foreach ($detalleFactura as $detalle) {
-            $body['items'][] = [
-                "product" => "$detalle->codigo_producto",
-                "warehouse" => 1,
-                "qty" => $detalle->cantidad,
-                "concept" => "$detalle->producto",
-                "average" => $detalle->valor_unitario,
-                "total" => $detalle->valor_unitario,
-            ];
-            
-        }//TERMINA EL RECORRIDO DEL PARA*/
+        }
        
         //   //ASIGNA A DATABOY EL VECTOR DE DETALLE DE FACTURAS 
         $dataBody = json_encode(["items" => $items]); // Codificamos el array de items a JSON
-        var_dump($dataHead);
+        
         curl_setopt_array($curl, [
             CURLOPT_URL => "http://begranda.com/equilibrium2/public/api/bill?key=$API_KEY",
             CURLOPT_RETURNTRANSFER => true,
@@ -1620,14 +1609,13 @@ class FacturaVentaController extends Controller
             curl_close($curl);
 
             $data = json_decode($response, true);
-            var_dump($dataBody);                   
-
+            
             if ($data === null) {
                 throw new Exception('Error al decodificar la respuesta JSON');
             }
             
              // Validar y extraer el CUFE
-          /*  if (isset($data['add']['fe']['cufe'])) {
+            if (isset($data['add']['fe']['cufe'])) {
                 $cufe = $data['add']['fe']['cufe'];
                 $fechaRecepcion = isset($data["data"]["sentDetail"]["response"]["send_email_date_time"]) && !empty($data["data"]["sentDetail"]["response"]["send_email_date_time"]) ? $data["data"]["sentDetail"]["response"]["send_email_date_time"] : date("Y-m-d H:i:s");
                 $factura->fecha_recepcion_dian = $fechaRecepcion;
@@ -1650,8 +1638,8 @@ class FacturaVentaController extends Controller
                 $factura->fecha_enviada_api = date("Y-m-d H:i:s");
                 $factura->save(false);
                 Yii::$app->getSession()->setFlash('error', "La factura no se envio a la Dian y se encuentra en la API de comunicacion."); 
-                return $this->redirect(['factura-venta/view', 'id' => $id_factura, 'token' => $token]);
-            }*/
+              //  return $this->redirect(['factura-venta/view', 'id' => $id_factura, 'token' => $token]);
+            }
             
         } catch (Exception $e) {
             Yii::$app->getSession()->setFlash('error', 'Error al enviar la factura: ' . $e->getMessage());

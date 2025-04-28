@@ -136,11 +136,13 @@ class TransportadoraController extends Controller
     public function actionCreate()
     {
         $model = new Transportadora();
-         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
         if ($model->load(Yii::$app->request->post()) && $model->save(false)) {
+            $model->user_name = Yii::$app->user->identity->username;
+            $model->save();
             return $this->redirect(['view', 'id' => $model->id_transportadora]);
         }
 
@@ -158,14 +160,20 @@ class TransportadoraController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $model = Transportadora::findOne($id);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->save(false)) {
             return $this->redirect(['view', 'id' => $model->id_transportadora]);
         }
-
+        
+        
+       
         return $this->render('update', [
             'model' => $model,
+            
         ]);
     }
 

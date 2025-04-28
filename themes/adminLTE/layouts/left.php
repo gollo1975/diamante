@@ -159,8 +159,6 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'database',
                                                     'url' => '#',
                                                     'items' => [
-                                                       ['label' => 'Medida materia prima', 'icon' => 'plus-square-o', 'url' => ['medida-materia-prima/index']],   
-                                                       ['label' => 'Medida producto', 'icon' => 'plus-square-o', 'url' => ['medida-producto-terminado/index']],   
                                                        ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],  
                                                        ['label' => 'Grupo', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
                                                         ['label' => 'Productos', 'icon' => 'plus-square-o', 'url' => ['productos/index']],
@@ -193,6 +191,63 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'url' => '#',
                                                     'items' => [
                                                         ['label' => 'Desabastecimiento', 'icon' => 'plus-square-o', 'url' => ['/pedidos/search_desabastecimiento']],
+                                                        
+                                                        [
+                                                        'label' => 'Ordenes',
+                                                        'icon' => 'cart-plus',
+                                                        'url' => '#',
+                                                        'items' => [
+                                                             
+                                                            ['label' => 'Orden producción    ', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/search_consulta_orden']],
+                                                        ]],
+                                                        ['label' => 'Devolucion productos    ', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/search_consulta_devolucion']],
+                                                    ],
+                                                ],
+
+                                                [
+                                                    'label' => 'Movimientos',
+                                                    'icon' => 'book',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                        
+                                                        ['label' => 'Orden produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index']],
+                                                        ['label' => 'Descargar ME-IP', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_descargar_inventario']],
+                                                        ['label' => 'Solicitud materiales', 'icon' => 'plus-square-o', 'url' => ['/solicitud-materiales/index']],
+                                                        ['label' => 'Entrega materiales', 'icon' => 'plus-square-o', 'url' => ['/entrega-materiales/index']],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                        //TERMINA 
+                                        //INICI MODULO DE INVENTARIO PRODUCCION
+                                        [
+                                            'label' => 'INVENTARIOS',
+                                            'icon' => 'shopping-cart',
+                                            'url' => '#',
+                                            'items' => [
+                                                [
+                                                    'label' => 'Administración',
+                                                    'icon' => 'database',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                            ['label' => 'Medida materia prima', 'icon' => 'plus-square-o', 'url' => ['medida-materia-prima/index']],   
+                                                            ['label' => 'Medida producto', 'icon' => 'plus-square-o', 'url' => ['medida-producto-terminado/index']],   
+                                                     ], 
+                                                ],
+                                                [
+                                                    'label' => 'Utilidades',
+                                                    'icon' => 'cube',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                        //['label' => 'Parametro presupuesto', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
+                                                        
+                                                    ],
+                                                ],
+                                                [
+                                                    'label' => 'Consultas',
+                                                    'icon' => 'question',
+                                                    'url' => '#',
+                                                    'items' => [
                                                         [
                                                         'label' => 'Materias prima',
                                                         'icon' => 'cart-plus',
@@ -207,12 +262,11 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                         'url' => '#',
                                                         'items' => [
                                                              ['label' => 'Inventario de productos', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/search_consulta_inventario']],
-                                                            ['label' => 'Orden producción    ', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/search_consulta_orden']],
+                                                             
                                                         ]],
-                                                        ['label' => 'Devolucion productos    ', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/search_consulta_devolucion']],
+                                                        
                                                     ],
                                                 ],
-
                                                 [
                                                     'label' => 'Movimientos',
                                                     'icon' => 'book',
@@ -234,15 +288,13 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             ['label' => 'Inventario', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/index']],
                                                             ['label' => 'Entradas', 'icon' => 'plus-square-o', 'url' => ['/entrada-producto-terminado/index']],
                                                         ]],
-                                                        ['label' => 'Orden produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index']],
-                                                        ['label' => 'Descargar ME-IP', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_descargar_inventario']],
-                                                        ['label' => 'Solicitud materiales', 'icon' => 'plus-square-o', 'url' => ['/solicitud-materiales/index']],
-                                                        ['label' => 'Entrega materiales', 'icon' => 'plus-square-o', 'url' => ['/entrega-materiales/index']],
+                                                        
                                                     ],
                                                 ],
                                             ],
+                                                
                                         ],
-                                        //TERMINA 
+                                        //TERMINA MODULO DE INVENTARIO
                                         //  INICIO MODULO DE CALIDAD
                                         [
                                             'label' => 'CALIDAD',
@@ -260,7 +312,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             ['label' => 'Formula auditoria', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion', 'sw' => 1]], 
                                                         ], 
 
-                                                    ],
+                                                ],
                                                 [
                                                     'label' => 'Consultas',
                                                     'icon' => 'question',

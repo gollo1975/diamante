@@ -15,27 +15,30 @@ use app\models\TipoDocumento;
 $this->title = 'Actualizar';
 $this->params['breadcrumbs'][] = ['label' => 'Transportadora', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 
 
 <!--<h1>Editar proveedor</h1>-->
-<?php $form = ActiveForm::begin([
-    "method" => "post",
-    'id' => 'formulario',
-    'enableClientValidation' => false,
-    'enableAjaxValidation' => true,
-	'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
-                'fieldConfig' => [
-                    'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
-                    'labelOptions' => ['class' => 'col-sm-4 control-label'],
-                    'options' => []
-                ],
-]);
-?>
 
+<?php $form = ActiveForm::begin([
+            "method" => "post",
+            'id' => 'formulario',
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
+            'fieldConfig' => [
+                'template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>',
+                'labelOptions' => ['class' => 'col-sm-4 control-label'],
+                'options' => []
+            ],
+        ]);
+?>
 <?php
+
 $departamento = ArrayHelper::map(Departamentos::find()->orderBy('departamento ASC')->all(), 'codigo_departamento', 'departamento');
 $municipios = ArrayHelper::map(\app\models\Municipios::find()->orderBy('municipio ASC')->all(), 'codigo_municipio', 'municipio');
+$tipodocumento = ArrayHelper::map(TipoDocumento::find()->where(['=','proceso_proveedor', 1])->all(), 'id_tipo_documento', 'documento');
 ?>
     <div class="panel panel-success">
         <div class="panel-heading">
@@ -65,11 +68,20 @@ $municipios = ArrayHelper::map(\app\models\Municipios::find()->orderBy('municipi
             <div class="row">
                 <?= $form->field($model, 'telefono')->input("text") ?>
             </div>
-            
-            
             <div class="row">
-                <?= $form->field($model, 'codigo_departamento')->dropDownList($departamento, ['prompt' => 'Seleccione...', 'onchange' => ' $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } ) .done(function( data ) {
-               $( "#' . Html::getInputId($model, 'codigo_municipio', ['required']) . '" ).html( data ); });']); ?>
+              <?= $form->field($model, 'codigo_departamento')->widget(Select2::classname(), [
+                'data' => $departamento,
+                'options' => ['placeholder' => 'Seleccione un departamento'],
+                'pluginOptions' => ['allowClear' => true],
+                'pluginEvents' => [
+                    "change" => 'function() { $.get( "' . Url::toRoute('proveedor/municipio') . '", { id: $(this).val() } )
+                            .done(function( data ) {
+                                $( "#' . Html::getInputId($model, 'codigo_municipio') . '" ).html( data );
+                        });
+                    }',
+                    ],
+                ]);
+            ?>
             </div>
             <div class="row">
                 <?= $form->field($model, 'codigo_municipio')->dropDownList($municipios, ['prompt' => 'Seleccione...']) ?>
@@ -82,7 +94,7 @@ $municipios = ArrayHelper::map(\app\models\Municipios::find()->orderBy('municipi
             </div>
         </div>    
         <div class="panel-footer text-right">        
-            <a href="<?= Url::toRoute("cliente-prospecto/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
+            <a href="<?= Url::toRoute("transportadora/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success",]) ?>
         </div>
     </div>

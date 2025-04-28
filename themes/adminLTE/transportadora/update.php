@@ -9,13 +9,15 @@ $this->title = 'Actualizar: ' . $model->razon_social;
 $this->params['breadcrumbs'][] = ['label' => 'Transportadoras', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id_transportadora, 'url' => ['index']];
 $this->params['breadcrumbs'][] = 'Actualizar';
+
 ?>
 <div class="transportadora-update">
 
  <!--  <h1><?= Html::encode($this->title) ?></h1>-->
 
-    <?= $this->render('_form', [
+    <?= $this->render('_form_editar', [       
         'model' => $model,
+        
     ]) ?>
 
 </div>
