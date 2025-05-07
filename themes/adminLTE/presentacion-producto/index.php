@@ -97,6 +97,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
                      <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Nombre grupo</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Medida</th>
+                      <th scope="col" style='background-color:#B9D5CE;'>Total items</th>
                      <th scope="col" style='background-color:#B9D5CE;'></th>  
                      <th scope="col" style='background-color:#B9D5CE;'></th>  
 
@@ -110,7 +111,8 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
                         <td><?= $val->descripcion ?></td>
                         <td><?= $val->producto->nombre_producto ?></td>
                         <td><?= $val->grupo->nombre_grupo ?></td>
-                          <td><?= $val->medidaProducto->descripcion ?></td>
+                        <td><?= $val->medidaProducto->descripcion ?></td>
+                        <td style="text-align: right"><?= $val->total_item ?></td>
                         <td style= 'width: 20px; right: 20px;'>
                             <a href="<?= Url::toRoute(["presentacion-producto/view", "id" => $val->id_presentacion]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>

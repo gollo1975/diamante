@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $model->id_presentacion;
     ]);?>
      <div>
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#materialempaque" aria-controls="materialempaque" role="tab" data-toggle="tab">Material de empaque  <span class="badge"><?= 1 ?></span></a></li>
+            <li role="presentation" class="active"><a href="#materialempaque" aria-controls="materialempaque" role="tab" data-toggle="tab">Material de empaque  <span class="badge"><?= count($listadoEmpaque) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="materialempaque">

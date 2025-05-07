@@ -112,7 +112,8 @@ $form = ActiveForm::begin([
             <thead>
                 <tr style ='font-size: 85%;'>         
                 
-                <th scope="col" style='background-color:#B9D5CE;'>No orden</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Orden de ensamble</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>OP</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
@@ -122,9 +123,12 @@ $form = ActiveForm::begin([
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
+            <?php foreach ($model as $val): 
+                $detalle = app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $val->id_ensamble])->one();
+                ?>
                 <tr style ='font-size: 85%;'>                
                     <td><?= $val->numero_orden_ensamble?></td>
+                    <td><?= $detalle->nombre_producto?></td>
                     <td><?= $val->ordenProduccion->producto->nombre_producto?></td>
                     <td><?= $val->ordenProduccion->numero_orden?></td>
                     <td><?= $val->etapa->concepto?></td>

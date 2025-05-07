@@ -41,7 +41,7 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     {
         return [
             [['id_producto', 'descripcion', 'id_medida_producto'], 'required'],
-            [['id_grupo','id_medida_producto','id_producto'], 'integer'],
+            [['id_grupo','id_medida_producto','id_producto','total_item'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 70],
             [['user_name'], 'string', 'max' => 15],
@@ -58,11 +58,12 @@ class PresentacionProducto extends \yii\db\ActiveRecord
         return [
             'id_presentacion' => 'Id',
             'id_grupo' => 'Grupo producto',
-            'id_producto' => 'Producto',
-            'descripcion' => 'Presentacion producto',
+            'id_producto' => 'Nombre del producto',
+            'descripcion' => 'Presentacion del producto',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'User name',
-           'id_medida_producto' => 'Medida:',
+           'id_medida_producto' => 'Unidad medida:',
+            'total_item' => 'total_item',
         ];
     }
 

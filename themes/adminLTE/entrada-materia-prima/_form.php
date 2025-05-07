@@ -55,7 +55,7 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
         </div>    
         <div class="row">
              <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => 'true']) ?>
-             <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
+             <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15','readonly' => true]) ?>
              
         </div>
          <div class="row">

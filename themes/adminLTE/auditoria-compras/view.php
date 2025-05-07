@@ -127,7 +127,7 @@ $view = 'auditoria-compras';
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Muetras si la mercancia llego con novedad">E /S</span></th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Estado</th>  
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>N. cantidad</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>U. auditadas</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>N. valor</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Estado</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Descripcion del auditor</th>  

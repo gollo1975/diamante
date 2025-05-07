@@ -278,8 +278,10 @@ class EntradaMateriaPrimaController extends Controller
         }
         $token = 0;
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $orden = OrdenCompra::findOne($model->id_orden_compra);
             $model->user_name_crear= Yii::$app->user->identity->username;
-            $model->update();
+            $model->numero_soporte = $orden->numero_orden;
+            $model->save(false);
             return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
         }
         $model->fecha_proceso = date('Y-m-d');
@@ -319,9 +321,11 @@ class EntradaMateriaPrimaController extends Controller
             return ActiveForm::validate($model);
         }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-             $model->user_name_edit= Yii::$app->user->identity->username;
-            $model->update();
-            return $this->redirect(['index']);
+            $compra = OrdenCompra::findOne($model->id_orden_compra);
+            $model->user_name_edit= Yii::$app->user->identity->username;
+            $model->numero_soporte = $compra->numero_orden;
+            $model->save(false);
+            return $this->redirect(['view','id' => $id, 'token' => 0]);
         }
          if (Yii::$app->request->get("id")) {
             $table = EntradaMateriaPrima::findOne($id);

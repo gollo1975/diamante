@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_cierre') ?></th>
                     <td><?= Html::encode($model->fecha_cierre) ?></td>  
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_autorizada') ?></th>
-                    <td><?= Html::encode($model->fecha_autorizada) ?></td>
+                    <td style='background-color:#aed9e0'><?= Html::encode($model->fecha_autorizada) ?></td>
               </tr>
                <tr style ='font-size:90%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>

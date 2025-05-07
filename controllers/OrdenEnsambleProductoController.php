@@ -869,6 +869,7 @@ class OrdenEnsambleProductoController extends Controller
                             $inventario->fecha_proceso = $ordenP->fecha_proceso;
                             $inventario->fecha_vencimiento = $inventario->fecha_vencimiento;
                             $inventario->id_detalle = $detalles->ordenProduccionProducto->id_detalle;
+                            $inventario->inventario_inicial = 1;
                             $inventario->save();
                             $detalles->importado = 1;
                             $detalles->save();

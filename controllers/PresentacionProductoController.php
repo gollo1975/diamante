@@ -196,7 +196,9 @@ class PresentacionProductoController extends Controller
             $dato = \app\models\ConfiguracionMaterialEmpaque::findOne($id_detalle);
             $dato->delete();
             Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->SumarItems($id);
             $this->redirect(["presentacion-producto/view",'id' => $id]);
+            
         } catch (IntegrityException $e) {
             Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
             $this->redirect(["presentacion-producto/view",'id' => $id]);
@@ -244,6 +246,7 @@ class PresentacionProductoController extends Controller
                         $table->id_presentacion = $id;
                         $table->user_name =  Yii::$app->user->identity->username;
                         $table->save(false);
+                        $this->SumarItems($id);
                     }    
                 }
                 return $this->redirect(['view','id' => $id]);
@@ -254,6 +257,14 @@ class PresentacionProductoController extends Controller
             'form' => $form,
             'id' => $id,
         ]);
+    }
+    
+    //SUMA LOS ITEMS DE MATERIA DE EMPAQUE
+    protected function SumarItems($id) {
+        $modelo = PresentacionProducto::findOne($id);
+        $cantidad = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $id])->all();
+        $modelo->total_item = count($cantidad);
+        $modelo->save();
     }
 
     /**
