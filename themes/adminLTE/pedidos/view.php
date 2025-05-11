@@ -81,7 +81,7 @@ $view = 'pedidos';
                         </div>
                      </div>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_pedido") ?></th>
                     <td><?= Html::encode($model->id_pedido) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_pedido') ?></th>
@@ -91,7 +91,7 @@ $view = 'pedidos';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Vr_bruto') ?>:</th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_bruto,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'documento') ?></th>
                     <td><?= Html::encode($model->documento) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cliente')?></th>
@@ -101,7 +101,7 @@ $view = 'pedidos';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Dscto_comercial') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->descuento_comercial,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
                     <td><?= Html::encode($model->autorizadoPedido) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cerrado') ?></th>
@@ -111,7 +111,7 @@ $view = 'pedidos';
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>                  
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'usuario') ?></th>
                     <td><?= Html::encode($model->usuario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_agente') ?></th>
@@ -121,7 +121,7 @@ $view = 'pedidos';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'impuesto') ?></th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->impuesto,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td  colspan="5"><?= Html::encode($model->observacion) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'gran_total') ?></th>
@@ -153,7 +153,7 @@ $view = 'pedidos';
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <th scope="col" style='background-color:#B9D5CE;'><b>Codigo</b></th>  
                                         <th scope="col" style='background-color:#B9D5CE;'>Presentación</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>TV</th>
@@ -167,7 +167,7 @@ $view = 'pedidos';
                                <tbody>
                                <?php
                                foreach ($detalle_pedido as $val): ?>
-                               <tr style="font-size: 90%;">
+                               <tr style="font-size: 85%;">
                                     <td><?= $val->inventario->codigo_producto ?></td>
                                    <td><?= $val->inventario->nombre_producto ?></td>
                                     <td><?= $val->venta_condicionado?></td>
@@ -236,7 +236,7 @@ $view = 'pedidos';
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th> 
                                         <th scope="col" align="center" style='background-color:#B9D5CE;'>TV</th> 
@@ -255,7 +255,7 @@ $view = 'pedidos';
                                     $impuesto += $val->impuesto;
                                     $total += $val->total_linea;
                                      ?>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <td><?= $val->inventario->codigo_producto ?></td>
                                         <td><?= $val->inventario->nombre_producto ?></td>
                                         <td><?= $val->ventaCondicionado?></td>

@@ -94,7 +94,8 @@ class Empleados extends \yii\db\ActiveRecord
                 'barrio', 'estado_civil', 'fecha_expedicion_documento', 'codigo_municipio_expedicion', 'id_grupo', 'genero', 'fecha_nacimiento', 'codigo_municipio_nacimiento', 'padre_familia', 'cabeza_hogar',
                 'discapacitado', 'id_banco', 'tipo_cuenta', 'numero_cuenta', 'tipo_transacion', 'id_profesion'], 'required'],
             ['nit_cedula', 'match', 'pattern' => '/^[0-9\s]+$/i', 'message' => 'Sólo se aceptan números'],
-            [['tipo_empleado', 'id_tipo_documento', 'nit_cedula', 'dv', 'estado_civil', 'id_grupo', 'genero', 'padre_familia', 'cabeza_hogar', 'discapacitado', 'id_banco', 'tipo_transacion', 'id_profesion','estado','id_forma_pago'], 'integer'],
+            [['tipo_empleado', 'id_tipo_documento', 'nit_cedula', 'dv', 'estado_civil', 'id_grupo', 'genero', 'padre_familia', 'cabeza_hogar', 'discapacitado', 'id_banco', 'tipo_transacion', 'id_profesion','estado',
+                'id_forma_pago','homologar_document','documento_pago_banco'], 'integer'],
             [['fecha_expedicion_documento', 'fecha_nacimiento', 'fecha_ingreso', 'fecha_retiro', 'fecha_hora_registro', 'fecha_hora_editado'], 'safe'],
             [['nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefono', 'celular', 'numero_cuenta', 'user_name', 'user_name_editado'], 'string', 'max' => 15],
             [['direccion', 'email_empleado'], 'string', 'max' => 50],
@@ -168,6 +169,8 @@ class Empleados extends \yii\db\ActiveRecord
             'talla_camisa' => 'Talla camisa:',
             'estado' => 'Activo:',
             'id_forma_pago' => 'Forma de pago:',
+            'documento_pago_banco' => 'Documento pago banco:',
+            'homologar_document' => 'Homologar documento:',
         ];
     }
 
@@ -334,5 +337,14 @@ class Empleados extends \yii\db\ActiveRecord
         return $estadoactivo;
     }
     
+    public function getTransacion()
+     {
+        if($this->tipo_transacion == 27){
+            $transacion = "ABONO A CTA CORRIENTE";
+        }else{
+            $transacion = "ABONO A CTA AHORRO";
+        }
+        return $transacion;
+    }
     
 }

@@ -128,7 +128,7 @@ $conPension = ArrayHelper::map(\app\models\EntidadPension::find()->where(['=','e
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 90%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Nro contrato</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo contrato</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Empleado</th>
@@ -143,7 +143,7 @@ $conPension = ArrayHelper::map(\app\models\EntidadPension::find()->where(['=','e
             <tbody>
                 <?php
                 foreach ($model as $val): ?>
-                    <tr style="font-size: 90%;">                   
+                    <tr style="font-size: 85%;">                   
                          <td><?= $val->id_contrato ?></td>
                         <td><?= $val->tipoContrato->contrato ?></td>
                         <td><?= $val->empleado->nombre_completo ?></td>

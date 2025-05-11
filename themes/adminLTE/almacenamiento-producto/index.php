@@ -112,7 +112,7 @@ $form = ActiveForm::begin([
         </div>
         <table class="table table-bordered table-hover">
         <thead>
-            <tr style ='font-size: 90%;'>         
+            <tr style ='font-size: 85%;'>         
             <th scope="col" style='background-color:#B9D5CE;'>Id alm.</th>
             <th scope="col" style='background-color:#B9D5CE;'>Piso</th> 
             <th scope="col" style='background-color:#B9D5CE;'>Rack</th>
@@ -134,7 +134,7 @@ $form = ActiveForm::begin([
         <?php 
         if($model){
             foreach ($model as $val):?>
-                <tr style ='font-size: 90%;'>                
+                <tr style ='font-size: 85%;'>                
                     <td><?= $val->id_almacenamiento?></td>
                     <td><?= $val->piso->descripcion?></td>
                     <td><?= $val->rack->descripcion?></td>

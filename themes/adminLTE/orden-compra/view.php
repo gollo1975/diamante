@@ -56,7 +56,7 @@ $view = 'orden-compra';
                     echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordencompra', 'id' => $model->id_orden_compra], ['class' => 'btn btn-default btn-sm']);            
                 }else{
                     echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimirordencompra', 'id' => $model->id_orden_compra], ['class' => 'btn btn-default btn-sm']);            
-                   echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 5, 'codigo' => $model->id_orden_compra,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
+                    echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 5, 'codigo' => $model->id_orden_compra,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
                 }
             }?>        
     </p>  

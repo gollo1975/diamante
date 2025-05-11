@@ -177,6 +177,10 @@ $form = ActiveForm::begin([
                 ]); ?>
             
         </div>
+        <div class="row">
+            <?= $form->field($model, 'homologar_document')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
+             <?= $form->field($model, 'documento_pago_banco')->input("text", ["maxlength" => 20]) ?>
+        </div>
          <div class="row">
             <?= $form->field($model, 'talla_zapato')->input("text", ["maxlength" => 10]) ?>
             <?= $form->field($model, 'talla_pantalon')->input("text", ["maxlength" => 10]) ?>

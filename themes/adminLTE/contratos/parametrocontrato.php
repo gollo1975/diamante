@@ -123,7 +123,7 @@ $tiempo = ArrayHelper::map(TiempoServicio::find()->orderBy ('id_tiempo ASC')->al
                 <?php } ?>   
                 <td><?= $val->grupoPago->grupo_pago ?></td>
                 <td><?= $val->activo ?></td>
-                <td style="width: 25px;">				
+                <td style="width: 20px; height: 20px">				
                     <a href="<?= Url::toRoute(["contratos/viewparameters", "id" => $val->id_contrato]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>
             </tr>

@@ -86,7 +86,7 @@ $view = 'contrato';
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_cotizante') ?></th>
                     <td><?= Html::encode($model->tipoCotizante->tipo) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_subtipo_cotizante') ?></th>
-                    <td><?= Html::encode($model->subtipoCotizante->descripcion) ?></td>
+                    <td><?= Html::encode($model->subtipoCotizante->subtipo) ?></td>
                                      
                              
                 </tr>

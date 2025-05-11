@@ -15,11 +15,6 @@ $this->title = 'EMPLEADO: ' .$model->nombre_completo;
 $this->params['breadcrumbs'][] = ['label' => 'Empleados', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_empleado;
 $view = 'empleados';
-//$contrato = Contrato::find()->where(['=','id_empleado', $model->id_empleado])->orderBy('id_contrato DESC')->all();
-/*$incapacidad = Incapacidad::find()->where(['=','id_empleado', $model->id_empleado])->orderBy('id_incapacidad DESC')->all();
-$licencia = Licencia::find()->where(['=','id_empleado', $model->id_empleado])->orderBy('id_licencia_pk DESC')->all();
-$credito = Credito::find()->where(['=','id_empleado', $model->id_empleado])->orderBy('id_credito DESC')->all();
-$estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_empleado])->orderBy('id DESC')->all();*/
 ?>
 <div class="empleados-view">
 
@@ -129,10 +124,10 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
         <ul class="nav nav-tabs" role="tablist">
            
             <li role="presentation" class="active"><a href="#contrato" aria-controls="contrato" role="tab" data-toggle="tab">Contratos <span class="badge"><?= count($contrato) ?></span></a></li>
-            <li role="presentation"><a href="#incapacidad" aria-controls="incapacidad" role="tab" data-toggle="tab">Incapacidades <span class="badge"><?= 1 ?></span></a></li>
-            <li role="presentation"><a href="#licencia" aria-controls="licencia" role="tab" data-toggle="tab">Licencias <span class="badge"><?= 1 ?></span></a></li>
-            <li role="presentation"><a href="#credito" aria-controls="licencia" role="tab" data-toggle="tab">Créditos <span class="badge"><?= 1 ?></span></a></li>
-            <li role="presentation"><a href="#estudio" aria-controls="estudio" role="tab" data-toggle="tab">Estudios <span class="badge"><?= 1 ?></span></a></li>
+            <li role="presentation"><a href="#incapacidad" aria-controls="incapacidad" role="tab" data-toggle="tab">Incapacidades <span class="badge"><?= count($incapacidad) ?></span></a></li>
+            <li role="presentation"><a href="#licencia" aria-controls="licencia" role="tab" data-toggle="tab">Licencias <span class="badge"><?= count($licencias) ?></span></a></li>
+            <li role="presentation"><a href="#credito" aria-controls="licencia" role="tab" data-toggle="tab">Créditos <span class="badge"><?= count($creditos) ?></span></a></li>
+            <li role="presentation"><a href="#estudio" aria-controls="estudio" role="tab" data-toggle="tab">Estudios <span class="badge"><?= count($estudios) ?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="contrato">
@@ -151,6 +146,7 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                         <th scope="col" style='background-color:#B9D5CE;'>Cargo</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Salario</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Activo</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'></th>    
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -171,7 +167,23 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                             <td><?= $valor->cargo->nombre_cargo ?></td>
                                             <td align="right"><?= '$'.number_format($valor->salario,0) ?></td>
                                             <td><?= $valor->activo ?></td>
-                                            
+                                            <td style="width: 20px; height: 20px">	
+                                            <?= Html::a('<span class="glyphicon glyphicon-eye-open"></span>',            
+                                                    ['/contratos/detalle_contrato','id_contrato' => $valor->id_contrato],
+                                                    [
+                                                        'title' => 'Detalle del contrato',
+                                                        'data-toggle'=>'modal',
+                                                        'data-target'=>'#modaldetallecontrato'.$valor->id_contrato,
+                                                        'class' => ''
+                                                    ]
+                                                );
+                                                ?>
+                                               <div class="modal remote fade" id = "modaldetallecontrato<?= $valor->id_contrato ?>">
+                                                   <div class="modal-dialog modal-lg">
+                                                       <div class="modal-content"></div>
+                                                   </div>
+                                               </div>
+                                            </td>    
                                         </tr>
                                    <?php endforeach; ?>    
                                 </tbody>      
@@ -195,13 +207,30 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha final</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Dias</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Medico</th>
+                                        <th scope="col" style='background-color:#B9D5CE;'>No contrato</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Grupo pago</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Salario</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Vlr_Incapacidad</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                   
+                                    <?php
+                                    foreach ($incapacidad as $valor):?>
+                                        <tr style='font-size:85%;'>
+                                            <td><?= $valor->numero_incapacidad ?></td>
+                                            <td><?= $valor->codigoIncapacidad->nombre?></td>
+                                            <td><?= $valor->codigo_diagnostico ?></td>
+                                            <td><?= $valor->fecha_inicio ?></td>
+                                            <td><?= $valor->fecha_final ?></td>
+                                            <td><?= $valor->dias_incapacidad ?></td>
+                                            <td><?= $valor->nombre_medico ?></td>
+                                            <td><?= $valor->id_contrato ?></td>
+                                            <td><?= $valor->grupoPago->grupo_pago ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->salario,0) ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->vlr_liquidado,0) ?></td>
+                                            
+                                        </tr>
+                                   <?php endforeach; ?>    
                                 </tbody>      
                             </table>
                         </div>
@@ -228,7 +257,20 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
+                                    <?php
+                                     foreach ($licencias as $valor):?>
+                                        <tr style='font-size:85%;'>
+                                            <td><?= $valor->id_licencia_pk ?></td>
+                                            <td><?= $valor->codigoLicencia->concepto?></td>
+                                            <td><?= $valor->id_contrato ?></td>
+                                            <td><?= $valor->fecha_desde ?></td>
+                                            <td><?= $valor->fecha_hasta ?></td>
+                                            <td><?= $valor->dias_licencia ?></td>
+                                            <td><?= $valor->grupoPago->grupo_pago ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->salario,0) ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->vlr_licencia,0) ?></td>
+                                        </tr>
+                                   <?php endforeach; ?>    
                                 </tbody>      
                             </table>
                         </div>
@@ -256,7 +298,22 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                     </tr>
                                 </thead>
                                 <tbody>
-                                        
+                                    <?php
+                                    foreach ($creditos as $valor):?>
+                                        <tr style='font-size:85%;'>
+                                            <td><?= $valor->id_credito ?></td>
+                                            <td><?= $valor->codigoCredito->nombre_credito?></td>
+                                            <td><?= $valor->tipoPago->descripcion ?></td>
+                                            <td><?= $valor->fecha_inicio ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->valor_credito,0) ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->valor_cuota,0) ?></td>
+                                            <td><?= $valor->numero_cuotas ?></td>
+                                            <td style="text-align: right"><?= '$'.number_format($valor->saldo_credito,0) ?></td>
+                                            <td><?= $valor->grupoPago->grupo_pago ?></td>
+                                            <td><?= $valor->user_name ?></td>
+                                            
+                                        </tr>
+                                   <?php endforeach; ?>       
                                 </tbody>      
                             </table>
                         </div>
@@ -285,7 +342,23 @@ $estudio = EstudioEmpleado::find()->where(['=','id_empleado', $model->id_emplead
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
+                                    <?php
+                                     foreach ($estudios as $valor):?>
+                                        <tr style='font-size:85%;'>
+                                            <td><?= $valor->id ?></td>
+                                            <td><?= $valor->titulo_obtenido?></td>
+                                            <td><?= $valor->institucion_educativa ?></td>
+                                            <td><?= $valor->codigoMunicipio->municipio ?></td>
+                                             <td><?= $valor->fecha_inicio ?></td>
+                                             <td><?= $valor->fecha_terminacion ?></td>
+                                            <td><?= $valor->tipoEstudio->estudio ?></td>
+                                            <td><?= $valor->anio_cursado ?></td>
+                                            <td><?= $valor->graduadoestudio ?></td>
+                                            <td><?= $valor->fecha_registro ?></td>
+                                            <td><?= $valor->user_name ?></td>
+                                            
+                                        </tr>
+                                   <?php endforeach; ?>    
                                 </tbody>      
                             </table>
                         </div>

@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $id_orden;
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_orden_produccion") ?></th>
                     <td><?= Html::encode($model->id_orden_produccion) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_orden') ?></th>
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Presentación</th>  
                                         <th scope="col"  style='background-color:#B9D5CE;'>U. Fabricadas</th> 
@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                      foreach ($detalle as $val):
                                          $conDato = app\models\AlmacenamientoProductoDetalles::find()->where(['=','id_almacenamiento', $val->id_almacenamiento])->one();
                                          ?>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <td><?= $val->codigo_producto ?></td>
                                             <td><?= $val->nombre_producto ?></td>
                                             <td style="text-align: right"><?= ''.number_format($val->unidades_producidas,0) ?></td>
@@ -173,7 +173,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <th scope="col"  style='background-color:#B9D5CE;'><b>Piso</b></th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Rack</th>                        
                                         <th scope="col"  style='background-color:#B9D5CE;'>Ubicación</th> 
@@ -188,7 +188,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                 <body>
                                      <?php
                                      foreach ($conAlmacenado as $dato):?>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <td><?= $dato->piso->descripcion ?></td>
                                             <td><?= $dato->rack->numero_rack ?> - <?= $dato->rack->descripcion ?></td>
                                             <td><?= $dato->posicion->posicion ?></td>

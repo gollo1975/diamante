@@ -739,6 +739,12 @@ class ContratosController extends Controller
         return $this->renderAjax('_acumulardevengado', ['model' => $model, 'id' => $id]);
     }
     
+    //PERMITE VER DEL DETALLE DEL CONTRATO
+    public function actionDetalle_contrato($id_contrato) {
+       $modelo = Contratos::findOne($id_contrato);
+       return $this->renderAjax('_detalle_contrato', ['modelo' => $modelo, 'id_contrato' => $id_contrato]);
+    }
+    
      //PERMITE CAMBIAR DE EPS EN E CONTRATO
     public function actionCambioeps($id)
      { 

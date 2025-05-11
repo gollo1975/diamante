@@ -108,6 +108,22 @@ class AlmacenamientoProductoController extends Controller
                     } else {
                         $form->getErrors();
                     }
+                }else{
+                    $table = AlmacenamientoProductoDetalles::find()->orderBy('id DESC'); 
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id  DESC']);
+                            $this->actionExcelAlmacenamiento($tableexcel);
+                    }
                 } 
                 return $this->render('index', [
                             'model' => $model,
@@ -589,14 +605,19 @@ class AlmacenamientoProductoController extends Controller
     {
         $detalle = AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $id_orden])->all();
         $conAlmacenado = AlmacenamientoProductoDetalles::find()->where(['=','id_orden_produccion', $id_orden])->all();
-        $model = OrdenProduccion::findOne($id_orden);
-        return $this->render('view_almacenamiento', [
-            'detalle' => $detalle,
-            'id_orden' => $id_orden,
-            'model' => $model,
-            'conAlmacenado' => $conAlmacenado,
-            'token' =>$token,
-        ]);
+        $model = OrdenProduccion::find()->where(['=','id_orden_produccion', $id_orden])->andWhere(['=','producto_almacenado', 1])->one();
+         if($model !== null){
+            return $this->render('view_almacenamiento', [
+                'detalle' => $detalle,
+                'id_orden' => $id_orden,
+                'model' => $model,
+                'conAlmacenado' => $conAlmacenado,
+                'token' =>$token,
+            ]);
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No se puede ver las unidades porque la orden de produccion no se ha almacenado en su totalidad. Validar la informacion con logistca.');
+            return $this->redirect(['index']);
+        }    
     }
     
     //VISTA DE ALMACENAMIENTO DE ENTRADAS
@@ -2087,7 +2108,7 @@ class AlmacenamientoProductoController extends Controller
                     ->setCellValue('H1', 'POSICION')
                     ->setCellValue('I1', 'OP')
                     ->setCellValue('J1', 'CODIGO PRODUCTO')
-                    ->setCellValue('K1', 'NOMBRE PRODUCTO')
+                    ->setCellValue('K1', 'PRESENTACION')
                     ->setCellValue('L1', 'NRO LOTE')
                     ->setCellValue('M1', 'FECHA ALMACENAMIENTO')
                     ->setCellValue('N1', 'USER NAME');

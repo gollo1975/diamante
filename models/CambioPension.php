@@ -54,9 +54,9 @@ class CambioPension extends \yii\db\ActiveRecord
     {
         return [
             'id_cambio' => 'Id Cambio',
-            'id_contrato' => 'Id Contrato',
-            'id_entidad_pension_anterior' => 'Id Entidad Pension Anterior',
-            'id_entidad_pension_nueva' => 'Id Entidad Pension Nueva',
+            'id_contrato' => 'Contrato',
+            'id_entidad_pension_anterior' => 'Entidad Pension Anterior',
+            'id_entidad_pension_nueva' => 'Entidad Pension Nueva',
             'fecha_cambio' => 'Fecha Cambio',
             'user_name' => 'User Name',
             'observacion' => 'Observacion',

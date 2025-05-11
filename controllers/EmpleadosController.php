@@ -133,10 +133,18 @@ class EmpleadosController extends Controller
     public function actionView($id, $token)
     {
         $contrato = \app\models\Contratos::find()->where(['id_empleado' => $id])->orderBy('id_contrato DESC')->all();
+        $incapacidad = \app\models\Incapacidad::find()->where(['=','id_empleado', $id])->orderBy('id_incapacidad DESC')->all();
+        $licencias = \app\models\Licencia::find()->where(['=','id_empleado', $id])->orderBy('id_licencia_pk DESC')->all();
+        $creditos = \app\models\Credito::find()->where(['=','id_empleado', $id])->orderBy('id_credito DESC')->all();
+        $estudios = \app\models\EstudiosEmpleados::find()->where(['=','id_empleado', $id])->orderBy('id DESC')->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
             'token' => $token, 
             'contrato' => $contrato,
+            'incapacidad' => $incapacidad,
+            'licencias' => $licencias,
+            'creditos' => $creditos,
+            'estudios' => $estudios,
         ]);
     }
 

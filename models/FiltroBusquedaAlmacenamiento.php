@@ -44,7 +44,7 @@ class FiltroBusquedaAlmacenamiento extends Model
             'piso' => 'Numero piso:',
             'rack' => 'Numero rack:',
             'posicion' => 'Posicion:',
-            'producto' => 'Nombre producto:',
+            'producto' => 'Presentacion:',
             'codigo' => 'Codigo producto',
             'proveedor' => 'Nombre proveedor:',
             'tipo_entrada' => 'Tipo entrada:',

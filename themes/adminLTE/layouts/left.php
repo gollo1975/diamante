@@ -644,7 +644,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 'icon' => 'connectdevelop',
                                                                 'url' => '#',
                                                                 'items' => [
-                                                                    ['label' => 'Tipo de estudio', 'icon' => 'plus-square-o', 'url' => ['/departamentos/indexdepartamento']],
+                                                                    ['label' => 'Tipo de estudio', 'icon' => 'plus-square-o', 'url' => ['/estudios-empleados/index']],
                                                                     ]
                                                                 ],
                                                                 ['label' => 'Empleado', 'icon' => 'plus-square-o', 'url' => ['/empleados/index']],
@@ -811,6 +811,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                  ['label' => 'Creditos', 'icon' => 'plus-square-o', 'url' => ['credito/index']],
                                                                  ['label' => 'Pago adicional x fecha', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-fecha/index']],
                                                                  ['label' => 'Adicional permanente', 'icon' => 'plus-square-o', 'url' => ['pago-adicional-permanente/index']],
+                                                                 ['label' => 'Pago banco', 'icon' => 'plus-square-o', 'url' => ['pago-banco/index']],
                                                             ],
                                                         ],
                                                         //COMIENZA MEDU DE PROCESOS

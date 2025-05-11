@@ -185,9 +185,9 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                      <table class="table table-responsive">
                                          <link rel="stylesheet" href="dist/css/site.css">
                                         <thead>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <th scope="col" style='background-color:#B9D5CE;'>Código</th>
-                                                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                                                 <th scope="col" style='background-color:#B9D5CE;'>Imagen</th>
                                                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
                                                 <th scope="col" style='background-color:#B9D5CE;'>Cant.</th>
@@ -204,7 +204,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                             $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
                                             $descuento = app\models\ReglaDescuentoDistribuidor::find()->where(['=','id_inventario', $val->id_inventario])->one();
                                             ?>
-                                            <tr style="font-size: 90%;">
+                                            <tr style="font-size: 85%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->nombre_producto ?></td>
                                                 <?php if($valor){
@@ -254,7 +254,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                        <thead>
                                            <tr style="font-size: 85%;">
                                                 <th scope="col" style='background-color:#B9D5CE;'>Código</th>
-                                                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                                                 <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                <th scope="col" style='background-color:#B9D5CE; text-align: right'>Cant.</th>
                                                <th scope="col" style='background-color:#B9D5CE; text-align: right'>Vlr. unit.</th>
@@ -357,7 +357,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                <table class="table table-responsive">
                                    <thead>
                                        <tr style="font-size: 85%;">
-                                           <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>     
+                                           <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>     
                                            <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                            <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Cant.</th>       
                                             <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Vr. Unit.</th>  
@@ -561,7 +561,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                           <table class="table table-responsive">
                                              <thead>
                                                  <tr style="font-size: 85%;">
-                                                      <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                                                     <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
+                                                      <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                                                       <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                       <th scope="col" style='background-color:#B9D5CE; text-align: right'>Cant.</th>
                                                       <th scope="col" style='background-color:#B9D5CE; text-align: right'>Vlr. unit.</th>
@@ -577,6 +578,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                                                                         ->andWhere(['=','estado_regla', 0])->one();
                                                       ?>
                                                        <tr style="font-size: 85%;">
+                                                           <td><?= $val->inventario->codigo_producto ?></td>
                                                            <td><?= $val->inventario->nombre_producto ?></td>
                                                            <td><?= $val->venta_condicionado ?></td>
                                                            <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
@@ -618,31 +620,31 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                       <td colspan="8" style='background-color:#B9D5CE;'></td>
                                                   </tr>
                                                  <tr style="font-size: 85%;">
-                                                      <td colspan="3"></td>
+                                                      <td colspan="4"></td>
                                                       <td style="text-align: right;"><b>Vr. bruto:</b></td>
                                                       <td align="right" ><b><?= '$'.number_format($model->valor_bruto,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
                                                   <tr style="font-size: 85%;">
-                                                      <td colspan="3"></td>
+                                                      <td colspan="4"></td>
                                                       <td style="text-align: right;"><b>Descuento:</b></td>
                                                       <td align="right" ><b><?= '$'.number_format($model->descuento_comercial,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
                                                   <tr style="font-size: 85%;">
-                                                      <td colspan="3"></td>
+                                                      <td colspan="4"></td>
                                                       <td style="text-align: right;"><b>Subtotal:</b></td>
                                                       <td align="right" ><b><?= '$'.number_format($model->subtotal,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
                                                   <tr style="font-size: 85%;">
-                                                      <td colspan="3"></td>
+                                                      <td colspan="4"></td>
                                                       <td style="text-align: right;"><b>Iva:</b></td>
                                                       <td align="right" ><b><?= '$'.number_format($model->impuesto,2); ?></b></td>
                                                       <td colspan="1"></td>
                                                   </tr>
                                                    <tr style="font-size: 85%;">
-                                                      <td colspan="3"></td>
+                                                      <td colspan="4"></td>
                                                       <td style="text-align: right;"><b>Total:</b></td>
                                                       <td align="right" ><b><?= '$'.number_format($model->gran_total,2); ?></b></td>
                                                       <td colspan="1"></td>
@@ -663,7 +665,8 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                           <table class="table table-responsive">
                                               <thead>
                                                   <tr style="font-size: 85%;">
-                                                      <th scope="col" align="center" style='background-color:#B9D5CE;'>Producto</th>   
+                                                      <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>  
+                                                      <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentacion</th>   
                                                       <th scope="col" style='background-color:#B9D5CE; text-align: left'><span title="Tipo de venta - venta/bonificable">TV</span></th>
                                                       <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Cant.</th>       
                                                        <th scope="col" align="center" style='background-color:#B9D5CE; text-align: right'>Vr. Unit.</th>  
@@ -679,6 +682,7 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                       $impuesto += $val->impuesto;
                                                       $total += $val->total_linea;?>
                                                       <tr style="font-size: 85%;">
+                                                          <td><?= $val->codigo_producto ?></td>
                                                           <td><?= $val->inventario->nombre_producto ?></td>
                                                           <td><?= $val->venta_condicionado ?></td>
                                                           <?php if($val->cantidad == 0){?>
@@ -708,19 +712,19 @@ $this->params['breadcrumbs'][] = $model->id_pedido;
                                                   <td colspan="8" style='background-color:#B9D5CE;'></td>
                                               </tr>
                                               <tr style="font-size: 85%;">
-                                                  <td colspan="3"></td>
+                                                  <td colspan="4"></td>
                                                   <td style="text-align: right;"><b>Subtotal:</b></td>
                                                   <td align="right"><b><?= '$'.number_format($subtotal,2); ?></b></td>
                                                   <td colspan="1"></td>
                                               </tr>
                                               <tr style="font-size: 85%;">
-                                                  <td colspan="3"></td>
+                                                  <td colspan="4"></td>
                                                   <td style="text-align: right;"><b>Iva:</b></td>
                                                   <td align="right" ><b><?= '$'.number_format($impuesto,2); ?></b></td>
                                                   <td colspan="1"></td>
                                               </tr>
                                                <tr style="font-size: 85%;">
-                                                  <td colspan="3"></td>
+                                                  <td colspan="4"></td>
                                                   <td style="text-align: right;"><b>Total:</b></td>
                                                   <td align="right" ><b><?= '$'.number_format($total,2); ?></b></td>
                                                   <td colspan="1"></td>
