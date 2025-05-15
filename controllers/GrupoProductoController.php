@@ -226,21 +226,17 @@ class GrupoProductoController extends Controller
          if (isset($_POST["guardarmateriaprima"])) {
             if(isset($_POST["nuevo_materia_prima"])){
                 foreach ($_POST["nuevo_materia_prima"] as $intCodigo) {
-                    //consulta para no duplicar
-                    $registro = \app\models\ConfiguracionProducto::find()->where(['=','id_producto', $id_producto])
-                                                                   ->andWhere(['=','id_materia_prima', $intCodigo])->one();
-                    if(!$registro){
-                        $materia = \app\models\MateriaPrimas::findOne($intCodigo);
-                        $table = new \app\models\ConfiguracionProducto();
-                        $table->id_grupo = $id_grupo;
-                        $table->id_producto = $id_producto;
-                        $table->id_materia_prima = $intCodigo;
-                        $table->codigo_materia =  $materia->codigo_materia_prima;
-                        $table->nombre_materia_prima = $materia->materia_prima;
-                        $table->id_fase = 1;
-                        $table->user_name =  Yii::$app->user->identity->username;
-                        $table->save(false);
-                    }    
+                    $materia = \app\models\MateriaPrimas::findOne($intCodigo);
+                    $table = new \app\models\ConfiguracionProducto();
+                    $table->id_grupo = $id_grupo;
+                    $table->id_producto = $id_producto;
+                    $table->id_materia_prima = $intCodigo;
+                    $table->codigo_materia =  $materia->codigo_materia_prima;
+                    $table->nombre_materia_prima = $materia->materia_prima;
+                    $table->id_fase = 1;
+                    $table->user_name =  Yii::$app->user->identity->username;
+                    $table->save(false);
+                      
                 }
                 return $this->redirect(['view_configuracion','id_producto' => $id_producto, 'sw' => $sw]);
             }
