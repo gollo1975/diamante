@@ -153,7 +153,7 @@ $form = ActiveForm::begin([
                     <td style="text-align: right"><?= ''.number_format($val->cantidad, 0)?></td>
                     <?php if($val->id_orden_produccion <> null){?>
                         <td style= 'width: 25px; height: 20px;'>
-                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento", "id_orden" => $val->id_orden_produccion, 'token' => 0]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                             <a href="<?= Url::toRoute(["almacenamiento-producto/view_almacenamiento_search", "id_orden" => $val->id_orden_produccion, 'token' => 2]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                     <?php }else{?>    
                         <td style= 'width: 25px; height: 20px;'>

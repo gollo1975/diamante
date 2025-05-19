@@ -605,19 +605,36 @@ class AlmacenamientoProductoController extends Controller
     {
         $detalle = AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $id_orden])->all();
         $conAlmacenado = AlmacenamientoProductoDetalles::find()->where(['=','id_orden_produccion', $id_orden])->all();
-        $model = OrdenProduccion::find()->where(['=','id_orden_produccion', $id_orden])->andWhere(['=','producto_almacenado', 1])->one();
-         if($model !== null){
-            return $this->render('view_almacenamiento', [
+        $model = OrdenProduccion::find()->where(['=','id_orden_produccion', $id_orden])->one();
+        return $this->render('view_almacenamiento', [
                 'detalle' => $detalle,
                 'id_orden' => $id_orden,
                 'model' => $model,
                 'conAlmacenado' => $conAlmacenado,
                 'token' =>$token,
             ]);
+        
+    }
+    
+     //VISTA DE ALMACENAMIENTO CONSULTA
+    public function actionView_almacenamiento_search($id_orden, $token)
+    {
+        $detalle = AlmacenamientoProducto::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        $conAlmacenado = AlmacenamientoProductoDetalles::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        $model = OrdenProduccion::find()->where(['=','id_orden_produccion', $id_orden])->andWhere(['=','producto_almacenado', 1])->one();
+        if($model !== null){
+            return $this->render('search_view_almacenamiento', [
+                    'detalle' => $detalle,
+                    'id_orden' => $id_orden,
+                    'model' => $model,
+                    'conAlmacenado' => $conAlmacenado,
+                    'token' => $token,
+                ]);
         }else{
-            Yii::$app->getSession()->setFlash('error', 'No se puede ver las unidades porque la orden de produccion no se ha almacenado en su totalidad. Validar la informacion con logistca.');
-            return $this->redirect(['index']);
-        }    
+            Yii::$app->getSession()->setFlash('error', 'La Orden de produccion No se encuentra almancenada en su totalidad o No se ha cerrado. Validar con el personal de logistica.');
+            return $this->redirect(['index']); 
+        }
+        
     }
     
     //VISTA DE ALMACENAMIENTO DE ENTRADAS
