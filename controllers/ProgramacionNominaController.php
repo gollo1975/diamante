@@ -1280,6 +1280,7 @@ class ProgramacionNominaController extends Controller
             $detalle->fecha_hasta = $fecha_hasta;
             $detalle->porcentaje = $tiempo_extra->porcentaje;
             $detalle->id_grupo_pago = $id_grupo_pago;
+            $detalle->id_novedad = $tiempo_extra->id_novedad;
             $detalle->save(false);
         }
     }

@@ -336,8 +336,8 @@ class Empleados extends \yii\db\ActiveRecord
         }
         return $estadoactivo;
     }
-    
-    public function getTransacion()
+ 
+     public function getTransacion()
      {
         if($this->tipo_transacion == 27){
             $transacion = "ABONO A CTA CORRIENTE";
@@ -346,5 +346,9 @@ class Empleados extends \yii\db\ActiveRecord
         }
         return $transacion;
     }
+    
+    
+    
+   
     
 }

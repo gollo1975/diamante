@@ -46,7 +46,7 @@ $contador = count($concepto_salario);
                         <tbody>
                                 <?php foreach ($concepto_salario as $val): ?>
                                   <tr>
-                                      <td><input type="hidden" name="codigo_salario[]" value="<?= $val->codigo_salario ?>" readonly="readonly"><?= $val->codigo_salario ?></td>
+                                        <td><input type="hidden" name="codigo_salario[]" value="<?= $val->codigo_salario ?>" readonly="readonly"><?= $val->codigo_salario ?></td>
                                         <td><input type="hidden" name="concepto[]" value="<?= $val->nombre_concepto ?>" readonly="readonly"><?= $val->nombre_concepto ?></td>
                                         <td><input type="hidden" name="porcentaje[]" value="<?= $val->porcentaje_tiempo_extra ?>" readonly="readonly"><?= $val->porcentaje_tiempo_extra?>%</td>
                                         <td align ="right"><input type="text" style="text-align:right" name="horas[]" value="0" size="4" required></td>

@@ -39,7 +39,7 @@ use kartik\select2\Select2;
                                 <th scope="col" style='background-color:#B9D5CE;'>Concepto de salario</th>
                                 <th scope="col" style='background-color:#B9D5CE;'>% de pago</th>
                                 <th scope="col" style='background-color:#B9D5CE;'>Nro_Horas</th>
-                                <th scope="col" style='background-color:#B9D5CE;'></th>
+                                <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
 
                                                        
                             </tr>
@@ -47,12 +47,13 @@ use kartik\select2\Select2;
                         <tbody>
                                 <?php foreach ($datos_novedad as $val): ?>
                                   <tr>
-                                      <td><input type="hidden" name="codigo_salario[]" value="<?= $val->codigo_salario ?>" readonly="readonly"><?= $val->codigo_salario ?></td>
+                                     <td><?= $val->codigo_salario ?></td>
                                       <td><?= $val->codigoSalario->nombre_concepto?></td>
                                       <td><?= $val->porcentaje?>%</td>
                                       <td align ="right"><input type="text" style="text-align:right"  name="horas[]" value="<?= $val->nro_horas ?>" size="4"></td>
                                       <input type="hidden" name="vlr_hora[]" value="<?= $val->vlr_hora ?>" readonly="readonly">
-                                      <td style="width: 30px;"><input type="checkbox" name="eliminar_dato[]" value="<?= $val->id_novedad ?>"></td>
+                                      <td style="width: 30px;"><input type="checkbox" name="novedades_nomina[]" value="<?= $val->id_novedad ?>"></td>
+                                      <input type="hidden" name="codigo_novedad[]" value="<?= $val->id_novedad ?>" >
                                   </tr>
 
                               <?php endforeach; ?>   
@@ -68,3 +69,16 @@ use kartik\select2\Select2;
         </div>
     </div>
 <?php $form->end() ?> 
+<script type="text/javascript">
+	function marcar(source) 
+	{
+		checkboxes=document.getElementsByTagName('input'); //obtenemos todos los controles del tipo Input
+		for(i=0;i<checkboxes.length;i++) //recoremos todos los controles
+		{
+			if(checkboxes[i].type == "checkbox") //solo si es un checkbox entramos
+			{
+				checkboxes[i].checked=source.checked; //si es un checkbox le damos el valor del checkbox que lo llamó (Marcar/Desmarcar Todos)
+			}
+		}
+	}
+</script>

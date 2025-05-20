@@ -2,11 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use app\models\Contrato;
-use app\models\Incapacidad;
-use app\models\EstudioEmpleado;
-use app\models\Licencia;
-use app\models\Credito;
+
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Empleado */
@@ -351,7 +347,7 @@ $view = 'empleados';
                                             <td><?= $valor->codigoMunicipio->municipio ?></td>
                                              <td><?= $valor->fecha_inicio ?></td>
                                              <td><?= $valor->fecha_terminacion ?></td>
-                                            <td><?= $valor->tipoEstudio->estudio ?></td>
+                                            <td><?= $valor->profesion->profesion ?></td>
                                             <td><?= $valor->anio_cursado ?></td>
                                             <td><?= $valor->graduadoestudio ?></td>
                                             <td><?= $valor->fecha_registro ?></td>

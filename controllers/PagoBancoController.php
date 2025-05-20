@@ -299,7 +299,7 @@ class PagoBancoController extends Controller
                            $table->documento = $empleado->documento_pago_banco;
                         }    
                         $table->nombres = utf8_decode(mb_substr($nomina->empleado->nombre_completo, 0, 20));
-                        $table->tipo_transacion = $empleado->tipo_transacion;
+                        $table->tipo_transacion = $empleado->tipoTransacion->codigo_enlace;
                         $table->codigo_banco = $empleado->banco->codigo_interfaz;
                         $table->banco = $empleado->banco->entidad;
                         $table->numero_cuenta = $empleado->numero_cuenta;
@@ -391,6 +391,111 @@ class PagoBancoController extends Controller
      $this->redirect(["pago-banco/view", 'id' => $id, 'tipo_proceso' => $tipo_proceso, 'token' => $token]);
     }
     
+    //GENERAR ARCHIVOS TXT PAB
+    
+    public function actionPagoarchivopab($id) {
+       
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        $pago_banco = PagoBanco::findOne($id);
+        ob_clean();
+        $fijo = 6;
+        $letra = 'S';
+        $strArchivo = "archivoPlanoPab".".txt";                
+        $ar = fopen($strArchivo, "a+") or die("Problemas en la creacion del archivo plano");              
+        //Linea inicial
+        fputs($ar, $this->RellenarNr($pago_banco->id_empresa, "1", 1));  
+        fputs($ar, $this->RellenarNr($pago_banco->nit_cedula, "0", 15));
+        fputs($ar, $pago_banco->aplicacion, 2);
+        fputs($ar, $this->RellenarNr($pago_banco->tipo_pago, " ", 18));
+        fputs($ar, str_pad(utf8_decode($pago_banco->descripcion), 10)); 
+        fputs($ar, date("Ymd", strtotime($pago_banco->fecha_creacion)));
+        fputs($ar, $pago_banco->secuencia);
+        fputs($ar, date("Ymd", strtotime($pago_banco->fecha_aplicacion)));
+        fputs($ar, $this->RellenarNr($pago_banco->total_empleados, "0", 6));
+        fputs($ar, $this->RellenarNr($pago_banco->debitos, "0", 17));
+        fputs($ar, $this->RellenarNr(round($pago_banco->total_pagar.$pago_banco->adicion_numero), "0", 17));
+        fputs($ar, $this->RellenarNr($empresa->entidadBancaria->producto, "0", 11));
+        fputs($ar, $empresa->entidadBancaria->tipo_producto, 1);
+        fputs($ar, "\n");
+        //fin linea
+        $detalle_pago = PagoBancoDetalle::find()->where(['=','id_pago_banco', $id])->orderBy('nombres ASC')->all(); 
+        foreach ($detalle_pago as $pago):
+            fputs($ar, $fijo);  
+            if(mb_strlen($pago->documento) == 6){
+              fputs($ar, $pago->documento);                
+              fputs($ar, "         ");
+            }
+            if(mb_strlen($pago->documento) == 7){
+              fputs($ar, $pago->documento);                
+              fputs($ar, "        ");
+            }
+             if(mb_strlen($pago->documento) == 8){
+              fputs($ar, $pago->documento);                
+              fputs($ar, "       ");
+            }
+            
+            if(mb_strlen($pago->documento) == 10){
+              fputs($ar, $pago->documento);                
+              fputs($ar, "     ");
+            }
+            fputs($ar, str_pad(utf8_decode($pago->nombres), 30));
+            fputs($ar, $this->RellenarNr($pago->codigo_banco, "0", 9));
+            //campos para cuentas bancarias
+            if(strlen($pago->numero_cuenta) == 12){
+                fputs($ar, $pago->numero_cuenta);
+                fputs($ar, "     ");
+            }
+            if(strlen($pago->numero_cuenta) == 11){
+                fputs($ar, $pago->numero_cuenta);
+                fputs($ar, "      ");
+            }
+            if(strlen($pago->numero_cuenta) == 10){
+                fputs($ar, $pago->numero_cuenta);
+                fputs($ar, "       ");
+            }
+            if(strlen($pago->numero_cuenta) == 9){
+                fputs($ar, $pago->numero_cuenta);
+                fputs($ar, "        ");
+            }
+            if(strlen($pago->numero_cuenta) == 8){
+                fputs($ar, $pago->numero_cuenta);
+                fputs($ar, "         ");
+            }
+           
+            fputs($ar, $letra);  
+            fputs($ar, $pago->tipo_transacion, 2);
+            fputs($ar, $this->RellenarNr(round($pago->valor_transacion.$pago_banco->adicion_numero), "0", 17));
+            fputs($ar, date("Ymd", strtotime($pago_banco->fecha_aplicacion)));
+            fputs($ar, "                     ");
+            fputs($ar, $pago->tipo_documento, 1);
+            fputs($ar, "00000");
+            fputs($ar, "\n");
+        endforeach;
+        fclose($ar);
+        header('Content-Description: File Transfer');
+        header('Content-Type: text/csv; charset=ISO-8859-15');
+        header('Content-Disposition: attachment; filename='.basename($strArchivo));
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($strArchivo));
+        readfile($strArchivo);
+        unlink($strArchivo);
+        exit;
+    }
+    
+    public static function RellenarNr($Nro, $Str, $NroCr) {
+        $Longitud = strlen($Nro);
+
+        $Nc = $NroCr - $Longitud;
+        for ($i = 0; $i < $Nc; $i++)
+            $Nro = $Str . $Nro;
+
+        return (string) $Nro;
+    }
+
+    
+    
     //ARCHIVO QUE PERMITE IMPRIMIR EL PDF
    public function actionImprimir_reporte($id, $token, $tipo_proceso)
     {
@@ -400,6 +505,8 @@ class PagoBancoController extends Controller
             'model' => $this->findModel($id),
         ]);*/
     }
+    
+    
     
     /**
      * Finds the PagoBanco model based on its primary key value.
@@ -504,6 +611,12 @@ class PagoBancoController extends Controller
         $objWriter->save('php://output');
         //$objWriter->save($pFilename = 'Descargas');
         exit; 
+        
+    }
+    
+    //ARCHIVO GENERAL
+    public function actionExcelconsultaPagoBanco($tableexcel) {
+        
         
     }
 }

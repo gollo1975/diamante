@@ -76,7 +76,7 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
             [['id_programacion', 'codigo_salario', 'horas_periodo', 'horas_periodo_reales', 'dias', 'dias_reales', 'dias_transporte', 'factor_dia', 'salario_basico', 'vlr_devengado', 'valor_tiempo_extra', 'vlr_devengado_no_prestacional',
                 'vlr_neto_pagar', 'descuento_salud', 'descuento_pension', 'auxilio_transporte', 'vlr_licencia', 'dias_licencia_descontar', 'vlr_incapacidad', 'id_incapacidad', 'nro_horas_incapacidad', 'dias_incapacidad_descontar',
                 'vlr_ajuste_incapacidad', 'deduccion', 'id_credito', 'id_periodo_pago_nomina', 'id_grupo_pago', 'dias_salario', 'dias_descontar_transporte', 'id_licencia', 'porcentaje', 'vlr_licencia_no_pagada', 'vlr_vacacion',
-                'aplico_dias_licencia','aplico_dias_incapacidad','descuento_fondo_solidaridad','vlr_ibc_medio_tiempo'], 'integer'],
+                'aplico_dias_licencia','aplico_dias_incapacidad','descuento_fondo_solidaridad','vlr_ibc_medio_tiempo','id_novedad'], 'integer'],
             [['fecha_desde', 'fecha_hasta'], 'safe'],
             [['vlr_deduccion', 'vlr_credito', 'vlr_hora', 'vlr_dia', 'nro_horas'], 'number'],
             [['id_credito'], 'exist', 'skipOnError' => true, 'targetClass' => Credito::className(), 'targetAttribute' => ['id_credito' => 'id_credito']],
@@ -86,6 +86,7 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
             [['codigo_salario'], 'exist', 'skipOnError' => true, 'targetClass' => ConceptoSalarios::className(), 'targetAttribute' => ['codigo_salario' => 'codigo_salario']],
             [['id_incapacidad'], 'exist', 'skipOnError' => true, 'targetClass' => Incapacidad::className(), 'targetAttribute' => ['id_incapacidad' => 'id_incapacidad']],
             [['id_licencia'], 'exist', 'skipOnError' => true, 'targetClass' => Licencia::className(), 'targetAttribute' => ['id_licencia' => 'id_licencia_pk']],
+            [['id_novedad'], 'exist', 'skipOnError' => true, 'targetClass' => NovedadTiempoExtra::className(), 'targetAttribute' => ['id_novedad' => 'id_novedad']],
         ];
     }
 
@@ -140,6 +141,7 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
             'aplico_dias_licencia' => 'aplico_dias_licencia',
             'descuento_fondo_solidaridad' => 'descuento_fondo_solidaridad',
             'vlr_ibc_medio_tiempo' =>'vlr_ibc_medio_tiempo',
+            'id_novedad' => 'id_novedad',
         ];
     }
 
@@ -197,5 +199,13 @@ class ProgramacionNominaDetalle extends \yii\db\ActiveRecord
     public function getLicencia()
     {
         return $this->hasOne(Licencia::className(), ['id_licencia_pk' => 'id_licencia']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNovedadTiempo()
+    {
+        return $this->hasOne(NovedadTiempoExtra::className(), ['id_novedad' => 'id_novedad']);
     }
 }
