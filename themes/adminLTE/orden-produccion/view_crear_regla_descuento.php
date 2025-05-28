@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $id;
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_inventario') ?></th>
                     <td><?= Html::encode($model->id_inventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?></th>
@@ -48,9 +48,9 @@ $this->params['breadcrumbs'][] = $id;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
-                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
+                    <td><?= Html::encode($model->producto->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $id;
                    <td><?= Html::encode($model->user_name) ?></td>
                 </tr>
                                 
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion_producto') ?></th>
                     <td colspan="9"><?= Html::encode($model->descripcion_producto)?></td>
                 </tr>
@@ -105,7 +105,7 @@ $this->params['breadcrumbs'][] = $id;
                                 </thead>
                                 <tbody>
                                     <?php foreach ($regla_distribuidor as $val):?>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <td><?= $val->id_regla?></td>
                                             <td><?= $val->fecha_inicio?></td>
                                             <td><?= $val->fecha_final?></td>

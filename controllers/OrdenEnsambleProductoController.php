@@ -626,18 +626,25 @@ class OrdenEnsambleProductoController extends Controller
         $orden = OrdenEnsambleProducto::findOne($id);
         $buscarP = \app\models\OrdenProduccionProductos::findOne($id_detalle);
         $registro = \app\models\EntregaMaterialesDetalle::find()->where(['=','id_detalle',$buscarP->id_detalle])
-                                                                ->andWhere(['=','id_orden_produccion', $buscarP->id_orden_produccion])->all();
+                                                                ->andWhere(['=','id_orden_produccion', $buscarP->id_orden_produccion])
+                                                                ->orderBy('id_materia_prima DESC')->all();
         if(count($registro) > 0){
             foreach ($registro as $val) {
+                 
                 if(!\app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_materia_prima', $val->id_materia_prima])
                                                                   ->andWhere(['=','id_ensamble', $id])->andWhere(['=','id_presentacion', $buscarP->id_presentacion])->one()){
+                    $ConMaterial = \app\models\EntregaMaterialesDetalle::find()->where(['=','id_materia_prima', $val->id_materia_prima])->andWhere(['=','id_detalle', $id_detalle])->all();
+                    $contar = 0;
+                    foreach ($ConMaterial as $valores){
+                        $contar += $valores->unidades_despachadas;
+                    }
                     $table = new \app\models\OrdenEnsambleProductoEmpaque();
                     $table->id_ensamble = $id;
                     $table->id_presentacion = $buscarP->id_presentacion;
                     $table->id_materia_prima = $val->id_materia_prima;
-                    $table->unidades_solicitadas =  $buscarP->cantidad;
+                    $table->unidades_solicitadas =  $contar;
                     $table->unidades_utilizadas =  $buscarP->cantidad;
-                    $table->unidades_reales =  $buscarP->cantidad;
+                    $table->unidades_reales =  $contar;
                     $table->user_name =  Yii::$app->user->identity->username;
                     $materia = \app\models\MateriaPrimas::findOne($val->id_materia_prima);
                     if($orden->total_unidades <= $materia->stock){
@@ -649,7 +656,7 @@ class OrdenEnsambleProductoController extends Controller
                       $table->stock = $suma;
                     }
                      $table->save(false);
-                }                               
+                }                           
             }//fin para
             return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
         }else{
@@ -718,9 +725,68 @@ class OrdenEnsambleProductoController extends Controller
         ]);
     }
     
+    //actualizar rendimiento y cantidades reales
+    public function actionActualizar_unidades_rendimiento($id, $token, $id_presentacion, $sw, $codigo, $id_detalle) {
+        //validar unidades utilizads
+        
+        $u_utilizadas = OrdenEnsambleProductoEmpaque::find()->where(['=','id_ensamble', $id])->andWhere(['=','id_presentacion', $id_presentacion])->all();
+        $primer_valor = null; // Inicializamos una variable para guardar el primer valor
+        foreach ($u_utilizadas as $utilizadas) {
+            if ($primer_valor === null) {
+                // Asignamos el primer valor encontrado
+                $primer_valor = $utilizadas->unidades_utilizadas;
+            } else {
+                // Comparamos con el primer valor. Si son diferentes, mostramos el mensaje.
+                if ($primer_valor !== $utilizadas->unidades_utilizadas) {
+                    Yii::$app->getSession()->setFlash('error', 'No se puede actualizar el porcentaje de rendimiento del producto porque las unidades envasadas deben de ser iguales. Favor valide la información.');
+                    return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
+                }
+            }
+        }
+        //validamos que las aunidades reales esten iguales
+        $primer_valor_unidades = null;
+        foreach ($u_utilizadas as $utilizadas) {
+            if ($primer_valor_unidades === null) {
+                // Asignamos el primer valor encontrado
+                $primer_valor_unidades = $utilizadas->unidades_reales;
+            } else {
+                // Comparamos con el primer valor. Si son diferentes, mostramos el mensaje.
+                if ($primer_valor_unidades !== $utilizadas->unidades_reales) {
+                    Yii::$app->getSession()->setFlash('warning', 'No se puede actualizar las unidades reales porque las cantidades deben de ser iguales en todas las lineas. Favor valide la información.');
+                    return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
+                }else{
+                    
+                }
+            }
+        }
+        //actualiza unidades reales y rendimiento
+        $orden = \app\models\OrdenEnsambleProductoDetalle::findOne($codigo);
+        $total = 0;
+        $total = ''.number_format(($primer_valor / $orden->cantidad_proyectada) * 100, 2);
+        $orden->cantidad_real = $primer_valor_unidades;
+        $orden->porcentaje_rendimiento = $total;
+        $orden->save();
+        //actualiza unidaes totales reales
+        $ordenTotal = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', 'null'])->all();
+        $cantidad = 0;
+        foreach ($ordenTotal as $val) {
+            $cantidad += $val->cantidad_real;
+            $val->cantidad_real = $cantidad;
+            $val->save();
+        }
+        //actuliza la orden de produccion
+        $orden_ensamble = OrdenEnsambleProducto::findOne($id);
+        $orden_ensamble->total_unidades = $cantidad;
+        $orden_ensamble->save(false);
+        $this->CambiarCantidadOrdenProduccion($id_detalle, $cantidad);
+       return $this->redirect(["orden-ensamble-producto/view", 'id' => $id, 'token' => $token, 'sw' => $sw]);
+        
+
+    }
+    
     //actualiza la orden de produccion en su cantidad
-    protected function CambiarCantidadOrdenProduccion($codigo, $cantidad) {
-        $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_detalle', $codigo])->one();
+    protected function CambiarCantidadOrdenProduccion($id_detalle, $cantidad) {
+        $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_detalle', $id_detalle])->one();
         $producto->cantidad_real = $cantidad;
         $producto->save();
         $orden = \app\models\OrdenProduccion::findOne($producto->id_orden_produccion);

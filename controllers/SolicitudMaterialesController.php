@@ -143,7 +143,8 @@ class SolicitudMaterialesController extends Controller
     {
         $solicitd = $this->findModel($id);
         $detalle_solicitud = \app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->orderBy('linea_cerrada ASC')->all();
-        $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->all();
+        $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 0])->all();
+        $presentacion2 = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 1])->all();
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_cantidad"])){
                 if(isset($_POST["listado_materiales"])){
@@ -151,7 +152,6 @@ class SolicitudMaterialesController extends Controller
                     foreach ($_POST["listado_materiales"] as $intCodigo):
                         $table = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id', $intCodigo])->andwhere(['=','linea_cerrada', 0])->one();
                         if($table){
-                            echo 'dasdas';
                             if (isset($_POST["unidades_requeridas"][$intIndice])) {
                                 $cantidad = $_POST["unidades_requeridas"][$intIndice];
                                 $table->unidades_requeridas = $cantidad;
@@ -171,6 +171,7 @@ class SolicitudMaterialesController extends Controller
             'token' =>$token,
             'detalle_solicitud' => $detalle_solicitud,
             'presentacion' => $presentacion,
+            'presentacion2' => $presentacion2,
         ]);
     }
 
@@ -186,7 +187,7 @@ class SolicitudMaterialesController extends Controller
                 $model = new SolicitudMateriales();
                 $tipoSolicitud = TipoSolicitud::find()->where(['=','aplica_materia_prima', 1])->orderBy ('descripcion ASC')->all();
                 $grupo = GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all();
-                $ordenProduccion = \app\models\OrdenProduccion::find()->where(['=','orden_cerrada_ensamble', 0])->all();
+                $ordenProduccion = \app\models\OrdenProduccion::find()->where(['=','orden_cerrada_ensamble', 0])->orderBy('id_orden_produccion DESC')->all();
                 if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
                     return ActiveForm::validate($model);

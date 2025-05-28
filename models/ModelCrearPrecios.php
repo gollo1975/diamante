@@ -14,6 +14,7 @@ class ModelCrearPrecios extends Model
     public $codigo;
     public $producto;
     public $grupo;
+    public $presentacion;
     public $marca;
     public $proveedor;
     public $categoria;
@@ -22,8 +23,8 @@ class ModelCrearPrecios extends Model
     public function rules()
     {
         return [  
-           [['codigo', 'grupo','marca','proveedor','categoria','punto_venta'], 'integer'],
-           [['producto'], 'string'],
+           [['codigo', 'grupo','marca','proveedor','categoria','punto_venta','producto'], 'integer'],
+           [['presentacion'], 'string'],
         ];
     }
 
@@ -32,7 +33,8 @@ class ModelCrearPrecios extends Model
         return [   
             'codigo' => 'Codigo producto:',
             'grupo' => 'Grupo producto:',
-            'producto' => 'Nombre producto:',
+            'presentacion' => 'Presentacion del producto:',
+            'producto' => 'Nombre producto',
             'punto_venta' => 'Punto de venta:',
             'proveedor' => 'Proveedor:',
             'categoria' => 'Categoria:',

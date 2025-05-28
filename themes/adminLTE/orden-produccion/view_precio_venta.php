@@ -37,30 +37,30 @@ $posicion = ArrayHelper::map(app\models\PosicionPrecio::find()->all(), 'id_posic
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Id') ?></th>
                     <td><?= Html::encode($model->id_inventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?></th>
                     <td><?= Html::encode($model->codigo_producto) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nombre_producto') ?></th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Presentacion') ?></th>
                     <td><?= Html::encode($model->nombre_producto) ?></td>
                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                    
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_iva') ?></th>
                     <td><?= Html::encode($model->aplicaIva) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
-                    <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
+                    <td><?= Html::encode($model->producto->nombre_producto) ?></td>
                     
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_iva') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_iva,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
                     <td><?= Html::encode($model->user_name) ?></td>
                   
@@ -71,7 +71,7 @@ $posicion = ArrayHelper::map(app\models\PosicionPrecio::find()->all(), 'id_posic
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_ean') ?></th>
                     <td><?= Html::encode($model->codigo_ean) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
@@ -81,7 +81,7 @@ $posicion = ArrayHelper::map(app\models\PosicionPrecio::find()->all(), 'id_posic
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_inventario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_inventario,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'codigo_ean') ?></th>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'inventario_inicial') ?></th>
                     <td><?= Html::encode($model->inventarioInicial) ?></td>
@@ -91,7 +91,7 @@ $posicion = ArrayHelper::map(app\models\PosicionPrecio::find()->all(), 'id_posic
                     <td colspan="3"><?= Html::encode($model->porcentaje_iva) ?></td>
                   
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion_producto') ?></th>
                     <td colspan="9"><?= Html::encode($model->descripcion_producto)?></td>
                 </tr>
@@ -122,7 +122,7 @@ $posicion = ArrayHelper::map(app\models\PosicionPrecio::find()->all(), 'id_posic
                                 <thead>
                                     <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE;'>Id</th>                      
-                                        <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>Presentacion del producto</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Precio venta publico</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Posición</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Iva incluido</th> 
@@ -133,7 +133,7 @@ $posicion = ArrayHelper::map(app\models\PosicionPrecio::find()->all(), 'id_posic
                                 </thead>
                                 <tbody>
                                     <?php foreach ($listado_precio as $val):?>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <td><?= $val->consecutivo ?></td>  
                                             <td><?= $val->inventario->nombre_producto ?></td>
                                             <td style="padding-right: 1;padding-right: 0; text-align: right"> <input type="text" name="precio_venta_publico[]" value="<?= $val->precio_venta_publico ?>" style="text-align: right" size="9" required="true"> </td> 

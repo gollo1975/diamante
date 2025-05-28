@@ -35,7 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_registro', 1])->orderBy('nombre_grupo DESC')->all(), 'id_grupo', 'nombre_grupo');?>
+$grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_registro', 1])->orderBy('nombre_grupo DESC')->all(), 'id_grupo', 'nombre_grupo');
+$conProducto = ArrayHelper::map(app\models\Productos::find()->orderBy('nombre_producto DESC')->all(), 'id_producto', 'nombre_producto');?>
 <div class="panel panel-success panel-filters">
     <div class="panel-heading">
         Parametros de entrada
@@ -44,8 +45,15 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
     <div class="panel-body" id="importardocumentocontable">
         <div class="row" >
             <?= $formulario->field($form, "codigo")->input("search") ?>
-            <?= $formulario->field($form, "producto")->input("search") ?>
-            <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
+            <?= $formulario->field($form, "presentacion")->input("search") ?>
+            <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                'data' => $conProducto,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
+             <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
                 'data' => $grupo,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
@@ -74,9 +82,10 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size:90%;'>                
-                    <th scope="col" style='background-color:#B9D5CE;'>Codigo producto</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
+                <tr style ='font-size:85%;'>                
+                    <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Nombre del producto</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Nombre del Grupo</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
@@ -94,9 +103,10 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->where(['=','ver_regi
                     foreach ($model as $val):
                         $concodigo = \app\models\InventarioReglaDescuento::find()->where(['=','id_inventario', $val->id_inventario])->one();
                         ?>
-                        <tr style='font-size:90%;'>             
+                        <tr style='font-size:85%;'>             
                             <td><?= $val->codigo_producto ?></td>    
                             <td><?= $val->nombre_producto ?></td>
+                            <td><?= $val->producto->nombre_producto ?></td>
                             <td><?= $val->grupo->nombre_grupo ?></td>
                             <td style="text-align: right"><?= ''.number_format($val->unidades_entradas,0)?></td>
                             <td style="text-align: right"><?= ''.number_format($val->stock_unidades,0)?></td>

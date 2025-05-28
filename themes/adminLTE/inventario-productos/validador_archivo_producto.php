@@ -74,10 +74,10 @@ $view_archivo = 'view_archivo';
                            <div class="panel-body">
                                  <table class="table table-bordered table-striped table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Nombre_producto</th>
-                                             <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'>Presentacion del producto</th>
+                                             <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Imagen</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -91,10 +91,10 @@ $view_archivo = 'view_archivo';
                                             $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])
                                                                                           ->andWhere(['=','predeterminado', 1])->one();
                                             ?>
-                                            <tr style ='font-size: 90%;'>                
+                                            <tr style ='font-size: 85%;'>                
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
-                                                <td><?= $val->grupo->nombre_grupo?></td>
+                                                <td><?= $val->producto->nombre_producto?></td>
                                                 <?php 
                                                 if($valor){
                                                   $variable = 'Documentos/'.$valor->numero.'/'.$valor->codigo.'/'. $valor->nombre;

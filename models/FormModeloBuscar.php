@@ -35,7 +35,7 @@ class FormModeloBuscar extends Model
     {
         return [
             'q' => 'Dato a Buscar:',  
-            'nombre' =>'Producto:',
+            'nombre' =>'Presentacion:',
             'observacion' => 'Observacion:',
             'fecha_entrega' => 'F. entrega:',
             'etapa' => 'Etapa proceso:',

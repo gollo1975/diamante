@@ -130,9 +130,10 @@ $view = 'solicitud-materiales';
                                         </tr>
                                     </thead>
                                     <body>
-                                         <?php
-                                         foreach ($presentacion as $val):?>
-                                            <tr style="font-size: 85%;">
+                                        <?php
+                                        
+                                            foreach ($presentacion as $val):?>
+                                                <tr style="font-size: 85%;">
                                                 <td><?= $val->id_detalle ?></td>
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->descripcion ?></td>
@@ -186,7 +187,9 @@ $view = 'solicitud-materiales';
                                                 <?php }   ?>      
                                                    
                                             </tr>
-                                         <?php endforeach;?>          
+                                         <?php endforeach;
+                                       
+                                         ?>          
                                     </body>
                                 </table>
                             </div>

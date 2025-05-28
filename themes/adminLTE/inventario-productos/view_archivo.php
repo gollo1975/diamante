@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $model->id_inventario;
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?></th>
                     <td><?= Html::encode($model->codigo_producto) ?></td>

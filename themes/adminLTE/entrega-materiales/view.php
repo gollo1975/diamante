@@ -133,7 +133,6 @@ $view = 'entrega-materiales';
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                         <tr style="font-size: 85%;">
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código del material</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del material</th> 
                                               <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentación</th> 
@@ -142,22 +141,29 @@ $view = 'entrega-materiales';
                                         </tr>
                                     </thead>
                                     <body>
-                                         <?php
-                                         foreach ($detalle_solicitud as $val):?>
-                                            <tr style="font-size: 85%;">
-                                                <td><?= $val->id ?></td>
-                                                <td><?= $val->codigo_materia ?></td>
-                                                <td><?= $val->materiales ?></td>
-                                                  <td><?= $val->ordenProductos->descripcion ?></td>
-                                                <td style="text-align: right"><?= $val->unidades_solicitadas ?></td>
-                                                <?php if($model->autorizado == 0){?>
-                                                    <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_despachadas[]" style ="text-align: right" value="<?= $val->unidades_despachadas ?>" size ="12" required="true"> </td> 
-                                                <?php }else{?>
-                                                    <td style='text-align: right'><?= ''.number_format($val->unidades_despachadas,0) ?></td>
-                                                <?php }?>   
-                                                <input type="hidden" name="listado_materiales[]" value="<?= $val->id?>"> 
-                                            </tr>
-                                         <?php endforeach;?>          
+                                        <?php
+                                        $previousIdProceso = null; // 
+                                        $colSpanCount = 8;
+                                         foreach ($detalle_solicitud as $val):
+                                            if ($previousIdProceso !== null && $val->id_detalle !== $previousIdProceso){ ?>
+                                               <tr style="background-color: #f0f0f0;"> <td colspan="<?= $colSpanCount ?>" style="text-align: center; font-weight: bold; padding: 10px;">
+                                                   Presentacion: <?= $val->ordenProductos->descripcion ?> 
+                                               </tr>
+                                            <?php } ?>
+                                                <tr style="font-size: 85%;">
+                                                    <td><?= $val->codigo_materia ?></td>
+                                                    <td><?= $val->materiales ?></td>
+                                                      <td><?= $val->ordenProductos->descripcion ?></td>
+                                                    <td style="text-align: right"><?= $val->unidades_solicitadas ?></td>
+                                                    <?php if($model->autorizado == 0){?>
+                                                        <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_despachadas[]" style ="text-align: right" value="<?= $val->unidades_despachadas ?>" size ="12" required="true"> </td> 
+                                                    <?php }else{?>
+                                                        <td style='text-align: right'><?= ''.number_format($val->unidades_despachadas,0) ?></td>
+                                                    <?php }?>   
+                                                    <input type="hidden" name="listado_materiales[]" value="<?= $val->id?>"> 
+                                                </tr>
+                                                  <?php  $previousIdProceso = $val->id_detalle; 
+                                         endforeach;?>          
                                     </body>
                                 </table>
                             </div>

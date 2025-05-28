@@ -164,10 +164,11 @@ if($sw == 0){
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
                                                 <td style="text-align: right;"><?= ''. number_format($val->cantidad_proyectada,0)?></td>
-                                                <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="cantidad_real[]" style = "text-align: right;" value="<?= $val->cantidad_real ?>"  size="15"> </td>
+                                                <td style="text-align: right"> <?= $val->cantidad_real ?> </td>
                                                   <td><?= $val->importadoRegistro?></td>
                                                 <td style="text-align: right;"><?= $val->porcentaje_rendimiento?>%</td>
-                                                <?php if($model->autorizado == 0 ){?>
+                                                <?php
+                                                if($model->autorizado == 0 ){?>
                                                     <td style= 'width: 25px; height: 25px;'>
                                                         <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle_ensamble', 'id' => $model->id_ensamble, 'id_detalle' => $val->id, 'token' =>$token, 'sw' => $sw], [
                                                                       'class' => '',
@@ -182,28 +183,20 @@ if($sw == 0){
                                                         <td style= 'width: 25px; height: 20px;'>
                                                            <a href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $model->id_ensamble, 'token' => $token, 'id_detalle' => $val->id_detalle, 'sw' => $sw])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
                                                        </td>
-                                                    <?php }else{
-                                                        ?>
-                                                       <td style= 'width: 25px; height: 25px;'></td>
-                                                    <?php }   
-                                                   }else{
+                                                    <?php }
+                                                }else{
                                                     if ($model->cerrar_orden_ensamble == 1 && $model->cerrar_proceso == 0){ 
                                                         ?>
                                                         <td style= 'width: 25px; height: 25px;'>
-                                                            <!-- Inicio Nuevo Detalle proceso -->
-                                                                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                                    ['/orden-ensamble-producto/modificar_cantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token,  'codigo' => $val->id_detalle, 'sw' => $sw],
-                                                                    [
-                                                                        'title' => 'Modificar cantidades de producción',
-                                                                        'data-toggle'=>'modal',
-                                                                        'data-target'=>'#modalsubirnuevasunidades'.$val->id,
-                                                                    ])    
-                                                               ?>
-                                                            <div class="modal remote fade" id="modalsubirnuevasunidades<?= $val->id ?>">
-                                                                <div class="modal-dialog modal-lg" style ="width: 550px;">
-                                                                    <div class="modal-content"></div>
-                                                                </div>
-                                                            </div>
+                                                        <!-- Inicio Nuevo Detalle proceso -->
+                                                           <?= Html::a('<span class="glyphicon glyphicon-repeat"></span> ', ['actualizar_unidades_rendimiento', 'id' => $val->id_ensamble, 'token' => $token,'id_presentacion' => $val->ordenProduccionProducto->id_presentacion, 'sw' => $sw, 'codigo' => $val->id, 'id_detalle' => $val->id_detalle], [
+                                                                'class' => '',
+                                                                'title' => 'Proceso que permite actualizar las unidades reales y el porcentaje del rendimiento.)', 
+                                                                'data' => [
+                                                                    'confirm' => 'Esta seguro de ACTUALIZAR las unidades reales y el porcentaje de rendimiento de la presentacion   ('.$val->nombre_producto.').',
+                                                                    'method' => 'post',
+                                                                ],
+                                                            ])?>
                                                         </td>
                                                     <?php }else{?>
                                                         <td style= 'width: 25px; height: 25px;'></td>
@@ -220,7 +213,9 @@ if($sw == 0){
                             if($model->autorizado == 0){?>
                                 <div class="panel-footer text-right">  
                                      <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Refrescar', ['orden-ensamble-producto/cargar_nuevamente_items', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'token' => $token, 'sw' => $sw],[ 'class' => 'btn btn-info btn-sm']) ?>
-                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_presentacion'])?>
+                                    <?php if(count($conMateriales) > 0){
+                                        echo Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_presentacion']);
+                                    }?>    
                                 </div> 
                             <?php }else{
                                 if((count($conMateriales) == 0)){?>
@@ -241,7 +236,7 @@ if($sw == 0){
                             <div class="panel-body">
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style='font-size:90%;'>
+                                        <tr style='font-size:85%;'>
                                             <th scope="col" style='background-color:#B9D5CE; '>Codigo</th>                        
                                             <th scope="col" style='background-color:#B9D5CE; '>Presentacion del producto</th> 
                                             <th scope="col" style='background-color:#B9D5CE; '>Cantidad proyectada</th> 
@@ -258,11 +253,11 @@ if($sw == 0){
                                         foreach ($conPresentacion as $val):
                                             $empacada = app\models\OrdenEnsambleProductoEmpaque::find()->where(['=','id_presentacion', $val->id])->one();
                                             ?>
-                                            <tr style='font-size:90%;'>
+                                            <tr style='font-size:85%;'>
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
                                                 <td style="text-align: right;"><?= ''. number_format($val->cantidad_proyectada,0)?></td>
-                                                <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="cantidad_real[]" style = "text-align: right;" value="<?= $val->cantidad_real ?>"  size="15"> </td>
+                                                <td style="text-align: right"> <?= $val->cantidad_real ?> </td>
                                                   <td><?= $val->importadoRegistro?></td>
                                                 <td style="text-align: right;"><?= $val->porcentaje_rendimiento?>%</td>
                                                 <?php if($model->autorizado == 0 ){?>
@@ -277,21 +272,15 @@ if($sw == 0){
                                                         ])?>
                                                     </td> 
                                                     <td style= 'width: 25px; height: 25px;'>
-                                                            <!-- Inicio Nuevo Detalle proceso -->
-                                                                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                                    ['/orden-ensamble-producto/modificar_cantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token,  'codigo' => $val->id_detalle, 'sw' => $sw],
-                                                                    [
-                                                                        'title' => 'Modificar cantidades de producción',
-                                                                        'data-toggle'=>'modal',
-                                                                        'data-target'=>'#modalsubirnuevasunidades'.$val->id,
-                                                                    ])    
-                                                               ?>
-                                                            <div class="modal remote fade" id="modalsubirnuevasunidades<?= $val->id ?>">
-                                                                <div class="modal-dialog modal-lg" style ="width: 550px;">
-                                                                    <div class="modal-content"></div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
+                                                        <?= Html::a('<span class="glyphicon glyphicon-repeat"></span> ', ['actualizar_unidades_rendimiento', 'id' => $val->id_ensamble, 'token' => $token,'id_presentacion' => $val->ordenProduccionProducto->id_presentacion, 'sw' => $sw, 'codigo' => $val->id, 'id_detalle' => $val->id_detalle], [
+                                                                'class' => '',
+                                                                'title' => 'Proceso que permite actualizar las unidades reales y el porcentaje del rendimiento.)', 
+                                                                'data' => [
+                                                                    'confirm' => 'Esta seguro de ACTUALIZAR las unidades reales y el porcentaje de rendimiento de la presentacion   ('.$val->nombre_producto.').',
+                                                                    'method' => 'post',
+                                                                ],
+                                                        ])?>
+                                                    </td>      
                                                     <?php if(!$empacada){?>
                                                         <td style= 'width: 25px; height: 20px;'>
                                                            <a href="<?= Url::toRoute(["orden-ensamble-producto/buscar_material_empaque", 'id' => $model->id_ensamble, 'token' => $token, 'id_detalle' => $val->id_detalle, 'sw' => $sw])?>"><span class="glyphicon glyphicon-search" title ="Permite descargar el materia de empaque."></span></a>
@@ -304,22 +293,7 @@ if($sw == 0){
                                                 }else{
                                                     if ($model->cerrar_orden_ensamble == 1 && $model->cerrar_proceso == 0){ 
                                                         ?>
-                                                        <td style= 'width: 25px; height: 25px;'>
-                                                            <!-- Inicio Nuevo Detalle proceso -->
-                                                                <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
-                                                                    ['/orden-ensamble-producto/modificar_cantidades', 'id' => $model->id_ensamble, 'detalle' => $val->id, 'token' => $token,  'codigo' => $val->id_detalle, 'sw' => $sw],
-                                                                    [
-                                                                        'title' => 'Modificar cantidades de producción',
-                                                                        'data-toggle'=>'modal',
-                                                                        'data-target'=>'#modalsubirnuevasunidades'.$val->id,
-                                                                    ])    
-                                                               ?>
-                                                            <div class="modal remote fade" id="modalsubirnuevasunidades<?= $val->id ?>">
-                                                                <div class="modal-dialog modal-lg" style ="width: 550px;">
-                                                                    <div class="modal-content"></div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
+                                                       
                                                          <td style= 'width: 25px; height: 25px;'></td>
                                                     <?php }else{?>
                                                         <td style= 'width: 25px; height: 25px;'></td>
@@ -336,7 +310,9 @@ if($sw == 0){
                             <?php if($model->autorizado == 0){?>
                                 <div class="panel-footer text-right">  
                                      <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Refrescar', ['orden-ensamble-producto/cargar_nuevamente_items', 'id' => $model->id_ensamble, 'id_orden_produccion' => $model->id_orden_produccion, 'token' => $token, 'sw' => $sw],[ 'class' => 'btn btn-info btn-sm']) ?>
-                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_presentacion'])?>
+                                     <?php if(count($conPresentacion) > 0){
+                                        echo Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_listado_presentacion']);
+                                     }?>
                                 </div> 
                             <?php }else{
                                 if((count($conMateriales) == 0)){?>
@@ -360,7 +336,7 @@ if($sw == 0){
                                            <th scope="col" style='background-color:#B9D5CE; '>Material de empaque</th> 
                                            <th scope="col" style='background-color:#B9D5CE; '>Estado</th>
                                            <th scope="col" style='background-color:#B9D5CE; '>Stock</th>
-                                           <th scope="col" style='background-color:#B9D5CE; '>U. Solicitadas</th> 
+                                           <th scope="col" style='background-color:#B9D5CE; '>U. Entregadas</th> 
                                            <th scope="col" style='background-color:#B9D5CE; '>U. Devolucion</th> 
                                            <th scope="col" style='background-color:#B9D5CE; '>U. Averias</th> 
                                            <th scope="col" style='background-color:#B9D5CE; '>U. Envasadas</th>

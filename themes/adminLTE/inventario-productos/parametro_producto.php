@@ -74,9 +74,9 @@ $this->params['breadcrumbs'][] = $this->title;
                            <div class="panel-body">
                                  <table class="table table-bordered table-striped table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
+                                        <tr style="font-size: 85%;">
                                             <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Nombre_producto</th>
+                                            <th scope="col" style='background-color:#B9D5CE;'>Presentacion producto</th>
                                             <th scope="col" style='background-color:#B9D5CE;'>Imagen</th>
                                             <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                                         </tr>
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         foreach ($model as $val): 
                                              $valor = app\models\DirectorioArchivos::find()->where(['=','codigo', $val->id_inventario])->andWhere(['=','numero', $item->codigodocumento])->one();
                                             ?>
-                                            <tr style ='font-size: 90%;'>                
+                                            <tr style ='font-size: 85%;'>                
                                                 <td><?= $val->codigo_producto?></td>
                                                 <td><?= $val->nombre_producto?></td>
                                                 <?php if($valor){

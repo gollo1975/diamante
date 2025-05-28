@@ -391,7 +391,7 @@ class OrdenProduccionController extends Controller
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',27])->all()){
                 $form = new ModelCrearPrecios();
                 $codigo= null;
-                $producto = null;
+                $producto = null; $presentacion = null;
                 $grupo = null;
                 $sw  = 0;
                 if ($form->load(Yii::$app->request->get())) {
@@ -399,10 +399,12 @@ class OrdenProduccionController extends Controller
                         $codigo = Html::encode($form->codigo);
                         $grupo = Html::encode($form->grupo);
                         $producto = Html::encode($form->producto);
+                        $presentacion = Html::encode($form->presentacion);
                         $table = InventarioProductos::find()
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo])
-                                        ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                        ->andFilterWhere(['=', 'id_producto', $producto])
+                                        ->andFilterWhere(['like', 'nombre_producto', $presentacion])
                                         ->andWhere(['>','stock_unidades', 0]); 
                         $table = $table->orderBy('id_inventario DESC');
                         $tableexcel = $table->all();
