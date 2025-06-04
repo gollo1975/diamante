@@ -680,6 +680,19 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                                 
                                                                 ],
                                                         ],
+                                                        //TERMINA MENU DE CONTRATO
+                                                        [
+                                                            'label' => 'Consultas',
+                                                            'icon' => 'search',
+                                                            'url' => '#',
+                                                            'items' => [
+                                                                
+                                                                ['label' => 'Empleados', 'icon' => 'plus-square-o', 'url' => ['/empleados/index_search']],
+                                                                ['label' => 'Contratos', 'icon' => 'plus-square-o', 'url' => ['/contratos/index_search']],
+                                                                ['label' => 'Estudios', 'icon' => 'plus-square-o', 'url' => ['/estudios-empleados/index_search']],
+                                                                ],
+                                                        ],
+                                                        
                                                     ],
                                                 ],
                                                 //INICIA MODULO DE GESTION HUMANA

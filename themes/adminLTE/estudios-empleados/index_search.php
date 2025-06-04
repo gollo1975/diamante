@@ -16,7 +16,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
-$this->title = 'Estudios';
+$this->title = 'CONSULTA / ESTUDIOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("estudios-empleados/index"),
+    "action" => Url::toRoute("estudios-empleados/index_search"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -71,7 +71,7 @@ $tipo_estudio = ArrayHelper::map(app\models\Profesiones::find()->orderBy('id_pro
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("estudios-empleados/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("estudios-empleados/index_search") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -101,45 +101,31 @@ $tipo_estudio = ArrayHelper::map(app\models\Profesiones::find()->orderBy('id_pro
                 <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Validar vencimiento" >Val.</span></th>
                 <th scope="col" align="center" style='background-color:#B9D5CE;'>Usuario</th>  
                 <th scope="col" align="center" style='background-color:#B9D5CE;'></th>
-                <th scope="col" align="center" style='background-color:#B9D5CE;'></th>
-                <th scope="col" align="center" style='background-color:#B9D5CE;'></th>
+               
               
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($modelo as $val): ?>
-                <tr style='font-size:85%;'>                
-                <td><?= $val->id ?></td>
-                <td><?= $val->documento?></td>
-                <td><?= mb_strtoupper($val->empleado->nombre_completo)?></td>
-                <td><?= $val->profesion->profesion ?></td>
-                <td><?= $val->codigoMunicipio->municipio?></td>
-                 <td><?= $val->institucion_educativa ?></td>
-                <td><?= $val->titulo_obtenido ?></td>
-                <td><?= $val->graduadoEstudio ?></td>
-                <td><?= $val->validarEstudio ?></td>
-                <td><?= $val->user_name ?></td>
-                <td style= 'width: 25px; height: 25px;'>
-                        <a href="<?= Url::toRoute(["estudios-empleados/view", "id" => $val->id,  'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
-                </td>    
-                <td style= 'width: 25px; height: 25px;'>
-                        <a href="<?= Url::toRoute(["estudios-empleados/update", "id" => $val->id, ]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
-                </td>
-                 <td style= 'width: 25px;'>
-                        <?= Html::a('', ['delete', 'id' => $val->id], [
-                            'class' => 'glyphicon glyphicon-trash',
-                            'data' => [
-                                'confirm' => 'Esta seguro de eliminar el registro?',
-                                'method' => 'post',
-                            ],
-                        ]) ?>
-                    </td>
-            </tbody>            
-            <?php endforeach; ?>
+                <?php foreach ($modelo as $val): ?>
+                    <tr style='font-size:85%;'>                
+                    <td><?= $val->id ?></td>
+                    <td><?= $val->documento?></td>
+                    <td><?= mb_strtoupper($val->empleado->nombre_completo)?></td>
+                    <td><?= $val->profesion->profesion ?></td>
+                    <td><?= $val->codigoMunicipio->municipio?></td>
+                     <td><?= $val->institucion_educativa ?></td>
+                    <td><?= $val->titulo_obtenido ?></td>
+                    <td><?= $val->graduadoEstudio ?></td>
+                    <td><?= $val->validarEstudio ?></td>
+                    <td><?= $val->user_name ?></td>
+                    <td style= 'width: 25px; height: 25px;'>
+                            <a href="<?= Url::toRoute(["estudios-empleados/view", "id" => $val->id, 'token' => $token ]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
+                    </td>    
+                <?php endforeach; ?>
+            </tbody>       
         </table>    
         <div class="panel-footer text-right" >            
                 <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm ']); ?>                
-                <a align="right" href="<?= Url::toRoute("estudios-empleados/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
             <?php $form->end() ?>
         </div>
     </div>

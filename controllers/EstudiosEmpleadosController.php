@@ -41,7 +41,7 @@ class EstudiosEmpleadosController extends Controller
      * Lists all EstudiosEmpleados models.
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex($token = 0)
     {
         if (Yii::$app->user->identity) {
             if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 91])->all()) {
@@ -100,6 +100,7 @@ class EstudiosEmpleadosController extends Controller
                             'modelo' => $modelo,
                             'form' => $form,
                             'pagination' => $pages,
+                            'token' => $token,
                 ]);
             } else {
                 return $this->redirect(['site/sinpermiso']);
@@ -109,16 +110,87 @@ class EstudiosEmpleadosController extends Controller
         }
     }
 
+    //consulta de estudios
+     public function actionIndex_search($token = 1)
+    {
+        if (Yii::$app->user->identity) {
+            if (UsuarioDetalle::find()->where(['=', 'codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=', 'id_permiso', 91])->all()) {
+                $form = new \app\models\FormFiltroEstudios();
+                $id_empleado = null;
+                $id_tipo_estudio = null;
+                 $documento = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $id_empleado = Html::encode($form->id_empleado);
+                        $documento = Html::encode($form->documento);
+                        $id_tipo_estudio = Html::encode($form->id_tipo_estudio);
+                        $table = EstudiosEmpleados::find()
+                                ->andFilterWhere(['=', 'id_empleado', $id_empleado])
+                                ->andFilterWhere(['=', 'documento', $documento])
+                                ->andFilterWhere(['=', 'id_profesion', $id_tipo_estudio]);
+                        $table = $table->orderBy('id DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $modelo = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                ->all();
+                        if (isset($_POST['excel'])) {
+                            $check = isset($_REQUEST['id DESC']);
+                            $this->actionExcelconsultaEstudio($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                } else {
+                    $table = EstudiosEmpleados::find()
+                             ->orderBy('id DESC');
+                    $tableexcel = $table->all();
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $modelo = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if (isset($_POST['excel'])) {
+                        //$table = $table->all();
+                        $this->actionExcelconsultaEstudio($tableexcel);
+                    }
+                }
+                $to = $count->count();
+                return $this->render('index_search', [
+                            'modelo' => $modelo,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            } else {
+                return $this->redirect(['site/sinpermiso']);
+            }
+        } else {
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     /**
      * Displays a single EstudiosEmpleados model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id, $token)
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+             'token' => $token,
         ]);
     }
 

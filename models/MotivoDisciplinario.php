@@ -37,7 +37,7 @@ class MotivoDisciplinario extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_motivo' => 'Id Motivo',
+            'id_motivo' => 'Codigo',
             'concepto' => 'Concepto',
         ];
     }

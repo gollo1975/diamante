@@ -21,7 +21,7 @@ $view = 'empleados';
             <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
             <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 10, 'codigo' => $model->id_empleado,'view' => $view, 'token' => $token], ['class' => 'btn btn-default btn-sm']) ?>
         <?php }else{?>
-            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['indexconsulta'], ['class' => 'btn btn-primary btn-sm']) ?>
+            <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_search'], ['class' => 'btn btn-primary btn-sm']) ?>
             <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 22, 'codigo' => $model->id_empleado,'view' => $view, 'token' => $token], ['class' => 'btn btn-default btn-sm']) ?>
         <?php }?>
     </p>

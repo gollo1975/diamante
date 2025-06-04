@@ -10,7 +10,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $model app\models\Contratos */
 
-$this->title = 'CONTRATOS No: ' . $model->id_contrato;
+$this->title = 'CONTRATO No: ' . $model->id_contrato;
 $this->params['breadcrumbs'][] = ['label' => 'Contratos', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -18,31 +18,38 @@ $view = 'contratos';
 ?>
 <div class="contratos-view">
     <p>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']) ?>
+        <?php 
+        if($token == 0){
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);
+        }else{
+            echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_search'], ['class' => 'btn btn-primary btn-sm']);
+        }?>
         <?= Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_contrato_laboral', 'id' => $model->id_contrato], ['class' => 'btn btn-default btn-sm']); ?>
         <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index', 'numero' => 23, 'codigo' => $model->id_contrato, 'view' => $view, 'token' => $token], ['class' => 'btn btn-default btn-sm']) ?>        
-        <?php if ($model->contrato_activo == 0) { ?>
-            <!-- Inicio Cerrar contrato -->
-            <?=
-            Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar Contrato',
-                    ['/contratos/cerrar_contrato_trabajo', 'id' => $model->id_contrato, 'token' => $token],
-                    [
-                        'title' => 'Cerrar Contrato',
-                        'data-toggle' => 'modal',
-                        'data-target' => '#modalcerrarcontrato' . $model->id_contrato,
-                        'class' => 'btn btn-default btn-sm'
-                    ]
-            );
-            ?>
-        <div class="modal remote fade" id="modalcerrarcontrato<?= $model->id_contrato ?>">
-            <div class="modal-dialog modal-lg_centered">
-                <div class="modal-content"></div>
-            </div>
-        </div>
-    <?php } else { ?>
-        <!-- Abrir contrato-->
-        <?= Html::a('<span class="glyphicon glyphicon-open"></span> Abrir contrato', ['abrir_contrato_laboral', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-default btn-sm']); ?>
-<?php } ?>   
+        <?php
+        if($token == 0){
+            if ($model->contrato_activo == 0) { ?>
+                <!-- Inicio Cerrar contrato -->
+                    <?=  Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar Contrato',
+                                ['/contratos/cerrar_contrato_trabajo', 'id' => $model->id_contrato, 'token' => $token],
+                                [
+                                    'title' => 'Cerrar Contrato',
+                                    'data-toggle' => 'modal',
+                                    'data-target' => '#modalcerrarcontrato' . $model->id_contrato,
+                                    'class' => 'btn btn-default btn-sm'
+                                ]
+                        );
+                    ?>
+                <div class="modal remote fade" id="modalcerrarcontrato<?= $model->id_contrato ?>">
+                    <div class="modal-dialog modal-lg_centered">
+                        <div class="modal-content"></div>
+                    </div>
+                </div>
+            <?php } else { ?>
+                <!-- Abrir contrato-->
+                <?= Html::a('<span class="glyphicon glyphicon-open"></span> Abrir contrato', ['abrir_contrato_laboral', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-default btn-sm']); ?>
+            <?php }
+        } ?>   
     <!-- Fin Cerrar contrato -->
 </p>
 <div class="panel panel-success">
@@ -164,11 +171,14 @@ $form = ActiveForm::begin([
                             </tr>
                         <?php endforeach; ?>
                     </tbody>  
-                    <?php if ($model->contrato_activo == 0) { ?>
-                        <div align="right">  
-                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Cambio de salario', ['contratos/nuevo_cambio_salario', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-info btn-sm']) ?>                    
-                        </div>
-                    <?php } ?>
+                    <?php 
+                    if($token == 0){
+                        if ($model->contrato_activo == 0) { ?>
+                            <div align="right">  
+                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Cambio de salario', ['contratos/nuevo_cambio_salario', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-info btn-sm']) ?>                    
+                            </div>
+                        <?php }
+                    }    ?>
                 </table>  
             </div>
         </div>  
@@ -225,11 +235,14 @@ $form = ActiveForm::begin([
                             </tr>
                             <?php endforeach; ?>
                     </tbody>
-                        <?php if ($model->contrato_activo == 0) { ?>
-                        <div align="right">  
-                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Adicion salarial', ['contratos/nueva_adicion_contrato', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-info btn-sm']) ?>                    
-                        </div>
-                        <?php } ?>
+                        <?php
+                        if($token == 0){
+                            if ($model->contrato_activo == 0) { ?>
+                                <div align="right">  
+                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Adicion salarial', ['contratos/nueva_adicion_contrato', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-info btn-sm']) ?>                    
+                                </div>
+                            <?php }
+                        }    ?>
                 </table>  
             </div>
         </div>
@@ -281,18 +294,20 @@ $form = ActiveForm::begin([
                             <?php endforeach; ?>
                         </tbody> 
                         <?php
-                        if ($model->contrato_activo == 0) {
-                            if (count($prorrogas) < 3) {
-                                ?>
-                                <div align="right">  
-                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Renovar contrato', ['contratos/nueva_prorroga', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-info btn-sm']) ?>                    
-                                </div>
-                            <?php } else { ?>
-                                <div align="right">  
-                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Contrato 1 año', ['contratos/nueva_prorroga_ano', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-warning btn-sm']) ?>                    
-                                </div>
-                             <?php }
-                        } ?>
+                        if($token == 0){
+                            if ($model->contrato_activo == 0) {
+                                if (count($prorrogas) < 3) {
+                                    ?>
+                                    <div align="right">  
+                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Renovar contrato', ['contratos/nueva_prorroga', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-info btn-sm']) ?>                    
+                                    </div>
+                                <?php } else { ?>
+                                    <div align="right">  
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Contrato 1 año', ['contratos/nueva_prorroga_ano', 'id' => $model->id_contrato, 'token' => $token], ['class' => 'btn btn-warning btn-sm']) ?>                    
+                                    </div>
+                                 <?php }
+                            }
+                        }    ?>
                     </table>  
                 </div>
             </div>

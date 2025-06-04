@@ -123,7 +123,81 @@ class EmpleadosController extends Controller
             return $this->redirect(['site/login']);
         }
     }
-
+    
+    //consulta de empleados
+    public function actionIndex_search($token = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',162])->all()){
+                $form = new \app\models\FiltroEmpleados();
+                $documento = null;
+                $empleado = null;
+                $estado = null;
+                $tipo_empleado = null;
+                $desde = null;
+                $hasta = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $documento = Html::encode($form->documento);
+                        $empleado = Html::encode($form->empleado);
+                        $estado = Html::encode($form->estado);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        $tipo_empleado = Html::encode($form->tipo_empleado);
+                        $table = Empleados::find()
+                                ->andFilterWhere(['=', 'nit_cedula', $documento])
+                                ->andFilterWhere(['like', 'nombre_completo', $empleado])
+                                ->andFilterWhere(['between', 'fecha_ingreso', $desde, $desde])
+                                ->andFilterWhere(['=', 'tipo_empleado', $tipo_empleado])
+                                ->andFilterWhere(['=', 'estado', $estado]);
+                        $table = $table->orderBy('id_empleado DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelEmpleados($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                }else{
+                  
+                    $table = Empleados::find()->orderBy('id_empleado DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelEmpleados($tableexcel);
+                    }
+                } 
+                return $this->render('index_search', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
+    
     /**
      * Displays a single Empleados model.
      * @param integer $id

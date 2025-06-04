@@ -16,8 +16,14 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="estudio-empleado-view">
 
   <p>
-        <?= Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index', 'id' => $model->id], ['class' => 'btn btn-primary btn-sm']) ?>
-		<?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar', ['update', 'id' => $model->id], ['class' => 'btn btn-success btn-sm']) ?>
+     <?php 
+     if($token == 0){
+         echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index'], ['class' => 'btn btn-primary btn-sm']);?>
+         <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> Editar', ['update', 'id' => $model->id], ['class' => 'btn btn-success btn-sm']) ?>
+     <?php }else{
+         echo Html::a('<span class="glyphicon glyphicon-circle-arrow-left"></span> Regresar', ['index_search'], ['class' => 'btn btn-primary btn-sm']);
+     }?>    
+     
         
     </p>
     <div class="panel panel-success">

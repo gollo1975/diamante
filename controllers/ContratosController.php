@@ -132,6 +132,86 @@ class ContratosController extends Controller
             return $this->redirect(['site/login']);
         }
     }
+    
+    //consulta de contratos
+     public function actionIndex_search($token = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',163])->all()){
+                $form = new \app\models\FiltroContratos();
+                $tipo_contrato = null;
+                $empleado = null;
+                $estado = null;
+                $grupo_pago = null;
+                $desde = null;
+                $hasta = null;
+                $eps = null;
+                $pension = null;
+                if ($form->load(Yii::$app->request->get())) {
+                    if ($form->validate()) {
+                        $tipo_contrato = Html::encode($form->tipo_contrato);
+                        $empleado = Html::encode($form->empleado);
+                        $estado = Html::encode($form->estado);
+                        $desde = Html::encode($form->desde);
+                        $hasta = Html::encode($form->hasta);
+                        $grupo_pago = Html::encode($form->grupo_pago);
+                        $eps = Html::encode($form->eps);
+                        $pension = Html::encode($form->pension);
+                        $table = Contratos::find()
+                                ->andFilterWhere(['=', 'id_tipo_contrato', $tipo_contrato])
+                                ->andFilterWhere(['=', 'id_empleado', $empleado])
+                                ->andFilterWhere(['between', 'fecha_inicio', $desde, $desde])
+                                ->andFilterWhere(['=', 'id_grupo_pago', $grupo_pago])
+                                ->andFilterWhere(['=', 'contrato_activo', $estado])
+                                ->andFilterWhere(['=', 'id_entidad_salud', $eps])
+                                ->andFilterWhere(['=', 'id_entidad_pension', $pension]);
+                        $table = $table->orderBy('id_contrato DESC');
+                        $tableexcel = $table->all();
+                        $count = clone $table;
+                        $to = $count->count();
+                        $pages = new Pagination([
+                            'pageSize' => 15,
+                            'totalCount' => $count->count()
+                        ]);
+                        $model = $table
+                                ->offset($pages->offset)
+                                ->limit($pages->limit)
+                                    ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelContratos($tableexcel);
+                        }
+                    } else {
+                        $form->getErrors();
+                    }
+                }else{
+                  
+                    $table = Contratos::find()->orderBy('id_contrato DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 15,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelContratos($tableexcel);
+                    }
+                } 
+                return $this->render('index_search', [
+                            'model' => $model,
+                            'form' => $form,
+                            'pagination' => $pages,
+                            'token' => $token,
+                ]);
+            }else{
+                return $this->redirect(['site/sinpermiso']);
+            }
+        }else{
+            return $this->redirect(['site/login']);
+        }
+    }
 
     //PARAMETROS DEL CONTRATO
     public function actionParametro_contrato()

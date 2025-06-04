@@ -67,7 +67,7 @@ class MotivoDisciplinarioController extends Controller
         $model = new MotivoDisciplinario();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_motivo]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -87,7 +87,7 @@ class MotivoDisciplinarioController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_motivo]);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
