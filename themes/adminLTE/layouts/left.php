@@ -693,8 +693,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'icon' => 'database',
                                                             'url' => '#',
                                                             'items' => [
-                                                                ['label' => 'Items disciplinario', 'icon' => 'plus-square-o', 'url' => ['/items-disciplinarios/index']],  
-                                                                ['label' => 'Motivos', 'icon' => 'plus-square-o', 'url' => ['/motivos/index']],
+                                                                ['label' => 'Motivos', 'icon' => 'plus-square-o', 'url' => ['/motivo-disciplinario/index']],
                                                                 
                                                             ],
                                                         ],
@@ -715,6 +714,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                             'url' => '#',
                                                             'items' => [
                                                                 ['label' => 'Entrega de dotaciones', 'icon' => 'plus-square-o', 'url' => ['entrega-dotacion/search_dotaciones']],
+                                                                ['label' => 'Proceso disciplinario', 'icon' => 'plus-square-o', 'url' => ['proceso-disciplinario/index_search']],
                                                                 
                                                             ],
                                                         ],
@@ -828,6 +828,21 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                         ],
                                                     ],
                                                 ],//TERMINA /MODULO
+                                                //INICIA MODULO GENERAL
+                                                [
+                                                    'label' => 'GENERAL',
+                                                    'icon' => 'wrench',
+                                                    'url' => '#',
+                                                    'items' => [
+                                                        [
+                                                        'label' => 'Contenido',
+                                                        'icon' => 'comment',
+                                                        'url' => '#',
+                                                        'items' => [
+                                                            ['label' => 'Formato principal', 'icon' => 'tumblr-square', 'url' => ['formato-contenido/index']],
+                                                        ]],
+                                                    ],
+                                                ],
                                             ],
                                         ],
                                     ],    

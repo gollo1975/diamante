@@ -272,7 +272,7 @@ class ClientesController extends Controller
     public function actionCreate()
     {
         $model = new Clientes();
-         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
