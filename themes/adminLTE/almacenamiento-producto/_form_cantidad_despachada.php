@@ -71,6 +71,7 @@ $cantidad_caja = \app\models\PackingPedidoDetalle::find()->where(['=','id_packin
                                               'title' => 'Almacenar unidades en caja',
                                               'data-toggle'=>'modal',
                                               'data-target'=>'#modalalmacenarunidades'.$caja->id_detalle,
+                                              'data-backdrop'=> 'static'
                                           ])    
                                      ?>
                                   <div class="modal remote fade" id="modalalmacenarunidades<?= $caja->id_detalle ?>">
@@ -89,6 +90,7 @@ $cantidad_caja = \app\models\PackingPedidoDetalle::find()->where(['=','id_packin
                                               'title' => 'Almacenar unidades en caja',
                                               'data-toggle'=>'modal',
                                               'data-target'=>'#modalalmacenarunidades'.$caja->id_detalle,
+                                               'data-backdrop'=> 'static'
                                           ])    
                                      ?>
                                     <div class="modal remote fade" id="modalalmacenarunidades<?= $caja->id_detalle ?>">

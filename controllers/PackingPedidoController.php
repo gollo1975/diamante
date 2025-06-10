@@ -244,14 +244,21 @@ class PackingPedidoController extends Controller
     public function actionCrear_caja_packing($id) {
         $model = $this->findModel($id);
         $detalle = \app\models\PackingPedidoDetalle::find()->where(['=','id_packing', $id])->orderBy('numero_caja DESC')->one();
+       
         $table = new \app\models\PackingPedidoDetalle();
         $table->id_packing = $id;
         if($detalle){
+            $table->cantidad_porcaja = $model->unidades_caja;
             $table->numero_caja = $detalle->numero_caja + 1;
         }else{
+            $table->cantidad_porcaja = $model->unidades_caja;
             $table->numero_caja = 1;
         }
         $table->save();
+        $actualizarCaja = PackingPedidoDetalle::find()->where(['=','id_packing', $id])->all();
+        $total = count($actualizarCaja);
+        $model->total_cajas = $total;
+        $model->save(false);
         return $this->redirect(['packing-pedido/view','id' => $id]);
     }
 
@@ -269,7 +276,7 @@ class PackingPedidoController extends Controller
                         $table->save(false);
                         return $this->redirect(['packing-pedido/view', 'id' => $id]);
                     }else{
-                        Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacion, debe de ingreso al menos 1 unidad.');
+                        Yii::$app->getSession()->setFlash('error', 'Este campo no puede ser vacio, debe de ingreso al menos 1 unidad.');
                         return $this->redirect(['packing-pedido/view', 'id' => $id]);
                     }    
                 }
@@ -353,7 +360,8 @@ class PackingPedidoController extends Controller
      */
      public function actionEliminar_caja($id_detalle, $id)
     {
-        try {
+        
+         try {
             $dato = \app\models\PackingPedidoDetalle::findOne($id_detalle);
             $dato->delete();
             $this->TotalizarUnidades($id);

@@ -918,8 +918,15 @@ class AlmacenamientoProductoController extends Controller
                     if($model->cantidad_despachada > 0){
                         $linea_pedido = PedidoDetalles::findOne($id_detalle);
                         $table = \app\models\PackingPedidoDetalle::findOne($id_caja) ;
-                        if($model->cantidad_despachada <= $table->cantidad_porcaja){
-                            $table->codigo_producto = $linea_pedido->inventario->codigo_producto;
+                        $totalUnidades = \app\models\PackingPedidoDetalle::find()->where(['=','id_inventario', $linea_pedido->id_inventario])->andWhere(['=','id_packing', $table->id_packing])->all();
+                        $suma =0; $total = 0;
+                        foreach ($totalUnidades as $unidades) {
+                            $suma += $unidades->cantidad_despachada; 
+                        }
+                        $total = $suma + $model->cantidad_despachada;
+                      // if($model->cantidad_despachada <= $table->cantidad_porcaja){
+                        if($total <= $linea_pedido->cantidad){  
+                           $table->codigo_producto = $linea_pedido->inventario->codigo_producto;
                             $table->nombre_producto = $linea_pedido->inventario->nombre_producto;
                             $table->fecha_packing = date('Y-m-d');
                             $table->cantidad_despachada = $model->cantidad_despachada;
@@ -928,12 +935,12 @@ class AlmacenamientoProductoController extends Controller
                             $table->save(false);
                             return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
                         }else{
-                            Yii::$app->getSession()->setFlash('error', 'La cantidad ingresada es MAYOR que la cantidad que debe de llevar la caja. Valide al informacion.');
+                            Yii::$app->getSession()->setFlash('error', 'Las unidades a despachar de la referencia '.$linea_pedido->inventario->codigo_producto.' son mayores que las unidades vendidas. Valide al informacion.');
                             return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
                         }    
                     }else{
                         Yii::$app->getSession()->setFlash('error', 'Este campo (Cantidad despachada)no puede ser vacio, debe de ingreso al menos 1 unidad.');
-                        return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
+                       return $this->redirect(['almacenamiento-producto/cantidad_despachada', 'id_pedido' => $id_pedido, 'sw' =>$sw, 'id_detalle' => $id_detalle]);
                     }    
                 }
             }else{

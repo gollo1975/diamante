@@ -8,7 +8,7 @@ use app\models\MotivoDisciplinarioSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-
+use app\models\UsuarioDetalle;
 /**
  * MotivoDisciplinarioController implements the CRUD actions for MotivoDisciplinario model.
  */
@@ -35,13 +35,21 @@ class MotivoDisciplinarioController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new MotivoDisciplinarioSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',164])->all()){
+                $searchModel = new MotivoDisciplinarioSearch();
+                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+                return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+            }else{
+                 return $this->redirect(['site/sinpermiso']);
+            } 
+            
+        }else{
+             return $this->redirect(['site/sinpermiso']);
+        }    
     }
 
     /**
@@ -104,9 +112,17 @@ class MotivoDisciplinarioController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["motivo-disciplinario/index"]);
+        } catch (IntegrityException $e) {
+            $this->redirect(["motivo-disciplinario/index"]);
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene registros asociados en otros procesos');
+            $this->redirect(["motivo-disciplinario/index"]);
+        }
     }
 
     /**

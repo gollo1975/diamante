@@ -203,12 +203,15 @@ $this->params['breadcrumbs'][] = $model->id_packing;
                                     <?php } ?>
                                 </tbody>
                             </table>
-                            <?php if ($model->autorizado == 0){?>
-                                <div class="panel-footer text-right">
-                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear caja', ['crear_caja_packing', 'id' => $model->id_packing],['class' => 'btn btn-success btn-xs',
-                                     'data' => ['confirm' => 'Esta seguro de crear una nueva caja para el PACKING del cliente  '. $model->cliente.'.', 'method' => 'post']]);?>
-                                </div>
-                            <?php }?>
+                            <?php if ($model->autorizado == 0){
+                                if ($detalle){ ?>
+                                    <div class="panel-footer text-right">
+                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Crear caja', ['crear_caja_packing', 'id' => $model->id_packing],['class' => 'btn btn-success btn-xs',
+                                         'data' => ['confirm' => 'Esta seguro de crear una nueva caja para el PACKING del cliente  '. $model->cliente.'.', 'method' => 'post']]);?>
+                                    </div>
+                            
+                            <?php }
+                            }?>
                         </div>
                     </div>
                 </div>
