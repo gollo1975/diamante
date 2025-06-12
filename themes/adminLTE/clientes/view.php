@@ -143,7 +143,7 @@ $view = 'clientes';
             <li role="presentation" class="active"><a href="#asignacioncupo" aria-controls="asignacioncupo" role="tab" data-toggle="tab">Asignacion de cupo  <span class="badge"><?= count($cupo) ?></span></a></li>
             <li role="presentation"><a href="#anotaciones" aria-controls="anotaciones" role="tab" data-toggle="tab">Anotaciones  <span class="badge"><?= count($anotacion) ?></span></a></li>
             <li role="presentation"><a href="#contactos" aria-controls="contactos" role="tab" data-toggle="tab">Contactos  <span class="badge"><?= count($Concontacto) ?></span></a></li>
-            <li role="presentation"><a href="#monedapago" aria-controls="monedapago" role="tab" data-toggle="tab">Moneda negociacion  <span class="badge"><?= 1 ?></span></a></li>
+            <li role="presentation"><a href="#monedapago" aria-controls="monedapago" role="tab" data-toggle="tab">Moneda negociacion  <span class="badge"><?= count($searchMonedas)?></span></a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="asignacioncupo">

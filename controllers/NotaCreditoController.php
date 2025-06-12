@@ -312,12 +312,16 @@ class NotaCreditoController extends Controller
                         $table->producto = $factura_detalle->producto;
                         $table->cantidad = $factura_detalle->cantidad;
                         $table->valor_unitario = $factura_detalle->valor_unitario;  
-                        $table->subtotal = $factura_detalle->subtotal;
-                        $table->impuesto = $factura_detalle->impuesto;
-                        $table->total_linea = $factura_detalle->total_linea;
+                        if($factura_detalle->factura->id_tipo_factura == 1){
+                            $table->subtotal = $factura_detalle->subtotal;
+                            $table->impuesto = $factura_detalle->impuesto;
+                            $table->total_linea = $factura_detalle->total_linea;
+                        }else{
+                            $table->subtotal = $factura_detalle->subtotal;
+                            $table->total_linea = $factura_detalle->subtotal; 
+                        }    
                         $table->save(false);
                         $this->ActualizarLineaDetalleNota($id, $id_factura);
-                      //  $this->TotalPresupuestoPedido($id, $sw);
                     }    
                     $intIndice ++;
                 endforeach;
@@ -396,11 +400,16 @@ class NotaCreditoController extends Controller
         $factura = FacturaVenta::findOne($id_factura);
         $subtotal = 0; $total = 0; $porcentaje = 0; $iva = 0;
         $total = round($nota_detalle->cantidad * $nota_detalle->valor_unitario);
-        $porcentaje = $factura->porcentaje_iva /100;
-        $iva = round($total * $porcentaje);
-        $nota_detalle->total_linea = $total;
-        $nota_detalle->impuesto = $iva;
-        $nota_detalle->subtotal = $total - $iva;
+        if($factura->id_tipo_factura == 1){
+            $porcentaje = $factura->porcentaje_iva /100;
+            $iva = round($total * $porcentaje);
+            $nota_detalle->total_linea = $total;
+            $nota_detalle->impuesto = $iva;
+            $nota_detalle->subtotal = $total - $iva;
+        }else{
+            $nota_detalle->total_linea = $total;
+            $nota_detalle->subtotal = $total;
+        }    
         $nota_detalle->save();
     }
     //PROCESO QUE EDITA LA NOTA
@@ -435,15 +444,20 @@ class NotaCreditoController extends Controller
         $model = NotaCredito::findOne($id);
         $factura = FacturaVenta::findOne($id_factura);
         if($model->valor_total_devolucion <= $factura->saldo_factura){
-            if($model->autorizado == 0){
-                $model->autorizado = 1;
-                $model->save();
-                 $this->redirect(["nota-credito/view", 'id' => $id]);
-            } else{
-                $model->autorizado = 0;
-                $model->save();
+            if($model->id_motivo <> null){
+                if($model->autorizado == 0){
+                    $model->autorizado = 1;
+                    $model->save();
+                     $this->redirect(["nota-credito/view", 'id' => $id]);
+                } else{
+                    $model->autorizado = 0;
+                    $model->save();
+                    $this->redirect(["nota-credito/view", 'id' => $id]);
+                }
+            }else{
+                Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar el motivo de la nota credito. Valide la informacion desde el boton EDITAR.'); 
                 $this->redirect(["nota-credito/view", 'id' => $id]);
-            }
+            }    
         }else{
             Yii::$app->getSession()->setFlash('error', 'La nota credito tiene saldo en rojos. El valor de la nota credito es mayor que el saldo de la factura.'); 
             $this->redirect(["nota-credito/view", 'id' => $id]);
@@ -467,9 +481,17 @@ class NotaCreditoController extends Controller
     protected function ActualizarSaldoFacturas($id, $id_factura) {
         $factura = FacturaVenta::findOne($id_factura);
         $model = NotaCredito::findOne($id);
-        $saldo = 0;    
+        $saldo = 0;  
         $saldo = $factura->saldo_factura - $model->valor_total_devolucion;
-        $factura->saldo_factura = $saldo;
+        if($factura->id_tipo_factura == 1){
+            $factura->saldo_factura = $saldo;
+        }else{
+            $tasa = \app\models\ClienteMoneda::find()->where(['=','id_cliente', $factura->id_cliente])->one();
+            $cambio = 0;
+            $cambio = $saldo / $tasa->tasa_negociacion;
+            $factura->saldo_factura_internacional = $cambio;
+            $factura->saldo_factura = $saldo;
+        }   
         $factura->estado_factura = 4;
         $factura->save(false);
     }

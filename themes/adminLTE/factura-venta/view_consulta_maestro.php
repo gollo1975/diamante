@@ -87,8 +87,11 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                     <td><?= Html::encode($model->plazo_pago) ?> Dias</td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_factura')?></th>
                     <td><?= Html::encode($model->tipoFactura->descripcion) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Saldo') ?></th>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Saldo_nacional') ?></th>
                     <td style="text-align: right"><?= Html::encode('$ '.number_format($model->saldo_factura,0)) ?></td>
+                 
+                      
+                    
                 </tr>
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Estado') ?>:</th>
@@ -105,8 +108,20 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                     <td><?= Html::encode($model->porcentaje_mora) ?> %</td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_tipo_venta') ?></th>
                     <td><?= Html::encode($model->tipoVenta->concepto) ?></td>
+                    <th style='background-color:#F0F3EF;'></th>
+                    <td></td>
+                    <?php if($model->id_tipo_factura == 5){
+                        $tasa = \app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_cliente])->one();?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Saldo_internacional') ?></th>
+                        <td style="text-align: right;"><?= Html::encode(('('.$tasa->sigla.') '. ''.number_format($model->saldo_factura_internacional,2))) ?></td>
+                    <?php }else{ ?>
+                         <th style='background-color:#F0F3EF;'></th>
+                        <td></td>
+                    <?php }?>
+                </tr>
+                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
-                    <td colspan="6"><?= Html::encode($model->observacion) ?></td>
+                    <td colspan="8"><?= Html::encode($model->observacion) ?></td>
                 </tr>
               
             </table>
@@ -179,9 +194,9 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                                     <td><?= $val->tipo_venta ?></td>
                                                     <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                     <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                    <td style="text-align: right; background-color: #c4ebf3"><?= $val->valor_unitario_internacional ?></td>
+                                                    <td style="text-align: right"><?= $val->valor_unitario_internacional ?></td>
                                                     <td style="text-align: right; background-color: #c4ebf3"><?= $val->subtotal_internacional ?></td>
-                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                    <td style="text-align: right; background-color: #c4ebf3"><?= ''.number_format($val->subtotal,0) ?></td>
                                                </tr>
                                              <?php }
                                         endforeach;?>          
@@ -304,7 +319,11 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                          foreach ($nota_credito as $val):?>
                                             <tr style="font-size: 90%;">
                                                 <td><?= $val->numero_nota_credito ?></td>
-                                                <td><?= $val->motivo->concepto ?></td>
+                                                <?php if($val->id_motivo <> null){?>
+                                                    <td><?= $val->motivo->concepto ?></td>
+                                                <?php }else{ ?>
+                                                    <td><?= 'NOT FOUND' ?></td>
+                                                <?php } ?>   
                                                 <td><?= $val->fecha_nota_credito ?></td>
                                                 <td><?= $val->user_name ?></td> 
                                                 <td style="text-align: right"><?= '$ '.number_format($val->valor_total_devolucion,0) ?></td>

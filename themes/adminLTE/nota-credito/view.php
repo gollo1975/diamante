@@ -47,7 +47,8 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                         'title' => 'Permite editar los campors de motivo y observaciones',
                         'data-toggle'=>'modal',
                         'data-target'=>'#modaleditarnota',
-                        'class' => 'btn btn-default btn-sm'
+                        'class' => 'btn btn-success btn-sm',
+                        'data-backdrop' =>'static'
                     ])    
                     ?>
              <div class="modal remote fade" id="modaleditarnota">
@@ -58,7 +59,7 @@ $this->params['breadcrumbs'][] = $model->id_nota;
         <?php } else {
             if ($model->autorizado == 1 && $model->numero_nota_credito == 0){
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_nota, 'id_factura' => $model->id_factura], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar nota crédito', ['generar_nota_credito', 'id' => $model->id_nota,'id_factura' => $model->id_factura],['class' => 'btn btn-default btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-book"></span> Generar nota crédito', ['generar_nota_credito', 'id' => $model->id_nota,'id_factura' => $model->id_factura],['class' => 'btn btn-info btn-sm',
                            'data' => ['confirm' => 'Esta seguro de generar la Nota Credito  al cliente '.$model->cliente.' para ser enviada a la Dian. Despues de este proceso No se puede modificar el documento.', 'method' => 'post']]);
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_nota_credito', 'id' => $model->id_nota], ['class' => 'btn btn-default btn-sm']);            
             }else{
@@ -160,10 +161,10 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <td><?= $val->producto ?></td>
                                                 <td style="text-align: right"> <?= ''.number_format($val->cantidad,0) ?> </td> 
-                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                                <td style="text-align: right"><?= '$'.number_format($val->total_linea,0) ?></td>
+                                                <td style="text-align: right"><?= '$ '.number_format($val->valor_unitario,2) ?></td>
+                                                <td style="text-align: right"><?= '$ '.number_format($val->subtotal,2) ?></td>
+                                                <td style="text-align: right"><?= '$ '.number_format($val->impuesto,2) ?></td>
+                                                <td style="text-align: right"><?= '$ '.number_format($val->total_linea,2) ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style= 'width: 20px; height: 20px;'>
                                                         <?= Html::a('<span class="glyphicon glyphicon-refresh"></span>',
@@ -171,6 +172,7 @@ $this->params['breadcrumbs'][] = $model->id_nota;
                                                           ['title' => 'Modificar las cantidades a devolver',
                                                            'data-toggle'=>'modal',
                                                            'data-target'=>'#modaleditarlineanota',
+                                                            'data-backdrop' =>'static'
                                                           ])    
                                                         ?>
                                                         <div class="modal remote fade" id="modaleditarlineanota">

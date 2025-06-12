@@ -37,8 +37,9 @@ class NotaCreditoDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_nota', 'id_inventario', 'codigo_producto', 'cantidad', 'valor_unitario', 'subtotal', 'impuesto', 'total_linea'], 'integer'],
+            [['id_nota', 'id_inventario', 'codigo_producto', 'cantidad',  'subtotal', 'impuesto', 'total_linea'], 'integer'],
             [['producto'], 'string', 'max' => 40],
+            [['valor_unitario'], 'number'],
             [['id_nota'], 'exist', 'skipOnError' => true, 'targetClass' => NotaCredito::className(), 'targetAttribute' => ['id_nota' => 'id_nota']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
         ];

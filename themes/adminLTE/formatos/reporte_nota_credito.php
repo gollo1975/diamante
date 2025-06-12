@@ -119,8 +119,13 @@ class PDF extends FPDF {
         $this->SetXY(10, 52);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(26, 5, utf8_decode("Motivo:"), 0, 0, 'l', 1);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(82, 5, utf8_decode($nota->motivo->concepto), 0, 0, 'L',1);
+        if ($nota->id_motivo <> null){
+            $this->SetFont('Arial', '', 8);
+            $this->Cell(82, 5, utf8_decode($nota->motivo->concepto), 0, 0, 'L',1);
+        }else{
+            $this->SetFont('Arial', '', 8);
+            $this->Cell(82, 5, utf8_decode('NOT FOUND'), 0, 0, 'L',1);
+        }    
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(21, 5, utf8_decode("Fecha nota:"), 0, 0, 'l', 1);
         $this->SetFont('Arial', '', 8);
@@ -257,7 +262,7 @@ class PDF extends FPDF {
         $qrstr = utf8_decode($model->qrstr);
         $pdf->SetXY(120, 70); // Establece la posición donde aparecerá el QR
         QRcode::png($qrstr,"test.png");
-        $pdf->Image("test.png", 118.5, 198, 38, 35, "png");
+      //  $pdf->Image("test.png", 118.5, 198, 38, 35, "png");
         
         //muestra software propio
         $pdf->SetXY(100, 231);

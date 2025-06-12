@@ -80,28 +80,58 @@ $this->params['breadcrumbs'][] = $id_factura;
                            <div class="panel-body">
                                <table class="table table-bordered table-hover">
                                     <thead>
-                                        <tr style="font-size: 90%;">
-                                             <th scope="col" style='background-color:#B9D5CE;'>Código</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Vr. unitario</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'>Total</th>
-                                            <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
-                                        </tr>
+                                        <?php 
+                                        $factura = app\models\FacturaVenta::findOne($id_factura);
+                                        if($factura->id_tipo_factura == 1){?>
+                                            <tr style="font-size: 85%;">
+                                                 <th scope="col" style='background-color:#B9D5CE;'>Código</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Vr. unitario</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Total</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
+                                            </tr>
+                                        <?php
+                                        }else{?> 
+                                            <tr style="font-size: 90%;">
+                                                <th scope="col" style='background-color:#B9D5CE;'>Código</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Vr. unit. Nacional</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Vr. unit. internacion</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Subtotal nacional</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Subtotal internacional</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Total nacional</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'>Total internacional</th>
+                                                <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
+                                            </tr>
+                                        <?php }?>    
                                     </thead>
                                     <tbody>
                                         <?php
                                         foreach ($variable as $val): ?>
-                                            <tr style="font-size: 90%;">
-                                                <td><?= $val->codigo_producto ?></td>
-                                                <td><?= $val->producto ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->impuesto,0) ?></td>
-                                                <td style="text-align: right"><?= ''.number_format($val->total_linea,0) ?></td>
+                                            <tr style="font-size: 85%;">
+                                                <?php if($val->factura->id_tipo_factura == 1){?>
+                                                    <td><?= $val->codigo_producto ?></td>
+                                                    <td><?= $val->producto ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->impuesto,2) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->total_linea,2) ?></td>
+                                                <?php }else{?>
+                                                    <td><?= $val->codigo_producto ?></td>
+                                                    <td><?= $val->producto ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,2) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario_internacional,2) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
+                                                     <td style="text-align: right"><?= ''.number_format($val->subtotal_internacional,2) ?></td>
+                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,2) ?></td>
+                                                     <td style="text-align: right"><?= ''.number_format($val->subtotal_internacional,2) ?></td>
+                                                <?php }?>     
                                                 <td style= 'width: 25px; height: 25px;'><input type="checkbox" name="devolucion_factura_detalle[]" value="<?= $val->id_detalle ?>"></td> 
                                             </tr>     
                                         <?php endforeach; ?>
