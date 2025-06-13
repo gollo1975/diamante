@@ -105,7 +105,7 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 90%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
@@ -114,7 +114,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Saldo</th>
                  <th scope="col" style='background-color:#B9D5CE;'>Estado</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora factura">D.M.</span></th>
+                
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th> 
             </tr>
@@ -124,23 +124,15 @@ $form = ActiveForm::begin([
                 if($model){
                     $fecha_dia = date('Y-m-d');
                     foreach ($model as $val): ?>
-                        <tr style="font-size: 90%;">
+                        <tr style="font-size: 85%;">
                             <td><?= $val->numero_factura ?></td>
                             <td><?= $val->cliente ?></td>
                             <td><?= $val->clienteFactura->codigoMunicipio->municipio?> - <?= $val->clienteFactura->codigoMunicipio->codigoDepartamento->departamento?></td>
                             <td><?= $val->fecha_inicio ?></td>
                             <td><?= $val->fecha_vencimiento ?></td>
                             <td style="text-align: right"><?= '$'.number_format($val->total_factura,0)?></td>
-                            <?php if($val->dias_mora > 0){ ?>  
-                                <td style="text-align: right; background-color:#FAE4D7;"><?= '$'.number_format($val->saldo_factura,0)?></td>
-                                 <td><?= $val->estadoFactura ?></td>
-                                <td style="text-align: right"><?= $val->dias_mora ?></td>
-                               
-                            <?php }else{ ?>
-                                <td style="text-align: right;"><?= '$'.number_format($val->saldo_factura,0)?></td>
-                                 <td><?= $val->estadoFactura ?></td>
-                                 <td style="text-align: right"><?= $val->dias_mora ?></td>
-                            <?php }?>    
+                            <td style="text-align: right; background-color:#FAE4D7;"><?= '$'.number_format($val->saldo_factura,0)?></td>
+                            <td><?= $val->estadoFactura ?></td>
                             <td style= 'width: 20px; height: 20px;'>
                                 <a href="<?= Url::toRoute(["factura-venta/view_consulta", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver del detalle factura de venta"></span></a>
                             </td>

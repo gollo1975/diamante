@@ -19,14 +19,17 @@ class MotivoDisciplinario extends \yii\db\ActiveRecord
     {
         return 'motivo_disciplinario';
     }
-	if(!parent::beforeSave($insert)){
+    public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
             return false;
         }
-	# ToDo: Cambiar a cliente cargada de configuración.    
-	$this->concepto = strtoupper($this->concepto);
-	
+     
+        $this->concepto = strtoupper($this->concepto); 
+ 
         return true;
     }
+	
+    
     /**
      * {@inheritdoc}
      */

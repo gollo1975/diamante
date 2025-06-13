@@ -427,7 +427,24 @@ class FacturaVentaController extends Controller
                     } else {
                         $form->getErrors();
                     }
-                }   
+                } else{
+                     $table = FacturaVenta::find()->Where(['>', 'numero_factura', 0])
+                                                 ->orderBy('id_factura DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    $this->CargarDiasInteresMora($model);
+                    if(isset($_POST['excel'])){                    
+                             $this->actionExcelFacturaVenta($tableexcel);
+                    }
+                }  
                 return $this->render('search_maestro_factura', [
                                 'model' => $model,
                                 'form' => $form,

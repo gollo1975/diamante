@@ -122,8 +122,9 @@ $form = ActiveForm::begin([
                     <th scope="col" style='background-color:#B9D5CE;'>F. factura</th>
                     <th scope="col" style='background-color:#B9D5CE;'>F. vencimiento</th>
                     <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Impuesto</th>
-                    <th scope="col" style='background-color:#B9D5CE;'>Total pagar</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Iva</th>
+                    <th scope="col" style='background-color:#B9D5CE;'>Total Nacional</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Total Internacional</th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Factura libre">FL</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Tipo de factura">T.F.</span></th>
                     <th scope="col" style='background-color:#B9D5CE;'><span title="Dias de mora en la factura">DM</span></th>
@@ -145,10 +146,17 @@ $form = ActiveForm::begin([
                         <td><?= $val->agenteFactura->nombre_completo?></td>
                         <td><?= $val->fecha_inicio?></td>
                         <td><?= $val->fecha_vencimiento?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->subtotal_factura,0)?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->impuesto,0)?></td>
-                        <td style="text-align: right"><?= ''.number_format($val->total_factura,0)?></td>
-                        
+                        <td style="text-align: right"><?= '$'.number_format($val->subtotal_factura,0)?></td>
+                        <td style="text-align: right"><?= '$'.number_format($val->impuesto,0)?></td>
+                        <?php if($val->id_tipo_factura == 1){?>
+                            <td style="text-align: right"><?= '$'.number_format($val->total_factura,0)?></td>
+                            <td></td>
+                        <?php }else {
+                            $tasa = app\models\ClienteMoneda::find()->where(['=','id_cliente', $val->id_cliente])->one(); ?>
+                            <td></td>
+                            <td style="text-align: right"><?=  $tasa->operador. ''.number_format($val->total_factura_internacional,2)?></td>
+                           
+                        <?php }?>    
                         <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 
                             $total = strtotime($fecha_dia) - strtotime($val->fecha_vencimiento );
                             $total = round($total / 86400);

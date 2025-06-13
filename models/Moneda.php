@@ -47,6 +47,7 @@ class Moneda extends \yii\db\ActiveRecord
             'descripcion' => 'Descripcion',
             'abreviatura' => 'Abreviatura',
             'user_name' => 'User Name',
+            
         ];
     }
 

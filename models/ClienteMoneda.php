@@ -38,7 +38,7 @@ class ClienteMoneda extends \yii\db\ActiveRecord
             [['id_moneda', 'tasa_negociacion'], 'required'],
             [['tasa_negociacion'], 'number'],
             [['nombre_moneda'], 'string', 'max' => 30],
-            [['sigla'], 'string', 'max' => 10],
+            [['sigla','operador'], 'string', 'max' => 10],
             [['user_name'], 'string', 'max' => 15],
             [['id_cliente'], 'exist', 'skipOnError' => true, 'targetClass' => Clientes::className(), 'targetAttribute' => ['id_cliente' => 'id_cliente']],
             [['id_moneda'], 'exist', 'skipOnError' => true, 'targetClass' => Moneda::className(), 'targetAttribute' => ['id_moneda' => 'id_moneda']],
@@ -58,6 +58,7 @@ class ClienteMoneda extends \yii\db\ActiveRecord
             'sigla' => 'Sigla',
             'tasa_negociacion' => 'Tasa Negociacion',
             'user_name' => 'User Name',
+            'operador' => 'operador',
         ];
     }
 

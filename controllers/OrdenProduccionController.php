@@ -1461,18 +1461,18 @@ class OrdenProduccionController extends Controller
         $orden = OrdenProduccion::findOne($id);
         $detalle = OrdenProduccionFaseInicial::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','importado', 0])->all();
         if(count($detalle) > 0){
-            $valor = 0; $variable = 0;
+            $variable = 0;
             foreach ($detalle as $detalles):
                 $materia = MateriaPrimas::findOne($detalles->id_materia_prima);
                 if ($materia){
                     if($materia->aplica_inventario == 1){
                         if($materia->convertir_gramos == 1){
-                            $valor = 1;
+                            $shouldCalculate = 1;
                             $materia->stock_gramos = $materia->stock_gramos - $detalles->cantidad_gramos;
                             $variable = round($materia->stock_gramos /1000);
                             $materia->stock = ''.number_format($variable, 2);
                             $materia->save(false);
-                            $this->ActualizarCostoMateriaPrima($materia, $valor);
+                            $this->ActualizarCostoMateriaPrima($materia, $shouldCalculate);
                             $detalles->importado = 1;
                             $detalles->save();
                         }    
@@ -1490,29 +1490,29 @@ class OrdenProduccionController extends Controller
     }
     //ACTUALIZA EL COSTO DEL INVENTARIO DE MATERIAS PRIMAS
     
-    protected function ActualizarCostoMateriaPrima($materia, $valor) {
-        $iva = 0; $subtotal = 0;
-        if($valor == 1){
-            if($materia->valor_unidad > 0){
-                if ($materia->stock <= 0){
-                   $subtotal = 0; 
-                }else{
-                    $subtotal = round($materia->stock * $materia->valor_unidad);
-                }
-                
-            }else{
-               $subtotal = 0; 
-            }    
-            if($materia->aplica_iva == 1){
-                $iva = round(($subtotal * $materia->porcentaje_iva)/100);
-            }else{
-               $iva = 0;                
-            }    
-            $materia->valor_iva = $iva;
-            $materia->subtotal = $subtotal;
-            $materia->total_materia_prima = $subtotal + $iva;
-            $materia->save(false);
-        }    
+    protected function ActualizarCostoMateriaPrima($materia, $shouldCalculate) {
+        
+        if (!$shouldCalculate) {
+            return;
+        }
+        $subtotal = 0;
+        $iva = 0;
+        
+        $stock = (float)$materia->stock;
+        $valorUnidad = (float)$materia->valor_unidad;
+        if ($valorUnidad > 0 && $stock > 0) {
+         $subtotal = $stock * $valorUnidad;
+        }
+        if ($materia->aplica_iva == 1 && $subtotal > 0) {
+        // Ensure porcentaje_iva is treated as a float for accurate calculation.
+        $porcentajeIva = (float)$materia->porcentaje_iva;
+        $iva = round(($subtotal * $porcentajeIva) / 100);
+        }
+        $materia->valor_iva = $iva;
+        $materia->subtotal = $subtotal;
+        $materia->total_materia_prima = $subtotal + $iva;
+        $materia->save(false);
+            
     }
         
     //PROCESO QUE TOTALIZA EL INVENTARIO
