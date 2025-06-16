@@ -17,7 +17,7 @@ use kartik\depdrop\DepDrop;
 //Modelos...
 use app\models\GrupoProducto;
 
-$this->title = 'CONSULTA (Inventario de productos)';
+$this->title = 'CONSULTA / INVENTARIOS';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ]);
 
 $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
+$producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -53,7 +54,7 @@ $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->a
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
             <?= $formulario->field($form, "codigo")->input("search") ?>
-             <?= $formulario->field($form, "producto")->input("search") ?>
+             <?= $formulario->field($form, "presentacion")->input("search") ?>
             <?= $formulario->field($form, 'fecha_inicio')->widget(DatePicker::className(), ['name' => 'check_issue_date',
                 'value' => date('d-M-Y', strtotime('+2 days')),
                 'options' => ['placeholder' => 'Seleccione una fecha ...'],
@@ -68,7 +69,14 @@ $grupo = ArrayHelper::map(GrupoProducto::find()->orderBy ('nombre_grupo ASC')->a
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
-             <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
+             <?= $formulario->field($form, 'producto')->widget(Select2::classname(), [
+                'data' => $producto,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?> 
+            <?= $formulario->field($form, 'grupo')->widget(Select2::classname(), [
                 'data' => $grupo,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
@@ -100,49 +108,54 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. Vcto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Subtotal</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Iva </th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total </th>
+                <th scope="col" style='background-color:#B9D5CE;'>Salidas</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                          
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): ?>
-            <tr style ='font-size: 90%;'>                
-                <td><?= $val->codigo_producto?></td>
-                <td><?= $val->nombre_producto?></td>
-                <td><?= $val->grupo->nombre_grupo?></td>
-                <?php if($val->id_detalle == NULL){?>
-                    <td><?= 'NO FOUND'?></td>
-                <?php }else{?>     
-                    <td><?= $val->detalle->numero_lote?></td>
-                <?php }?>
-                <td><?= $val->fecha_proceso?></td>
-                <td><?= $val->fecha_vencimiento?></td>
-                <td style="text-align: right;"><?= ''.number_format($val->unidades_entradas,0)?></td>
-                <?php if($val->stock_unidades > 0){?>
-                    <td style="text-align: right; background-color:#F5EEF8; color: black"><?= ''.number_format($val->stock_unidades,0)?></td>
-                <?php }else{?>
-                    <td style="text-align: right"><?= ''.number_format($val->stock_unidades,0)?></td>
-                <?php }?>    
-                <td style="text-align: right;"><?= ''.number_format($val->subtotal,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->valor_iva,0)?></td>
-                <td style="text-align: right"><?= ''.number_format($val->total_inventario,0)?></td>
-                <td style= 'width: 25px; height: 20px;'>
-                   <a href="<?= Url::toRoute(["inventario-productos/view", "id" => $val->id_inventario,'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
-                </td>  
-            </tr>            
+            <?php
+            foreach ($model as $val): 
+                $contar = 0; $contar2 = 0; $total = 0;
+                $Buscar = app\models\PedidoDetalles::find()->where(['=','id_inventario', $val->id_inventario])->all(); //busca los pedidos
+                $BuscarP = app\models\PedidoPresupuestoComercial::find()->where(['=','id_inventario', $val->id_inventario])->all(); //busca los presupuestos
+                if(count($Buscar) > 0){
+                    foreach ($Buscar as $unidades) {
+                        $contar += $unidades->cantidad_despachada;
+                    }
+                }
+                //acumula el presupuespto
+                if(count($BuscarP) > 0){
+                    foreach ($BuscarP as $unidad) {
+                        $contar2 += $unidad->cantidad_despachada;
+                    }
+                }
+                $total = $contar + $contar2;
+                ?>
+                <tr style ='font-size: 85%;'>                
+                    <td><?= $val->codigo_producto?></td>
+                    <td><?= $val->nombre_producto?></td>
+                     <td><?= $val->producto->nombre_producto?></td>
+                    <td><?= $val->grupo->nombre_grupo?></td>
+                    <td style="text-align: right;"><?= ''.number_format($val->unidades_entradas,0)?></td>
+                    <?php if($val->stock_unidades > 0){?>
+                        <td style="text-align: right; background-color:#F5EEF8; color: black"><?= ''.number_format($val->stock_unidades,0)?></td>
+                    <?php }else{?>
+                        <td style="text-align: right"><?= ''.number_format($val->stock_unidades,0)?></td>
+                    <?php }?> 
+                    <td style="text-align: right"><?= ''.number_format($total   ,0)?></td>    
+                    <td style= 'width: 25px; height: 20px;'>
+                       <a href="<?= Url::toRoute(["inventario-productos/view", "id" => $val->id_inventario,'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                    </td>  
+                </tr>            
             <?php endforeach; ?>
             </tbody>    
         </table> 

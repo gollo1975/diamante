@@ -59,7 +59,7 @@ class InventarioProductosController extends Controller
                 $codigo = null;
                 $inventario_inicial = null;
                 $fecha_inicio = null;
-                $fecha_corte = null;
+                $fecha_corte = null; $presentacion = null;
                 $grupo = null;
                 $producto = null;
                 $busqueda_vcto = null;
@@ -71,19 +71,22 @@ class InventarioProductosController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $producto = Html::encode($form->producto);
                         $grupo = Html::encode($form->grupo);
+                        $presentacion = Html::encode($form->presentacion);
                         $busqueda_vcto = Html::encode($form->busqueda_vcto);
                         if ($busqueda_vcto == 0){
                             $table = InventarioProductos::find()
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                        ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                       ->andFilterWhere(['=', 'id_producto', $producto])
+                                        ->andFilterWhere(['like', 'nombre_producto', $presentacion])
                                         ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }else{
                             $table = InventarioProductos::find()
                                     ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                     ->andFilterWhere(['between', 'fecha_vencimiento', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                   ->andFilterWhere(['=', 'id_producto', $producto])
+                                   ->andFilterWhere(['like', 'nombre_producto', $presentacion])
                                     ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);
                         }    
@@ -147,7 +150,7 @@ class InventarioProductosController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null;
                 $grupo = null;
-                $producto = null;
+                $producto = null;   $presentacion = null;
                 $busqueda_vcto = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
@@ -156,13 +159,15 @@ class InventarioProductosController extends Controller
                         $fecha_inicio = Html::encode($form->fecha_inicio);
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $producto = Html::encode($form->producto);
+                        $presentacion = Html::encode($form->presentacion);
                         $grupo = Html::encode($form->grupo);
                         $busqueda_vcto = Html::encode($form->busqueda_vcto);
                         if ($busqueda_vcto == 0){
                             $table = InventarioProductos::find()
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
-                                        ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                        ->andFilterWhere(['=', 'id_producto', $producto])
+                                        ->andFilterWhere(['like', 'nombre_producto', $presentacion])
                                         ->andWhere(['=', 'activar_producto_venta', 1])
                                         ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo]);
@@ -170,7 +175,8 @@ class InventarioProductosController extends Controller
                             $table = InventarioProductos::find()
                                     ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                     ->andFilterWhere(['between', 'fecha_vencimiento', $fecha_inicio, $fecha_corte])
-                                    ->andFilterWhere(['like', 'nombre_producto', $producto])
+                                    ->andFilterWhere(['=', 'id_producto', $producto])
+                                    ->andFilterWhere(['like', 'nombre_producto', $presentacion])
                                     ->andWhere(['=', 'activar_producto_venta', 1])
                                     ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo]);

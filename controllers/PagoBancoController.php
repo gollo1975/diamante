@@ -400,7 +400,7 @@ class PagoBancoController extends Controller
         ob_clean();
         $fijo = 6;
         $letra = 'S';
-        $strArchivo = "archivoPlanoPab".".txt";                
+        $strArchivo = "archivoPlanoPab_$pago_banco->fecha_creacion.$pago_banco->secuencia".".txt";                
         $ar = fopen($strArchivo, "a+") or die("Problemas en la creacion del archivo plano");              
         //Linea inicial
         fputs($ar, $this->RellenarNr($pago_banco->id_empresa, "1", 1));  

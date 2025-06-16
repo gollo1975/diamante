@@ -47,8 +47,8 @@ $view = 'inventario-productos';
                     <td><?= Html::encode($model->id_inventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?></th>
                     <td><?= Html::encode($model->codigo_producto) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
-                    <td><?= Html::encode($model->producto->nombre_producto) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nombre_producto') ?></th>
+                    <td><?= Html::encode($model->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->costo_unitario,0)) ?></td>
                 </tr>
