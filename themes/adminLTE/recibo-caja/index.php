@@ -55,8 +55,8 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
 
             </div>
             <div class="panel-footer text-right">
-                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-                <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
+                <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
             </div>
         </div>
     </div>
@@ -103,8 +103,8 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
                 <?= $formulario->field($form, 'recibo_detalle')->checkbox(['label' => 'Detalle recibo de caja por fechas', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'recibo_detalle']) ?>
             </div>
             <div class="panel-footer text-right">
-                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-                <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+                <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
+                <a align="right" href="<?= Url::toRoute("recibo-caja/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
             </div>
         </div>
     </div>
@@ -119,7 +119,7 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
        <?php if($tokenAcceso == 3){?>
             <table class="table table-responsive">
                 <thead>
-                    <tr style="font-size: 90%;">    
+                    <tr style="font-size: 85%;">    
                          <th scope="col" style='background-color:#B9D5CE;'>No recibo</th>
                          <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                          <th scope="col" style='background-color:#B9D5CE;'>F. pago</th>
@@ -134,7 +134,7 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
                 foreach ($model as $val):
                     $detalle = app\models\ReciboCajaDetalles::find()->where(['=','id_recibo', $val->id_recibo])->all();
                     ?>
-                        <tr style="font-size: 95%;">                   
+                        <tr style="font-size: 85%;">                   
                             <td><?= $val->numero_recibo ?></td>
                             <td><?= $val->cliente ?></td>
                              <td><?= $val->fecha_pago ?></td>
@@ -162,7 +162,7 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
         ?>
            <table class="table table-bordered table-striped table-hover">
                 <thead>
-                    <tr style="font-size: 90%;">    
+                    <tr style="font-size: 85%;">    
                          <th scope="col" style='background-color:#B9D5CE;'>No recibo</th>
                          <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                          <th scope="col" style='background-color:#B9D5CE;'>Tipo recibo</th>
@@ -180,7 +180,7 @@ $tipo = ArrayHelper::map(app\models\TipoReciboCaja::find()->all(), 'id_tipo', 'c
                 foreach ($model as $val):
                     $detalle = app\models\ReciboCajaDetalles::find()->where(['=','id_recibo', $val->id_recibo])->all();
                     ?>
-                        <tr style="font-size: 90%;">                   
+                        <tr style="font-size: 85%;">                   
                             <td><?= $val->numero_recibo ?></td>
                             <td><?= $val->cliente ?></td>
                             <td><?= $val->tipo->concepto ?></td>

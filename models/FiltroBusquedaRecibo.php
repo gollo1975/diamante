@@ -21,13 +21,14 @@ class FiltroBusquedaRecibo extends Model
     public $vendedores;
     public $documento;
     public $recibo_detalle;
+    public $tipo_factura;
 
 
     public function rules()
     {
         return [  
           
-            [['numero','tipo_recibo','vendedores','recibo_detalle'], 'integer'],
+            [['numero','tipo_recibo','vendedores','recibo_detalle','tipo_factura'], 'integer'],
             [['banco','municipio','documento','cliente'], 'string'],
             [['desde','hasta'], 'safe'],
         ];
@@ -46,6 +47,7 @@ class FiltroBusquedaRecibo extends Model
             'vendedores' => 'Agente comercial:',
             'documento' => 'Nit/Cedula:',
             'recibo_detalle' => 'recibo_detalle',
+            'tipo_factura' => 'Tipo de factura:'
 
         ];
     }

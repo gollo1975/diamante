@@ -132,8 +132,13 @@ class PDF extends FPDF {
         $this->Cell(55, 5, utf8_decode($factura->cliente), 0, 0, 'c', 0);
         $this->SetFont('Arial', 'B', 8);
         $this->Cell(17, 5, utf8_decode("No pedido:"), 0, 0, 'c', 0);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(55, 5, utf8_decode($factura->pedido->numero_pedido), 0, 0, 'c', 0);
+        if($factura->id_pedido <> null){
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(55, 5, utf8_decode($factura->pedido->numero_pedido), 0, 0, 'c', 0);
+        }else{
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(55, 5, utf8_decode('NOT FOUNT'), 0, 0, 'c', 0);
+        }    
         //FIN
         $this->SetXY(10, 44);
         $this->SetFont('Arial', 'B', 8);
@@ -256,9 +261,13 @@ class PDF extends FPDF {
             $lineas +=1;
             $pdf->SetFont('Arial', '', 7);
             $pdf->Cell(5, 4, $lineas, 0, 0, 'L');
-            $pdf->Cell(17, 4, $detalle->inventario->codigo_producto, 0, 0, 'L');
-            $pdf->Cell(74, 4, $detalle->inventario->nombre_producto , 0, 0, 'L');
-            $pdf->Cell(7,  4, $detalle->inventario->presentacion->medidaProducto->codigo_enlace, 0, 0, 'L');
+            $pdf->Cell(17, 4, $detalle->codigo_producto, 0, 0, 'L');
+            $pdf->Cell(74, 4, $detalle->producto , 0, 0, 'L');
+            if($detalle->id_inventario <> null){
+                $pdf->Cell(7,  4, $detalle->inventario->presentacion->medidaProducto->codigo_enlace, 0, 0, 'L');
+            }else{
+                
+            }    
             $pdf->Cell(12, 4, $detalle->cantidad, 0, 0, 'R');
             $pdf->Cell(19, 4, '$'.number_format($detalle->valor_unitario, 0, '.', ','), 0, 0, 'R');
             $pdf->Cell(13, 4, $detalle->porcentaje_iva, 0, 0, 'R');

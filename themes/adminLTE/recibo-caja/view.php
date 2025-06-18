@@ -20,7 +20,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Empleado */
 
-$this->title = 'Detalle';
+$this->title = 'RECIBO DE CAJA';
 $this->params['breadcrumbs'][] = ['label' => 'Recibo de caja', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_recibo;
 $view = 'recibo-caja';
@@ -53,7 +53,7 @@ $view = 'recibo-caja';
         </div>
         <div class="panel-body">
                 <table class="table table-bordered table-striped table-hover">
-                    <tr style="font-size: 90%;">
+                    <tr style="font-size: 85%;">
                         <th style='background-color:#F0F3EF;'>Id:</th>
                         <td><?= $model->id_recibo ?></td>
                         <th style='background-color:#F0F3EF;'>Numero recibo:</th>
@@ -65,7 +65,7 @@ $view = 'recibo-caja';
                         <th style='background-color:#F0F3EF;' >Valor pago:</th>
                         <td style="text-align: right"><?= ''.number_format($model->valor_pago,0) ?></td>
                     </tr>
-                    <tr style="font-size: 90%;">
+                    <tr style="font-size: 85%;">
                         <th style='background-color:#F0F3EF;'>Tipo documento:</th>
                         <td><?= $model->clienteRecibo->tipoDocumento->tipo_documento ?></td>
                         <th style='background-color:#F0F3EF;'>Documento:</th>
@@ -77,7 +77,7 @@ $view = 'recibo-caja';
                         <th style='background-color:#F0F3EF;' >Municipio:</th>
                         <td><?= $model->codigoMunicipio->municipio?></td>
                     </tr>
-                     <tr style="font-size: 90%;">
+                     <tr style="font-size: 85%;">
                         <th style='background-color:#F0F3EF;'>Banco:</th>
                         <td><?= $model->codigoBanco->entidad_bancaria ?></td>
                         <th style='background-color:#F0F3EF;'>Fecha_proceso:</th>
@@ -89,7 +89,7 @@ $view = 'recibo-caja';
                         <th style='background-color:#F0F3EF;'></th>
                         <td></td>
                     </tr>
-                    <tr style="font-size: 90%;">
+                    <tr style="font-size: 85%;">
                         <th style='background-color:#F0F3EF;'>Observación:</th>
                         <td colspan="9"><?= $model->observacion ?></td>
                     </tr>
@@ -116,7 +116,7 @@ $view = 'recibo-caja';
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE;'>No factura</th>                        
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha inicio</th>
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha vcto</th>                        
@@ -129,12 +129,16 @@ $view = 'recibo-caja';
                                 <tbody>
                                     <?php 
                                     foreach ($detalle_recibo as $detalle):?>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <td> <?= $detalle->numero_factura?></td>
                                          <td> <?= $detalle->facturaRecibo->fecha_inicio?></td>
                                         <td> <?= $detalle->facturaRecibo->fecha_vencimiento?></td>
                                         <td style="text-align: right"> <?= '$'.number_format($detalle->saldo_factura,0)?></td>
-                                        <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="abono_factura[]" value="<?= $detalle->abono_factura?>" style="text-align: right" size="9" required="true"> </td> 
+                                        <?php if($model->autorizado == 0){?>
+                                            <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="abono_factura[]" value="<?= $detalle->abono_factura?>" style="text-align: right" size="9" required="true"> </td> 
+                                        <?php }else{?>
+                                            <td style="text-align: right"> <?= '$'.number_format($detalle->abono_factura,0)?></td>
+                                        <?php }?>    
                                         <input type="hidden" name="actualizar_recibo_caja[]" value="<?= $detalle->id_detalle?>">  
                                         <td style= 'width: 25px; height: 25px;'>
                                             <?php if($model->autorizado == 0){?>

@@ -44,20 +44,19 @@ $cliente = ArrayHelper::map(app\models\Clientes::find()->where(['=','estado_clie
         <div class="panel-body">
             <div class="row">
 
-            <div class="row">
-             <?= $form->field($model, 'id_cliente')->widget(Select2::classname(), [
-                    'data' => $cliente,
-                    'options' => ['prompt' => 'Seleccione...'],
-                    'pluginOptions' => [
-                        'allowClear' => true
-                    ],
-                ]); ?>
+                <div class="row">
+                <?= $form->field($model, 'id_cliente')->widget(Select2::classname(), [
+                        'data' => $cliente,
+                        'options' => ['prompt' => 'Seleccione...'],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ],
+                    ]); ?>
 
-            </div>
-            <div class="row">
-
-                <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-            </div>    
+                </div>
+                <div class="row">
+                    <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+                </div>    
             <div class="panel-footer text-right">			
                 <a href="<?= Url::toRoute(["factura-venta/index", 'id' => $model->id_factura]) ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
                 <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>

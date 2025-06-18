@@ -16,10 +16,11 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 use app\models\AgentesComerciales;
 
-$this->title = 'CONSULTA FACTURA DE VENTA';
+$this->title = 'CONSULTA / FACTURA DE VENTA';
 $this->params['breadcrumbs'][] = $this->title;
 
 $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$tipoFactura = ArrayHelper::map(\app\models\TipoFacturaVenta::find()->where(['=','ver_registro_factura', 1])->all(), 'id_tipo_factura', 'descripcion');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -74,6 +75,14 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
             ?>
              <?= $formulario->field($form, "documento")->input("search") ?>
             <?= $formulario->field($form, "cliente")->input("search") ?>
+            <?= $formulario->field($form, 'tipo_factura')->widget(Select2::classname(), [
+                'data' => $tipoFactura,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]);?>
+             <?= $formulario->field($form, 'saldo')->dropDownList(['0' => 'SI'],['prompt' => 'Seleccione una opcion ...']) ?> 
         </div>
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
@@ -98,7 +107,7 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 90%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>No factura</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
@@ -115,7 +124,7 @@ $form = ActiveForm::begin([
                 if($model){
                     $fecha_dia = date('Y-m-d');
                     foreach ($model as $val): ?>
-                        <tr style="font-size: 90%;">
+                        <tr style="font-size: 85%;">
                             <td><?= $val->numero_factura ?></td>
                             <td><?= $val->cliente ?></td>
                             <td><?= $val->clienteFactura->codigoMunicipio->municipio?> - <?= $val->clienteFactura->codigoMunicipio->codigoDepartamento->departamento?></td>

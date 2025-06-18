@@ -25,13 +25,14 @@ class FiltroBusquedaPedidos extends Model
     public $pedido_anulado;
     public $punto_venta;
     public $tipo_factura;
+    public $tipo_documento;
 
 
     public function rules()
     {
         return [  
           
-            [['numero_pedido','facturado','vendedor','pedido_cerrado','presupuesto','saldo','numero_factura','pedido_anulado','punto_venta','tipo_factura'], 'integer'],
+            [['numero_pedido','facturado','vendedor','pedido_cerrado','presupuesto','saldo','numero_factura','pedido_anulado','punto_venta','tipo_factura','tipo_documento'], 'integer'],
             [['cliente','documento'], 'string'],
             [['fecha_inicio', 'fecha_corte'],'safe'],
         ];
@@ -54,6 +55,7 @@ class FiltroBusquedaPedidos extends Model
             'pedido_anulado' => 'Pedido anulado:',
             'punto_venta' => 'Punto de venta:',
             'tipo_factura' => 'Tipo de factura:',
+            'tipo_documento' =>'Tipo documento:'
 
         ];
     }

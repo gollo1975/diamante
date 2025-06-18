@@ -216,7 +216,7 @@ class FacturaVentaController extends Controller
                 $form = new \app\models\FiltroBusquedaPedidos();
                 $documento= null;
                 $cliente = null;
-                $vendedores = null;
+                $vendedores = null; $tipo_factura = null;
                 $desde = null;
                 $hasta = null;
                 $numero = null;
@@ -227,12 +227,14 @@ class FacturaVentaController extends Controller
                         $desde = Html::encode($form->fecha_inicio);
                         $hasta = Html::encode($form->fecha_corte);
                         $vendedores = Html::encode($form->vendedor);
+                        $tipo_factura = Html::encode($form->tipo_factura);
                         $numero = Html::encode($form->numero_factura);
                         $table = FacturaVenta::find()
                                 ->andFilterWhere(['=', 'nit_cedula', $documento])
                                 ->andFilterWhere(['like', 'cliente', $cliente])
                                 ->andFilterWhere(['=', 'id_agente', $vendedores])
-                                ->andFilterWhere(['=', 'numero_factura', $numero])  
+                                ->andFilterWhere(['=', 'numero_factura', $numero])
+                                ->andFilterWhere(['=', 'id_tipo_factura', $tipo_factura])
                                 ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
                                 ->andWhere(['>', 'saldo_factura', 0])
                                 ->andWhere(['>', 'numero_factura', 0]);
@@ -323,13 +325,11 @@ class FacturaVentaController extends Controller
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',66])->all()){
                 $form = new \app\models\FiltroBusquedaPedidos();
                 $documento= null;
-                $cliente = null;
-                $vendedores = null;
+                $cliente = null; $saldo = null;
+                $vendedores = null; $tipo_factura = null;
                 $desde = null;
                 $hasta = null;
                 $numero = null;
-                $pages = null;
-                $model = null;
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $documento = Html::encode($form->documento);
@@ -337,12 +337,16 @@ class FacturaVentaController extends Controller
                         $desde = Html::encode($form->fecha_inicio);
                         $hasta = Html::encode($form->fecha_corte);
                         $vendedores = Html::encode($form->vendedor);
+                        $tipo_factura = Html::encode($form->tipo_factura);
                         $numero = Html::encode($form->numero_factura);
+                        $saldo = Html::encode($form->saldo);
                         $table = FacturaVenta::find()
                                 ->andFilterWhere(['=', 'nit_cedula', $documento])
                                 ->andFilterWhere(['like', 'cliente', $cliente])
                                 ->andFilterWhere(['=', 'id_agente', $vendedores])
+                                ->andFilterWhere(['=', 'id_tipo_factura', $tipo_factura])
                                 ->andFilterWhere(['=', 'numero_factura', $numero])  
+                                ->andFilterWhere(['>', 'saldo_factura', 0])
                                 ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
                                 ->andWhere(['>', 'numero_factura', 0]);
                         $table = $table->orderBy('id_factura DESC');
@@ -364,7 +368,23 @@ class FacturaVentaController extends Controller
                     } else {
                         $form->getErrors();
                     }
-                }   
+                } else{
+                     $table = FacturaVenta::find()->Where(['>', 'numero_factura', 0])
+                                                 ->orderBy('id_factura DESC');
+                    $count = clone $table;
+                    $pages = new Pagination([
+                        'pageSize' => 20,
+                        'totalCount' => $count->count(),
+                    ]);
+                    $tableexcel = $table->all();
+                    $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+                    if(isset($_POST['excel'])){                    
+                           $this->actionExcelFacturaVenta($tableexcel);
+                    }
+                }  
                    return $this->render('search_factura_venta', [
                                 'model' => $model,
                                 'form' => $form,
@@ -804,7 +824,92 @@ class FacturaVentaController extends Controller
          return $this->render('/factura-venta/_form_crear_factura_libre', ['model' => $model]);
        
     }
+    
+    public function actionCargar_documento_libre ($id, $token) {
+        $model = new FiltroBusquedaPedidos();
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["enviar_documento"])) {
+                if($model->tipo_documento <> null){
+                    $Validar = FacturaVentaDetalle::find()->where(['=','codigo_producto', $model->tipo_documento])
+                                                          ->andWhere(['=','id_factura', $id])->one();
+                    if(!$Validar){
+                        $documento = TipoFacturaVenta::findOne($model->tipo_documento);
+                        $table = new FacturaVentaDetalle();
+                        $table->id_factura = $id;
+                        $table->codigo_producto = $model->tipo_documento;
+                        $table->producto = $documento->descripcion;
+                        $table->tipo_venta = $documento->abreviatura;
+                        $table->cantidad = 1;
+                        $table->fecha_venta = date('Y-m-d');
+                        $table->save();
+                        return $this->redirect(["factura-venta/view",'id' => $id, 'token' => $token]);
+                    }
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'Debe de seleccionar el domento para facturar. Valide la informacion'); 
+                    return $this->redirect(["factura-venta/view",'id' => $id, 'token' => $token]);
+                }
+            }
+        }
+        return $this->renderAjax('cargar_documento_libre', [
+            'model' => $model,
+            
+        ]);   
+    }  
+    
+    //EDITAR DOCUMENTO FACTURA
+    public function actionEditar_concepto($id, $token, $id_detalle) {
+        $model = new \app\models\FiltroModeloDocumento();
+        if ($model->load(Yii::$app->request->post())) {
+              if (isset($_POST["editar_documento"])) {
+                  if($model->cantidad <> null && $model->valor <> null){
+                       $table = FacturaVentaDetalle::findOne($id_detalle);
+                       $table->cantidad = $model->cantidad;
+                       $table->valor_unitario = $model->valor;
+                       $table->subtotal = $model->cantidad * $model->valor;
+                       $table->porcentaje_retencion = $model->porcentaje;
+                       $table->save();
+                       $this->ActualizaSaldoFactura($id);
+                       return $this->redirect(["factura-venta/view",'id' => $id, 'token' => $token]);
+                  }else{
+                       Yii::$app->getSession()->setFlash('error', 'Campos vacios, debe de llenar los campos.'); 
+                       return $this->redirect(["factura-venta/view",'id' => $id, 'token' => $token]);
+                  }
+                  
+              }
+        }
+         return $this->renderAjax('editar_concepto_factura', [
+            'model' => $model,
+            
+        ]);   
+    }
 
+    //ACTUALIZA SALDO DE FACTURA LIBRE
+    protected function ActualizaSaldoFactura($id) {
+        $model = FacturaVenta::findOne($id);
+        $empresa = \app\models\MatriculaEmpresa::findOne(1);
+        if($empresa->sugiere_retencion == 1){
+            $cliente = Clientes::findOne($model->id_cliente);
+            if($cliente->aplica_retencion_fuente == 1){
+                $detalle = FacturaVentaDetalle::find()->where(['=','id_factura', $id])->all();
+                $total = 0; 
+                foreach ($detalle as $detalles) {
+                    $total += $detalles->valor_unitario;
+                    $porcentaje = round($total * $detalles->porcentaje_retencion)/100;
+                    $valor_porcentaje = $detalles->porcentaje_retencion;
+                }
+                $model->valor_bruto = $total;
+                $model->subtotal_factura = $total;
+                $model->porcentaje_rete_fuente = $valor_porcentaje;
+                $model->valor_retencion = $porcentaje;
+                $model->total_factura = $total - $porcentaje;
+                $model->saldo_factura = $model->total_factura;
+                $model->save(false);
+                
+            }
+        }
+    }
+    
+    
     //actualiza la fecha de la factura
     public function actionUpdate($id, $token, $id_pedido)
     {
@@ -838,6 +943,35 @@ class FacturaVentaController extends Controller
         ]);
     }
     
+    
+    //EDITAR FACTURA
+    public function actionEditar_factura($id) {
+        $model = $this->findModel($id);
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }   
+        if ($model->load(Yii::$app->request->post())) {
+            $cliente = Clientes::findOne($model->id_cliente);
+            $table = FacturaVenta::findOne($id);
+            $table->id_cliente = $model->id_cliente;
+            $table->cliente = $cliente->nombre_completo;
+            $table->nit_cedula = $cliente->nit_cedula;
+            $table->direccion =  $cliente->direccion;
+            $table->telefono_cliente =  $cliente->telefono;
+            $table->id_forma_pago = $cliente->id_forma_pago;
+            $table->plazo_pago =  $cliente->plazo;
+            $dias = $cliente->plazo;
+            $table->fecha_vencimiento = date("Y-m-d",strtotime($table->fecha_inicio."+".$dias."days")); 
+            $table->user_name = Yii::$app->user->identity->username;
+            $table->save(false);
+            return $this->redirect(['view', 'id' => $id,'token' => 0]);
+        }
+        return $this->render('_form_crear_factura_libre', [
+            'model' => $model,
+            
+        ]);  
+    }
     //PROCESO QUE PERMITE PONER EL DECUENTO A LA FACTURA  INTERNACIONAL
     protected function DescuentoFacturaInternacional($id) {
         $factura = FacturaVenta::findOne($id);
@@ -2110,7 +2244,7 @@ class FacturaVentaController extends Controller
                         ->setCellValue('I' . $i, $val->fecha_vencimiento)
                         ->setCellValue('J' . $i, $val->fecha_enviada_api)
                         ->setCellValue('K' . $i, $val->fecha_recepcion_dian)
-                        ->setCellValue('L' . $i, $val->formaPago)
+                        ->setCellValue('L' . $i, $val->formaPago->concepto)
                         ->setCellValue('M' . $i, $val->plazo_pago)
                         ->setCellValue('N' . $i, $val->valor_bruto)
                         ->setCellValue('O' . $i, $val->descuento)

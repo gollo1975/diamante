@@ -20,6 +20,7 @@ $this->title = 'LISTADO DE CARTERA';
 $this->params['breadcrumbs'][] = $this->title;
 
 $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_completo ASC')->all(), 'id_agente', 'nombre_completo');
+$tipoFactura = ArrayHelper::map(\app\models\TipoFacturaVenta::find()->where(['=','ver_registro_factura', 1])->all(), 'id_tipo_factura', 'descripcion');
 ?>
 <script language="JavaScript">
     function mostrarfiltro() {
@@ -73,10 +74,17 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
                     'allowClear' => true
                 ],
             ]);?>
+             <?= $formulario->field($form, 'tipo_factura')->widget(Select2::classname(), [
+                'data' => $tipoFactura,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]);?>
         </div>
         <div class="panel-footer text-right">
-            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary",]) ?>
-            <a align="right" href="<?= Url::toRoute("recibo-caja/cargar_cartera") ?>" class="btn btn-primary"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
+            <a align="right" href="<?= Url::toRoute("recibo-caja/cargar_cartera") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -90,7 +98,7 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 95%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Documento</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Cliente</th>
                  <th scope="col" style='background-color:#B9D5CE;'>Municipio</th>
@@ -109,17 +117,18 @@ $vendedores = ArrayHelper::map(AgentesComerciales::find()->orderBy('nombre_compl
                             $suma += $facturas->saldo_factura;
                         endforeach;
                         ?>
-                        <tr style="font-size: 95%;">                   
+                        <tr style="font-size: 85%;">                   
                             <td><?= $val->nit_cedula ?></td>
                             <td><?= $val->cliente ?></td>
                             <td><?= $val->clienteFactura->codigoMunicipio->municipio?> - <?= $val->clienteFactura->codigoMunicipio->codigoDepartamento->departamento?></td>
-                            <td style="text-align: right"><?= '$'.number_format($suma,0)?></td>
+                            <td style="text-align: right"><?= '$'.number_format($suma,2)?></td>
                             <td style= 'width: 25px; right: 25px;'>
                                <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span>',
                                     ['/recibo-caja/crear_nuevo_recibo','id_cliente' =>$val->id_cliente, 'tokenAcceso' => $tokenAcceso, 'token' => $token],
                                       ['title' => 'Crear recibo de caja al clinte',
                                        'data-toggle'=>'modal',
                                        'data-target'=>'#modalcrearrecibocaja',
+                                        'data-backdrop' => 'static',   
                                       ])    
                                     ?>
                                     <div class="modal remote fade" id="modalcrearrecibocaja">

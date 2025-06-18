@@ -210,6 +210,10 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                     <thead>
                                         <?php if($model->id_tipo_factura <> 5){?>
                                             <tr style="font-size: 85%; text-align: center">
+                                                <?php if($model->factura_libre == 1){?>
+                                                    <th scope="col"  style='background-color:#B9D5CE;text-align: center'></th> 
+                                                <?php }else{?>
+                                                <?php }?>
                                                 <th scope="col"  style='background-color:#B9D5CE;text-align: center'><b>Codigo</b></th>                        
                                                 <th scope="col"  style='background-color:#B9D5CE;text-align: center'>Descripcion producto</th>     
                                                 <th scope="col"  style='background-color:#B9D5CE;text-align: center'>TV</th>
@@ -234,19 +238,69 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                     <body>
                                          <?php
                                          foreach ($detalle_factura as $val):
-                                             if($model->id_tipo_factura <> 5){ ?>
-                                           
-                                                <tr style="font-size: 85%;">
-                                                    <td><?= $val->codigo_producto ?></td>
-                                                    <td><?= $val->producto ?></td>
-                                                    <td><?= $val->tipo_venta ?></td>
-                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
-                                                    <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
-                                                    <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>
-                                                    <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
-                                               </tr>
+                                            if($model->id_tipo_factura <> 5){ 
+                                                   if($model->factura_libre == 1){
+                                                       if($model->autorizado == 0){?>
+                                                            <tr style="font-size: 85%;">
+                                                                <td style= 'width: 20px; height: 20px;'>
+                                                                    <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ',
+                                                                           ['/factura-venta/editar_concepto','id' => $model->id_factura, 'token' =>$token, 'id_detalle' => $val->id_detalle],
+                                                                           [
+                                                                               'title' => 'Editar concepto de factura',
+                                                                               'data-toggle'=>'modal',
+                                                                               'data-target'=>'#modaleditarconceptofactura'.$model->id_factura,
+                                                                               'class' => '',
+                                                                               'data-backdrop' => 'static',
+                                                                               'data-keyboard' => 'false'
+                                                                           ])    
+                                                                      ?>
+                                                                    <div class="modal remote fade" id="modaleditarconceptofactura<?= $model->id_factura ?>">
+                                                                         <div class="modal-dialog modal-lg" style ="width: 500px;">
+                                                                              <div class="modal-content"></div>
+                                                                         </div>
+                                                                    </div> 
+                                                               </td>
+
+
+                                                                <td><?= $val->codigo_producto ?></td>
+                                                                <td><?= $val->producto ?></td>
+                                                                <td><?= $val->tipo_venta ?></td>
+                                                                <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                                <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>
+                                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                            </tr>
+                                                        <?php }else{?>
+                                                            <tr style="font-size: 85%;">
+                                                                <td style= 'width: 20px; height: 20px;'>
+                                                                   
+                                                               </td>
+
+
+                                                                <td><?= $val->codigo_producto ?></td>
+                                                                <td><?= $val->producto ?></td>
+                                                                <td><?= $val->tipo_venta ?></td>
+                                                                <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                                <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                                <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>
+                                                                <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                            </tr>
+                                                        <?php }    
+                                                    }else{?>
+                                                        <tr style="font-size: 85%;">
+                                                            <td><?= $val->codigo_producto ?></td>
+                                                            <td><?= $val->producto ?></td>
+                                                            <td><?= $val->tipo_venta ?></td>
+                                                            <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
+                                                            <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>
+                                                            <td style="text-align: right"><?= $val->porcentaje_iva ?>%</td>
+                                                            <td style="text-align: right"><?= ''.number_format($val->subtotal,0) ?></td>
+                                                        </tr>
+                                                   <?php }?>     
+                                                   
                                              <?php }else{?>
                                                <tr style="font-size: 85%;">
+                                                  
                                                     <td><?= $val->codigo_producto ?></td>
                                                     <td><?= $val->producto ?></td>
                                                     <td><?= $val->tipo_venta ?></td>
@@ -260,7 +314,12 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                          endforeach;?>          
                                     </body>
                                     <tr style="font-size: 90%; background-color:#B9D5CE">
+                                        <?php if($model->factura_libre == 1){?>
+                                        <td colspan="7"; style="text-align: right"><b>Moneda:</b></td>
+                                        <?php }else{?>
                                         <td colspan="6"; style="text-align: right"><b>Moneda:</b></td>
+                                        <?php }?>
+                                        
                                         <?php if($moneda){?>
                                             <td style="text-align: right;"><b><?= $moneda->sigla?></b></td>
                                             <td style="text-align: right;"><b><?= 'COP'?></b></td>
@@ -270,9 +329,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>                                         
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right;  background-color:#F0F3EF;"><b>Valor Bruto:</b></td>
-                                        <?php if($moneda){?>
+                                        <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right;  background-color:#F0F3EF;"><b>Valor Bruto:</b></td>
+                                        <?php }else{?>
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right;  background-color:#F0F3EF;"><b>Valor Bruto:</b></td> 
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_bruto_internacional; ?></b></td>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_bruto,0); ?></b></td>
                                         <?php }else{ ?>    
@@ -280,9 +344,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Comercial:</b></td>
-                                        <?php if($moneda){?>
+                                        <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Comercial:</b></td>
+                                        <?php }else{?>
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Comercial:</b></td>
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_comercial_internacional?></b></td>
                                             <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento_comercial,0)?></b></td>
                                         <?php }else{?> 
@@ -290,9 +359,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
-                                        <?php if($moneda){?>
+                                       <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
+                                        <?php }else{?>
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Descuento Efectivo (<?= $model->porcentaje_descuento?> %) :</b></td>
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style="background-color:#F0F3EF" ><b> <?= $model->descuento_internacional?></b></td>
                                             <td align="right" style="background-color:#F0F3EF" ><b> <?= '$ '.number_format($model->descuento,0)?></b></td>
                                         <?php }else{?>
@@ -300,9 +374,15 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Subtotal:</b></td>
-                                        <?php if($moneda){?>
+                                        <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                             <td style="text-align: right; background-color:#F0F3EF"><b>Subtotal:</b></td>
+                                        <?php }else{?>
+                                              <td colspan="5"></td>
+                                             <td style="text-align: right; background-color:#F0F3EF"><b>Subtotal:</b></td>
+                                        <?php }    
+                                       
+                                        if($moneda){?>
                                             <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->subtotal_factura_internacional?></b></td>
                                             <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->subtotal_factura,0); ?></b></td>
                                         <?php }else{?>
@@ -310,9 +390,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php  }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Impuesto:</b></td>
-                                        <?php if($moneda){?>
+                                        <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Impuesto:</b></td>
+                                        <?php }else{?> 
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Impuesto:</b></td>
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style=" background-color:#F0F3EF" ><b><?= $model->impuesto_internacional; ?></b></td>
                                             <td align="right" style=" background-color:#F0F3EF" ><b><?= '$ '.number_format($model->impuesto,0); ?></b></td>
                                         <?php }else{?>
@@ -320,9 +405,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>     
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Retencion (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
-                                        <?php if($moneda){?>
+                                        <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Retencion (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
+                                         <?php }else{?> 
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Retencion (<?= $model->porcentaje_rete_fuente?> %) :</b></td>
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_retencion_internacional; ?></b></td>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_retencion,0); ?></b></td>
                                         <?php }else{?>
@@ -330,9 +420,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>     
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Rete Iva (<?= $model->porcentaje_rete_iva?> %) :</b></td>
-                                        <?php if($moneda){?>
+                                       <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Rete Iva (<?= $model->porcentaje_rete_iva?> %) :</b></td>
+                                        <?php }else{?> 
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Rete Iva (<?= $model->porcentaje_rete_iva?> %) :</b></td>
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= $model->valor_reteiva_internacional ?></b></td>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->valor_reteiva,0); ?></b></td>
                                         <?php }else{?>    
@@ -340,9 +435,14 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                         <?php }?>    
                                     </tr>
                                     <tr style="font-size: 90%;">
-                                        <td colspan="5"></td>
-                                        <td style="text-align: right; background-color:#F0F3EF"><b>Total Pagar:</b></td>
-                                        <?php if($moneda){?>
+                                       <?php if($model->factura_libre == 1){?>
+                                            <td colspan="6"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Total Pagar:</b></td>
+                                        <?php }else{?> 
+                                            <td colspan="5"></td>
+                                            <td style="text-align: right; background-color:#F0F3EF"><b>Total Pagar:</b></td>
+                                        <?php }    
+                                        if($moneda){?>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= $model->total_factura_internacional ?></b></td>
                                             <td align="right" style="background-color:#F0F3EF" ><b><?= '$ '.number_format($model->total_factura,0); ?></b></td>
                                         <?php }else{?>    
@@ -352,6 +452,30 @@ $moneda = app\models\ClienteMoneda::find()->where(['=','id_cliente', $model->id_
                                 </table>
                                
                             </div>
+                            <?php if($model->factura_libre == 1 && $model->autorizado == 0){?>
+                                <div class="panel-footer text-right" >
+                                    <td style="width: 25px; height: 25px;">
+                                        <!-- Inicio Nuevo Detalle proceso -->
+                                          <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Cargar documento ',
+                                              ['/factura-venta/cargar_documento_libre', 'id' => $model->id_factura,'token' => $token],
+                                              [
+                                                  'title' => 'Cargar documento contable',
+                                                  'data-toggle'=>'modal',
+                                                  'data-target'=>'#modalcargardocumentolibre'.$model->id_factura,
+                                                  'class' => 'btn btn-success btn-sm',
+                                                  'data-backdrop' => 'static',
+
+                                              ])    
+                                         ?>
+                                    </td> 
+                                    <div class="modal remote fade" id="modalcargardocumentolibre<?= $model->id_factura ?>">
+                                              <div class="modal-dialog modal-lg" style ="width: 650px;">
+                                                  <div class="modal-content"></div>
+                                              </div>
+                                          </div>
+                                    </td>
+                                </div> 
+                            <?php }?>
                         </div>
                     </div>
                 </div>    

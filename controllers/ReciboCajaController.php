@@ -163,7 +163,7 @@ class ReciboCajaController extends Controller
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',55])->all()){
                 $form = new FiltroBusquedaRecibo();
                 $documento= null;
-                $cliente = null;
+                $cliente = null; $tipo_factura = null;
                 $vendedores = null;
                 $desde = null;
                 $hasta = null;
@@ -175,13 +175,16 @@ class ReciboCajaController extends Controller
                         $documento = Html::encode($form->documento);
                         $cliente = Html::encode($form->cliente);
                         $desde = Html::encode($form->desde);
+                        $tipo_factura = Html::encode($form->tipo_factura);
                         $hasta = Html::encode($form->hasta);
                         $vendedores = Html::encode($form->vendedores);
                         $numero = Html::encode($form->numero);
+                     
                         if($tokenAcceso == 3){
                             $table = FacturaVenta::find()
                                 ->andFilterWhere(['=', 'nit_cedula', $documento])
                                 ->andFilterWhere(['like', 'cliente', $cliente])
+                                ->andFilterWhere(['=', 'id_tipo_factura', $tipo_factura])
                                 ->andWhere(['>', 'saldo_factura', 0])
                                 ->andWhere(['=', 'autorizado', 1])
                                 ->andWhere(['>', 'numero_factura', 0])
@@ -191,6 +194,7 @@ class ReciboCajaController extends Controller
                                 ->andFilterWhere(['=', 'nit_cedula', $documento])
                                 ->andFilterWhere(['like', 'cliente', $cliente])
                                 ->andFilterWhere(['=', 'id_agente', $vendedores])
+                                ->andFilterWhere(['=', 'id_tipo_factura', $tipo_factura])
                                 ->andFilterWhere(['=', 'numero_factura', $numero])  
                                 ->andFilterWhere(['between', 'fecha_inicio', $desde, $hasta])      
                                 ->andWhere(['>', 'saldo_factura', 0])
@@ -222,10 +226,10 @@ class ReciboCajaController extends Controller
                             ->orderBy('id_factura ASC');
                     }else{
                         $table = FacturaVenta::find()->Where(['>', 'saldo_factura', 0])
-                            ->andWhere(['=', 'autorizado', 1])
-                            ->andWhere(['>', 'numero_factura', 0])
-                            ->orderBy('id_factura ASC');
-                    }    
+                                ->andWhere(['=', 'autorizado', 1])
+                               ->andWhere(['>', 'numero_factura', 0])
+                               ->orderBy('id_factura ASC');
+                    }  
                     $count = clone $table;
                     $pages = new Pagination([
                         'pageSize' => 20,

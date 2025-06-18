@@ -193,11 +193,21 @@ $form = ActiveForm::begin([
                                 </td>
                                 <td></td>
                             <?php }
-                        }else{ ?>
-                            <td style= 'width: 20px; height: 20px;'>
-                                <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
-                            </td>
-                            <td></td>
+                        }else{
+                            if($val->factura_libre == 1 && !app\models\FacturaVentaDetalle::find()->where(['=','id_factura', $val->id_factura])->one()){ ?>
+                                 <td style= 'width: 20px; height: 20px;'>
+                                    <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                </td>
+                                <td style= 'width: 20px; height: 20px;'>    
+                                    <a href="<?= Url::toRoute(["factura-venta/editar_factura", "id" => $val->id_factura]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar la factura "></span></a>
+                                </td>
+                            <?php }else{?>    
+                                <td style= 'width: 20px; height: 20px;'>
+                                    <a href="<?= Url::toRoute(["factura-venta/view", "id" => $val->id_factura, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver la vista de la factura y el detalle"></span></a>
+                                </td>
+                                <td style= 'width: 20px; height: 20px;'></td>    
+                            <?php }?>    
+                          
                         <?php }?>    
                    </tr>            
                 <?php endforeach;?>

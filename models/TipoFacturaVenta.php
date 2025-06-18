@@ -41,7 +41,7 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             [['descripcion'], 'string', 'max' => 35],
             [['user_name','abreviatura'], 'string', 'max' => 15],
             [['porcentaje_retencion','porcentaje_mora'], 'number'],
-            [['base_retencion','aplica_interes_mora','ver_registro_factura','codigo_interface'], 'integer'],
+            [['base_retencion','aplica_interes_mora','ver_registro_factura','codigo_interface','documento_libre'], 'integer'],
             
         ];
     }
@@ -62,7 +62,8 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
             'aplica_interes_mora' => 'Aplica interes mora',
             'codigo_interface' => 'Codigo interface',
             'abreviatura' => 'abreviatura',
-            'ver_registro_factura' => 'Ver registro factura'
+            'ver_registro_factura' => 'Ver registro factura',
+            'documento_libre' => 'Documento libre',
         ];
     }
     
@@ -82,5 +83,13 @@ class TipoFacturaVenta extends \yii\db\ActiveRecord
            $verregistro = 'SI';
        }
        return $verregistro;
+    }
+     public function getDocumentoLibre() {
+       if($this->documento_libre == 0){
+           $documentolibre = 'NO';
+       }else{
+           $documentolibre = 'SI';
+       }
+       return $documentolibre;
     }
 }

@@ -580,13 +580,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                             'items' => [
                                                 ['label' => 'Configuración', 'icon' => 'cog', 'url' => ['matricula-empresa/parametros', 'id' => 1]],
                                                 ['label' => 'Empresa', 'icon' => 'nav-icon fas fa-file', 'url' => ['matricula-empresa/matricula', 'id' => 1]],
-                                                [
-                                                'label' => 'Contenido',
-                                                'icon' => 'comment',
-                                                'url' => '#',
-                                                'items' => [
-                                                    ['label' => 'Formato principal', 'icon' => 'tumblr-square', 'url' => ['formato-contenido/index']],
-                                                ]],
+                                               
                                             ],
                                         ],
 
