@@ -13,7 +13,7 @@ use yii\helpers\ArrayHelper;
     <?php $form = ActiveForm::begin([
 		'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
 	'fieldConfig' => [
-                    'template' => '{label}<div class="col-sm-5 form-group">{input}{error}</div>',
+                    'template' => '{label}<div class="col-sm-6 form-group">{input}{error}</div>',
                     'labelOptions' => ['class' => 'col-sm-3 control-label'],
                     'options' => []
                 ],

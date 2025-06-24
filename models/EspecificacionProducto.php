@@ -39,7 +39,7 @@ class EspecificacionProducto extends \yii\db\ActiveRecord
         return [
             [['concepto'], 'required'],
             [['fecha_registro'], 'safe'],
-            [['concepto'], 'string', 'max' => 50],
+            [['concepto'], 'string', 'max' => 80],
             [['user_name'], 'string', 'max' => 15],
         ];
     }

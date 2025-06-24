@@ -65,18 +65,19 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 90%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Concepto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>User_name</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha registro</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
             <tbody>
                 <?php foreach ($model as $val): ?>
-                    <tr style="font-size: 90%;">                   
+                    <tr style="font-size: 85%;">                   
                         <td><?= $val->id_especificacion ?></td>
                         <td><?= $val->concepto ?></td>
                         <td><?= $val->user_name ?></td>
@@ -86,6 +87,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         </td>
                         <td style= 'width: 25px; height: 20px;'>
                             <a href="<?= Url::toRoute(["especificacion-producto/update", "id" => $val->id_especificacion])?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                        </td>
+                        <td style= 'width: 25px;'>
+                            <?= Html::a('', ['eliminar_linea', 'id' => $val->id_especificacion], [
+                                'class' => 'glyphicon glyphicon-trash',
+                                'data' => [
+                                    'confirm' => 'Esta seguro de eliminar el registro?',
+                                    'method' => 'post',
+                                ],
+                            ]) ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

@@ -19,6 +19,15 @@ class Marca extends \yii\db\ActiveRecord
     {
         return 'marca';
     }
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->marca = strtoupper($this->marca); 
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -27,6 +36,7 @@ class Marca extends \yii\db\ActiveRecord
     {
         return [
             [['marca'], 'required'],
+            [['estado'],'integer'],
             [['marca'], 'string', 'max' => 30],
         ];
     }
@@ -37,8 +47,18 @@ class Marca extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_marca' => 'Id Marca',
-            'marca' => 'Marca',
+            'id_marca' => 'Codigo',
+            'marca' => 'Nombre de la marca',
+            'estado' => 'Activo:',
         ];
+    }
+    
+    public function getEstadoRegistro() {
+        if($this->estado == 0){
+            $estadoregistro = 'SI';
+        }else{
+            $estadoregistro = 'NO';
+        }
+        return $estadoregistro;
     }
 }

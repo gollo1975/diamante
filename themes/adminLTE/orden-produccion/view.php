@@ -116,8 +116,8 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cerrar_orden') ?></th>
                     <td><?= Html::encode($model->cerrarOrden) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tipo_orden') ?></th>
-                    <td><?= Html::encode($model->tipoOrden) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proceso_produccion') ?></th>
+                    <td><?= Html::encode($model->tipoProceso->nombre_proceso) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
                      <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'costo_unitario') ?></th>
@@ -128,8 +128,8 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                     <td><?= Html::encode($model->user_name) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'responsable') ?></th>
                     <td><?= Html::encode($model->responsable) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proceso_produccion') ?></th>
-                    <td><?= Html::encode($model->tipoProceso->nombre_proceso) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tipo_orden') ?></th>
+                    <td><?= Html::encode($model->tipoOrden) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tamano_lote') ?></th>
                      <td style="text-align: right"><?= Html::encode(number_format($model->tamano_lote, 0)) ?> Gramos</td>
                 </tr>
@@ -171,7 +171,6 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                             <th scope="col" align="center" style='background-color:#B9D5CE; width: 25%'>Presentación producto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Proyectadas</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>U. en produccion</th>
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Tipo medida</th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>F. Vcto</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cerrado</th>  
@@ -186,19 +185,17 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                             <tr style="font-size: 85%;">
                                                 <td><?= $val->codigo_producto ?></td>
                                                 <?php if($model->autorizado == 0){?>
-                                                    <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="descripcion[]" value="<?= $val->descripcion ?>" size ="45" maxlength="40" required="true"> </td> 
+                                                    <td><?= $val->presentacionProducto->descripcion ?></td>
                                                     <td style="padding-right: 1;padding-right: 0; text-align: left"> <input type="text" name="cantidad_producto[]" value="<?= $val->cantidad ?>" style="text-align: right" size="9" required="true"> </td> 
                                                     <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
-                                                    <td><?= $val->medidaProducto->descripcion ?></td>
                                                     <td><?= $val->numero_lote ?></td>  
                                                     <td><?= $val->fecha_vencimiento ?></td>
                                                     <td><?= $val->cerrarLinea ?></td>
                                                      <td><?= $val->documentoExportado ?></td>
                                                 <?php }else{?>
-                                                   <td><?= $val->descripcion ?></td>
+                                                    <td><?= $val->presentacionProducto->descripcion ?></td>
                                                    <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                                    <td style="text-align: right"><?= ''. number_format($val->cantidad_real, 0) ?></td>
-                                                   <td><?= $val->medidaProducto->descripcion ?></td>
                                                    <td><?= Html::encode($val->numero_lote) ?></td>  
                                                    <td><?= $val->fecha_vencimiento ?></td>
                                                    <td><?= $val->cerrarLinea ?></td>
@@ -361,7 +358,7 @@ $iva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderBy ('valor_iva
                                                 <?php }else{?>
                                                     <td style="background-color: <?= $val->fase->color?>"><?= $val->fase->nombre_fase ?></td>
                                                 <?php } ?>    
-                                                    <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="porcentaje_aplicacion[]" value="<?= ''.number_format($val->porcentaje_aplicacion,2) ?>" style="text-align: right" size="6" required="true"> </td> 
+                                                    <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="porcentaje_aplicacion[]" value="<?= ''.number_format($val->porcentaje_aplicacion,4) ?>" style="text-align: right" size="8" required="true"> </td> 
                                                 <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="cantidad_gramos[]" value="<?= $val->cantidad_gramos ?>" style="text-align: right" size="9" required="true"> </td> 
                                                 <td><?= $val->cumple_existencia ?></td>
                                                 <?php if($val->cumple_existencia == 'OK'){?>

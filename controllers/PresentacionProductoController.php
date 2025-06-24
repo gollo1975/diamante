@@ -208,6 +208,33 @@ class PresentacionProductoController extends Controller
            $this->redirect(["presentacion-producto/view",'id' => $id]);
         }
     }
+    //ELIMINAR PRESENTACION
+     public function actionEliminar_linea($id) {
+        
+        if (Yii::$app->request->post()) {
+            $registro = PresentacionProducto::findOne($id);
+            if ((int) $id) {
+                try {
+                    PresentacionProducto::deleteAll("id_presentacion=:id_presentacion", [":id_presentacion" => $id]);
+                    Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                    $this->redirect(["presentacion-producto/index"]);
+                } catch (IntegrityException $e) {
+                   
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro Nro: ' .$registro->id_presentacion .', tiene registros asociados en otros procesos');
+                    return $this->redirect(["presentacion-producto/index"]);
+                } catch (\Exception $e) {
+                    
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro Nro: ' .$registro->id_presentacion .', tiene registros asociados en otros procesos');
+                    return $this->redirect(["presentacion-producto/index"]);
+                }
+            } else {
+                // echo "Ha ocurrido un error al eliminar el registros, redireccionando ...";
+                echo "<meta http-equiv='refresh' content='3; " . Url::toRoute("presentacion-producto/index") . "'>";
+            }
+        } else {
+            return $this->redirect(["presentacion-producto/index"]);
+        }
+    }
     
     //IMPORTAR MATERIAL DE EMPAQUE
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO

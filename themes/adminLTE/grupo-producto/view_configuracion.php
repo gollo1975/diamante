@@ -87,7 +87,7 @@ $conFases = ArrayHelper::map(app\models\TipoFases::find()->all(), 'id_fase', 'no
                                             <?php }else{?>
                                                 <td style="padding-left: 1;padding-right: 0; background-color:<?= $val->fase->color?>"><?= Html::dropDownList('fase[]', $val->id_fase, $conFases, ['class' => 'col-sm-12', 'prompt' => 'Seleccione', 'required' => true]) ?></td>
                                             <?php }?>    
-                                            <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="porcentaje_aplicacion[]" value="<?= ''. number_format($val->porcentaje_aplicacion,2) ?>" style="text-align: right" size="9" required="true"> </td>
+                                            <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="porcentaje_aplicacion[]" value="<?= ''. number_format($val->porcentaje_aplicacion,4) ?>" style="text-align: right" size="9" required="true"> </td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text"  name="codigo_homologacion[]" value="<?= $val->codigo_homologacion ?>" style="text-align: right" size="9"> </td>
                                             <td><?= $val->user_name?></td>
                                             <input type="hidden" name="listado_materia[]" value="<?= $val->id?>"> 

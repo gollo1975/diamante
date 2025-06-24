@@ -159,7 +159,8 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'database',
                                                     'url' => '#',
                                                     'items' => [
-                                                       ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],  
+                                                       
+                                                       ['label' => 'Marcas', 'icon' => 'plus-square-o', 'url' => ['marca/index']],
                                                        ['label' => 'Grupo', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
                                                         ['label' => 'Productos', 'icon' => 'plus-square-o', 'url' => ['productos/index']],
                                                        ['label' => 'Presentacion', 'icon' => 'plus-square-o', 'url' => ['presentacion-producto/index']], 
@@ -230,6 +231,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'database',
                                                     'url' => '#',
                                                     'items' => [
+                                                            ['label' => 'Almacen', 'icon' => 'plus-square-o', 'url' => ['almacen/index']],
                                                             ['label' => 'Medida materia prima', 'icon' => 'plus-square-o', 'url' => ['medida-materia-prima/index']],   
                                                             ['label' => 'Medida producto', 'icon' => 'plus-square-o', 'url' => ['medida-producto-terminado/index']],   
                                                      ], 
@@ -306,6 +308,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'database',
                                                     'url' => '#',
                                                     'items' => [
+                                                            ['label' => 'Tipos de fases', 'icon' => 'plus-square-o', 'url' => ['tipo-fases/index']],
                                                             ['label' => 'Especificaciones', 'icon' => 'plus-square-o', 'url' => ['especificacion-producto/index']],
                                                             ['label' => 'Concepto analisis', 'icon' => 'plus-square-o', 'url' => ['concepto-analisis/index']],
                                                             ['label' => 'Formula producto', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index_producto_configuracion','sw' =>0]], 

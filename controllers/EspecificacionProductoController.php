@@ -148,6 +148,34 @@ class EspecificacionProductoController extends Controller
             'model' => $model,
         ]);
     }
+    
+    
+     public function actionEliminar_linea($id) {
+        
+        if (Yii::$app->request->post()) {
+            $registro = EspecificacionProducto::findOne($id);
+            if ((int) $id) {
+                try {
+                    EspecificacionProducto::deleteAll("id_especificacion=:id_especificacion", [":id_especificacion" => $id]);
+                    Yii::$app->getSession()->setFlash('success', 'Registro Eliminado con exito.');
+                    $this->redirect(["especificacion-producto/index"]);
+                } catch (IntegrityException $e) {
+                   
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro Nro: ' .$registro->id_especificacion .', tiene registros asociados en otros procesos');
+                    return $this->redirect(["especificacion-producto/index"]);
+                } catch (\Exception $e) {
+                    
+                    Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro Nro: ' .$registro->id_especificacion .', tiene registros asociados en otros procesos');
+                    return $this->redirect(["especificacion-producto/index"]);
+                }
+            } else {
+                // echo "Ha ocurrido un error al eliminar el registros, redireccionando ...";
+                echo "<meta http-equiv='refresh' content='3; " . Url::toRoute("especificacion-producto/index") . "'>";
+            }
+        } else {
+            return $this->redirect(["especificacion-producto/index"]);
+        }
+    }
 
         /**
      * Finds the EspecificacionProducto model based on its primary key value.

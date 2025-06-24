@@ -30,6 +30,7 @@ class TipoProcesoProduccion extends \yii\db\ActiveRecord
             [['nombre_proceso'], 'required'],
             [['nombre_proceso'], 'string', 'max' => 30],
             [['user_name'], 'string', 'max' => 15],
+            [['consecutivo'], 'string', 'max' => 5],
         ];
     }
 
@@ -42,6 +43,7 @@ class TipoProcesoProduccion extends \yii\db\ActiveRecord
             'id_proceso_produccion' => 'Codigo',
             'nombre_proceso' => 'Nombre proceso',
             'user_name' => 'User name',
+            'consecutivo' => 'consecutivo',
         ];
     }
 }

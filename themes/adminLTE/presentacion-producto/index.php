@@ -15,7 +15,7 @@ use kartik\select2\Select2;
 use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 
-$this->title = 'PRESENTACION DEL PRODUCTOS';
+$this->title = 'PRESENTACION DEL PRODUCTO';
 $this->params['breadcrumbs'][] = $this->title;
 
 $producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
@@ -97,9 +97,10 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
                      <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Nombre grupo</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Medida</th>
-                      <th scope="col" style='background-color:#B9D5CE;'>Total items</th>
+                     <th scope="col" style='background-color:#B9D5CE;'>Total items</th>
                      <th scope="col" style='background-color:#B9D5CE;'></th>  
-                     <th scope="col" style='background-color:#B9D5CE;'></th>  
+                     <th scope="col" style='background-color:#B9D5CE;'></th> 
+                     <th scope="col" style='background-color:#B9D5CE;'></th>
 
                  </tr>
             </thead>
@@ -113,11 +114,20 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
                         <td><?= $val->grupo->nombre_grupo ?></td>
                         <td><?= $val->medidaProducto->descripcion ?></td>
                         <td style="text-align: right"><?= $val->total_item ?></td>
-                        <td style= 'width: 20px; right: 20px;'>
+                        <td style= 'width: 10px; right: 10px;'>
                             <a href="<?= Url::toRoute(["presentacion-producto/view", "id" => $val->id_presentacion]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
                         <td style= 'width: 20px; right: 20px;'>
                             <a href="<?= Url::toRoute(["presentacion-producto/update", "id" => $val->id_presentacion]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>
+                        </td>
+                        <td style= 'width: 20px; right: 20px'>
+                            <?= Html::a('', ['eliminar_linea', 'id' => $val->id_presentacion], [
+                                'class' => 'glyphicon glyphicon-trash',
+                                'data' => [
+                                    'confirm' => 'Esta seguro de eliminar el registro?',
+                                    'method' => 'post',
+                                ],
+                            ]) ?>
                         </td>
                     </tr>
             <?php endforeach;?>

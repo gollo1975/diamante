@@ -21,6 +21,17 @@ class TipoFases extends \yii\db\ActiveRecord
     {
         return 'tipo_fases';
     }
+    
+     public function beforeSave($insert) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+     
+        $this->nombre_fase = strtoupper($this->nombre_fase); 
+        $this->color = strtoupper($this->color);
+ 
+        return true;
+    }
 
     /**
      * {@inheritdoc}
@@ -40,9 +51,9 @@ class TipoFases extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_fase' => 'Id Fase',
-            'nombre_fase' => 'Nombre Fase',
-            'color' => 'Color:',
+            'id_fase' => 'Codigo',
+            'nombre_fase' => 'Nombre de fase',
+            'color' => 'Color',
         ];
     }
 

@@ -73,7 +73,7 @@ $conEtapa = ArrayHelper::map(EtapasAuditoria::find()->all(), 'id_etapa', 'concep
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-           <tr style="font-size: 90%;">    
+           <tr style="font-size: 85%;">    
                 <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Concepto</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Nombre de etapa</th>
@@ -85,7 +85,7 @@ $conEtapa = ArrayHelper::map(EtapasAuditoria::find()->all(), 'id_etapa', 'concep
             </thead>
             <tbody>
                 <?php foreach ($model as $val): ?>
-                    <tr style="font-size: 90%;">                   
+                    <tr style="font-size: 85%;">                   
                          <td><?= $val->id_analisis ?></td>
                         <td><?= $val->concepto ?></td>
                         <td><?= $val->etapaProceso->concepto?></td>

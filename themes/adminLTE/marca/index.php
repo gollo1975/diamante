@@ -2,17 +2,15 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
-use app\models\Marca;
-use app\models\GrupoProducto;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\MunicipioSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'PRODUCTOS';
+$this->title = 'MARCAS';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="productos-index">
+<div class="marca-index">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
     <?=  $this->render('_search', ['model' => $searchModel]); ?>
@@ -23,34 +21,23 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            
             [                
-                'attribute' => 'id_producto',
-                'contentOptions' => ['class' => 'col-lg-1'],
-            ],
-            [                
-                'attribute' => 'nombre_producto',
-                'contentOptions' => ['class' => 'col-lg-3'],
-            ],
-            [
-                'attribute' => 'id_grupo',
-                'value' => function($model){
-                    $grupo = GrupoProducto::findOne($model->id_grupo);
-                    return $grupo->nombre_grupo;
-                },
-                'filter' => ArrayHelper::map(GrupoProducto::find()->orderBy('nombre_grupo ASC')->all(),'id_grupo','nombre_grupo'),
-                'contentOptions' => ['class' => 'col-lg-2'],
-            ],
-            [
                 'attribute' => 'id_marca',
-                'value' => function($model){
-                    $nombre_marca = app\models\Marca::findOne($model->id_marca);
-                    return $nombre_marca->marca;
-                },
-                'filter' => ArrayHelper::map(app\models\Marca::find()->orderBy('marca ASC')->all(),'id_marca','marca'),
                 'contentOptions' => ['class' => 'col-lg-1'],
             ],
-           
+            [                
+                'attribute' => 'marca',
+                'contentOptions' => ['class' => 'col-lg-4'],
+            ],
+            [
+                'attribute' => 'estado',
+                'value' => function($model) {
+                    $marca = app\models\Marca::findOne($model->id_marca);
+                    return $marca->estadoRegistro;
+                },
+                'filter' => ArrayHelper::map(app\models\Marca::find()->all(), 'estado', 'estadoRegistro'),
+                'contentOptions' => ['class' => 'col-lg-1'],
+            ],
             [
                 'class' => 'yii\grid\ActionColumn', 
                  'contentOptions' => ['class' => 'col-lg-1'],
@@ -70,5 +57,6 @@ $this->params['breadcrumbs'][] = $this->title;
         
     ]); ?>
 </div>
+
 
 
