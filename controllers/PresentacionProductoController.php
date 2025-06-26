@@ -117,9 +117,11 @@ class PresentacionProductoController extends Controller
     public function actionView($id)
     {
         $listadoEmpaque = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $id])->all();
+        $listadoKits = \app\models\PresentacionKitsDetalle::find()->where(['=','id_presentacion', $id])->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
             'listadoEmpaque' => $listadoEmpaque,
+            'listadoKits' => $listadoKits,
         ]);
     }
 
@@ -189,6 +191,25 @@ class PresentacionProductoController extends Controller
         }
     }
     
+    //ELIMINA LOS DETALLES DEL KITS
+     public function actionEliminar_detalles_kits($id, $id_detalle)
+    {
+        try {
+            $modelo  = \app\models\PresentacionKitsDetalle::findOne($id_detalle);
+            $modelo->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+             $this->SumarItems($id, $sw = 1);
+            return $this->redirect(["presentacion-producto/view",'id' => $id]);
+        } catch (IntegrityException $e) {
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociados en otros procesos');
+            return $this->redirect(["presentacion-producto/view",'id' => $id]);            
+
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, esta asociado en otros procesos');
+            return $this->redirect(["presentacion-producto/view",'id' => $id]);
+        }
+    }
+    
     //eliminando detalles
      public function actionEliminar_detalles($id, $id_detalle)
     {
@@ -196,7 +217,7 @@ class PresentacionProductoController extends Controller
             $dato = \app\models\ConfiguracionMaterialEmpaque::findOne($id_detalle);
             $dato->delete();
             Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
-            $this->SumarItems($id);
+            $this->SumarItems($id, $sw = 0);
             $this->redirect(["presentacion-producto/view",'id' => $id]);
             
         } catch (IntegrityException $e) {
@@ -236,7 +257,7 @@ class PresentacionProductoController extends Controller
         }
     }
     
-    //IMPORTAR MATERIAL DE EMPAQUE
+    
     //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
      public function actionBuscar_material_empaque($id){
        
@@ -273,9 +294,10 @@ class PresentacionProductoController extends Controller
                         $table->id_presentacion = $id;
                         $table->user_name =  Yii::$app->user->identity->username;
                         $table->save(false);
-                        $this->SumarItems($id);
+                        
                     }    
                 }
+                $this->SumarItems($id, $sw = 0);
                 return $this->redirect(['view','id' => $id]);
             }
         }
@@ -286,12 +308,67 @@ class PresentacionProductoController extends Controller
         ]);
     }
     
+    //BUSCAR PRODUCTOS FABRICADOS PARA ARMAR EL KITS
+      //BUSCAR MATERIA PRIMA PARA EL PRODUCTO
+     public function actionBuscar_producto_terminado($id){
+       
+        $operacion = \app\models\InventarioProductos::find()->orderBy('nombre_producto ASC')->all();
+        $form = new \app\models\FormModeloBuscar();
+        $q = null;
+        if ($form->load(Yii::$app->request->get())) {
+            if ($form->validate()) {
+                $q = Html::encode($form->q);    
+                $operacion = \app\models\InventarioProductos::find()
+                        ->andFilterWhere(['like','nombre_producto', $q])
+                        ->orFilterWhere(['=','codigo_producto', $q])
+                        ->orderBy('nombre_producto ASC')->all();                    
+            } else {
+                $form->getErrors();
+            }                    
+        }else{
+            $operacion = \app\models\InventarioProductos::find()->orderBy('nombre_producto ASC')->all();
+        }
+        //PROCESO DE GUARDAR
+         if (isset($_POST["guardar_inventario_producto"])) {
+            if(isset($_POST["nuevo_producto_terminado"])){
+                foreach ($_POST["nuevo_producto_terminado"] as $intCodigo) {
+                    //consulta para no duplicar
+                    $registro = \app\models\PresentacionKitsDetalle::find()->where(['=','id_presentacion', $id])
+                                                                   ->andWhere(['=','id_inventario', $intCodigo])->one();
+                    if(!$registro){
+                        $inventario = \app\models\InventarioProductos::findOne($intCodigo);
+                        $table = new \app\models\PresentacionKitsDetalle();
+                        $table->id_inventario = $intCodigo;
+                        $table->id_presentacion = $id;
+                        $table->user_name =  Yii::$app->user->identity->username;
+                        $table->save(false);
+                       
+                    }    
+                }
+                $this->SumarItems($id, $sw = 1);
+                return $this->redirect(['view','id' => $id]);
+            }
+        }
+        return $this->render('importar_producto_terminado', [
+            'operacion' => $operacion,            
+            'form' => $form,
+            'id' => $id,
+        ]);
+    }
+    
+    
     //SUMA LOS ITEMS DE MATERIA DE EMPAQUE
-    protected function SumarItems($id) {
+    protected function SumarItems($id, $sw) {
         $modelo = PresentacionProducto::findOne($id);
-        $cantidad = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $id])->all();
-        $modelo->total_item = count($cantidad);
-        $modelo->save();
+        if($sw == 0){
+            $cantidad = \app\models\ConfiguracionMaterialEmpaque::find()->where(['=','id_presentacion', $id])->all();
+            $modelo->total_item = count($cantidad);
+            $modelo->save();
+        }else{
+            $cantidad = \app\models\PresentacionKitsDetalle::find()->where(['=','id_presentacion', $id])->all();
+            $modelo->total_item = count($cantidad);
+            $modelo->save();
+        }    
     }
 
     /**

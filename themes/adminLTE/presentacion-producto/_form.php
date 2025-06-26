@@ -50,6 +50,9 @@ $medidaProducto = ArrayHelper::map(app\models\MedidaProductoTerminado::find()->o
                 ],
             ]); ?>
         </div>  
+         <div class="row">
+               <?= $form->field($model, 'tipo_venta')->dropdownList(['0' => 'INDIVIDUAL', '1' => 'KITS'], ['prompt' => 'Seleccione...']) ?>
+           </div> 
         <div class="panel-footer text-right">            
             <a href="<?= Url::toRoute("presentacion-producto/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>		

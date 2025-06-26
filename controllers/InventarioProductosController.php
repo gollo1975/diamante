@@ -395,14 +395,14 @@ class InventarioProductosController extends Controller
         $tableexcel = $table->all();
         $count = clone $table;
         $pages = new Pagination([
-            'pageSize' => 5,
+            'pageSize' => 10,
             'totalCount' => $count->count(),
         ]);
         $detalle_entrada = $table
                 ->offset($pages->offset)
                 ->limit($pages->limit)
                 ->all();
-        $to = $count->count();
+        //$to = $count->count();
         $entradas = \app\models\EntradaProductoTerminadoDetalle::find()->where(['=','id_inventario', $id])->orderBy('id_detalle DESC')->all();
         return $this->render('view', [
             'model' => $model,

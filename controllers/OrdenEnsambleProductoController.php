@@ -224,14 +224,15 @@ class OrdenEnsambleProductoController extends Controller
                         $fecha_corte = Html::encode($form->fecha_corte);
                         $orden = Html::encode($form->orden);
                         $producto = Html::encode($form->producto);
-                        $table = OrdenEnsambleProducto::find()
-                                    ->andFilterWhere(['=', 'numero_orden_ensamble', $numero_ensamble])
+                        $table = \app\models\OrdenProduccion::find()
+                                    ->andFilterWhere(['=', 'numero_orden', $numero_ensamble])
                                     ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                     ->andFilterWhere(['=', 'id_orden_produccion', $orden])
-                                    ->andFilterWhere(['=', 'numero_lote', $numero_lote])
                                     ->andFilterWhere(['=', 'id_producto', $producto])
-                                    ->andWhere(['=', 'proceso_auditado', 1]);
-                                    $table = $table->orderBy('id_ensamble DESC');
+                                    ->andFilterWhere(['=', 'numero_lote', $numero_lote])
+                                    ->andWhere(['=', 'orden_cerrada_ensamble', 1])
+                                    ->andWhere(['=', 'exportar_inventario', 0]);
+                                    $table = $table->orderBy('id_orden_produccion DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
                         $to = $count->count();
@@ -248,9 +249,10 @@ class OrdenEnsambleProductoController extends Controller
                         $form->getErrors();
                     }
                 } else {
-                    $table = OrdenEnsambleProducto::find()
-                                         ->Where(['=', 'proceso_auditado', 1])
-                                         ->orderBy('id_ensamble DESC');
+                    $table = \app\models\OrdenProduccion::find()
+                                         ->Where(['=', 'orden_cerrada_ensamble', 1])
+                                         ->andWhere(['=', 'exportar_inventario', 0])
+                                         ->orderBy('id_orden_produccion DESC');
                     $tableexcel = $table->all();
                     $count = clone $table;
                     $pages = new Pagination([
@@ -367,6 +369,16 @@ class OrdenEnsambleProductoController extends Controller
             'conTerminadas' => $conTerminadas,
            
         ]);
+    }
+    
+    //VISTA QUE MUESTRA EL DETALLE DE PRODUCCION
+    public function actionView_detalle_descarga($id_orden) {
+        $modelo = \app\models\OrdenProduccion::findOne($id_orden);
+        $detalle = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all(); 
+        return $this->render('view_detalle_descarga', [
+            'modelo' => $modelo,
+            'detalle' => $detalle,
+            ]);
     }
     
     
@@ -917,83 +929,62 @@ class OrdenEnsambleProductoController extends Controller
     }
    
     //PERMITE EXPORTAR TODOS LOS PRODUCTOS APROBADOS
-    public function actionExportar_producto_inventario($id, $id_orden_produccion, $grupo) {
-        $ordenP = \app\models\OrdenProduccion::findOne($id_orden_produccion);
-        $orden_ensamble = OrdenEnsambleProducto::findOne($id);
-        $detalle = \app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $id])->andWhere(['<>','porcentaje_rendimiento', 'null'])->all();
-        if($orden_ensamble->proceso_auditado == 0){
-            Yii::$app->getSession()->setFlash('error', 'No se puede exportar el inventario al modulo de producto terminado porque esta orden de ensable no se ha auditado. Favor valide la informacion.'); 
-            $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
+        public function actionExportar_producto_inventario($id_orden) {
+        $ordenP = \app\models\OrdenProduccion::findOne($id_orden);
+        $detalle_producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id_orden])->all();
+        if(count($detalle_producto) <= 0){
+            Yii::$app->getSession()->setFlash('error', 'No hay productos para descargar al modulod de inventario. Favor valide la informacion.'); 
+            return $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
         }else {
-            if($ordenP->tipo_orden == 0){ //reprogramacion de productos
-                if(count($detalle) > 0){
-                    foreach ($detalle as $detalles):
-                        $inventario = \app\models\InventarioProductos::find()->where(['=','id_inventario', $detalles->ordenProduccionProducto->id_inventario])->one();
-                        if($inventario){
-                            $inventario->unidades_entradas += $detalles->cantidad_real;
-                            $inventario->stock_unidades +=  $detalles->cantidad_real;
-                            $inventario->fecha_proceso = $ordenP->fecha_proceso;
-                            $inventario->fecha_vencimiento = $inventario->fecha_vencimiento;
-                            $inventario->id_detalle = $detalles->ordenProduccionProducto->id_detalle;
-                            $inventario->inventario_inicial = 1;
-                            $inventario->save();
-                            $detalles->importado = 1;
-                            $detalles->save();
-                            $ordenP->exportar_inventario = 1;
-                            $ordenP->save();
-                            $orden_ensamble->inventario_exportado = 1;
-                            $orden_ensamble->save(false);
-                            
-                        }
-                    endforeach;
-                    $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
-                }else{
-                    Yii::$app->getSession()->setFlash('warning', 'Los productos que se crearon en esta orden de produccion ya fueron importados al modulo de inventario.'); 
-                     $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
-                }    
-            }else{ //INGRESA PRODUCTO NUEVO AL SISTEMA
-                if(count($detalle) > 0){
+            $contar = 0;
+            foreach ($detalle_producto as $detalles):
+                $inventario = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $detalles->codigo_producto])->one();
+                if($inventario){ //SI EL PRODUCTO YA EXISTE
+                    $contar++;
+                    $inventario->unidades_entradas += $detalles->cantidad_real;
+                    $inventario->stock_unidades +=  $detalles->cantidad_real;
+                    $inventario->fecha_proceso = $ordenP->fecha_proceso;
+                    $inventario->fecha_vencimiento = $detalles->fecha_vencimiento;
+                    $inventario->id_detalle = $detalles->id_detalle;
+                    $inventario->inventario_inicial = 1;
+                    $inventario->save(false);
+                    //guarda en la table de productos
+                    $detalles->importado = 1;
+                    $detalles->id_inventario = $inventario->id_inventario;
+                    $detalles->save();
+                }else{ // SI EL PRODUCTO NO EXISTE
+                    $contar++;
                     $proveedor = \app\models\Proveedor::find()->where(['=','predeterminado', 1])->one();
-                    foreach ($detalle as $detalles):
-                        $auxiliar = 0;
-                        $producto = \app\models\OrdenProduccionProductos::find()->where(['=','id_detalle', $detalles->id_detalle])->one();
-                        if($producto){
-                            $table = new \app\models\InventarioProductos();
-                            $table->codigo_producto = $detalles->codigo_producto;
-                            $table->nombre_producto = $detalles->nombre_producto;
-                            $table->descripcion_producto = $detalles->nombre_producto;
-                            $table->unidades_entradas = $detalles->cantidad_real;
-                            $table->stock_unidades = $detalles->cantidad_real;
-                            $table->id_grupo = $grupo;
-                            $table->id_producto = $producto->ordenProduccion->id_producto;
-                            $table->id_detalle = $detalles->id_detalle;
-                            $table->aplica_iva = $producto->aplica_iva;
-                            $table->porcentaje_iva = $producto->porcentaje_iva;
-                            $table->fecha_vencimiento = $producto->fecha_vencimiento;
-                            $table->fecha_proceso = $ordenP->fecha_proceso;
-                            $table->user_name = Yii::$app->user->identity->username;
-                            $table->codigo_ean = $detalles->codigo_producto;
-                            $table->id_proveedor = $proveedor->id_proveedor;
-                            $table->id_presentacion = $producto->id_presentacion;
-                            $table->activar_producto_venta = 1;
-                            $table->save(false);
-                            $detalles->importado = 1;
-                            $detalles->save();
-                            $ordenP->exportar_inventario = 1;
-                            $ordenP->save();
-                            $producto->importado = 1;
-                            $producto->save();
-                            $orden_ensamble->inventario_exportado = 1;
-                            $orden_ensamble->save(false);
-                        }    
-                   endforeach;
-                    Yii::$app->getSession()->setFlash('success', 'Los productos relacionados en esta ORDEN DE ENSAMBLE se exportaron con EXITO al modulo de inventario de producto terminado.');  
-                    $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
-                }else{
-                    Yii::$app->getSession()->setFlash('warning', 'Este producto no cumple con los requisistos para importar. Validar el porcentaje de cumplimiento en la vista de presentacion del producto. Este debe ser mayor a 0.');  
-                    $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
-                }    
-            }
+                    $table = new \app\models\InventarioProductos();
+                    $table->codigo_producto = $detalles->codigo_producto;
+                    $table->nombre_producto = $detalles->presentacionProducto->descripcion;
+                    $table->descripcion_producto = $detalles->presentacionProducto->descripcion;
+                    $table->unidades_entradas = $detalles->cantidad_real;
+                    $table->stock_unidades = $detalles->cantidad_real;
+                    $table->id_grupo = $ordenP->id_grupo;
+                    $table->id_producto = $detalles->ordenProduccion->id_producto;
+                    $table->id_detalle = $detalles->id_detalle;
+                    $table->aplica_iva = $detalles->aplica_iva;
+                    $table->porcentaje_iva = $detalles->porcentaje_iva;
+                    $table->fecha_vencimiento = $detalles->fecha_vencimiento;
+                    $table->fecha_proceso = $ordenP->fecha_proceso;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->codigo_ean = $detalles->codigo_producto;
+                    $table->inventario_inicial = 1;
+                    if($proveedor){
+                       $table->id_proveedor = $proveedor->id_proveedor; 
+                    }
+                    $table->id_presentacion = $detalles->id_presentacion;
+                    $table->activar_producto_venta = 1;
+                    $table->save(false);
+                    $detalles->importado = 1;
+                    $detalles->save();
+                }  
+            endforeach;
+            $ordenP->exportar_inventario = 1;
+            $ordenP->save(false);
+            Yii::$app->getSession()->setFlash('success', 'Se importaron (' .$contar.') registros al modulo de producto terminado con EXITO.'); 
+            return $this->redirect(["orden-ensamble-producto/index_descargar_inventario"]);
         }    
     }
     

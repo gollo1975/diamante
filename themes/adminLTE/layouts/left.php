@@ -159,7 +159,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'database',
                                                     'url' => '#',
                                                     'items' => [
-                                                       
+                                                        ['label' => 'Tipos de solicitudes', 'icon' => 'plus-square-o', 'url' => ['documento-solicitudes/index']],
                                                        ['label' => 'Marcas', 'icon' => 'plus-square-o', 'url' => ['marca/index']],
                                                        ['label' => 'Grupo', 'icon' => 'plus-square-o', 'url' => ['grupo-producto/index']],
                                                         ['label' => 'Productos', 'icon' => 'plus-square-o', 'url' => ['productos/index']],
@@ -184,6 +184,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                         ]],
                                                         ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 
                                                         ['label' => 'Devolucion productos', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/index']], 
+                                                        ['label' => 'Solicitud de kits', 'icon' => 'plus-square-o', 'url' => ['/solicitud-armado-kits/index']], 
                                                     ],
                                                 ],
                                                 [
@@ -212,7 +213,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'items' => [
                                                         
                                                         ['label' => 'Orden produccion', 'icon' => 'plus-square-o', 'url' => ['/orden-produccion/index']],
-                                                        ['label' => 'Descargar ME-IP', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_descargar_inventario']],
+                                                        
                                                         ['label' => 'Solicitud materiales', 'icon' => 'plus-square-o', 'url' => ['/solicitud-materiales/index']],
                                                         ['label' => 'Entrega materiales', 'icon' => 'plus-square-o', 'url' => ['/entrega-materiales/index']],
                                                     ],
@@ -241,7 +242,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'icon' => 'cube',
                                                     'url' => '#',
                                                     'items' => [
-                                                        //['label' => 'Parametro presupuesto', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/asignar_producto_presupuesto']],
+                                                        ['label' => 'Descargar PT', 'icon' => 'plus-square-o', 'url' => ['/orden-ensamble-producto/index_descargar_inventario']],
                                                         
                                                     ],
                                                 ],

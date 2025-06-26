@@ -20,7 +20,7 @@ use app\models\OrdenProduccion;
 
 
 
-$this->title = 'Descargar (PRODUCTO / MATERIAS PRIMAS)';
+$this->title = 'DESCARGAR / PRODUCTO TERMINADO';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -111,55 +111,30 @@ $form = ActiveForm::begin([
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 85%;'>         
-                
-                <th scope="col" style='background-color:#B9D5CE;'>Orden de ensamble</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>OP</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
-                <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Id</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Op produccion</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Nombre de producto</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Unidades fabricadas</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Numero de lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                <th scope="col" style='background-color:#B9D5CE;'></th>
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($model as $val): 
-                $detalle = app\models\OrdenEnsambleProductoDetalle::find()->where(['=','id_ensamble', $val->id_ensamble])->one();
-                ?>
-                <tr style ='font-size: 85%;'>                
-                    <td><?= $val->numero_orden_ensamble?></td>
-                    <td><?= $detalle->nombre_producto?></td>
-                    <td><?= $val->ordenProduccion->producto->nombre_producto?></td>
-                    <td><?= $val->ordenProduccion->numero_orden?></td>
-                    <td><?= $val->etapa->concepto?></td>
-                    <td><?= $val->fecha_proceso?></td>
-                    <?php if($val->inventario_exportado == 0 && $val->exportar_material_empaque == 0){?>
-                        <td style= 'width: 25px; height: 10px;'>
-                            <?= Html::a('<span class="glyphicon glyphicon-export"></span> Exportar Producto ', ['/orden-ensamble-producto/exportar_producto_inventario', 'id' => $val->id_ensamble, 'id_orden_produccion' => $val->id_orden_produccion, 'grupo' =>$val->id_grupo],['class' => 'btn btn-info btn-sm',
+            <?php foreach ($model as $val): ?>
+                <tr style ='font-size: 85%;'>
+                    <td><?= $val->id_orden_produccion?></td>
+                    <td><?= $val->numero_orden?></td>
+                    <td><?= $val->producto->nombre_producto?></td>
+                    <td style="text-align: right"><?= ''.number_format($val->unidades_reales,0)?></td>
+                     <td><?= $val->numero_lote?></td>
+                    <td style= 'width: 25px; height: 10px;'>
+                            <?= Html::a('<span class="glyphicon glyphicon-export"></span> Exportar Producto ', ['/orden-ensamble-producto/exportar_producto_inventario', 'id_orden' => $val->id_orden_produccion],['class' => 'btn btn-info btn-sm',
                                        'data' => ['confirm' => 'Esta seguro de exportar los productos que se encuentra en la OE al modulo de inventarios de productos!.', 'method' => 'post']]);?>
-                        </td>
-                        <td style= 'width: 25px; height: 10px;'>
-                             <a href="<?= Url::toRoute(["orden-ensamble-producto/view_lineas_empaque", "id_ensamble" => $val->id_ensamble ]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
-                        </td>     
-                    <?php }else{
-                            if($val->inventario_exportado == 1 && $val->exportar_material_empaque == 0){?>  
-                                <td style= 'width: 25px; height: 10px;'></td>
-                                <td style= 'width: 25px; height: 10px;'>
-                                     <a href="<?= Url::toRoute(["orden-ensamble-producto/view_lineas_empaque", "id_ensamble" => $val->id_ensamble ]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
-                                </td> 
-                            <?php }else{
-                                if($val->inventario_exportado == 0 && $val->exportar_material_empaque == 1){?>
-                                    <td style= 'width: 25px; height: 10px;'>
-                                        <?= Html::a('<span class="glyphicon glyphicon-export"></span> Exportar Producto ', ['/orden-ensamble-producto/exportar_producto_inventario', 'id' => $val->id_ensamble, 'id_orden_produccion' => $val->id_orden_produccion, 'grupo' =>$val->id_grupo],['class' => 'btn btn-info btn-sm',
-                                                   'data' => ['confirm' => 'Esta seguro de exportar los productos que se encuentra en la OE al modulo de inventarios de productos!.', 'method' => 'post']]);?>
-                                    </td>
-                                    <td style= 'width: 25px; height: 10px;'></td>
-                               <?php }else{?>
-                                     <td style= 'width: 25px; height: 10px;'></td>
-                                      <td style= 'width: 25px; height: 10px;'></td>
-                               <?php }
-                            }   
-                    }?>
+                    </td>
+                    <td style= 'width: 25px; height: 10px;'>
+                         <a href="<?= Url::toRoute(["orden-ensamble-producto/view_detalle_descarga",'id_orden' => $val->id_orden_produccion ]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear las cantidades del producto, lote y codigos"></span></a>
+                    </td>     
                 </tr>            
             <?php endforeach; ?>
             </tbody>    

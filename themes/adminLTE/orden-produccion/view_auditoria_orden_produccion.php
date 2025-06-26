@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-               <tr style ='font-size:90%;'>
+               <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_auditoria') ?></th>
                     <td><?= Html::encode($model->id_auditoria) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_orden') ?></th>
@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Producto') ?>:</th>
                     <td><?= Html::encode($model->productos->nombre_producto) ?></td>
               </tr>
-               <tr style ='font-size:90%;'>
+               <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_lote') ?></th>
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                       <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'continua') ?></th>
                     <td><?= Html::encode($model->continuaProceso) ?></td>
               </tr>
-              <tr style ='font-size:90%;'>
+              <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_auditoria') ?></th>
                     <td><?= Html::encode($model->numero_auditoria) ?></td>  
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'condicion_analisis') ?></th>
@@ -90,12 +90,12 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_autorizada') ?></th>
                     <td style='background-color:#aed9e0'><?= Html::encode($model->fecha_autorizada) ?></td>
               </tr>
-               <tr style ='font-size:90%;'>
+               <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
                     <td colspan="10"><?= Html::encode($model->observacion) ?></td>
                      
               </tr>
-              <tr style ='font-size:90%;'>
+              <tr style ='font-size:85%;'>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'nota') ?></th>
                     <td colspan="10"><?= Html::encode($model->nota) ?></td>
                      
@@ -123,7 +123,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                         <div class="panel-body">
                             <table class="table table-bordered table-hover">
                                 <thead>
-                                    <tr style='font-size:90%;'>
+                                    <tr style='font-size:85%;'>
                                         <th scope="col" style='background-color:#B9D5CE; '>Nombre de analisis</th>                        
                                         <th scope="col" style='background-color:#B9D5CE; '>Espeficicaciones</th> 
                                         <th scope="col" style='background-color:#B9D5CE; '>Resultado</th> 
@@ -134,7 +134,7 @@ $this->params['breadcrumbs'][] = $model->id_auditoria;
                                 <tbody>
                                     <?php
                                     foreach ($conConcepto as $val):?>
-                                        <tr style='font-size:90%;'>
+                                        <tr style='font-size:85%;'>
                                             <td><?= $val->analisis->concepto?></td>
                                             <td><?= $val->especificacion->concepto?></td>
                                             <td style="padding-right: 1;padding-right: 1; text-align: left"> <input type="text"  name="resultado[]" value="<?= $val->resultado ?>"  size="15"> </td>

@@ -731,15 +731,20 @@ class OrdenProduccionController extends Controller
     //CARGAR ITEMS DE AUDITORIA AL DETALLE SE ESTAN ELIMINADOS
     public function actionCargar_items_auditoria($id_grupo, $id_etapa, $id_auditoria){
         $configuracion = \app\models\ConfiguracionProductoProceso::find()->where(['=','id_grupo', $id_grupo])->andWhere(['=','id_etapa', $id_etapa])->all();
-        foreach ($configuracion as $resultado):
-            $table = new \app\models\OrdenProduccionAuditoriaFabricacionDetalle();
-            $table->id_auditoria = $id_auditoria;
-            $table->id_analisis = $resultado->id_analisis;
-            $table->id_especificacion = $resultado->id_especificacion;
-            $table->resultado = $resultado->resultado;
-            $table->save ();
-        endforeach;
-        return $this->redirect(['orden-produccion/view_auditoria_orden_produccion','id_auditoria' => $id_auditoria]);
+        if(count($configuracion) > 0){
+            foreach ($configuracion as $resultado):
+                $table = new \app\models\OrdenProduccionAuditoriaFabricacionDetalle();
+                $table->id_auditoria = $id_auditoria;
+                $table->id_analisis = $resultado->id_analisis;
+                $table->id_especificacion = $resultado->id_especificacion;
+                $table->resultado = $resultado->resultado;
+                $table->save ();
+            endforeach;
+            return $this->redirect(['orden-produccion/view_auditoria_orden_produccion','id_auditoria' => $id_auditoria]);
+        }else{
+             Yii::$app->getSession()->setFlash('error', 'Este producto No tiene creado la configuracion de la auditoria GRANEL. Valide la informacion.'); 
+             return $this->redirect(['orden-produccion/view_auditoria_orden_produccion','id_auditoria' => $id_auditoria]);
+        }    
     }
     
     //PROCESO QUE REGENERA LA FORMULA DE PRODUCCION DEL PRODUCTO
@@ -956,12 +961,12 @@ class OrdenProduccionController extends Controller
         foreach ($listado as $listados):
             if($listados->codigo_producto == NULL){
                 $listados->codigo_producto = $lista->numero_inicial + 1;
-                $listados->save();
+                $listados->save(false);
                 $lista->numero_inicial = $listados->codigo_producto;
                 $lista->save(false);
             }
         endforeach;
-        $this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);  
+        //$this->redirect(["orden-produccion/view", 'id' => $id, 'token' =>$token]);  
     }
     
         
@@ -1570,9 +1575,10 @@ class OrdenProduccionController extends Controller
         $orden_produccion = OrdenProduccion::findOne($id);
         $detalle = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->one();
         $sw = 0;
-        $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-        $detalle_orden_ensamble = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->all();
-        if(count($detalle_orden_ensamble ) < count($detalle_orden) ){
+        $detalle_orden = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->andWhere(['=','orden_ensamble_creado', 0])->all();
+       // $detalle_orden_ensamble = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_produccion', $id])->all();
+       
+        if(count($detalle_orden)> 0 ){
             if($detalle){
                 $sw = 1;
             }
@@ -1695,12 +1701,15 @@ class OrdenProduccionController extends Controller
     //permite cerrar las ordens de produccion sin hacerle ordenes de ensamble
     public function actionCerrar_orden_produccion($id) {
         $orden = OrdenProduccion::findOne($id);
-        $detalle = OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $id])->all();
-        $suma =0;
-        foreach ($detalle as $cantidad):
-            $suma += $cantidad->cantidad_real;
-        endforeach;
-        $orden->unidades_reales = $suma;
+        $ordenEnsamble = \app\models\OrdenEnsambleProducto::find()->where(['=','id_orden_ordenproduccion', $id])->all();
+        $total = 0;
+        if(count($ordenEnsamble) > 0){
+            foreach ($ordenEnsamble as $val) {
+                $total += $val->total_unidades;
+            }
+        }
+        
+        $orden->unidades_reales = $total;
         $orden->orden_cerrada_ensamble = 1;
         $orden->producto_aprobado = 1;
         $orden->save(false);

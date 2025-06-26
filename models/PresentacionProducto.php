@@ -40,8 +40,8 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_producto', 'descripcion', 'id_medida_producto'], 'required'],
-            [['id_grupo','id_medida_producto','id_producto','total_item'], 'integer'],
+            [['id_producto', 'descripcion', 'id_medida_producto','tipo_venta'], 'required'],
+            [['id_grupo','id_medida_producto','id_producto','total_item','tipo_venta'], 'integer'],
             [['fecha_registro'], 'safe'],
             [['descripcion'], 'string', 'max' => 70],
             [['user_name'], 'string', 'max' => 15],
@@ -57,13 +57,14 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     {
         return [
             'id_presentacion' => 'Id',
-            'id_grupo' => 'Grupo producto',
-            'id_producto' => 'Nombre del producto',
-            'descripcion' => 'Presentacion del producto',
+            'id_grupo' => 'Grupo producto:',
+            'id_producto' => 'Nombre del producto:',
+            'descripcion' => 'Presentacion del producto:',
             'fecha_registro' => 'Fecha registro',
             'user_name' => 'User name',
-           'id_medida_producto' => 'Unidad medida:',
+            'id_medida_producto' => 'Unidad de medida:',
             'total_item' => 'total_item',
+            'tipo_venta' => 'Tipo de venta:'
         ];
     }
 
@@ -89,6 +90,15 @@ class PresentacionProducto extends \yii\db\ActiveRecord
     public function getProducto()
     {
         return $this->hasOne(Productos::className(), ['id_producto' => 'id_producto']);
+    }
+    
+    public function getTipoVenta() {
+        if($this->tipo_venta == 0){
+            $tipoventa = 'INDIVIDUAL';
+        }else{
+            $tipoventa = 'KITS';
+        }
+        return $tipoventa;
     }
     
   

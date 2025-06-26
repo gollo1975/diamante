@@ -23,15 +23,16 @@ class FiltroBusquedaOrdenEnsamble extends Model
     public function rules()
     {
         return [  
-           [['numero_ensamble', 'producto','orden','numero_lote','grupo'], 'integer'],
+           [['numero_ensamble', 'producto','orden','grupo'], 'integer'],
            [['fecha_inicio','fecha_corte'], 'safe'],
+           [['numero_lote'], 'string'], 
         ];
     }
 
     public function attributeLabels()
     {
         return [   
-            'numero_ensamble' => 'Numero orden ensamble:',
+            'numero_ensamble' => 'Numero orden:',
             'producto' => 'Producto:',
             'orden' => 'Codigo orden:',
             'fecha_inicio' => 'Fecha inicio:',

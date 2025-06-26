@@ -1672,20 +1672,26 @@ class AlmacenamientoProductoController extends Controller
                 $dato = \app\models\InventarioProductos::find()->where(['=','codigo_producto', $detalle->codigo_producto])->one();
                 $table = new AlmacenamientoProducto();
                 $table->id_orden_produccion = $id_orden;
-                if($dato->id_inventario == null){
-                    Yii::$app->getSession()->setFlash('error', 'El codigo del producto (' . $detalle->codigo_producto.') que se encuentra en la OP No ('.$id_orden .'), No se encuentra en el Modulo de inventario.');
+                if($dato){
+                    if($dato->id_inventario == null){
+                        Yii::$app->getSession()->setFlash('error', 'El codigo del producto (' . $detalle->codigo_producto.') que se encuentra en la OP No ('.$id_orden .'), No se encuentra en el Modulo de inventario.');
+                        return $this->redirect(['almacenamiento-producto/cargar_orden_produccion']);
+                    }
+                    $table->id_inventario = $dato->id_inventario;
+                    $table->codigo_producto = $detalle->codigo_producto;
+                    $table->nombre_producto = $detalle->descripcion;
+                    $table->unidades_producidas = $detalle->cantidad_real;
+                    $table->fecha_almacenamiento = date('Y-m-d');
+                    $table->numero_lote = $detalle->numero_lote;
+                    $table->user_name = Yii::$app->user->identity->username;
+                    $table->fecha_vencimiento = $detalle->fecha_vencimiento;
+                    $table->id_documento = 1;
+                    $table->save(false);
+                    $con += 1;
+                }else{
+                    Yii::$app->getSession()->setFlash('error', 'El codigo del producto (' . $detalle->codigo_producto.') que se encuentra en la OP No ('.$id_orden .'), No se encuentra codificado en el Modulo de inventario.');
                     return $this->redirect(['almacenamiento-producto/cargar_orden_produccion']);
-                }
-                $table->id_inventario = $dato->id_inventario;
-                $table->codigo_producto = $detalle->codigo_producto;
-                $table->nombre_producto = $detalle->descripcion;
-                $table->unidades_producidas = $detalle->cantidad_real;
-                $table->fecha_almacenamiento = date('Y-m-d');
-                $table->numero_lote = $detalle->numero_lote;
-                $table->user_name = Yii::$app->user->identity->username;
-                $table->fecha_vencimiento = $detalle->fecha_vencimiento;
-                $table->save(false);
-                $con += 1;
+                } 
             }else{ //proceso que almacena entradas de producto
                 $dato = \app\models\InventarioProductos::find()->where(['=','id_inventario', $detalle->id_inventario])->one();
                 $table = new \app\models\AlmacenamientoProductoEntrada();
@@ -1699,6 +1705,7 @@ class AlmacenamientoProductoController extends Controller
                 $table->fecha_almacenamiento = date('Y-m-d');
                 $table->fecha_vencimiento = $detalle->fecha_vencimiento;
                 $table->user_name = Yii::$app->user->identity->username;
+                $table->id_documento = 2;
                 $table->save(false);
                 $con += 1;
             }    

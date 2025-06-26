@@ -20,7 +20,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Empleado */
 
-$this->title = 'Detalle';
+$this->title = 'DETALLE DE INVENTARIO';
 $this->params['breadcrumbs'][] = ['label' => 'Inventario producto', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_inventario;
 $view = 'inventario-productos';
@@ -112,7 +112,7 @@ $view = 'inventario-productos';
     <!--INICIO LOS TABS-->
     <div>
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#ordenproduccion" aria-controls="ordenproduccion" role="tab" data-toggle="tab">Lotes de producción <span class="badge"><?= $pagination->totalCount ?></span></a></li>
+            <li role="presentation" class="active"><a href="#ordenproduccion" aria-controls="ordenproduccion" role="tab" data-toggle="tab">Lotes de producción <span class="badge"><?= count($detalle_entrada) ?></span></a></li>
             <li role="presentation" ><a href="#entrada_producto" aria-controls="entrada_producto" role="tab" data-toggle="tab">Entradas productos <span class="badge"><?= count($entradas) ?></span></a></li>
             <li role="presentation" ><a href="#devolucion_producto" aria-controls="devolucion_producto" role="tab" data-toggle="tab">Devolucion de productos <span class="badge"><?= count($devoluciones) ?></span></a></li>
         </ul>
@@ -136,12 +136,11 @@ $view = 'inventario-productos';
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($detalle_entrada as $val):
-                                        $detalle = app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $val->id_orden_produccion])->all();
-                                        foreach ($detalle as $detalles): ?>
+                                    <?php foreach ($detalle_entrada as $detalles):?>
+                                       
                                             <tr style="font-size: 85%;">
                                                 <td><?= $detalles->id_detalle ?></td>  
-                                                <td><?= $val->ordenProduccion->numero_orden ?></td>
+                                                <td><?= $detalles->ordenProduccion->numero_orden ?></td>
                                                 <td><?= $detalles->codigo_producto ?></td>
                                                 <td><?= $detalles->descripcion ?></td>
                                                 <td style="text-align: right"><?= $detalles->cantidad ?></td>
@@ -153,13 +152,13 @@ $view = 'inventario-productos';
                                                     <?php }?>
                                                 </td>        
                                             </tr>
-                                        <?php endforeach;    
-                                     endforeach;?>
+                                     <?php endforeach;?>
                                 </tbody>      
                             </table>
                         </div>
                     </div>   
                 </div>
+                <?= LinkPager::widget(['pagination' => $pagination]) ?>
             </div>
             <!--FIN TABS-->
             <!--INICIO EL OTRO TABS -->
@@ -247,4 +246,4 @@ $view = 'inventario-productos';
         </div>
     </div>    
 </div>
-<?= LinkPager::widget(['pagination' => $pagination]) ?>
+

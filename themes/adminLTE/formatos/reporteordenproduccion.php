@@ -148,10 +148,11 @@ class PDF extends FPDF {
         $this->Line(127,70,127,102);
         $this->Line(10,81,202,81);//fila entre registro
         $this->Line(152,70,152,102);
-        $this->Line(10,86,202,86);//fila entre registro
-        $this->Line(10,91,202,91);//fila entre registro
+        $this->Line(10,85,202,85);//fila entre registro
+        $this->Line(10,89,202,89);//fila entre registro
         $this->Line(177,70,177,102);
-        $this->Line(10,96,202,96);//fila entre registro
+        $this->Line(10,93,202,93);//fila entre registro
+        $this->Line(10,97,202,97);//fila entre registro
         $this->Line(202,70,202,102);
         $this->Line(10,102,202,102);//linea horizontal inferior  
         //Líneas MATERIA PRIMAS FACE 1
@@ -259,7 +260,7 @@ class PDF extends FPDF {
         $pdf->SetFont('Arial', '', 8);
         foreach ($materiales as $detalle) {                                    
             $pdf->Cell(64, 4, $detalle->codigo_homologacion, 0, 0, 'C');            
-            $pdf->Cell(64, 4, utf8_decode($detalle->porcentaje_aplicacion), 0, 0, 'R');
+            $pdf->Cell(64, 4, ' '.number_format($detalle->porcentaje_aplicacion,4), 0, 0, 'R');
             $pdf->Cell(64, 4, ' '.number_format($detalle->cantidad_gramos, 0), 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              
@@ -282,7 +283,7 @@ class PDF extends FPDF {
         $pdf->SetFont('Arial', '', 8);
         foreach ($fase2 as $detalle) {                                    
             $pdf->Cell(64, 4, $detalle->codigo_homologacion, 0, 0, 'C');            
-            $pdf->Cell(64, 4, utf8_decode($detalle->porcentaje_aplicacion), 0, 0, 'R');
+            $pdf->Cell(64, 4, ' '.number_format($detalle->porcentaje_aplicacion,4), 0, 0, 'R');
             $pdf->Cell(64, 4, ' '.number_format($detalle->cantidad_gramos, 0), 0, 0, 'R');
             $pdf->Ln();
             $pdf->SetAutoPageBreak(true, 20);                              

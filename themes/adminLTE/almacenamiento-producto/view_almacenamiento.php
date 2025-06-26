@@ -22,7 +22,7 @@ use yii\filters\AccessControl;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ordenproduccion */
 
-$this->title = 'Detalle';
+$this->title = 'DETALLE DEL ALMACENAMIENTO';
 $this->params['breadcrumbs'][] = ['label' => 'Orden produccion', 'url' => ['cargar_orden_produccion']];
 $this->params['breadcrumbs'][] = $id_orden;
 ?>
@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_producto') ?></th>
                     <td><?= Html::encode($model->producto->nombre_producto) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
-                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
+                     <td style="text-align: right"><?= Html::encode(''.number_format($model->unidades_reales,0)) ?></td>
                 </tr>
             </table>    
         </div>
@@ -118,9 +118,10 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                          ['title' => 'Subir el documento del almacenamiento',
                                                           'data-toggle'=>'modal',
                                                           'data-target'=>'#modalsubirdocumento',
+                                                          
                                                          ])    
                                                    ?>
-                                                   <div class="modal remote fade" id="modalsubirdocumento">
+                                                   <div class="modal remote fade" id="modalsubirdocumento" data-backdrop="static">
                                                         <div class="modal-dialog modal-lg" style ="width: 560px;">    
                                                             <div class="modal-content"></div>
                                                         </div>
@@ -134,7 +135,7 @@ $this->params['breadcrumbs'][] = $id_orden;
                                                           'data-target'=>'#modalcrearalmacenamiento',
                                                          ])    
                                                    ?>
-                                                   <div class="modal remote fade" id="modalcrearalmacenamiento">
+                                                   <div class="modal remote fade" id="modalcrearalmacenamiento" data-backdrop="static">
                                                         <div class="modal-dialog modal-lg" style ="width: 550px;">    
                                                             <div class="modal-content"></div>
                                                         </div>

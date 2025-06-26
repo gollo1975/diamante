@@ -7,7 +7,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Municipio */
 
-$this->title = $model->descripcion;
+$this->title = $model->descripcion.' / ' .$model->tipoventa;
 $this->params['breadcrumbs'][] = ['label' => 'Presentacion del producto', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->id_presentacion;
 ?>
@@ -55,51 +55,102 @@ $this->params['breadcrumbs'][] = $model->id_presentacion;
     ]);?>
      <div>
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#materialempaque" aria-controls="materialempaque" role="tab" data-toggle="tab">Material de empaque  <span class="badge"><?= count($listadoEmpaque) ?></span></a></li>
+            <?php if($model->tipo_venta == 0){?>
+                <li role="presentation" class="active"><a href="#materialempaque" aria-controls="materialempaque" role="tab" data-toggle="tab">Material de empaque  <span class="badge"><?= count($listadoEmpaque) ?></span></a></li>
+            <?php }else{?>
+                <li role="presentation" class="active"><a href="#inventario_producto" aria-controls="inventario_producto" role="tab" data-toggle="tab">Detalle del Kits  <span class="badge"><?= count($listadoKits) ?></span></a></li>
+            <?php }?>    
         </ul>
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="materialempaque">
-                <div class="table-responsive">
-                    <div class="panel panel-success">
-                        <div class="panel-body">
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr style='font-size:90%;'>
-                                        <th scope="col" style='background-color:#B9D5CE; '>Codigo</th>                        
-                                        <th scope="col" style='background-color:#B9D5CE; '>Descripcion</th> 
-                                        <th scope="col" style='background-color:#B9D5CE; '>Medida</th> 
-                                         <th scope="col" style='background-color:#B9D5CE;'></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($listadoEmpaque as $val) { ?>
-                                        <tr style ='font-size:85%;'>
-                                            <td><?= $val->codigo_material?></td>
-                                            <td><?= $val->materiaPrima->materia_prima?></td>
-                                            <td><?= $val->presentacion->medidaProducto->descripcion?></td>
-                                            <td style="width: 25px; height: 20px">
-                                                <?= Html::a('', ['eliminar_detalles', 'id' => $val->id_presentacion, 'id_detalle' => $val->id_configuracion], [
-                                                    'class' => 'glyphicon glyphicon-trash',
-                                                    'data' => [
-                                                        'confirm' => 'Esta seguro de eliminar el registro?',
-                                                        'method' => 'post',
-                                                     
-                                                    ],
-                                                ]) ?>
-                                            </td>
+            <?php if($model->tipo_venta == 0){?>
+                <div role="tabpanel" class="tab-pane active" id="materialempaque">
+                    <div class="table-responsive">
+                        <div class="panel panel-success">
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr style='font-size:85%;'>
+                                            <th scope="col" style='background-color:#B9D5CE; '>Codigo</th>                        
+                                            <th scope="col" style='background-color:#B9D5CE; '>Descripcion</th> 
+                                            <th scope="col" style='background-color:#B9D5CE; '>Medida</th> 
+                                             <th scope="col" style='background-color:#B9D5CE;'></th>
                                         </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($listadoEmpaque as $val) { ?>
+                                            <tr style ='font-size:85%;'>
+                                                <td><?= $val->codigo_material?></td>
+                                                <td><?= $val->materiaPrima->materia_prima?></td>
+                                                <td><?= $val->presentacion->medidaProducto->descripcion?></td>
+                                                <td style="width: 25px; height: 20px">
+                                                    <?= Html::a('', ['eliminar_detalles', 'id' => $val->id_presentacion, 'id_detalle' => $val->id_configuracion], [
+                                                        'class' => 'glyphicon glyphicon-trash',
+                                                        'data' => [
+                                                            'confirm' => 'Esta seguro de eliminar el registro?',
+                                                            'method' => 'post',
 
-                                    <?php }?>
-                                </tbody>
-                            </table>
+                                                        ],
+                                                    ]) ?>
+                                                </td>
+                                            </tr>
+
+                                        <?php }?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="panel-footer text-right"> 
+                                <?= Html::a('<span class="glyphicon glyphicon-search"></span> Material de empaque', ['presentacion-producto/buscar_material_empaque', 'id' => $model->id_presentacion],[ 'class' => 'btn btn-warning btn-sm']) ?>   
+                            </div>    
                         </div>
-                        <div class="panel-footer text-right"> 
-                            <?= Html::a('<span class="glyphicon glyphicon-search"></span> Material de empaque', ['presentacion-producto/buscar_material_empaque', 'id' => $model->id_presentacion],[ 'class' => 'btn btn-warning btn-sm']) ?>   
-                        </div>    
                     </div>
                 </div>
-            </div>
+            <?php }else {?>
+                 <div role="tabpanel" class="tab-pane active" id="inventario_producto">
+                    <div class="table-responsive">
+                        <div class="panel panel-success">
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr style='font-size:85%;'>
+                                            <th scope="col" style='background-color:#B9D5CE; '>Codigo</th>                        
+                                            <th scope="col" style='background-color:#B9D5CE; '>Presentacion del producto</th> 
+                                            <th scope="col" style='background-color:#B9D5CE; '>Fecha hora registro</th> 
+                                            <th scope="col" style='background-color:#B9D5CE; '>User name</th> 
+                                            <th scope="col" style='background-color:#B9D5CE;'></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($listadoKits as $val) { ?>
+                                            <tr style ='font-size:85%;'>
+                                                <td><?= $val->inventario->codigo_producto?></td>
+                                                <td><?= $val->inventario->nombre_producto?></td>
+                                                <td><?= $val->fecha_hora_proceso?></td>
+                                                <td><?= $val->user_name?></td>
+                                                <td style="width: 25px; height: 20px">
+                                                    <?= Html::a('', ['eliminar_detalles_kits', 'id' => $val->id_presentacion, 'id_detalle' => $val->id_detalle], [
+                                                        'class' => 'glyphicon glyphicon-trash',
+                                                        'data' => [
+                                                            'confirm' => 'Esta seguro de eliminar el registro?',
+                                                            'method' => 'post',
+
+                                                        ],
+                                                    ]) ?>
+                                                </td>
+                                            </tr>
+
+                                        <?php }?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="panel-footer text-right"> 
+                                <?= Html::a('<span class="glyphicon glyphicon-search"></span> Inventario PT.', ['presentacion-producto/buscar_producto_terminado', 'id' => $model->id_presentacion],[ 'class' => 'btn btn-success btn-sm']) ?>   
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+            <?php }?>
         </div>
      </div> 
     <?php ActiveForm::end(); ?>      

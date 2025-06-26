@@ -112,13 +112,13 @@ $form = ActiveForm::begin([
             <thead>
                 <tr style ='font-size: 85%;'>         
                 
-                <th scope="col" style='background-color:#B9D5CE;'>Orden ensamble</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Op de ensamble</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Orden produccion</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Op produccion</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Etapa</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Responsable</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Unidades</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Exporta productos al inventario">Exp. producto</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Exporta material de empaque">Exp. empaque</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Orden de ensamble cerrado">Cerrado</span></th>
@@ -134,7 +134,7 @@ $form = ActiveForm::begin([
             $encontrado = 0;
             foreach ($model as $val): 
                 $buscarOP = \app\models\SolicitudMateriales::find()->where(['=','id_orden_produccion', $val->id_orden_produccion])->one();  ?>     
-                <tr style ='font-size: 90%;'>        
+                <tr style ='font-size: 85%;'>        
                     <?php if($buscarOP){?>
                         <td style="background-color: #f0efeb"><?= $val->numero_orden_ensamble?></td>
                         <td style="background-color: #f0efeb"><?= $val->productos->nombre_producto?></td>
@@ -142,7 +142,7 @@ $form = ActiveForm::begin([
                          <td style="background-color: #f0efeb"><?= $val->etapa->concepto?></td>
                         <td style="background-color: #f0efeb"><?= $val->numero_lote?></td>
                         <td style="background-color: #f0efeb"><?= $val->fecha_proceso?></td>
-                        <td style="background-color: #f0efeb"><?= $val->responsable?></td>
+                        <td style="background-color: #f0efeb"><?= ''.number_format($val->total_unidades,0)?></td>
                     <?php }else{?>
                        <td><?= $val->numero_orden_ensamble?></td>
                         <td><?= $val->productos->nombre_producto?></td>
@@ -150,7 +150,7 @@ $form = ActiveForm::begin([
                          <td><?= $val->etapa->concepto?></td>
                         <td><?= $val->numero_lote?></td>
                         <td><?= $val->fecha_proceso?></td>
-                        <td><?= $val->responsable?></td>
+                        <td><?= ''.number_format($val->total_unidades,0)?></td>
                     <?php }?>    
                     <?php if($val->inventario_exportado == 0){?>
                         <td  style="background-color: #BBD3E0"><?= $val->inventarioExportado?></td>

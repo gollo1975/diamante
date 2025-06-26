@@ -97,6 +97,7 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
                      <th scope="col" style='background-color:#B9D5CE;'>Nombre producto</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Nombre grupo</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Medida</th>
+                      <th scope="col" style='background-color:#B9D5CE;'>Tipo de venta</th>
                      <th scope="col" style='background-color:#B9D5CE;'>Total items</th>
                      <th scope="col" style='background-color:#B9D5CE;'></th>  
                      <th scope="col" style='background-color:#B9D5CE;'></th> 
@@ -106,14 +107,20 @@ $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy('nombre_grup
             </thead>
             <tbody>
             <?php 
-            foreach ($model as $val):
-                ?>
+            foreach ($model as $val): ?>
                     <tr style="font-size: 85%;">                   
                         <td><?= $val->descripcion ?></td>
                         <td><?= $val->producto->nombre_producto ?></td>
                         <td><?= $val->grupo->nombre_grupo ?></td>
                         <td><?= $val->medidaProducto->descripcion ?></td>
-                        <td style="text-align: right"><?= $val->total_item ?></td>
+                        <?php if($val->tipo_venta == 0){?>
+                            <td><?= $val->tipoVenta ?></td>
+                            <td style="text-align: right"><?= $val->total_item ?></td>
+                        <?php }else {?>
+                            <td style="background-color: #e8f4d4"><?= $val->tipoVenta ?></td>
+                            <td style="background-color: #e8f4d4; text-align: right""><?= $val->total_item ?></td>
+                        <?php }?>    
+                      
                         <td style= 'width: 10px; right: 10px;'>
                             <a href="<?= Url::toRoute(["presentacion-producto/view", "id" => $val->id_presentacion]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                         </td>
