@@ -86,7 +86,9 @@ $this->params['breadcrumbs'][] = $model->id_solicitud_armado;
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_hora_proceso) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
-                    <td  colspan="6"><?= Html::encode($model->observacion) ?></td>
+                    <td><?= Html::encode($model->observacion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Total_kits') ?></th>
+                    <td style="text-align: right"><?= Html::encode(''.number_format($model->cantidad_solicitada,0)) ?></td>
                 </tr>
               
             </table>

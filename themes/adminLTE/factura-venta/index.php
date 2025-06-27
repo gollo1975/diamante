@@ -154,7 +154,11 @@ $form = ActiveForm::begin([
                         <?php }else {
                             $tasa = app\models\ClienteMoneda::find()->where(['=','id_cliente', $val->id_cliente])->one(); ?>
                             <td></td>
-                            <td style="text-align: right"><?=  $tasa->operador. ''.number_format($val->total_factura_internacional,2)?></td>
+                            <?php if($tasa){?>
+                                <td style="text-align: right"><?=  $tasa->operador. ''.number_format($val->total_factura_internacional,2)?></td>
+                            <?php }else{
+                                 Yii::$app->getSession()->setFlash('error', 'El cliente es INTERNACIONAL y no tiene la creada la moneda de pago..');
+                            }?>    
                            
                         <?php }?>    
                         <?php if($val->fecha_vencimiento < $fecha_dia && $val->saldo_factura > 0){ 

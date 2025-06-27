@@ -365,6 +365,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                     'items' => [
                                                         ['label' => 'Listar pedidos', 'icon' => 'plus-square-o', 'url' => ['almacenamiento-producto/listar_pedidos']],
                                                         ['label' => 'Packing', 'icon' => 'plus-square-o', 'url' => ['packing-pedido/index']],
+                                                        ['label' => 'Entrega de kits', 'icon' => 'plus-square-o', 'url' => ['entrega-solicitud-kits/index']],
                                                     ],
                                                 ],
                                                 [
