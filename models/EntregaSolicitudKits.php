@@ -106,4 +106,22 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
     {
         return $this->hasMany(EntregaSolicitudKitsDetalle::className(), ['id_entrega_kits' => 'id_entrega_kits']);
     }
+    
+     public function getProcesoCerrado() {
+        if($this->proceso_cerrado == 0){
+            $procesocerrado = 'NO';
+        }else{
+            $procesocerrado = 'SI';
+        }
+        return $procesocerrado;    
+    }
+    
+    public function getAutorizadoProceso() {
+        if($this->autorizado == 0){
+            $autorizado = 'NO';
+        }else{
+            $autorizado = 'SI';
+        }
+        return $autorizado;    
+    }
 }

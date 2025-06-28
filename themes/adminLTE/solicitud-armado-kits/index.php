@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$conSolicitud = ArrayHelper::map(app\models\DocumentoSolicitudes::find()->orderBy ('concepto ASC')->all(), 'id_solicitud', 'concepto');
+$conSolicitud = ArrayHelper::map(app\models\DocumentoSolicitudes::find()->where(['=','produccion', 1])->orderBy ('concepto ASC')->all(), 'id_solicitud', 'concepto');
 $conPresentacion = ArrayHelper::map(app\models\PresentacionProducto::find()->where(['=','tipo_venta', 1])->orderBy ('descripcion ASC')->all(), 'id_presentacion', 'descripcion');
 ?>
 

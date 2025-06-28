@@ -36,7 +36,7 @@ class SolicitudArmadoKits extends \yii\db\ActiveRecord
     {
         return [
             [['id_solicitud', 'id_presentacion', 'fecha_solicitud','cantidad_solicitada'], 'required'],
-            [['id_solicitud', 'id_presentacion', 'total_unidades', 'autorizado', 'proceso_cerrado','numero_solicitud','cantidad_solicitada'], 'integer'],
+            [['id_solicitud', 'id_presentacion', 'total_unidades', 'autorizado', 'proceso_cerrado','numero_solicitud','cantidad_solicitada','entregado','saldo_cantidad_solicitada'], 'integer'],
             [['fecha_solicitud', 'fecha_hora_proceso'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['observacion'],'string', 'max' => 100],
@@ -60,7 +60,9 @@ class SolicitudArmadoKits extends \yii\db\ActiveRecord
             'fecha_hora_proceso' => 'Fecha Hora Proceso',
             'numero_solicitud' => 'Numero de solicitud',
             'observacion' => 'Observacion:',
-            'cantidad_solicitada' => 'Cantidad x presentacion:'
+            'cantidad_solicitada' => 'Cantidad x presentacion:',
+            'entregado' => 'entregado',
+            'saldo_cantidad_solicitada' => 'saldo_cantidad_solicitada',
         ];
     }
 
@@ -97,12 +99,20 @@ class SolicitudArmadoKits extends \yii\db\ActiveRecord
         return $procesocerrado;    
     }
     
-     public function getAutorizadoProceso() {
+    public function getAutorizadoProceso() {
         if($this->autorizado == 0){
             $autorizado = 'NO';
         }else{
             $autorizado = 'SI';
         }
         return $autorizado;    
+    }
+    public function getEntregaSolicitud() {
+        if($this->entregado == 0){
+            $entregadosolicitud = 'NO';
+        }else{
+            $entregadosolicitud = 'SI';
+        }
+        return $entregadosolicitud;    
     }
 }
