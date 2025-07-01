@@ -80,8 +80,15 @@ $view = 'solicitud-materiales';
                     <td style="text-align: right;"><?= Html::encode($model->numero_lote) ?></td>
                 </tr>
                 <tr style="font-size: 85%;">
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_produccion')?></th>
-                    <td><?= Html::encode($model->ordenProduccion->numero_orden) ?></td>
+                     <?php if($model->id_orden_produccion == null){?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_produccion')?></th>
+                        <td><?= Html::encode('NO FOUNT') ?></td>
+                        
+                    <?php } else { ?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_produccion')?></th>
+                        <td><?= Html::encode($model->ordenProduccion->numero_orden) ?></td>
+                    <?php }  ?>   
+                   
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
                     <td><?= Html::encode($model->autorizado) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cerrar_solicitud') ?></th>
@@ -131,7 +138,7 @@ $view = 'solicitud-materiales';
                                     </thead>
                                     <body>
                                         <?php
-                                        
+                                        if($sw == 0){
                                             foreach ($presentacion as $val):?>
                                                 <tr style="font-size: 85%;">
                                                 <td><?= $val->id_detalle ?></td>
@@ -187,9 +194,68 @@ $view = 'solicitud-materiales';
                                                 <?php }   ?>      
                                                    
                                             </tr>
-                                         <?php endforeach;
-                                       
-                                         ?>          
+                                         <?php endforeach; 
+                                         
+                                        } else{ ///TRAE LAS PRESENTACIONES DELKIT
+                                            
+                                            foreach ($presentacion as $val):?>
+                                                <tr style="font-size: 85%;">
+                                                <td><?= $val->id_detalle ?></td>
+                                                <td><?= $val->detalle->inventario->codigo_producto ?></td>
+                                                <td><?= $val->detalle->inventario->nombre_producto ?></td>
+                                                <td style="text-align: right"><?= $val->cantidad_despachada ?></td>
+                                                <?php if($model->autorizado == 0){
+                                                    $resp = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle', $val->id_detalle])->one();
+                                                    if(!$resp){?>
+                                                        <td style= 'width: 20px; height: 20px;'>
+                                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                           'class' => '',
+                                                                           'title' => 'Proceso que permite descargar el material de empaque.)', 
+                                                                           'data' => [
+                                                                               'confirm' => 'Esta seguro de importar el material de empaque a la presentacion de producto  ('.$val->detalle->inventario->nombre_producto.').',
+                                                                               'method' => 'post',
+                                                                           ],
+                                                             ])?>
+                                                        </td>    
+                                                        <td style= 'width: 20px; height: 20px;'> </td> 
+                                                       
+                                                    <?php }else{
+                                                        if($val->solicitud_empaque == 0){ ?>
+                                                        
+                                                            <td style= 'width: 20px; height: 20px;'>
+                                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                               'class' => '',
+                                                                               'title' => 'Proceso que permite descargar el material de empaque.)', 
+                                                                               'data' => [
+                                                                                   'confirm' => 'Esta seguro de importar el material de empaque a la presentacion de producto  '.$val->descripcion.'.',
+                                                                                   'method' => 'post',
+                                                                               ],
+                                                                ])?>
+                                                            </td>    
+                                                            <td style= 'width: 20px; height: 20px;'>    
+                                                                <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_presentacion', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                               'class' => '',
+                                                                               'title' => 'Proceso que permite cerrar la presentacion.)', 
+                                                                               'data' => [
+                                                                                   'confirm' => 'Esta seguro de CERRAR la presentacion de producto  ('.$val->descripcion.').',
+                                                                                   'method' => 'post',
+                                                                               ],
+                                                                 ])?>
+                                                            </td>  
+                                                        <?php }else{?>
+                                                            <td style= 'width: 20px; height: 20px;'></td>
+                                                            <td style= 'width: 20px; height: 20px;'></td>
+                                                        <?php }    
+                                                    }         
+                                                }else{?>
+                                                    <td style="width: 25px; height: 25px;"></td>
+                                                    <td style="width: 25px; height: 25px;"></td>
+                                                <?php }   ?>      
+                                                   
+                                            </tr>
+                                         <?php endforeach; 
+                                            
+                                        } ?>          
                                     </body>
                                 </table>
                             </div>

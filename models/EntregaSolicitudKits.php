@@ -43,8 +43,8 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
     {
         return [
             [['id_solicitud', 'cantidad_despachada'], 'required'],
-            [['id_solicitud', 'id_presentacion', 'id_solicitud_armado', 'total_unidades_entregadas', 'proceso_cerrado', 'autorizado', 'numero_entrega', 'cantidad_despachada'], 'integer'],
-            [['fecha_solicitud', 'fecha_hora_proceso'], 'safe'],
+            [['id_solicitud', 'id_presentacion', 'id_solicitud_armado', 'total_unidades_entregadas', 'proceso_cerrado', 'autorizado', 'numero_entrega', 'cantidad_despachada','solicitud_generada'], 'integer'],
+            [['fecha_solicitud', 'fecha_hora_proceso','fecha_hora_cierre'], 'safe'],
             [['observacion'], 'string', 'max' => 100],
             [['user_name'], 'string', 'max' => 15],
             [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoSolicitudes::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
@@ -59,11 +59,11 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_entrega_kits' => 'Id Entrega Kits',
-            'id_solicitud' => 'Id Solicitud',
-            'id_presentacion' => 'Id Presentacion',
+            'id_entrega_kits' => 'Id ',
+            'id_solicitud' => 'Tipo de solicitud:',
+            'id_presentacion' => 'Presentacion:',
             'id_solicitud_armado' => 'Id Solicitud Armado',
-            'total_unidades_entregadas' => 'Total Unidades Entregadas',
+            'total_unidades_entregadas' => 'Unidades entregadas:',
             'fecha_solicitud' => 'Fecha Solicitud',
             'fecha_hora_proceso' => 'Fecha Hora Proceso',
             'proceso_cerrado' => 'Proceso Cerrado',
@@ -72,6 +72,8 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
             'observacion' => 'Observacion',
             'cantidad_despachada' => 'Cantidad Despachada',
             'user_name' => 'User Name',
+            'fecha_hora_cierre' => 'fecha_hora_cierre',
+            'solicitud_generada' => 'solicitud_generada',
         ];
     }
 

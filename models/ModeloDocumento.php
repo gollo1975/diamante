@@ -13,6 +13,7 @@ class ModeloDocumento extends Model
 {
     public $documento;
     public $cantidad_vendida;
+    public $cantidad_solicitadas;
     public $cantidad_despachada;
     public $numero_guia;
     public $posicion;
@@ -23,7 +24,7 @@ class ModeloDocumento extends Model
     {
         return [
 
-           [['documento','cantidad_vendida','cantidad_despachada','posicion','codigo_caja','transportadora'], 'integer'],
+           [['documento','cantidad_vendida','cantidad_despachada','posicion','codigo_caja','transportadora','cantidad_solicitadas'], 'integer'],
             [['numero_guia'], 'string'],
         ];
     }
@@ -38,6 +39,7 @@ class ModeloDocumento extends Model
             'codigo_caja' => 'codigo_caja',
             'numero_guia' => 'Numero de guia:',
             'transportadora' => 'Transportadora:',
+            'cantidad_solicitadas' => 'Cantidad solicitadas:'
            
 
         ];

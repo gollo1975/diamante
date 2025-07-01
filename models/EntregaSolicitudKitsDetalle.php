@@ -33,8 +33,9 @@ class EntregaSolicitudKitsDetalle extends \yii\db\ActiveRecord
     {
         return [
             [['id_detalle_entrega'], 'required'],
-            [['id_detalle_entrega', 'id_entrega_kits', 'id_detalle', 'cantidad_solicitada', 'cantidad_despachada'], 'integer'],
+            [['id_detalle_entrega', 'id_entrega_kits', 'id_detalle', 'cantidad_solicitada', 'cantidad_despachada','unidades_faltante'], 'integer'],
             [['id_detalle_entrega'], 'unique'],
+            ['numero_lote' , 'string'],
             [['id_entrega_kits'], 'exist', 'skipOnError' => true, 'targetClass' => EntregaSolicitudKits::className(), 'targetAttribute' => ['id_entrega_kits' => 'id_entrega_kits']],
             [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => SolicitudArmadoKitsDetalle::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
         ];
@@ -51,6 +52,8 @@ class EntregaSolicitudKitsDetalle extends \yii\db\ActiveRecord
             'id_detalle' => 'Id Detalle',
             'cantidad_solicitada' => 'Cantidad Solicitada',
             'cantidad_despachada' => 'Cantidad Despachada',
+            'unidades_faltante' => 'unidades_faltante',
+            'numero_lote' => 'Numero lote',
         ];
     }
 

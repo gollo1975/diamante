@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->id_entrega_kits, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la solicitud de entrega.', 'method' => 'post']]);
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_solicitud_kits', 'id' => $model->id_entrega_kits], ['class' => 'btn btn-default btn-sm']);            
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_solicitud_kits', 'id' => $model->id_entrega_kits], ['class' => 'btn btn-default btn-sm']);            
                 
             }
         }?>        
@@ -85,10 +85,15 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_hora_proceso) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
-                    <td><?= Html::encode($model->observacion) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_cierre') ?></th>
+                    <td><?= Html::encode($model->fecha_hora_cierre) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Kits_despachados')?>:</th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->cantidad_despachada,0)) ?></td>
+                </tr>
+                <tr style="font-size: 85%;">
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
+                    <td colspan="6"><?= Html::encode($model->observacion) ?></td>
+                   
                 </tr>
               
             </table>
@@ -122,6 +127,8 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Presentacion del producto</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad solilicitada</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad a despachar</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades faltante</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero de lote</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
                                     </thead>
@@ -133,7 +140,9 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                                                 <td><?= $val->detalle->inventario->codigo_producto ?></td>
                                                 <td><?= $val->detalle->inventario->nombre_producto ?></td>
                                                 <td style='text-align: right'><?= ''.number_format($val->cantidad_solicitada,0) ?></td>
-                                                 <td style='text-align: right'><?= ''.number_format($val->cantidad_despachada,0) ?></td>
+                                                <td style='text-align: right'><?= ''.number_format($val->cantidad_despachada,0) ?></td>
+                                                <td style='text-align: right'><?= ''.number_format($val->unidades_faltante,0) ?></td>
+                                                 <td><?= $val->numero_lote ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style= 'width: 25px; height: 25px;'>
                                                         <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->id_entrega_kits, 'id_detalle' => $val->id_detalle_entrega, 'token' => $token], [
@@ -145,9 +154,20 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                                                                ])
                                                         ?>
                                                     </td>    
-                                                <?php }else{?>
-                                                    <td style="width: 25px; height: 25px;"></td>
-                                                <?php }   ?>      
+                                                <?php }else{
+                                                    if($model->proceso_cerrado == 0){ 
+                                                        if($val->unidades_faltante <> 0){?>
+                                                            <td style="width: 25px; height: 25px;">
+                                                                <?= Html::a('<span class="glyphicon glyphicon-list"></span> ', ['entrega-solicitud-kits/cantidad_despachada', 'id' => $model->id_entrega_kits, 'token' => $token, 'id_inventario' => $val->detalle->inventario->id_inventario,'id_detalle' => $val->id_detalle_entrega],[ 'class' => '']) ?>
+                                                            </td>
+                                                        <?php }else{?>
+                                                           <td style="background-color: #0097bc"><?= 'OK' ?></td>
+                                                        <?php }    
+                                                    }else{?>
+                                                            <td style="width: 25px; height: 25px;"></td>
+                                                    <?php }    
+                                                    
+                                                }?>      
                                                      <input type="hidden" name="listado_inventario[]" value="<?= $val->id_detalle?>"> 
                                             </tr>
                                          <?php endforeach;
@@ -163,7 +183,7 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                                     <?php }else {?>
                                         <?= Html::a('<span class="glyphicon glyphicon-refresh"></span> Descargar lista', ['entrega-solicitud-kits/regenerar_formula', 'id' => $model->id_entrega_kits, 'token' => $token, 'id_solicitud' => $model->id_solicitud_armado],[ 'class' => 'btn btn-info btn-sm']) ?>
                                     <?php }                                
-                                } ?>
+                                }?>    
                             </div>   
                         </div>
                     </div>

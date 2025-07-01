@@ -37,9 +37,9 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_orden_produccion', 'id_solicitud'], 'required'],
+            
             [['id_orden_produccion', 'id_solicitud', 'unidades',  'numero_orden_produccion','id_grupo','numero_solicitud','autorizado',
-            'cerrar_solicitud','id_producto','aplica_todo'], 'integer'],
+            'cerrar_solicitud','id_producto','aplica_todo','id_solicitud_documento','id_entrega_kits'], 'integer'],
             [['observacion'], 'string', 'max' => 100],
             [['fecha_cierre', 'fecha_hora_registro'], 'safe'],
             [['user_name','numero_lote'], 'string', 'max' => 15],
@@ -47,6 +47,8 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
             [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSolicitud::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
+            [['id_solicitud_documento'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoSolicitudes::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud_documento']],
+            [['id_entrega_kits'], 'exist', 'skipOnError' => true, 'targetClass' => EntregaSolicitudKits::className(), 'targetAttribute' => ['id_entrega_kits' => 'id_entrega_kits']],
         ];
     }
 
@@ -72,6 +74,8 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'id_producto' => 'Producto:',
             'aplica_todo' => 'Aplica todo:',
+            'id_solicitud_documento' => 'id_solicitud_documento',
+            'id_entrega_kits' => 'id_entrega_kits',
             
         ];
     }
@@ -114,6 +118,22 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
     public function getSolicitudMaterialesDetalles()
     {
         return $this->hasMany(SolicitudMaterialesDetalle::className(), ['codigo' => 'codigo']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSolicitudDocumento()
+    {
+        return $this->hasOne(DocumentoSolicitudes::className(), ['id_solicitud' => 'id_solicitud_documento']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEntregaSolicitud()
+    {
+        return $this->hasOne(EntregaSolicitudKits::className(), ['id_entrega_kits' => 'id_entrega_kits']);
     }
     
     public function getCerrarSolicitud() {

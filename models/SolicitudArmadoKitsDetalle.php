@@ -31,7 +31,7 @@ class SolicitudArmadoKitsDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_solicitud_armado', 'id_inventario', 'cantidad_solicitada'], 'integer'],
+            [['id_solicitud_armado', 'id_inventario', 'cantidad_solicitada','linea_validada'], 'integer'],
             [['id_solicitud_armado'], 'exist', 'skipOnError' => true, 'targetClass' => SolicitudArmadoKits::className(), 'targetAttribute' => ['id_solicitud_armado' => 'id_solicitud_armado']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
         ];
@@ -47,6 +47,7 @@ class SolicitudArmadoKitsDetalle extends \yii\db\ActiveRecord
             'id_solicitud_armado' => 'Id Solicitud Armado',
             'id_inventario' => 'Id Inventario',
             'cantidad_solicitada' => 'Cantidad Solicitada',
+            'linea_validada' => 'linea_validada',
         ];
     }
 

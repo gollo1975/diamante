@@ -259,6 +259,13 @@ class SolicitudArmadoKitsController extends Controller
         //proceso de generar consecutivo
         $lista = \app\models\Consecutivos::findOne(32);
         $model = SolicitudArmadoKits::findOne($id); 
+        $detalle = \app\models\SolicitudArmadoKitsDetalle::find()->where(['=','id_solicitud_armado', $id])->all();
+        foreach ($detalle as $val) {
+            if($val->linea_validada == 0){
+                Yii::$app->getSession()->setFlash('error', 'Debe de validar todas las lineas en estado (OK) para garantizar que si esten las unidades completas de la solicitud.'); 
+                return $this->redirect(["solicitud-armado-kits/view", 'id' => $id, 'token' => $token]); 
+            }
+        }
         //genera consecutivo
         $model->numero_solicitud = $lista->numero_inicial + 1;
         $model->proceso_cerrado = 1;
@@ -269,6 +276,37 @@ class SolicitudArmadoKitsController extends Controller
         return  $this->redirect(["solicitud-armado-kits/view", 'id' => $id, 'token' =>$token]);  
     }
 
+    ///VALIDAR SI HAY EXISTENCIAS EN EL INVENTARIO
+    public function actionValidar_inventario($id, $token, $id_detalle)
+    {
+        $detalle = \app\models\SolicitudArmadoKitsDetalle::findOne($id_detalle);//buscamos la linea
+        $inventario = \app\models\InventarioProductos::findOne($detalle->id_inventario);//Buscamos el inventario
+        if($detalle->cantidad_solicitada <= $inventario->stock_unidades){
+           $inventario->stock_unidades -= $detalle->cantidad_solicitada;
+           $inventario->save(false);
+           //actualiza linea
+           $detalle->linea_validada = 1;
+           $detalle->save();
+           return $this->redirect(["solicitud-armado-kits/view", 'id' => $id, 'token' => $token]); 
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'No hay inventario suficiente para validar esta solicitud.'); 
+            return $this->redirect(["solicitud-armado-kits/view", 'id' => $id, 'token' => $token]);  
+        }
+        
+        
+    }
+    
+    //IMPRIMIR SOLICITUD
+    public function actionImprimir_solicitud($id)
+    {
+        $model = $this->findModel($id);
+        
+        return $this->render('../formatos/reporte_solicitud_kits', [
+           'model' => $model, 
+        ]);
+        
+    }
+    
     /**
      * Finds the SolicitudArmadoKits model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

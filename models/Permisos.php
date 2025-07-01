@@ -30,7 +30,7 @@ class Permisos extends \yii\db\ActiveRecord
     {
         return [
             [['permiso', 'menu_operacion'], 'required'],
-            [['permiso', 'menu_operacion'], 'string', 'max' => 50],
+            [['permiso', 'menu_operacion'], 'string', 'max' => 60],
             ['tipo_modulo','integer'],
         ];
     }

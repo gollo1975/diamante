@@ -6,8 +6,19 @@ use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\db\ActiveQuery;
+use yii\base\Model;
+use yii\web\Response;
+use yii\web\Session;
 use yii\data\Pagination;
+use yii\filters\AccessControl;
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\web\UploadedFile;
+use yii\bootstrap\Modal;
+use yii\helpers\ArrayHelper;
+use Codeception\Lib\HelperModule;
 ///models
 use app\models\EntregaSolicitudKits;
 use app\models\EntregaSolicitudKitsSearch;
@@ -137,6 +148,7 @@ class EntregaSolicitudKitsController extends Controller
                                         $table->id_presentacion = $dato->id_presentacion;
                                         $table->id_solicitud_armado = $dato->id_solicitud_armado;
                                         $table->fecha_solicitud = date('Y-m-d');
+                                        $model->fecha_hora_proceso = date('Y-m-d H:i:s');
                                         $table->cantidad_despachada = $model->cantidad_entregada;
                                         $table->user_name = Yii::$app->user->identity->username;
                                         $table->save(false);
@@ -208,7 +220,7 @@ class EntregaSolicitudKitsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entrega_kits]);
+            return $this->redirect(['view', 'id' => $model->id_entrega_kits,'token' => 0]);
         }
 
         return $this->render('update', [
@@ -225,9 +237,18 @@ class EntregaSolicitudKitsController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        try {
+            $this->findModel($id)->delete();
+            Yii::$app->getSession()->setFlash('success', 'Registro Eliminado.');
+            $this->redirect(["entrega-solicitud-kits/index"]);
+        } catch (IntegrityException $e) {
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene procesos asociados.');
+            $this->redirect(["entrega-solicitud-kits/index"]);
+        } catch (\Exception $e) {            
+            Yii::$app->getSession()->setFlash('error', 'Error al eliminar el registro, tiene procesos asociados.');
+             $this->redirect(["entrega-solicitud-kits/index"]);            
 
-        return $this->redirect(['index']);
+        }
     }
     
      //ELIMINAR DETALLE DEL DESPACHOS
@@ -266,6 +287,172 @@ class EntregaSolicitudKitsController extends Controller
             
     }
 
+    //AUTORIZAR EL PROCESO
+    public function actionAutorizado($id, $token) {
+        $model = $this->findModel($id);
+        if(\app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $id])->one()){
+            if ($model->autorizado == 0){  
+                $model->autorizado = 1;
+                $model->save();
+                return $this->redirect(["entrega-solicitud-kits/view", 'id' => $id, 'token' =>$token]); 
+            } else{
+                $model->autorizado = 0;
+                $model->save();
+                return $this->redirect(["entrega-solicitud-kits/view", 'id' => $id, 'token' =>$token]); 
+            }                  
+            
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Debe descargar los producto para la entrega.'); 
+            return $this->redirect(["entrega-solicitud-kits/view", 'id' => $id, 'token' => $token]); 
+        }    
+    }
+    
+    //CIERRA EL PROCESO DE SOLICTUD
+    public function actionCerrar_solicitud($id, $token) {
+        //proceso de generar consecutivo
+        $detalle = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $id])->all();
+        foreach ($detalle as $val) {
+            if($val->unidades_faltante <> 0){
+                Yii::$app->getSession()->setFlash('error', 'Debe de validar todas las lineas en estado (OK) para garantizar que si esten las unidades completas a despachar.'); 
+                return $this->redirect(["entrega-solicitud-kits/view", 'id' => $id, 'token' => $token]); 
+            }
+        }
+        $lista = \app\models\Consecutivos::findOne(33);
+        $model = EntregaSolicitudKits::findOne($id); 
+        $suma = $model->cantidad_despachada;
+        //buscamos la solicitud
+        $solicitud = \app\models\SolicitudArmadoKits::findOne($model->id_solicitud_armado);
+        $total = $solicitud->saldo_cantidad_solicitada - $suma;
+        if($total <= 0){
+            $solicitud->entregado = 1;
+        }
+        $solicitud->saldo_cantidad_solicitada = $total;
+        $solicitud->save();
+        //genera consecutivo
+        $model->numero_entrega = $lista->numero_inicial + 1;
+        $model->proceso_cerrado = 1;
+        $model->fecha_hora_cierre = date('Y-m-d H:i:s');
+        $model->save();
+        //actualiza consecutivo
+        $lista->numero_inicial = $model->numero_entrega;
+        $lista->save();
+        return  $this->redirect(["entrega-solicitud-kits/view", 'id' => $id, 'token' =>$token]);  
+    }
+    
+    
+    //PROCESO QUE PERMITE SUBIR LAS UNIDADES A DESPACHAR 
+    public function actionCantidad_despachada($id, $id_detalle, $id_inventario,$token){
+        $model = new \app\models\ModeloDocumento(); 
+        $detalle  = \app\models\EntregaSolicitudKitsDetalle::findOne($id_detalle);
+        $almacenamiento = \app\models\AlmacenamientoProductoDetalles::find()
+                                                                  ->where(['=','id_inventario', $id_inventario])
+                                                                   ->andWhere(['>','cantidad', 0])->orderBy('fecha_vencimiento ASC')->all();
+        
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        
+            if ($model->load(Yii::$app->request->post())) {
+                if(isset($_POST["cantidaddespachada"])){
+                    if($model->cantidad_despachada <= $detalle->unidades_faltante){ 
+                        if(isset($_POST["seleccione_item"])){
+                            $valor = 0 ;
+                            foreach ($_POST["seleccione_item"] as $intCodigo):
+                                $cantidad = 0; $sobrante = 0; $restar = 0;
+                                $base = \app\models\AlmacenamientoProductoDetalles::findOne($intCodigo);
+                                if($base->cantidad >= $model->cantidad_despachada){
+                                    if($base->cantidad <= $model->cantidad_despachada){
+                                        $cantidad = $base->cantidad;
+                                        $restar =  $model->cantidad_despachada -  $cantidad;
+                                        $base->cantidad = $restar;
+                                        $base->save(false);
+                                        $id_rack = $base->id_rack;
+                                        $unidades = $model->cantidad_despachada;
+                                        $sobrante = $detalle->cantidad_despachada - $model->cantidad_despachada; 
+                                        //detalle
+                                        $detalle->unidades_faltante = $sobrante;
+                                        $detalle->numero_lote = $base->numero_lote;
+                                        $detalle->save(false);
+                                        $this->ActualizarUnidadesRack($id_rack, $unidades);
+                                    }else{
+                                        if($model->cantidad_despachada <= $base->cantidad){
+                                           $cantidad = $base->cantidad;
+                                           $restar =  $cantidad - $model->cantidad_despachada;
+                                           $sobrante = $detalle->unidades_faltante - $model->cantidad_despachada;
+                                           $base->cantidad = $restar;
+                                           $base->save(false);
+                                           $id_rack = $base->id_rack;
+                                           $unidades = $model->cantidad_despachada;                                          
+                                           //dettale
+                                           $detalle->unidades_faltante = $sobrante;
+                                           $detalle->numero_lote = $base->numero_lote;
+                                           $detalle->save(false);
+                                           $this->ActualizarUnidadesRack($id_rack, $unidades);
+                                        } else{
+                                            Yii::$app->getSession()->setFlash('error', 'La cantidad despachada es mayor que hay la cantidad que hay en RACK. Valide la informacion.');
+                                            return $this->redirect(['cantidad_despachada', 'id' => $id, 'id_detalle' => $id_detalle, 'id_inventario' => $id_inventario,'token' => $token]); 
+                                        }    
+                                    }
+                                }else{
+                                    Yii::$app->getSession()->setFlash('error', 'La cantidad despachada es mayor que hay la cantidad que hay en RACK. Valide la informacion.');
+                                    return $this->redirect(['cantidad_despachada', 'id' => $id, 'id_detalle' => $id_detalle, 'id_inventario' => $id_inventario,'token' => $token]); 
+                                }
+                                
+                                if($sobrante <> 0){
+                                    return $this->redirect(['cantidad_despachada', 'id' => $id, 'id_detalle' => $id_detalle, 'id_inventario' => $id_inventario,'token' => $token]); 
+                                }else{
+                                   return $this->redirect(['view', 'id' => $id, 'token' => $token]); 
+                                }    
+                              endforeach;
+                        }else{
+                              Yii::$app->getSession()->setFlash('error', 'Debe se chequear el RACK o medio de almacenamiento para descargar el prodcuto del inventario.');
+                              return $this->redirect(['cantidad_despachada', 'id' => $id, 'id_detalle' => $id_detalle, 'id_inventario' => $id_inventario,'token' => $token]);
+
+                        }     
+                    }else{
+                        Yii::$app->getSession()->setFlash('warning', 'La cantidad de unidades despachas NO pueden ser mayor que las unidades solicitadas. Valide esta informacion.');
+                        return $this->redirect(['cantidad_despachada', 'id' => $id, 'id_detalle' => $id_detalle, 'id_inventario' => $id_inventario,'token' => $token]);
+                    }  
+                }
+            }
+            if (Yii::$app->request->get()) {
+               $model->cantidad_solicitadas = $detalle->unidades_faltante;
+            }
+        
+        return $this->render('_form_cantidad_despachada', [
+                        'model' => $model,
+                        'almacenamiento' => $almacenamiento,
+                        'id' => $id,
+                        'id_inventario' => $id_inventario,
+                        'detalle' => $detalle,
+                        'token' => $token,
+                      
+        ]); 
+        
+    }
+    
+      
+    //ACTUALIZAR UNIDADES RACK
+    protected function ActualizarUnidadesRack($id_rack, $unidades) {
+        $rack = \app\models\TipoRack::findOne($id_rack);
+        $suma = 0;
+        $suma = $rack->capacidad_actual - $unidades;
+        $rack->capacidad_actual = $suma;
+        $rack->save();
+    }
+    
+    //REPORTE O IMPRESIONES
+    public function actionImprimir_solicitud_kits($id)
+    {
+        $model = $this->findModel($id);
+        return $this->render('../formatos/reporte_entrega_kits',[
+           'model' => $model, 
+        ]);
+        
+    }
+    
+    
     /**
      * Finds the EntregaSolicitudKits model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

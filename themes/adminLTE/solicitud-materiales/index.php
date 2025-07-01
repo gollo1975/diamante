@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$tipoSolicitud = ArrayHelper::map(TipoSolicitud::find()->where(['=','aplica_materia_prima', 1])->orderBy ('descripcion ASC')->all(), 'id_solicitud', 'descripcion');
+$tipoSolicitud = ArrayHelper::map(\app\models\DocumentoSolicitudes::find()->where(['=','todas', 1])->orderBy ('concepto ASC')->all(), 'id_solicitud', 'concepto');
 $producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_producto ASC')->all(), 'id_producto', 'nombre_producto');
 $grupo = ArrayHelper::map(app\models\GrupoProducto::find()->orderBy ('nombre_grupo ASC')->all(), 'id_grupo', 'nombre_grupo');
 $ordenProduccion = \app\models\OrdenEnsambleProducto::find()->all();
@@ -149,8 +149,17 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 85%;'>                
                     <td><?= $val->numero_solicitud?></td>
                     <td><?= $val->productos->nombre_producto?></td>
-                    <td><?= $val->ordenProduccion->numero_orden?></td>
-                     <td><?= $val->solicitud->descripcion?></td>
+                    <?php if($val->id_orden_produccion == null){?>
+                        <td><?= 'NO FOUNT' ?></td>
+                        
+                    <?php } else { ?>
+                        <td><?= $val->ordenProduccion->numero_orden?></td>
+                    <?php }     
+                    if($val->id_solicitud_documento == null){?>
+                         <td><?= 'NO FOUNT' ?></td>
+                    <?php } else { ?>     
+                          <td><?= $val->solicitudDocumento->concepto?></td>
+                    <?php } ?>         
                     <td><?= $val->numero_lote?></td>
                     <td><?= $val->fecha_hora_registro?></td>
                     <td><?= $val->fecha_cierre?></td>
@@ -168,11 +177,17 @@ $form = ActiveForm::begin([
                         <td  style="background-color: #F0DBF9"><?= $val->despachadoSolicitud?></td>
                     <?php }else{?>
                         <td style="background-color: #CFF7E9"><?= $val->despachadoSolicitud?></td>
-                    <?php }?>    
-                    <td style= 'width: 25px; height: 10px;'>
-                        <a href="<?= Url::toRoute(["solicitud-materiales/view", "id" => $val->codigo,'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear la nueva solicitud de material de empaque"></span></a>
-                    </td>
-                    <?php if($val->autorizado == 0){?>
+                    <?php }
+                    if($val->id_solicitud_documento == 4){?>    
+                        <td style= 'width: 25px; height: 10px;'>
+                            <a href="<?= Url::toRoute(["solicitud-materiales/view", "id" => $val->codigo,'token' => $token, 'sw' =>0]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear la nueva solicitud de material de empaque"></span></a>
+                        </td>
+                    <?php }elseif($val->id_solicitud_documento == 3){?>
+                        <td style= 'width: 25px; height: 10px;'>
+                            <a href="<?= Url::toRoute(["solicitud-materiales/view", "id" => $val->codigo,'token' => $token,'sw' =>1]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear la nueva solicitud de material de empaque"></span></a>
+                        </td>
+                    <?php }    
+                    if($val->autorizado == 0){?>
                         <td style= 'width: 25px; height: 10px;'>
                             <a href="<?= Url::toRoute(["solicitud-materiales/update", "id" => $val->codigo,'token' => $token]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite modificar la solicitud"></span></a>
                         </td>
@@ -198,8 +213,26 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>    
-            <a align="right" href="<?= Url::toRoute("solicitud-materiales/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>               
+            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?> 
+            <a align="right" href="<?= Url::toRoute("solicitud-materiales/create") ?>" class="btn btn-default btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva Solictud LIBRE</a> 
+            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Nueva solicitud KITS',
+                      ['/solicitud-materiales/nueva_solicitud_materiales_kits'],
+                      [
+                          'title' => 'Permite cargar la solicitud de kits',
+                          'data-toggle'=>'modal',
+                          'data-target'=>'#modalcargarsolicitudkits',
+                          'class' => 'btn btn-info btn-sm',
+                          'data-backdrop' => 'static',
+
+                      ]);    
+                 ?>
+            </td> 
+            <div class="modal remote fade" id="modalcargarsolicitudkits">
+                      <div class="modal-dialog modal-lg" style ="width: 700px;">
+                          <div class="modal-content"></div>
+                      </div>
+            </div>
+            <a align="right" href="<?= Url::toRoute("solicitud-materiales/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva Solictud OP</a>               
             <?php $form->end() ?>   
         </div>
      </div>

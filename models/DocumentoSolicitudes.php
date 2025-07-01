@@ -31,7 +31,7 @@ class DocumentoSolicitudes extends \yii\db\ActiveRecord
     {
         return [
             [['concepto'], 'required'],
-            [['produccion', 'logistica'], 'integer'],
+            [['produccion', 'logistica','todas','solicitud_materiales'], 'integer'],
             [['concepto'], 'string', 'max' => 40],
         ];
     }
@@ -46,6 +46,8 @@ class DocumentoSolicitudes extends \yii\db\ActiveRecord
             'concepto' => 'Concepto',
             'produccion' => 'Produccion',
             'logistica' => 'Logistica',
+            'todas' =>'todas',
+            'solicitud_materiales' => 'solicitud_materiales'
         ];
     }
 

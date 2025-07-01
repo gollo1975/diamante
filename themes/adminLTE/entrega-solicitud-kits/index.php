@@ -98,22 +98,25 @@ $form = ActiveForm::begin([
             ]);
     ?>
 <div class="table-responsive">
-<div class="panel panel-success ">
-    <div class="panel-heading">
-        Registros <span class="badge"><?= count($model) ?></span>
+    <div class="panel panel-success ">
+        <div class="panel-heading">
+            Registros <span class="badge"><?= count($model) ?></span>
 
-    </div>
+        </div>
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Id</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Tipo solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Tipo solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No de solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total unidades</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                                           
@@ -125,25 +128,46 @@ $form = ActiveForm::begin([
                         <tr style ='font-size: 85%;'>                
                             <td><?= $val->id_entrega_kits?></td>
                             <td><?= $val->solicitud->concepto?></td>
+                            <td><?= $val->solicitudArmado->numero_solicitud?></td>
                             <td><?= $val->presentacion->descripcion?></td>
+                             <td style="text-align: right"><?= ''. number_format($val->solicitudArmado->total_unidades,0)?></td>
                             <td style="text-align: right"><?= ''. number_format($val->total_unidades_entregadas,0)?></td>
                             <td><?= $val->fecha_solicitud?></td>
                             <td style="text-align: right"><?= $val->numero_entrega?></td>
                             <td ><?= $val->autorizadoProceso?></td>
                             <td style= 'width: 20px; height: 20px;'>
                                 <a href="<?= Url::toRoute(["entrega-solicitud-kits/view", "id" => $val->id_entrega_kits, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver el detalle de la solicitud"></span></a>
+                                 
                             </td> 
+                            <?php if(!app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $val->id_entrega_kits])->one()){?>
+                                <td style= 'width: 20px; height: 20px;'>
+                                    <a href="<?= Url::toRoute(["entrega-solicitud-kits/update", "id" => $val->id_entrega_kits]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar el detalle de la solicitud"></span></a>
+                                </td>
+                                <td style= 'width: 25px; height: 25px;'>
+                                    <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['delete', 'id' => $val->id_entrega_kits], [
+                                               'class' => '',
+                                               'data' => [
+                                                   'confirm' => 'Esta seguro de eliminar el registro?',
+                                                   'method' => 'post',
+                                               ],
+                                           ])
+                                    ?>
+                                </td>    
+                            <?php }else{ ?>
+                            <td style= 'width: 20px; height: 20px;'></td>
+                            <td style= 'width: 20px; height: 20px;'></td>
+                            
+                            <?php } ?>
                            
                        </tr>            
                 <?php endforeach;?>
             </tbody>    
         </table> 
-    </div>
-    <div class="panel-footer text-right" >            
-        <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm ']); ?>                
-        <td style="width: 25px; height: 25px;">
+        <div class="panel-footer text-right" >            
+            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm ']); ?>                
+            <td style="width: 25px; height: 25px;">
                 <!-- Inicio Nuevo Detalle proceso -->
-                  <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar solicitud ',
+                <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar solicitud ',
                       ['/entrega-solicitud-kits/importar_solicitud'],
                       [
                           'title' => 'Importar solicitud de kits',
@@ -152,15 +176,15 @@ $form = ActiveForm::begin([
                           'class' => 'btn btn-success btn-sm',
                           'data-backdrop' => 'static',
 
-                      ])    
+                      ]);    
                  ?>
-        </td> 
-         <div class="modal remote fade" id="modalimportarsolicitud">
-                  <div class="modal-dialog modal-lg" style ="width: 700px;">
-                      <div class="modal-content"></div>
-                  </div>
-              </div>
-        </td>    
+            </td> 
+            <div class="modal remote fade" id="modalimportarsolicitud">
+                      <div class="modal-dialog modal-lg" style ="width: 700px;">
+                          <div class="modal-content"></div>
+                      </div>
+            </div>
+        </div>
     </div>
     <?php $form->end() ?>      
 </div>

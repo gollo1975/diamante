@@ -802,7 +802,7 @@ class AlmacenamientoProductoController extends Controller
                                   }else{
                                       $base = \app\models\AlmacenamientoProductoEntradaDetalles::findOne($intCodigo);
                                   }    
-                                  if($base->cantidad < $model->cantidad_despachada){
+                                  if($base->cantidad <= $model->cantidad_despachada){
                                       $cantidad = $base->cantidad;
                                       $sobrante = $model->cantidad_despachada - $cantidad;
                                       $restar = $cantidad - ($model->cantidad_despachada - $sobrante);

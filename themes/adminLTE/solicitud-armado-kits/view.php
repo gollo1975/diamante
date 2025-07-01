@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $model->id_solicitud_armado;
                 echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->id_solicitud_armado, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la solicitud de KITS.', 'method' => 'post']]);
             }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_solicitud_kits', 'id' => $model->id_solicitud_armado], ['class' => 'btn btn-default btn-sm']);            
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_solicitud', 'id' => $model->id_solicitud_armado], ['class' => 'btn btn-default btn-sm']);            
                 
             }
         }?>        
@@ -120,6 +120,7 @@ $this->params['breadcrumbs'][] = $model->id_solicitud_armado;
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>   
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo del producto</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Presentacion del producto</b></th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Stock</th> 
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidades</th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
@@ -131,6 +132,7 @@ $this->params['breadcrumbs'][] = $model->id_solicitud_armado;
                                                 <td><?= $val->id_detalle ?></td>
                                                 <td><?= $val->inventario->codigo_producto ?></td>
                                                 <td><?= $val->inventario->nombre_producto ?></td>
+                                                  <td style='text-align: right'><?= ''.number_format($val->inventario->stock_unidades,0) ?></td>
                                                 <td style='text-align: right'><?= ''.number_format($val->cantidad_solicitada,0) ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style= 'width: 25px; height: 25px;'>
@@ -143,9 +145,22 @@ $this->params['breadcrumbs'][] = $model->id_solicitud_armado;
                                                                ])
                                                         ?>
                                                     </td>    
-                                                <?php }else{?>
-                                                    <td style="width: 25px; height: 25px;"></td>
-                                                <?php }   ?>      
+                                                <?php }else{
+                                                    if($val->linea_validada == 0){?>
+                                                        <td style= 'width: 25px; height: 25px;'>
+                                                            <?= Html::a('<span class="glyphicon glyphicon-list"></span> ', ['validar_inventario', 'id' => $model->id_solicitud_armado, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                    'class' => '',
+                                                                    'title' => 'Proceso que permite validar las existencias en sistemas.)', 
+                                                                    'data' => [
+                                                                        'confirm' => 'Esta seguro de VALIDAR las existencias de la presentacion   ('.$val->inventario->nombre_producto.').',
+                                                                        'method' => 'post',
+                                                                    ],
+                                                            ]);?>
+                                                        </td> 
+                                                    <?php }else{?>
+                                                        <td style="background-color: #0097bc"><?= 'OK' ?></td>
+                                                    <?php }    
+                                                } ?>      
                                                      <input type="hidden" name="listado_inventario[]" value="<?= $val->id_detalle?>"> 
                                             </tr>
                                          <?php endforeach;

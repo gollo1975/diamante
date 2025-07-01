@@ -81,7 +81,7 @@ class SolicitudMaterialesController extends Controller
                                     ->andFilterWhere(['=', 'numero_lote', $numero_lote])
                                     ->andFilterWhere(['=', 'id_grupo', $grupo])
                                     ->andFilterWhere(['=', 'id_producto', $producto])
-                                ->andFilterWhere(['=', 'id_solicitud', $tipo]);
+                                ->andFilterWhere(['=', 'id_solicitud_documento', $tipo]);
                         $table = $table->orderBy('codigo DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -139,12 +139,17 @@ class SolicitudMaterialesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id, $token)
+    public function actionView($id, $token, $sw)
     {
         $solicitd = $this->findModel($id);
         $detalle_solicitud = \app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->orderBy('linea_cerrada ASC')->all();
-        $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 0])->all();
-        $presentacion2 = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 1])->all();
+        if($sw == 0){
+            $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 0])->all();
+            $presentacion2 = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 1])->all();
+        }elseif($sw == 1){
+            $presentacion = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $solicitd->entregaSolicitud->id_entrega_kits])->all();
+            $presentacion2 = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $solicitd->entregaSolicitud->id_entrega_kits])->all();
+        }    
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_cantidad"])){
                 if(isset($_POST["listado_materiales"])){
@@ -172,6 +177,7 @@ class SolicitudMaterialesController extends Controller
             'detalle_solicitud' => $detalle_solicitud,
             'presentacion' => $presentacion,
             'presentacion2' => $presentacion2,
+            'sw' => $sw,
         ]);
     }
 
@@ -180,6 +186,8 @@ class SolicitudMaterialesController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
+    
+    //CREAR SOLICITUD CON OP
     public function actionCreate()
     {
         if (Yii::$app->user->identity){
@@ -222,6 +230,72 @@ class SolicitudMaterialesController extends Controller
         }    
                 
     }
+    
+    //CREAR SOLICITUD PARA KITS
+    public function actionNueva_solicitud_materiales_kits($sw = 1) {
+        if (Yii::$app->user->identity){
+            if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',169])->all()){
+                $model = new \app\models\ModeloImportarSolicitud();
+                $solicitud = \app\models\EntregaSolicitudKits::find()->where(['=','solicitud_generada', 0])->all();
+                if ($model->load(Yii::$app->request->post())) {
+                    if (isset($_POST["enviar_documento"])) {
+                        if (isset($_POST["nueva_entrega_materia"])){
+                            foreach ($_POST["nueva_entrega_materia"] as $intCodigo){
+                                $entrega = \app\models\EntregaSolicitudKits::findOne($intCodigo);
+                                if($model->tipo_entrega == 1){
+                                    if($model->cantidad_entregada <> 0){
+                                        $table = new SolicitudMateriales();
+                                        $table->id_solicitud = 2;
+                                        $table->id_entrega_kits = $intCodigo;
+                                        $table->id_solicitud_documento = $model->tipo_solicitud;
+                                        $table->id_grupo = $entrega->presentacion->id_grupo;
+                                        $table->id_producto = $entrega->presentacion->id_producto;
+                                        $table->unidades = $model->cantidad_entregada;
+                                        $table->user_name = Yii::$app->user->identity->username;
+                                        $table->observacion = 'Se hace solicitud parcial de materiales';
+                                        $table->save(false);
+                                        $ultimo = SolicitudMateriales::find()->orderBy('codigo DESC')->one();
+                                        return $this->redirect(["view",'id' => $ultimo->codigo, 'token' => 0,'sw' => $sw]);
+                                        
+                                    }else{
+                                        Yii::$app->getSession()->setFlash('error', 'El campo CANTIDAD ENTREGA no puede ser vacio'); 
+                                        return $this->redirect(["index"]);
+                                    }
+                               }else{
+                                    $table = new SolicitudMateriales();
+                                    $table->id_solicitud = 2;
+                                     $table->id_entrega_kits = $intCodigo;
+                                    $table->id_solicitud_documento = $model->tipo_solicitud;
+                                    $table->id_grupo = $entrega->presentacion->id_grupo;
+                                    $table->id_producto = $entrega->presentacion->id_producto;
+                                    $table->unidades = $model->cantidad_entregada;
+                                    $table->user_name = Yii::$app->user->identity->username;
+                                    $table->observacion = 'Se hace solicitud completa de materiales';
+                                    $table->save(false);
+                                    $ultimo = SolicitudMateriales::find()->orderBy('codigo DESC')->one();
+                                    return $this->redirect(["view",'id' => $ultimo->codigo, 'token' => 0, 'sw' => $sw]);
+                               }
+                                
+                            }
+                        }else{
+                            Yii::$app->getSession()->setFlash('error', 'Debe de chekear al menos una solicitdu de KITS'); 
+                            return $this->redirect(["index"]);
+                        }
+                    }    
+
+                }
+                return $this->renderAjax('_form_solicitud_kits', [
+                    'model' => $model,
+                    'solicitud' => $solicitud,
+
+                ]);  
+            }else{
+                return $this->redirect(['site/sinpermiso']); 
+            }   
+        }else{
+            return $this->redirect(['site/login']);
+        }        
+    } 
 
     /**
      * Updates an existing SolicitudMateriales model.
@@ -293,6 +367,7 @@ class SolicitudMaterialesController extends Controller
         $dato->delete();
         $this->redirect(["view",'id' => $id, 'token' => $token]);        
     }
+    
      //SE AUTORIZA O DESAUTORIZA EL PRODUCTO
     public function actionAutorizado($id, $token) {
         $model = $this->findModel($id);

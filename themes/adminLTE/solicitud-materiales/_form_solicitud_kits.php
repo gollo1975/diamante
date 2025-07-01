@@ -9,7 +9,7 @@ use kartik\date\DatePicker;
 use kartik\select2\Select2;
 ?>
 <?php
-$conSolicitud = ArrayHelper::map(app\models\DocumentoSolicitudes::find()->where(['=','logistica', 1])->orderBy ('concepto ASC')->all(), 'id_solicitud', 'concepto');
+$conSolicitud = ArrayHelper::map(app\models\DocumentoSolicitudes::find()->where(['=','solicitud_materiales', 1])->orderBy ('concepto ASC')->all(), 'id_solicitud', 'concepto');
 $form = ActiveForm::begin([
             "method" => "post",
             'id' => 'formulario',
@@ -32,17 +32,17 @@ $form = ActiveForm::begin([
     <div class="table table-responsive">
         <div class="panel panel-success ">
             <div class="panel-heading" style="text-align: left ">
-               Importar solicitud
+               Crear solicitud de material de empaque
             </div>
             <div class="panel-body">
                  <div class="row">
                     <?= $form->field($model, 'tipo_solicitud')->dropdownList($conSolicitud, ['prompt' => 'Seleccione...', 'required' => true]) ?>		
                 </div>
                 <div class="row">
-                    <?= $form->field($model, 'tipo_entrega')->dropdownList(['1' => 'PARCIAL', '2' => 'COMPLETA'], ['prompt' => 'Seleccione...', 'required' => true]) ?>		
+                    <?= $form->field($model, 'tipo_entrega')->dropdownList(['1' => 'PARCIAL', '2' => 'COMPLETA'], ['prompt' => 'Seleccione...','onchange' => 'mostrarcampo()', 'id' => 'tipo_entrega', 'required' => true]) ?>
                 </div>
                 <div class="row">
-                    <?= $form->field($model, 'cantidad_entregada')->input("text",['required' => true]) ?>
+                    <div id="cantidad_entregada" style="display:none"> <?= $form->field($model, 'cantidad_entregada')->textInput() ?></div>
                 </div>    
 
             </div>  
@@ -67,10 +67,9 @@ $form = ActiveForm::begin([
                             <thead>
                                 <tr style="font-size: 85%;">
                                     <th scope="col"  style='background-color:#B9D5CE;'><b>Id</b></th>   
-                                    <th scope="col"  style='background-color:#B9D5CE;'><b>Presentacion producto</b></th>                        
+                                    <th scope="col"  style='background-color:#B9D5CE;'><b>Presentacion producto</b></th>  
+                                    <th scope="col"  style='background-color:#B9D5CE;'><b>Inventario entregado</b></th>
                                     <th scope="col"  style='background-color:#B9D5CE;'><b>Total kits</b></th>
-                                    <th scope="col"  style='background-color:#B9D5CE;'><b>Faltan</b></th>
-                                    <th scope="col"  style='background-color:#B9D5CE;'>Unidades solicitadas</th> 
                                     <th scope="col" style='background-color:#B9D5CE;'><input type="checkbox" onclick="marcar(this);"/></th>
                                 </tr>
                             </thead>
@@ -78,12 +77,11 @@ $form = ActiveForm::begin([
                                 <?php
                                 foreach ($solicitud as $val):?>
                                     <tr style="font-size: 85%;">
-                                        <td><?= $val->id_solicitud_armado ?></td>
+                                        <td><?= $val->id_entrega_kits ?></td>
                                         <td style='text-align: left'><?= $val->presentacion->descripcion ?></td>
-                                        <td style='text-align: right'><?= ''.number_format($val->cantidad_solicitada,0) ?></td>
-                                         <td style='text-align: right'><?= ''.number_format($val->saldo_cantidad_solicitada,0) ?></td>
-                                        <td style='text-align: right'><?= ''.number_format($val->total_unidades,0) ?></td>
-                                        <td style= 'width: 20px; height: 20px;'><input type="checkbox" name="nueva_solicitud[]" value="<?= $val->id_solicitud_armado ?>"></td> 
+                                        <td style='text-align: right'><?= ''.number_format($val->total_unidades_entregadas,0) ?></td>
+                                        <td style='text-align: right'><?= ''.number_format($val->cantidad_despachada,0) ?></td>
+                                        <td style= 'width: 20px; height: 20px;'><input type="checkbox" name="nueva_entrega_materia[]" value="<?= $val->id_entrega_kits ?>"></td> 
                                     </tr>
                                  <?php endforeach;
                                  ?>          
@@ -114,6 +112,16 @@ $form = ActiveForm::begin([
 			}
 		}
 	}
-</script>
+    function mostrarcampo(){
+        let tipo_entrega = document.getElementById('tipo_entrega').value;
+        console.log('Valor de tipo_entrega:', tipo_entrega); 
+        if(tipo_entrega === '1'){
+            cantidad_entregada.style.display = "block";
+        } else {
+           
+           cantidad_entregada.style.display = "none";
+        }
+    }
+</script>    
 
 
