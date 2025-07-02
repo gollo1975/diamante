@@ -41,11 +41,11 @@ $view = 'solicitud-materiales';
         <?php }?>
         
         <?php if ($model->autorizado == 0 && $model->cerrar_solicitud == 0) { ?>
-            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->codigo, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->codigo, 'token' => $token,'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
         } else {
             if ($model->autorizado == 1 && $model->cerrar_solicitud == 0){
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->codigo, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->codigo, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->codigo, 'token' => $token, 'sw' => $sw], ['class' => 'btn btn-default btn-sm']);
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->codigo, 'token'=> $token, 'sw' => $sw],['class' => 'btn btn-warning btn-sm',
                            'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la solicitud de materiales.', 'method' => 'post']]);
             }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_solicitud_materiales', 'id' => $model->codigo], ['class' => 'btn btn-default btn-sm']);            
@@ -131,7 +131,7 @@ $view = 'solicitud-materiales';
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Id</b></th>   
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Codigo</b></th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Presentacion</b></th>
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidades</th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                         </tr>
@@ -149,7 +149,7 @@ $view = 'solicitud-materiales';
                                                     $resp = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle', $val->id_detalle])->one();
                                                     if(!$resp){?>
                                                         <td style= 'width: 20px; height: 20px;'>
-                                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
                                                                            'class' => '',
                                                                            'title' => 'Proceso que permite descargar el material de empaque.)', 
                                                                            'data' => [
@@ -164,7 +164,7 @@ $view = 'solicitud-materiales';
                                                         if($val->solicitud_empaque == 0){ ?>
                                                         
                                                             <td style= 'width: 20px; height: 20px;'>
-                                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
                                                                                'class' => '',
                                                                                'title' => 'Proceso que permite descargar el material de empaque.)', 
                                                                                'data' => [
@@ -204,11 +204,12 @@ $view = 'solicitud-materiales';
                                                 <td><?= $val->detalle->inventario->codigo_producto ?></td>
                                                 <td><?= $val->detalle->inventario->nombre_producto ?></td>
                                                 <td style="text-align: right"><?= $val->cantidad_despachada ?></td>
-                                                <?php if($model->autorizado == 0){
-                                                    $resp = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle', $val->id_detalle])->one();
+                                                <?php 
+                                                if($model->autorizado == 0){
+                                                    $resp = \app\models\SolicitudMaterialesDetalle::find()->where(['=','id_detalle_entrega', $val->id_detalle_entrega])->one();
                                                     if(!$resp){?>
                                                         <td style= 'width: 20px; height: 20px;'>
-                                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                            <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
                                                                            'class' => '',
                                                                            'title' => 'Proceso que permite descargar el material de empaque.)', 
                                                                            'data' => [
@@ -219,25 +220,26 @@ $view = 'solicitud-materiales';
                                                         </td>    
                                                         <td style= 'width: 20px; height: 20px;'> </td> 
                                                        
-                                                    <?php }else{
+                                                    <?php
+                                                    }else{
+                                                       
                                                         if($val->solicitud_empaque == 0){ ?>
-                                                        
                                                             <td style= 'width: 20px; height: 20px;'>
-                                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
                                                                                'class' => '',
                                                                                'title' => 'Proceso que permite descargar el material de empaque.)', 
                                                                                'data' => [
-                                                                                   'confirm' => 'Esta seguro de importar el material de empaque a la presentacion de producto  '.$val->descripcion.'.',
+                                                                                   'confirm' => 'Esta seguro de importar el material de empaque a la presentacion de producto  '.$val->detalle->inventario->nombre_producto.'.',
                                                                                    'method' => 'post',
                                                                                ],
                                                                 ])?>
                                                             </td>    
                                                             <td style= 'width: 20px; height: 20px;'>    
-                                                                <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_presentacion', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_presentacion', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle_entrega,'sw' => $sw], [
                                                                                'class' => '',
                                                                                'title' => 'Proceso que permite cerrar la presentacion.)', 
                                                                                'data' => [
-                                                                                   'confirm' => 'Esta seguro de CERRAR la presentacion de producto  ('.$val->descripcion.').',
+                                                                                   'confirm' => 'Esta seguro de CERRAR la presentacion de producto  ('.$val->detalle->inventario->nombre_producto.').',
                                                                                    'method' => 'post',
                                                                                ],
                                                                  ])?>
@@ -282,13 +284,21 @@ $view = 'solicitud-materiales';
                                     </thead>
                                     <body>
                                          <?php
+                                         $valor = 0;
                                          foreach ($detalle_solicitud as $val):
                                              ?>
                                             <tr style="font-size: 85%;">
                                                 <td><?= $val->id ?></td>
                                                 <td><?= $val->codigo_materia ?></td>
                                                 <td><?= $val->materiales ?></td>
-                                                <td><?= $val->ordenPresentacion->descripcion ?></td>
+                                                <?php if($val->id_detalle_entrega == null){?>
+                                                    <td><?= $val->ordenPresentacion->descripcion ?></td>
+                                                <?php }else{
+                                                    $valor = $val->entregaSolicitudDetalle->id_detalle; 
+                                                    $armadoKit = app\models\SolicitudArmadoKitsDetalle::find()->where(['=','id_detalle', $valor])->one();
+                                                    ?>
+                                                    <td><?= $armadoKit->inventario->presentacion->descripcion?></td>
+                                                <?php }?>    
                                                 <td style="text-align: right"><?= $val->unidades_lote ?></td>
                                                 <?php if($model->autorizado == 0 && $val->linea_cerrada == 0){?>
                                                     <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_requeridas[]" style ="text-align: right" value="<?= $val->unidades_requeridas ?>" size ="12" required="true"> </td> 
@@ -297,7 +307,7 @@ $view = 'solicitud-materiales';
                                                 <?php }?>   
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style= 'width: 25px; height: 25px;'>
-                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->codigo, 'id_detalle' => $val->id, 'token' => $token], [
+                                                        <?= Html::a('<span class="glyphicon glyphicon-trash"></span> ', ['eliminar_detalle', 'id' => $model->codigo, 'id_detalle' => $val->id, 'token' => $token, 'sw' => $sw], [
                                                                    'class' => '',
                                                                    'data' => [
                                                                        'confirm' => 'Esta seguro de eliminar el registro?',

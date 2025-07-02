@@ -34,12 +34,13 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['codigo', 'id_materia_prima', 'unidades_lote', 'unidades_requeridas','id_detalle','linea_cerrada'], 'integer'],
+            [['codigo', 'id_materia_prima', 'unidades_lote', 'unidades_requeridas','id_detalle','linea_cerrada','id_detalle_entrega'], 'integer'],
             [['codigo_materia'], 'string', 'max' => 15],
             [['materiales'], 'string', 'max' => 30],
             [['codigo'], 'exist', 'skipOnError' => true, 'targetClass' => SolicitudMateriales::className(), 'targetAttribute' => ['codigo' => 'codigo']],
             [['id_materia_prima'], 'exist', 'skipOnError' => true, 'targetClass' => MateriaPrimas::className(), 'targetAttribute' => ['id_materia_prima' => 'id_materia_prima']],
             [['id_detalle'], 'exist', 'skipOnError' => true, 'targetClass' => OrdenProduccionProductos::className(), 'targetAttribute' => ['id_detalle' => 'id_detalle']],
+            [['id_detalle_entrega'], 'exist', 'skipOnError' => true, 'targetClass' => EntregaSolicitudKitsDetalle::className(), 'targetAttribute' => ['id_detalle_entrega' => 'id_detalle_entrega']],
         ];
     }
 
@@ -58,6 +59,7 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
             'unidades_requeridas' => 'Unidades Requeridas',
             'id_detalle' => 'id_detalle,',
             'linea_cerrada' => 'linea_cerrada',
+            'id_detalle_entrega' => 'id_detalle_entrega',
         ];
     }
 
@@ -83,5 +85,13 @@ class SolicitudMaterialesDetalle extends \yii\db\ActiveRecord
     public function getOrdenPresentacion()
     {
         return $this->hasOne(OrdenProduccionProductos::className(), ['id_detalle' => 'id_detalle']);
+    }
+    
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEntregaSolicitudDetalle()
+    {
+        return $this->hasOne(EntregaSolicitudKitsDetalle::className(), ['id_detalle_entrega' => 'id_detalle_entrega']);
     }
 }
