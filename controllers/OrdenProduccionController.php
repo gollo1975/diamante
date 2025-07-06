@@ -1724,20 +1724,22 @@ class OrdenProduccionController extends Controller
             $this->redirect(["view", 'id' => $id_orden, 'token' => $token]); 
         }else{
             $orden = OrdenProduccion::findOne($id_orden);
-            $tipo = \app\models\TipoSolicitud::findOne(2);
             $table = new \app\models\SolicitudMateriales();
             $table->id_orden_produccion = $id_orden;
-            $table->id_solicitud = $tipo->id_solicitud;
+            $table->id_solicitud = 2;
+            $table->id_solicitud_documento = 4;
             $table->id_grupo = $orden->id_grupo;
             $table->id_producto = $orden->id_producto;
             $table->unidades = $orden->unidades;
             $table->numero_lote = $orden->numero_lote;
             $table->numero_orden_produccion = $orden->numero_orden;
             $table->user_name = Yii::$app->user->identity->username;
+            $table->observacion = 'Se crea solicitud desde orden de produccion';
+            $table->aplica_todo = 1;
             $table->save(false);
             $nuevo_registro = \app\models\SolicitudMateriales::find()->orderBy('codigo DESC')->one();
             $id = $nuevo_registro->codigo;
-            $this->redirect(['solicitud-materiales/view', 'id' => $id, 'token' => $token]);
+            $this->redirect(['solicitud-materiales/view', 'id' => $id, 'token' => $token, 'sw' => 0]);
         }    
 
     }

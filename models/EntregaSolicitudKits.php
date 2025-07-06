@@ -43,7 +43,8 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
     {
         return [
             [['id_solicitud', 'cantidad_despachada'], 'required'],
-            [['id_solicitud', 'id_presentacion', 'id_solicitud_armado', 'total_unidades_entregadas', 'proceso_cerrado', 'autorizado', 'numero_entrega', 'cantidad_despachada','solicitud_generada'], 'integer'],
+            [['id_solicitud', 'id_presentacion', 'id_solicitud_armado', 'total_unidades_entregadas', 'proceso_cerrado', 'autorizado', 'numero_entrega', 'cantidad_despachada',
+                'solicitud_generada','cantidad_despachada_saldo'], 'integer'],
             [['fecha_solicitud', 'fecha_hora_proceso','fecha_hora_cierre'], 'safe'],
             [['observacion'], 'string', 'max' => 100],
             [['user_name'], 'string', 'max' => 15],
@@ -74,6 +75,7 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'fecha_hora_cierre' => 'fecha_hora_cierre',
             'solicitud_generada' => 'solicitud_generada',
+            'cantidad_despachada_saldo' => 'cantidad_despachada_saldo',
         ];
     }
 

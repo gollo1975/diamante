@@ -23,8 +23,13 @@ class PDF extends FPDF {
         $this->SetFillColor(220, 220, 220);
         $this->SetXY(10, 39);
         $this->SetFont('Arial', 'B', 12);
-        $this->Cell(162, 7, utf8_decode("SOLICITUD DE MATERIALES (OP)"), 0, 0, 'l', 0);
-        $this->Cell(30, 7, utf8_decode('N°. '.str_pad($solicitud->numero_orden_produccion, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        if($solicitud->id_orden_produccion !== null){
+            $this->Cell(162, 7, utf8_decode("SOLICITUD DE MATERIALES (OP)"), 0, 0, 'l', 0);
+            $this->Cell(30, 7, utf8_decode('N°. '.str_pad($solicitud->numero_orden_produccion, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        }else{
+            $this->Cell(162, 7, utf8_decode("SOLICITUD DE MATERIALES"), 0, 0, 'l', 0);
+            $this->Cell(30, 7, utf8_decode('N°. '.str_pad($solicitud->numero_solicitud, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
+        }    
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
         $this->SetFont('Arial', 'B', 7);

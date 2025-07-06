@@ -109,7 +109,8 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>F. despacho</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud cerrada">Cerrado</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud autorizado">Autorizado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud autorizado">Aut.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Descargar material de empaque">Descargar ME</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
              
                          
@@ -121,8 +122,14 @@ $form = ActiveForm::begin([
                     <td><?= $val->id_entrega?></td>
                     <td><?= $val->numero_entrega?></td>
                     <td><?= $val->solicitud->numero_solicitud?></td>
-                    <td><?= $val->solicitud->ordenProduccion->producto->nombre_producto?></td>
-                    <td><?= $val->solicitud->ordenProduccion->numero_lote?></td>
+                    <?php if($val->solicitud->id_orden_produccion !== null){?>
+                        <td><?= $val->solicitud->ordenProduccion->producto->nombre_producto?></td>
+                         <td><?= $val->solicitud->ordenProduccion->numero_lote?></td>
+                    <?php  }else{?>
+                        <td><?= $val->solicitud->productos->nombre_producto?></td>
+                        <td><?= 'NOT FOUND'?></td>
+                    <?php  }?>    
+                   
                     <td><?= $val->fecha_despacho?></td>
                     <td><?= $val->fecha_hora_registro?></td>
                     <?php if($val->cerrar_solicitud == 0){?>
@@ -134,7 +141,12 @@ $form = ActiveForm::begin([
                         <td  style="background-color: #9FE6F3"><?= $val->autorizadosolicitud?></td>
                     <?php }else{?>
                         <td style="background-color: #F9ECCD"><?= $val->autorizadosolicitud?></td>
-                    <?php }?>  
+                    <?php }
+                    if($val->descargar_material_empaque == 0){ ?> 
+                        <td><?= $val->aplicoMaterialEmpaque?></td>
+                    <?php }else{?>
+                        <td style="background-color: #FFFFE3"><?= $val->aplicoMaterialEmpaque?></td>
+                    <?php }?>    
                     <td style= 'width: 25px; height: 10px;'>
                         <a href="<?= Url::toRoute(["entrega-materiales/view", "id" => $val->id_entrega,'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear la nueva solicitud de material de empaque"></span></a>
                     </td>

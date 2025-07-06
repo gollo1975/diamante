@@ -28,14 +28,26 @@ class PDF extends FPDF {
         $this->Cell(30, 7, utf8_decode('N°. '.str_pad($solicitud->numero_entrega, 5, "0", STR_PAD_LEFT)), 0, 0, 'l', 0);
        // $this->SetFillColor(200, 200, 200);
         $this->SetXY(10, 48);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(25, 5, utf8_decode("No LOTE:"), 0, 0, 'L', 1);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(32, 5, utf8_decode($solicitud->solicitud->ordenProduccion->numero_lote), 0, 0, 'L',1);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(23, 5, utf8_decode("PRODUCTO:"), 0, 0, 'L', 1);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(60, 5, utf8_decode($solicitud->solicitud->ordenProduccion->producto->nombre_producto), 0, 0, 'L', 1);
+       
+        if($solicitud->solicitud->id_orden_produccion !== null){
+            $this->SetFont('Arial', 'B', 7);
+            $this->Cell(25, 5, utf8_decode("No LOTE:"), 0, 0, 'L', 1);
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(32, 5, utf8_decode($solicitud->solicitud->ordenProduccion->numero_lote), 0, 0, 'L',1);
+            $this->SetFont('Arial', 'B', 7);
+            $this->Cell(23, 5, utf8_decode("PRODUCTO:"), 0, 0, 'L', 1);
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(60, 5, utf8_decode($solicitud->solicitud->ordenProduccion->producto->nombre_producto), 0, 0, 'L', 1);
+        }else{
+            $this->SetFont('Arial', 'B', 7);
+            $this->Cell(25, 5, utf8_decode("No LOTE:"), 0, 0, 'L', 1);
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(32, 5, utf8_decode('NOT FOUND'), 0, 0, 'L',1);
+            $this->SetFont('Arial', 'B', 7);
+            $this->Cell(23, 5, utf8_decode("PRODUCTO:"), 0, 0, 'L', 1);
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(60, 5, utf8_decode($solicitud->solicitud->productos->nombre_producto), 0, 0, 'L', 1);
+        }    
         $this->SetFont('Arial', 'B', 7);
         $this->Cell(25, 5, utf8_decode("O. PRODUCCION:"), 0, 0, 'L', 1);
         $this->SetFont('Arial', '', 7);
@@ -70,10 +82,17 @@ class PDF extends FPDF {
         $this->Cell(27, 5, $solicitud->solicitud->numero_solicitud, 0, 0, 'L', 1);
         //FIN
         $this->SetXY(10, 60);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Cell(25, 5, utf8_decode("TAMAÑO LOTE:"), 0, 0, 'L', 1);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(167, 5, utf8_decode($solicitud->solicitud->ordenProduccion->tamano_lote), 0, 0, 'L',1);
+        if($solicitud->solicitud->id_orden_produccion !== null){
+            $this->SetFont('Arial', 'B', 7);
+            $this->Cell(25, 5, utf8_decode("TAMAÑO LOTE:"), 0, 0, 'L', 1);
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(167, 5, (''.number_format($solicitud->solicitud->ordenProduccion->tamano_lote, 0).'  Gramos'), 0, 0, 'L',1);
+        }else{
+            $this->SetFont('Arial', 'B', 7);
+            $this->Cell(25, 5, utf8_decode("TAMAÑO LOTE:"), 0, 0, 'L', 1);
+            $this->SetFont('Arial', '', 7);
+            $this->Cell(167, 5, utf8_decode('NOT FOUND'), 0, 0, 'L',1);
+        }    
         
         $this->EncabezadoDetalles();
                  
@@ -87,12 +106,12 @@ class PDF extends FPDF {
         $this->Line(10,30,202,30);//linea inferior horizontal
        
         //Lineas del encabezado
-        $this->Line(10,74,10,160);
-        $this->Line(80,74,80,160);
-        $this->Line(150,74,150,160);
-        $this->Line(176,74,176,160);
-        $this->Line(202,74,202,160);
-        $this->Line(10,160,202,160);//linea horizontal inferior  
+        $this->Line(10,74,10,190);
+        $this->Line(80,74,80,190);
+        $this->Line(150,74,150,190);
+        $this->Line(176,74,176,190);
+        $this->Line(202,74,202,190);
+        $this->Line(10,190,202,190);//linea horizontal inferior  
     }
     function EncabezadoDetalles() {
         $this->Ln(10);
@@ -124,46 +143,72 @@ class PDF extends FPDF {
         $pdf->SetX(10);
         $pdf->SetFont('Arial', '', 7);
         $currentProductDescription = null; 
-	foreach ($detalles as $detalle) {         
-             if ($detalle->ordenProductos->descripcion !== $currentProductDescription) {
-                // Añadir un salto de línea extra si no es el primer producto
-                if ($currentProductDescription !== null) {
-                    $pdf->Ln(7); // Salto de línea más grande para separar productos
-                }
+	foreach ($detalles as $detalle) {  
+            if($detalle->id_orden_produccion !== null){
+                if ($detalle->ordenProductos->descripcion !== $currentProductDescription) {
+                    // Añadir un salto de línea extra si no es el primer producto
+                    if ($currentProductDescription !== null) {
+                        $pdf->Ln(7); // Salto de línea más grande para separar productos
+                    }
 
-                $pdf->SetFont('Arial', 'B', 8); // Opcional: negrita para el nombre del producto
-                // Celda que "abarca" para el nombre del producto
-                // Ajusta el ancho (192) según la suma de tus celdas de detalle si es necesario
-                $pdf->Cell(192, 5, utf8_decode('Producto: ' . $detalle->ordenProductos->descripcion), 1, 1, 'L'); 
-                $pdf->SetFont('Arial', '', 7); // Volver al tamaño de fuente normal
-                $currentProductDescription = $detalle->ordenProductos->descripcion; // Actualizar el producto actual
-                $pdf->Ln(1); // Pequeño espacio después del encabezado del producto
-            }
-            $pdf->Cell(70, 4, utf8_decode(substr($detalle->materiales,0, 45)), 0, 0, 'L');
-            $pdf->Cell(70, 4, utf8_decode(substr($detalle->ordenProductos->descripcion, 0, 45)), 0, 0, 'L');
-            $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_solicitadas,0)), 0, 0, 'R');
-            $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_despachadas,0)), 0, 0, 'R');
-            $pdf->Ln();
-            $pdf->SetAutoPageBreak(true, 20);                              
+                    $pdf->SetFont('Arial', 'B', 8); // Opcional: negrita para el nombre del producto
+                    // Celda que "abarca" para el nombre del producto
+                    // Ajusta el ancho (192) según la suma de tus celdas de detalle si es necesario
+                    $pdf->Cell(192, 5, utf8_decode('Producto: ' . $detalle->ordenProductos->descripcion), 1, 1, 'L'); 
+                    $pdf->SetFont('Arial', '', 7); // Volver al tamaño de fuente normal
+                    $currentProductDescription = $detalle->ordenProductos->descripcion; // Actualizar el producto actual
+                    $pdf->Ln(1); // Pequeño espacio después del encabezado del producto
+                }
+                 $pdf->Cell(70, 4, utf8_decode(substr($detalle->materiales,0, 45)), 0, 0, 'L');
+                $pdf->Cell(70, 4, utf8_decode(substr($detalle->ordenProductos->descripcion, 0, 45)), 0, 0, 'L');
+                $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_solicitadas,0)), 0, 0, 'R');
+                $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_despachadas,0)), 0, 0, 'R');
+                $pdf->Ln();
+                $pdf->SetAutoPageBreak(true, 20); 
+            }else{
+                $entrega = \app\models\EntregaSolicitudKitsDetalle::findOne($detalle->id_detalle_entrega);
+                $solicitudArmado = app\models\SolicitudArmadoKitsDetalle::findOne($entrega->id_detalle);
+                if ($solicitudArmado->inventario->presentacion->descripcion !== $currentProductDescription) {
+                    // Añadir un salto de línea extra si no es el primer producto
+                    if ($currentProductDescription !== null) {
+                        $pdf->Ln(7); // Salto de línea más grande para separar productos
+                    }
+
+                    $pdf->SetFont('Arial', 'B', 8); // Opcional: negrita para el nombre del producto
+                    // Celda que "abarca" para el nombre del producto
+                    // Ajusta el ancho (192) según la suma de tus celdas de detalle si es necesario
+                    $pdf->Cell(192, 5, utf8_decode('Producto: ' . $solicitudArmado->inventario->presentacion->descripcion), 1, 1, 'L'); 
+                    $pdf->SetFont('Arial', '', 7); // Volver al tamaño de fuente normal
+                    $currentProductDescription = $solicitudArmado->inventario->presentacion->descripcion; // Actualizar el producto actual
+                    $pdf->Ln(1); // Pequeño espacio después del encabezado del producto
+                }
+                 $pdf->Cell(70, 4, utf8_decode(substr($detalle->materiales,0, 45)), 0, 0, 'L');
+                $pdf->Cell(70, 4, utf8_decode(substr($solicitudArmado->inventario->presentacion->descripcion, 0, 45)), 0, 0, 'L');
+                $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_solicitadas,0)), 0, 0, 'R');
+                $pdf->Cell(26, 4, utf8_decode(''.number_format($detalle->unidades_despachadas,0)), 0, 0, 'R');
+                $pdf->Ln();
+                $pdf->SetAutoPageBreak(true, 20); 
+            }    
+                                        
         }
-	$pdf->SetXY(10, 180);
+	$pdf->SetXY(10, 200);
         $this->SetFont('Arial', 'B', 8);
         $pdf->MultiCell(146, 4, utf8_decode('OBSERVACION: '.$model->observacion),0,'J');
 	//firma trabajador
-        $pdf->SetXY(10, 200);
+        $pdf->SetXY(10, 220);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(35, 5, '________________________________', 0, 0, 'L',0);
-         $pdf->SetXY(10, 205);
+         $pdf->SetXY(10, 225);
         $pdf->Cell(35, 5, 'OPERARIO DE PRODUCCION', 0, 0, 'L',0);
-        $pdf->SetXY(10, 210);
+        $pdf->SetXY(10, 230);
         $pdf->Cell(35, 5, utf8_decode('Despacha'), 0, 0, 'L',0);
         // SEGUNDA FIRMA
-        $pdf->SetXY(120, 200);
+        $pdf->SetXY(120, 220);
         $this->SetFont('', 'B', 9);
         $pdf->Cell(120, 5, '________________________________', 0, 0, 'L',0);
-        $pdf->SetXY(120, 205);
+        $pdf->SetXY(120, 225);
         $pdf->Cell(120, 5, 'OPERARIO DE PRODUCCION', 0, 0, 'L',0);
-        $pdf->SetXY(120, 210);
+        $pdf->SetXY(120, 230);
         $pdf->Cell(120, 5, utf8_decode('Recibe'), 0, 0, 'L',0);
         //liena
         //encabezado de linea

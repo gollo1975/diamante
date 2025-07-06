@@ -15,6 +15,7 @@ use kartik\depdrop\DepDrop;
 ?>
 
 <?php
+
 $form = ActiveForm::begin([
             "method" => "post",
             'id' => 'formulario',
@@ -49,6 +50,7 @@ $form = ActiveForm::begin([
                 ]); ?> 
             </div>
         <?php }?>
+        
         <div class="row">
                 <?= $form->field($model, 'aplica_todo')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
             </div>

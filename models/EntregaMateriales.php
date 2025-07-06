@@ -37,7 +37,7 @@ class EntregaMateriales extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['codigo', 'numero_entrega', 'unidades_solicitadas', 'autorizado', 'cerrar_solicitud'], 'integer'],
+            [['codigo', 'numero_entrega', 'unidades_solicitadas', 'autorizado', 'cerrar_solicitud','descargar_material_empaque'], 'integer'],
             [['fecha_despacho', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['observacion'], 'string', 'max' => 100],
@@ -61,6 +61,8 @@ class EntregaMateriales extends \yii\db\ActiveRecord
             'autorizado' => 'Autorizado:',
             'cerrar_solicitud' => 'Solicitud cerrada:',
             'observacion' => 'Observacion:',
+            'descargar_material_empaque' => 'descargar_material_empaque',
+
         ];
     }
 
@@ -101,6 +103,14 @@ class EntregaMateriales extends \yii\db\ActiveRecord
             $autorizadosolicitud = 'SI';
         }
         return $autorizadosolicitud;
+    }
+    public function getAplicoMaterialEmpaque() {
+        if($this->descargar_material_empaque == 0){
+            $aplicomaterialempaque = 'NO';
+        }else{
+            $aplicomaterialempaque = 'SI';
+        }
+        return $aplicomaterialempaque;
     }
    
 }

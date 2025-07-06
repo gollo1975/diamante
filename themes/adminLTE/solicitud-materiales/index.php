@@ -135,8 +135,8 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>No lote</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. proceso</th>
                 <th scope="col" style='background-color:#B9D5CE;'>F. cierre</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud cerrada">Cerrado</span></th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud autorizado">Autorizado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud cerrada">Cerr.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Solicitud autorizado">Aut.</span></th>
                  <th scope="col" style='background-color:#B9D5CE;'>Despachado</th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -187,22 +187,41 @@ $form = ActiveForm::begin([
                             <a href="<?= Url::toRoute(["solicitud-materiales/view", "id" => $val->codigo,'token' => $token,'sw' =>1]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite crear la nueva solicitud de material de empaque"></span></a>
                         </td>
                     <?php }    
-                    if($val->autorizado == 0){?>
-                        <td style= 'width: 25px; height: 10px;'>
-                            <a href="<?= Url::toRoute(["solicitud-materiales/update", "id" => $val->codigo,'token' => $token]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite modificar la solicitud"></span></a>
-                        </td>
-                    <?php }else {
-                        if($val->cerrar_solicitud == 1 && $val->despachado == 0 ){?>
+                    if($val->autorizado == 0){
+                        if($val->id_orden_produccion !== null) { ?>
                             <td style= 'width: 25px; height: 10px;'>
-                                <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_despacho_material', 'id' => $val->codigo, 'token' => $token], [
-                                               'class' => '',
-                                               'title' => 'Proceso que permite crear el despacho de material de empaque.', 
-                                               'data' => [
-                                                   'confirm' => 'Esta seguro de crear el despacho a la solicitud  Nro:  ('.$val->numero_solicitud.').',
-                                                   'method' => 'post',
-                                               ],
-                                ])?>
-                            </td>    
+                                <a href="<?= Url::toRoute(["solicitud-materiales/update", "id" => $val->codigo,'token' => $token]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite modificar la solicitud"></span></a>
+                            </td>
+                        <?php }else{?>
+                            <td style= 'width: 25px; height: 10px;'>
+                                
+                            </td>
+                        <?php }?>    
+                    <?php }else {
+                        if($val->cerrar_solicitud == 1 && $val->despachado == 0 ){
+                            if ($val->id_orden_produccion !== null) { ?>
+                                <td style= 'width: 25px; height: 10px;'>
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_despacho_material', 'id' => $val->codigo, 'token' => $token,'sw' => 0], [
+                                                   'class' => '',
+                                                   'title' => 'Proceso que permite crear el despacho de material de empaque.', 
+                                                   'data' => [
+                                                       'confirm' => 'Esta seguro de crear el despacho a la solicitud  Nro:  ('.$val->numero_solicitud.').',
+                                                       'method' => 'post',
+                                                   ],
+                                    ])?>
+                                </td>  
+                            <?php }else{?>
+                                <td style= 'width: 25px; height: 10px;'>
+                                    <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span> ', ['generar_despacho_material', 'id' => $val->codigo, 'token' => $token,'sw' => 1], [
+                                                   'class' => '',
+                                                   'title' => 'Proceso que permite crear el despacho de material de empaque.', 
+                                                   'data' => [
+                                                       'confirm' => 'Esta seguro de crear el despacho a la solicitud  Nro:  ('.$val->numero_solicitud.').',
+                                                       'method' => 'post',
+                                                   ],
+                                    ])?>
+                                </td>  
+                            <?php }?>
                         <?php }else{?>
                               <td style= 'width: 25px; height: 10px;'></td>
                         <?php }    

@@ -28,7 +28,7 @@ use yii\filters\AccessControl;
 $this->title = 'SOLICITUD MATERIAL DE EMPAQUE';
 $this->params['breadcrumbs'][] = ['label' => 'Solicitud de materiales', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->codigo;
-$view = 'solicitud-materiales';
+
 ?>
 <div class="solicitud-materiales-view">
 
@@ -49,7 +49,7 @@ $view = 'solicitud-materiales';
                            'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la solicitud de materiales.', 'method' => 'post']]);
             }else{
                 echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_solicitud_materiales', 'id' => $model->codigo], ['class' => 'btn btn-default btn-sm']);            
-                echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 19, 'codigo' => $model->codigo,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
+               
             }
         }?>        
     </p>  
@@ -66,8 +66,8 @@ $view = 'solicitud-materiales';
                     <td><?= Html::encode($model->productos->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?></th>
                     <td><?= Html::encode($model->solicitud->descripcion) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades') ?></th>
-                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Cantidad_solicitada') ?></th>
+                     <td style="text-align: right; background-color: #C5C5EC"><?= Html::encode(''.number_format($model->unidades,0)) ?></td>
                 </tr>
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_solicitud') ?></th>
@@ -90,7 +90,7 @@ $view = 'solicitud-materiales';
                     <?php }  ?>   
                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado') ?></th>
-                    <td><?= Html::encode($model->autorizado) ?></td>
+                    <td><?= Html::encode($model->autorizadoSolicitud) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'cerrar_solicitud') ?></th>
                     <td><?= Html::encode($model->cerrarSolicitud) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name') ?></th>
@@ -174,7 +174,7 @@ $view = 'solicitud-materiales';
                                                                 ])?>
                                                             </td>    
                                                             <td style= 'width: 20px; height: 20px;'>    
-                                                                <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_presentacion', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle], [
+                                                                <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_presentacion', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
                                                                                'class' => '',
                                                                                'title' => 'Proceso que permite cerrar la presentacion.)', 
                                                                                'data' => [
@@ -222,7 +222,6 @@ $view = 'solicitud-materiales';
                                                        
                                                     <?php
                                                     }else{
-                                                       
                                                         if($val->solicitud_empaque == 0){ ?>
                                                             <td style= 'width: 20px; height: 20px;'>
                                                                 <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
@@ -244,9 +243,40 @@ $view = 'solicitud-materiales';
                                                                                ],
                                                                  ])?>
                                                             </td>  
-                                                        <?php }else{?>
-                                                            <td style= 'width: 20px; height: 20px;'></td>
-                                                            <td style= 'width: 20px; height: 20px;'></td>
+                                                        <?php }else{
+                                                            if($val->solicitud_empaque == 1){ ?>
+                                                                <td style= 'width: 20px; height: 20px;'>
+                                                                    <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ', ['buscar_material_empaque', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle, 'sw' => $sw], [
+                                                                                   'class' => '',
+                                                                                   'title' => 'Proceso que permite descargar el material de empaque.)', 
+                                                                                   'data' => [
+                                                                                       'confirm' => 'Esta seguro de importar el material de empaque a la presentacion de producto  '.$val->detalle->inventario->nombre_producto.'.',
+                                                                                       'method' => 'post',
+                                                                                   ],
+                                                                    ])?>
+                                                                </td> 
+                                                                <?php
+                                                                $producto = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_detalle', $val->id_detalle])->one();
+                                                                $entrega = app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $model->codigo])->andWhere(['=','id_detalle_entrega', $producto->id_detalle_entrega])->one();
+                                                                if($entrega && $entrega->linea_cerrada == 0){
+                                                                    ?>
+                                                                    <td style= 'width: 20px; height: 20px;'> 
+                                                                        <?= Html::a('<span class="glyphicon glyphicon-eye-close"></span> ', ['cerrar_presentacion', 'id' => $model->codigo, 'token' => $token,'id_detalle' => $val->id_detalle_entrega,'sw' => $sw], [
+                                                                                       'class' => '',
+                                                                                       'title' => 'Proceso que permite cerrar la presentacion.)', 
+                                                                                       'data' => [
+                                                                                           'confirm' => 'Esta seguro de CERRAR la presentacion de producto  ('.$val->detalle->inventario->nombre_producto.').',
+                                                                                           'method' => 'post',
+                                                                                       ],
+                                                                         ])?>
+                                                                    </td>
+                                                                <?php }else{?>
+                                                                   <td style= 'width: 20px; height: 20px;'></td>
+                                                                <?php }    
+                                                            }else{?>   
+                                                                <td style= 'width: 20px; height: 20px;'></td>
+                                                                <td style= 'width: 20px; height: 20px;'></td>
+                                                            <?php }?>    
                                                         <?php }    
                                                     }         
                                                 }else{?>

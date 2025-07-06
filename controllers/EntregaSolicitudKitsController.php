@@ -150,6 +150,7 @@ class EntregaSolicitudKitsController extends Controller
                                         $table->fecha_solicitud = date('Y-m-d');
                                         $model->fecha_hora_proceso = date('Y-m-d H:i:s');
                                         $table->cantidad_despachada = $model->cantidad_entregada;
+                                        $table->cantidad_despachada_saldo = $model->cantidad_entregada;
                                         $table->user_name = Yii::$app->user->identity->username;
                                         $table->save(false);
                                         $codigo = $dato->id_solicitud_armado;

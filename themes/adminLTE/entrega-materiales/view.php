@@ -44,26 +44,31 @@ $view = 'entrega-materiales';
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_entrega, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
         } else {
             if ($model->autorizado == 1 && $model->cerrar_solicitud == 0){
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_entrega, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->id_entrega, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la entrega de materiales.', 'method' => 'post']]);
-                echo Html::a('<span class="glyphicon glyphicon-check"></span> Observaciones',
+                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_entrega, 'token' => $token], ['class' => 'btn btn-default btn-sm']);?>
+                <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->id_entrega, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la entrega de materiales.', 'method' => 'post']]);?>
+                <?= Html::a('<span class="glyphicon glyphicon-check"></span> Observaciones',
                         ['/entrega-materiales/crear_observacion','id' =>$model->id_entrega, 'token' => $token],
                         [
                             'title' => 'Permite subir las observaciones',
                             'data-toggle'=>'modal',
                             'data-target'=>'#modalcrearobservacion',
-                            'class' => 'btn btn-info btn-sm'
+                            'class' => 'btn btn-info btn-sm',
+                            'data-backdrop' =>"static"
                         ])?>
                         
                 <div class="modal remote fade" id="modalcrearobservacion">
-                         <div class="modal-dialog modal-lg" style ="width: 500px;">
+                         <div class="modal-dialog modal-lg" style ="width: 550px;">
                             <div class="modal-content"></div>
                         </div>
                 </div>
             <?php }else{
-                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_entrega_materiales', 'id' => $model->id_entrega], ['class' => 'btn btn-default btn-sm']);            
-                echo Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 20, 'codigo' => $model->id_entrega,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
+                echo Html::a('<span class="glyphicon glyphicon-print"></span> Imprimir', ['imprimir_entrega_materiales', 'id' => $model->id_entrega], ['class' => 'btn btn-default btn-sm']); ?>           
+                <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 20, 'codigo' => $model->id_entrega,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm']);
+                if(count($validar_inventario) > 0){?>
+                     <?= Html::a('<span class="glyphicon glyphicon-export"></span> Descargar ME', ['descargar_material_empaque', 'id' => $model->id_entrega, 'token'=> $token],['class' => 'btn btn-info btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de hacer la descarga al modulo de inventarios del MATERIAL DE EMPAQUE que se encuentra en esta entrega..', 'method' => 'post']]);
+                }
             }
         }?>        
     </p>  
@@ -77,7 +82,7 @@ $view = 'entrega-materiales';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_entrega") ?></th>
                     <td><?= Html::encode($model->id_entrega) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Producto') ?>:</th>
-                    <td><?= Html::encode($model->solicitud->ordenProduccion->producto->nombre_producto) ?></td>
+                    <td><?= Html::encode($model->solicitud->productos->nombre_producto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_entrega') ?></th>
                     <td><?= Html::encode($model->numero_entrega) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'unidades_solicitadas') ?></th>
@@ -90,8 +95,13 @@ $view = 'entrega-materiales';
                     <td><?= Html::encode($model->fecha_despacho) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_hora_registro') ?></th>
                     <td><?= Html::encode($model->fecha_hora_registro) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Numero_lote') ?></th>
-                    <td style="text-align: right;"><?= Html::encode($model->solicitud->ordenProduccion->numero_lote) ?></td>
+                    <?php if($model->solicitud->id_orden_produccion !== null){?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Numero_lote') ?></th>
+                        <td style="text-align: right;"><?= Html::encode($model->solicitud->ordenProduccion->numero_lote) ?></td>
+                    <?php }else{ ?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Numero_lote') ?></th>
+                        <td style="text-align: right;"><?= Html::encode('NO FOUNT') ?></td>
+                    <?php }?>    
                 </tr>
                 <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'autorizado')?></th>
@@ -135,9 +145,11 @@ $view = 'entrega-materiales';
                                         <tr style="font-size: 85%;">
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'><b>Código del material</b></th>
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Nombre del material</th> 
-                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentación</th> 
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades solicitadas</th>  
-                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades despachadas</th>
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Presentación</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades solicitadas</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Stock</th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'><span title="Inventario validado">Inv. Validado</span></th> 
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Unidades despachadas</th>
                                         </tr>
                                     </thead>
                                     <body>
@@ -145,16 +157,23 @@ $view = 'entrega-materiales';
                                         $previousIdProceso = null; // 
                                         $colSpanCount = 8;
                                          foreach ($detalle_solicitud as $val):
-                                            if ($previousIdProceso !== null && $val->id_detalle !== $previousIdProceso){ ?>
-                                               <tr style="background-color: #f0f0f0;"> <td colspan="<?= $colSpanCount ?>" style="text-align: center; font-weight: bold; padding: 10px;">
-                                                   Presentacion: <?= $val->ordenProductos->descripcion ?> 
-                                               </tr>
-                                            <?php } ?>
+                                            if($val->id_orden_produccion !== null){ 
+                                                if ($previousIdProceso !== null && $val->id_detalle !== $previousIdProceso){ ?>
+                                                   <tr style="background-color: #f0f0f0;"> <td colspan="<?= $colSpanCount ?>" style="text-align: center; font-weight: bold; padding: 10px;">
+                                                       Presentacion: <?= $val->ordenProductos->descripcion ?> 
+                                                   </tr>
+                                                <?php } ?>
                                                 <tr style="font-size: 85%;">
                                                     <td><?= $val->codigo_materia ?></td>
                                                     <td><?= $val->materiales ?></td>
-                                                      <td><?= $val->ordenProductos->descripcion ?></td>
+                                                    <td><?= $val->ordenProductos->descripcion ?></td>
                                                     <td style="text-align: right"><?= $val->unidades_solicitadas ?></td>
+                                                    <td style="text-align: right; background-color: #ddb3b0"><?= ''.number_format($val->materiaPrima->stock,0) ?></td>
+                                                    <?php if($val->validar_linea_materia_prima == 0){?>
+                                                        <td ><?= $val->validarLineaMateriaPrima ?></td>
+                                                    <?php }else{?>
+                                                        <td style="background-color: #fff0f0" ><?= $val->validarLineaMateriaPrima ?></td>
+                                                    <?php }?>    
                                                     <?php if($model->autorizado == 0){?>
                                                         <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_despachadas[]" style ="text-align: right" value="<?= $val->unidades_despachadas ?>" size ="12" required="true"> </td> 
                                                     <?php }else{?>
@@ -162,7 +181,43 @@ $view = 'entrega-materiales';
                                                     <?php }?>   
                                                     <input type="hidden" name="listado_materiales[]" value="<?= $val->id?>"> 
                                                 </tr>
-                                                  <?php  $previousIdProceso = $val->id_detalle; 
+                                                <?php  $previousIdProceso = $val->id_detalle; 
+                                            }else{
+                                                if ($previousIdProceso !== null && $val->id_detalle_entrega !== $previousIdProceso){ ?>
+                                                    <tr style="background-color: #f0f0f0;"> <td colspan="<?= $colSpanCount ?>" style="text-align: center; font-weight: bold; padding: 10px;">
+                                                        <?php $entrega = \app\models\EntregaSolicitudKitsDetalle::findOne($val->id_detalle_entrega);
+                                                            $solicitudArmado = app\models\SolicitudArmadoKitsDetalle::findOne($entrega->id_detalle)?>
+                                                            Presentacion: <?= $solicitudArmado->inventario->presentacion->descripcion ?> 
+                                                    </tr>
+                                                <?php
+                                                } ?>
+                                                <tr style="font-size: 85%;">
+                                                    <td><?= $val->codigo_materia ?></td>
+                                                    <td><?= $val->materiales ?></td>
+                                                    <?php 
+                                                        $entrega = \app\models\EntregaSolicitudKitsDetalle::findOne($val->id_detalle_entrega);
+                                                        $solicitudArmado = app\models\SolicitudArmadoKitsDetalle::findOne($entrega->id_detalle)
+                                                        ?>
+                                                        <td><?= $solicitudArmado->inventario->presentacion->descripcion?></td>
+                                                   <?php ?>     
+                                                    <td style="text-align: right"><?= $val->unidades_solicitadas ?></td>
+                                                    <td style="text-align: right; background-color: #ddb3b0"><?= ''.number_format($val->materiaPrima->stock,0) ?></td>
+                                                    <?php if($val->validar_linea_materia_prima == 0){?>
+                                                        <td ><?= $val->validarLineaMateriaPrima ?></td>
+                                                    <?php }else{?>
+                                                        <td style="background-color: #fff0f0" ><?= $val->validarLineaMateriaPrima ?></td>
+                                                    <?php }?>    
+                                                    <?php if($model->autorizado == 0){?>
+                                                        <td style="padding-right: 1;padding-right: 1; text-align: right"> <input type="text" name="unidades_despachadas[]" style ="text-align: right" value="<?= $val->unidades_despachadas ?>" size ="12" required="true"> </td> 
+                                                    <?php }else{?>
+                                                        <td style='text-align: right'><?= ''.number_format($val->unidades_despachadas,0) ?></td>
+                                                    <?php }?>   
+                                                    <input type="hidden" name="listado_materiales[]" value="<?= $val->id?>"> 
+                                                </tr>
+                                                <?php  $previousIdProceso = $val->id_detalle_entrega; 
+                                                      
+                                            }
+                                                    
                                          endforeach;?>          
                                     </body>
                                 </table>

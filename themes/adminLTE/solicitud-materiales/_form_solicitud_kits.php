@@ -80,7 +80,7 @@ $form = ActiveForm::begin([
                                         <td><?= $val->id_entrega_kits ?></td>
                                         <td style='text-align: left'><?= $val->presentacion->descripcion ?></td>
                                         <td style='text-align: right'><?= ''.number_format($val->total_unidades_entregadas,0) ?></td>
-                                        <td style='text-align: right'><?= ''.number_format($val->cantidad_despachada,0) ?></td>
+                                        <td style='text-align: right'><?= ''.number_format($val->cantidad_despachada_saldo,0) ?></td>
                                         <td style= 'width: 20px; height: 20px;'><input type="checkbox" name="nueva_entrega_materia[]" value="<?= $val->id_entrega_kits ?>"></td> 
                                     </tr>
                                  <?php endforeach;

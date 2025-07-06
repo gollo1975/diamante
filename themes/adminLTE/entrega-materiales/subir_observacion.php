@@ -16,8 +16,8 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'options' => ['class' => 'form-horizontal condensed', 'role' => 'form'],
             'fieldConfig' => [
-            'template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>',
-            'labelOptions' => ['class' => 'col-sm-4 control-label'],
+            'template' => '{label}<div class="col-sm-10 form-group">{input}{error}</div>',
+            'labelOptions' => ['class' => 'col-sm-3 control-label'],
             'options' => []
         ],
         ]);
@@ -31,12 +31,12 @@ $form = ActiveForm::begin([
         <div class="table table-responsive">
             <div class="panel panel-success ">
                 <div class="panel-heading" style="text-align: left ">
-                  INFORMACION DE ENTREGA
+                  Observacion de la entrega
                 </div>
                 <div class="panel-body">
                     <div class="row">
                       
-                        <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+                        <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-8 form-group">{input}{error}</div>'])->textarea(['rows' => 3]) ?>
                        
                     </div>
                 </div>  

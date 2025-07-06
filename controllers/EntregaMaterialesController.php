@@ -129,22 +129,24 @@ class EntregaMaterialesController extends Controller
     public function actionView($id,$token)
     {
         $detalle_solicitud = EntregaMaterialesDetalle::find()->where(['=','id_entrega', $id])->all();
+        $validar_inventario = EntregaMaterialesDetalle::find()->where(['=','id_entrega', $id])->andWhere(['=','validar_linea_materia_prima', 0])->all();
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_cantidad"])){
                 if(isset($_POST["listado_materiales"])){
                     $intIndice = 0; $cantidad = 0;
                     foreach ($_POST["listado_materiales"] as $intCodigo):
-                         $table = \app\models\EntregaMaterialesDetalle::findOne($intCodigo);
+                        $table = \app\models\EntregaMaterialesDetalle::findOne($intCodigo);
                         $cantidad = $_POST["unidades_despachadas"][$intIndice];
                         if($cantidad <= $table->unidades_solicitadas){
                             $table->unidades_despachadas = $_POST["unidades_despachadas"][$intIndice];
-                            $table->save();
+                            $materia = \app\models\MateriaPrimas::findOne($table->id_materia_prima);
+                            $table->save(false);
                             $intIndice++;
                         }else{
                             Yii::$app->getSession()->setFlash('warning', 'La cantidad a entregar NO puede ser mayor que la cantidad solicitada. Valide la informacion!');
                         }    
                     endforeach;
-                    return $this->redirect(['view','id' =>$id, 'token' => $token]);
+                   return $this->redirect(['view','id' =>$id, 'token' => $token]);
                 }
             }
         }
@@ -152,8 +154,11 @@ class EntregaMaterialesController extends Controller
             'model' => $this->findModel($id),
             'token' => $token,
             'detalle_solicitud' => $detalle_solicitud,
+            'validar_inventario' => $validar_inventario,
         ]);
     }
+    
+  
 
       //SE AUTORIZA O DESAUTORIZA EL PRODUCTO
     public function actionAutorizado($id, $token) {
@@ -207,12 +212,75 @@ class EntregaMaterialesController extends Controller
         $solicitud->numero_entrega = $lista->numero_inicial + 1;
         $solicitud->cerrar_solicitud = 1;
         $solicitud->fecha_despacho = date('Y-m-d');
-        $solicitud->save();
+        $solicitud->save(false);
         $orden->despachado = 1;
-        $orden->save();
+        $orden->save(false);
         $lista->numero_inicial = $solicitud->numero_entrega;
-        $lista->save();
+        $lista->save(false);
         $this->redirect(["entrega-materiales/view", 'id' => $id, 'token' =>$token]);  
+    }
+    
+     //DESCARGAR MATERIAL DE EMPAQUE
+    public function actionDescargar_material_empaque($id, $token)
+    {
+        $model = \app\models\EntregaMateriales::findOne($id);
+        $detalle = \app\models\EntregaMaterialesDetalle::find()->where(['=','id_entrega', $id])->andWhere(['=','validar_linea_materia_prima', 0])->all();
+        $con = 0; $stock = 0;
+        foreach ($detalle as $val) {
+            $materia = \app\models\MateriaPrimas::findOne($val->id_materia_prima);
+            if($materia){
+                $stock = $materia->stock - $val->unidades_despachadas;
+                $id_materia = $val->id_materia_prima;
+                if($stock >= 0){
+                    $con++;
+                    $materia->stock = $stock;
+                    $materia->salida_materia_prima += $val->unidades_despachadas;
+                    $materia->save(false);
+                    //actualiza la linea de inventario
+                    $val->validar_linea_materia_prima = 1;
+                    $val->save(false);
+                    //guarda la bitagora
+                    $table = new \app\models\BitacoraMateriasPrimas();
+                    $table->id_materia_prima = $id_materia;
+                    $table->cantidad = $val->unidades_despachadas;
+                    $table->fecha_salida = date('Y-m-d');
+                    $table->fecha_hora_salida = date('Y-m-d H:i:s');
+                    $table->user_name = Yii::$app->user->identity->username;
+                    if($model->solicitud->id_orden_produccion !== null){
+                       $table->descripcion_salida = 'Salida de material de empaque para ordenes de produccion';
+                       $table->id_orden_produccion = $model->solicitud->id_orden_produccion;
+
+                    }else{
+                        $table->descripcion_salida = 'Salida de material de empaque para entrega de kits';
+                        $table->id_entrega_kits = $model->solicitud->id_entrega_kits;
+                    }
+                    $table->save(false);
+                    $this->SumarTotalesMateria($id_materia);
+                }    
+            }
+        }
+        if(count($detalle)> 0){
+            $model->descargar_material_empaque = 1;
+            $model->save();
+        }    
+        Yii::$app->getSession()->setFlash('success', 'Se enviaron al modulo de inventario de materias primas ('.$con.') registros para ser descargados. Se validaron exitosamente.');
+        return $this->redirect(["entrega-materiales/view", 'id' => $id, 'token' =>$token]);  
+    }
+    
+    //PROCESO QUE ACTUALIZA SALDOS
+    protected function SumarTotalesMateria($id_materia) {
+        $materia = \app\models\MateriaPrimas::findOne($id_materia);
+        $total = 0; $iva = 0;
+         if ($materia->valor_unidad !== 0){
+             $total = $materia->valor_unidad * $materia->stock;     
+             $iva = ($total * $materia->porcentaje_iva)/100;
+             $materia->valor_iva = round($iva);
+             $materia->subtotal = $total;
+             $materia->total_materia_prima = $total + $iva;
+             $materia->save(false);
+         }
+         
+        
     }
     
        //REPORTES

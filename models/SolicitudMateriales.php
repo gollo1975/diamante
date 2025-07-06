@@ -47,7 +47,7 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
             [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => TipoSolicitud::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud']],
             [['id_grupo'], 'exist', 'skipOnError' => true, 'targetClass' => GrupoProducto::className(), 'targetAttribute' => ['id_grupo' => 'id_grupo']],
             [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Productos::className(), 'targetAttribute' => ['id_producto' => 'id_producto']],
-            [['id_solicitud_documento'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoSolicitudes::className(), 'targetAttribute' => ['id_solicitud' => 'id_solicitud_documento']],
+            [['id_solicitud'], 'exist', 'skipOnError' => true, 'targetClass' => DocumentoSolicitudes::className(), 'targetAttribute' => ['id_solicitud_documento' => 'id_solicitud']],
             [['id_entrega_kits'], 'exist', 'skipOnError' => true, 'targetClass' => EntregaSolicitudKits::className(), 'targetAttribute' => ['id_entrega_kits' => 'id_entrega_kits']],
         ];
     }
@@ -74,7 +74,7 @@ class SolicitudMateriales extends \yii\db\ActiveRecord
             'observacion' => 'Observacion:',
             'id_producto' => 'Producto:',
             'aplica_todo' => 'Aplica todo:',
-            'id_solicitud_documento' => 'id_solicitud_documento',
+            'id_solicitud_documento' => 'Tipo de solicitud:',
             'id_entrega_kits' => 'id_entrega_kits',
             
         ];
