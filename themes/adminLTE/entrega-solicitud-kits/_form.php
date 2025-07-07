@@ -32,17 +32,17 @@ $form = ActiveForm::begin([
     <div class="table table-responsive">
         <div class="panel panel-success ">
             <div class="panel-heading" style="text-align: left ">
-               Importar solicitud
+               Crear solicitud de entrega...
             </div>
             <div class="panel-body">
                  <div class="row">
                     <?= $form->field($model, 'tipo_solicitud')->dropdownList($conSolicitud, ['prompt' => 'Seleccione...', 'required' => true]) ?>		
                 </div>
                 <div class="row">
-                    <?= $form->field($model, 'tipo_entrega')->dropdownList(['1' => 'PARCIAL', '2' => 'COMPLETA'], ['prompt' => 'Seleccione...', 'required' => true]) ?>		
+                    <?= $form->field($model, 'tipo_entrega')->dropdownList(['1' => 'PARCIAL', '2' => 'COMPLETA'], ['prompt' => 'Seleccione...','onchange' => 'mostrarcampo()', 'id' => 'tipo_entrega', 'required' => true]) ?>
                 </div>
                 <div class="row">
-                    <?= $form->field($model, 'cantidad_entregada')->input("text",['required' => true]) ?>
+                     <div id="cantidad_entregada" style="display:none"> <?= $form->field($model, 'cantidad_entregada')->textInput() ?></div>
                 </div>    
 
             </div>  
@@ -114,6 +114,18 @@ $form = ActiveForm::begin([
 			}
 		}
 	}
+        
+        function mostrarcampo(){
+        let tipo_entrega = document.getElementById('tipo_entrega').value;
+        console.log('Valor de tipo_entrega:', tipo_entrega); 
+        if(tipo_entrega === '1'){
+            cantidad_entregada.style.display = "block";
+        } else {
+           
+           cantidad_entregada.style.display = "none";
+        }
+    }
+        
 </script>
 
 

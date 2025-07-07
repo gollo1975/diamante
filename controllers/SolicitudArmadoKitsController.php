@@ -135,6 +135,7 @@ class SolicitudArmadoKitsController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $model->user_name = Yii::$app->user->identity->username;
+            $model->saldo_cantidad_solicitada = $model->cantidad_solicitada;
             $model->save();
             $concepto = \app\models\PresentacionKitsDetalle::find()->where(['=','id_presentacion', $model->id_presentacion])->all();
             if($concepto){
@@ -143,7 +144,6 @@ class SolicitudArmadoKitsController extends Controller
                     $table->id_solicitud_armado = $model->id_solicitud_armado;
                     $table->id_inventario = $val->id_inventario;
                     $table->cantidad_solicitada = $model->cantidad_solicitada;
-                    $table->saldo_cantidad_solicitada = $model->cantidad_solicitada;
                     $table->save(false);
                     $id = $model->id_solicitud_armado;
                 }
@@ -173,6 +173,8 @@ class SolicitudArmadoKitsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->saldo_cantidad_solicitada = $model->cantidad_solicitada;
+            $model->save();
             $concepto = \app\models\PresentacionKitsDetalle::find()->where(['=','id_presentacion', $model->id_presentacion])->all();
             if($concepto){
                 foreach ($concepto as $val) {
@@ -180,7 +182,6 @@ class SolicitudArmadoKitsController extends Controller
                     $table->id_solicitud_armado = $model->id_solicitud_armado;
                     $table->id_inventario = $val->id_inventario;
                     $table->cantidad_solicitada = $model->cantidad_solicitada;
-                    $table->saldo_cantidad_solicitada = $model->cantidad_solicitada;
                     $table->save(false);
                 }
                 $this->SumarCantidades($id);

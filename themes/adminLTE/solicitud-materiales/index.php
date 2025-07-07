@@ -232,8 +232,7 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?> 
-            <a align="right" href="<?= Url::toRoute("solicitud-materiales/create") ?>" class="btn btn-default btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva Solictud LIBRE</a> 
+            <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?> 
             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Nueva solicitud KITS',
                       ['/solicitud-materiales/nueva_solicitud_materiales_kits'],
                       [
@@ -251,7 +250,7 @@ $form = ActiveForm::begin([
                           <div class="modal-content"></div>
                       </div>
             </div>
-            <a align="right" href="<?= Url::toRoute("solicitud-materiales/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva Solictud OP</a>               
+            <a align="right" href="<?= Url::toRoute("solicitud-materiales/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nueva Solicitud OP</a>               
             <?php $form->end() ?>   
         </div>
      </div>

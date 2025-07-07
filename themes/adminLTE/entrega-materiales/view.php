@@ -227,7 +227,11 @@ $view = 'entrega-materiales';
                                 if($model->autorizado == 0){?>
                                     <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-success btn-sm", 'name' => 'actualizar_cantidad']) ?>
                                 
-                                <?php } ?>
+                                <?php } 
+                                if($model->cerrar_solicitud == 1){ ?>
+                                    <?= Html::a('<span class="glyphicon glyphicon-export"></span> Exportar detalle a excel', ['excel_detalle_materiales', 'id' => $model->id_entrega], ['class' => 'btn btn-primary btn-sm']);?>
+                                <?= Html::a('<span class="glyphicon glyphicon-export"></span> Exportar materiales por hoja', ['detalle_materiales_hoja', 'id' => $model->id_entrega], ['class' => 'btn btn-success btn-sm']);?>
+                                <?php }?>     
                             </div>   
                         </div>
                     </div>

@@ -308,8 +308,399 @@ class EntregaMaterialesController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
     
-     //exceles
+    //EXCEL QUE EXPORTA TODAS LAS ENTREGA
+      //exceles
     public function actionExcelConsultaEntrega($tableexcel) {
-          Yii::$app->getSession()->setFlash('info', 'Este proceso esta en desarrollo.'); 
+        
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+       
+                               
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NRO SOLICITUD')
+                    ->setCellValue('C1', 'NRO ENTREGA')
+                    ->setCellValue('D1', 'FECHA DESPACHO')
+                    ->setCellValue('E1', 'FECHA HORA REGISTRO')
+                    ->setCellValue('F1', 'U. SOLICITADAS')
+                    ->setCellValue('G1', 'USER NANE');
+                   
+               
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_entrega)
+                    ->setCellValue('B' . $i, $val->solicitud->numero_solicitud)
+                    ->setCellValue('C' . $i, $val->numero_entrega)
+                    ->setCellValue('D' . $i, $val->fecha_despacho )
+                    ->setCellValue('E' . $i, $val->fecha_hora_registro)
+                    ->setCellValue('F' . $i, $val->unidades_solicitadas)
+                    ->setCellValue('G' . $i, $val->user_name);
+                   
+                 
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Entregas.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+    
+    //EXCEL QUE EXPORTA EL DETALLE DE LA ENTREGA
+     public function actionExcel_detalle_materiales($id) {
+        
+        $detalle = EntregaMaterialesDetalle::find()->where(['=','id_entrega', $id])->all();
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
+       
+                               
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'NRO SOLICITUD')
+                    ->setCellValue('C1', 'NRO ENTREGA')
+                    ->setCellValue('D1', 'FECHA DESPACHO')
+                    ->setCellValue('E1', 'FECHA HORA REGISTRO')
+                    ->setCellValue('F1', 'CODIGO')
+                    ->setCellValue('G1', 'NOMBRE DEL MATERIAL')
+                    ->setCellValue('H1', 'CODIGO PRESENTACION')
+                    ->setCellValue('I1', 'NOMBRE DE LA PRESENTACION')
+                    ->setCellValue('J1', "NRO ORDEN")
+                    ->setCellValue('K1', 'NRO SOLICITUD KITS')
+                    ->setCellValue('L1', 'U. SOLICITADAS')
+                    ->setCellValue('M1', 'U. DESPACHADAS')
+                    ->setCellValue('N1', 'USER NANE');
+                   
+               
+        $i = 2;
+        
+        foreach ($detalle as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->entrega->id_entrega)
+                    ->setCellValue('B' . $i, $val->entrega->solicitud->numero_solicitud)
+                    ->setCellValue('C' . $i, $val->entrega->numero_entrega)
+                    ->setCellValue('D' . $i, $val->entrega->fecha_despacho )
+                    ->setCellValue('E' . $i, $val->entrega->fecha_hora_registro)
+                    ->setCellValue('G' . $i, $val->materiales);
+                    if($val->id_orden_produccion !== null){
+                        $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('H' . $i, $val->ordenProductos->codigo_producto)
+                        ->setCellValue('I' . $i, $val->ordenProductos->descripcion)
+                        ->setCellValue('J' . $i, $val->entrega->solicitud->ordenProduccion->numero_orden)
+                        ->setCellValue('K' . $i, 'NO FOUNT');  
+                    }else{
+                        $entrega = \app\models\EntregaSolicitudKitsDetalle::findOne($val->id_detalle_entrega);
+                        $solicitudArmado = \app\models\SolicitudArmadoKitsDetalle::findOne($entrega->id_detalle);
+                        $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('H' . $i, $solicitudArmado->inventario->codigo_producto)
+                        ->setCellValue('I' . $i, $solicitudArmado->inventario->presentacion->descripcion)
+                        ->setCellValue('J' . $i, 'NO FOUNT')    
+                        ->setCellValue('K' . $i, $solicitudArmado->solicitudArmado->numero_solicitud) ;
+                         
+                    }
+                    $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('L' . $i, $val->unidades_solicitadas)
+                    ->setCellValue('M' . $i, $val->unidades_despachadas)
+                    ->setCellValue('N' . $i, $val->entrega->user_name);
+                   
+                 
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Detalle_entrega_materiales.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+        
+    
+    //EXPORTAR MATERIAL EN CADA HOJA
+    public function actionDetalle_materiales_hoja($id)
+    {
+        $detalle = EntregaMaterialesDetalle::find()->where(['=', 'id_entrega', $id])->all();
+        $objPHPExcel = new \PHPExcel();
+
+        // Establecer propiedades del documento
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+        ->setLastModifiedBy("EMPRESA")
+        ->setTitle("Detalle de Entrega de Materiales")
+        ->setSubject("Detalle de Entrega de Materiales por Presentación")
+        ->setDescription("Documento de Excel generado por PHP para el detalle de entrega de materiales, separado por presentación.")
+        ->setKeywords("excel php entrega materiales presentacion")
+        ->setCategory("Reporte");
+
+        // --- Agrupar los datos por presentación ---
+        $groupedData = [];
+        foreach ($detalle as $val) {
+            $presentationName = '';
+            $productCode = ''; // Para almacenar el código del producto para las columnas F y H
+
+            // Determinar el nombre de la presentación y el código del producto
+            if ($val->id_orden_produccion !== null) {
+                // Si es una orden de producción
+                $presentationName = $val->ordenProductos->descripcion;
+                $productCode = $val->ordenProductos->codigo_producto;
+            } else {
+                // Si es un kit, buscar la información a través de las relaciones
+                $entrega = \app\models\EntregaSolicitudKitsDetalle::findOne($val->id_detalle_entrega);
+                $solicitudArmado = null;
+                if ($entrega) {
+                    $solicitudArmado = \app\models\SolicitudArmadoKitsDetalle::findOne($entrega->id_detalle);
+                }
+
+                if ($solicitudArmado && $solicitudArmado->inventario && $solicitudArmado->inventario->presentacion) {
+                    $presentationName = $solicitudArmado->inventario->presentacion->descripcion;
+                    $productCode = $solicitudArmado->inventario->codigo_producto;
+                } else {
+                    // Fallback si los datos de presentación no se encuentran para los kits
+                    $presentationName = 'Sin Presentacion (Kits)';
+                    $productCode = 'N/A';
+                }
+            }
+
+            // Limpiar el nombre de la presentación para usarlo como título de la hoja (máx. 31 caracteres, sin caracteres inválidos)
+            $sanitizedPresentationName = preg_replace('/[\\\\\/:\*\?\[\]]/', '', $presentationName);
+            $sanitizedPresentationName = substr($sanitizedPresentationName, 0, 31); // Máximo 31 caracteres para el nombre de la hoja
+
+            if (!isset($groupedData[$sanitizedPresentationName])) {
+                $groupedData[$sanitizedPresentationName] = [];
+            }
+            // Almacenar el objeto de detalle y el código del producto juntos
+            $groupedData[$sanitizedPresentationName][] = ['data' => $val, 'productCode' => $productCode];
+        }
+
+        // --- Generar hojas de cálculo para cada presentación ---
+
+        // Eliminar la hoja predeterminada creada por PHPExcel si existe, para empezar limpio.
+        if ($objPHPExcel->getSheetCount() > 0) {
+            $objPHPExcel->removeSheetByIndex(0);
+        }
+
+        $sheetIndex = 0;
+    if (empty($groupedData)) {
+        // Si no hay datos agrupados, crear una hoja por defecto "Sin Datos"
+        $objPHPExcel->createSheet(0);
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objPHPExcel->getActiveSheet()->setTitle('Sin Datos');
+
+        // Configurar estilos y dimensiones de columna para la hoja "Sin Datos"
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
+
+        // Añadir encabezados a la hoja "Sin Datos"
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A1', 'ID')
+            ->setCellValue('B1', 'NRO SOLICITUD')
+            ->setCellValue('C1', 'NRO ENTREGA')
+            ->setCellValue('D1', 'FECHA DESPACHO')
+            ->setCellValue('E1', 'FECHA HORA REGISTRO')
+            ->setCellValue('F1', 'CODIGO')
+            ->setCellValue('G1', 'NOMBRE DEL MATERIAL')
+            ->setCellValue('H1', 'CODIGO PRESENTACION')
+            ->setCellValue('I1', 'NOMBRE DE LA PRESENTACION')
+            ->setCellValue('J1', "NRO ORDEN")
+            ->setCellValue('K1', 'NRO SOLICITUD KITS')
+            ->setCellValue('L1', 'U. SOLICITADAS')
+            ->setCellValue('M1', 'U. DESPACHADAS')
+            ->setCellValue('N1', 'USER NANE');
+
+    } else {
+        // Iterar sobre los datos agrupados para crear una hoja por cada presentación
+        foreach ($groupedData as $presentationName => $items) {
+            $objPHPExcel->createSheet($sheetIndex); // Crear una nueva hoja en el índice actual
+            $objPHPExcel->setActiveSheetIndex($sheetIndex);
+            $objPHPExcel->getActiveSheet()->setTitle($presentationName); // Usar el nombre de presentación sanitizado
+
+            // Configurar estilos y dimensiones de columna para la hoja actual
+            $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+            $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setAutoSize(true); // Añadida dimensión para la columna N
+
+            // Añadir encabezados a la hoja actual
+            $objPHPExcel->setActiveSheetIndex($sheetIndex)
+                ->setCellValue('A1', 'ID')
+                ->setCellValue('B1', 'NRO SOLICITUD')
+                ->setCellValue('C1', 'NRO ENTREGA')
+                ->setCellValue('D1', 'FECHA DESPACHO')
+                ->setCellValue('E1', 'FECHA HORA REGISTRO')
+                ->setCellValue('F1', 'CODIGO') // Código del producto/material
+                ->setCellValue('G1', 'NOMBRE DEL MATERIAL') // Nombre del material/producto
+                ->setCellValue('H1', 'CODIGO PRESENTACION') // Código de la presentación (o el mismo código de producto si no hay uno específico)
+                ->setCellValue('I1', 'NOMBRE DE LA PRESENTACION') // Nombre de la presentación
+                ->setCellValue('J1', "NRO ORDEN")
+                ->setCellValue('K1', 'NRO SOLICITUD KITS')
+                ->setCellValue('L1', 'U. SOLICITADAS')
+                ->setCellValue('M1', 'U. DESPACHADAS')
+                ->setCellValue('N1', 'USER NANE');
+
+            $i = 2; // Iniciar los datos desde la fila 2 (después de los encabezados)
+            foreach ($items as $itemData) {
+                $val = $itemData['data'];
+                $productCode = $itemData['productCode']; // Código del producto obtenido durante el agrupamiento
+
+                $objPHPExcel->setActiveSheetIndex($sheetIndex)
+                    ->setCellValue('A' . $i, $val->entrega->id_entrega)
+                    ->setCellValue('B' . $i, $val->entrega->solicitud->numero_solicitud)
+                    ->setCellValue('C' . $i, $val->entrega->numero_entrega)
+                    ->setCellValue('D' . $i, $val->entrega->fecha_despacho)
+                    ->setCellValue('E' . $i, $val->entrega->fecha_hora_registro)
+                    ->setCellValue('F' . $i, $productCode) // Se llena la columna F con el código del producto
+                    ->setCellValue('G' . $i, $val->materiales); // Nombre del material
+
+                if ($val->id_orden_produccion !== null) {
+                    $objPHPExcel->setActiveSheetIndex($sheetIndex)
+                        ->setCellValue('H' . $i, $val->ordenProductos->codigo_producto) // Código de la presentación (original)
+                        ->setCellValue('I' . $i, $val->ordenProductos->descripcion) // Nombre de la presentación (original)
+                        ->setCellValue('J' . $i, $val->entrega->solicitud->ordenProduccion->numero_orden)
+                        ->setCellValue('K' . $i, 'NO FOUND'); // Valor original
+                } else {
+                    // Para los kits, se vuelve a buscar la información para esta fila específica
+                    // (considerar optimizar si el rendimiento es crítico, pasando más datos en $groupedData)
+                    $entrega = \app\models\EntregaSolicitudKitsDetalle::findOne($val->id_detalle_entrega);
+                    $solicitudArmado = null;
+                    if ($entrega) {
+                        $solicitudArmado = \app\models\SolicitudArmadoKitsDetalle::findOne($entrega->id_detalle);
+                    }
+
+                    if ($solicitudArmado && $solicitudArmado->inventario && $solicitudArmado->inventario->presentacion) {
+                        $objPHPExcel->setActiveSheetIndex($sheetIndex)
+                            ->setCellValue('H' . $i, $solicitudArmado->inventario->codigo_producto) // Código de la presentación (original)
+                            ->setCellValue('I' . $i, $solicitudArmado->inventario->presentacion->descripcion) // Nombre de la presentación (original)
+                            ->setCellValue('J' . $i, 'NO FOUND') // Valor original
+                            ->setCellValue('K' . $i, $solicitudArmado->solicitudArmado->numero_solicitud);
+                    } else {
+                        // Fallback si faltan datos del kit
+                        $objPHPExcel->setActiveSheetIndex($sheetIndex)
+                            ->setCellValue('H' . $i, 'N/A')
+                            ->setCellValue('I' . $i, 'N/A')
+                            ->setCellValue('J' . $i, 'NO FOUND')
+                            ->setCellValue('K' . $i, 'N/A');
+                    }
+                }
+                $objPHPExcel->setActiveSheetIndex($sheetIndex)
+                    ->setCellValue('L' . $i, $val->unidades_solicitadas)
+                    ->setCellValue('M' . $i, $val->unidades_despachadas)
+                    ->setCellValue('N' . $i, $val->entrega->user_name);
+
+                $i++;
+            }
+            $sheetIndex++;
+        }
+    }
+
+
+    // Establecer la hoja activa de nuevo a la primera (índice 0) para que se muestre al abrir el archivo
+    if ($objPHPExcel->getSheetCount() > 0) {
+        $objPHPExcel->setActiveSheetIndex(0);
+    }
+
+    // Redirigir la salida al navegador del cliente (Excel2007)
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment;filename="Detalle_entrega_materiales.xlsx"');
+    header('Cache-Control: max-age=0');
+    header('Cache-Control: max-age=1'); // Para IE 9
+    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Fecha en el pasado
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // Siempre modificado
+    header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+    header('Pragma: public'); // HTTP/1.0
+
+    $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+    $objWriter->save('php://output');
+    exit;
     }
 }

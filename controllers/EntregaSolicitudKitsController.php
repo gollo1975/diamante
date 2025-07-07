@@ -78,6 +78,9 @@ class EntregaSolicitudKitsController extends Controller
                                 ->offset($pages->offset)
                                 ->limit($pages->limit)
                                 ->all();
+                        if(isset($_POST['excel'])){                    
+                            $this->actionExcelConsultaEntregaSolicitud($tableexcel);
+                        }
                     } else {
                         $form->getErrors();
                     }
@@ -93,6 +96,9 @@ class EntregaSolicitudKitsController extends Controller
                             ->offset($pages->offset)
                             ->limit($pages->limit)
                             ->all();
+                    if(isset($_POST['excel'])){                    
+                            $this->actionExcelConsultaEntregaSolicitud($tableexcel);
+                        } 
                 }
                 $to = $count->count();
                 return $this->render('index', [
@@ -137,18 +143,18 @@ class EntregaSolicitudKitsController extends Controller
             if(isset($_POST["enviar_documento"])){
                 if(isset($_POST["nueva_solicitud"])){
                     foreach ($_POST["nueva_solicitud"] as $intCodigo){
-                        if($model->cantidad_entregada <> null && $model->tipo_entrega > 0){
-                            $dato = \app\models\SolicitudArmadoKits::findOne($intCodigo);
-                            if($dato){
+                        $dato = \app\models\SolicitudArmadoKits::findOne($intCodigo);
+                        $detalle = \app\models\SolicitudArmadoKitsDetalle::find()->where(['=','id_solicitud_armado', $intCodigo])->all();
+                        if($model->tipo_entrega == 1){
+                            if($model->cantidad_entregada > 0){
                                 if($model->cantidad_entregada <= $dato->saldo_cantidad_solicitada){
-                                    $detalle = \app\models\SolicitudArmadoKitsDetalle::find()->where(['=','id_solicitud_armado', $intCodigo])->all();
                                     foreach ($detalle as $val) {
                                         $table = new EntregaSolicitudKits();
                                         $table->id_solicitud = $model->tipo_solicitud;
                                         $table->id_presentacion = $dato->id_presentacion;
                                         $table->id_solicitud_armado = $dato->id_solicitud_armado;
                                         $table->fecha_solicitud = date('Y-m-d');
-                                        $model->fecha_hora_proceso = date('Y-m-d H:i:s');
+                                        $table->fecha_hora_proceso = date('Y-m-d H:i:s');
                                         $table->cantidad_despachada = $model->cantidad_entregada;
                                         $table->cantidad_despachada_saldo = $model->cantidad_entregada;
                                         $table->user_name = Yii::$app->user->identity->username;
@@ -161,17 +167,37 @@ class EntregaSolicitudKitsController extends Controller
                                         $this->SumarCantidades($id);
                                         return $this->redirect(["view",'id' => $id, 'token' =>0]);
                                     }
-                                    
+
                                 }else{
-                                    Yii::$app->getSession()->setFlash('error', 'Las cantidades entregas nos mayores que las cantidades solicitadas'); 
+                                    Yii::$app->getSession()->setFlash('error', 'Las cantidad entregada NO pueden ser mayore que la cantidad solicitada.'); 
                                     return $this->redirect(["index"]);
                                 }
-                            }    
+                            }else{
+                                Yii::$app->getSession()->setFlash('error', 'Campos vacios. Vuelva a intentarlo.'); 
+                                return $this->redirect(["index"]);
 
-                        } else {
-                            Yii::$app->getSession()->setFlash('error', 'Campos vacios. Vuelva a intentarlo.'); 
-                            return $this->redirect(["index"]);
-                        }
+                            }    
+                        }else{
+                            foreach ($detalle as $val) {
+                                    $table = new EntregaSolicitudKits();
+                                    $table->id_solicitud = $model->tipo_solicitud;
+                                    $table->id_presentacion = $dato->id_presentacion;
+                                    $table->id_solicitud_armado = $dato->id_solicitud_armado;
+                                    $table->fecha_solicitud = date('Y-m-d');
+                                    $table->fecha_hora_proceso = date('Y-m-d H:i:s');
+                                    $table->cantidad_despachada = $dato->saldo_cantidad_solicitada;
+                                    $table->cantidad_despachada_saldo = $dato->saldo_cantidad_solicitada;
+                                    $table->user_name = Yii::$app->user->identity->username;
+                                    $table->save(false);
+                                    $codigo = $dato->id_solicitud_armado;
+                                    $consecutivo = EntregaSolicitudKits::find()->orderBy('id_entrega_kits DESC')->one();
+                                    $id = $consecutivo->id_entrega_kits;
+                                    $unidades = $dato->saldo_cantidad_solicitada;
+                                    $this->DetalleEntrega($codigo, $id, $unidades);
+                                    $this->SumarCantidades($id);
+                                    return $this->redirect(["view",'id' => $id, 'token' =>0]);
+                            }    
+                        }    
                     }
                     return $this->redirect(['index']);       
                 }    
@@ -193,6 +219,7 @@ class EntregaSolicitudKitsController extends Controller
             $table->id_detalle = $val->id_detalle;
             $table->cantidad_solicitada = $val->cantidad_solicitada;
             $table->cantidad_despachada = $unidades;
+            $table->unidades_faltante = $unidades;
             $table->save(false);
         }
     }
@@ -219,9 +246,18 @@ class EntregaSolicitudKitsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_entrega_kits,'token' => 0]);
+        if ($model->load(Yii::$app->request->post())){
+            $entrega = EntregaSolicitudKits::findOne($id);   
+            $armado = \app\models\SolicitudArmadoKits::findOne($entrega->id_solicitud_armado);
+            if($model->cantidad_despachada <= $armado->saldo_cantidad_solicitada){
+                $model->cantidad_despachada = $model->cantidad_despachada;
+                $model->observacion = $model->observacion;
+                $model->save(); 
+                return $this->redirect(['view', 'id' => $model->id_entrega_kits,'token' => 0]);
+            }else{
+               Yii::$app->getSession()->setFlash('error', 'Las unidades despachadas NO pueden ser mayo que las unidades solicitadas.');
+               return $this->redirect(["entrega-solicitud-kits/update",'model' =>$model,'id' => $id]);   
+            }
         }
 
         return $this->render('update', [
@@ -276,6 +312,7 @@ class EntregaSolicitudKitsController extends Controller
                     $table->id_detalle = $val->id_detalle;
                     $table->cantidad_solicitada = $val->cantidad_solicitada;
                     $table->cantidad_despachada = $model->cantidad_despachada;
+                    $table->unidades_faltante = $model->cantidad_despachada;
                     $table->save(false);
                 }    
             }
@@ -468,5 +505,90 @@ class EntregaSolicitudKitsController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+    //EXPORTA LOS CLIENTES DE CADA VENDEDOR
+    public function actionExcelConsultaEntregaSolicitud($tableexcel) {
+        $objPHPExcel = new \PHPExcel();
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
+        $objPHPExcel->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $objPHPExcel->getActiveSheet()->getStyle('1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
+       
+                               
+        $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A1', 'ID')
+                    ->setCellValue('B1', 'TIPO SOLICITUD')
+                    ->setCellValue('C1', 'PRESENTACION')
+                    ->setCellValue('D1', 'UNIDADES SOLICITADAS')
+                    ->setCellValue('E1', 'UNIDADES ENTREGADAS')
+                    ->setCellValue('F1', 'KITS SOLICITADOS')
+                    ->setCellValue('G1', 'KIT ENTREGADOS')
+                    ->setCellValue('H1', 'FECHA SOLICITUD')
+                    ->setCellValue('I1', 'FECHA HORA PROCESO')
+                    ->setCellValue('J1', 'FECHA HORA CIERRE')
+                    ->setCellValue('K1', "NUMERO ENTREGA")
+                    ->setCellValue('L1', 'NUMERO SOLICITUD')
+                    ->setCellValue('M1', 'USER NANE');
+                   
+               
+        $i = 2;
+        
+        foreach ($tableexcel as $val) {
+                                  
+            $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue('A' . $i, $val->id_entrega_kits)
+                    ->setCellValue('B' . $i, $val->solicitud->concepto)
+                    ->setCellValue('C' . $i, $val->presentacion->descripcion)
+                    ->setCellValue('D' . $i, $val->total_unidades_entregadas )
+                    ->setCellValue('E' . $i, $val->solicitudArmado->total_unidades)
+                    ->setCellValue('F' . $i, $val->cantidad_despachada)
+                    ->setCellValue('G' . $i, $val->solicitudArmado->cantidad_solicitada)
+                    ->setCellValue('H' . $i, $val->fecha_solicitud)
+                    ->setCellValue('I' . $i, $val->fecha_hora_proceso)
+                    ->setCellValue('J' . $i, $val->fecha_hora_cierre)
+                    ->setCellValue('K' . $i, $val->numero_entrega)
+                    ->setCellValue('L' . $i, $val->solicitudArmado->numero_solicitud)
+                    ->setCellValue('M' . $i, $val->user_name);
+                 
+            $i++;
+        }
+
+        $objPHPExcel->getActiveSheet()->setTitle('Listado');
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Entrega_solicitud.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
     }
 }

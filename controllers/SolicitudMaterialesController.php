@@ -147,8 +147,8 @@ class SolicitudMaterialesController extends Controller
             $presentacion = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 0])->all();
             $presentacion2 = \app\models\OrdenProduccionProductos::find()->where(['=','id_orden_produccion', $solicitd->id_orden_produccion])->andWhere(['=','solicitud_empaque', 1])->all();
         }elseif($sw == 1){
-            $presentacion = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $solicitd->entregaSolicitud->id_entrega_kits])->all();
-            $presentacion2 = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $solicitd->entregaSolicitud->id_entrega_kits])->all();
+            $presentacion = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $solicitd->entregaSolicitud->id_entrega_kits])->andWhere(['=','solicitud_empaque', 0])->all();
+            $presentacion2 = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $solicitd->entregaSolicitud->id_entrega_kits])->andWhere(['=','solicitud_empaque', 1])->all();
         }    
         if (Yii::$app->request->post()) {
             if(isset($_POST["actualizar_cantidad"])){
@@ -237,7 +237,7 @@ class SolicitudMaterialesController extends Controller
         if (Yii::$app->user->identity){
             if (UsuarioDetalle::find()->where(['=','codusuario', Yii::$app->user->identity->codusuario])->andWhere(['=','id_permiso',169])->all()){
                 $model = new \app\models\ModeloImportarSolicitud();
-                $solicitud = \app\models\EntregaSolicitudKits::find()->where(['=','solicitud_generada', 0])->all();
+                $solicitud = \app\models\EntregaSolicitudKits::find()->where(['=','solicitud_generada', 0])->andwhere(['>','cantidad_despachada_saldo', 0])->all();
                 if ($model->load(Yii::$app->request->post())) {
                     if (isset($_POST["enviar_documento"])) {
                         if (isset($_POST["nueva_entrega_materia"])){
@@ -430,11 +430,16 @@ class SolicitudMaterialesController extends Controller
             }else{
                 $detalle = \app\models\SolicitudMaterialesDetalle::find()->where(['=','codigo', $id])->all();
                 foreach ($detalle as $val) {
-                    if ($val->unidades_requeridas === null) {
+                    if ($val->unidades_requeridas <= 0) {
                         Yii::$app->getSession()->setFlash('error', 'Debe de ingresar las unidades solicitadas de empaque.');
                         return $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' => $token , 'sw' =>$sw]);
                     }
-                }
+                     if ($val->linea_cerrada == 0) {
+                        Yii::$app->getSession()->setFlash('error', 'Debe de CERRAR la linea de empaque. Valide la informacion.');
+                        return $this->redirect(["solicitud-materiales/view", 'id' => $id, 'token' => $token , 'sw' =>$sw]);
+                    }
+                }   
+                
             }    
             if ($model->autorizado == 0){  
                 $model->autorizado = 1;

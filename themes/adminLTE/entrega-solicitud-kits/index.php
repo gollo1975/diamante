@@ -111,6 +111,7 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No de solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total kits</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
@@ -130,7 +131,8 @@ $form = ActiveForm::begin([
                             <td><?= $val->solicitud->concepto?></td>
                             <td><?= $val->solicitudArmado->numero_solicitud?></td>
                             <td><?= $val->presentacion->descripcion?></td>
-                             <td style="text-align: right"><?= ''. number_format($val->solicitudArmado->total_unidades,0)?></td>
+                            <td style="text-align: right"><?= ''. number_format($val->solicitudArmado->cantidad_solicitada,0)?></td>
+                            <td style="text-align: right"><?= ''. number_format($val->solicitudArmado->total_unidades,0)?></td>
                             <td style="text-align: right"><?= ''. number_format($val->total_unidades_entregadas,0)?></td>
                             <td><?= $val->fecha_solicitud?></td>
                             <td style="text-align: right"><?= $val->numero_entrega?></td>

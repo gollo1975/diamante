@@ -141,7 +141,7 @@ $this->params['breadcrumbs'][] = $model->id_entrega_kits;
                                                 <td><?= $val->detalle->inventario->nombre_producto ?></td>
                                                 <td style='text-align: right'><?= ''.number_format($val->cantidad_solicitada,0) ?></td>
                                                 <td style='text-align: right'><?= ''.number_format($val->cantidad_despachada,0) ?></td>
-                                                <td style='text-align: right'><?= ''.number_format($val->unidades_faltante,0) ?></td>
+                                                <td style='text-align: right'><?= ($val->unidades_faltante) ?></td>
                                                  <td><?= $val->numero_lote ?></td>
                                                 <?php if($model->autorizado == 0){?>
                                                     <td style= 'width: 25px; height: 25px;'>
