@@ -99,7 +99,7 @@ $form = ActiveForm::begin([
     </div>
         <table class="table table-bordered table-hover">
             <thead>
-                <tr style ='font-size: 90%;'>         
+                <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>No Orden</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th>
@@ -119,9 +119,15 @@ $form = ActiveForm::begin([
             <?php foreach ($model as $val): 
                 $detalle = app\models\EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $val->id_entrada])->one();
                 ?>
-            <tr style ='font-size: 90%;'>                
-                <td><?= $val->id_orden_compra?></td>
-                <td><?= $val->ordenCompra->tipoOrden->descripcion_orden?></td>
+            <tr style ='font-size: 85%;'>                
+               
+                <?php if($val->id_orden_compra !== null){?>
+                    <td><?= $val->id_orden_compra?></td>
+                    <td><?= $val->ordenCompra->tipoOrden->descripcion_orden?></td>
+                <?php }else{?>
+                    <td><?= 'NOT FOUND'?></td>
+                    <td><?= 'NOT FOUND'?></td>
+                <?php }?>    
                 <td><?= $val->proveedor->nombre_completo?></td>
                 <td><?= $val->numero_soporte?></td>
                 <td><?= $val->fecha_proceso?></td>
@@ -133,10 +139,16 @@ $form = ActiveForm::begin([
                 <td style= 'width: 25px; height: 10px;'>
                     <a href="<?= Url::toRoute(["entrada-materia-prima/view", "id" => $val->id_entrada, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>
-                <?php if(!$detalle){?>
-                    <td style= 'width: 25px; height: 10px;'>
-                       <a href="<?= Url::toRoute(["entrada-materia-prima/update", "id" => $val->id_entrada]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
-                    </td>
+                <?php if(!$detalle){
+                    if($val->id_orden_compra !== null){ ?>
+                        <td style= 'width: 25px; height: 10px;'>
+                           <a href="<?= Url::toRoute(["entrada-materia-prima/update", "id" => $val->id_entrada,'sw' => 0]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                        </td>
+                    <?php }else{?>
+                        <td style= 'width: 25px; height: 10px;'>
+                           <a href="<?= Url::toRoute(["entrada-materia-prima/update", "id" => $val->id_entrada,'sw' => 1]) ?>" ><span class="glyphicon glyphicon-pencil"></span></a>                   
+                        </td>
+                    <?php }?>    
                 <?php }else{?>
                     <td style= 'width: 25px; height: 10px;'></td>
                 <?php }?>    
@@ -145,8 +157,9 @@ $form = ActiveForm::begin([
             </tbody>    
         </table> 
         <div class="panel-footer text-right" >            
-           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>                
-            <a align="right" href="<?= Url::toRoute("entrada-materia-prima/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+           <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm']); ?>              
+             <a align="right" href="<?= Url::toRoute(["entrada-materia-prima/create", 'sw' => 1]) ?>" class="btn btn-default btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo sin OC</a>
+            <a align="right" href="<?= Url::toRoute(["entrada-materia-prima/create", 'sw' => 0]) ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo con OC</a>
         <?php $form->end() ?>
         </div>
      </div>

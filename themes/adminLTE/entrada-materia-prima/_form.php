@@ -37,31 +37,50 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
     </div>
     
     <div class="panel-body">
-        <div class="row">
-             <?= $form->field($model, 'id_proveedor')->widget(Select2::classname(), [
+        <?php if($sw == 0){?>
+            <div class="row">
+
+                 <?= $form->field($model, 'id_proveedor')->widget(Select2::classname(), [
+                        'data' => $proveedor,
+                        'options' => ['placeholder' => 'Seleccione un proveedor..'],
+                        'pluginOptions' => ['allowClear' => true],
+                        'pluginEvents' => [
+                            "change" => 'function() { $.get( "' . Url::toRoute('entrada-materia-prima/ordencompra') . '", { id: $(this).val() } )
+                                    .done(function( data ) {
+                                        $( "#' . Html::getInputId($model, 'id_orden_compra') . '" ).html( data );
+                                    });
+                            }',
+                        ],
+                        ]); ?>
+
+                <?= $form->field($model, 'id_orden_compra')->dropDownList(['prompt' => 'Seleccione...']) ?>
+            </div>    
+            <div class="row">
+                 <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => 'true']) ?>
+                 <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15','readonly' => true]) ?>
+
+            </div>
+            <div class="row">
+
+                <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+            </div>  
+        <?php }else{?>
+            <div class="row">
+                <?= $form->field($model, 'id_proveedor')->widget(Select2::classname(), [
                     'data' => $proveedor,
-                    'options' => ['placeholder' => 'Seleccione un cliente...'],
-                    'pluginOptions' => ['allowClear' => true],
-                    'pluginEvents' => [
-                        "change" => 'function() { $.get( "' . Url::toRoute('entrada-materia-prima/ordencompra') . '", { id: $(this).val() } )
-                                .done(function( data ) {
-                                    $( "#' . Html::getInputId($model, 'id_orden_compra') . '" ).html( data );
-                                });
-                        }',
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
                     ],
-                    ]); ?>
+                ]); ?>
+                 <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => true]) ?>
+            </div>
+            <div class="row">
+                 <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
+               <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?> 
+            </div>
+        <?php }?>
            
-            <?= $form->field($model, 'id_orden_compra')->dropDownList(['prompt' => 'Seleccione...']) ?>
-        </div>    
-        <div class="row">
-             <?= $form->field($model, 'fecha_proceso')->textInput(['maxlength' => true, 'readonly' => 'true']) ?>
-             <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15','readonly' => true]) ?>
-             
-        </div>
-         <div class="row">
-           
-            <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-        </div>    
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("entrada-materia-prima/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>

@@ -56,9 +56,9 @@ class MateriaPrimas extends \yii\db\ActiveRecord
         return [
             [['codigo_materia_prima', 'materia_prima', 'id_medida', 'aplica_inventario','valor_unidad'], 'required'],
             [['id_medida', 'aplica_iva', 'valor_iva', 'total_cantidad', 'total_materia_prima', 'aplica_inventario','inventario_inicial',
-                'subtotal','id_solicitud','stock_gramos','convertir_gramos','unidades_requeridas'], 'integer'],
+                'subtotal','id_solicitud','stock_gramos','convertir_gramos','unidades_requeridas','salida_materia_prima'], 'integer'],
             [['valor_unidad', 'porcentaje_iva','stock'], 'number'],
-            [['fecha_entrada', 'fecha_vencimiento', 'fecha_registro'], 'safe'],
+            [['fecha_entrada', 'fecha_registro'], 'safe'],
             [['codigo_materia_prima', 'usuario_creador', 'usuario_editado'], 'string', 'max' => 15],
             [['descripcion'], 'string', 'max' => 100],
             [['materia_prima'], 'string', 'max' => 40],
@@ -84,7 +84,6 @@ class MateriaPrimas extends \yii\db\ActiveRecord
             'valor_iva' => 'Valor Iva:',
             'total_cantidad' => 'Cantidad:',
             'total_materia_prima' => 'Valor total:',
-            'fecha_vencimiento' => 'Fecha vencimiento:',
             'fecha_entrada' => 'Fecha entrada:',
             'fecha_registro' => 'Fecha Registro:',
             'usuario_creador' => 'User name creador',
@@ -98,6 +97,7 @@ class MateriaPrimas extends \yii\db\ActiveRecord
             'id_solicitud' => 'Clasificacion:',
             'stock_gramos' => 'Stock gramos:',
             'convertir_gramos' => 'Convertir a gramos:',
+            'salida_materia_prima' => 'Salida de materia prima:'
         ];
     }
 

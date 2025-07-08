@@ -37,27 +37,44 @@ $proveedor = ArrayHelper::map(Proveedor::find()->orderBy ('nombre_completo ASC')
     </div>
     
     <div class="panel-body">
-        <div class="row">
-            <?= $form->field($model, 'id_proveedor')->dropDownList($proveedor,['prompt'=>'Seleccione un proveedor...', 'onchange'=>' $.get( "'.Url::toRoute('entrada-materia-prima/ordencompra').'", { id: $(this).val() } ) .done(function( data ) {
-            $( "#'.Html::getInputId($model, 'id_orden_compra',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
-            <?= $form->field($model, 'id_orden_compra')->dropDownList($orden_compra, ['prompt' => 'Seleccione...']) ?>
-          
-        </div>    
-        <div class="row">
-            <?=  $form->field($model, 'fecha_proceso')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
-             <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
-             
-        </div>
+        <?php if($sw == 0){?>
+            <div class="row">
+                <?= $form->field($model, 'id_proveedor')->dropDownList($proveedor,['prompt'=>'Seleccione un proveedor...', 'onchange'=>' $.get( "'.Url::toRoute('entrada-materia-prima/ordencompra').'", { id: $(this).val() } ) .done(function( data ) {
+                $( "#'.Html::getInputId($model, 'id_orden_compra',['required', 'class' => 'select-2']).'" ).html( data ); });']); ?>
+                <?= $form->field($model, 'id_orden_compra')->dropDownList($orden_compra, ['prompt' => 'Seleccione...']) ?>
+
+            </div>    
+            <div class="row">
+                <?=  $form->field($model, 'fecha_proceso')->widget(DatePicker::className(), ['name' => 'check_issue_date',
+                               'value' => date('Y-m-d', strtotime('+2 days')),
+                               'options' => ['placeholder' => 'Seleccione una fecha ...'],
+                               'pluginOptions' => [
+                                   'format' => 'yyyy-m-d',
+                                   'todayHighlight' => true]])
+                ?>
+                 <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
+
+            </div>
+             <div class="row">
+
+                <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+            </div>    
+        <?php }else{?>
+            <div class="row">
+                              
+                <?= $form->field($model, 'id_proveedor')->widget(Select2::classname(), [
+                    'data' => $proveedor,
+                    'options' => ['prompt' => 'Seleccione...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]); ?>
+                <?= $form->field($model, 'numero_soporte')->textInput(['maxlength' => true, 'size' => '15']) ?>
+            </div> 
          <div class="row">
-           
-            <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
-        </div>    
+                <?= $form->field($model, 'observacion', ['template' => '{label}<div class="col-sm-4 form-group">{input}{error}</div>'])->textarea(['rows' => 2]) ?>
+            </div>    
+        <?php }?>
         <div class="panel-footer text-right">			
             <a href="<?= Url::toRoute("entrada-materia-prima/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-circle-arrow-left'></span> Regresar</a>
             <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Guardar", ["class" => "btn btn-success btn-sm",]) ?>

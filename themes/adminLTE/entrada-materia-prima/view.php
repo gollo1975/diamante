@@ -19,6 +19,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\filters\AccessControl;
+use kartik\select2\Select2;
 
 use app\models\MateriaPrimas;
 /* @var $this yii\web\View */
@@ -44,10 +45,15 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
         } else {
             if ($model->autorizado == 1 && $model->enviar_materia_prima  == 0) {?> 
-                <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm'])?>
-                <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar materia prima', ['enviarmateriales', 'id' => $model->id_entrada, 'token'=> $token, 'id_compra' => $model->id_orden_compra],['class' => 'btn btn-info btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de actualizar el inventario de materia prima.', 'method' => 'post']]);?>
-            <?php }else{ ?>
+                <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
+                if($model->id_orden_compra !== null){?>
+                    <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar materia prima', ['enviarmateriales', 'id' => $model->id_entrada, 'token'=> $token, 'id_compra' => $model->id_orden_compra],['class' => 'btn btn-info btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de actualizar el modulo de inventario de materias primas .', 'method' => 'post']]);
+                }else {?>
+                     <?= Html::a('<span class="glyphicon glyphicon-send"></span> Actualizar materia prima', ['enviar_materiales_entrada', 'id' => $model->id_entrada, 'token'=> $token],['class' => 'btn btn-info btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de actualizar el modulo de inventario de materias primas .', 'method' => 'post']]);
+                }
+            }else{ ?>
                <?= Html::a('<span class="glyphicon glyphicon-folder-open"></span> Archivos', ['directorio-archivos/index','numero' => 15, 'codigo' => $model->id_entrada,'view' => $view, 'token' => $token,], ['class' => 'btn btn-default btn-sm'])?>  
             <?php }    
         }?>        
@@ -58,17 +64,22 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, "id_entrada") ?></th>
                     <td><?= Html::encode($model->id_entrada) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_proveedor') ?></th>
                     <td><?= Html::encode($model->proveedor->nombre_completo) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_compra') ?></th>
-                    <td><?= Html::encode($model->ordenCompra->descripcion) ?></td>
+                    <?php if($model->id_orden_compra !== null){?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_compra') ?></th>
+                        <td><?= Html::encode($model->ordenCompra->descripcion) ?></td>
+                    <?php }else{?>
+                        <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_orden_compra') ?></th>
+                        <td><?= Html::encode('NOT FOUND') ?></td>
+                    <?php }?>    
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
                      <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_soporte') ?></th>
                     <td><?= Html::encode($model->numero_soporte) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'user_name_crear')?></th>
@@ -78,7 +89,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'impuesto') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->impuesto,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                    
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
@@ -89,7 +100,7 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_salida') ?></th>
                     <td style="text-align: right"><?= Html::encode(''.number_format($model->total_salida,0)) ?></td>                    
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'enviar_materia_prima') ?></th>
                     <td><?= Html::encode($model->enviarMateria) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
@@ -121,14 +132,15 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                         <tr style="font-size: 85%;">
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Codigo</th>                        
+                                            <th scope="col" align="center" style='background-color:#B9D5CE; width: 20%'>Codigo</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Insumos</th>                        
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Editar precio</th>  
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>F. vencimiento</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Iva</th>       
                                              <th scope="col" align="center" style='background-color:#B9D5CE;'>Cantidad</th>  
                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>Vr. unitario</th>                        
-                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>Numero lote</th>  
+                                            <th scope="col" align="center" style='background-color:#B9D5CE;'>No lote cliente</th>  
+                                             <th scope="col" align="center" style='background-color:#B9D5CE;'>No lote interno</th>
                                             <th scope="col" style='background-color:#B9D5CE;'></th> 
                                             
                                         </tr>
@@ -140,10 +152,38 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                                                 
                                                 <?php  if($model->autorizado == 0){
                                                     if($val->id_materia_prima === (NULL)){?>
-                                                         <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('id_materia_prima[]', $val->id_materia_prima, $materiaprima, ['class' => 'col-sm-13', 'prompt' => 'Seleccion...', 'required' => true]) ?></td>
-                                                         <td><?= 'No Found'?></td>
+                                                        <td style="padding-left: 1;padding-right: 0;">
+                                                                <?= Select2::widget([
+                                                                'name' => 'id_materia_prima[]',
+                                                                'value' => $val->id_materia_prima,
+                                                                'data' => $materiaprima,
+                                                                'options' => [
+                                                                    'placeholder' => 'Seleccion...',
+                                                                    'required' => true,
+                                                                    'class' => 'col-sm-18 my-custom-select2', // Mantén tu clase original si la necesitas para estilos
+                                                                ],
+                                                                'pluginOptions' => [
+                                                                    'allowClear' => true // Permite limpiar la selección
+                                                                ],
+                                                            ]); ?>
+                                                        </td>
+                                                        <td><?= 'No Found' ?></td>
                                                     <?php }else{?>    
-                                                        <td style="padding-left: 1;padding-right: 0;"><?= Html::dropDownList('id_materia_prima[]', $val->id_materia_prima, $materiaprima, ['class' => 'col-sm-13', 'prompt' => 'Seleccion...', 'required' => true]) ?></td>
+                                                        <td style="padding-left: 1;padding-right: 0; font-size: 14px;">
+                                                            <?= Select2::widget([
+                                                                'name' => 'id_materia_prima[]',
+                                                                'value' => $val->id_materia_prima,
+                                                                'data' => $materiaprima,
+                                                                'options' => [
+                                                                    'placeholder' => 'Seleccion...',
+                                                                    'required' => true,
+                                                                   'class' => 'col-sm-18 my-custom-select2',
+                                                                ],
+                                                                'pluginOptions' => [
+                                                                    'allowClear' => true
+                                                                ],
+                                                            ]); ?>
+                                                        </td>
                                                         <td><?= $val->materiaPrima->materia_prima ?></td>
                                                     <?php }?>    
                                                     <td align="center"><select name="actualizar_precio[]" style="width: 60px;">
@@ -196,11 +236,11 @@ $configuracionIva = ArrayHelper::map(app\models\ConfiguracionIva::find()->orderB
                             <div class="panel-footer text-right">  
                                 <?php 
                                 if($model->autorizado == 0){
-                                   if ($sw <> 0){?>
-                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea', ['entrada-materia-prima/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
+                                   if ($model->id_orden_compra === null){?>
+                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea nueva', ['entrada-materia-prima/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
                                         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>    
                                     <?php }else{?>
-                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea', ['entrada-materia-prima/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
+                                        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> Linea nueva', ['entrada-materia-prima/nuevalinea', 'id' => $model->id_entrada, 'token' => $token], ['class' => 'btn btn-primary btn-sm']); ?>        
                                         <?= Html::a('<span class="glyphicon glyphicon-export"></span> Cargar items', ['entrada-materia-prima/importardetallecompra','id' => $model->id_entrada, 'id_orden' => $model->id_orden_compra, 'token' => $token, 'proveedor' => $model->id_proveedor],[ 'class' => 'btn btn-success btn-sm']) ?>                                            
                                         <?= Html::submitButton("<span class='glyphicon glyphicon-floppy-disk'></span> Actualizar", ["class" => "btn btn-warning btn-sm", 'name' => 'actualizarlineas']);?>
                                     <?php }

@@ -41,7 +41,7 @@ $view = 'materia-primas';
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-striped table-hover">
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Id') ?></th>
                     <td><?= Html::encode($model->id_materia_prima) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Codigo') ?></th>
@@ -53,23 +53,24 @@ $view = 'materia-primas';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Vlr_unidad') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_unidad,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Medida') ?></th>
                     <td><?= Html::encode($model->medida->descripcion) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_entrada') ?></th>
                     <td><?= Html::encode($model->fecha_entrada) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
-                    <td><?= Html::encode($model->fecha_vencimiento) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
+                    <td><?= Html::encode($model->aplicaInventario) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_registro') ?></th>
                     <td><?= Html::encode($model->fecha_registro) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_iva') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->valor_iva,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'usuario_creador') ?></th>
                     <td><?= Html::encode($model->usuario_creador) ?></td>
-                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'usuario_editado') ?></th>
-                    <td><?= Html::encode($model->usuario_editado) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'salida_materia_prima') ?></th>
+                    <td><?= Html::encode($model->salida_materia_prima) ?></td>
+                    
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Unidades') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_cantidad,0)) ?></td>
                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'Stock') ?></th>
@@ -77,11 +78,11 @@ $view = 'materia-primas';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'subtotal') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->subtotal,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'inventario_inicial') ?></th>
                     <td><?= Html::encode($model->inventarioInicial) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'aplica_inventario') ?></th>
-                    <td><?= Html::encode($model->aplicaInventario) ?></td>
+                    <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'usuario_editado') ?></th>
+                    <td><?= Html::encode($model->usuario_editado) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'porcentaje_iva') ?></th>
                     <td><?= Html::encode($model->porcentaje_iva) ?></td>
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_solicitud') ?></th>
@@ -89,7 +90,7 @@ $view = 'materia-primas';
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'total_materia_prima') ?></th>
                     <td style="text-align: right;"><?= Html::encode(''.number_format($model->total_materia_prima,0)) ?></td>
                 </tr>
-                <tr style="font-size: 90%;">
+                <tr style="font-size: 85%;">
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'convertir_gramos') ?></th>
                     <td><?= Html::encode($model->covertirGramos) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'descripcion') ?></th>
@@ -117,7 +118,7 @@ $view = 'materia-primas';
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha entrada</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Fecha vcto</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Soporte</th> 
-                                        <th scope="col" style='background-color:#B9D5CE;'>No Lote</th> 
+                                        <th scope="col" style='background-color:#B9D5CE;'>No Lote cliente</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Tipo orden</th> 
                                          <th scope="col" style='background-color:#B9D5CE;'>% Iva</th> 
                                         <th scope="col" style='background-color:#B9D5CE;'>Cantidad</th>                        
@@ -131,13 +132,17 @@ $view = 'materia-primas';
                                     <?php foreach ($detalle_entrada as $val):
                                         $entrada = \app\models\EntradaMateriaPrima::findOne($val->id_entrada); 
                                         ?>
-                                    <tr style="font-size: 90%;">
+                                    <tr style="font-size: 85%;">
                                         <td><?= $val->id_entrada ?></td>  
                                         <td><?= $val->entrada->fecha_proceso ?></td>
                                         <td><?= $val->fecha_vencimiento ?></td>
                                         <td><?= $val->entrada->numero_soporte ?></td>
                                         <td><?= $val->numero_lote ?></td>
-                                        <td><?= $val->entrada->ordenCompra->tipoOrden->descripcion_orden ?></td>
+                                        <?php if($entrada->id_orden_compra !== null){?>
+                                            <td><?= $val->entrada->ordenCompra->tipoOrden->descripcion_orden ?></td>
+                                        <?php }else{?>    
+                                            <td><?= 'NOT FOUND' ?></td>
+                                         <?php }?>
                                         <td style="text-align: right"><?= $val->porcentaje_iva ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->cantidad,0) ?></td>
                                         <td style="text-align: right"><?= ''.number_format($val->valor_unitario,0) ?></td>

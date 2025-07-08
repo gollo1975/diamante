@@ -12,10 +12,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="entrada-materia-prima-create">
 
     <!--<h1><?= Html::encode($this->title) ?></h1>-->
-
+    
     <?= $this->render('_form', [
         'model' => $model,
         'ordenes' => $ordenes,
+        'sw' => $sw,
     ]) ?>
 
 </div>

@@ -118,13 +118,12 @@ $form = ActiveForm::begin([
                 <th scope="col" style='background-color:#B9D5CE;'>Nombre materia prima</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Medida</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha entrada</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Fecha_vcto</th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Aplica inventario">Ap. Inv.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'>Entrada</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Stock unidades</th>
-                 <th scope="col" style='background-color:#B9D5CE;'>Stock en gramos</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Clasificaion </th>
-                <th scope="col" style='background-color:#B9D5CE;'>User name </th>
+                <th scope="col" style='background-color:#B9D5CE;'>Stock en gramos</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Salida </th>
+                <th scope="col" style='background-color:#B9D5CE;'>Clasificacion </th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th score="col" style='background-color:#B9D5CE;'></th>                              
             </tr>
@@ -137,7 +136,6 @@ $form = ActiveForm::begin([
                 <td><?= $val->materia_prima?></td>
                 <td><?= $val->medida->descripcion?></td>
                 <td><?= $val->fecha_entrada?></td>
-                <td><?= $val->fecha_vencimiento?></td>
                 <td><?= $val->aplicaInventario?></td>
                 <td style="text-align: right"><?= ''.number_format($val->total_cantidad,0)?></td>
                 <?php if($val->stock > 0){?>
@@ -146,8 +144,8 @@ $form = ActiveForm::begin([
                    <td style="text-align: right;"><?= ''.number_format($val->stock,0)?></td>
                 <?php }?>   
                    <td style="text-align: right"><?= ''.number_format($val->stock_gramos,0)?></td>
+                    <td style="text-align: right"><?= ''.number_format($val->salida_materia_prima,0)?></td>
                 <td><?= $val->tipoSolicitud->descripcion?></td>
-                 <td><?= $val->usuario_creador?></td>
                 <td style= 'width: 25px; height: 10px;'>
                     <a href="<?= Url::toRoute(["materia-primas/view", "id" => $val->id_materia_prima, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open"></span></a>
                 </td>

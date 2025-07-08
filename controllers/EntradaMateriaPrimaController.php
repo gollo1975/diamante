@@ -201,14 +201,10 @@ class EntradaMateriaPrimaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id, $token, $sw = 0)
+    public function actionView($id, $token)
     {
         $detalle_entrada = \app\models\EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->orderBy('id_detalle DESC')->all();
-        if (count($detalle_entrada) > 0){
-            $sw = 1;
-        }else{
-            $sw = 0;
-        }
+       
         $materiaprima = \app\models\MateriaPrimas::find()->orderBy('materia_prima ASC')->all();
         if(isset($_POST["actualizarlineas"])){
             if(isset($_POST["detalle_entrada"])){
@@ -235,14 +231,13 @@ class EntradaMateriaPrimaController extends Controller
                     $intIndice++;
                 endforeach;
                 $this->ActualizarLineas($id);
-                return $this->redirect(['view','id' =>$id, 'token' => $token, 'sw' => $sw]);
+                return $this->redirect(['view','id' =>$id, 'token' => $token]);
             }
             
         }
         return $this->render('view', [
             'model' => $this->findModel($id),
             'token'=> $token,
-            'sw' => $sw,
             'detalle_entrada' => $detalle_entrada,
             'materiaprima' => ArrayHelper::map($materiaprima, "id_materia_prima", "materiasPrimas"),
         ]);
@@ -268,7 +263,7 @@ class EntradaMateriaPrimaController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($sw)
     {
         $model = new EntradaMateriaPrima();
         $ordenes = \app\models\OrdenCompra::find()->orderBy('id_orden_compra desc')->all(); 
@@ -276,18 +271,27 @@ class EntradaMateriaPrimaController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-        $token = 0;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $orden = OrdenCompra::findOne($model->id_orden_compra);
-            $model->user_name_crear= Yii::$app->user->identity->username;
-            $model->numero_soporte = $orden->numero_orden;
-            $model->save(false);
-            return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> $token]);
-        }
+        if($sw == 0){
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $orden = OrdenCompra::findOne($model->id_orden_compra);
+                $model->user_name_crear= Yii::$app->user->identity->username;
+                $model->numero_soporte = $orden->numero_orden;
+                $model->save(false);
+                return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> 0]);
+            }
+        }else{
+             if ($model->load(Yii::$app->request->post()) && $model->save(false)) {
+                $model->user_name_crear= Yii::$app->user->identity->username;
+                $model->save(false);
+                return $this->redirect(['view', 'id' => $model->id_entrada, 'token'=> 0]);
+             }
+        }    
         $model->fecha_proceso = date('Y-m-d');
         return $this->render('create', [
             'model' => $model,
              'ordenes' => ArrayHelper::map($ordenes, "id_orden_compra", "descripcion"),
+            'sw' => $sw,
+            
         ]);
     }
     
@@ -312,40 +316,53 @@ class EntradaMateriaPrimaController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $sw)
     {
         $model = $this->findModel($id);
         $ordenes = \app\models\OrdenCompra::find()->orderBy('id_orden_compra desc')->all(); 
-         if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $compra = OrdenCompra::findOne($model->id_orden_compra);
-            $model->user_name_edit= Yii::$app->user->identity->username;
-            $model->numero_soporte = $compra->numero_orden;
-            $model->save(false);
-            return $this->redirect(['view','id' => $id, 'token' => 0]);
-        }
-         if (Yii::$app->request->get("id")) {
-            $table = EntradaMateriaPrima::findOne($id);
-            $orden_compra = \app\models\OrdenCompra::find()->where(['=','id_proveedor', $table->id_proveedor])
-                                               ->andWhere(['=','importado', 0])
-                                               ->andWhere(['=','auditada', 1])->orderBy('descripcion desc')->all();
-            $orden_compra = ArrayHelper::map($orden_compra, "id_orden_compra", "OrdenCompraCompleto");
-            $model->id_proveedor = $table->id_proveedor;
-            $model->id_orden_compra = $table->id_orden_compra;
-            $model->fecha_proceso = $table->fecha_proceso;
-            $model->numero_soporte = $table->numero_soporte;
-            $model->observacion = $table->observacion;
-         }
-
-        return $this->render('update', [
-            'model' => $model,
-            'orden_compra' => $orden_compra,
-            
-            
-        ]);
+        if($sw == 0){
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $compra = OrdenCompra::findOne($model->id_orden_compra);
+                $model->user_name_edit= Yii::$app->user->identity->username;
+                $model->numero_soporte = $compra->numero_orden;
+                $model->save(false);
+                return $this->redirect(['view','id' => $id, 'token' => 0]);
+            }
+            if (Yii::$app->request->get("id")) {
+                $table = EntradaMateriaPrima::findOne($id);
+                $orden_compra = \app\models\OrdenCompra::find()->where(['=','id_proveedor', $table->id_proveedor])
+                                                   ->andWhere(['=','importado', 0])
+                                                   ->andWhere(['=','auditada', 1])->orderBy('descripcion desc')->all();
+                $orden_compra = ArrayHelper::map($orden_compra, "id_orden_compra", "OrdenCompraCompleto");
+                $model->id_proveedor = $table->id_proveedor;
+                $model->id_orden_compra = $table->id_orden_compra;
+                $model->fecha_proceso = $table->fecha_proceso;
+                $model->numero_soporte = $table->numero_soporte;
+                $model->observacion = $table->observacion;
+            }
+        }else{
+           if ($model->load(Yii::$app->request->post()) && $model->save(false)) {
+                $model->user_name_edit= Yii::$app->user->identity->username;
+                $model->save(false);
+               return $this->redirect(['view','id' => $id, 'token' => 0]);
+           } 
+        }    
+        if($sw == 0){
+            return $this->render('update', [
+                'model' => $model,
+                'orden_compra' => $orden_compra,
+                'sw' => $sw,
+            ]);
+        }else{
+           return $this->render('update', [
+                'model' => $model,
+                'sw' => $sw,
+            ]);
+        }    
     }
     //NUEVA LINEA
     public function actionNuevalinea($id, $token) {
@@ -400,25 +417,26 @@ class EntradaMateriaPrimaController extends Controller
      public function actionAutorizado($id, $token) {
         $model = $this->findModel($id);
         $detalle = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->all();
-        $sw = 0;
-        foreach ($detalle as $val){
-            if($val->id_materia_prima == ''){
-                $sw = 1;
-                Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar el codigo de la materia prima para asociarlo a la entrada y luego presiona el boton actualizar.');
-                return $this->redirect(["view",'id' => $id, 'token' => $token]); 
+        if(count($detalle) > 0){
+            foreach ($detalle as $val){
+                if($val->id_materia_prima == ''){
+                    Yii::$app->getSession()->setFlash('warning', 'Debe de seleccionar el codigo de la materia prima para asociarlo a la entrada y luego presiona el boton actualizar.');
+                    return $this->redirect(["view",'id' => $id, 'token' => $token]); 
+                }
             }
-        }
-        if($sw == 0){
             if ($model->autorizado == 0) {                        
                     $model->autorizado = 1;            
-                   $model->update();
+                   $model->save(false);
                    $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
 
             } else{
                     $model->autorizado = 0;
-                    $model->update();
+                    $model->save(false);
                     $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);  
             } 
+        }else{
+            Yii::$app->getSession()->setFlash('error', 'Debe de cargar los items en el detalle del documento. Valide la informaacion.');
+            return $this->redirect(["view",'id' => $id, 'token' => $token]); 
         }    
     }
     
@@ -457,6 +475,40 @@ class EntradaMateriaPrimaController extends Controller
         $orden->save();
         $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);
     }
+    
+    //ENVIR ENTRADA AL INVENTARIO SIN ORDEN DE COMPRA
+    public function actionEnviar_materiales_entrada($id, $token) {
+        $model = $this->findModel($id);
+        $detalle = EntradaMateriaPrimaDetalle::find()->where(['=','id_entrada', $id])->all(); // carga el detalle
+        //VECTOR QUE RECORRE CAA ITEMS
+        foreach ($detalle as $detalles):
+            $materia = MateriaPrimas::find()->where(['=','id_materia_prima', $detalles->id_materia_prima])->one();
+            if($materia){
+                $codigo = $materia->id_materia_prima;
+                if($detalles->actualizar_precio == 1){
+                   $materia->valor_unidad = $detalles->valor_unitario;
+                   $materia->total_cantidad += $detalles->cantidad; 
+                   $materia->stock += $detalles->cantidad;
+                   if($materia->convertir_gramos == 1){
+                       $materia->stock_gramos = round($materia->stock * 1000);
+                   }
+                } else {
+                   $materia->total_cantidad += $detalles->cantidad;   
+                   $materia->stock += $detalles->cantidad;
+                   if($materia->convertir_gramos == 1){
+                       $materia->stock_gramos = round($materia->stock * 1000);
+                   }
+                } 
+                  $materia->save(false);
+                  $codigo = $detalles->id_materia_prima;
+                  $this->ActualizarCostoMateriaPrima($codigo);
+            }
+        endforeach;
+        $model->enviar_materia_prima = 1;
+        $model->save(false);
+        $this->redirect(["entrada-materia-prima/view", 'id' => $id, 'token' =>$token]);
+    }
+    
     //proceso para multiplicar inventario
     protected function ActualizarCostoMateriaPrima($codigo) {
         $iva = 0; $subtotal = 0; $cant = 0;
