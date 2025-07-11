@@ -66,7 +66,7 @@ use kartik\select2\Select2;
                                  <?php endforeach;  ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="4">No hay solicitudes de kits disponibles para importar.</td>
+                                        <td colspan="4" style="background-color: #4bb1cf">No hay solicitudes de kits disponibles para importar.</td>
                                     </tr>
                                 <?php endif; ?>    
                             </body>

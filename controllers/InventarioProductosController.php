@@ -61,8 +61,8 @@ class InventarioProductosController extends Controller
                 $fecha_inicio = null;
                 $fecha_corte = null; $presentacion = null;
                 $grupo = null;
-                $producto = null;
-                $busqueda_vcto = null;
+                $producto = null; $tipo_producto = null;
+               
                 if ($form->load(Yii::$app->request->get())) {
                     if ($form->validate()) {
                         $codigo = Html::encode($form->codigo);
@@ -72,24 +72,16 @@ class InventarioProductosController extends Controller
                         $producto = Html::encode($form->producto);
                         $grupo = Html::encode($form->grupo);
                         $presentacion = Html::encode($form->presentacion);
-                        $busqueda_vcto = Html::encode($form->busqueda_vcto);
-                        if ($busqueda_vcto == 0){
-                            $table = InventarioProductos::find()
+                        $tipo_producto = Html::encode($form->tipo_producto);
+                        $table = InventarioProductos::find()
                                         ->andFilterWhere(['=', 'codigo_producto', $codigo])
                                         ->andFilterWhere(['between', 'fecha_proceso', $fecha_inicio, $fecha_corte])
                                        ->andFilterWhere(['=', 'id_producto', $producto])
                                         ->andFilterWhere(['like', 'nombre_producto', $presentacion])
                                         ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
+                                        ->andFilterWhere(['=', 'tipo_producto', $tipo_producto])
                                         ->andFilterWhere(['=', 'id_grupo', $grupo]);
-                        }else{
-                            $table = InventarioProductos::find()
-                                    ->andFilterWhere(['=', 'codigo_producto', $codigo])
-                                    ->andFilterWhere(['between', 'fecha_vencimiento', $fecha_inicio, $fecha_corte])
-                                   ->andFilterWhere(['=', 'id_producto', $producto])
-                                   ->andFilterWhere(['like', 'nombre_producto', $presentacion])
-                                    ->andFilterWhere(['=', 'inventario_inicial', $inventario_inicial])
-                                    ->andFilterWhere(['=', 'id_grupo', $grupo]);
-                        }    
+                       
                         $table = $table->orderBy('id_inventario DESC');
                         $tableexcel = $table->all();
                         $count = clone $table;
@@ -832,7 +824,7 @@ class InventarioProductosController extends Controller
                     ->setCellValue('C1', 'PRESENTACION')
                     ->setCellValue('D1', 'DESCRIPCION')
                     ->setCellValue('E1', 'FECHA PROCESO')
-                    ->setCellValue('F1', 'FECHA VCTO')
+                    ->setCellValue('F1', 'TIPO PRODUCTO')
                     ->setCellValue('G1', 'APLICA INVENTARIO')
                     ->setCellValue('H1', 'INVENTARIO INICIAL')
                     ->setCellValue('I1', 'No LOTE')
@@ -858,7 +850,7 @@ class InventarioProductosController extends Controller
                     ->setCellValue('C' . $i, $val->nombre_producto)
                     ->setCellValue('D' . $i, $val->descripcion_producto)
                     ->setCellValue('E' . $i, $val->fecha_proceso)
-                    ->setCellValue('F' . $i, $val->fecha_vencimiento)
+                    ->setCellValue('F' . $i, $val->tipoProducto)
                     ->setCellValue('G' . $i, $val->aplicaInventario)
                     ->setCellValue('H' . $i, $val->inventarioInicial);
                     if($val->id_detalle == NULL){

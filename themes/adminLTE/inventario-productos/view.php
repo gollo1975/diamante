@@ -55,8 +55,8 @@ $view = 'inventario-productos';
                 <tr style="font-size: 85%;">
                      <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_proceso') ?></th>
                     <td><?= Html::encode($model->fecha_proceso) ?></td>
-                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'fecha_vencimiento') ?></th>
-                    <td><?= Html::encode($model->fecha_vencimiento) ?></td>
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'tipo_producto') ?></th>
+                    <td><?= Html::encode($model->tipoProducto) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'id_grupo') ?></th>
                     <td><?= Html::encode($model->grupo->nombre_grupo) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'valor_iva') ?></th>

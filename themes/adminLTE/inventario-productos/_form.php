@@ -56,7 +56,7 @@ $provedor = ArrayHelper::map(Proveedor::find()->orderBy('nombre_completo ASC')->
                                'format' => 'yyyy-m-d',
                                'todayHighlight' => true]])
             ?>
-            <?= $form->field($model, 'inventario_inicial')->dropDownList(['0' => 'INDIVIDUAL', '1' => 'KITS'], ['prompt' => 'Seleccione una opcion...']) ?>
+            <?= $form->field($model, 'tipo_producto')->dropDownList(['0' => 'INDIVIDUAL', '1' => 'KITS'], ['prompt' => 'Seleccione una opcion...']) ?>
         </div>
         
         <div class="row">

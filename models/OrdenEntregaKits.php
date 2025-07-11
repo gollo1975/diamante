@@ -43,6 +43,7 @@ class OrdenEntregaKits extends \yii\db\ActiveRecord
             [['id_entrega_kits', 'id_presentacion', 'id_inventario', 'total_kits', 'total_productos_procesados', 'autorizado', 'proceso_cerrado','numero_orden','inventario_enviado'], 'integer'],
             [['fecha_orden', 'fecha_hora_registro'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
+            [['observacion'], 'string', 'max' => 100],
             [['id_entrega_kits'], 'exist', 'skipOnError' => true, 'targetClass' => EntregaSolicitudKits::className(), 'targetAttribute' => ['id_entrega_kits' => 'id_entrega_kits']],
             [['id_presentacion'], 'exist', 'skipOnError' => true, 'targetClass' => PresentacionProducto::className(), 'targetAttribute' => ['id_presentacion' => 'id_presentacion']],
             [['id_inventario'], 'exist', 'skipOnError' => true, 'targetClass' => InventarioProductos::className(), 'targetAttribute' => ['id_inventario' => 'id_inventario']],
@@ -67,7 +68,8 @@ class OrdenEntregaKits extends \yii\db\ActiveRecord
             'proceso_cerrado' => 'Proceso cerrado:',
             'user_name' => 'User name:',
             'numero_orden' => 'numero_orden:',
-            'inventario_enviado' =>'inventario_enviado'
+            'inventario_enviado' =>'inventario_enviado',
+            'observacion' => 'Observacion:',
             
         ];
     }

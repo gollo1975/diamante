@@ -19,12 +19,13 @@ class FiltroBusquedaInventario extends Model
     public $inventario_inicial;
     public $busqueda_vcto;
     public $presentacion;
+    public $tipo_producto;
 
 
     public function rules()
     {
         return [  
-           [['codigo', 'grupo','inventario_inicial','producto'], 'integer'],
+           [['codigo', 'grupo','inventario_inicial','producto','tipo_producto'], 'integer'],
            [['fecha_inicio','fecha_corte','busqueda_vcto'], 'safe'],
            ['presentacion', 'string'],
         ];
@@ -40,7 +41,8 @@ class FiltroBusquedaInventario extends Model
             'fecha_corte' => 'Fecha corte:',
             'inventario_inicial' => 'Inventario inicial:',
             'busqueda_vcto' => 'Busqueda_vcto',
-            'presentacion' => 'Presentacion del producto:'
+            'presentacion' => 'Presentacion del producto:',
+            'tipo_producto' => 'Tipo de producto:',
         ];
     }
     

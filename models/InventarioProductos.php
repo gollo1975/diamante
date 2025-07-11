@@ -179,6 +179,7 @@ class InventarioProductos extends \yii\db\ActiveRecord
         }
         return $inventario_inicial;
     }
+    
     public function getAplicaInventario() {
         if($this->aplica_inventario == 0){
            $aplicainventario = 'SI';
@@ -239,5 +240,14 @@ class InventarioProductos extends \yii\db\ActiveRecord
             $aplicadescuentodistribuidor = 'SI';
         }
         return $aplicadescuentodistribuidor;
+    }
+    
+     public function getTipoProducto() {
+        if($this->tipo_producto == 0){
+           $tipoproducto = 'INDIVIDUAL';
+        }else{
+            $tipoproducto = 'KIT';
+        }
+        return $tipoproducto;
     }
 }

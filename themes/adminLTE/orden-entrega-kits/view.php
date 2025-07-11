@@ -44,17 +44,32 @@ $this->params['breadcrumbs'][] = $model->id_orden_entrega;
         <?php if ($model->autorizado == 0 && $model->proceso_cerrado == 0) { ?>
             <?= Html::a('<span class="glyphicon glyphicon-ok"></span> Autorizar', ['autorizado', 'id' => $model->id_orden_entrega, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
         } else {
-            if ($model->autorizado == 1 && $model->proceso_cerrado == 0){
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_orden_entrega, 'token' => $token], ['class' => 'btn btn-default btn-sm']);
-                echo Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->id_orden_entrega, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
-                           'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la orden de entrega de los KITS.', 'method' => 'post']]);
-            }else{
+            if ($model->autorizado == 1 && $model->proceso_cerrado == 0){?>
+                <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Desautorizar', ['autorizado', 'id' => $model->id_orden_entrega, 'token' => $token], ['class' => 'btn btn-default btn-sm']);?>
+                <?= Html::a('<span class="glyphicon glyphicon-list"></span> Observaciones',
+                        ['/orden-entrega-kits/crear_observaciones','id' =>$model->id_orden_entrega, 'token' => $token],
+                        [
+                            'title' => 'Permite crear las observaciones a la orden de entrega',
+                            'data-toggle'=>'modal',
+                            'data-target'=>'#modalobservaciones',
+                            'class' => 'btn btn-info btn-sm'
+                        ])?>
+                        
+               
+                <?= Html::a('<span class="glyphicon glyphicon-remove"></span> Cerrar solicitud', ['cerrar_solicitud', 'id' => $model->id_orden_entrega, 'token'=> $token],['class' => 'btn btn-warning btn-sm',
+                           'data' => ['confirm' => 'Esta seguro de CERRAR y CREAR el consecutivo a la orden de entrega de los KITS.', 'method' => 'post']]);?>
+                 <div class="modal remote fade" id="modalobservaciones">
+                         <div class="modal-dialog modal-lg" style ="width: 650px;">
+                            <div class="modal-content"></div>
+                        </div>
+                </div>
+           <?php }else{
                 if($model->inventario_enviado == 0){?>
-                    <?= Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_solicitud_kits', 'id' => $model->id_orden_entrega], ['class' => 'btn btn-default btn-sm']);  ?>          
+                    <?= Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_orden_entrega', 'id' => $model->id_orden_entrega], ['class' => 'btn btn-default btn-sm']);  ?>          
                     <?= Html::a('<span class="glyphicon glyphicon-send"></span> Enviar kits a inventarios', ['crear_producto_kits', 'id' => $model->id_orden_entrega, 'token'=> $token],['class' => 'btn btn-info btn-sm',
                            'data' => ['confirm' => 'Esta seguro de CREAR la presentacion del prdoucto '.$model->presentacion->descripcion.' en el modulo de inventarios.', 'method' => 'post']]);
                 }else{?>
-                    <?= Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_solicitud_kits', 'id' => $model->id_orden_entrega], ['class' => 'btn btn-default btn-sm']);  
+                    <?= Html::a('<span class="glyphicon glyphicon-print"></span> Visualizar PDF', ['imprimir_orden_entrega', 'id' => $model->id_orden_entrega], ['class' => 'btn btn-default btn-sm']);  
                 } 
             }
         }?>        
@@ -101,6 +116,12 @@ $this->params['breadcrumbs'][] = $model->id_orden_entrega;
                     <td><?= Html::encode($model->fecha_hora_registro) ?></td>
                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'numero_orden')?>:</th>
                     <td style="text-align: right"><?= Html::encode($model->numero_orden) ?></td>
+                    
+                </tr>
+                <tr style="font-size: 85%;">
+                     <th style='background-color:#F0F3EF;'><?= Html::activeLabel($model, 'observacion') ?></th>
+                    <td colspan="6"><?= Html::encode($model->observacion) ?></td>
+                   
                     
                 </tr>
                

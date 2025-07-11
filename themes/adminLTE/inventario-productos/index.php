@@ -113,11 +113,10 @@ $producto = ArrayHelper::map(app\models\Productos::find()->orderBy ('nombre_prod
                     'allowClear' => true
                 ],
             ]); ?> 
+           <?= $formulario->field($form, 'tipo_producto')->dropdownList(['0' => 'INDIVIDUAL', '1' => 'KITS'], ['prompt' => 'Seleccione...']) ?>
             <?= $formulario->field($form, 'inventario_inicial')->dropdownList(['0' => 'NO', '1' => 'SI'], ['prompt' => 'Seleccione...']) ?>
         </div>
-        <div class="row checkbox checkbox-success" align ="center">
-                <?= $formulario->field($form, 'busqueda_vcto')->checkbox(['label' => 'Aplica fecha vencimiento', '1' =>'small', 'class'=>'bs_switch','style'=>'margin-bottom:10px;', 'id'=>'busqueda_vcto']) ?>
-        </div>
+        
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
             <a align="right" href="<?= Url::toRoute("inventario-productos/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
@@ -143,6 +142,7 @@ $form = ActiveForm::begin([
                         <th scope="col" style='background-color:#B9D5CE;'>Codigo</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Producto</th>
+                        <th scope="col" style='background-color:#B9D5CE;'>Tipo producto</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Grupo</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Entradas</th>
                         <th scope="col" style='background-color:#B9D5CE;'>Stock</th>
@@ -175,7 +175,12 @@ $form = ActiveForm::begin([
                             <td><?= $val->codigo_producto?></td>
                             <td><?= $val->nombre_producto?></td>
                             <td><?= $val->producto->nombre_producto?></td>
-                            <?php if($val->id_grupo == NULL){?>
+                            <?php if($val->tipo_producto == 0){?>
+                                  <td ><?= $val->tipoProducto?></td>
+                            <?php }else{?> 
+                                 <td style="background-color:#fae1dd"><?= $val->tipoProducto?></td>
+                            <?php }
+                            if($val->id_grupo == NULL){?>
                                 <td><?= 'NO FOUND'?></td>
                             <?php }else{?> 
                                 <td><?= $val->grupo->nombre_grupo?></td>

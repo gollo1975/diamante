@@ -142,6 +142,7 @@ class OrdenEntregaKitsController extends Controller
             if (isset($_POST["nueva_solicitud"])) {
                 $selected_id = $_POST['nueva_solicitud'];
                 $buscar = \app\models\EntregaSolicitudKits::findOne($selected_id);
+                $inventario = \app\models\InventarioProductos::find()->where(['=','id_presentacion', $buscar->id_presentacion])->one();
                 if ($buscar !== null) {
                     $table->id_entrega_kits = $buscar->id_entrega_kits;
                     $table->id_presentacion = $buscar->id_presentacion;
@@ -150,6 +151,9 @@ class OrdenEntregaKitsController extends Controller
                     $table->fecha_orden = date('Y-m-d');
                     $table->fecha_hora_registro = date('Y-m-d H:i:s');
                     $table->user_name = Yii::$app->user->identity->username;
+                    if($inventario){
+                        $table->id_inventario = $inventario->id_inventario;
+                    }
                     if($table->save(false)){
                         $buscarDetalles = \app\models\EntregaSolicitudKitsDetalle::find()->where(['=','id_entrega_kits', $buscar->id_entrega_kits])->all();
                         foreach ($buscarDetalles as $val) {
@@ -188,8 +192,27 @@ class OrdenEntregaKitsController extends Controller
             $model->save();
             return $this->redirect(["orden-entrega-kits/view", 'id' => $id, 'token' =>$token]); 
         }                  
-            
-        
+    }
+    
+    //CREAR OBSERVACIONES
+    public function actionCrear_observaciones($id, $token) {
+        $model = new \app\models\FormModeloSubirAuditoria();
+        $table = OrdenEntregaKits::findOne($id);
+        if ($model->load(Yii::$app->request->post())) {
+            if (isset($_POST["enviar_nota"])) {
+              $table->observacion = $model->observacion;
+              $table->save(false);
+              //Yii::$app->getSession()->setFlash('success', 'La orden de entrega de kit ha sido guardada exitosamente.');
+
+              return $this->redirect(["orden-entrega-kits/view", 'id' => $id, 'token' =>$token]); 
+            }
+        }
+        if (Yii::$app->request->get()) {
+            $model->observacion= $table->observacion; 
+        }    
+        return $this->renderAjax('observaciones', [
+            'model' => $model,
+        ]);  
     }
     
      //CIERRA EL PROCESO DE SOLICTUD
@@ -215,7 +238,33 @@ class OrdenEntregaKitsController extends Controller
     public function actionCrear_producto_kits($id, $token) {
         $model = $this->findModel($id);
         if(\app\models\InventarioProductos::find()->where(['=','id_presentacion', $model->id_presentacion])->one()){//produco existente
+            $inventario = \app\models\InventarioProductos::findOne($model->id_inventario);
+            if($inventario){
+                $inventario->unidades_entradas += $model->total_kits;
+                $inventario->stock_unidades += $model->total_kits;
+                if($inventario->save()){
+                    $model->inventario_enviado = 1;
+                    $model->save(); 
+                    ///guarda la bitagora
+                    $bitacora = new \app\models\BitacoraInventarioProducto();
+                    $bitacora->id_inventario = $model->id_inventario;
+                    $bitacora->cantidad = $model->total_kits;
+                    $bitacora->fecha_proceso = date('Y-m-d');
+                    $bitacora->fecha_hora_registro = date('Y-m-d H:i:s');
+                    $bitacora->user_name = Yii::$app->user->identity->username;;
+                    $bitacora->id_orden_entrega = $id;
+                    $bitacora->nota = 'Actualizar inventario de kits al modulo de inventario';
+                    $bitacora->save(false);
+                    Yii::$app->getSession()->setFlash('success', 'Producto actualizado exitosamente en el modulo de inventario de productos.');
+                    return $this->redirect(['view','id' => $id, 'token' => $token]);
+                }
+            }else{
+                Yii::$app->getSession()->setFlash('info', 'Este producto NO se encuentra codificado en el modulo de Inventario de producto terminado.');
+                return $this->redirect(['view','id' => $id, 'token' => $token]);   
+            }
             
+           //  Yii::$app->getSession()->setFlash('error', 'dasdddddddddddd.');
+            return $this->redirect(['view','id' => $id, 'token' => $token]);   
         }else{
             $proveedor = \app\models\Proveedor::find()->where(['=','predeterminado', 1])->one();
             $porcentaje_iva = \app\models\ConfiguracionIva::find()->where(['=','predeterminado', 1])->one();
@@ -233,27 +282,33 @@ class OrdenEntregaKitsController extends Controller
             $table->user_name = Yii::$app->user->identity->username;
             $table->codigo_ean = $table->codigo_producto;
             $table->inventario_inicial = 0;
+            $table->tipo_producto = 1;
             if($proveedor){
                $table->id_proveedor = $proveedor->id_proveedor; 
             }
             $table->id_presentacion = $model->id_presentacion;
             $table->activar_producto_venta = 1;
-            $table->save(false);
-           // actualiza el estaoo
-            $model->inventario_enviado = 1;
-            $model->id_inventario = $table->id_inventario;
-            $model->save();
-            ///guarda la bitagora
-            $bitacora = new \app\models\BitacoraInventarioProducto();
-            $bitacora->id_inventario = $table->id_inventario;
-            $bitacora->cantidad = $model->total_kits;
-            $bitacora->fecha_proceso = date('Y-m-d');
-            $bitacora->fecha_hora_registro = date('Y-m-d H:i:s');
-            $bitacora->user_name = Yii::$app->user->identity->username;;
-            $bitacora->id_orden_entrega = $id;
-            $bitacora->nota = 'Entrada kits al modulo de inventario';
-            $bitacora->save(false);
-            return $this->redirect(['view','id' => $id, 'token' => $token]);            
+           if($table->save(false)){ 
+                // actualiza el estaoo
+                 $model->inventario_enviado = 1;
+                 $model->id_inventario = $table->id_inventario;
+                 $model->save();
+                 ///guarda la bitagora
+                 $bitacora = new \app\models\BitacoraInventarioProducto();
+                 $bitacora->id_inventario = $table->id_inventario;
+                 $bitacora->cantidad = $model->total_kits;
+                 $bitacora->fecha_proceso = date('Y-m-d');
+                 $bitacora->fecha_hora_registro = date('Y-m-d H:i:s');
+                 $bitacora->user_name = Yii::$app->user->identity->username;;
+                 $bitacora->id_orden_entrega = $id;
+                 $bitacora->nota = 'Entrada kits al modulo de inventario';
+                 $bitacora->save(false);
+                 Yii::$app->getSession()->setFlash('success', 'Producto creado exitosamente en el modulo de inventario de productos.');
+                 return $this->redirect(['view','id' => $id, 'token' => $token]);
+           }else{
+                Yii::$app->getSession()->setFlash('error', 'El Producto No se crear en el modulo de inventario de productos.');
+                return $this->redirect(['view','id' => $id, 'token' => $token]);
+           }     
         }
     }
     
@@ -264,6 +319,22 @@ class OrdenEntregaKitsController extends Controller
         $lista->numero_inicial = $codigo;
         $lista->save();
         return $codigo;
+    }
+    
+    //REPORTES
+    public function actionImprimir_orden_entrega($id) {
+        $model = OrdenEntregaKits::findOne($id);
+        return $this->render('../formatos/reporte_orden_entrega_kits', [
+            'model' => $model,
+        ]);
+    }
+    
+         //REPORTES
+    public function actionImprimir_entrega_materiales($id) {
+        $model = EntregaMateriales::findOne($id);
+        return $this->render('../formatos/reporte_entrega_materiales', [
+            'model' => $model,
+        ]);
     }
     
     /**
@@ -281,4 +352,117 @@ class OrdenEntregaKitsController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    //EXCELES
+    public function actionExcelConsultaEntregaKits($tableexcel)
+    {
+        // Create new PHPExcel object
+        $objPHPExcel = new \PHPExcel();
+
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("EMPRESA")
+            ->setLastModifiedBy("EMPRESA")
+            ->setTitle("Reporte de Consulta de Entrega de Kits")
+            ->setSubject("Reporte de Entrega de Kits")
+            ->setDescription("Documento de reporte de entrega de kits generado usando PHPExcel.")
+            ->setKeywords("excel kits entrega")
+            ->setCategory("Reporte");
+
+        // --- Sheet 1: Listado de Órdenes (Main Data) ---
+        $objPHPExcel->setActiveSheetIndex(0);
+        $sheet1 = $objPHPExcel->getActiveSheet();
+        $sheet1->setTitle('Listado_Ordenes');
+
+        // Set default font style for Sheet 1
+        $sheet1->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $sheet1->getStyle('1')->getFont()->setBold(true); // Bold header row
+
+        // Set headers for Sheet 1
+        $sheet1->setCellValue('A1', 'ID')
+            ->setCellValue('B1', 'NUMERO ENTREGA')
+            ->setCellValue('C1', 'NOMBRE DE LA PRESENTACION')
+            ->setCellValue('D1', 'FECHA ORDEN')
+            ->setCellValue('E1', 'FECHA Y HORA')
+            ->setCellValue('F1', 'NUMERO ORDEN')
+            ->setCellValue('G1', 'TOTAL KITS')
+            ->setCellValue('H1', 'TOTAL PRODUCTOS')
+            ->setCellValue('I1', 'USUARIO')
+            ->setCellValue('J1', 'OBSERVACION');
+
+        // Auto-size columns for Sheet 1
+        foreach (range('A', 'J') as $column) {
+            $sheet1->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Populate Sheet 1 with main data
+        $row1 = 2; // Start data from row 2
+        foreach ($tableexcel as $val) {
+            $sheet1->setCellValue('A' . $row1, $val->id_orden_entrega)
+                ->setCellValue('B' . $row1, $val->entregaKits->numero_entrega)
+                ->setCellValue('C' . $row1, $val->presentacion->descripcion)
+                ->setCellValue('D' . $row1, $val->fecha_orden)
+                ->setCellValue('E' . $row1, $val->fecha_hora_registro)
+                ->setCellValue('F' . $row1, $val->numero_orden)
+                ->setCellValue('G' . $row1, $val->total_kits)
+                ->setCellValue('H' . $row1, $val->total_productos_procesados)
+                ->setCellValue('I' . $row1, $val->user_name)
+                ->setCellValue('J' . $row1, $val->observacion);
+            $row1++;
+        }
+
+        // --- Sheet 2: Detalles de Productos (Detail Data) ---
+        $objPHPExcel->createSheet(); // Create a new sheet
+        $objPHPExcel->setActiveSheetIndex(1);
+        $sheet2 = $objPHPExcel->getActiveSheet();
+        $sheet2->setTitle('Detalles_Productos');
+
+        // Set default font style for Sheet 2
+        $sheet2->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        $sheet2->getStyle('1')->getFont()->setBold(true); // Bold header row
+
+        // Set headers for Sheet 2
+        $sheet2->setCellValue('A1', 'ID ORDEN ENTREGA')
+            ->setCellValue('B1', 'CODIGO PRODUCTO')
+            ->setCellValue('C1', 'NOMBRE PRODUCTO')
+            ->setCellValue('D1', 'LOTE')
+            ->setCellValue('E1', 'CANTIDAD');
+
+        // Auto-size columns for Sheet 2
+        foreach (range('A', 'E') as $column) {
+            $sheet2->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $row2 = 2; // se inicializa la segunda hoja
+        foreach ($tableexcel as $val) {
+            // Fetch details for the current main order
+            $detalle = \app\models\OrdenEntregaKitsDetalles::find()->where(['=', 'id_orden_entrega', $val->id_orden_entrega])->all();
+
+            foreach ($detalle as $detalles) {
+                $sheet2->setCellValue('A' . $row2, $val->id_orden_entrega) // Link back to the main order ID
+                    ->setCellValue('B' . $row2, $detalles->detalleEntrega->detalle->inventario->codigo_producto)
+                    ->setCellValue('C' . $row2, $detalles->detalleEntrega->detalle->inventario->nombre_producto)
+                    ->setCellValue('D' . $row2, $detalles->detalleEntrega->numero_lote)
+                    ->setCellValue('E' . $row2, $detalles->cantidad_producto);
+                $row2++;
+            }
+        }
+
+        // Set the active sheet back to the first one (optional, but good practice)
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Reporte_Entrega_Kits.xlsx"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+
+        $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save('php://output');
+        exit;
+    }
+
 }
