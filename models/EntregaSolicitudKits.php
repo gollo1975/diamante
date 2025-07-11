@@ -44,7 +44,7 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
         return [
             [['id_solicitud', 'cantidad_despachada'], 'required'],
             [['id_solicitud', 'id_presentacion', 'id_solicitud_armado', 'total_unidades_entregadas', 'proceso_cerrado', 'autorizado', 'numero_entrega', 'cantidad_despachada',
-                'solicitud_generada','cantidad_despachada_saldo'], 'integer'],
+                'solicitud_generada','cantidad_despachada_saldo','producto_armado'], 'integer'],
             [['fecha_solicitud', 'fecha_hora_proceso','fecha_hora_cierre'], 'safe'],
             [['observacion'], 'string', 'max' => 100],
             [['user_name'], 'string', 'max' => 15],
@@ -76,6 +76,7 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
             'fecha_hora_cierre' => 'fecha_hora_cierre',
             'solicitud_generada' => 'solicitud_generada',
             'cantidad_despachada_saldo' => 'cantidad_despachada_saldo',
+            'producto_armado' => 'producto_armado',
         ];
     }
 
@@ -111,6 +112,12 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
         return $this->hasMany(EntregaSolicitudKitsDetalle::className(), ['id_entrega_kits' => 'id_entrega_kits']);
     }
     
+     //proceso que agrupa varios campos de la solicitud del kits
+    public function getEntregaKits()
+    {
+        return " Numero orden: {$this->numero_entrega} - Nombre de Kits: {$this->presentacion->descripcion}";
+    }
+    
      public function getProcesoCerrado() {
         if($this->proceso_cerrado == 0){
             $procesocerrado = 'NO';
@@ -127,5 +134,14 @@ class EntregaSolicitudKits extends \yii\db\ActiveRecord
             $autorizado = 'SI';
         }
         return $autorizado;    
+    }
+    
+    public function getProductoArmado() {
+        if($this->producto_armado == 0){
+            $productoarmado = 'NO';
+        }else{
+            $productoarmado = 'SI';
+        }
+        return $productoarmado;    
     }
 }

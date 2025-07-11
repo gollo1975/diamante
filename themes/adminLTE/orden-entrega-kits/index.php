@@ -16,7 +16,7 @@ use yii\data\Pagination;
 use kartik\depdrop\DepDrop;
 //Modelos...
 
-$this->title = 'SOLICITUD DE KITS';
+$this->title = 'ORDEN DE ENSAMBLE DE KITS';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--<h1>Lista Facturas</h1>-->
 <?php $formulario = ActiveForm::begin([
     "method" => "get",
-    "action" => Url::toRoute("solicitud-armado-kits/index"),
+    "action" => Url::toRoute("orden-entrega-kits/index"),
     "enableClientValidation" => true,
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -40,8 +40,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 ]);
-$conSolicitud = ArrayHelper::map(app\models\DocumentoSolicitudes::find()->where(['=','produccion', 1])->orderBy ('concepto ASC')->all(), 'id_solicitud', 'concepto');
+$conSolicitud = ArrayHelper::map(app\models\EntregaSolicitudKits::find()->orderBy ('id_entrega_kits DESC')->all(), 'id_entrega_kits', 'entregaKits');
 $conPresentacion = ArrayHelper::map(app\models\PresentacionProducto::find()->where(['=','tipo_venta', 1])->orderBy ('descripcion ASC')->all(), 'id_presentacion', 'descripcion');
+$producto = ArrayHelper::map(app\models\InventarioProductos::find()->where(['=','tipo_producto', 1])->orderBy ('nombre_producto ASC')->all(), 'id_inventario', 'nombre_producto');
 ?>
 
 <div class="panel panel-success panel-filters">
@@ -52,15 +53,15 @@ $conPresentacion = ArrayHelper::map(app\models\PresentacionProducto::find()->whe
     <div class="panel-body" id="filtro" style="display:none">
         <div class="row" >
            
-             <?= $formulario->field($form, 'solicitud')->widget(Select2::classname(), [
-                'data' => $conSolicitud,
+             <?= $formulario->field($form, 'nombre_kits')->widget(Select2::classname(), [
+                'data' => $conPresentacion,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ]); ?>
             <?= $formulario->field($form, 'presentacion')->widget(Select2::classname(), [
-                'data' => $conPresentacion,
+                'data' => $conSolicitud,
                 'options' => ['prompt' => 'Seleccione...'],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -80,13 +81,19 @@ $conPresentacion = ArrayHelper::map(app\models\PresentacionProducto::find()->whe
                     'format' => 'yyyy-m-d',
                     'todayHighlight' => true]])
             ?>
-         
+              <?= $formulario->field($form, 'ordenkits')->widget(Select2::classname(), [
+                'data' => $producto,
+                'options' => ['prompt' => 'Seleccione...'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ]); ?>
      
         </div>
         
         <div class="panel-footer text-right">
             <?= Html::submitButton("<span class='glyphicon glyphicon-search'></span> Buscar", ["class" => "btn btn-primary btn-sm",]) ?>
-            <a align="right" href="<?= Url::toRoute("solicitud-armado-kits/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
+            <a align="right" href="<?= Url::toRoute("orden-entrega-kits/index") ?>" class="btn btn-primary btn-sm"><span class='glyphicon glyphicon-refresh'></span> Actualizar</a>
         </div>
     </div>
 </div>
@@ -98,58 +105,73 @@ $form = ActiveForm::begin([
             ]);
     ?>
 <div class="table-responsive">
-<div class="panel panel-success ">
-    <div class="panel-heading">
-        Registros <span class="badge"><?= count($model) ?></span>
+    <div class="panel panel-success ">
+        <div class="panel-heading">
+            Registros <span class="badge"><?= count($model) ?></span>
 
-    </div>
+        </div>
         <table class="table table-bordered table-hover">
             <thead>
                 <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Id</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No solicitud</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Tipo solicitud</th>
+                 <th scope="col" style='background-color:#B9D5CE;'>Numero orden</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Numero de solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total productos</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total kits</th>
-                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total productos</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
+                <th scope="col" style='background-color:#B9D5CE;'>F. hora registro</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Autorizado</span></th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Cerrado</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
-                <th scope="col" style='background-color:#B9D5CE;'></th>
+                
                                           
             </tr>
             </thead>
             <tbody>
                 <?php
                 foreach ($model as $val):?>
-                        <tr style ='font-size: 85%;'>                
-                            <td><?= $val->id_solicitud_armado?></td>
-                            <td style="text-align: right"><?= $val->numero_solicitud?></td>
-                            <td><?= $val->solicitud->concepto?></td>
-                            <td><?= $val->presentacion->descripcion?></td>
-                            <td><?= $val->fecha_solicitud?></td>
-                            <td style="text-align: right"><?= ''. number_format($val->total_unidades,0)?></td>
-                            <td style="text-align: right"><?= ''. number_format($val->cantidad_solicitada,0)?></td>
-                            <td ><?= $val->autorizadoProceso?></td>
-                            <td style= 'width: 20px; height: 20px;'>
-                                <a href="<?= Url::toRoute(["solicitud-armado-kits/view", "id" => $val->id_solicitud_armado, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver el detalle de la solicitud"></span></a>
-                            </td> 
-                            <?php if(!\app\models\SolicitudArmadoKitsDetalle::find()->where(['=','id_solicitud_armado', $val->id_solicitud_armado])->one()){?>
-                                <td style= 'width: 20px; height: 20px;'>
-                                    <a href="<?= Url::toRoute(["solicitud-armado-kits/update", "id" => $val->id_solicitud_armado]) ?>" ><span class="glyphicon glyphicon-pencil" title="Permite editar el detalle de la solicitud"></span></a>
-                                </td>
-                            <?php }else{?><td style= 'width: 20px; height: 20px;'></td>
-                                
-                            <?php }?>    
-                       </tr>            
+                    <tr style ='font-size: 85%;'>                
+                        <td><?= $val->id_orden_entrega?></td>
+                         <td><?= $val->numero_orden?></td>
+                        <td><?= $val->entregaKits->numero_entrega?></td>
+                        <td><?= $val->presentacion->descripcion?></td>
+                        <td style="text-align: right"><?= ''. number_format($val->total_kits,0)?></td>
+                        <td style="text-align: right"><?= ''. number_format($val->total_productos_procesados,0)?></td>
+                        <td><?= $val->fecha_orden?></td>
+                        <td><?= $val->fecha_hora_registro?></td>
+                        <td ><?= $val->autorizadoProceso?></td>
+                         <td ><?= $val->procesoCerrado?></td>
+                        <td style= 'width: 20px; height: 20px;'>
+                            <a href="<?= Url::toRoute(["orden-entrega-kits/view", "id" => $val->id_orden_entrega, 'token' =>$token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver el detalle de la solicitud"></span></a>
+                        </td> 
+                    </tr>            
                 <?php endforeach;?>
             </tbody>    
         </table> 
-    </div>
-    <div class="panel-footer text-right" >            
+        <div class="panel-footer text-right" >            
             <?= Html::submitButton("<span class='glyphicon glyphicon-export'></span> Exportar a excel", ['name' => 'excel','class' => 'btn btn-primary btn-sm ']); ?>                
-            <a align="right" href="<?= Url::toRoute("solicitud-armado-kits/create") ?>" class="btn btn-success btn-sm"><span class='glyphicon glyphicon-plus'></span> Nuevo</a>
+            <td style="width: 25px; height: 25px;">
+                <!-- Inicio Nuevo Detalle proceso -->
+                <?= Html::a('<span class="glyphicon glyphicon-import"></span> Importar entrega kits ',
+                      ['/orden-entrega-kits/importar_entrega_kits'],
+                      [
+                          'title' => 'Importar solicitud de kits',
+                          'data-toggle'=>'modal',
+                          'data-target'=>'#modalimportarsolicitud',
+                          'class' => 'btn btn-success btn-sm',
+                          'data-backdrop' => 'static',
+
+                      ]);    
+                 ?>
+            </td> 
+            <div class="modal remote fade" id="modalimportarsolicitud">
+                      <div class="modal-dialog modal-lg" style ="width: 700px;">
+                          <div class="modal-content"></div>
+                      </div>
+            </div>
+        </div>
     </div>
     <?php $form->end() ?>      
 </div>

@@ -966,7 +966,6 @@ class OrdenEnsambleProductoController extends Controller
                     $table->id_detalle = $detalles->id_detalle;
                     $table->aplica_iva = $detalles->aplica_iva;
                     $table->porcentaje_iva = $detalles->porcentaje_iva;
-                    $table->fecha_vencimiento = $detalles->fecha_vencimiento;
                     $table->fecha_proceso = $ordenP->fecha_proceso;
                     $table->user_name = Yii::$app->user->identity->username;
                     $table->codigo_ean = $detalles->codigo_producto;

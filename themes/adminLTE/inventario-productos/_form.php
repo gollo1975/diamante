@@ -56,13 +56,7 @@ $provedor = ArrayHelper::map(Proveedor::find()->orderBy('nombre_completo ASC')->
                                'format' => 'yyyy-m-d',
                                'todayHighlight' => true]])
             ?>
-            <?=  $form->field($model, 'fecha_vencimiento')->widget(DatePicker::className(), ['name' => 'check_issue_date',
-                           'value' => date('Y-m-d', strtotime('+2 days')),
-                           'options' => ['placeholder' => 'Seleccione una fecha ...'],
-                           'pluginOptions' => [
-                               'format' => 'yyyy-m-d',
-                               'todayHighlight' => true]])
-            ?>
+            <?= $form->field($model, 'inventario_inicial')->dropDownList(['0' => 'INDIVIDUAL', '1' => 'KITS'], ['prompt' => 'Seleccione una opcion...']) ?>
         </div>
         
         <div class="row">

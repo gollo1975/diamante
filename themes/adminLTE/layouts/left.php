@@ -185,6 +185,7 @@ $empresa = \app\models\MatriculaEmpresa::findOne(1);
                                                         ['label' => 'Cargar devolucion', 'icon' => 'plus-square-o', 'url' => ['/inventario-productos/cargar_nota_credito']], 
                                                         ['label' => 'Devolucion productos', 'icon' => 'plus-square-o', 'url' => ['/devolucion-productos/index']], 
                                                         ['label' => 'Solicitud de kits', 'icon' => 'plus-square-o', 'url' => ['/solicitud-armado-kits/index']], 
+                                                        ['label' => 'Orden entrega de kits', 'icon' => 'plus-square-o', 'url' => ['/orden-entrega-kits/index']], 
                                                     ],
                                                 ],
                                                 [

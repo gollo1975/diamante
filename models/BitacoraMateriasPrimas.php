@@ -37,7 +37,7 @@ class BitacoraMateriasPrimas extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_materia_prima', 'cantidad', 'id_orden_produccion', 'id_entrega_kits'], 'integer'],
+            [['id_materia_prima', 'cantidad', 'id_orden_produccion', 'id_entrega_kits','entrada_salida'], 'integer'],
             [['fecha_salida', 'fecha_hora_salida'], 'safe'],
             [['user_name'], 'string', 'max' => 15],
             [['descripcion_salida'], 'string', 'max' => 57],
@@ -62,6 +62,7 @@ class BitacoraMateriasPrimas extends \yii\db\ActiveRecord
             'descripcion_salida' => 'Descripcion Salida',
             'id_orden_produccion' => 'Id Orden Produccion',
             'id_entrega_kits' => 'Id Entrega Kits',
+            'entrada_salida' => 'entrada_salida',
         ];
     }
 
@@ -87,5 +88,14 @@ class BitacoraMateriasPrimas extends \yii\db\ActiveRecord
     public function getEntregaKits()
     {
         return $this->hasOne(EntregaSolicitudKits::className(), ['id_entrega_kits' => 'id_entrega_kits']);
+    }
+    
+    public function getEntradaSalidas() {
+        if($this->entrada_salida == 0){
+            $entradasalida = 'ENTRADAS';
+        }else{
+            $entradasalida = 'SALIDAS';
+        }
+        return $entradasalida;
     }
 }

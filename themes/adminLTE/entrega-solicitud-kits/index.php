@@ -108,14 +108,15 @@ $form = ActiveForm::begin([
                 <tr style ='font-size: 85%;'>         
                 
                 <th scope="col" style='background-color:#B9D5CE;'>Id</th>
+                <th scope="col" style='background-color:#B9D5CE;'>No entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Tipo solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>No de solicitud</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Presentacion</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total kits</th>
-                <th scope="col" style='background-color:#B9D5CE;'>Total solicitud</th>
+                <th scope="col" style='background-color:#B9D5CE;'>Total productos</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Total entrega</th>
                 <th scope="col" style='background-color:#B9D5CE;'>Fecha proceso</th>
-                <th scope="col" style='background-color:#B9D5CE;'>No entrega</th>
+                <th scope="col" style='background-color:#B9D5CE;'><span title="Producto ensamblado">P. ensamblado</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'><span title="Proceso autorizado">Aut.</span></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
                 <th scope="col" style='background-color:#B9D5CE;'></th>
@@ -128,6 +129,7 @@ $form = ActiveForm::begin([
                 foreach ($model as $val):?>
                         <tr style ='font-size: 85%;'>                
                             <td><?= $val->id_entrega_kits?></td>
+                            <td style="text-align: right"><?= $val->numero_entrega?></td>
                             <td><?= $val->solicitud->concepto?></td>
                             <td><?= $val->solicitudArmado->numero_solicitud?></td>
                             <td><?= $val->presentacion->descripcion?></td>
@@ -135,7 +137,11 @@ $form = ActiveForm::begin([
                             <td style="text-align: right"><?= ''. number_format($val->solicitudArmado->total_unidades,0)?></td>
                             <td style="text-align: right"><?= ''. number_format($val->total_unidades_entregadas,0)?></td>
                             <td><?= $val->fecha_solicitud?></td>
-                            <td style="text-align: right"><?= $val->numero_entrega?></td>
+                            <?php if($val->producto_armado == 0){?>
+                                <td ><?= $val->productoArmado?></td>
+                            <?php }else{?>
+                                <td style = "background-color: #ffe8a1" ><?= $val->productoArmado?></td>
+                            <?php }?>    
                             <td ><?= $val->autorizadoProceso?></td>
                             <td style= 'width: 20px; height: 20px;'>
                                 <a href="<?= Url::toRoute(["entrega-solicitud-kits/view", "id" => $val->id_entrega_kits, 'token' => $token]) ?>" ><span class="glyphicon glyphicon-eye-open" title="Permite ver el detalle de la solicitud"></span></a>
